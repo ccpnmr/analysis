@@ -2,34 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Search Box</title>
+    <title>Macro Writing - Objects and Methods</title>
     <style >.action {color: #803594; font-weight:bold;}</style>
     <link rel="stylesheet" href="CcpnVideoTutorials.css">
 </head>
 <body>
 <div><img src="CCPN.png" alt="CCPN Logo" height="50"></div>
 <br>
-<div class="headerBar">Search Box</div>
+<div class="headerBar">Macro Writing - Objects and Methods</div>
 <div class="tutorial">
-<h2>Search Box</h2>
-<p>The search box at the bottom of the left-hand sidebar lets you search for items in the sidebar. As you type a search string, possible matches are shown in a <span class="action">Search Results</span> box above. If you <span class="action">click</span> on a result line, then the sidebar will automatically navigate to that item, expanding the visible data structure where necessary. You can also <span class="action">drag</span> an item from the <span class="action">Search Results</span> box into the drop area. This has the same effect as a normal drag from the sidebar, i.e. chemical shift lists or peak lists are opened as tables and spectra are opened in spectrum display modules. Dropping NmrAtoms and NmrResidues into spectrum display modules will create marks at their respective chemical shift positions, or if dropped onto peaks, the peaks will be assigned to the NmrAtoms/NmrResidues.</p>
-<h3>Search Strings and Examples</h3>
-<p>The search will look for any text matches and is case-insensitive. <span class="action">*</span> can be used as a wildcard.</p>
-<p>Note that every item of data in the sidebar is listed as a so-called <span class="action">Project ID</span>, or <span class="action">PID</span> for short. These PIDs contain a short code to signify the data type (e.g. SP for spectrum - see below for a full list) followed by the name of the data item. Nested items also contain the names of their parents/grandparents, separated by a <span class="action">.</span> , e.g. a peak list is shown as <span class="action">PL:spectrumName.peakListName</span> or an NmrAtom as <span class="action">NA:@3.23.THR.CA</span>.</p>
-<p><span class="action">val</span>
-<br>as a search string would should any Valine NmrAtoms and NmrResidues, while
-<br><span class="action">nr*val</span>
-<br>would show only Valine NmrResidues.</p>
-<p><span class="action">hsqc</span>
-<br>might show you any spectra and their peak lists that contain the string <span class="action">hsqc</span>. whereas
-<br><span class="action">pl*hsqc</span>
-<br>would restrict this to peak lists or
-<br><span class="action">sp*hsqc</span>
-<br>would restrict this to spectra.</p>
-<table>
+<h2>Macro Writing - Objects and Methods</h2>
+    <p><b>The pages on macro writing assume that you have a basic understanding of python scripting and programming, but are not necessarily familiar with object-oriented programming.</b></p>
+    <p>CcpNmr Analysis is written as an object-oriented programme. In effect, this means that different types of data (e.g. spectra, peak lists, peaks, chemical shifts, NmrAtoms etc.) automatically have certain properties/attributes and 'subroutines' or functions/methods associated with them. For example, <span class="action">peak.positions</span> would give you the ppm positions of  a peak, or <span class="action">peak.assignDimension(axisCode='H', value=['NA:A.23.ALA.H'])</span> would assign the NmrAtom <span class="action">A.23.ALA.H</span> to the <span class="action">H</span> dimension of a peak. Thus, if you want to write a macro, there are a large number of routines that you can draw on to access and manipulate all the data objects in the programme. So what are the objects and how do I find the methods associated with them?</p>
+    <h2>Data Objects</h2>
+    <p>The main types of objects (technically classes) that you can access are those shown in the sidebar. Spectra, PeakLists, Peaks, SpectrumGroups, ChemicalShifts etc. Below is a list of all of them. Note that each data object has a unique identifier (Project ID, or Pid) associated with it which will come in very useful during macro writing.</p>
+    <table>
  <tr>
   <th align="left" width="5%"><h3>PID Short Code</h3></th>
-  <th align="left" width="15%"><h3>Data Item</h3></th>
+  <th align="left" width="15%"><h3>Data Object</h3></th>
   <th align="left" width="20%"><h3>Nesting</h3></th>
   <th align="left" width="60%"><h3>Example</h3></th>
  </tr>
@@ -52,16 +42,34 @@
   <td>PL:hsqc.1</td>
  </tr>
  <tr>
+  <td><span class="action">PK</span></td>
+  <td>Peak</td>
+  <td>Spectrum / Peak List / Peak</td>
+  <td>PK:hsqc.1.1</td>
+ </tr>
+ <tr>
   <td><span class="action">ML</span></td>
   <td>Multiplet List</td>
   <td>Spectrum / Multiplet List</td>
   <td>ML:hsqc.1</td>
  </tr>
  <tr>
+  <td><span class="action">MT</span></td>
+  <td>Multiplet</td>
+  <td>Spectrum / Multiplet List / Multiplet</td>
+  <td>MT:hsqc.1.1</td>
+ </tr>
+ <tr>
   <td><span class="action">IL</span></td>
   <td>Integral List</td>
   <td>Spectrum / Integral List</td>
   <td>IL:hsqc.1</td>
+ </tr>
+ <tr>
+  <td><span class="action">IT</span></td>
+  <td>Integral</td>
+  <td>Spectrum / Integral List / Integral</td>
+  <td>IT:hsqc.1.1</td>
  </tr>
  <tr>
   <td><span class="action">SG</span></td>
@@ -74,6 +82,12 @@
   <td>Chemical Shift List</td>
   <td>Chemical Shift List</td>
   <td>CL:default</td>
+ </tr>
+ <tr>
+  <td><span class="action">CS</span></td>
+  <td>Chemical Shift</td>
+  <td>Chemical Shift List / Chemical Shift</td>
+  <td>CS:default.A.23.THR.H</td>
  </tr>
  <tr>
   <td><span class="action">NC</span></td>
@@ -124,6 +138,12 @@
   <td>MR:A.23.THR</td>
  </tr>
  <tr>
+  <td><span class="action">MA</span></td>
+  <td>(Molecule) Atom</td>
+  <td>Chain / Residue / Atom</td>
+  <td>MA:A.23.THR.H</td>
+ </tr>
+ <tr>
   <td><span class="action">MX</span></td>
   <td>(Molecule) Complex</td>
   <td>Complex</td>
@@ -148,6 +168,18 @@
   <td>RL:run1.TALOS restraints</td>
  </tr>
  <tr>
+  <td><span class="action">RE</span></td>
+  <td>Restraint</td>
+  <td>Data Set / Restraint List / Restraint</td>
+  <td>RE:run1.TALOS restraints. .</td>
+ </tr>
+ <tr>
+  <td><span class="action">RC</span></td>
+  <td>Restraint Contribution</td>
+  <td>Data Set / Restraint List / Restraint / Restraint Contribution</td>
+  <td>RC:run1.TALOS restraints. .</td>
+ </tr>
+ <tr>
   <td><span class="action">NO</span></td>
   <td>Note</td>
   <td>Note</td>
@@ -155,6 +187,11 @@
  </tr>
 </table>
 
-</div>
+    <h2>Finding Methods from echoed commands</h2>
+    <p></p>
+    <h2>Finding Methods in the console</h2>
+    <p></p>
+    <h2>Finding Methods in the Documentation</h2>
+    <p></p>
 </body>
 </html>

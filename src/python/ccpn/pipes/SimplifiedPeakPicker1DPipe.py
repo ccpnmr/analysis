@@ -39,7 +39,8 @@ from tqdm import tqdm
 
 PipeName = 'Peak Detector 1D'
 ExcludeRegions = 'Exclude_Regions'
-
+NoiseThreshold = 'Noise_Threshold'
+DefaultNoiseThreshold = [0.0, 0.0]
 DefaultExcludeRegions = [[0.0, 0.0], [0.0, 0.0]]
 DefaultPeakListIndex = -1
 
@@ -100,6 +101,11 @@ class PeakPicker1DPipe(SpectraPipe):
             with notificationEchoBlocking():
                 for spectrum in tqdm(self.inputData):
                     if len(spectrum.peakLists) > 0:
+                        if NoiseThreshold in self.pipeline._kwargs:
+                            noiseThresholds = self.pipeline._kwargs[NoiseThreshold]
+                            spectrum.noiseLevel = max(noiseThresholds) or None
+                            spectrum.negativeNoiseLevel = min(noiseThresholds) or None
+
                         spectrum.peakLists[DefaultPeakListIndex].peakFinder1D(maxNoiseLevel=spectrum.noiseLevel,
                                                                               minNoiseLevel=spectrum.negativeNoiseLevel,
                                                                               ignoredRegions=excludeRegions, negativePeaks=False,

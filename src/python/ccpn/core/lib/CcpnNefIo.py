@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-20 12:55:11 +0100 (Wed, May 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-20 13:36:36 +0100 (Wed, May 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4030,7 +4030,7 @@ class CcpnNefReader:
         frames = self._getSaveFramesInOrder(dataBlock)
         frameCats = frames.get(category) or []
         # get all saveframes attached to this spectrum - for ccpn
-        frameList = [frame.name for frame in frameCats if _saveFrameNameFromCategory(frame).subname == _frameID.subname]
+        frameList = ['None']        # [frame.name for frame in frameCats if _saveFrameNameFromCategory(frame).subname == _frameID.subname]
 
         loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_{}_list', 'ccpn_{}', 'ccpn_{}_peaks')]
         replaceList = ('serial', '{}_list_serial'.format(_lowerCaseName))

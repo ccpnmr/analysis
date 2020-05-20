@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-04 18:45:05 +0100 (Mon, May 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-20 13:05:54 +0100 (Wed, May 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -56,6 +56,8 @@ class ExportNefPopup(ExportDialog):
                                              preferences=preferences, selectFile=selectFile,
                                              filter=filter, pathID=USERNEFPATH,
                                              **kwds)
+
+        self.setMinimumSize(self.sizeHint())
 
     def initialise(self, userFrame):
         self.buttonCCPN = CheckBox(userFrame, checked=True,

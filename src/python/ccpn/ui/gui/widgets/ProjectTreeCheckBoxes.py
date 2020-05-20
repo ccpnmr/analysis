@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-20 12:55:11 +0100 (Wed, May 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-20 13:05:54 +0100 (Wed, May 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -183,8 +183,6 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
                 else:
                     if self._enableCheckboxes:
                         item.setCheckState(0, QtCore.Qt.Checked)
-
-        self.projectItem.setCheckState(None)
 
     def _setFocusColour(self, focusColour=None, noFocusColour=None):
         """Set the focus/noFocus colours for the widget

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-20 11:03:52 +0100 (Wed, May 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-20 11:26:02 +0100 (Wed, May 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3902,6 +3902,24 @@ class CcpnNefReader:
 
         return newName
 
+    def rename_ccpn_note(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
+                               itemName=None, newName=None):
+        """Rename a ccpn_note in ccpn_notes
+        :param itemName: name of the item to rename - dependent on saveFrame type
+        :param newName: new item name or None to autorename to next available name
+        """
+        if not itemName or newName == itemName:
+            return
+
+        newName = self._getNewName(saveFrame, itemName, newName, 'ccpn_notes', 'Note')
+
+        loopList = ('ccpn_note')
+        replaceList = ('name')
+        self.searchReplace(project, dataBlock, True, None, itemName, newName, replace=True,
+                           loopSearchList=loopList, rowSearchList=replaceList)
+
+        return newName
+
     def _getNewListName(self, saveFrame, itemName, newName, contentItem, descriptor):
         
         def incrementName(name):
@@ -3938,6 +3956,40 @@ class CcpnNefReader:
                 newName = incrementName(newName)
 
         return newName
+
+    def _getNewSerial(self, saveFrame, itemSerial, newSerial, contentItem, descriptor):
+
+        def incrementSerial(serial):
+            """Add '.1' to serial or change suffix '.n' to '.(n+1) 
+            Assume that the current Pid.IDSEP is '.'
+            """
+            try:
+                ll = str(int(serial) + 1)
+                return ll
+
+            except ValueError:
+                pass
+            return '1'
+
+        _content = getattr(saveFrame, '_content', [])
+
+        if not _content:
+            raise RuntimeError('_content not defined')
+
+        # itemSerial is the current item
+        currentItems = _content.get(contentItem) or []
+
+        if newSerial:
+            # check not in the current list
+            if newSerial in currentItems:
+                raise ValueError("{} {} already exists".format(descriptor, newSerial))
+        else:
+            # iterate through the serials to find the first that is not taken yet
+            newSerial = itemSerial
+            while newSerial in currentItems:
+                newSerial = incrementSerial(newSerial)
+
+        return newSerial
 
     def rename_ccpn_list(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
                                    itemName=None, newName=None, _lowerCaseName='none', _upperCaseName='None'):
@@ -3980,6 +4032,30 @@ class CcpnNefReader:
 
         return newName
 
+    def rename_ccpn_peak_cluster_list(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
+                               itemName=None, newName=None):
+        """Rename a ccpn_note in ccpn_notes
+        :param itemName: name of the item to rename - dependent on saveFrame type
+        :param newName: new item name or None to autorename to next available name
+        """
+        if not itemName or newName == itemName:
+            return
+
+        newName = self._getNewSerial(saveFrame, itemName, newName, 'ccpn_peak_cluster', 'PeakCluster')
+
+        try:
+            oldSerial = int(itemName)
+            newSerial = int(newName)
+        except Exception as es:
+            raise TypeError('Incorrect PeakCluster definition; must be <int>')
+
+        loopList = ('ccpn_peak_cluster', 'ccpn_peak_cluster_peaks')
+        replaceList = ('serial', 'peak_cluster_serial')
+        self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True,
+                           loopSearchList=loopList, rowSearchList=replaceList)
+
+        return newName
+
     renames['nef_chemical_shift_list'] = rename_saveframe
     renames['nef_distance_restraint_list'] = rename_saveframe
     renames['nef_dihedral_restraint_list'] = rename_saveframe
@@ -3992,6 +4068,8 @@ class CcpnNefReader:
     renames['nmr_chain'] = rename_ccpn_assignment
     renames['ccpn_integral_list'] = partial(rename_ccpn_list, _lowerCaseName='integral', _upperCaseName='Integral')
     renames['ccpn_multiplet_list'] = partial(rename_ccpn_list, _lowerCaseName='multiplet', _upperCaseName='Multiplet')
+    renames['ccpn_note'] = rename_ccpn_note
+    renames['ccpn_peak_cluster_list'] = rename_ccpn_peak_cluster_list
 
     def load_nef_chemical_shift(self, parent: ChemicalShiftList, loop: StarIo.NmrLoop):
         """load nef_chemical_shift loop"""

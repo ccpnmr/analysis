@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:06:39 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-20 17:00:33 +0100 (Wed, May 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -979,7 +979,7 @@ GuiTable::item::selected {
                 self._currentRow = item.row()
                 self._currentCol = item.column()
 
-                if isinstance(item.value, bool):
+                if isinstance(item.value, bool) and self._checkBoxTableCallback is not None:
                     self._checkBoxTableCallback(item)
             else:
                 self._currentRow = None
@@ -2291,6 +2291,28 @@ GuiTable::item::selected {
         if self._searchNotifier is not None:
             self._searchNotifier.unRegister()
             self._searchNotifier = None
+
+    def setRowBackgroundColour(self, row, colour, columnList=None):
+        """Set the background colour for the row
+
+        :param row: row to be coloured
+        :param colour: colour of type QtGui.Brush/QtGui.Color
+        :param columnList: None, or list of column numbers, out-of-range columns are ignored
+        :return:
+        """
+        # NOTE:ED - need colour/row checking, ignore for the minute
+        try:
+            if not isinstance(columnList, (type(None), list, tuple)):
+                raise TypeError('columnList must be None, or a list of integers')
+
+            if columnList:
+                cols = [col for col in columnList if 0 <= col < self.columnCount()]
+            else:
+                cols = range(self.columnCount())
+            for j in cols:
+                self.item(row, j).setBackground(colour)
+        except Exception as es:
+            pass
 
     # def dragEnterEvent(self, event):
     #   ccpnmrJsonData = 'ccpnmr-json'

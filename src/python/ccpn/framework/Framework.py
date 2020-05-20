@@ -3416,7 +3416,8 @@ if __name__ == '__main__':
     # run the dialog
     dialog = ImportNefPopup(parent=ui.mainWindow, mainWindow=ui.mainWindow,
                             # nefObjects=(_loader,))
-                            nefObjects=(project, _loader2,))
+                            nefObjects=((project, False),
+                                        (_loader2, True),))
 
     dialog._initialiseProject(ui.mainWindow, application, project)
     dialog.fillPopup()

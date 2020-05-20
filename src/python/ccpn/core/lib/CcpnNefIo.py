@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-20 11:26:02 +0100 (Wed, May 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-20 12:55:11 +0100 (Wed, May 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1143,7 +1143,7 @@ def _saveFrameNameFromCategory(saveFrame: StarIo.NmrSaveFrame):
     """Parse the saveframe name to extract pre- and post- numbering
     necessary for restraint and spectrum saveframe names
     """
-    _nameFromCategory = namedtuple('_nameFromCategory', ('framecode', 'frameName', 'subname', 'prefix', 'postfix', 'precode', 'postcode'))
+    _nameFromCategory = namedtuple('_nameFromCategory', ('framecode', 'frameName', 'subname', 'prefix', 'postfix', 'precode', 'postcode', 'category'))
 
     def _tryNumber(value):
         code = None
@@ -1171,7 +1171,7 @@ def _saveFrameNameFromCategory(saveFrame: StarIo.NmrSaveFrame):
     postfix = matches[-1].group() if matches and matches[-1] and matches[-1].span()[1] == len(frameName) else ''
     postSerial = _tryNumber(postfix)
 
-    return _nameFromCategory(framecode, frameName, subName, prefix, postfix, preSerial, postSerial)
+    return _nameFromCategory(framecode, frameName, subName, prefix, postfix, preSerial, postSerial, category)
 
 
 class CcpnNefWriter:
@@ -2882,16 +2882,15 @@ class CcpnNefReader:
 
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        if categorySearchList and framecode not in categorySearchList:
-            return
 
-        for k, val in saveFrame.items():
-            if val == searchFrameCode:
-                getLogger().debug('found {} {} --> {}'.format(saveFrame, k, val))
-                if replace:
-                    saveFrame[k] = replaceFrameCode
+        if not categorySearchList or framecode in categorySearchList:
+            for k, val in saveFrame.items():
+                if val == searchFrameCode:
+                    getLogger().debug('found {} {} --> {}'.format(saveFrame, k, val))
+                    if replace:
+                        saveFrame[k] = replaceFrameCode
 
-        # search loops as well
+        # search loops as well - will still search for all loops even in ignored saveFrames
         mapping = nef2CcpnMap[saveFrame.category]
         for tag, ccpnTag in mapping.items():
             if ccpnTag == _isALoop:
@@ -3820,13 +3819,13 @@ class CcpnNefReader:
         :param itemName: name of the item to rename - dependent on saveFrame type
         :param newName: new item name or None to autorename to next available name
         """
-        category = saveFrame['sf_category']
-        framecode = saveFrame['sf_framecode']
+        # category = saveFrame['sf_category']
+        # framecode = saveFrame['sf_framecode']
         if not itemName or newName == itemName:
             return
 
         _frameID = _saveFrameNameFromCategory(saveFrame)
-        _, frameName, subName, prefix, postfix, preSerial, postSerial = _frameID
+        framecode, frameName, subName, prefix, postfix, preSerial, postSerial, category = _frameID
         frames = self._getSaveFramesInOrder(dataBlock)
         frameList = frames.get(category) or []
         frameNames = [_saveFrameNameFromCategory(frame).framecode for frame in frameList]
@@ -3863,19 +3862,27 @@ class CcpnNefReader:
         :param itemName: name of the item to rename - dependent on saveFrame type
         :param newName: new item name or None to autorename to next available name
         """
+        # category = saveFrame['sf_category']
+        # framecode = saveFrame['sf_framecode']
         if not itemName or newName == itemName:
             return
 
         newName = self._getNewName(saveFrame, itemName, newName, 'nef_sequence_chain_code', 'Chain')
 
         # NOTE:ED - check which are chains and which are nmr_chains
+        _frameID = _saveFrameNameFromCategory(saveFrame)
+        framecode, frameName, subName, prefix, postfix, preSerial, postSerial, category = _frameID
+        frames = self._getSaveFramesInOrder(dataBlock)
+        frameCats = frames.get(category) or []
+
+        frameList = ['None']        #_saveFrameNameFromCategory(frame).framecode for frame in frameCats if _saveFrameNameFromCategory(frame).fr]
         replaceList = ('chain_code', 'complex_chain_code',
                        'chain_code_1', 'chain_code_2', 'chain_code_3', 'chain_code_4', 'chain_code_5',
                        'chain_code_6', 'chain_code_7', 'chain_code_8', 'chain_code_9', 'chain_code_10',
                        'chain_code_11', 'chain_code_12', 'chain_code_13', 'chain_code_14', 'chain_code_15',
                        'ccpn_tensor_chain_code', 'tensor_chain_code')
         self.searchReplace(project, dataBlock, True, None, itemName, newName, replace=True,
-                           categorySearchList=None, rowSearchList=replaceList)
+                           categorySearchList=frameList, rowSearchList=replaceList)
 
         return newName
 
@@ -4056,6 +4063,17 @@ class CcpnNefReader:
 
         return newName
 
+    def rename_ccpn_substance(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
+                               itemName=None, newName=None):
+        """Rename a ccpn_substance
+        :param itemName: name of the item to rename - dependent on saveFrame type
+        :param newName: new item name or None to autorename to next available name
+        """
+        if not itemName or newName == itemName:
+            return
+
+        pass
+
     renames['nef_chemical_shift_list'] = rename_saveframe
     renames['nef_distance_restraint_list'] = rename_saveframe
     renames['nef_dihedral_restraint_list'] = rename_saveframe
@@ -4070,6 +4088,7 @@ class CcpnNefReader:
     renames['ccpn_multiplet_list'] = partial(rename_ccpn_list, _lowerCaseName='multiplet', _upperCaseName='Multiplet')
     renames['ccpn_note'] = rename_ccpn_note
     renames['ccpn_peak_cluster_list'] = rename_ccpn_peak_cluster_list
+    renames['ccpn_substance'] = rename_ccpn_substance
 
     def load_nef_chemical_shift(self, parent: ChemicalShiftList, loop: StarIo.NmrLoop):
         """load nef_chemical_shift loop"""

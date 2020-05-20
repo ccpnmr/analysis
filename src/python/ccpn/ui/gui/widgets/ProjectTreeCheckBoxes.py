@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-18 18:56:31 +0100 (Mon, May 18, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-20 12:55:11 +0100 (Wed, May 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -105,7 +105,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         Note._pluralLinkName         : QtCore.Qt.Checked
         }
 
-    def __init__(self, parent=None, project=None, maxSize=(250, 300), includeProject=False, **kwds):
+    def __init__(self, parent=None, project=None, maxSize=(250, 300), includeProject=False, enableCheckboxes=True, **kwds):
         """Initialise the widget
         """
         super().__init__(parent)
@@ -116,6 +116,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         self.projectItem = None
         self.project = project
         self.includeProject = includeProject
+        self._enableCheckboxes = enableCheckboxes
         self.header().hide()
         if self.project is not None:
             self._populateTreeView()
@@ -145,11 +146,15 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
             # set the new project if required
             self.project = project
 
+        checkable = QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable
         if self.includeProject:
             # add the project as the top of the tree - allows to un/select all
             self.projectItem = QtWidgets.QTreeWidgetItem(self.invisibleRootItem())
             self.projectItem.setText(0, self.project.name)
-            self.projectItem.setFlags(self.projectItem.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+            if self._enableCheckboxes:
+                self.projectItem.setFlags(self.projectItem.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+            else:
+                self.projectItem.setFlags(self.projectItem.flags() & ~(QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable))
             self.projectItem.setExpanded(True)
             self.headerItem = self.projectItem
 
@@ -161,17 +166,25 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
 
                 for obj in getattr(self.project, name):
                     child = QtWidgets.QTreeWidgetItem(item)
-                    child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                    if self._enableCheckboxes:
+                        child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                    else:
+                        child.setFlags(child.flags() & ~QtCore.Qt.ItemIsUserCheckable)
                     child.setData(1, 0, obj)
                     child.setText(0, obj.pid)
-                    child.setCheckState(0, QtCore.Qt.Unchecked)
+                    if self._enableCheckboxes:
+                        child.setCheckState(0, QtCore.Qt.Unchecked)
 
                 item.setExpanded(False)
                 if name in self.lockedItems:
                     item.setDisabled(True)
-                    item.setCheckState(0, self.lockedItems[name])
+                    if self._enableCheckboxes:
+                        item.setCheckState(0, self.lockedItems[name])
                 else:
-                    item.setCheckState(0, QtCore.Qt.Checked)
+                    if self._enableCheckboxes:
+                        item.setCheckState(0, QtCore.Qt.Checked)
+
+        self.projectItem.setCheckState(None)
 
     def _setFocusColour(self, focusColour=None, noFocusColour=None):
         """Set the focus/noFocus colours for the widget
@@ -268,22 +281,25 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
     def selectObjects(self, pids):
         """Handle changing the state of checkboxes
         """
-        items = self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive)
-        for item in items:
-            if item.text(0) in pids:
-                item.setCheckState(0, QtCore.Qt.Checked)
+        if self._enableCheckboxes:
+            items = self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive)
+            for item in items:
+                if item.text(0) in pids:
+                    item.setCheckState(0, QtCore.Qt.Checked)
 
     def _clicked(self, *args):
-        for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
-            if item.text(0) in self.lockedItems:
-                item.setCheckState(0, self.lockedItems[item.text(0)])
+        if self._enableCheckboxes:
+            for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+                if item.text(0) in self.lockedItems:
+                    item.setCheckState(0, self.lockedItems[item.text(0)])
 
     def _uncheckAll(self, includeRoot=False):
         """Clear all selection
         """
-        for itemTree in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
-            for i in range(itemTree.childCount()):
-                itemTree.child(i).setCheckState(0, QtCore.Qt.Unchecked)
+        if self._enableCheckboxes:
+            for itemTree in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+                for i in range(itemTree.childCount()):
+                    itemTree.child(i).setCheckState(0, QtCore.Qt.Unchecked)
 
 
 class ExportTreeCheckBoxes(ProjectTreeCheckBoxes):
@@ -395,7 +411,10 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
             # add the project as the top of the tree - allows to un/select all
             self.projectItem = QtWidgets.QTreeWidgetItem(self.invisibleRootItem())
             self.projectItem.setText(0, self.project.name)
-            self.projectItem.setFlags(self.projectItem.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+            if self._enableCheckboxes:
+                self.projectItem.setFlags(self.projectItem.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+            else:
+                self.projectItem.setFlags(self.projectItem.flags() & ~(QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable))
             self.projectItem.setExpanded(True)
             self.headerItem = self.projectItem
 
@@ -403,8 +422,12 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
             if hasattr(self.project, name):  # just to be safe
                 item = QtWidgets.QTreeWidgetItem(self.headerItem)
                 item.setText(0, name)
-                item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+                if self._enableCheckboxes:
+                    item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+                else:
+                    item.setFlags(item.flags() & ~(QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable))
 
+                # # keep for future reference
                 # for obj in getattr(self.project, name):
                 #     child = QtWidgets.QTreeWidgetItem(item)
                 #     child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
@@ -415,9 +438,11 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                 item.setExpanded(False)
                 if name in self.lockedItems:
                     item.setDisabled(True)
-                    item.setCheckState(0, self.lockedItems[name])
+                    if self._enableCheckboxes:
+                        item.setCheckState(0, self.lockedItems[name])
                 else:
-                    item.setCheckState(0, QtCore.Qt.Checked)
+                    if self._enableCheckboxes:
+                        item.setCheckState(0, QtCore.Qt.Checked)
 
     # NOTE:ED - define methods here to match CcpnNefIo
     def content_nef_molecular_system(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag):
@@ -465,10 +490,14 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                     #           i.e. Chains = saveFrame._content['chain_code'] from nefToTreeViewMapping
                     for listItem in thisList:
                         child = QtWidgets.QTreeWidgetItem(found[0])
-                        child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                        if self._enableCheckboxes:
+                            child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                        else:
+                            child.setFlags(child.flags() & ~QtCore.Qt.ItemIsUserCheckable)
                         child.setData(1, 0, saveFrame)
                         child.setText(0, str(listItem))
-                        child.setCheckState(0, QtCore.Qt.Unchecked)
+                        if self._enableCheckboxes:
+                            child.setCheckState(0, QtCore.Qt.Unchecked)
 
     def _contentLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag=None,
                       addLoopAttribs=None, excludeList=(), **kwds):

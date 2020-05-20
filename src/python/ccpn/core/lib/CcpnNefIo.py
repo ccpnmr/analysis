@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-20 18:59:33 +0100 (Wed, May 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-20 19:15:33 +0100 (Wed, May 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2698,8 +2698,8 @@ class CcpnNefReader:
         # Map for speeding up restraint reading
         self._dataSet2ItemMap = None
         self._nmrResidueMap = None
-        self._ccpn_peak_list = None
-        self._ccpn_peak_list_set = None
+        self._ccpn_peak_list = {}
+        self._ccpn_peak_list_set = {}
 
         self.defaultDataSetSerial = None
         self.defaultNmrChain = None
@@ -3039,8 +3039,8 @@ class CcpnNefReader:
                         traverseFunc=None):
         """Print the contents of the nef dict - results generated with _contentNef
         """
-        self._ccpn_peak_list = None
-        self._ccpn_peak_list_set = None
+        self._ccpn_peak_list = {}
+        self._ccpn_peak_list_set = {}
         return self._traverse(project, dataBlock, True, selection=None, traverseFunc=self._clearSaveFrame)
 
     def _traverse(self, project: Project, dataBlock: StarIo.NmrDataBlock,
@@ -5871,14 +5871,19 @@ class CcpnNefReader:
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [name, peakListSerial])
             result.add(listName)
 
-            if self._ccpn_peak_list is None:
+            _content = self._ccpn_peak_list.get('_content')
+            if not _content:
                 # create a new temporary saveFrame
-                self._ccpn_peak_list = StarIo.NmrLoop(name='_ccpn_peak_list', columns=('pid',))
-                self._ccpn_peak_list_set = OrderedSet()
+                self._ccpn_peak_list['_content'] = AttrDict()
 
-            if listName not in self._ccpn_peak_list_set:
-                self._ccpn_peak_list_set.add(listName)
-                self._ccpn_peak_list.newRow((listName,))
+            attrib = self._ccpn_peak_list['_content']
+            if not attrib.get('loop'):
+                attrib.loop = StarIo.NmrLoop(name='_ccpn_peak_list', columns=('pid',))
+                attrib.loopSet = OrderedSet()
+
+            if listName not in attrib.loopSet:
+                attrib.loopSet.add(listName)
+                attrib.loop.newRow((listName,))
 
         return result
 

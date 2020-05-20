@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-20 17:56:58 +0100 (Wed, May 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-20 18:59:33 +0100 (Wed, May 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2698,6 +2698,8 @@ class CcpnNefReader:
         # Map for speeding up restraint reading
         self._dataSet2ItemMap = None
         self._nmrResidueMap = None
+        self._ccpn_peak_list = None
+        self._ccpn_peak_list_set = None
 
         self.defaultDataSetSerial = None
         self.defaultNmrChain = None
@@ -3037,6 +3039,8 @@ class CcpnNefReader:
                         traverseFunc=None):
         """Print the contents of the nef dict - results generated with _contentNef
         """
+        self._ccpn_peak_list = None
+        self._ccpn_peak_list_set = None
         return self._traverse(project, dataBlock, True, selection=None, traverseFunc=self._clearSaveFrame)
 
     def _traverse(self, project: Project, dataBlock: StarIo.NmrDataBlock,
@@ -4082,7 +4086,7 @@ class CcpnNefReader:
         return newSerial
 
     def rename_ccpn_list(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
-                         itemName=None, newName=None, _lowerCaseName='none', _upperCaseName='None'):
+                         itemName=None, newName=None, _lowerCaseName='none'):
         """Rename a ccpn_list in a ccpn_assignment
         :param itemName: name of the item to rename - dependent on saveFrame type
         :param newName: new item name or None to autorename to next available name
@@ -4091,6 +4095,7 @@ class CcpnNefReader:
         if not itemName or newName == itemName:
             return
 
+        _upperCaseName = _lowerCaseName.capitalize()
         newName = self._getNewListName(saveFrame, itemName, newName, 'ccpn_{}_list'.format(_lowerCaseName), '{}List'.format(_upperCaseName))
 
         try:
@@ -4139,10 +4144,11 @@ class CcpnNefReader:
         except Exception as es:
             raise TypeError('Incorrect PeakCluster definition; must be <int>')
 
+        frameList = ('None',)
         loopList = ('ccpn_peak_cluster', 'ccpn_peak_cluster_peaks')
         replaceList = ('serial', 'peak_cluster_serial')
         self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True,
-                           loopSearchList=loopList, rowSearchList=replaceList)
+                        categorySearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
         return newName
 
@@ -4252,6 +4258,48 @@ class CcpnNefReader:
 
         return newName
 
+    def rename_ccpn_peak_list(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
+                         itemName=None, newName=None, _lowerCaseName='none'):
+        """Rename a ccpn_list in a ccpn_assignment
+        :param itemName: name of the item to rename - dependent on saveFrame type
+        :param newName: new item name or None to autorename to next available name
+        """
+        category = saveFrame['sf_category']
+        if not itemName or newName == itemName:
+            return
+
+        _upperCaseName = _lowerCaseName.capitalize()
+        newName = self._getNewName(saveFrame, itemName, newName, 'ccpn_{}_list'.format(_lowerCaseName), '{}List'.format(_upperCaseName))
+
+        try:
+            # split name into spectrum.serial
+            oldSpectrum, oldSerial = itemName.split(Pid.IDSEP)
+            if not (oldSpectrum or oldSerial):
+                raise
+            oldSerial = int(oldSerial)
+            spectrum, newSerial = newName.split(Pid.IDSEP)
+            if not (spectrum or newSerial):
+                raise
+            newSerial = int(newSerial)
+        except Exception as es:
+            raise TypeError('Incorrect {}List definition; must be <spectrum>.<serial>'.format(_upperCaseName))
+
+        _frameID = _saveFrameNameFromCategory(saveFrame)
+        if spectrum != _frameID.subname:
+            raise ValueError('{}List prefix cannot be changed; must be <spectrum>.<serial>'.format(_upperCaseName))
+
+        frames = self._getSaveFramesInOrder(dataBlock)
+        frameCats = frames.get(category) or []
+        # get all saveframes attached to this spectrum - for ccpn
+        frameList = ['None']  # [frame.name for frame in frameCats if _saveFrameNameFromCategory(frame).subname == _frameID.subname]
+
+        loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_{}_list', 'ccpn_{}', 'ccpn_{}_peaks')]
+        replaceList = ('serial', '{}_list_serial'.format(_lowerCaseName))
+        self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True,
+                           categorySearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
+
+        return newName
+
     renames['nef_chemical_shift_list'] = rename_saveframe
     renames['nef_distance_restraint_list'] = rename_saveframe
     renames['nef_dihedral_restraint_list'] = rename_saveframe
@@ -4262,8 +4310,9 @@ class CcpnNefReader:
     renames['ccpn_spectrum_group'] = rename_saveframe
     renames['nef_sequence'] = rename_nef_molecular_system
     renames['nmr_chain'] = rename_ccpn_assignment
-    renames['ccpn_integral_list'] = partial(rename_ccpn_list, _lowerCaseName='integral', _upperCaseName='Integral')
-    renames['ccpn_multiplet_list'] = partial(rename_ccpn_list, _lowerCaseName='multiplet', _upperCaseName='Multiplet')
+    renames['ccpn_integral_list'] = partial(rename_ccpn_list, _lowerCaseName='integral')
+    renames['ccpn_multiplet_list'] = partial(rename_ccpn_list, _lowerCaseName='multiplet')
+    renames['ccpn_peak_list'] = partial(rename_ccpn_peak_list, _lowerCaseName='peak')
     renames['ccpn_note'] = rename_ccpn_note
     renames['ccpn_peak_cluster_list'] = rename_ccpn_peak_cluster_list
     renames['ccpn_substance'] = rename_ccpn_substance
@@ -4928,12 +4977,12 @@ class CcpnNefReader:
         result = {category: OrderedSet([spectrumName]), }
         # 'nef_peak_list': OrderedSet([peakListParameters['serial']])}
 
-        # NOTE:ED - this is a hack to get the peakLists into a list
-        if saveFrame.get('nef_peak'):
-            content = self.contents['nef_peak']
-            result['nef_peak'] = content(self, project, saveFrame.get('nef_peak'), saveFrame, name=spectrumName)
-            content = self.contents['nef_peaks']
-            result['nef_peaks'] = content(self, project, saveFrame.get('nef_peak'), saveFrame, name=spectrumName)
+        # # NOTE:ED - this is a hack to get the peakLists into a list
+        # if saveFrame.get('nef_peak'):
+        #     content = self.contents['nef_peak']
+        #     result['nef_peak'] = content(self, project, saveFrame.get('nef_peak'), saveFrame, name=spectrumName)
+        #     content = self.contents['nef_peaks']
+        #     result['nef_peaks'] = content(self, project, saveFrame.get('nef_peak'), saveFrame, name=spectrumName)
 
         self._contentLoops(project, saveFrame, name=spectrumName, itemLength=saveFrame['num_dimensions'],
                            excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension',  #'nef_peak',
@@ -5821,6 +5870,15 @@ class CcpnNefReader:
             # NOTE:ED - this is actually putting the peak list name into the list NOT the peak - nef_peak
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [name, peakListSerial])
             result.add(listName)
+
+            if self._ccpn_peak_list is None:
+                # create a new temporary saveFrame
+                self._ccpn_peak_list = StarIo.NmrLoop(name='_ccpn_peak_list', columns=('pid',))
+                self._ccpn_peak_list_set = OrderedSet()
+
+            if listName not in self._ccpn_peak_list_set:
+                self._ccpn_peak_list_set.add(listName)
+                self._ccpn_peak_list.newRow((listName,))
 
         return result
 

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-20 16:58:20 +0100 (Wed, May 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-20 17:56:58 +0100 (Wed, May 20, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2938,7 +2938,7 @@ class CcpnNefReader:
 
             # must have found ALL matching in the list
             if len(found) == len(rowSearchList):
-                for k, (val, newVal) in enumerate(found.items()):
+                for k, (val, newVal) in found.items():
                     getLogger().debug('found {} {} --> {}'.format(rowNum, k, val))
                     if replace:
                         row[k] = newVal
@@ -2966,7 +2966,7 @@ class CcpnNefReader:
 
             # must have found ALL matching in the list
             if len(found) == len(attributeSearchList):
-                for k, (val, newVal) in enumerate(found.items()):
+                for k, (val, newVal) in found.items():
                     getLogger().debug('found {} {} --> {}'.format(saveFrame, k, val))
                     if replace:
                         saveFrame[k] = newVal
@@ -4235,7 +4235,7 @@ class CcpnNefReader:
             del dataBlock[oldFramecode]
             dataBlock[newSaveFrameName] = saveFrame
 
-            return newName
+            return _name
 
         # if name != _frameID.subname:
         #     raise ValueError('{} prefix cannot be changed; must be <name>.<labelling>'.format(_upperCaseName))

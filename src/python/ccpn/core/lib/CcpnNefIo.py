@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 10:56:00 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-21 14:58:51 +0100 (Thu, May 21, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2698,8 +2698,6 @@ class CcpnNefReader:
         # Map for speeding up restraint reading
         self._dataSet2ItemMap = None
         self._nmrResidueMap = None
-        self._ccpn_peak_list = {}
-        self._ccpn_peak_list_set = {}
 
         self.defaultDataSetSerial = None
         self.defaultNmrChain = None
@@ -3098,8 +3096,6 @@ class CcpnNefReader:
                         traverseFunc=None):
         """Clear the contents and rowErrors of the nef dict
         """
-        self._ccpn_peak_list = {}
-        self._ccpn_peak_list_set = {}
         if hasattr(dataBlock, '_content'):
             del dataBlock._content
         if hasattr(dataBlock, '_rowErrors'):
@@ -5909,6 +5905,21 @@ class CcpnNefReader:
                     else:
                         parentFrame._rowErrors[peakID].add(loop.data.index(row))
 
+                ATTRIB = '_rowErrors'
+                _content = getattr(self._dataBlock, ATTRIB, None)
+                if not _content:
+                    # create a new temporary saveFrame
+                    setattr(self._dataBlock, ATTRIB, AttrDict())
+
+                attrib = getattr(self._dataBlock, ATTRIB)
+                if not attrib.get('loop'):
+                    attrib.loop = StarIo.NmrLoop(name='_ccpn_peak_list', columns=('pid',))
+                    attrib.loopSet = OrderedSet()
+
+                if listName not in attrib.loopSet:
+                    attrib.loopSet.add(listName)
+                    attrib.loop.newRow((listName,))
+
     verifiers['nef_peak'] = verify_nef_peak
 
     def content_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
@@ -5932,12 +5943,13 @@ class CcpnNefReader:
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [name, peakListSerial])
             result.add(listName)
 
-            _content = self._ccpn_peak_list.get('_content')
+            ATTRIB = '_content'
+            _content = getattr(self._dataBlock, ATTRIB, None)
             if not _content:
                 # create a new temporary saveFrame
-                self._ccpn_peak_list['_content'] = AttrDict()
+                setattr(self._dataBlock, ATTRIB, AttrDict())
 
-            attrib = self._ccpn_peak_list['_content']
+            attrib = getattr(self._dataBlock, ATTRIB)
             if not attrib.get('loop'):
                 attrib.loop = StarIo.NmrLoop(name='_ccpn_peak_list', columns=('pid',))
                 attrib.loopSet = OrderedSet()

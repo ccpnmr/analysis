@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 14:58:51 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-21 19:17:02 +0100 (Thu, May 21, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -770,7 +770,7 @@ nef2CcpnMap = {
         ('peak_spectrum', 'peakList.spectrum.name'),
         ('peak_list_serial', 'peakList.serial'),
         ('peak_serial', 'serial'),
-        ('peak_pid', 'pid'),
+        # ('peak_pid', 'pid'),
         )),
 
     'ccpn_peak_cluster_list'         : OD((
@@ -788,7 +788,7 @@ nef2CcpnMap = {
         ('peak_spectrum', 'peakList.spectrum.name'),
         ('peak_list_serial', 'peakList.serial'),
         ('peak_serial', 'serial'),
-        ('peak_pid', 'pid'),
+        # ('peak_pid', 'pid'),
         )),
 
     # NB Sample crosslink to spectrum is handled on the spectrum side
@@ -1735,7 +1735,7 @@ class CcpnNefWriter:
                     row['peak_spectrum'] = peak.peakList.spectrum.name
                     row['peak_list_serial'] = peak.peakList.serial
                     row['peak_serial'] = peak.serial
-                    row['peak_pid'] = peak.pid
+                    # row['peak_pid'] = peak.pid
             return result
 
     def assignments2Nef(self, project: Project) -> StarIo.NmrSaveFrame:
@@ -2332,7 +2332,7 @@ class CcpnNefWriter:
                     row = loop.newRow(self._loopRowData(loopName, peak))
                     row['multiplet_list_serial'] = multiplet.multipletList.serial
                     row['multiplet_serial'] = multiplet.serial
-                    row['peak_pid'] = peak.pid
+                    # row['peak_pid'] = peak.pid
             else:
                 del result['ccpn_multiplet_peaks']
         else:
@@ -3957,6 +3957,44 @@ class CcpnNefReader:
 
         return newName
 
+    def _getNewNameDataBlock(self, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
+                             itemName, newName, contentItem, descriptor):
+
+        def incrementName(name):
+            """Add '.1' to name or change suffix '.n' to '.(n+1)
+            Assume that the current Pid.IDSEP is '.'
+            """
+            ll = name.rsplit(Pid.IDSEP, 1)
+            if len(ll) == 2:
+                try:
+                    ll[1] = str(int(ll[1]) + 1)
+                    return Pid.IDSEP.join(ll)
+
+                except ValueError:
+                    pass
+
+            return name + Pid.IDSEP + '1'
+
+        _content = getattr(dataBlock, '_content', [])
+
+        if not _content:
+            raise RuntimeError('_content not defined')
+
+        # itemName is the current item name
+        currentItems = dataBlock._content.loopSet or []
+
+        if newName:
+            # check not in the current list
+            if newName in currentItems:
+                raise ValueError("{} {} already exists".format(descriptor, newName))
+        else:
+            # iterate through the names to find the first that is not taken yet
+            newName = itemName
+            while newName in currentItems:
+                newName = incrementName(newName)
+
+        return newName
+
     def rename_saveframe(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
                          itemName=None, newName=None):
         """Rename a saveFrame
@@ -4272,7 +4310,6 @@ class CcpnNefReader:
             newName = itemName
             while newSaveFrameName in frameList:
                 name = commonUtil.incrementName(name)
-                _name = Pid.IDSEP.join([name, newLabelling])
                 _framename = Pid.IDSEP.join([name, newLabelling or 'None'])
                 newSaveFrameName = '_'.join([category, prefix + _framename + postfix])
 
@@ -4298,7 +4335,7 @@ class CcpnNefReader:
             del dataBlock[oldFramecode]
             dataBlock[newSaveFrameName] = saveFrame
 
-            return _name
+            return Pid.IDSEP.join([name, newLabelling])
 
         # if name != _frameID.subname:
         #     raise ValueError('{} prefix cannot be changed; must be <name>.<labelling>'.format(_upperCaseName))
@@ -4326,7 +4363,7 @@ class CcpnNefReader:
             return
 
         _upperCaseName = _lowerCaseName.capitalize()
-        newName = self._getNewName(saveFrame, itemName, newName, 'ccpn_{}_list'.format(_lowerCaseName), '{}List'.format(_upperCaseName))
+        newName = self._getNewNameDataBlock(dataBlock, saveFrame, itemName, newName, 'ccpn_{}_list'.format(_lowerCaseName), '{}List'.format(_upperCaseName))
 
         try:
             # split name into spectrum.serial
@@ -4350,9 +4387,32 @@ class CcpnNefReader:
         # get all saveframes attached to this spectrum - for ccpn
         frameList = ['None']  # [frame.name for frame in frameCats if _saveFrameNameFromCategory(frame).subname == _frameID.subname]
 
-        loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_{}_list', 'ccpn_{}', 'ccpn_{}_peaks')]
-        replaceList = ('serial', '{}_list_serial'.format(_lowerCaseName))
+        # now need to update the serial number in the relevant saveFrames
+
+        _frameID = _saveFrameNameFromCategory(saveFrame)
+        framecode, frameName, subName, prefix, postfix, preSerial, postSerial, category = _frameID
+
+        # if postSerial is not None:
+        # may not be necessary
+        newFrameCode = '_'.join([category, prefix+subName+'`{}`'.format(newSerial)])
+        saveFrame.name = newFrameCode
+        saveFrame['sf_framecode'] = newFrameCode
+
+        if saveFrame.get('ccpn_peaklist_serial') is not None:
+            saveFrame['ccpn_peaklist_serial'] = newSerial
+
+        # replace the serial number in the nef_peak loop
+        frameList = (newFrameCode,)
+        loopList = ('nef_peak',)
+        replaceList = ('ccpn_peak_list_serial')
         self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True,
+                           frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
+
+        # replace the spectrum/serial in the peak clusters
+        frameList = ('None',)
+        loopList = ('ccpn_peak_cluster_peaks',)
+        replaceList = ('peak_spectrum', 'peak_list_serial')
+        self.searchReplaceList(project, dataBlock, True, None, (subName, oldSerial), (subName, newSerial), replace=True,
                            frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
         return newName
@@ -5575,7 +5635,11 @@ class CcpnNefReader:
 
             mList = row['multiplet_list_serial']
             mSerial = row['multiplet_serial']
-            mPeak = row['peak_pid']
+            pSpectrum = row['peak_spectrum']
+            pList = row['peak_list_serial']
+            pSerial = row['peak_serial']
+            mPeak = Pid.IDSEP.join(('' if x is None else str(x)) for x in ['PK:'+pSpectrum, pList, pSerial])
+            # mPeak = row['peak_pid']
 
             mlList = [ml for ml in spectrum.multipletLists if ml.serial == mList]
             mlts = [mt for ml in mlList for mt in ml.multiplets if mt.serial == mSerial]
@@ -5651,7 +5715,11 @@ class CcpnNefReader:
 
         for row in loop.data:
             pSerial = row['peak_cluster_serial']
-            pPeak = row['peak_pid']
+            pSpectrum = row['peak_spectrum']
+            pList = row['peak_list_serial']
+            pSerial = row['peak_serial']
+            pPeak = Pid.IDSEP.join(('' if x is None else str(x)) for x in ['PK:'+pSpectrum, pList, pSerial])
+            # pPeak = row['peak_pid']
 
             pcs = [pc for pc in project.peakClusters if pc.serial == pSerial]
             peak = project.getByPid(pPeak)
@@ -5904,6 +5972,14 @@ class CcpnNefReader:
                         parentFrame._rowErrors[peakID] = OrderedSet([loop.data.index(row)])
                     else:
                         parentFrame._rowErrors[peakID].add(loop.data.index(row))
+
+                # NOTE:ED - needed because don't have a ccpn_peak_list loop at the moment
+                #           when we do, this will get overwritten - need to check later
+                _peaklist_errors = parentFrame._rowErrors.get('ccpn_peak_list_serial')
+                if not _peaklist_errors:
+                    parentFrame._rowErrors['ccpn_peak_list_serial'] = OrderedSet((listName,))
+                else:
+                    _peaklist_errors.add(listName)
 
                 ATTRIB = '_rowErrors'
                 _content = getattr(self._dataBlock, ATTRIB, None)

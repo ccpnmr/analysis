@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-15 16:34:23 +0100 (Wed, April 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-21 14:00:18 +0100 (Thu, May 21, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -54,7 +54,7 @@ from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
-from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply, _verifyPopupTabApply
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise
 from ccpn.core.lib.ContextManagers import queueStateChange
@@ -116,6 +116,7 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
         self.tabs = tuple(self.tabWidget.widget(ii) for ii in range(self.tabWidget.count()))
         self._populate()
 
+        self._okButton = self.getButton(self.OKBUTTON)
         self._applyButton = self.getButton(self.APPLYBUTTON)
         self._revertButton = self.getButton(self.RESETBUTTON)
 
@@ -131,6 +132,12 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
 
     def _populate(self):
         """Set the primary classType for the child list attached to this container
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
+    def _getChangeState(self):
+        """Get the change state of the contained widgets
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
@@ -276,6 +283,17 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
             if self._contoursTab:
                 self._contoursTab._populateColour()
 
+    def _getChangeState(self):
+        """Get the change state from the popup tabs
+        """
+        applyState = True
+        revertState = False
+        tabs = self.getActiveTabList()
+        allChanges = any(t._changes for t in tabs if t is not None)
+
+        return self, allChanges, applyState, revertState, \
+               self._applyButton, self._revertButton, self._currentNumApplies
+
     def getActiveTabList(self):
         """Return the list of active tabs
         """
@@ -323,6 +341,17 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
         with self.blockWidgetSignals():
             for aTab in self.tabs:
                 aTab._populateColour()
+
+    def _getChangeState(self):
+        """Get the change state from the colour tabs
+        """
+        applyState = True
+        revertState = False
+        tabs = self.getActiveTabList()
+        allChanges = any(t._changes for t in tabs if t is not None)
+
+        return self, allChanges, applyState, revertState, \
+               self._applyButton, self._revertButton, self._currentNumApplies
 
     def _tabClicked(self, index):
         """Callback for clicking a tab - needed for refilling the checkboxes and populating the pulldown
@@ -388,6 +417,17 @@ class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
         with self.blockWidgetSignals():
             for aTab in self.tabs:
                 aTab._populateColour()
+
+    def _getChangeState(self):
+        """Get the change state from the colour tabs
+        """
+        applyState = True
+        revertState = False
+        tabs = self.getActiveTabList()
+        allChanges = any(t._changes for t in tabs if t is not None)
+
+        return self, allChanges, applyState, revertState, \
+               self._applyButton, self._revertButton, self._currentNumApplies
 
     def _tabClicked(self, index):
         """Callback for clicking a tab - needed for refilling the checkboxes and populating the pulldown
@@ -766,11 +806,16 @@ class GeneralTab(Widget):
         else:
             self.noiseLevelData.setValue(0)
 
+    def _getChangeState(self):
+        """Get the change state from the parent widget
+        """
+        return self._parent._getChangeState()
+
     def _writeLoggingMessage(self, command):
         self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
         self.logger.info(command)
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetValidateDataUrl(self, dataUrl, newUrl, urlValid, dim):
         """Set the new url in the dataUrl
         dim is required by the decorator to give a unique id for dataUrl row
@@ -785,7 +830,7 @@ class GeneralTab(Widget):
         # if urlValid:
         self._validateFrame.dataUrlFunc(dataUrl, newUrl)
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetValidateFilePath(self, spectrum, filePath, dim):
         """Set the new filePath for the spectrum
         dim is required by the decorator to give a unique id for filePath row
@@ -793,7 +838,7 @@ class GeneralTab(Widget):
         if filePath != spectrum.filePath:
             return partial(self._validateFrame.filePathFunc, spectrum, filePath)
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSpectrumNameChange(self, spectrum, value):
         if value != spectrum.name:
             return partial(self._changeSpectrumName, spectrum, value)
@@ -802,7 +847,7 @@ class GeneralTab(Widget):
         spectrum.rename(name)
         self._writeLoggingMessage("spectrum.rename('%s')" % str(name))
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSpectrumScaleChange(self, spectrum, textFromValue, value):
         specValue = textFromValue(spectrum.scale)
         if value >= 0 and textFromValue(value) != specValue:
@@ -813,7 +858,7 @@ class GeneralTab(Widget):
         self._writeLoggingMessage("spectrum.scale = %s" % str(scale))
         self.pythonConsole.writeConsoleCommand("spectrum.scale = %s" % scale, spectrum=spectrum)
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueNoiseLevelDataChange(self, spectrum, textFromValue, value):
         specValue = textFromValue(spectrum.noiseLevel) if spectrum.noiseLevel else None
         if textFromValue(value) != specValue:
@@ -823,7 +868,7 @@ class GeneralTab(Widget):
         spectrum.noiseLevel = float(noise)
         self._writeLoggingMessage("spectrum.noiseLevel = %s" % str(noise))
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChemicalShiftListChange(self, spectrum, item):
         if item == '<New>':
             listLen = len(self.chemicalShiftListPulldown.texts)
@@ -859,7 +904,7 @@ class GeneralTab(Widget):
         self._writeLoggingMessage("""chemicalShiftList = project.getByPid('%s')
                                   spectrum.chemicalShiftList = chemicalShiftList""" % spectrum.chemicalShiftList.pid)
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSampleChange(self, spectrum, value):
         return partial(self._changeSampleSpectrum, spectrum, self.samplesPulldownList.currentObject())
 
@@ -870,7 +915,7 @@ class GeneralTab(Widget):
             if spectrum.sample is not None:
                 spectrum.sample = None
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetSpectrumType(self, spectrum, value):
         if self.spectrumType.getObject():
             expType = self.spectrumType.objects[value]
@@ -947,7 +992,7 @@ class GeneralTab(Widget):
             self._parent._fillPullDowns()
             self.colourBox.setCurrentText(spectrumColours[newColour.name()])
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangeSliceComboIndex(self, spectrum, value):
         if value >= 0 and list(spectrumColours.keys())[value] != spectrum.sliceColour:
             return partial(self._changedSliceComboIndex, spectrum, value)
@@ -959,7 +1004,7 @@ class GeneralTab(Widget):
             self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour)
             self.pythonConsole.writeConsoleCommand("spectrum.sliceColour '%s'" % newColour, spectrum=spectrum)
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSpinningRateChange(self, spectrum, textFromValue, value):
         specValue = textFromValue(spectrum.scale)
         if value >= 0 and textFromValue(value) != specValue:
@@ -970,7 +1015,7 @@ class GeneralTab(Widget):
         self._writeLoggingMessage("spectrum.spinningRate = %s" % str(value))
         self.pythonConsole.writeConsoleCommand("spectrum.spinningRate = %s" % value, spectrum=spectrum)
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueTemperatureChange(self, spectrum, textFromValue, value):
         specValue = textFromValue(spectrum.scale)
         if value >= 0 and textFromValue(value) != specValue:
@@ -1236,7 +1281,7 @@ class DimensionsTab(Widget):
             specIndex = axisOrder.index(specOrder) + 1
             self.preferredAxisOrderPulldown.setIndex(specIndex)
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetSpectrumOrderingComboIndex(self, spectrum, item):
         if item:
             index = self.preferredAxisOrderPulldown.getIndex()
@@ -1319,11 +1364,16 @@ class DimensionsTab(Widget):
 
         self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
 
+    def _getChangeState(self):
+        """Get the change state from the parent widget
+        """
+        return self._parent._getChangeState()
+
     def _writeLoggingMessage(self, command):
         self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
         self.logger.info(command)
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetAssignmentTolerances(self, spectrum, dim, textFromValue, value):
         specValue = textFromValue(spectrum.assignmentTolerances[dim] or 0.0)  # this means they are not being set
         if textFromValue(value) != specValue:
@@ -1336,7 +1386,7 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.assignmentTolerances = {0}".format(assignmentTolerances), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.assignmentTolerances = {0}".format(assignmentTolerances))
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetDoubleCursorOffset(self, spectrum, dim, textFromValue, value):
         specValue = textFromValue(spectrum.doubleCrosshairOffsets[dim])
         if textFromValue(value) != specValue:
@@ -1349,7 +1399,7 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.doubleCrosshairOffsets = {0}".format(doubleCrosshairOffsets), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.doubleCrosshairOffsets = {0}".format(doubleCrosshairOffsets))
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetAxisCodes(self, spectrum, valueGetter, dim):
         value = valueGetter()
         if value != spectrum.axisCodes[dim]:
@@ -1368,7 +1418,7 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.axisCodes = {0}".format(axisCodes), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.referenceValues = {0}".format(axisCodes))
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetIsotopeCodes(self, spectrum, valueGetter, dim):
         value = valueGetter()
         if value != spectrum.isotopeCodes[dim]:
@@ -1384,7 +1434,7 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.isotopeCodes = {0}".format(isotopeCodes), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.referenceValues = {0}".format(isotopeCodes))
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetDimensionReferencing(self, spectrum, dim, textFromValue, value):
         specValue = textFromValue(spectrum.referenceValues[dim])
         if textFromValue(value) != specValue:
@@ -1397,7 +1447,7 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.referenceValues = {0}".format(spectrumReferencing), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.referenceValues = {0}".format(spectrumReferencing))
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetPointDimensionReferencing(self, spectrum, dim, textFromValue, value):
         specValue = textFromValue(spectrum.referencePoints[dim])
         if textFromValue(value) != specValue:
@@ -1410,7 +1460,7 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.referencePoints = {0}".format(spectrumReferencing), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.referencePoints = {0}".format(spectrumReferencing))
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetMinAliasing(self, spectrum, valueGetter, dim):
         minValue = int(valueGetter())
         if minValue != spectrum.visibleAliasingRange[dim][0]:
@@ -1430,7 +1480,7 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.visibleAliasingRange = {0}".format(tuple(alias)), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.visibleAliasingRange = {0}".format(tuple(alias)))
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetMaxAliasing(self, spectrum, valueGetter, dim):
         maxValue = int(valueGetter())
         if maxValue != spectrum.visibleAliasingRange[dim][1]:
@@ -1449,7 +1499,7 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.visibleAliasingRange = {0}".format(tuple(alias)), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.aliasingLimits = {0}".format(tuple(alias)))
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetFoldingModes(self, spectrum, valueGetter, dim):
         dd = {True: 'mirror', False: 'circular', None: None}
         value = dd[valueGetter()]
@@ -1464,7 +1514,7 @@ class DimensionsTab(Widget):
         self.pythonConsole.writeConsoleCommand("spectrum.foldingModes = {0}".format(tuple(folding)), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.foldingModes = {0}".format(tuple(folding)))
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueSetDisplayFoldedContours(self, spectrum, valueGetter):
         value = valueGetter()
         if value != spectrum.displayFoldedContours:
@@ -1762,6 +1812,11 @@ class ContoursTab(Widget):
         # if self._showCopyOptions:
         self._populateCheckBoxes()
 
+    def _getChangeState(self):
+        """Get the change state from the parent widget
+        """
+        return self._parent._getChangeState()
+
     def _populateCheckBoxes(self):
         """Populate the checkbox from preferences and fill the pullDown from the list of spectra
         """
@@ -1786,7 +1841,7 @@ class ContoursTab(Widget):
         """
         self._changes = OrderedDict()
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangePositiveContourDisplay(self, spectrum, state):
         if (state == QtCore.Qt.Checked) != spectrum.includePositiveContours:
             return partial(self._changePositiveContourDisplay, spectrum, state)
@@ -1805,7 +1860,7 @@ class ContoursTab(Widget):
                 self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
                 self.logger.info("spectrumView.displayPositiveContours = False")
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangeNegativeContourDisplay(self, spectrum, state):
         if (state == QtCore.Qt.Checked) != spectrum.includeNegativeContours:
             return partial(self._changeNegativeContourDisplay, spectrum, state)
@@ -1824,7 +1879,7 @@ class ContoursTab(Widget):
                 self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
                 self.logger.info("spectrumView.displayNegativeContours = False")
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangePositiveContourBase(self, spectrum, textFromValue, value):
         specValue = textFromValue(spectrum.positiveContourBase)
         if value >= 0 and textFromValue(value) != specValue:
@@ -1842,7 +1897,7 @@ class ContoursTab(Widget):
         self._writeLoggingMessage("spectrum.positiveContourBase = %f" % float(value))
         self.pythonConsole.writeConsoleCommand("spectrum.positiveContourBase = %f" % float(value), spectrum=spectrum)
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangePositiveContourFactor(self, spectrum, textFromValue, value):
         specValue = textFromValue(spectrum.positiveContourFactor)
         if value >= 0 and textFromValue(value) != specValue:
@@ -1860,7 +1915,7 @@ class ContoursTab(Widget):
         self._writeLoggingMessage("spectrum.positiveContourFactor = %f" % float(value))
         self.pythonConsole.writeConsoleCommand("spectrum.positiveContourFactor = %f" % float(value), spectrum=spectrum)
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangePositiveContourCount(self, spectrum, value):
         if value >= 0 and value != spectrum.positiveContourCount:
             returnVal = partial(self._changePositiveContourCount, spectrum, value)
@@ -1877,7 +1932,7 @@ class ContoursTab(Widget):
         self._writeLoggingMessage("spectrum.positiveContourCount = %d" % int(value))
         self.pythonConsole.writeConsoleCommand("spectrum.positiveContourCount = %d" % int(value), spectrum=spectrum)
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangeNegativeContourBase(self, spectrum, textFromValue, value):
         specValue = textFromValue(spectrum.negativeContourBase)
         if value <= 0 and textFromValue(value) != specValue:
@@ -1897,7 +1952,7 @@ class ContoursTab(Widget):
         self._writeLoggingMessage("spectrum.negativeContourBase = %f" % float(value))
         self.pythonConsole.writeConsoleCommand("spectrum.negativeContourBase = %f" % float(value), spectrum=spectrum)
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangeNegativeContourFactor(self, spectrum, textFromValue, value):
         specValue = textFromValue(spectrum.negativeContourFactor)
         if value >= 0 and textFromValue(value) != specValue:
@@ -1915,7 +1970,7 @@ class ContoursTab(Widget):
         self._writeLoggingMessage("spectrum.negativeContourFactor = %f" % float(value))
         self.pythonConsole.writeConsoleCommand("spectrum.negativeContourFactor = %f" % float(value), spectrum=spectrum)
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangeNegativeContourCount(self, spectrum, value):
         if value >= 0 and value != spectrum.negativeContourCount:
             returnVal = partial(self._changeNegativeContourCount, spectrum, value)
@@ -1941,7 +1996,7 @@ class ContoursTab(Widget):
             self._parent._fillPullDowns()
             self.positiveColourBox.setCurrentText(spectrumColours[newColour.name()])
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangePosColourComboIndex(self, spectrum, value):
         if value >= 0 and list(spectrumColours.keys())[value] != spectrum.positiveContourColour:
             return partial(self._changePosColourComboIndex, spectrum, value)
@@ -1963,7 +2018,7 @@ class ContoursTab(Widget):
             self._parent._fillPullDowns()
             self.negativeColourBox.setCurrentText(spectrumColours[newColour.name()])
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangeNegColourComboIndex(self, spectrum, value):
         if value >= 0 and list(spectrumColours.keys())[value] != spectrum.negativeContourColour:
             return partial(self._changeNegColourComboIndex, spectrum, value)
@@ -2199,6 +2254,11 @@ class ColourTab(Widget):
         # if self._showCopyOptions:
         self._populateCheckBoxes()
 
+    def _getChangeState(self):
+        """Get the change state from the parent widget
+        """
+        return self._parent._getChangeState()
+
     def _populateCheckBoxes(self):
         """Populate the checkbox from preferences and fill the pullDown from the list of spectra
         """
@@ -2231,7 +2291,7 @@ class ColourTab(Widget):
             self._parent._fillPullDowns()
             self.positiveColourBox.setCurrentText(spectrumColours[newColour.name()])
 
-    @queueStateChange(_verifyPopupTabApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangeSliceComboIndex(self, spectrum, value):
         if value >= 0 and list(spectrumColours.keys())[value] != spectrum.sliceColour:
             return partial(self._changedSliceComboIndex, spectrum, value)

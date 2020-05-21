@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:18:23 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-21 14:00:17 +0100 (Thu, May 21, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -146,6 +146,16 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.__postInit__()
         self._applyButton = self.getButton(self.APPLYBUTTON)
         self._revertButton = self.getButton(self.RESETBUTTON)
+
+    def _getChangeState(self):
+        """Get the change state from the _changes dict
+        """
+        applyState = True
+        revertState = False
+        allChanges = True if self._changes else False
+
+        return self, allChanges, applyState, revertState, \
+               self._applyButton, self._revertButton, self._currentNumApplies
 
     def getActiveTabList(self):
         """Return the list of active tabs

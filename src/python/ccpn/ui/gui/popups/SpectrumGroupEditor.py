@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-29 15:21:46 +0100 (Wed, April 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-21 14:00:18 +0100 (Thu, May 21, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ from ast import literal_eval
 from typing import Tuple, Any
 from collections import OrderedDict, Iterable
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupChangesApply
+from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.core.Spectrum import Spectrum
@@ -373,6 +373,29 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
         # NOTE:ED - check that the list widgets are populated correctly - may be called twice
         super()._populate()
+
+    def _getChangeState(self):
+        """Define the required widgets with storing changes
+        returns Popup containing the apply/close buttons
+                dict containing current changes
+        """
+        try:
+            editName = self.nameEdit.text()
+            defaultName = self._defaultName
+            pidState = self._groupedObjects
+            pidList = [str(spec.pid) for spec in self._defaultSpectra]
+
+            revertState = (pidState != pidList) or (editName != defaultName)
+            applyState = (True if pidState else False) and (True if editName else False) # and revertState
+
+            tabs = self.getActiveTabList()
+            allChanges = any(t._changes for t in tabs if t is not None)
+
+        except Exception as es:
+            return [None] * 7
+
+        return self, allChanges, applyState, revertState, \
+               self._applyButton, self._revertButton, 0
 
     def _tabClicked1d(self, index):
         """Callback for clicking a tab - needed for refilling the checkboxes and populating the pulldown
@@ -744,7 +767,7 @@ class SeriesFrame(Frame):
         for sp in spacers:
             layout.removeItem(sp)
 
-    @queueStateChange(_verifyPopupChangesApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangeSpectrumSeriesValues(self, editor, spectrumGroup, spectrum, dim):
         # queue the value if has changed from the original
         value = editor.get()
@@ -863,7 +886,7 @@ class SeriesFrame(Frame):
         # bit of a hack here - called by _groupInit which builds the spectrumGroup series
         self._parent._spectrumGroupSeriesEdited[dim] = value
 
-    @queueStateChange(_verifyPopupChangesApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangeSeriesUnits(self, editor, spectrumGroup):
         """callback from editing the seriesUnits - respond to every keypress
         """
@@ -889,30 +912,12 @@ class SeriesFrame(Frame):
 
         self._queueChangeSeriesUnits(editor, spectrumGroup)
 
-    def getChangesDict(self):
-        """Define the required widgets with storing changes
-        returns Popup containing then apply/close buttons
-                dict containing current changes
-                stateValue, an overriding boolean that needs to be true for all else to be true
+    def _getChangeState(self):
+        """Get the change state from the parent widget
         """
+        return self._parent._getChangeState()
 
-        applyState = revertState = False
-        try:
-            editName = self._parent.nameEdit.text()
-            defaultName = self._parent._defaultName
-            pidState = self._parent._groupedObjects
-            pidList = [str(spec.pid) for spec in self._parent._defaultSpectra]
-
-            revertState = (pidState != pidList) or (editName != defaultName)
-            applyState = (True if pidState else False) and (True if editName else False) # and revertState
-
-        except Exception as es:
-            pass
-
-        return self._parent, self._changes, applyState, revertState, \
-               self._parent._applyButton, self._parent._revertButton
-
-    @queueStateChange(_verifyPopupChangesApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangeSeriesType(self, spectrumGroup):
         """callback from editing the seriesType
         """
@@ -928,7 +933,7 @@ class SeriesFrame(Frame):
         """
         self._parent._spectrumGroupSeriesTypeEdited = value
 
-    @queueStateChange(_verifyPopupChangesApply)
+    @queueStateChange(_verifyPopupApply)
     def _queueChangeName(self):
         """callback from editing the name
         """

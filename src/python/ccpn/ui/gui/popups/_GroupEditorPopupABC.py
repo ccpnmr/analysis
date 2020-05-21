@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-03 22:11:57 +0100 (Fri, April 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-21 16:38:03 +0100 (Thu, May 21, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -535,6 +535,12 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     def _populate(self):
         self._populateLists()
+
+    def _getChangeState(self):
+        """Get the change state from the _changes dict
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
 
     def _getPreviousState(self):
         result = {}

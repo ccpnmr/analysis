@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 14:00:18 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-21 16:38:03 +0100 (Thu, May 21, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -363,21 +363,21 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
     def _populate(self):
         """Populate the widgets in the tabs
         """
-        with self.blockWidgetSignals():
-            for colourTab in (self._colourTabs1d, self._colourTabsNd):
-                for aTab in tuple(colourTab.widget(ii) for ii in range(colourTab.count())):
-                    aTab._populateColour()
-
-        self.seriesTab._fillSeriesFrame(self._defaultSpectra)
-        self.seriesTab._populate()
-
         # NOTE:ED - check that the list widgets are populated correctly - may be called twice
         super()._populate()
+        self._spectraChanged()
+
+        # check whether any tabs need removing here
+        for colourTab in (self._colourTabs1d, self._colourTabsNd):
+            for aTab in tuple(colourTab.widget(ii) for ii in range(colourTab.count())):
+                aTab._populateColour()
+
+        with self.blockWidgetSignals():
+            self.seriesTab._fillSeriesFrame(self._defaultSpectra)
+        self.seriesTab._populate()
 
     def _getChangeState(self):
-        """Define the required widgets with storing changes
-        returns Popup containing the apply/close buttons
-                dict containing current changes
+        """Get the change state from the _changes dict
         """
         try:
             editName = self.nameEdit.text()
@@ -446,6 +446,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         """
         self._spectraChanged1d()
         self._spectraChangedNd()
+        # call the series frame as this contains code for updating _changes
+        self.seriesTab._queueChangeSpectrumList()
 
     def _spectraChanged1d(self):
         self._newSpectra = self._getSpectraFromList()
@@ -709,11 +711,8 @@ class SeriesFrame(Frame):
 
             editorFrame = Frame(self._seriesFrame, setLayout=True, grid=(sRow, 1), vAlign='t')
             seriesEditor = PlainTextEditor(editorFrame, grid=(0, 0), fitToContents=True)
-            seriesEditor.textChanged.connect(partial(self._queueChangeSpectrumSeriesValues,
-                                                     seriesEditor, self.defaultObject,
-                                                     spec, sRow))
-
             seriesEditor.setMinimumSize(50, 25)
+
             # attributes for setting size when using resize-grip
             seriesEditor._minimumWidth = 50
             seriesEditor._minimumHeight = 25
@@ -721,6 +720,11 @@ class SeriesFrame(Frame):
 
             if spec in self._currentSeriesValues and self._currentSeriesValues[spec] is not None:
                 seriesEditor.set(self._currentSeriesValues[spec])
+
+            # add the callback after setting the initial values
+            seriesEditor.textChanged.connect(partial(self._queueChangeSpectrumSeriesValues,
+                                                     seriesEditor, self.defaultObject,
+                                                     spec, sRow))
 
             self._editors[spec] = seriesEditor
 
@@ -945,6 +949,22 @@ class SeriesFrame(Frame):
 
     def _changeName(self, value):
         """set the spectrumGroup seriesType
+        """
+        # doesn't need to do anything, just insert an item into the revert _changes dict
+        pass
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueChangeSpectrumList(self):
+        """callback from changing the spectra in the list
+        """
+        pidList = self._parent._groupedObjects
+        defaultList = self._parent._defaultSpectra
+
+        if pidList != defaultList:
+            return partial(self._changeSpectrumList, pidList)
+
+    def _changeSpectrumList(self, value):
+        """set the spectra in the spectrumGroup
         """
         # doesn't need to do anything, just insert an item into the revert _changes dict
         pass

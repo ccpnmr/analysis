@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 14:00:18 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-21 16:38:03 +0100 (Thu, May 21, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1797,17 +1797,18 @@ class ContoursTab(Widget):
         # clear all changes
         self._changes = OrderedDict()
 
-        self.positiveContoursCheckBox.setChecked(self.spectrum.includePositiveContours)
-        self.positiveContourBaseData.setValue(self.spectrum.positiveContourBase)
-        self.positiveMultiplierData.setValue(float(self.spectrum.positiveContourFactor))
-        self.positiveContourCountData.setValue(int(self.spectrum._apiDataSource.positiveContourCount))
-        _setColourPulldown(self.positiveColourBox, self.spectrum.positiveContourColour)
+        with self.blockWidgetSignals():
+            self.positiveContoursCheckBox.setChecked(self.spectrum.includePositiveContours)
+            self.positiveContourBaseData.setValue(self.spectrum.positiveContourBase)
+            self.positiveMultiplierData.setValue(float(self.spectrum.positiveContourFactor))
+            self.positiveContourCountData.setValue(int(self.spectrum._apiDataSource.positiveContourCount))
+            _setColourPulldown(self.positiveColourBox, self.spectrum.positiveContourColour)
 
-        self.negativeContoursCheckBox.setChecked(self.spectrum.includeNegativeContours)
-        self.negativeContourBaseData.setValue(-abs(self.spectrum.negativeContourBase))
-        self.negativeMultiplierData.setValue(self.spectrum.negativeContourFactor)
-        self.negativeContourCountData.setValue(self.spectrum.negativeContourCount)
-        _setColourPulldown(self.negativeColourBox, self.spectrum.negativeContourColour)
+            self.negativeContoursCheckBox.setChecked(self.spectrum.includeNegativeContours)
+            self.negativeContourBaseData.setValue(-abs(self.spectrum.negativeContourBase))
+            self.negativeMultiplierData.setValue(self.spectrum.negativeContourFactor)
+            self.negativeContourCountData.setValue(self.spectrum.negativeContourCount)
+            _setColourPulldown(self.negativeColourBox, self.spectrum.negativeContourColour)
 
         # if self._showCopyOptions:
         self._populateCheckBoxes()
@@ -1823,14 +1824,16 @@ class ContoursTab(Widget):
         if not hasattr(self, '_copyCheckBoxes'):
             return
 
-        checkBoxList = self.preferences.general._copySpectraSettingsNd
-        if checkBoxList:
-            for cc, checkBox in enumerate(checkBoxList):
-                state = checkBoxList[cc]
-                self._copyCheckBoxes[cc].setChecked(state)
-        if self._copyToSpectra:
-            texts = ['<All>'] + [spectrum.pid for spectrum in self._copyToSpectra if spectrum != self.spectrum]
-            self._copyToSpectraPullDown.modifyTexts(texts)
+        with self.blockWidgetSignals():
+            checkBoxList = self.preferences.general._copySpectraSettingsNd
+            if checkBoxList:
+                for cc, checkBox in enumerate(checkBoxList):
+                    state = checkBoxList[cc]
+                    self._copyCheckBoxes[cc].setChecked(state)
+
+            if self._copyToSpectra:
+                texts = ['<All>'] + [spectrum.pid for spectrum in self._copyToSpectra if spectrum != self.spectrum]
+                self._copyToSpectraPullDown.modifyTexts(texts)
 
     def _writeLoggingMessage(self, command):
         self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
@@ -2249,7 +2252,8 @@ class ColourTab(Widget):
         # clear all changes
         self._changes = OrderedDict()
 
-        _setColourPulldown(self.positiveColourBox, self.spectrum.sliceColour)
+        with self.blockWidgetSignals():
+            _setColourPulldown(self.positiveColourBox, self.spectrum.sliceColour)
 
         # if self._showCopyOptions:
         self._populateCheckBoxes()
@@ -2265,18 +2269,19 @@ class ColourTab(Widget):
         if not hasattr(self, '_copyCheckBoxes'):
             return
 
-        checkBoxList = self.preferences.general._copySpectraSettings1d
-        if checkBoxList:
-            for cc, checkBox in enumerate(checkBoxList):
-                state = checkBoxList[cc]
-                try:
-                    self._copyCheckBoxes[cc].setChecked(state)
-                except Exception as es:
-                    pass
+        with self.blockWidgetSignals():
+            checkBoxList = self.preferences.general._copySpectraSettings1d
+            if checkBoxList:
+                for cc, checkBox in enumerate(checkBoxList):
+                    state = checkBoxList[cc]
+                    try:
+                        self._copyCheckBoxes[cc].setChecked(state)
+                    except Exception as es:
+                        pass
 
-        if self._copyToSpectra:
-            texts = ['<All>'] + [spectrum.pid for spectrum in self._copyToSpectra if spectrum != self.spectrum]
-            self._copyToSpectraPullDown.modifyTexts(texts)
+            if self._copyToSpectra:
+                texts = ['<All>'] + [spectrum.pid for spectrum in self._copyToSpectra if spectrum != self.spectrum]
+                self._copyToSpectraPullDown.modifyTexts(texts)
 
     def _writeLoggingMessage(self, command):
         self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)

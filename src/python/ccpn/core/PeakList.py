@@ -1392,3 +1392,7 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
         result.lineColour = lineColour
 
     return result
+
+# for sp in project.spectra:
+#     c = sp.positiveContourColour
+#     sp.peakLists[-1].symbolColour = c

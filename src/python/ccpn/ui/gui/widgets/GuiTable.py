@@ -1684,8 +1684,11 @@ GuiTable::item::selected {
 
     def selectIndex(self, idx, doCallback=True):
         model = self.model()
+        selectionModel = self.selectionModel()
+        selectionModel.clearSelection()
         rowIndex = model.index(idx, 0)
         self.setCurrentIndex(rowIndex)
+        selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
         if doCallback:
             self._selectionTableCallback(None)
 

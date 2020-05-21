@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-27 19:23:39 +0000 (Mon, January 27, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-05-21 14:00:17 +0100 (Thu, May 21, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -120,6 +120,10 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
 
         # make the buttons appear
         self._setButtons()
+        self._okButton = self.dialogButtons.button(self.OKBUTTON)
+        self._cancelButton = self.dialogButtons.button(self.CANCELBUTTON)
+        self._helpButton = self.dialogButtons.button(self.HELPBUTTON)
+        self._revertButton = self.dialogButtons.button(self.RESETBUTTON)
 
         # populate the widgets
         self._populate()
@@ -147,6 +151,16 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
                     # set the current value
                     value = getFunction(self.obj, attr, None)
                     attrSetter(self.edits[attr], value)
+
+    def _getChangeState(self):
+        """Get the change state from the _changes dict
+        """
+        applyState = True
+        revertState = False
+        allChanges = True if self._changes else False
+
+        return self, allChanges, applyState, revertState, \
+               self._okButton, self._revertButton, 0
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetValue(self, attr, attrType, getFunction, setFunction, presetFunction, callback, dim):

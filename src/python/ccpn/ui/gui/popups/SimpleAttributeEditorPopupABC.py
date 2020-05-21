@@ -4,7 +4,7 @@ Abstract base class to easily implement a popup to edit attributes of V3 layer o
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-05-21 14:00:18 +0100 (Thu, May 21, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -84,6 +84,10 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
 
         # make the buttons appear
         self._setButtons()
+        self._okButton = self.dialogButtons.button(self.OKBUTTON)
+        self._cancelButton = self.dialogButtons.button(self.CANCELBUTTON)
+        self._helpButton = self.dialogButtons.button(self.HELPBUTTON)
+        self._revertButton = self.dialogButtons.button(self.RESETBUTTON)
 
         # populate the widgets
         self._populate()
@@ -94,6 +98,16 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
             if attr in self.edits:
                 value = getFunction(self.obj, attr)
                 self.edits[attr].setText(str(value))
+
+    def _getChangeState(self):
+        """Get the change state from the _changes dict
+        """
+        applyState = True
+        revertState = False
+        allChanges = True if self._changes else False
+
+        return self, allChanges, applyState, revertState, \
+               self._okButton, self._revertButton, self._currentNumApplies
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetValue(self, attr, getFunction, setFunction, dim):

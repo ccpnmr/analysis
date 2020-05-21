@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-17 16:48:35 +0100 (Fri, April 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-21 14:00:17 +0100 (Thu, May 21, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -53,7 +53,7 @@ ORIENTATIONLIST = (HORIZONTAL, VERTICAL)
 DEFAULTSPACING = 3
 # DEFAULTMARGINS = (24, 8, 24, 18)
 DEFAULTMARGINS = (14, 14, 14, 14)
-GETCHANGESDICT = 'getChangesDict'
+GETCHANGESTATE = '_getChangeState'
 
 
 class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
@@ -522,6 +522,11 @@ def handleDialogApply(self):
 def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
     """Change the state of the apply button based on the changes in the tabs
     """
+    if not hasattr(self, GETCHANGESTATE):
+        raise RuntimeError('widget {} must have changes defined'.format(self))
+    _getChanges = getattr(self, GETCHANGESTATE)
+    if not callable(_getChanges):
+        raise RuntimeError('changes method for {} not correctly defined'.format(self))
 
     # if attributeName is defined use as key to dict to store change functions
     # append postFixes if need to differentiate partial functions
@@ -550,107 +555,17 @@ def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
         if getattr(self, 'LIVEDIALOG', None):
             self._changeSettings()
 
-    if self:
-        # set button state depending on number of changes
-        allChanges = True if self._changes else False
-        _button = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
-        if _button:
-            _button.setEnabled(allChanges)
-        _button = self.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
-        if _button:
-            _button.setEnabled(allChanges or self._currentNumApplies)
-
-
-def _verifyPopupTabApply(self, attributeName, value, *postArgs, **postKwds):
-    """Change the state of the apply button based on the changes in the tabs
-    """
-    # self must be a tab in a tabWidget
-    popup = self._parent
-
-    # if attributeName is defined use as key to dict to store change functions
-    # append postFixes if need to differentiate partial functions
-    if attributeName:
-
-        # append the extra parameters to the end of attributeName to give a unique
-        # identifier into _changes dict, to differentiate same-name partial functions
-        for pf in postArgs:
-            if pf is not None:
-                attributeName += str(pf)
-        for k, pf in sorted(postKwds.items()):
-            if pf is not None:
-                attributeName += str(pf)
-        attributeName += str(id(self))
-
-        if value:
-            # store in dict - overwrite as required
-            self._changes[attributeName] = value
-        else:
-            if attributeName in self._changes:
-                # delete from dict - empty dict implies no changes
-                del self._changes[attributeName]
+    # get the information from the popup - which must handle its own nested _changes
+    popup, changeState, applyState, revertState, applyButton, revertButton, numApplies = _getChanges()
 
     if popup:
-        # check whether there is a list of tabs
-        tabs = popup.getActiveTabList()
+        _applyButton = applyButton if applyButton else popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
+        _revertButton = revertButton if revertButton else popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
 
-        if tabs:
-            # set button state depending on number of changes
-            # tabs = tuple(tabWidget.widget(ii) for ii in range(tabWidget.count()))
-
-            allChanges = any(t._changes for t in tabs if t is not None)
-            _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
-            if _button:
-                _button.setEnabled(allChanges)
-            _button = popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
-            if _button:
-                _button.setEnabled(allChanges or popup._currentNumApplies)
-
-
-def _verifyPopupChangesApply(self, attributeName, value, *postArgs, **postKwds):
-    """Change the state of the apply button based on the changes in the tabs
-    """
-    # self must be a tab in a tabWidget
-    if not hasattr(self, GETCHANGESDICT):
-        raise RuntimeError('Error: widget must have changes defined')
-
-    popup, _changeDict, applyState, revertState, applyButton, revertButton = self.getChangesDict()
-
-    _applyButton = applyButton if applyButton else popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
-    _revertButton = revertButton if revertButton else popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
-
-    # if attributeName is defined use as key to dict to store change functions
-    # append postFixes if need to differentiate partial functions
-    if attributeName:
-
-        # append the extra parameters to the end of attributeName to give a unique
-        # identifier into _changes dict, to differentiate same-name partial functions
-        for pf in postArgs:
-            if pf is not None:
-                attributeName += str(pf)
-        for k, pf in sorted(postKwds.items()):
-            if pf is not None:
-                attributeName += str(pf)
-        attributeName += str(id(self))
-
-        if value:
-            # store in dict - overwrite as required
-            _changeDict[attributeName] = value
-        else:
-            if attributeName in _changeDict:
-                # delete from dict - empty dict implies no changes
-                del _changeDict[attributeName]
-
-    if popup:
-        # check whether there is a list of tabs
-        tabs = popup.getActiveTabList()
-
-        if tabs:
-            # set button state depending on number of changes
-            # tabs = tuple(tabWidget.widget(ii) for ii in range(tabWidget.count()))
-
-            applyChanges = any(t._changes for t in tabs if t is not None) and applyState
-            revertChanges = any(t._changes for t in tabs if t is not None) or revertState
-            if _applyButton:
-                _applyButton.setEnabled(applyChanges)
-            if _revertButton:
-                _revertButton.setEnabled(revertChanges or popup._currentNumApplies)
+        # set button states depending on number of changes
+        applyChanges = changeState and applyState
+        revertChanges = changeState or revertState
+        if _applyButton:
+            _applyButton.setEnabled(applyChanges)
+        if _revertButton:
+            _revertButton.setEnabled(revertChanges or numApplies)

@@ -3327,8 +3327,11 @@ if __name__ == '__main__':
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    # TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
+    # TESTNEF2 = '/Users/ejb66/Documents/nefTestProject0.nef'
+
     TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
-    TESTNEF2 = '/Users/ejb66/Documents/nefTestProject0.nef'
+    TESTNEF2 = '/Users/ejb66/Documents/nefTestProject.nef'
 
     # TESTNEF = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
     # TESTNEF2 = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'

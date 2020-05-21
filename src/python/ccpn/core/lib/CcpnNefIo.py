@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 19:17:02 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-21 19:53:19 +0100 (Thu, May 21, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2920,7 +2920,8 @@ class CcpnNefReader:
                         row[k] = replaceFrameCode
 
     def _searchReplaceFrame(self, project, saveFrame: StarIo.NmrSaveFrame,
-                            searchFrameCode=None, replaceFrameCode=None, replace=False,
+                            searchFrameCode=None, replaceFrameCode=None,
+                            replace=False, validFramesOnly=False,
                             frameSearchList=None, attributeSearchList=None,
                             loopSearchList=None, rowSearchList=None):
         """Search the saveFrame for occurrences of searchFrameCode and replace if required
@@ -2941,6 +2942,9 @@ class CcpnNefReader:
                     if replace:
                         saveFrame[k] = replaceFrameCode
 
+        elif validFramesOnly:
+            return
+
         # search loops as well - will still search for all loops even in ignored saveFrames
         mapping = nef2CcpnMap[saveFrame.category]
         for tag, ccpnTag in mapping.items():
@@ -2954,7 +2958,8 @@ class CcpnNefReader:
     def searchReplace(self, project: Project, dataBlock: StarIo.NmrDataBlock,
                       projectIsEmpty: bool = True,
                       selection: typing.Optional[dict] = None,
-                      searchFrameCode=None, replaceFrameCode=None, replace=False,
+                      searchFrameCode=None, replaceFrameCode=None,
+                      replace=False, validFramesOnly=False,
                       frameSearchList=None, attributeSearchList=None,
                       loopSearchList=None, rowSearchList=None):
         """Search the saveframes for references to findFrameCode
@@ -2964,7 +2969,8 @@ class CcpnNefReader:
         if searchFrameCode:
             return self._traverse(project, dataBlock, True, selection=None,
                                   traverseFunc=partial(self._searchReplaceFrame,
-                                                       searchFrameCode=searchFrameCode, replaceFrameCode=replaceFrameCode, replace=replace,
+                                                       searchFrameCode=searchFrameCode, replaceFrameCode=replaceFrameCode,
+                                                       replace=replace, validFramesOnly=validFramesOnly,
                                                        frameSearchList=frameSearchList, attributeSearchList=attributeSearchList,
                                                        loopSearchList=loopSearchList, rowSearchList=rowSearchList))
 
@@ -2992,7 +2998,8 @@ class CcpnNefReader:
                         row[k] = newVal
 
     def _searchReplaceListFrame(self, project, saveFrame: StarIo.NmrSaveFrame,
-                                searchFrameCode=None, replaceFrameCode=None, replace=False,
+                                searchFrameCode=None, replaceFrameCode=None,
+                                replace=False, validFramesOnly=False,
                                 frameSearchList=None, attributeSearchList=None,
                                 loopSearchList=None, rowSearchList=None):
         """Search the saveFrame for occurrences of searchFrameCode and replace if required
@@ -3019,6 +3026,9 @@ class CcpnNefReader:
                     if replace:
                         saveFrame[k] = newVal
 
+        elif validFramesOnly:
+            return
+
         # search loops as well - will still search for all loops even in ignored saveFrames
         mapping = nef2CcpnMap[saveFrame.category]
         for tag, ccpnTag in mapping.items():
@@ -3032,7 +3042,8 @@ class CcpnNefReader:
     def searchReplaceList(self, project: Project, dataBlock: StarIo.NmrDataBlock,
                           projectIsEmpty: bool = True,
                           selection: typing.Optional[dict] = None,
-                          searchFrameCode=None, replaceFrameCode=None, replace=False,
+                          searchFrameCode=None, replaceFrameCode=None,
+                          replace=False, validFramesOnly=False,
                           frameSearchList=None, attributeSearchList=None,
                           loopSearchList=None, rowSearchList=None):
         """Search the saveframes for references to attribute list and row list
@@ -3051,7 +3062,8 @@ class CcpnNefReader:
         if searchFrameCode:
             return self._traverse(project, dataBlock, True, selection=None,
                                   traverseFunc=partial(self._searchReplaceListFrame,
-                                                       searchFrameCode=searchFrameCode, replaceFrameCode=replaceFrameCode, replace=replace,
+                                                       searchFrameCode=searchFrameCode, replaceFrameCode=replaceFrameCode,
+                                                       replace=replace, validFramesOnly=validFramesOnly,
                                                        frameSearchList=frameSearchList, attributeSearchList=attributeSearchList,
                                                        loopSearchList=loopSearchList, rowSearchList=rowSearchList))
 
@@ -4213,11 +4225,12 @@ class CcpnNefReader:
         frames = self._getSaveFramesInOrder(dataBlock)
         frameCats = frames.get(category) or []
         # get all saveframes attached to this spectrum - for ccpn
-        frameList = ['None']  # [frame.name for frame in frameCats if _saveFrameNameFromCategory(frame).subname == _frameID.subname]
+        # frameList = ['None']
+        frameList = [frame.name for frame in frameCats if _saveFrameNameFromCategory(frame).subname == _frameID.subname]
 
         loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_{}_list', 'ccpn_{}', 'ccpn_{}_peaks')]
         replaceList = ('serial', '{}_list_serial'.format(_lowerCaseName))
-        self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True,
+        self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True, validFramesOnly=True,
                            frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
         return newName
@@ -5590,15 +5603,18 @@ class CcpnNefReader:
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, row['multiplet_list_serial']])
             multipletID = '_'.join([_ID, listName])
 
-            multiplet = serial2creatorFunc[row['multiplet_list_serial']](parameters['serial'])
-            if multiplet is not None:
-                self.error('ccpn_multiplet - Multiplet {} already exists'.format(multiplet), loop, (multiplet,))
-                _rowErrors.add(loop.data.index(row))
+            try:
+                multiplet = serial2creatorFunc[row['multiplet_list_serial']](parameters['serial'])
+                if multiplet is not None:
+                    self.error('ccpn_multiplet - Multiplet {} already exists'.format(multiplet), loop, (multiplet,))
+                    _rowErrors.add(loop.data.index(row))
 
-                if multipletID not in parentFrame._rowErrors:
-                    parentFrame._rowErrors[multipletID] = OrderedSet([loop.data.index(row)])
-                else:
-                    parentFrame._rowErrors[multipletID].add(loop.data.index(row))
+                    if multipletID not in parentFrame._rowErrors:
+                        parentFrame._rowErrors[multipletID] = OrderedSet([loop.data.index(row)])
+                    else:
+                        parentFrame._rowErrors[multipletID].add(loop.data.index(row))
+            except Exception as es:
+                print('>>>>>> verify_ccpn_multiplet {}'.format(es))
 
     verifiers['ccpn_multiplet'] = verify_ccpn_multiplet
 
@@ -6488,9 +6504,12 @@ class CcpnNefReader:
             parameters = self._parametersFromLoopRow(row, map2)
 
             # NOTE:ED - need to check if 'labelling' removed from pid (which is should be)
-            result = (sampleName, parameters['name'], parameters['labelling'])
+            try:
+                result = (sampleName, parameters['name'], parameters.get('labelling'))
             # componentName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
-            components.add(result)
+                components.add(result)
+            except Exception as es:
+                print('>>>>>> content_ccpn_sample_component {}'.format(es))
 
         return components
 

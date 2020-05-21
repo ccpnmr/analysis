@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 19:53:19 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-21 23:15:21 +0100 (Thu, May 21, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4227,11 +4227,12 @@ class CcpnNefReader:
         # get all saveframes attached to this spectrum - for ccpn
         # frameList = ['None']
         frameList = [frame.name for frame in frameCats if _saveFrameNameFromCategory(frame).subname == _frameID.subname]
-
+        attList = ('None',)
         loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_{}_list', 'ccpn_{}', 'ccpn_{}_peaks')]
         replaceList = ('serial', '{}_list_serial'.format(_lowerCaseName))
         self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True, validFramesOnly=True,
-                           frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
+                           frameSearchList=frameList, attributeSearchList=attList,
+                           loopSearchList=loopList, rowSearchList=replaceList)
 
         return newName
 
@@ -4423,7 +4424,7 @@ class CcpnNefReader:
 
         # replace the spectrum/serial in the peak clusters
         frameList = ('None',)
-        loopList = ('ccpn_peak_cluster_peaks',)
+        loopList = ('ccpn_peak_cluster_peaks', 'ccpn_multiplet_peaks')
         replaceList = ('peak_spectrum', 'peak_list_serial')
         self.searchReplaceList(project, dataBlock, True, None, (subName, oldSerial), (subName, newSerial), replace=True,
                            frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)

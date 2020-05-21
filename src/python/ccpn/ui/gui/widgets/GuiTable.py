@@ -2321,6 +2321,11 @@ GuiTable::item::selected {
         """
         # NOTE:ED - need colour/row checking, ignore for the minute
         try:
+            model = self.model()
+            _rowMapping = [self.item(xx, 0).index for xx in range(self.rowCount())]
+            _rowIndex = _rowMapping.index(row)
+            rowIndex = model.index(row, 0).row()
+
             if not isinstance(columnList, (type(None), list, tuple)):
                 raise TypeError('columnList must be None, or a list of integers')
 
@@ -2329,7 +2334,7 @@ GuiTable::item::selected {
             else:
                 cols = range(self.columnCount())
             for j in cols:
-                self.item(row, j).setBackground(colour)
+                self.item(_rowIndex, j).setBackground(colour)
         except Exception as es:
             pass
 

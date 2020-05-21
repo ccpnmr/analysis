@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-20 19:15:33 +0100 (Wed, May 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-21 10:56:00 +0100 (Thu, May 21, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2745,9 +2745,81 @@ class CcpnNefReader:
         #
         return result
 
+    # def verifyProject(self, project: Project, dataBlock: StarIo.NmrDataBlock,
+    #                   projectIsEmpty: bool = True,
+    #                   selection: typing.Optional[dict] = None):
+    #     """Verify import of selection from dataBlock into existing/empty Project
+    #     """
+    #     # Initialise mapping dicts
+    #     if not hasattr(self, '_dataSet2ItemMap') or projectIsEmpty:
+    #         self._dataSet2ItemMap = {}
+    #     if not hasattr(self, '_nmrResidueMap') or projectIsEmpty:
+    #         self._nmrResidueMap = {}
+    #
+    #     self.warnings = []
+    #     self.project = project
+    #     self.defaultChainCode = None
+    #
+    #     saveframeOrderedDict = self._getSaveFramesInOrder(dataBlock)
+    #
+    #     # Load metadata and molecular system first
+    #     metaDataFrame = dataBlock['nef_nmr_meta_data']
+    #     self.saveFrameName = 'nef_nmr_meta_data'
+    #     self.verifiers['nef_nmr_meta_data'](self, project, metaDataFrame)
+    #     del saveframeOrderedDict['nef_nmr_meta_data']
+    #
+    #     saveFrame = dataBlock.get('nef_molecular_system')
+    #     if saveFrame:
+    #         self.saveFrameName = 'nef_molecular_system'
+    #         self.verifiers['nef_molecular_system'](self, project, saveFrame)
+    #     del saveframeOrderedDict['nef_molecular_system']
+    #
+    #     # Load assignments, or preload from shiftlists
+    #     # to make sure '@' and '#' identifiers match the right serials
+    #     saveFrame = dataBlock.get('ccpn_assignment')
+    #     if saveFrame:
+    #         self.saveFrameName = 'ccpn_assignment'
+    #         self.verify_ccpn_assignment(project, saveFrame)
+    #         del saveframeOrderedDict['ccpn_assignment']
+    #     # else:
+    #     #     self.verify_preloadAssignmentData(dataBlock)
+    #
+    #     for sf_category, saveFrames in saveframeOrderedDict.items():
+    #         for saveFrame in saveFrames:
+    #             saveFrameName = self.saveFrameName = saveFrame.name
+    #             saveFrame._rowErrors = {}
+    #
+    #             if selection and saveFrameName not in selection:
+    #                 getLogger().debug2('>>>   -- skip saveframe {}'.format(saveFrameName))
+    #                 continue
+    #             getLogger().debug2('>>> verifying saveframe {}'.format(saveFrameName))
+    #
+    #             verifier = self.verifiers.get(sf_category)
+    #             if verifier is None:
+    #                 print("    unknown saveframe category", sf_category, saveFrameName)
+    #             else:
+    #                 result = verifier(self, project, saveFrame)
+    #
+    #     return (tuple(self.warnings or ()), tuple(self.errors or ()))
+
+    def _verifySaveFrame(self, project, saveFrame: StarIo.NmrSaveFrame,
+                         projectIsEmpty: bool = True,
+                         selection: typing.Optional[dict] = None):
+        """Verify a saveFrame (if in selection, or always if selection is empty)
+        """
+        saveFrameName = saveFrame.name
+        sf_category = saveFrame['sf_category']
+        saveFrame._rowErrors = {}
+
+        verifier = self.verifiers.get(sf_category)
+        if verifier is None:
+            getLogger().debug("verify - unknown saveframe category {} {}".format(sf_category, saveFrameName))
+        else:
+            return verifier(self, project, saveFrame)
+
     def verifyProject(self, project: Project, dataBlock: StarIo.NmrDataBlock,
-                      projectIsEmpty: bool = True,
-                      selection: typing.Optional[dict] = None):
+                       projectIsEmpty: bool = True,
+                       selection: typing.Optional[dict] = None):
         """Verify import of selection from dataBlock into existing/empty Project
         """
         # Initialise mapping dicts
@@ -2757,57 +2829,29 @@ class CcpnNefReader:
             self._nmrResidueMap = {}
 
         self.warnings = []
+        self.errors = []
         self.project = project
         self.defaultChainCode = None
+        dataBlock._rowErrors = {}
 
-        saveframeOrderedDict = self._getSaveFramesInOrder(dataBlock)
-
-        # Load metadata and molecular system first
-        metaDataFrame = dataBlock['nef_nmr_meta_data']
-        self.saveFrameName = 'nef_nmr_meta_data'
-        self.verifiers['nef_nmr_meta_data'](self, project, metaDataFrame)
-        del saveframeOrderedDict['nef_nmr_meta_data']
-
-        saveFrame = dataBlock.get('nef_molecular_system')
-        if saveFrame:
-            self.saveFrameName = 'nef_molecular_system'
-            self.verifiers['nef_molecular_system'](self, project, saveFrame)
-        del saveframeOrderedDict['nef_molecular_system']
-
-        # Load assignments, or preload from shiftlists
-        # to make sure '@' and '#' identifiers match the right serials
-        saveFrame = dataBlock.get('ccpn_assignment')
-        if saveFrame:
-            self.saveFrameName = 'ccpn_assignment'
-            self.verify_ccpn_assignment(project, saveFrame)
-            del saveframeOrderedDict['ccpn_assignment']
-        # else:
-        #     self.verify_preloadAssignmentData(dataBlock)
-
-        for sf_category, saveFrames in saveframeOrderedDict.items():
-            for saveFrame in saveFrames:
-                saveFrameName = self.saveFrameName = saveFrame.name
-                saveFrame._rowErrors = {}
-
-                if selection and saveFrameName not in selection:
-                    getLogger().debug2('>>>   -- skip saveframe {}'.format(saveFrameName))
-                    continue
-                getLogger().debug2('>>> verifying saveframe {}'.format(saveFrameName))
-
-                verifier = self.verifiers.get(sf_category)
-                if verifier is None:
-                    print("    unknown saveframe category", sf_category, saveFrameName)
-                else:
-                    result = verifier(self, project, saveFrame)
+        self._traverse(project, dataBlock, traverseFunc=partial(self._verifySaveFrame,
+                                                                projectIsEmpty=projectIsEmpty,
+                                                                selection=selection))
 
         return (tuple(self.warnings or ()), tuple(self.errors or ()))
 
-    def _getContents(self, project, saveFrame):
+    def _getContents(self, project, saveFrame: StarIo.NmrSaveFrame,
+                     projectIsEmpty: bool = True,
+                     selection: typing.Optional[dict] = None):
+        """Get the contents of the saveFrame into _contents (if in selection, or always if selection is empty)
+        """
+        saveFrameName = saveFrame.name
         sf_category = saveFrame['sf_category']
+        saveFrame._contents = {}
 
         content = self.contents.get(sf_category)
         if content is None:
-            print("    unknown saveframe category", sf_category, saveFrame.name)
+            getLogger().debug("    unknown saveframe category {} {}".format(sf_category, saveFrameName))
         else:
             return content(self, project, saveFrame)
 
@@ -2822,11 +2866,13 @@ class CcpnNefReader:
         if not hasattr(self, '_nmrResidueMap') or projectIsEmpty:
             self._nmrResidueMap = {}
 
-        # result = {}
         self.project = project
         self.defaultChainCode = None
+        dataBlock._contents = {}
 
-        return self._traverse(project, dataBlock, traverseFunc=self._getContents)
+        return self._traverse(project, dataBlock, traverseFunc=partial(self._getContents,
+                                                                       projectIsEmpty=projectIsEmpty,
+                                                                       selection=selection))
 
     def _getErrors(self, project, saveFrame):
         """Print the errors in a saveFrame/dataBlock - results generated with _verifyNef
@@ -2877,7 +2923,7 @@ class CcpnNefReader:
 
     def _searchReplaceFrame(self, project, saveFrame: StarIo.NmrSaveFrame,
                             searchFrameCode=None, replaceFrameCode=None, replace=False,
-                            categorySearchList=None, attributeSearchList=None,
+                            frameSearchList=None, attributeSearchList=None,
                             loopSearchList=None, rowSearchList=None):
         """Search the saveFrame for occurrences of searchFrameCode and replace if required
         """
@@ -2887,7 +2933,7 @@ class CcpnNefReader:
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
 
-        if not categorySearchList or framecode in categorySearchList:
+        if not frameSearchList or framecode in frameSearchList:
             for k, val in saveFrame.items():
                 if attributeSearchList and k not in attributeSearchList:
                     continue
@@ -2911,15 +2957,17 @@ class CcpnNefReader:
                       projectIsEmpty: bool = True,
                       selection: typing.Optional[dict] = None,
                       searchFrameCode=None, replaceFrameCode=None, replace=False,
-                      categorySearchList=None, attributeSearchList=None,
+                      frameSearchList=None, attributeSearchList=None,
                       loopSearchList=None, rowSearchList=None):
         """Search the saveframes for references to findFrameCode
+        If replace is True, will replace all attributes of saveFrame (if in selection, or all if selection is empty)
+        and row items
         """
         if searchFrameCode:
             return self._traverse(project, dataBlock, True, selection=None,
                                   traverseFunc=partial(self._searchReplaceFrame,
                                                        searchFrameCode=searchFrameCode, replaceFrameCode=replaceFrameCode, replace=replace,
-                                                       categorySearchList=categorySearchList, attributeSearchList=attributeSearchList,
+                                                       frameSearchList=frameSearchList, attributeSearchList=attributeSearchList,
                                                        loopSearchList=loopSearchList, rowSearchList=rowSearchList))
 
     def _searchReplaceListLoop(self, project, loop: StarIo.NmrLoop,
@@ -2947,7 +2995,7 @@ class CcpnNefReader:
 
     def _searchReplaceListFrame(self, project, saveFrame: StarIo.NmrSaveFrame,
                                 searchFrameCode=None, replaceFrameCode=None, replace=False,
-                                categorySearchList=None, attributeSearchList=None,
+                                frameSearchList=None, attributeSearchList=None,
                                 loopSearchList=None, rowSearchList=None):
         """Search the saveFrame for occurrences of searchFrameCode and replace if required
         MUST BE LIST BASED
@@ -2958,7 +3006,7 @@ class CcpnNefReader:
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
 
-        if not categorySearchList or framecode in categorySearchList:
+        if not frameSearchList or framecode in frameSearchList:
             found = OD()
             for k, oldVal, newVal in zip(attributeSearchList, searchFrameCode, replaceFrameCode):
                 if k in saveFrame:
@@ -2987,19 +3035,30 @@ class CcpnNefReader:
                           projectIsEmpty: bool = True,
                           selection: typing.Optional[dict] = None,
                           searchFrameCode=None, replaceFrameCode=None, replace=False,
-                          categorySearchList=None, attributeSearchList=None,
+                          frameSearchList=None, attributeSearchList=None,
                           loopSearchList=None, rowSearchList=None):
-        """Search the saveframes for references to findFrameCode
+        """Search the saveframes for references to attribute list and row list
+        All saveframes are traversed, attributes are processed for saveFrames in categorySearch list (if exists, or all of empty)
+        All searchframeCodes must match for replace to occur
+
+        e.g. searchFrameCode = ('exampleName', 'exampleLabel')
+            replaceFrameCode = ('newName', 'newLabel')
+
+            attributes to search for are defined in attributeSearchList and rowSearchList
+             ('name', 'labelling')
+
+             Replace will occur if name == exampleName & labelling == exampleLabel
+             in saveFrame attributes and in row of a loop with columns 'name' and 'labelling'
         """
         if searchFrameCode:
             return self._traverse(project, dataBlock, True, selection=None,
                                   traverseFunc=partial(self._searchReplaceListFrame,
                                                        searchFrameCode=searchFrameCode, replaceFrameCode=replaceFrameCode, replace=replace,
-                                                       categorySearchList=categorySearchList, attributeSearchList=attributeSearchList,
+                                                       frameSearchList=frameSearchList, attributeSearchList=attributeSearchList,
                                                        loopSearchList=loopSearchList, rowSearchList=rowSearchList))
 
     def _printFunc(self, project, saveFrame):
-        """Print the contents of a saveFrame/dataBlock - results generated with _contentNef
+        """Print the contents of a saveFrame/dataBlock - results generated from _contentNef
         Loops are included in the saveFrame
         """
         if hasattr(saveFrame, '_content'):  # may occasionally be a dataBlock
@@ -3021,7 +3080,7 @@ class CcpnNefReader:
                   projectIsEmpty: bool = True,
                   selection: typing.Optional[dict] = None,
                   traverseFunc=None):
-        """Print the contents of the nef dict - results generated with _contentNef
+        """Print the contents of the nef dict
         """
         return self._traverse(project, dataBlock, True, selection=None, traverseFunc=self._printFunc)
 
@@ -3037,10 +3096,14 @@ class CcpnNefReader:
                         projectIsEmpty: bool = True,
                         selection: typing.Optional[dict] = None,
                         traverseFunc=None):
-        """Print the contents of the nef dict - results generated with _contentNef
+        """Clear the contents and rowErrors of the nef dict
         """
         self._ccpn_peak_list = {}
         self._ccpn_peak_list_set = {}
+        if hasattr(dataBlock, '_content'):
+            del dataBlock._content
+        if hasattr(dataBlock, '_rowErrors'):
+            del dataBlock._rowErrors
         return self._traverse(project, dataBlock, True, selection=None, traverseFunc=self._clearSaveFrame)
 
     def _traverse(self, project: Project, dataBlock: StarIo.NmrDataBlock,
@@ -3049,6 +3112,9 @@ class CcpnNefReader:
                   traverseFunc=None):
         """Traverse the saveFrames in the correct order
         """
+        # NOTE:ED - keep a record of the current datablock
+        self._dataBlock = dataBlock
+
         result = OD()
         saveframeOrderedDict = self._getSaveFramesInOrder(dataBlock)
 
@@ -3083,12 +3149,7 @@ class CcpnNefReader:
 
                 result[self.saveFrameName] = traverseFunc(project, saveFrame)
 
-                # content = self.contents.get(sf_category)
-                # if content is None:
-                #     print("    unknown saveframe category", sf_category, saveFrameName)
-                # else:
-                #     result[self.saveFrameName] = content(self, project, saveFrame)
-
+        self._dataBlock = None
         return result
 
     def importExistingProject(self, project: Project, dataBlock: StarIo.NmrDataBlock,
@@ -3969,7 +4030,7 @@ class CcpnNefReader:
                        'chain_code_11', 'chain_code_12', 'chain_code_13', 'chain_code_14', 'chain_code_15',
                        'ccpn_tensor_chain_code', 'tensor_chain_code')
         self.searchReplace(project, dataBlock, True, None, itemName, newName, replace=True,
-                           categorySearchList=frameList, rowSearchList=replaceList)
+                           frameSearchList=frameList, rowSearchList=replaceList)
 
         return newName
 
@@ -4123,7 +4184,7 @@ class CcpnNefReader:
         loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_{}_list', 'ccpn_{}', 'ccpn_{}_peaks')]
         replaceList = ('serial', '{}_list_serial'.format(_lowerCaseName))
         self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True,
-                           categorySearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
+                           frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
         return newName
 
@@ -4148,7 +4209,7 @@ class CcpnNefReader:
         loopList = ('ccpn_peak_cluster', 'ccpn_peak_cluster_peaks')
         replaceList = ('serial', 'peak_cluster_serial')
         self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True,
-                        categorySearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
+                           frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
         return newName
 
@@ -4233,7 +4294,7 @@ class CcpnNefReader:
             loopList = ('ccpn_sample_component',)
             replaceList = ('name', 'labelling')
             self.searchReplaceList(project, dataBlock, True, None, (oldName, oldLabelling or None), (name, newLabelling or None), replace=True,
-                                   categorySearchList=frameList, attributeSearchList=replaceList,
+                                   frameSearchList=frameList, attributeSearchList=replaceList,
                                    loopSearchList=loopList, rowSearchList=replaceList)
 
             # remove the old saveFrame in the dataBlock and replace with the new
@@ -4254,12 +4315,12 @@ class CcpnNefReader:
         # loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_{}_list', 'ccpn_{}', 'ccpn_{}_peaks')]
         # replaceList = ('serial', '{}_list_serial'.format(_lowerCaseName))
         # self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True,
-        #                    categorySearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
+        #                    frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
         return newName
 
     def rename_ccpn_peak_list(self, project: Project, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
-                         itemName=None, newName=None, _lowerCaseName='none'):
+                              itemName=None, newName=None, _lowerCaseName='none'):
         """Rename a ccpn_list in a ccpn_assignment
         :param itemName: name of the item to rename - dependent on saveFrame type
         :param newName: new item name or None to autorename to next available name
@@ -4296,7 +4357,7 @@ class CcpnNefReader:
         loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_{}_list', 'ccpn_{}', 'ccpn_{}_peaks')]
         replaceList = ('serial', '{}_list_serial'.format(_lowerCaseName))
         self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True,
-                           categorySearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
+                           frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
         return newName
 

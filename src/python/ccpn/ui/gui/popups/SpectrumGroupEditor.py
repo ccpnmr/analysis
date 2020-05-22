@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-22 19:02:20 +0100 (Fri, May 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-22 21:10:21 +0100 (Fri, May 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -264,7 +264,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         # this should be the list when the popup is opened
         self._defaultSpectra = self.currentSpectra
         self._defaultName = self._editedObject.name if self._editedObject else ''
-
+        self._defaultComment = self._editedObject.comment if self._editedObject else ''
+        
         # set the labels in the first pass
         for tNum, (tabName, tabFunc) in enumerate(self.TAB_NAMES):
             self._tabWidget.setTabText(tNum, tabName)
@@ -283,6 +284,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
     def connectSignals(self):
         # connect to changes in the spectrumGroup
         self.nameEdit.textChanged.connect(self.seriesTab._queueChangeName)
+        self.commentEdit.textChanged.connect(self.seriesTab._queueChangeComment)
         self.leftListWidget.model().dataChanged.connect(self._spectraChanged)
         self.leftListWidget.model().rowsRemoved.connect(self._spectraChanged)
         self.leftListWidget.model().rowsInserted.connect(self._spectraChanged)
@@ -382,10 +384,12 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         try:
             editName = self.nameEdit.text()
             defaultName = self._defaultName
+            editComment = self.commentEdit.text()
+            defaultComment = self._defaultComment
             pidState = self._groupedObjects
             pidList = [str(spec.pid) for spec in self._defaultSpectra]
 
-            revertState = (pidState != pidList) or (editName != defaultName)
+            revertState = (pidState != pidList) or (editName != defaultName) or (editComment != defaultComment)
             applyState = (True if pidState else False) and (True if editName else False) # and revertState
 
             tabs = self.getActiveTabList()
@@ -948,6 +952,22 @@ class SeriesFrame(Frame):
             return partial(self._changeName, editName)
 
     def _changeName(self, value):
+        """set the spectrumGroup seriesType
+        """
+        # doesn't need to do anything, just insert an item into the revert _changes dict
+        pass
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueChangeComment(self):
+        """callback from editing the comment
+        """
+        editComment = self._parent.commentEdit.text()
+        defaultComment = self._parent._defaultComment
+
+        if editComment != defaultComment:
+            return partial(self._changeComment, editComment)
+
+    def _changeComment(self, value):
         """set the spectrumGroup seriesType
         """
         # doesn't need to do anything, just insert an item into the revert _changes dict

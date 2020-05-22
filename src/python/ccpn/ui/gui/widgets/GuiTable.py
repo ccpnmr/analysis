@@ -191,7 +191,7 @@ GuiTable::item::selected {
                  mainWindow=None,
                  dataFrameObject=None,  # collate into a single object that can be changed quickly
                  actionCallback=None, selectionCallback=None, checkBoxCallback=None,
-                 _pulldownKwds=None,
+                 _pulldownKwds=None, enableMouseMoveEvent = True,
                  multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                  enableExport=True, enableDelete=True, enableSearch=True,
                  hideIndex=True, stretchLastSection=True, _applyPostSort=True,
@@ -290,6 +290,7 @@ GuiTable::item::selected {
             self.setTableFromDataFrame(dataFrameObject.dataFrame)
 
         # enable callbacks
+        self.enableMouseMoveEvent = enableMouseMoveEvent #this will fire callbacks
         self._actionCallback = actionCallback
         self._selectionCallback = selectionCallback
         self._lastSelection = None
@@ -950,16 +951,17 @@ GuiTable::item::selected {
             super(GuiTable, self).enterEvent(event)
 
     def mouseMoveEvent(self, event):
-        event.ignore()
-        super(GuiTable, self).mouseMoveEvent(event)
-        if self._mousePressedPos is not None:
-            # if the mouse has been pressed, then re-enable selection if started a mouse drag, and override double-click
-            if self._selectOverride and (event.pos() - self._mousePressedPos).manhattanLength() > QtWidgets.QApplication.startDragDistance():
-                # turn off selection blocking
-                self._handleCellClickedExit()
+        if self.enableMouseMoveEvent:
+            event.ignore()
+            super(GuiTable, self).mouseMoveEvent(event)
+            if self._mousePressedPos is not None:
+                # if the mouse has been pressed, then re-enable selection if started a mouse drag, and override double-click
+                if self._selectOverride and (event.pos() - self._mousePressedPos).manhattanLength() > QtWidgets.QApplication.startDragDistance():
+                    # turn off selection blocking
+                    self._handleCellClickedExit()
 
-            # this is alter selection in a mouseDrag
-            self._selectionTableCallback(None)
+                # this is alter selection in a mouseDrag
+                self._selectionTableCallback(None)
 
     def mousePressEvent(self, event):
         """handle mouse press events

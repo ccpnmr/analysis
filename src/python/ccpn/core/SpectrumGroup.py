@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-22 19:02:19 +0100 (Fri, May 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-22 21:20:39 +0100 (Fri, May 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,7 @@ SPECTRUMGROUPCOMMENT = 'spectrumGroupComment'
 SPECTRUMGROUPSERIES = 'spectrumGroupSeries'
 SPECTRUMGROUPSERIESUNITS = 'spectrumGroupSeriesUnits'
 SPECTRUMGROUPSERIESTYPE = 'spectrumGroupSeriesType'
+
 
 class SeriesTypes(LabelledEnum):
     """
@@ -102,7 +103,7 @@ class SpectrumGroup(AbstractWrapperObject):
         return self._wrappedData.name
 
     @name.setter
-    def name(self, value:str):
+    def name(self, value: str):
         """set name of SpectrumGroup."""
         self.rename(value)
 
@@ -123,7 +124,7 @@ class SpectrumGroup(AbstractWrapperObject):
         return comment
 
     @comment.setter
-    def comment(self, value:str):
+    def comment(self, value: str):
         """set optional comment of SpectrumGroup."""
         if not isinstance(value, (str, type(None))):
             raise ValueError("comment must be a string/None.")
@@ -135,6 +136,7 @@ class SpectrumGroup(AbstractWrapperObject):
     #-------------------------------------------------------------------------------------------------------
 
     SPECTRUM_ORDER = 'spectrum_order'
+
     @property
     def spectra(self) -> Tuple[Spectrum, ...]:
         """Spectra that make up SpectrumGroup."""
@@ -146,7 +148,7 @@ class SpectrumGroup(AbstractWrapperObject):
     @spectra.setter
     @ccpNmrV3CoreSetter()
     def spectra(self, value):
-        if not isinstance(value, (tuple,list)):
+        if not isinstance(value, (tuple, list)):
             raise ValueError('Expected a tuple or list')
         getDataObj = self._project._data2Obj.get
         data = [getDataObj(x) if isinstance(x, str) else x for x in value]
@@ -270,7 +272,7 @@ class SpectrumGroup(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(SpectrumGroup)
-def _newSpectrumGroup(self: Project, name: str, spectra=(), serial: int = None) -> SpectrumGroup:
+def _newSpectrumGroup(self: Project, name: str, spectra=(), comment: str = None, serial: int = None) -> SpectrumGroup:
     """Create new SpectrumGroup
 
     See the SpectrumGroup class for details.
@@ -298,9 +300,11 @@ def _newSpectrumGroup(self: Project, name: str, spectra=(), serial: int = None) 
             result.resetSerial(serial)
         except ValueError:
             getLogger().warning("Could not reset serial of %s to %s - keeping original value"
-                                         % (result, serial))
+                                % (result, serial))
     if spectra:
         result.spectra = spectra
+    if comment:
+        result.comment = comment
 
     return result
 

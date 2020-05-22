@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-22 19:02:19 +0100 (Fri, May 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-22 21:20:39 +0100 (Fri, May 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -62,7 +62,6 @@ def _nextChainCode(project):
 
 
 class CreateChainPopup(CcpnDialogMainWidget):
-
     FIXEDWIDTH = False
     FIXEDHEIGHT = False
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-22 21:10:21 +0100 (Fri, May 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-22 21:20:40 +0100 (Fri, May 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,7 @@ from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import ColourTab, ContoursTab
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Constants import ALL_UNITS, ERRORSTRING
+
 
 DEFAULTSPACING = (3, 3)
 TABMARGINS = (1, 10, 1, 5)  # l, t, r, b
@@ -265,7 +266,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         self._defaultSpectra = self.currentSpectra
         self._defaultName = self._editedObject.name if self._editedObject else ''
         self._defaultComment = self._editedObject.comment if self._editedObject else ''
-        
+
         # set the labels in the first pass
         for tNum, (tabName, tabFunc) in enumerate(self.TAB_NAMES):
             self._tabWidget.setTabText(tNum, tabName)
@@ -390,7 +391,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             pidList = [str(spec.pid) for spec in self._defaultSpectra]
 
             revertState = (pidState != pidList) or (editName != defaultName) or (editComment != defaultComment)
-            applyState = (True if pidState else False) and (True if editName else False) # and revertState
+            applyState = (True if pidState else False) and (True if editName else False)  # and revertState
 
             tabs = self.getActiveTabList()
             allChanges = any(t._changes for t in tabs if t is not None)

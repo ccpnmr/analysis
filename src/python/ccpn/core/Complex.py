@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-22 19:02:19 +0100 (Fri, May 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-22 21:20:39 +0100 (Fri, May 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import ChainGroup as ApiChainGroup
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
+
 
 COMPLEX = 'complex'
 COMPLEXCOMMENT = 'complexComment'
@@ -77,7 +78,7 @@ class Complex(AbstractWrapperObject):
         return self._wrappedData.name
 
     @name.setter
-    def name(self, value:str):
+    def name(self, value: str):
         """set name of Complex."""
         self.rename(value)
 
@@ -110,7 +111,7 @@ class Complex(AbstractWrapperObject):
         return comment
 
     @comment.setter
-    def comment(self, value:str):
+    def comment(self, value: str):
         """set optional comment of Complex."""
         if not isinstance(value, (str, type(None))):
             raise ValueError("comment must be a string/None.")

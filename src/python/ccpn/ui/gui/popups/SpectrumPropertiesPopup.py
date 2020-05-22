@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-22 19:02:20 +0100 (Fri, May 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-22 21:20:40 +0100 (Fri, May 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2193,7 +2193,7 @@ class ColourTab(Widget):
         self._checkBoxCol = 4
 
         # if showCopyOptions:
-        copyLabel = Label(self, text="Copy Selected\nAttribute", grid=(self._topRow-1, self._checkBoxCol), vAlign='t', hAlign='l')
+        copyLabel = Label(self, text="Copy Selected\nAttribute", grid=(self._topRow - 1, self._checkBoxCol), vAlign='t', hAlign='l')
         self._addToCopyWidgetSet(copyLabel)
 
         Label(self, text="Colour", vAlign='t', hAlign='l', grid=(7, 0))

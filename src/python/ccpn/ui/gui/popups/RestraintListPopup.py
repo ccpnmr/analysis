@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:49 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-05-22 19:02:20 +0100 (Fri, May 22, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,8 +35,8 @@ class RestraintListEditPopup(AttributeEditorPopupABC):
 
     klass = RestraintList
     attributes = [('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                  ('restraintType', EntryCompoundWidget, getattr, None, None, None, {}),
                   ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                  ('restraintType', EntryCompoundWidget, getattr, None, None, None, {}),
                   ]
 
     def __init__(self, parent=None, mainWindow=None, obj=None,
@@ -59,8 +59,8 @@ class RestraintListNewPopup(RestraintListEditPopup):
 
     klass = RestraintList
     attributes = [('name', EntryCompoundWidget, None, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                  ('restraintType', PulldownListCompoundWidget, None, setattr, None, None, {}),
                   ('comment', EntryCompoundWidget, None, setattr, None, None, {'backgroundText': '> Optional <'}),
+                  ('restraintType', PulldownListCompoundWidget, None, setattr, None, None, {}),
                   ]
 
     def __init__(self, *args, **kwds):

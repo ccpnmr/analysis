@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 14:00:17 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-22 19:02:19 +0100 (Fri, May 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -89,14 +89,18 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         Base._init(self, setLayout=setLayout, **kwds)
 
         if orientation not in ORIENTATIONLIST:
-            raise TypeError('Error: orientation not in %s', ORIENTATIONLIST)
+            raise TypeError('orientation not in {}'.format(ORIENTATIONLIST))
 
         self.setWindowTitle(windowTitle)
         self.setContentsMargins(*DEFAULTMARGINS)
         self.getLayout().setSpacing(0)
 
         self._orientation = orientation
-        self._size = size
+        # get the initial size as a QSize
+        try:
+            self._size = QtCore.QSize(*size) if size else None
+        except Exception as es:
+            raise TypeError('bad size {}'.format(size))
 
         # set up the mainWidget area
         self.mainWidget = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
@@ -151,22 +155,20 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     def _setDialogSize(self):
         """Set the fixed/free dialog size from size or sizeHint
         """
-        size = None
+        # get the initial size as a QSize
+        try:
+            size = self._size if isinstance(self._size, QtCore.QSize) else QtCore.QSize(*self._size) if self._size else None
+        except Exception as es:
+            raise TypeError('bad size {}'.format(self._size))
 
-        # check whether the size has been defined
-        if self._size is not None:
-            if not isinstance(self._size, (tuple, list, QtCore.QSize)):
-                raise TypeError('size is not defined correctly: %s' % str(self._size))
-            if isinstance(self._size, (tuple, list)) and len(self._size) != 2:
-                raise TypeError('size is not the correct length: %s' % str(self._size))
-
-            size = self._size if isinstance(self._size, QtCore.QSize) else QtCore.QSize(*self._size)
-
-        # set the fixed sized policies as requird
+        _size = QtCore.QSize(size.width() if size else self.sizeHint().width(),
+                             size.height() if size else self.sizeHint().height())
+        # set the fixed sized policies as required
         if self.FIXEDWIDTH:
-            self.setFixedWidth(size.width() if size else self.sizeHint().width())
+            self.setFixedWidth(_size.width())
         if self.FIXEDHEIGHT:
-            self.setFixedHeight(size.height() if size else self.sizeHint().height())
+            self.setFixedHeight(_size.height())
+        self.resize(_size)
 
         self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Fixed if self.FIXEDWIDTH else QtWidgets.QSizePolicy.Preferred,
                                       QtWidgets.QSizePolicy.Fixed if self.FIXEDHEIGHT else QtWidgets.QSizePolicy.Preferred, )
@@ -221,10 +223,10 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                                texts=text, tipTexts=tipText, icons=icon,
                                enabledStates=enabled, visibleStates=visible)
 
-    def  setDiscardButton(self, callback=None, text=None,
-                           tipText='Discard changes',
-                           icon='icons/orange-apply',
-                           enabled=True, visible=True):
+    def setDiscardButton(self, callback=None, text=None,
+                         tipText='Discard changes',
+                         icon='icons/orange-apply',
+                         enabled=True, visible=True):
         """Add an Apply button to the dialog box
         """
         return self._addButton(buttons=self.DISCARDBUTTON, callbacks=callback,

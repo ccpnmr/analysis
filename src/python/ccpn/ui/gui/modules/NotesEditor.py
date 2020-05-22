@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-05-22 19:02:19 +0100 (Fri, May 22, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,7 +40,7 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.core.lib.ContextManagers import undoBlock
-
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 logger = getLogger()
 
@@ -105,15 +105,24 @@ class NotesEditorModule(CcpnModule):
         self.noteWidget = Widget(self._widget, grid=(row, 0), gridSpan=(4, 5), setLayout=True)
         self.noteWidget.hide()
 
-        self.label1 = Label(self.noteWidget, text='Note name', grid=(1, 0), vAlign='centre', hAlign='right')
+        nRow = 1
+        self.label1 = Label(self.noteWidget, text='name', grid=(nRow, 0), vAlign='c', hAlign='r')
         self.label1.setMaximumHeight(30)
-        self.lineEdit1 = LineEdit(self.noteWidget, grid=(1, 1), gridSpan=(1, 2), vAlign='top')
+        self.lineEdit1 = LineEdit(self.noteWidget, grid=(nRow, 1), gridSpan=(1, 2), vAlign='top', textAlignment='l', backgroundText='> Enter name <')
         self.lineEdit1.editingFinished.connect(self._applyNote)  # *1
+        nRow += 1
+
+        self.labelComment = Label(self.noteWidget, text='comment', grid=(nRow, 0), vAlign='c', hAlign='r')
+        self.labelComment.setMaximumHeight(30)
+        self.lineEditComment = LineEdit(self.noteWidget, grid=(nRow, 1), gridSpan=(1, 2), vAlign='top', textAlignment='l', backgroundText='> Optional <')
+        self.lineEditComment.editingFinished.connect(self._applyNote)  # *1
+        nRow += 1
+
         self.spacer = Spacer(self.noteWidget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-                             grid=(2, 3), gridSpan=(1, 1))
-
-        self.textBox = TextEditor(self.noteWidget, grid=(3, 0), gridSpan=(1, 6))
+                             grid=(nRow, 3), gridSpan=(1, 1))
+        nRow += 1
+        self.textBox = TextEditor(self.noteWidget, grid=(nRow, 0), gridSpan=(1, 6))
         self.textBox.editingFinished.connect(self._applyNote)  # *1
 
         # *1 Automatically save the note when it loses the focus.
@@ -200,33 +209,31 @@ class NotesEditorModule(CcpnModule):
                                                    [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                                    self._processDroppedItems)
 
-    # def _clearNotifiers(self):
-    #     """
-    #     clean up the notifiers
-    #     """
-    #     if self._noteNotifier is not None:
-    #         self._noteNotifier.unRegister()
-    #     if self.droppedNotifier is not None:
-    #         self.droppedNotifier.unRegister()
-
     def _applyNote(self):
         """
         Called by clicking the apply button in the module.
         Temporarily disable notifiers, and define commandEchoBlock so all changes
         are treated as a single undo/redo event
         """
-        self.setBlankingAllNotifiers(True)  # disable the notifier while updating object other
         if self.note:  # calls _updateCallBack during _applyNote
+            self.setBlankingAllNotifiers(True)  # disable my own notifiers while updating object other
             name = self.lineEdit1.text()
             text = self.textBox.toPlainText()
+            comment = self.lineEditComment.text()
 
-            with undoBlock():
-                if name != self.note.name:
-                    self.note.rename(name)
-                self.note.text = text
+            try:
+                if name != self.note.name or text != self.note.text or comment != self.note.comment:
+                    with undoBlock():
+                        self.note.rename(name)
+                        self.note.text = text
+                        self.note.comment = comment
+            except Exception as es:
+                # need to immediately set back to stop error on loseFocus which also fires editingFinished
+                self.lineEdit1.setText(self.note.name)
+                showWarning('', str(es))
 
             self.noWidget.select(self.note.pid)
-        self.setBlankingAllNotifiers(False)
+            self.setBlankingAllNotifiers(False)
 
     def _reject(self):
         """
@@ -260,9 +267,10 @@ class NotesEditorModule(CcpnModule):
         """
         Update the Note widgets
         """
-        self.noWidget.select(note.pid)
         self.textBox.setText(note.text)
         self.lineEdit1.setText(note.name)
+        if note.comment:
+            self.lineEditComment.setText(note.comment)
         self.noteWidget.show()
         self.show()
 

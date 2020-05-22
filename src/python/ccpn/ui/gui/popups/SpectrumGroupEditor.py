@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 16:38:03 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-22 19:02:20 +0100 (Fri, May 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -193,36 +193,37 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         if self._spectrumGroupSeriesTypeEdited is not None:
             self.obj.seriesType = self._spectrumGroupSeriesTypeEdited
 
-        specList = self._currentEditorState()[self.obj.id]
-        for dim, specPid in enumerate(specList):
-            spec = self.project.getByPid(specPid)
+        if self.obj.id in self._currentEditorState():
+            specList = self._currentEditorState()[self.obj.id]
+            for dim, specPid in enumerate(specList):
+                spec = self.project.getByPid(specPid)
 
-            # read the value from the edits dict - bit of a hack from _changeSpectrumSeriesValues
-            if spec and dim in self._spectrumGroupSeriesEdited:
-                self._spectrumGroupSeriesValues[dim] = self._spectrumGroupSeriesEdited[dim]
-        if self._spectrumGroupSeriesEdited:
-            try:
+                # read the value from the edits dict - bit of a hack from _changeSpectrumSeriesValues
+                if spec and dim in self._spectrumGroupSeriesEdited:
+                    self._spectrumGroupSeriesValues[dim] = self._spectrumGroupSeriesEdited[dim]
+            if self._spectrumGroupSeriesEdited:
+                try:
 
-                for ii, val in enumerate(self._spectrumGroupSeriesValues):
-                    try:
-                        tp = self.seriesTab.seriesType.getIndex()
-                        if tp == SeriesTypes.FLOAT.value:
-                            val = float(val)
-                        elif tp == SeriesTypes.INTEGER.value:
-                            val = int(val)
-                        elif tp == SeriesTypes.STRING.value:
-                            val = str(val)
+                    for ii, val in enumerate(self._spectrumGroupSeriesValues):
+                        try:
+                            tp = self.seriesTab.seriesType.getIndex()
+                            if tp == SeriesTypes.FLOAT.value:
+                                val = float(val)
+                            elif tp == SeriesTypes.INTEGER.value:
+                                val = int(val)
+                            elif tp == SeriesTypes.STRING.value:
+                                val = str(val)
+                            else:
+                                val = repr(val)
+                        except Exception as es:
+                            break
                         else:
-                            val = repr(val)
-                    except Exception as es:
-                        break
+                            self._spectrumGroupSeriesValues[ii] = val
                     else:
-                        self._spectrumGroupSeriesValues[ii] = val
-                else:
-                    self.obj.series = tuple(self._spectrumGroupSeriesValues)
+                        self.obj.series = tuple(self._spectrumGroupSeriesValues)
 
-            except Exception as es:
-                raise es
+                except Exception as es:
+                    raise es
 
     GROUPEDITOR_INIT_METHOD = _groupInit
 
@@ -230,11 +231,11 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
     USE_TAB = 0
     NUMBER_TABS = 4  # create the first tab
 
-    def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, **kwds):
+    def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, size=(700, 550), **kwds):
         """
         Initialise the widget, note defaultItems is only used for create
         """
-        super().__init__(parent=parent, mainWindow=mainWindow, editMode=editMode, obj=obj, defaultItems=defaultItems, **kwds)
+        super().__init__(parent=parent, mainWindow=mainWindow, editMode=editMode, obj=obj, defaultItems=defaultItems, size=size, **kwds)
 
         self.TAB_NAMES = ((SPECTRA_LABEL, self._initSpectraTab),
                           (GENERALTAB1D_LABEL, self._initGeneralTab1d),
@@ -275,7 +276,6 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
         self._populate()
         self.setDefaultButton(None)
-        self.setMinimumSize(600, 550)  # change to a calculation rather than a guess
 
         self.connectSignals()
         self.setSizeGripEnabled(False)

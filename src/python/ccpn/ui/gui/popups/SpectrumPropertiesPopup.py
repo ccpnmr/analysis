@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 16:38:03 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-22 19:02:20 +0100 (Fri, May 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -478,15 +478,21 @@ class GeneralTab(Widget):
                grid=(row, 3))
         row += 1
 
-        Label(self, text="PID ", vAlign='t', hAlign='l', grid=(row, 0))
+        Label(self, text="pid ", vAlign='t', hAlign='l', grid=(row, 0))
         # self.layout().addItem(QtWidgets.QSpacerItem(0, 5), 0, 0)
         self.spectrumPidLabel = Label(self, vAlign='t', grid=(row, 1))
         row += 1
 
-        Label(self, text="Name ", grid=(row, 0))
-        self.nameData = LineEdit(self, textAlignment='left', vAlign='t', grid=(row, 1))
+        Label(self, text="name ", grid=(row, 0))
+        self.nameData = LineEdit(self, textAlignment='left', vAlign='t', grid=(row, 1), backgroundText='> Enter name <')
         # self.nameData.setText(spectrum.name)
         self.nameData.textChanged.connect(partial(self._queueSpectrumNameChange, spectrum))  # ejb - was editingFinished
+        row += 1
+
+        Label(self, text="comment ", grid=(row, 0))
+        self.commentData = LineEdit(self, textAlignment='left', vAlign='t', grid=(row, 1), backgroundText='> Optional <')
+        # self.commentData.setText(spectrum.name)
+        self.commentData.textChanged.connect(partial(self._queueSpectrumCommentChange, spectrum))  # ejb - was editingFinished
         row += 1
 
         # add validate frame
@@ -752,6 +758,7 @@ class GeneralTab(Widget):
 
         self.spectrumPidLabel.setText(self.spectrum.pid)
         self.nameData.setText(self.spectrum.name)
+        self.commentData.setText(self.spectrum.comment)
         # self.pathData.setValidator(SpectrumValidator(parent=self.pathData, spectrum=self.spectrum))
 
         # self.spectrumData[self.spectrum] = (self.pathData, self.pathButton, Label)
@@ -846,6 +853,15 @@ class GeneralTab(Widget):
     def _changeSpectrumName(self, spectrum, name):
         spectrum.rename(name)
         self._writeLoggingMessage("spectrum.rename('%s')" % str(name))
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSpectrumCommentChange(self, spectrum, value):
+        if value != spectrum.comment:
+            return partial(self._changeSpectrumComment, spectrum, value)
+
+    def _changeSpectrumComment(self, spectrum, comment):
+        spectrum.comment = comment
+        self._writeLoggingMessage("spectrum.comment = '%s'" % str(comment))
 
     @queueStateChange(_verifyPopupApply)
     def _queueSpectrumScaleChange(self, spectrum, textFromValue, value):

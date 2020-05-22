@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 14:00:18 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-22 19:02:20 +0100 (Fri, May 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -42,12 +42,12 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
     # if setFunction is None: display attribute value without option to change value
     # kwds: optional kwds passed to LineEdit constructor
 
-    def __init__(self, parent=None, mainWindow=None, obj=None, **kwds):
+    def __init__(self, parent=None, mainWindow=None, obj=None, size=None, **kwds):
         """
         Initialise the widget
         """
         super().__init__(parent, setLayout=True,
-                         windowTitle='Edit ' + self.klass.className, **kwds)
+                         windowTitle='Edit ' + self.klass.className, size=size, **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
@@ -61,12 +61,11 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
         self.edits = {}  # An (attributeName, LineEdit-widget) dict
 
         for attr, getFunction, setFunction, kwds in self.attributes:
-            value = getFunction(self.obj, attr)
+            # value = getFunction(self.obj, attr)
             editable = setFunction is not None
             self.labels[attr] = Label(self.mainWidget, attr, grid=(row, 0))
             self.edits[attr] = LineEdit(self.mainWidget, textAlignment='left', editable=editable,
                                         vAlign='t', grid=(row, 1), **kwds)
-
             self.edits[attr].textChanged.connect(partial(self._queueSetValue, attr, getFunction, setFunction, row))
 
             row += 1
@@ -95,9 +94,10 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
 
     def _populate(self):
         for attr, getFunction, _, _ in self.attributes:
-            if attr in self.edits:
+            if getFunction and attr in self.edits:
                 value = getFunction(self.obj, attr)
-                self.edits[attr].setText(str(value))
+                if value is not None:
+                    self.edits[attr].setText(str(value))
 
     def _getChangeState(self):
         """Get the change state from the _changes dict

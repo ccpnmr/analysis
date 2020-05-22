@@ -1008,7 +1008,9 @@ GuiTable::item::selected {
                 else:
                     QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 0.75,
                                              partial(self._handleCellClicked, event.pos()))
-
+            else: # odd behaviours otherwise
+                self._selectionTableCallback(None)
+                super(GuiTable, self).mousePressEvent(event)
         else:
             event.ignore()
             super(GuiTable, self).mousePressEvent(event)

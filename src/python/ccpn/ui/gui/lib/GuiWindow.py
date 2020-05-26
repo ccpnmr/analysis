@@ -136,7 +136,7 @@ class GuiWindow():
         addShortCut("p, l", self, self.cycleSymbolLabelling, context=context)
         addShortCut("p, s", self, self.cyclePeakSymbols, context=context)
         # addShortCut("Space, Space", self, self.toggleConsole, context=context) # this is not needed here, already set on Menus!!
-        addShortCut("CTRL+a", self, self.selectAllPeaks, context=context)
+        # addShortCut("CTRL+a", self, self.selectAllPeaks, context=context)
 
         addShortCut("q, q", self, self.contourLevelUp, context=context)
         addShortCut("w, w", self, self.contourLevelDown, context=context)
@@ -397,14 +397,18 @@ class GuiWindow():
                 popup = ReorderPeakListAxesPopup(parent=self, mainWindow=self, peakList=clickedPeaks[0].peakList)
                 popup.exec_()
 
-    def selectAllPeaks(self):
-        '''selects all peaks in the current strip if the spectrum is toggled on'''
-        if self.application.current.strip:
-            if self.application.current.strip.spectrumDisplay:
-                spectra = [spectrumView.spectrum for spectrumView in
-                           self.application.current.strip.spectrumDisplay.spectrumViews if spectrumView.isVisible()]
-                peakLists = [peakList.peaks for spectrum in spectra for peakList in spectrum.peakLists]
-                self.application.current.peaks = [peak for peakList in peakLists for peak in peakList]
+    def selectAllPeaks(self, strip=None):
+        '''selects all peaks in the strip or current strip if any and if the spectrum is toggled on'''
+        if strip is None:
+            if self.application.current.strip:
+                strip = self.application.current.strip
+        if strip and not strip.isDeleted:
+
+                spectra = [spectrumView.spectrum for spectrumView in strip.spectrumDisplay.spectrumViews
+                           if spectrumView.isVisible()]
+                listOfPeaks = [peakList.peaks for spectrum in spectra for peakList in spectrum.peakLists]
+
+                self.application.current.peaks = [peak for peaks in listOfPeaks for peak in peaks]
 
     def addMultiplet(self):
         """add current peaks to a new multiplet"""

@@ -938,6 +938,17 @@ GuiTable::item::selected {
                 else:
                     self._defaultDoubleClick(self.currentItem())
 
+        modifiers = QtWidgets.QApplication.keyboardModifiers()
+
+        if modifiers == QtCore.Qt.MetaModifier or modifiers == QtCore.Qt.ControlModifier:
+
+            if key == QtCore.Qt.Key_A:
+                # self.selectAll()
+                self._selectionTableCallback(None)
+
+
+
+
     def enterEvent(self, event):
         try:
             # basic tables may not have preferences defined

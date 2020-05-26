@@ -2528,6 +2528,13 @@ class CcpnGLWidget(QOpenGLWidget):
         if isShift:
             self._movePeakFromGLKeys(key)
 
+    def _KeyModifiersAction(self, key):
+        modifiers = QtWidgets.QApplication.keyboardModifiers()
+
+        if modifiers == QtCore.Qt.MetaModifier or modifiers == QtCore.Qt.ControlModifier:
+            if key == QtCore.Qt.Key_A:
+                self.mainWindow.selectAllPeaks(self.strip)
+
     def _checkKeys(self, key):
         keyMod = QApplication.keyboardModifiers()
 
@@ -2559,6 +2566,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._checkKeys(self._key)
             if self.strip == self.current.strip:
                 self._singleKeyAction(self._key, self._isSHIFT)
+                self._KeyModifiersAction(self._key)
 
             elif not self._preferences.currentStripFollowsMouse:
                 self.GLSignals._emitKeyEvent(strip=self.strip, key=event.key(), modifier=self._isSHIFT)

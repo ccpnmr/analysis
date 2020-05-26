@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-22 21:20:40 +0100 (Fri, May 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-26 10:04:34 +0100 (Tue, May 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -738,6 +738,7 @@ class SeriesFrame(Frame):
     def _populate(self):
         """Populate the texteditors - seriesValues and seriesUnits for the spectrumGroup
         """
+        # with self.blockWidgetSignals():
         self.seriesType.setIndex(int(self.defaultObject.seriesType or 0))
         series = self.defaultObject.series
         if series:
@@ -762,6 +763,7 @@ class SeriesFrame(Frame):
             self._pulldownData += (self.defaultObject.seriesUnits,)
         self.unitsEditor.modifyTexts(texts=self._pulldownData)
         self.unitsEditor.select(self.defaultObject.seriesUnits)
+
         self._validateEditors()
 
     def _getValuesFromTextEdit(self):

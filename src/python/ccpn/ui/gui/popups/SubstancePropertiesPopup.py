@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:50 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-05-27 16:49:01 +0100 (Wed, May 27, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -34,8 +33,10 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.CompoundView import CompoundView, Variant, importSmiles
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
-
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply, CcpnDialogMainWidget
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget
+from ccpn.core.Substance import Substance
 
 OTHER_UNIT = ['µ', 'm', 'n', 'p']
 CONCENTRATION_UNIT = ['µM', 'mM', 'nM', 'pM']
@@ -50,9 +51,20 @@ SELECT = '> Select <'
 
 LESS_BUTTON = 'Show less'
 MORE_BUTTON = 'Show more'
+ADVANCED = 'Advanced'
 
 
-class SubstancePropertiesPopup(CcpnDialog):
+class SubstancePropertiesPopup(AttributeEditorPopupABC):
+    klass = Substance
+    attributes = [('pid', EntryCompoundWidget, getattr, None, None, None, {}),
+                  ('nmrChain', PulldownListCompoundWidget, getattr, setattr, None, None, {}),
+                  ('sequenceCode', EntryCompoundWidget, getattr, setattr, None, None, {}),
+                  ('residueType', PulldownListCompoundWidget, getattr, setattr, None, None, {}),
+                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                  ]
+
+
+class SubstancePropertiesPopup2(CcpnDialogMainWidget):
 
     def __init__(self, parent=None, mainWindow=None,
                  substance=None, sampleComponent=None, newSubstance=False, **kwds):
@@ -60,7 +72,7 @@ class SubstancePropertiesPopup(CcpnDialog):
         Initialise the widget
         """
         title = 'New Substance' if newSubstance else 'Edit Substance'
-        CcpnDialog.__init__(self, parent, setLayout=True, margins=(10,10,10,10),
+        super().__init__(self, parent, setLayout=True, margins=(10,10,10,10),
                             windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow  # ejb - should always be done like this
@@ -97,7 +109,7 @@ class SubstancePropertiesPopup(CcpnDialog):
 
         widgets = self._allWidgets()
         # layout = self.contentsFrame.getLayout()
-        layout = self.getLayout()
+        layout = self.mainWidget.getLayout()
 
         count = int(len(widgets) / 2)
         self.positions = [[i + 1, j] for i in range(count) for j in range(2)]

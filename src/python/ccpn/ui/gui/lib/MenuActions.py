@@ -624,6 +624,7 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
             mainWindow.application.current.strip = spectrumDisplay.strips[0]
             # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
             spectrumDisplay.autoRange()
+            return spectrumDisplay
 
     openItemDirectMethod = _openSpectrumGroup
 
@@ -730,17 +731,16 @@ def _openItemObjects(mainWindow, objs, **kwds):
                     if obj.__class__ in OpenObjAction:
 
                         # if a spectrum object has already been opened then attach to that spectrumDisplay
-                        if isinstance(obj, Spectrum) and spectrumDisplay:
-                            spectrumDisplay.displaySpectrum(obj)
+                        if isinstance(obj, (Spectrum, SpectrumGroup)) and spectrumDisplay:
+                            spectrumDisplay._handlePids([obj.pid])
 
                         else:
-
                             # process objects to open
                             func = OpenObjAction[obj.__class__](useNone=True, **kwds)
                             returnObj = func._execOpenItem(mainWindow, obj)
 
                             # if the first spectrum then set the spectrumDisplay
-                            if isinstance(obj, Spectrum):
+                            if isinstance(obj, (Spectrum, SpectrumGroup)):
                                 spectrumDisplay = returnObj
 
                     else:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-22 19:02:20 +0100 (Fri, May 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -429,6 +429,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     BUTTON_FILTER = 'Filter by:'
     BUTTON_CANCEL = 'Cancel'
+    SETREVERTBUTTON = True
 
     USE_TAB = None
     NUMBER_TABS = 0
@@ -510,6 +511,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self._connectLists()
         self._populateLists()
 
+        self._applyButton.setEnabled(False)
+        self._revertButton.setEnabled(False)
+
         # # one cannot be a copy of the other unless its a deep copy...
         # # this is easier
         # self._previousState = self._getPreviousState()
@@ -527,7 +531,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         # one cannot be a copy of the other unless its a deep copy...
         # this is easier
         self._previousState = self._getPreviousState()
-        self._updatedState = copy.deepcopy(self._getPreviousState())
+        self._updatedState = copy.deepcopy(self._previousState)
 
         self._previousNames = {key: key for key in self._previousState}
         self._updatedNames = dict(self._previousNames)
@@ -552,7 +556,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                 #GST do I need to filter object in an undo state, if so could we add some interface for this...
                 object = self.project._pid2Obj.get(self.GROUP_PID_KEY)[key]
                 items = [elem.pid for elem in getattr(object, self.PROJECT_ITEM_ATTRIBUTE)]
-                comment = object.comment
+                comment = object.comment or None
                 result[key] = {'spectra': items,
                                'comment': comment}
         return result
@@ -806,11 +810,11 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         if self.editMode and self._editedObject:
             key = self._editedObject.name
             items = self._groupedObjects
-            comment = self.commentEdit.text()
+            comment = self.commentEdit.text() or None
         else:
             key = self.nameEdit.text()
             items = self._groupedObjects
-            comment = self.commentEdit.text()
+            comment = self.commentEdit.text() or None
         if len(key) > 0:
             result = {key: {'spectra': items,
                             'comment': comment}
@@ -1055,6 +1059,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         # self.applyButtons.setButtonEnabled(self._acceptButtonText, enabled)
         self._applyButton.setEnabled(enabled)
 
+        if self.SETREVERTBUTTON:
+            self._revertButton.setEnabled(True)
+
         self._emptyErrorFrame()
 
         if len(self.errors) != 0:
@@ -1108,34 +1115,36 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         """Update Left
         """
 
-        if self.editMode:
+        # block widget signals to stop feedback loops
+        with self.blockWidgetSignals():
+            if self.editMode:
 
-            self.leftPullDownLabel.show()
-            self.leftPullDown.show()
-            self.rightPullDown.setEnabled(len(self.leftPullDown.getObjects()) > 0)
-            obj = self._editedObject
-            if obj is not None:
-                name = self._updatedNames[obj.name]
-                self.nameEdit.setText(name)
-                self.commentEdit.setText(self._editedObjectComment)
-                self._setLeftListWidgetItems(self._editedObjectItems)
-                self.nameEdit.setEnabled(True)
-                self.leftListWidget.setEnabled(True)
-                self.rightListWidget.setEnabled(True)
+                self.leftPullDownLabel.show()
+                self.leftPullDown.show()
+                self.rightPullDown.setEnabled(len(self.leftPullDown.getObjects()) > 0)
+                obj = self._editedObject
+                if obj is not None:
+                    name = self._updatedNames[obj.name]
+                    self.nameEdit.setText(name)
+                    self.commentEdit.setText(self._editedObjectComment)
+                    self._setLeftListWidgetItems(self._editedObjectItems)
+                    self.nameEdit.setEnabled(True)
+                    self.leftListWidget.setEnabled(True)
+                    self.rightListWidget.setEnabled(True)
+                else:
+                    self.nameEdit.setText('')
+                    self.commentEdit.setText('')
+                    self.leftListWidget.clear()
+                    self.nameEdit.setEnabled(False)
+                    self.leftListWidget.setEnabled(False)
+                    self.rightListWidget.setEnabled(False)
+
             else:
+                self.leftListWidget.clear()
+                if self.defaultItems is not None:
+                    self._setLeftListWidgetItems(self.defaultItems)
                 self.nameEdit.setText('')
                 self.commentEdit.setText('')
-                self.leftListWidget.clear()
-                self.nameEdit.setEnabled(False)
-                self.leftListWidget.setEnabled(False)
-                self.rightListWidget.setEnabled(False)
-
-        else:
-            self.leftListWidget.clear()
-            if self.defaultItems is not None:
-                self._setLeftListWidgetItems(self.defaultItems)
-            self.nameEdit.setText('')
-            self.commentEdit.setText('')
 
     def _updateRight(self):
         """Update Right
@@ -1196,6 +1205,10 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                 result[name] = rename
 
         return result
+
+    # def _revertClicked(self):
+    #     super()._revertClicked()
+    #     self._populate()
 
     def _applyChanges(self):
         """

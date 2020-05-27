@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:48 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -62,9 +62,15 @@ class NmrResiduePopup(AttributeEditorPopupABC):
             self.residueType.pulldownList.addItem(value)
         self.residueType.pulldownList.set(value)
 
+    def _getNmrChainList(self, nmrChain):
+        """Populate the nmrChain pulldown
+        """
+        self.nmrChain.modifyTexts([x.pid for x in self.obj.project.nmrChains])
+        self.nmrChain.select(self.obj.nmrChain.pid)
+
     klass = NmrResidue
     attributes = [('pid', EntryCompoundWidget, getattr, None, None, None, {}),
-                  ('nmrChain', NmrChainPulldown, getattr, None, None, None, {}),
+                  ('nmrChain', PulldownListCompoundWidget, getattr, setattr, _getNmrChainList, None, {}),
                   ('sequenceCode', EntryCompoundWidget, getattr, setattr, None, None, {}),
                   ('residueType', PulldownListCompoundWidget, getattr, setattr, _getResidueTypeProb, _checkNmrResidue, {}),
                   ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),

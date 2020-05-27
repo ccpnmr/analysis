@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-22 19:02:20 +0100 (Fri, May 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,8 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 from functools import partial
+
+from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
@@ -78,8 +80,8 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
             self.setRevertButton(callback=self._revertClicked, enabled=False)
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
-        # clear the changes list
-        self._changes = {}
+        # # clear the changes list
+        # self._changes = ChangeDict()
 
         # make the buttons appear
         self._setButtons()
@@ -93,21 +95,25 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
         self.setFixedSize(self._size if self._size else self.sizeHint())
 
     def _populate(self):
-        for attr, getFunction, _, _ in self.attributes:
-            if getFunction and attr in self.edits:
-                value = getFunction(self.obj, attr)
-                if value is not None:
-                    self.edits[attr].setText(str(value))
+        """Populate the widgets while blocking the queue changes dict
+        """
+        with self._changes.blockChanges():
+            for attr, getFunction, _, _ in self.attributes:
+                if getFunction and attr in self.edits:
+                    value = getFunction(self.obj, attr)
+                    self.edits[attr].setText(str(value) if value is not None else '')
 
     def _getChangeState(self):
         """Get the change state from the _changes dict
         """
+        if not self._changes.enabled:
+            return None
+
         applyState = True
         revertState = False
         allChanges = True if self._changes else False
 
-        return self, allChanges, applyState, revertState, \
-               self._okButton, self._revertButton, self._currentNumApplies
+        return changeState(self, allChanges, applyState, revertState, self._okButton, None, self._revertButton, self._currentNumApplies)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetValue(self, attr, getFunction, setFunction, dim):

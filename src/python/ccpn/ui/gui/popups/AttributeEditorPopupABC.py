@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 14:00:17 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ from collections import OrderedDict
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.util.Common import makeIterableList
+from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 
 
 ATTRGETTER = 0
@@ -115,8 +116,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
 
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
-        # clear the changes list
-        self._changes = OrderedDict()
+        # # clear the changes list
+        # self._changes = ChangeDict()
 
         # make the buttons appear
         self._setButtons()
@@ -134,33 +135,36 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         """
         from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
 
-        for attr, attrType, getFunction, _, _presetFunction, _, _ in self.attributes:
-            # remove whitespaces to give the attribute name in the class
-            attr = attr.translate({ord(c): None for c in whitespace})
+        with self._changes.blockChanges():
+            for attr, attrType, getFunction, _, _presetFunction, _, _ in self.attributes:
+                # remove whitespaces to give the attribute name in the class
+                attr = attr.translate({ord(c): None for c in whitespace})
 
-            # populate the widget
-            if attr in self.edits and attrType and attrType.__name__ in CommonWidgetsEdits:
-                thisEdit = CommonWidgetsEdits[attrType.__name__]
-                attrSetter = thisEdit[ATTRSETTER]
+                # populate the widget
+                if attr in self.edits and attrType and attrType.__name__ in CommonWidgetsEdits:
+                    thisEdit = CommonWidgetsEdits[attrType.__name__]
+                    attrSetter = thisEdit[ATTRSETTER]
 
-                if _presetFunction:
-                    # call the preset function for the widget (e.g. populate pulldowns with modified list)
-                    _presetFunction(self, self.obj)
+                    if _presetFunction:
+                        # call the preset function for the widget (e.g. populate pulldowns with modified list)
+                        _presetFunction(self, self.obj)
 
-                if getFunction and self.EDITMODE:
-                    # set the current value
-                    value = getFunction(self.obj, attr, None)
-                    attrSetter(self.edits[attr], value)
+                    if getFunction and self.EDITMODE:
+                        # set the current value
+                        value = getFunction(self.obj, attr, None)
+                        attrSetter(self.edits[attr], value)
 
     def _getChangeState(self):
         """Get the change state from the _changes dict
         """
+        if not self._changes.enabled:
+            return None
+
         applyState = True
         revertState = False
         allChanges = True if self._changes else False
 
-        return self, allChanges, applyState, revertState, \
-               self._okButton, self._revertButton, 0
+        return changeState(self, allChanges, applyState, revertState, self._okButton, None, self._revertButton, 0)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetValue(self, attr, attrType, getFunction, setFunction, presetFunction, callback, dim):

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-22 19:02:19 +0100 (Fri, May 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
 from ccpn.core.lib.ContextManagers import undoStackBlocking
+from ccpn.ui.gui.lib.ChangeStateHandler import ChangeDict
 
 
 def _updateGl(self, spectrumList):
@@ -133,7 +134,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self._currentNumApplies = 0
 
         # clear the changes list
-        self._changes = {}
+        self._changes = ChangeDict()
 
         self.setDefaultButton()
 
@@ -392,7 +393,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             return False
 
         # remove all changes
-        self._changes = {}
+        self._changes.clear()
 
         self._currentNumApplies += 1
         if self.dialogButtons.button(self.RESETBUTTON):
@@ -530,6 +531,10 @@ def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
     if not callable(_getChanges):
         raise RuntimeError('changes method for {} not correctly defined'.format(self))
 
+    # _changes must  be a ChangeDict and be enabled to accept changes from the gui
+    if not self._changes.enabled:
+        return
+
     # if attributeName is defined use as key to dict to store change functions
     # append postFixes if need to differentiate partial functions
     if attributeName:
@@ -558,16 +563,19 @@ def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
             self._changeSettings()
 
     # get the information from the popup - which must handle its own nested _changes
-    popup, changeState, applyState, revertState, applyButton, revertButton, numApplies = _getChanges()
+    _changes = _getChanges()
+    if not _changes:
+        return
+
+    popup, changeState, applyState, revertState, okButton, applyButton, revertButton, numApplies = _changes
 
     if popup:
-        _applyButton = applyButton if applyButton else popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
-        _revertButton = revertButton if revertButton else popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
-
-        # set button states depending on number of changes
+        # set button states depending on number of changes - ok button or apply button can be selected
         applyChanges = changeState and applyState
         revertChanges = changeState or revertState
-        if _applyButton:
-            _applyButton.setEnabled(applyChanges)
-        if _revertButton:
-            _revertButton.setEnabled(revertChanges or numApplies)
+        if okButton:
+            okButton.setEnabled(applyChanges)
+        if applyButton:
+            applyButton.setEnabled(applyChanges)
+        if revertButton:
+            revertButton.setEnabled(revertChanges or numApplies)

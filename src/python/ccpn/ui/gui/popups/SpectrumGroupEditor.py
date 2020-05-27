@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-26 10:04:34 +0100 (Tue, May 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,7 @@ from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import ColourTab, ContoursTab
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Constants import ALL_UNITS, ERRORSTRING
+from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 
 
 DEFAULTSPACING = (3, 3)
@@ -91,6 +92,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
     GROUP_PID_KEY = 'SG'
     ITEM_PID_KEY = 'SP'
+
+    SETREVERTBUTTON = False
 
     def _applyChanges(self):
         """
@@ -158,7 +161,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
         # remove all changes
         for tab in (_colourTabs1d + _colourTabsNd):
-            tab._changes = {}
+            tab._changes = ChangeDict()
 
         # self._currentNumApplies += 1
         # self._revertButton.setEnabled(True)
@@ -281,6 +284,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
         self.connectSignals()
         self.setSizeGripEnabled(False)
+        # self._applyButton.setEnabled(False)
 
     def connectSignals(self):
         # connect to changes in the spectrumGroup
@@ -302,7 +306,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
     def _initSpectraTab(self):
         thisTab = self.spectraTab
-        thisTab._changes = OrderedDict()
+        thisTab._changes = ChangeDict()
 
     def _initGeneralTab1d(self):
         thisTab = self.generalTab1d
@@ -360,15 +364,21 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
     def _initSeriesTab(self):
         thisTab = self.seriesTab
-        thisTab._changes = OrderedDict()
+        thisTab._changes = ChangeDict()
         thisTab._populate()
+
+    def _fillPullDowns(self):
+        for colourTab in (self._colourTabs1d, self._colourTabsNd):
+            for aTab in tuple(colourTab.widget(ii) for ii in range(colourTab.count())):
+                aTab._fillPullDowns()
 
     def _populate(self):
         """Populate the widgets in the tabs
         """
         # NOTE:ED - check that the list widgets are populated correctly - may be called twice
         super()._populate()
-        self._spectraChanged()
+        with self.seriesTab._changes.blockChanges():
+            self._spectraChanged()
 
         # check whether any tabs need removing here
         for colourTab in (self._colourTabs1d, self._colourTabsNd):
@@ -385,7 +395,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         try:
             editName = self.nameEdit.text()
             defaultName = self._defaultName
-            editComment = self.commentEdit.text()
+            editComment = self.commentEdit.text() or None
             defaultComment = self._defaultComment
             pidState = self._groupedObjects
             pidList = [str(spec.pid) for spec in self._defaultSpectra]
@@ -397,10 +407,9 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             allChanges = any(t._changes for t in tabs if t is not None)
 
         except Exception as es:
-            return [None] * 7
+            return None
 
-        return self, allChanges, applyState, revertState, \
-               self._applyButton, self._revertButton, 0
+        return changeState(self, allChanges, applyState, revertState, None, self._applyButton, self._revertButton, 0)
 
     def _tabClicked1d(self, index):
         """Callback for clicking a tab - needed for refilling the checkboxes and populating the pulldown
@@ -606,7 +615,7 @@ class SeriesFrame(Frame):
         else:
             self._copyToSpectra = None
 
-        self._changes = OrderedDict()
+        self._changes = ChangeDict()
         self._editors = OrderedDict()
         self._currentSeriesValues = OrderedDict()
 
@@ -697,72 +706,73 @@ class SeriesFrame(Frame):
             editor.textChanged.disconnect()
             self._currentSeriesValues[spec] = editor.get()
 
-        self._changes = OrderedDict()
+        self._changes.clear()
         self._editors = OrderedDict()
 
-        # empty the frame
-        if self._seriesFrame:
-            self._seriesFrame.hide()
-            self._seriesFrame.deleteLater()
+        with self._changes.blockChanges():
+            # empty the frame
+            if self._seriesFrame:
+                self._seriesFrame.hide()
+                self._seriesFrame.deleteLater()
 
-        self._seriesFrame = Frame(self, setLayout=True, showBorder=False,
-                                  grid=(self._seriesFrameRow, self._seriesFrameCol), gridSpan=(1, 3),
-                                  vAlign='t')
+            self._seriesFrame = Frame(self, setLayout=True, showBorder=False,
+                                      grid=(self._seriesFrameRow, self._seriesFrameCol), gridSpan=(1, 3),
+                                      vAlign='t')
 
-        # add new editors with the new values
-        for sRow, spec in enumerate(defaultItems):
-            seriesLabel = Label(self._seriesFrame, text=spec.pid, grid=(sRow, 0), vAlign='t')
-            seriesLabel.setFixedHeight(30)
+            # add new editors with the new values
+            for sRow, spec in enumerate(defaultItems):
+                seriesLabel = Label(self._seriesFrame, text=spec.pid, grid=(sRow, 0), vAlign='t')
+                seriesLabel.setFixedHeight(30)
 
-            editorFrame = Frame(self._seriesFrame, setLayout=True, grid=(sRow, 1), vAlign='t')
-            seriesEditor = PlainTextEditor(editorFrame, grid=(0, 0), fitToContents=True)
-            seriesEditor.setMinimumSize(50, 25)
+                editorFrame = Frame(self._seriesFrame, setLayout=True, grid=(sRow, 1), vAlign='t')
+                seriesEditor = PlainTextEditor(editorFrame, grid=(0, 0), fitToContents=True)
+                seriesEditor.setMinimumSize(50, 25)
 
-            # attributes for setting size when using resize-grip
-            seriesEditor._minimumWidth = 50
-            seriesEditor._minimumHeight = 25
-            seriesEditor.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+                # attributes for setting size when using resize-grip
+                seriesEditor._minimumWidth = 50
+                seriesEditor._minimumHeight = 25
+                seriesEditor.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
-            if spec in self._currentSeriesValues and self._currentSeriesValues[spec] is not None:
-                seriesEditor.set(self._currentSeriesValues[spec])
+                if spec in self._currentSeriesValues and self._currentSeriesValues[spec] is not None:
+                    seriesEditor.set(self._currentSeriesValues[spec])
 
-            # add the callback after setting the initial values
-            seriesEditor.textChanged.connect(partial(self._queueChangeSpectrumSeriesValues,
-                                                     seriesEditor, self.defaultObject,
-                                                     spec, sRow))
+                # add the callback after setting the initial values
+                seriesEditor.textChanged.connect(partial(self._queueChangeSpectrumSeriesValues,
+                                                         seriesEditor, self.defaultObject,
+                                                         spec, sRow))
 
-            self._editors[spec] = seriesEditor
+                self._editors[spec] = seriesEditor
 
         self._seriesFrame.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
 
     def _populate(self):
         """Populate the texteditors - seriesValues and seriesUnits for the spectrumGroup
         """
-        # with self.blockWidgetSignals():
-        self.seriesType.setIndex(int(self.defaultObject.seriesType or 0))
-        series = self.defaultObject.series
-        if series:
-            for spec, textEditor in self._editors.items():
-                ii = self.defaultObject.spectra.index(spec)
+        with self._changes.blockChanges():
+            self.seriesType.setIndex(int(self.defaultObject.seriesType or 0))
+            series = self.defaultObject.series
+            if series:
+                for spec, textEditor in self._editors.items():
+                    ii = self.defaultObject.spectra.index(spec)
 
-                try:
-                    if self.seriesType.getIndex() == SeriesTypes.FLOAT.value:
-                        seriesValue = float(series[ii])
-                    if self.seriesType.getIndex() == SeriesTypes.INTEGER.value:
-                        seriesValue = int(series[ii])
-                    elif self.seriesType.getIndex() == SeriesTypes.STRING.value:
-                        seriesValue = str(series[ii])
+                    try:
+                        if self.seriesType.getIndex() == SeriesTypes.FLOAT.value:
+                            seriesValue = float(series[ii])
+                        if self.seriesType.getIndex() == SeriesTypes.INTEGER.value:
+                            seriesValue = int(series[ii])
+                        elif self.seriesType.getIndex() == SeriesTypes.STRING.value:
+                            seriesValue = str(series[ii])
+                        else:
+                            seriesValue = repr(series[ii])
+                    except Exception as es:
+                        textEditor.set('')
                     else:
-                        seriesValue = repr(series[ii])
-                except Exception as es:
-                    textEditor.set('')
-                else:
-                    textEditor.set(str(seriesValue))
+                        textEditor.set(str(seriesValue))
 
-        if self.defaultObject.seriesUnits is not None and self.defaultObject.seriesUnits not in self._pulldownData:
-            self._pulldownData += (self.defaultObject.seriesUnits,)
-        self.unitsEditor.modifyTexts(texts=self._pulldownData)
-        self.unitsEditor.select(self.defaultObject.seriesUnits)
+            if self.defaultObject.seriesUnits is not None and self.defaultObject.seriesUnits not in self._pulldownData:
+                self._pulldownData += (self.defaultObject.seriesUnits,)
+            self.unitsEditor.modifyTexts(texts=self._pulldownData)
+            self.unitsEditor.select(self.defaultObject.seriesUnits)
 
         self._validateEditors()
 
@@ -964,7 +974,7 @@ class SeriesFrame(Frame):
     def _queueChangeComment(self):
         """callback from editing the comment
         """
-        editComment = self._parent.commentEdit.text()
+        editComment = self._parent.commentEdit.text() or None
         defaultComment = self._parent._defaultComment
 
         if editComment != defaultComment:

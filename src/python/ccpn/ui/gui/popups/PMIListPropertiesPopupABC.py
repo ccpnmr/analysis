@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-22 19:02:20 +0100 (Fri, May 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,7 @@ from ccpn.core.lib.ContextManagers import undoStackBlocking, queueStateChange
 from ccpn.core.PMIListABC import MERITENABLED, MERITTHRESHOLD, \
     SYMBOLCOLOUR, TEXTCOLOUR, LINECOLOUR, MERITCOLOUR
 from ccpn.util.AttrDict import AttrDict
+from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 
 
 # define two groups of buttons for above/below the merit checkbox
@@ -165,19 +166,22 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
     def _populate(self):
         """Populate the widgets from listViewSettings
         """
-        with self.blockWidgetSignals():
+        # with self.blockWidgetSignals():
+        with self._changes.blockChanges():
             # populate widgets from settings
             self._setWidgetSettings()
 
     def _getChangeState(self):
         """Get the change state from the _changes dict
         """
+        if not self._changes.enabled:
+            return None
+
         applyState = True
         revertState = False
         allChanges = True if self._changes else False
 
-        return self, allChanges, applyState, revertState, \
-               self._okButton, self._revertButton, self._currentNumApplies
+        return changeState(self, allChanges, applyState, revertState, self._okButton, None, self._revertButton, self._currentNumApplies)
 
     def _addButtonOption(self, pulldowns, attrib, row):
         """Add a labelled pulldown list for the selected attribute
@@ -209,8 +213,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         for attr, getFunction, _, _ in self.attributes:
             if getFunction and attr in self.edits:
                 value = getFunction(self.ccpnList, attr)
-                if value is not None:
-                    self.edits[attr].setText(str(value))
+                self.edits[attr].setText(str(value) if value is not None else '')
 
         # add any new colours that may not be in the colour list
         for item in self._colourPulldowns:
@@ -300,7 +303,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
 
         # redraw the items
         self._refreshGLItems()
-        self._changes = {}
+        self._changes.clear()
 
         self._revertButton.setEnabled(False)
 

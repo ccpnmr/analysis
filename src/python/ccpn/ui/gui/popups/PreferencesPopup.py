@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 14:00:17 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -58,6 +58,7 @@ from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, USERAUXILIARYPATH, \
     USERMACROSPATH, USERPLUGINSPATH, USERLAYOUTSPATH, USERPIPESPATH, USERDATAPATH, \
     USEROTHERPATH, getInitialPath, setInitialPath
+from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
@@ -150,12 +151,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _getChangeState(self):
         """Get the change state from the _changes dict
         """
+        if not self._changes.enabled:
+            return None
+
         applyState = True
         revertState = False
         allChanges = True if self._changes else False
 
-        return self, allChanges, applyState, revertState, \
-               self._applyButton, self._revertButton, self._currentNumApplies
+        return changeState(self, allChanges, applyState, revertState, None, self._applyButton, self._revertButton, self._currentNumApplies)
 
     def getActiveTabList(self):
         """Return the list of active tabs
@@ -282,7 +285,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             return False
 
         # remove all changes
-        self._changes = {}
+        self._changes.clear()
 
         self._currentNumApplies += 1
         self._revertButton.setEnabled(True)
@@ -550,12 +553,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _populate(self):
         """Populate the widgets in the tabs
         """
-        with self.blockWidgetSignals():
-            # clear all changes
-            self._changes = {}
+        # clear all changes
+        self._changes.clear()
 
+        with self._changes.blockChanges():
             self.useApplyToSpectrumDisplaysBox.setChecked(self.preferences.general.applyToSpectrumDisplays)
-
             self._populateGeneralTab()
             self._populateSpectrumTab()
             self._populateExternalProgramsTab()
@@ -710,7 +712,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _populateExternalProgramsTab(self):
         """Populate the widgets in the externalProgramsTab
         """
-        self.pymolPath.setText(self.preferences.externalPrograms.pymol)
+        with self._changes.blockChanges():
+            self.pymolPath.setText(self.preferences.externalPrograms.pymol)
 
     def _setSpectrumTabWidgets(self, parent):
         """Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live

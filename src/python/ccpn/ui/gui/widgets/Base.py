@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-20 18:10:04 +0000 (Fri, March 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -79,23 +79,22 @@ class SignalBlocking():
     """
     Class to add widget blocking methods to a subclass
     """
-    def _blockEvents(self, blanking=False, project=None):
+    def _blockEvents(self, _widgetBlockers, blanking=False, project=None):
         """Block all updates/signals/notifiers in the widget.
         """
         if not hasattr(self, '_widgetSignalBlockingLevel'):
             self._widgetSignalBlockingLevel = 0
 
-        # block on first entry
+        # block all signals on first entry
         if self._widgetSignalBlockingLevel == 0:
-            self._widgetSignalBlockers = {}
-            self._blockAllWidgetSignals(self)
             self.setUpdatesEnabled(False)
+            self._blockAllWidgetSignals(_widgetBlockers, self)
             if blanking and project:
                 project.blankNotification()
 
         self._widgetSignalBlockingLevel += 1
 
-    def _unblockEvents(self, blanking=False, project=None):
+    def _unblockEvents(self, _widgetBlockers, blanking=False, project=None):
         """Unblock all updates/signals/notifiers in the dialog.
         """
         if self._widgetSignalBlockingLevel > 0:
@@ -103,10 +102,9 @@ class SignalBlocking():
 
             # unblock all signals on last exit
             if self._widgetSignalBlockingLevel == 0:
-                # del self._widgetSignalBlockers
-                self._widgetSignalBlockers = {}
                 if blanking and project:
                     project.unblankNotification()
+                self._unblockAllWidgetSignals(_widgetBlockers, self)
                 self.setUpdatesEnabled(True)
 
         else:
@@ -116,24 +114,40 @@ class SignalBlocking():
     def blockWidgetSignals(self, projectBlanking=False):
         """Block all signals for the widget (recursive)
         """
-        self._blockEvents(projectBlanking)
+        _widgetBlockers = {}
+        self._blockEvents(_widgetBlockers, projectBlanking)
         try:
             yield  # yield control to the calling process
 
         except Exception as es:
             raise es
         finally:
-            self._unblockEvents(projectBlanking)
+            self._unblockEvents(_widgetBlockers, projectBlanking)
 
-    def _blockAllWidgetSignals(self, widget=None):
+    def _blockAllWidgetSignals(self, _widgetBlockers, widget=None):
         """Recursively block/unblock signals to all children
         """
-        if widget:
+        if widget and hasattr(widget, 'blockWidgetSignals'):
             for child in widget.children():
-                self._blockAllWidgetSignals(child)
+                self._blockAllWidgetSignals(_widgetBlockers, child)
 
             # add the blocking signal by creation of QSignalBlocker
-            self._widgetSignalBlockers[widget] = QtCore.QSignalBlocker(widget)
+            _block = QtCore.QSignalBlocker(widget)
+            assert widget not in _widgetBlockers
+            _widgetBlockers[widget] = _block
+
+    def _unblockAllWidgetSignals(self, _widgetBlockers, widget=None):
+        """Recursively block/unblock signals to all children
+        """
+        if widget and hasattr(widget, 'blockWidgetSignals'):
+            for child in widget.children():
+                self._unblockAllWidgetSignals(_widgetBlockers, child)
+
+            # remove the blocking signal by deletion of QSignalBlocker
+            if widget in _widgetBlockers:
+                del _widgetBlockers[widget]
+            else:
+                getLogger().debug2('_unblockAllWidgetSignals: widget not found {}'.format(widget))
 
     def _removeWidget(self, widget, removeTopWidget=False):
         """Destroy a widget and all it's contents
@@ -149,11 +163,12 @@ class SignalBlocking():
                         widget.setParent(None)
                         del widget
 
-        deleteItems(widget.getLayout())
-        if removeTopWidget:
-            widget.setVisible(False)
-            widget.setParent(None)
-            del widget
+        if widget and hasattr(widget, 'getLayout'):
+            deleteItems(widget.getLayout())
+            if removeTopWidget:
+                widget.setVisible(False)
+                widget.setParent(None)
+                del widget
 
 
 class Base(DropBase, SignalBlocking):

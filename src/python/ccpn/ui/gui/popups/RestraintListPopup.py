@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-22 19:02:20 +0100 (Fri, May 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-27 20:01:38 +0100 (Wed, May 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
 from ccpn.core.RestraintList import RestraintList
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget
+from ccpn.util.AttrDict import AttrDict
 
 
 class RestraintListEditPopup(AttributeEditorPopupABC):
@@ -46,9 +47,11 @@ class RestraintListEditPopup(AttributeEditorPopupABC):
 
         super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, **kwds)
 
-        if self.dataSet is None and self.obj is not None:
-            self.dataSet = self.obj.dataSet
-
+        if self.EDITMODE:
+            if self.dataSet is None and self.obj is not None:
+                self.dataSet = self.obj.dataSet
+        else:
+            self.obj = _RestraintListContainer(self, dataSet=dataSet)
 
 class RestraintListNewPopup(RestraintListEditPopup):
     EDITMODE = False
@@ -56,11 +59,17 @@ class RestraintListNewPopup(RestraintListEditPopup):
 
     def _getRestraintTypes(self, obj=None):
         self.restraintType.modifyTexts(RestraintList.restraintTypes)
+        self.restraintType.setIndex(0)
 
-    klass = RestraintList
-    attributes = [('name', EntryCompoundWidget, None, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                  ('comment', EntryCompoundWidget, None, setattr, None, None, {'backgroundText': '> Optional <'}),
-                  ('restraintType', PulldownListCompoundWidget, None, setattr, None, None, {}),
+    # klass = RestraintList
+    # attributes = [('name', EntryCompoundWidget, None, setattr, None, None, {'backgroundText': '> Enter name <'}),
+    #               ('comment', EntryCompoundWidget, None, setattr, None, None, {'backgroundText': '> Optional <'}),
+    #               ('restraintType', PulldownListCompoundWidget, None, setattr, None, None, {}),
+    #               ]
+
+    attributes = [('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                  ('restraintType', PulldownListCompoundWidget, getattr, setattr, _getRestraintTypes, None, {}),
                   ]
 
     def __init__(self, *args, **kwds):
@@ -81,3 +90,20 @@ class RestraintListNewPopup(RestraintListEditPopup):
         """Not needed here - subclass so does no operation
         """
         pass
+
+
+class _RestraintListContainer(AttrDict):
+    """
+    Class to simulate a restraintList in new/edit popup.
+    """
+
+    def __init__(self, popupClass, dataSet):
+        super().__init__()
+        self._dataSet = dataSet
+        for attr in popupClass.attributes:
+            self[attr[0]] = None
+
+    def newRestraintList(self, *args, **kwds):
+        """Create a new restraint here
+        """
+        self._dataSet.newRestraintList(*args, **kwds)

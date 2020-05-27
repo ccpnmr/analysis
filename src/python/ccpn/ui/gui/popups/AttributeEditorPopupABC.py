@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-27 20:01:38 +0100 (Wed, May 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -111,8 +111,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         self.setOkButton(callback=self._okClicked)
         self.setCancelButton(callback=self._cancelClicked)
         self.setHelpButton(callback=self._helpClicked, enabled=False)
-        if self.EDITMODE:
-            self.setRevertButton(callback=self._revertClicked, enabled=False)
+        # if self.EDITMODE:
+        self.setRevertButton(callback=self._revertClicked, enabled=False)
 
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
@@ -149,7 +149,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
                         # call the preset function for the widget (e.g. populate pulldowns with modified list)
                         _presetFunction(self, self.obj)
 
-                    if getFunction and self.EDITMODE:
+                    if getFunction:     # and self.EDITMODE:
                         # set the current value
                         value = getFunction(self.obj, attr, None)
                         attrSetter(self.edits[attr], value)
@@ -176,7 +176,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
             attrGetter = CommonWidgetsEdits[attrType.__name__][ATTRGETTER]
             value = attrGetter(self.edits[attr])
 
-            if getFunction and self.EDITMODE:
+            if getFunction:     # and self.EDITMODE:
                 oldValue = getFunction(self.obj, attr, None)
                 if value != oldValue:
                     return partial(self._setValue, attr, setFunction, value)

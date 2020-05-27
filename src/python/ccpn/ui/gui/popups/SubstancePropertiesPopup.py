@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-27 16:49:01 +0100 (Wed, May 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-27 20:01:38 +0100 (Wed, May 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -28,15 +28,16 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.TextEditor import TextEditor
-from ccpn.ui.gui.widgets.CompoundView import CompoundView, Variant, importSmiles
+from ccpn.ui.gui.widgets.CompoundView import CompoundView
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply, CcpnDialogMainWidget
+from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget
 from ccpn.core.Substance import Substance
+
 
 OTHER_UNIT = ['µ', 'm', 'n', 'p']
 CONCENTRATION_UNIT = ['µM', 'mM', 'nM', 'pM']
@@ -51,10 +52,9 @@ SELECT = '> Select <'
 
 LESS_BUTTON = 'Show less'
 MORE_BUTTON = 'Show more'
-ADVANCED = 'Advanced'
 
 
-class SubstancePropertiesPopup(AttributeEditorPopupABC):
+class SubstancePropertiesPopup2(AttributeEditorPopupABC):
     klass = Substance
     attributes = [('pid', EntryCompoundWidget, getattr, None, None, None, {}),
                   ('nmrChain', PulldownListCompoundWidget, getattr, setattr, None, None, {}),
@@ -64,7 +64,7 @@ class SubstancePropertiesPopup(AttributeEditorPopupABC):
                   ]
 
 
-class SubstancePropertiesPopup2(CcpnDialogMainWidget):
+class SubstancePropertiesPopup(CcpnDialog):
 
     def __init__(self, parent=None, mainWindow=None,
                  substance=None, sampleComponent=None, newSubstance=False, **kwds):
@@ -72,7 +72,7 @@ class SubstancePropertiesPopup2(CcpnDialogMainWidget):
         Initialise the widget
         """
         title = 'New Substance' if newSubstance else 'Edit Substance'
-        super().__init__(self, parent, setLayout=True, margins=(10,10,10,10),
+        CcpnDialog.__init__(self, parent, setLayout=True, margins=(10, 10, 10, 10),
                             windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow  # ejb - should always be done like this
@@ -101,6 +101,9 @@ class SubstancePropertiesPopup2(CcpnDialogMainWidget):
         else:
             self._hideSubstanceCreator()
 
+        # # NOTE:ED - test the more/less frame
+        # self._moreFrame = MoreLessFrame(self, name='Advanced', showMore=True, grid=(1, 1), gridSpan=(1, 4))
+
     def _setWidgets(self):
         for setWidget in self._getWidgetsToSet():
             setWidget()
@@ -109,7 +112,7 @@ class SubstancePropertiesPopup2(CcpnDialogMainWidget):
 
         widgets = self._allWidgets()
         # layout = self.contentsFrame.getLayout()
-        layout = self.mainWidget.getLayout()
+        layout = self.getLayout()
 
         count = int(len(widgets) / 2)
         self.positions = [[i + 1, j] for i in range(count) for j in range(2)]
@@ -117,8 +120,8 @@ class SubstancePropertiesPopup2(CcpnDialogMainWidget):
             i, j = position
             layout.addWidget(widget, i, j)
 
-        self.addSpacer(0, 10, grid=(count+1, 0))
-        layout.addWidget(self.buttonBox, count + 2, 0, 1 , 2)
+        self.addSpacer(0, 10, grid=(count + 1, 0))
+        layout.addWidget(self.buttonBox, count + 2, 0, 1, 2)
 
     def _getWidgetsToSet(self):
         widgetsToSet = (self._initialOptionWidgets, self._setCurrentSubstanceWidgets,

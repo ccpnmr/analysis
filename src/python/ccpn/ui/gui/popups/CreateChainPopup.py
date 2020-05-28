@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-28 16:14:05 +0100 (Thu, May 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-28 16:34:54 +0100 (Thu, May 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -84,7 +84,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
         # flag required because using attributeDialog which tries to populate
         self._popupReady = False
 
-        super().__init__(parent, mainWindow=mainWindow, size=(500, 250), **kwds)
+        super().__init__(parent, mainWindow=mainWindow, size=(500, 300), **kwds)
 
         row = 2
         label2a = Label(self.mainWidget, text="name", grid=(row, 0))

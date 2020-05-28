@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-28 11:18:20 +0100 (Thu, May 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-28 16:34:54 +0100 (Thu, May 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,9 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
     # get/set-Function have getattr, setattr profile
     # if setFunction is None: display attribute value without option to change value
     # kwds: optional kwds passed to LineEdit constructor
+
+    FIXEDWIDTH = True
+    FIXEDHEIGHT = True
 
     def __init__(self, parent=None, mainWindow=None, obj=None, size=None, **kwds):
         """
@@ -80,19 +83,15 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
             self.setRevertButton(callback=self._revertClicked, enabled=False)
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
-        # # clear the changes list
-        # self._changes = ChangeDict()
+        # populate the widgets
+        self._populate()
 
         # make the buttons appear
-        self._setButtons()
+        self.__postInit__()
         self._okButton = self.dialogButtons.button(self.OKBUTTON)
         self._cancelButton = self.dialogButtons.button(self.CANCELBUTTON)
         self._helpButton = self.dialogButtons.button(self.HELPBUTTON)
         self._revertButton = self.dialogButtons.button(self.RESETBUTTON)
-
-        # populate the widgets
-        self._populate()
-        self.setFixedSize(self._size if self._size else self.sizeHint())
 
     def _populate(self):
         """Populate the widgets while blocking the queue changes dict

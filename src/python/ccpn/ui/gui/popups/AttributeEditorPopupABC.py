@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-28 11:18:20 +0100 (Thu, May 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-28 16:34:54 +0100 (Thu, May 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -46,6 +46,10 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
     klass = None  # The class whose properties are edited/displayed
     attributes = []  # A list of (attributeName, getFunction, setFunction, kwds) tuples;
 
+    # get/set-Function have getattr, setattr profile
+    # if setFunction is None: display attribute value without option to change value
+    # kwds: optional kwds passed to LineEdit constructor
+
     # the width of the first column for compound widgets
     hWidth = 100
 
@@ -53,10 +57,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
     WINDOWPREFIX = 'Edit '
 
     ENABLEREVERT = True
-
-    # get/set-Function have getattr, setattr profile
-    # if setFunction is None: display attribute value without option to change value
-    # kwds: optional kwds passed to LineEdit constructor
+    FIXEDWIDTH = True
+    FIXEDHEIGHT = True
 
     def __init__(self, parent=None, mainWindow=None, obj=None, **kwds):
         """
@@ -114,25 +116,19 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         self.setOkButton(callback=self._okClicked, enabled=False)
         self.setCancelButton(callback=self._cancelClicked)
         self.setHelpButton(callback=self._helpClicked, enabled=False)
-        # if self.EDITMODE:
         if self.ENABLEREVERT:
             self.setRevertButton(callback=self._revertClicked, enabled=False)
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
 
-        # make the buttons appear
-        self._setButtons()
+        # populate the widgets
+        self._populate()
 
         # set the links to the buttons
+        self.__postInit__()
         self._okButton = self.dialogButtons.button(self.OKBUTTON)
         self._cancelButton = self.dialogButtons.button(self.CANCELBUTTON)
         self._helpButton = self.dialogButtons.button(self.HELPBUTTON)
         self._revertButton = self.dialogButtons.button(self.RESETBUTTON)
-
-        # populate the widgets
-        self._populate()
-
-        # fix the size of the widget - may not be required, set in individual cases from class attributes
-        self.setFixedSize(self._size if self._size else self.sizeHint())
 
     def _populate(self):
         """Populate the widgets in the popup

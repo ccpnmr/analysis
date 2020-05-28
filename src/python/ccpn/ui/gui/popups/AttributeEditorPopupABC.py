@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-28 16:34:54 +0100 (Thu, May 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-28 21:13:36 +0100 (Thu, May 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,8 @@ ATTRPRESET = 3
 
 
 class AttributeEditorPopupABC(CcpnDialogMainWidget):
-    """Abstract base class to implement a popup for editing properties
+    """
+    Abstract base class to implement a popup for editing properties
     """
     klass = None  # The class whose properties are edited/displayed
     attributes = []  # A list of (attributeName, getFunction, setFunction, kwds) tuples;
@@ -135,6 +136,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         """
         from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
 
+        self._changes.clear()
         with self._changes.blockChanges():
             for attr, attrType, getFunction, _, _presetFunction, _, _ in self.attributes:
                 # remove whitespaces to give the attribute name in the class

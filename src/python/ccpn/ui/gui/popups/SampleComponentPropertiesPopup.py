@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:49 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-05-28 21:13:36 +0100 (Thu, May 28, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,6 +37,14 @@ from ccpn.util.Constants import concentrationUnits
 from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoStackBlocking
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
+from ccpn.util.AttrDict import AttrDict
+from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
+from ccpn.core.lib.ContextManagers import queueStateChange
+from ccpn.core.SampleComponent import SampleComponent
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
+    RadioButtonsCompoundWidget, SpinBoxCompoundWidget, PulldownListCompoundWidget
+
 
 SELECT = '> Select <'
 
@@ -47,15 +55,126 @@ Labelling = ['None', 'Type_New', '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 
 WIDTH = 150
 
 
-class SampleComponentPopup(CcpnDialog):
+class SampleComponentPopup(AttributeEditorPopupABC):
+    """
+    SampleComponent attributes editor popup
+    """
+
+    def _get(self, attr, default):
+        """change the value from the sample object into an index for the radioButton
+        """
+        value = getattr(self, attr, default)
+        return TYPECOMPONENT.index(value) if value and value in TYPECOMPONENT else 0
+
+    def _set(self, attr, index):
+        """change the index from the radioButtons into the string for the sample object
+        """
+        value = TYPECOMPONENT[index if index and 0 <= index < len(TYPECOMPONENT) else 0]
+        setattr(self, attr, value)
+
+    def _getRoleTypes(self, sampleComponent):
+        """Populate the role pulldown
+        """
+        self.role.modifyTexts(TYPECOMPONENT)
+        self.role.select(self.obj.role)
+
+    def _getConcentrationUnits(self, sampleComponent):
+        """Populate the concentrationUnit pulldown
+        """
+        self.concentrationUnit.modifyTexts(C_COMPONENT_UNIT)
+        self.concentrationUnit.select(self.obj.role)
+
+    def _getCurrentSubstances(self, sampleComponent):
+        """Populate the current substances pulldown
+        """
+        substancePulldownData = [SELECT]
+        for substance in self.project.substances:
+            substancePulldownData.append(str(substance.id))
+        self.Currentsubstances.pulldownList.setData(substancePulldownData)
+
+    klass = SampleComponent  # The class whose properties are edited/displayed
+    attributes = []
+    _editAttributes = [('name', EntryCompoundWidget, getattr, None, None, None, {'backgroundText': '> Enter name <'}),
+                       ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                       ('labelling', EntryCompoundWidget, getattr, None, None, None, {'backgroundText': ''}),
+                       ('role', PulldownListCompoundWidget, getattr, setattr, _getRoleTypes, None, {'editable': False}),
+                       ('concentrationUnit', PulldownListCompoundWidget, getattr, setattr, _getConcentrationUnits, None, {'editable': False}),
+                       ('concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                       ]
+
+    _newAttributes = [('Select source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : ['New', 'From Substances'],
+                                                                                             'selectedInd': 1,
+                                                                                             'direction'  : 'h'}),
+                      ('Current substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
+                      ('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                      ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                      ('labelling', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                      ('role', PulldownListCompoundWidget, getattr, setattr, _getRoleTypes, None, {'editable': False}),
+                      ('concentrationUnit', PulldownListCompoundWidget, getattr, setattr, _getConcentrationUnits, None, {'editable': False}),
+                      ('concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                      ]
+
+    hWidth = 150
+    FIXEDWIDTH = True
+    FIXEDHEIGHT = True
+    ENABLEREVERT = True
+
+    def __init__(self, parent=None, mainWindow=None, obj=None,
+                 sample=None, sampleComponent=None, newSampleComponent=False, **kwds):
+        newSampleComponent = True
+        self.EDITMODE = not newSampleComponent
+        self.WINDOWPREFIX = 'New ' if newSampleComponent else 'Edit '
+
+        if newSampleComponent == True:
+            self.attributes = self._newAttributes
+            obj = _blankContainer(self)
+        else:
+            self.attributes = self._editAttributes
+            obj = sampleComponent
+
+        super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, **kwds)
+
+        # attach callbacks to the new/fromSubstances radioButton
+        if not self.EDITMODE:
+            self._setVisibleState(True)
+            self.Selectsource.radioButtons.buttonGroup.buttonClicked.connect(self._changeSource)
+
+    def _setVisibleState(self, fromSubstances):
+        if fromSubstances:
+            self.Currentsubstances.setVisible(True)
+            self.labelling.setEnabled(False)
+        else:
+            self.Currentsubstances.setVisible(False)
+            self.labelling.setEnabled(True)
+
+    def _changeSource(self, value):
+        pass
+
+
+class _blankContainer(AttrDict):
+    """
+    Class to simulate a blank object in new/edit popup.
+    """
+
+    def __init__(self, popupClass):
+        """Create a list of attributes from the container class
+        """
+        super().__init__()
+        for attr in popupClass.attributes:
+            self[attr[0]] = None
+
+
+class SampleComponentPopup2(CcpnDialog):
 
     def __init__(self, parent=None, mainWindow=None,
                  sample=None, sampleComponent=None, newSampleComponent=False, **kwds):
         """
         Initialise the widget
         """
+        newSampleComponent = True
+
         title = 'New SampleComponent' if newSampleComponent else 'Edit SampleComponent'
-        CcpnDialog.__init__(self, parent, setLayout=True, margins=(10,10,10,10),
+        CcpnDialog.__init__(self, parent, setLayout=True, margins=(10, 10, 10, 10),
                             windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow
@@ -111,8 +230,8 @@ class SampleComponentPopup(CcpnDialog):
             i, j = position
             layout.addWidget(widget, i, j)
 
-        self.addSpacer(0, 10, grid=(count+1, 0))
-        layout.addWidget(self.buttons, count + 2, 0, 1 , 2)
+        self.addSpacer(0, 10, grid=(count + 1, 0))
+        layout.addWidget(self.buttons, count + 2, 0, 1, 2)
 
         self.nameLabellingOptions()
 
@@ -222,7 +341,7 @@ class SampleComponentPopup(CcpnDialog):
     def _setPerformButtonWidgets(self):
         tipTexts = ['', 'Click to apply changes. Name and Labelling cannot be changed once a new sample component is created', 'Click to apply and close']
         self.buttons = ButtonList(self, callbacks=[self.reject, self._applyChanges, self._okButton],
-                                  texts=['Cancel', 'Apply', 'Ok'], tipTexts=tipTexts, gridSpan=(1,2))
+                                  texts=['Cancel', 'Apply', 'Ok'], tipTexts=tipTexts, gridSpan=(1, 2))
 
     def _checkCurrentSubstances(self):
         if len(self.project.substances) > 0:

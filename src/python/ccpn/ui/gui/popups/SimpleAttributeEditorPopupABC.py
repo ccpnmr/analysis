@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-28 16:34:54 +0100 (Thu, May 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-28 21:13:36 +0100 (Thu, May 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,8 @@ from ccpn.core.lib.ContextManagers import queueStateChange
 
 
 class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
-    """Abstract base class to implement a popup for editing simple properties
+    """
+    Abstract base class to implement a popup for editing simple properties
     """
     klass = None  # The class whose properties are edited/displayed
     attributes = []  # A list of (attributeName, getFunction, setFunction, kwds) tuples;
@@ -44,6 +45,7 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
     # if setFunction is None: display attribute value without option to change value
     # kwds: optional kwds passed to LineEdit constructor
 
+    hWidth = 120
     FIXEDWIDTH = True
     FIXEDHEIGHT = True
 
@@ -72,6 +74,8 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
             self.edits[attr] = LineEdit(self.mainWidget, textAlignment='left', editable=editable,
                                         vAlign='t', grid=(row, 1), **kwds)
             self.edits[attr].textChanged.connect(partial(self._queueSetValue, attr, getFunction, setFunction, row))
+            if self.hWidth:
+                self.labels[attr].setFixedWidth(self.hWidth)
 
             row += 1
 
@@ -96,6 +100,7 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
     def _populate(self):
         """Populate the widgets while blocking the queue changes dict
         """
+        self._changes.clear()
         with self._changes.blockChanges():
             for attr, getFunction, _, _ in self.attributes:
                 if getFunction and attr in self.edits:

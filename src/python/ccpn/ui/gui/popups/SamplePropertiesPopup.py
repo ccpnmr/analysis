@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-28 19:08:55 +0100 (Thu, May 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-28 21:13:36 +0100 (Thu, May 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,6 @@ from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.core.Sample import Sample
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
     RadioButtonsCompoundWidget, SpinBoxCompoundWidget
-from ccpn.util.AttrDict import AttrDict
 
 
 OTHER_UNIT = ['µ', 'm', 'n', 'p']
@@ -54,8 +53,9 @@ AMOUNT_UNIT = ['L', 'g', 'mole']
 
 
 class SamplePropertiesPopup(AttributeEditorPopupABC):
-    FIXEDWIDTH = True
-    FIXEDHEIGHT = True
+    """
+    Sample attributes editor popup
+    """
 
     def _get(self, attr, default):
         """change the value from the sample object into an index for the radioButton
@@ -84,11 +84,10 @@ class SamplePropertiesPopup(AttributeEditorPopupABC):
                   ('columnNumber', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0, 'step': 1}),
                   ]
 
-    EDITMODE = False
-    WINDOWPREFIX = 'New '
-
+    hWidth = 120
+    FIXEDWIDTH = True
+    FIXEDHEIGHT = True
     ENABLEREVERT = True
-    USESCROLLWIDGET = True
 
     def __init__(self, parent=None, mainWindow=None, obj=None,
                  sample=None, **kwds):

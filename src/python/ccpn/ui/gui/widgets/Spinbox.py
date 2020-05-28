@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:56 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-05-28 19:08:56 +0100 (Thu, May 28, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,7 +36,8 @@ class Spinbox(QtWidgets.QSpinBox, Base):
     returnPressed = pyqtSignal(int)
     wheelChanged = pyqtSignal(int)
 
-    def __init__(self, parent, prefix=None, value=None, step=None, min=None, max=None, showButtons=True, **kwds):
+    def __init__(self, parent, prefix=None, value=None, step=None, min=None, max=None,
+                 showButtons=True, callback=None, editable=True, **kwds):
 
         super().__init__(parent)
         Base._init(self, **kwds)
@@ -54,10 +55,15 @@ class Spinbox(QtWidgets.QSpinBox, Base):
         if showButtons is False:
             self.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
 
+        self._callback = None
+        self.setCallback(callback)
+
         lineEdit = self.lineEdit()
         lineEdit.returnPressed.connect(self._keyPressed)
 
         self._internalWheelEvent = True
+        self._keyPressed = False
+
         # change focusPolicy so that spinboxes don't grab focus unless selected
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
@@ -99,6 +105,15 @@ class Spinbox(QtWidgets.QSpinBox, Base):
         """emit the value when return has been pressed
         """
         self.returnPressed.emit(self.value())
+
+    def setCallback(self, callback):
+        """Sets callback; disconnects if callback=None
+        """
+        if self._callback is not None:
+            self.valueChanged.disconnect()
+        if callback:
+            self.valueChanged.connect(callback)
+        self._callback = callback
 
 
 if __name__ == '__main__':

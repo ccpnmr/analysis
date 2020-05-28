@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-27 14:49:41 +0000 (Fri, March 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-28 19:08:56 +0100 (Thu, May 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -180,7 +180,8 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
         super(DoubleSpinbox, self).focusInEvent(QFocusEvent)
 
     def setCallback(self, callback):
-        "Sets callback; disconnects if callback=None"
+        """Sets callback; disconnects if callback=None
+        """
         if self._callback is not None:
             self.valueChanged.disconnect()
         if callback:

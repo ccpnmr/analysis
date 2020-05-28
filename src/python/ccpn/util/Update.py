@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-17 16:48:35 +0100 (Fri, April 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-28 13:57:25 +0100 (Thu, May 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -437,7 +437,7 @@ class UpdateAgent(object):
             isDifferent = True
         else:
             # this is a hack so that updates that don't belong are excluded
-            isDifferent = False
+            isDifferent = True
 
         return isDifferent
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-28 11:18:20 +0100 (Thu, May 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -134,7 +134,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
 
         self.GLSignals = GLNotifier(parent=self)
 
-        self.setOkButton(callback=self._okClicked)
+        self.setOkButton(callback=self._okClicked, enabled=False)
         self.setCancelButton(callback=self._cancelClicked)
         self.setHelpButton(callback=self._helpClicked, enabled=False)
         self.setRevertButton(callback=self._revertClicked, enabled=False)
@@ -305,6 +305,8 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         self._refreshGLItems()
         self._changes.clear()
 
+        # disable the buttons
+        self._okButton.setEnabled(False)
         self._revertButton.setEnabled(False)
 
     def _helpClicked(self):

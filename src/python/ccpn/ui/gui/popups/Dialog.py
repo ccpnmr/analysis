@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-28 11:18:20 +0100 (Thu, May 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -148,6 +148,8 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self._setButtons()
         self._setDialogSize()
 
+        if self.getButton(self.OKBUTTON):
+            self.getButton(self.OKBUTTON).setEnabled(False)
         if self.getButton(self.APPLYBUTTON):
             self.getButton(self.APPLYBUTTON).setEnabled(False)
         if self.getButton(self.RESETBUTTON):
@@ -305,10 +307,27 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                 self.project._undo.undo()
 
         self._populate()
-        if self.dialogButtons.button(self.APPLYBUTTON):
-            self.dialogButtons.button(self.APPLYBUTTON).setEnabled(False)
-        if self.dialogButtons.button(self.RESETBUTTON):
-            self.dialogButtons.button(self.RESETBUTTON).setEnabled(False)
+
+        if not hasattr(self, GETCHANGESTATE):
+            raise RuntimeError('widget {} must have changes defined'.format(self))
+        _getChanges = getattr(self, GETCHANGESTATE)
+        if not callable(_getChanges):
+            raise RuntimeError('changes method for {} not correctly defined'.format(self))
+
+        # get the information from the popup - which must handle its own nested _changes
+        _changes = _getChanges()
+        if not _changes:
+            return
+        popup, changeState, applyState, revertState, okButton, applyButton, revertButton, numApplies = _changes
+
+        if popup:
+            # disable the required buttons
+            if okButton:
+                okButton.setEnabled(False)
+            if applyButton:
+                applyButton.setEnabled(False)
+            if revertButton:
+                revertButton.setEnabled(False)
 
     def _cancelClicked(self):
         """Cancel button signal comes here

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-27 20:01:38 +0100 (Wed, May 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-28 11:18:20 +0100 (Thu, May 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,14 +31,14 @@ from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownLis
 from ccpn.util.AttrDict import AttrDict
 
 
-class RestraintListEditPopup(AttributeEditorPopupABC):
-    EDITMODE = True
+class RestraintListPopupABC(AttributeEditorPopupABC):
 
-    klass = RestraintList
-    attributes = [('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                  ('restraintType', EntryCompoundWidget, getattr, None, None, None, {}),
-                  ]
+    def _getRestraintTypes(self, obj=None):
+        self.restraintType.modifyTexts(RestraintList.restraintTypes)
+        self.restraintType.setIndex(0)
+
+    klass = RestraintList  # The class whose properties are edited/displayed
+    attributes = []  # A list of (attributeName, getFunction, setFunction, kwds) tuples;
 
     def __init__(self, parent=None, mainWindow=None, obj=None,
                  restraintList=None, dataSet=None, editMode=False, **kwds):
@@ -47,63 +47,56 @@ class RestraintListEditPopup(AttributeEditorPopupABC):
 
         super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, **kwds)
 
-        if self.EDITMODE:
-            if self.dataSet is None and self.obj is not None:
-                self.dataSet = self.obj.dataSet
-        else:
-            self.obj = _RestraintListContainer(self, dataSet=dataSet)
+        if self.dataSet is None and self.obj is not None:
+            self.dataSet = self.obj.dataSet
 
-class RestraintListNewPopup(RestraintListEditPopup):
-    EDITMODE = False
-    WINDOWPREFIX = 'New '
-
-    def _getRestraintTypes(self, obj=None):
-        self.restraintType.modifyTexts(RestraintList.restraintTypes)
-        self.restraintType.setIndex(0)
-
-    # klass = RestraintList
-    # attributes = [('name', EntryCompoundWidget, None, setattr, None, None, {'backgroundText': '> Enter name <'}),
-    #               ('comment', EntryCompoundWidget, None, setattr, None, None, {'backgroundText': '> Optional <'}),
-    #               ('restraintType', PulldownListCompoundWidget, None, setattr, None, None, {}),
-    #               ]
-
-    attributes = [('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                  ('restraintType', PulldownListCompoundWidget, getattr, setattr, _getRestraintTypes, None, {}),
-                  ]
-
-    def __init__(self, *args, **kwds):
-        super(RestraintListNewPopup, self).__init__(*args, **kwds)
-
-        self._getRestraintTypes()
+        if not self.EDITMODE:
+            self._getRestraintTypes()
 
     def _applyAllChanges(self, changes):
         """Apply all changes - add new restraintList
         """
-        name = self.name.getText()
-        comment = self.comment.getText()
+        if self.EDITMODE:
+            super()._applyAllChanges(changes)
+        else:
 
-        restraintType = self.restraintType.getText()
-        self.dataSet.newRestraintList(name=name, restraintType=restraintType, comment=comment)
+            # make a blank container dict into which the new values will go
+            self.obj = _blankContainer(self)
+            super()._applyAllChanges(changes)
 
-    def _setValue(self, attr, setFunction, value):
-        """Not needed here - subclass so does no operation
+            # restraintList constraint, restraintType MUST be set
+            if not self.obj.restraintType:
+                self.obj.restraintType = self.restraintType.getText()
+
+            # use the blank container as a dict for creating the new object
+            self.dataSet.newRestraintList(**self.obj)
+
+class RestraintListEditPopup(RestraintListPopupABC):
+
+    attributes = [('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                  ('restraintType', EntryCompoundWidget, getattr, None, None, None, {}),
+                  ]
+
+
+class RestraintListNewPopup(RestraintListPopupABC):
+    WINDOWPREFIX = 'New '
+
+    # new requires a pulldown list for restraintType - in edit it is fixed
+    attributes = [('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                  ('restraintType', PulldownListCompoundWidget, getattr, setattr, RestraintListPopupABC._getRestraintTypes, None, {}),
+                  ]
+
+
+class _blankContainer(AttrDict):
+    """
+    Class to simulate a blank object in new/edit popup.
+    """
+
+    def __init__(self, popupClass):
+        """Create a list of attributes from the container class
         """
-        pass
-
-
-class _RestraintListContainer(AttrDict):
-    """
-    Class to simulate a restraintList in new/edit popup.
-    """
-
-    def __init__(self, popupClass, dataSet):
         super().__init__()
-        self._dataSet = dataSet
         for attr in popupClass.attributes:
             self[attr[0]] = None
-
-    def newRestraintList(self, *args, **kwds):
-        """Create a new restraint here
-        """
-        self._dataSet.newRestraintList(*args, **kwds)

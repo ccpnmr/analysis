@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-28 11:18:20 +0100 (Thu, May 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,10 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
+from re import finditer
+from collections import Counter, OrderedDict
+from itertools import zip_longest
+import copy
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QDataStream, Qt, QVariant
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
@@ -40,12 +44,7 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.core.lib.ContextManagers import undoBlock
-
-from re import finditer
-
-from collections import Counter, OrderedDict
-from itertools import zip_longest
-import copy
+from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 
 
 DEFAULTSPACING = (3, 3)
@@ -545,8 +544,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
     def _getChangeState(self):
         """Get the change state from the _changes dict
         """
-        # MUST BE SUBCLASSED
-        raise NotImplementedError("Code error: function not implemented")
+        # changes not required here, just need to define which buttons to disable after revert
+        return changeState(self, False, False, False, None, self._applyButton, self._revertButton, 0)
 
     def _getPreviousState(self):
         result = {}

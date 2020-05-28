@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-27 20:01:38 +0100 (Wed, May 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-28 11:18:20 +0100 (Thu, May 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -52,6 +52,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
     EDITMODE = True
     WINDOWPREFIX = 'Edit '
 
+    ENABLEREVERT = True
+
     # get/set-Function have getattr, setattr profile
     # if setFunction is None: display attribute value without option to change value
     # kwds: optional kwds passed to LineEdit constructor
@@ -74,6 +76,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         row = 0
         self.edits = {}  # An (attributeName, widgetType) dict
 
+        # create the list of widgets and set the callbacks for each
         for attr, attrType, getFunction, setFunction, presetFunction, callback, kwds in self.attributes:
             editable = setFunction is not None
             newWidget = attrType(self.mainWidget, mainWindow=mainWindow, labelText=attr, editable=editable,
@@ -108,19 +111,18 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
             row += 1
 
         # set up the required buttons for the dialog
-        self.setOkButton(callback=self._okClicked)
+        self.setOkButton(callback=self._okClicked, enabled=False)
         self.setCancelButton(callback=self._cancelClicked)
         self.setHelpButton(callback=self._helpClicked, enabled=False)
         # if self.EDITMODE:
-        self.setRevertButton(callback=self._revertClicked, enabled=False)
-
+        if self.ENABLEREVERT:
+            self.setRevertButton(callback=self._revertClicked, enabled=False)
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
-
-        # # clear the changes list
-        # self._changes = ChangeDict()
 
         # make the buttons appear
         self._setButtons()
+
+        # set the links to the buttons
         self._okButton = self.dialogButtons.button(self.OKBUTTON)
         self._cancelButton = self.dialogButtons.button(self.CANCELBUTTON)
         self._helpButton = self.dialogButtons.button(self.HELPBUTTON)
@@ -128,6 +130,8 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
 
         # populate the widgets
         self._populate()
+
+        # fix the size of the widget - may not be required, set in individual cases from class attributes
         self.setFixedSize(self._size if self._size else self.sizeHint())
 
     def _populate(self):
@@ -183,6 +187,9 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
 
     def _setValue(self, attr, setFunction, value):
         """Function for setting the attribute, called by _applyAllChanges
+
+        This can be subclassed to completely disable writing to the object
+        as maybe required in a new object
         """
         setFunction(self.obj, attr, value)
 

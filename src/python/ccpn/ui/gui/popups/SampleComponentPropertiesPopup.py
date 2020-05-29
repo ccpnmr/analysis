@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-28 21:13:36 +0100 (Thu, May 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 12:40:09 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -47,11 +47,11 @@ from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificS
 
 
 SELECT = '> Select <'
-
 TYPECOMPONENT = [SELECT, 'Compound', 'Solvent', 'Buffer', 'Target', 'Inhibitor ', 'Other']
-C_COMPONENT_UNIT = concentrationUnits  #['Select', 'Molar', 'g/L', 'L/L', 'mol/mol', 'g/g']
-Labelling = ['None', 'Type_New', '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 'ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
-
+C_COMPONENT_UNIT = concentrationUnits
+TYPENEW = 'Type_New'
+LABELLING = ['None', TYPENEW, '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 'ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
+BUTTONSTATES = ['New', 'From Substances']
 WIDTH = 150
 
 
@@ -84,6 +84,16 @@ class SampleComponentPopup(AttributeEditorPopupABC):
         self.concentrationUnit.modifyTexts(C_COMPONENT_UNIT)
         self.concentrationUnit.select(self.obj.role)
 
+    def _getLabelling(self, sampleComponent):
+        """Populate the labelling pulldown
+        """
+        labels = LABELLING.copy()
+        newLabel = str(self.obj.labelling)
+        if newLabel not in labels:
+            labels.append(newLabel)
+        self.labelling.modifyTexts(labels)
+        self.labelling.select(newLabel or 'None')
+
     def _getCurrentSubstances(self, sampleComponent):
         """Populate the current substances pulldown
         """
@@ -93,26 +103,27 @@ class SampleComponentPopup(AttributeEditorPopupABC):
         self.Currentsubstances.pulldownList.setData(substancePulldownData)
 
     klass = SampleComponent  # The class whose properties are edited/displayed
-    attributes = []
-    _editAttributes = [('name', EntryCompoundWidget, getattr, None, None, None, {'backgroundText': '> Enter name <'}),
-                       ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                       ('labelling', EntryCompoundWidget, getattr, None, None, None, {'backgroundText': ''}),
-                       ('role', PulldownListCompoundWidget, getattr, setattr, _getRoleTypes, None, {'editable': False}),
-                       ('concentrationUnit', PulldownListCompoundWidget, getattr, setattr, _getConcentrationUnits, None, {'editable': False}),
-                       ('concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
-                       ]
+    # attributes = []
+    # _editAttributes = [('name', EntryCompoundWidget, getattr, None, None, None, {'backgroundText': '> Enter name <'}),
+    #                    ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+    #                    ('labelling', PulldownListCompoundWidget, getattr, setattr, _getLabelling, None, {'editable': False}),
+    #                    ('role', PulldownListCompoundWidget, getattr, setattr, _getRoleTypes, None, {'editable': False}),
+    #                    ('concentrationUnit', PulldownListCompoundWidget, getattr, setattr, _getConcentrationUnits, None, {'editable': False}),
+    #                    ('concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+    #                    ]
 
-    _newAttributes = [('Select source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : ['New', 'From Substances'],
-                                                                                             'selectedInd': 1,
-                                                                                             'direction'  : 'h'}),
-                      ('Current substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
-                      ('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                      ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                      ('labelling', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
-                      ('role', PulldownListCompoundWidget, getattr, setattr, _getRoleTypes, None, {'editable': False}),
-                      ('concentrationUnit', PulldownListCompoundWidget, getattr, setattr, _getConcentrationUnits, None, {'editable': False}),
-                      ('concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
-                      ]
+    attributes = [('Select source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
+                                                                                         'selectedInd': 1,
+                                                                                         'direction'  : 'h'}),
+                  ('Current substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
+                  ('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                  ('labelling', PulldownListCompoundWidget, getattr, setattr, _getLabelling, None, {'editable': True}),
+                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                  ('role', PulldownListCompoundWidget, getattr, setattr, _getRoleTypes, None, {'editable': False}),
+                  ('concentrationUnit', PulldownListCompoundWidget, getattr, setattr, _getConcentrationUnits, None, {'editable': False}),
+                  ('concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                  ]
+    DISCARDITEMS = ['Select source', 'Current substances']
 
     hWidth = 150
     FIXEDWIDTH = True
@@ -121,34 +132,102 @@ class SampleComponentPopup(AttributeEditorPopupABC):
 
     def __init__(self, parent=None, mainWindow=None, obj=None,
                  sample=None, sampleComponent=None, newSampleComponent=False, **kwds):
-        newSampleComponent = True
+        """
+        Initialise the widget
+        """
         self.EDITMODE = not newSampleComponent
         self.WINDOWPREFIX = 'New ' if newSampleComponent else 'Edit '
 
+        if sample is None and sampleComponent is not None:
+            sample = sampleComponent.sample
+        self.sample = sample
+        self.sampleComponent = sampleComponent
+
         if newSampleComponent == True:
-            self.attributes = self._newAttributes
             obj = _blankContainer(self)
         else:
-            self.attributes = self._editAttributes
             obj = sampleComponent
 
+        # initialise the widgets in the popup
         super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, **kwds)
 
         # attach callbacks to the new/fromSubstances radioButton
-        if not self.EDITMODE:
+        if self.EDITMODE:
+            self.Selectsource.setEnabled(False)
+            self.Currentsubstances.setEnabled(False)
+            self.Selectsource.setVisible(False)
+            self.Currentsubstances.setVisible(False)
+            self.name.setEnabled(False)
+            self.labelling.setEnabled(False)
+        else:
             self._setVisibleState(True)
             self.Selectsource.radioButtons.buttonGroup.buttonClicked.connect(self._changeSource)
+            self.Currentsubstances.pulldownList.activated.connect(self._fillInfoFromSubstance)
+
+        self.labelling.pulldownList.activated.connect(self._labellingSpecialCases)
 
     def _setVisibleState(self, fromSubstances):
         if fromSubstances:
             self.Currentsubstances.setVisible(True)
-            self.labelling.setEnabled(False)
+            # self.labelling.setEnabled(False)
         else:
             self.Currentsubstances.setVisible(False)
             self.labelling.setEnabled(True)
 
-    def _changeSource(self, value):
-        pass
+    def _changeSource(self, button):
+        self._setVisibleState(True if button.get() == BUTTONSTATES[1] else False)
+
+    def _fillInfoFromSubstance(self, index):
+        selected = self.Currentsubstances.getText()
+        if selected != SELECT:
+            substance = self.project.getByPid('SU:' + selected)
+            if substance:
+                self.name.setText(str(substance.name))
+                newLabel = str(substance.labelling)
+                if newLabel not in self.labelling.getTexts():
+                    self.labelling.pulldownList.addItem(text=newLabel)
+                self.labelling.pulldownList.set(newLabel or 'None')
+                self.labelling.setEnabled(False)
+        else:
+            self.name.setText('')
+            self.labelling.pulldownList.setIndex(0)
+            self.labelling.setEnabled(True)
+
+        if hasattr(self.name, '_queueCallback'):
+            self.name._queueCallback()
+        if hasattr(self.labelling, '_queueCallback'):
+            self.labelling._queueCallback()
+
+    def _labellingSpecialCases(self, index):
+        selected = self.labelling.pulldownList.currentText()
+        if selected == TYPENEW:
+            self.labelling.pulldownList.setEditable(True)
+        else:
+            self.labelling.pulldownList.setEditable(False)
+
+    def _populate(self):
+        super()._populate()
+        self.labelling.setEnabled(True)
+        self.labelling.pulldownList.setEditable(False)
+
+    def _applyAllChanges(self, changes):
+        if self.EDITMODE:
+            super()._applyAllChanges(changes)
+        else:
+            super()._applyAllChanges(changes)
+
+            for item in self.DISCARDITEMS:
+                if item in self.obj:
+                    del self.obj[item]
+            self.sample.newSampleComponent(**self.obj)
+
+            # self.sampleComponent = self.sample.newSampleComponent(
+            #         name=str(self.nameComponentLineEdit.text()),
+            #         labelling=str(self.labellingPulldownList.currentText()),
+            #         role=str(self.typePulldownList.get()),
+            #         concentration=float(self.concentrationLineEdit.text()),
+            #         concentrationUnit=str(self.concentrationUnitPulldownList.get()),
+            #         comment=str(self.commentLineEdit.text()))
 
 
 class _blankContainer(AttrDict):
@@ -171,7 +250,6 @@ class SampleComponentPopup2(CcpnDialog):
         """
         Initialise the widget
         """
-        newSampleComponent = True
 
         title = 'New SampleComponent' if newSampleComponent else 'Edit SampleComponent'
         CcpnDialog.__init__(self, parent, setLayout=True, margins=(10, 10, 10, 10),
@@ -295,7 +373,7 @@ class SampleComponentPopup2(CcpnDialog):
         self.sampleComponentLabellingLabel = Label(self, text="Labelling")
         self.labellingPulldownList = PulldownList(self)
         self.labellingPulldownList.setMinimumWidth(WIDTH)
-        self.labellingPulldownList.setData(Labelling)
+        self.labellingPulldownList.setData(LABELLING)
         self.labellingPulldownList.setEnabled(True)  # ejb - was False
         self.labellingPulldownList.activated[str].connect(self._labellingSpecialCases)
 

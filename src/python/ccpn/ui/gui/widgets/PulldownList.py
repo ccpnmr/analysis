@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-04 18:10:35 +0000 (Tue, February 04, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-05-29 12:40:09 +0100 (Fri, May 29, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -116,6 +116,15 @@ class PulldownList(QtWidgets.QComboBox, Base):
         if editable:
             self.currentIndexChanged.connect(self._textReady)
             self.lineEdit().editingFinished.connect(self._textReady)
+
+    def setEditable(self, editable: bool) -> None:
+        super(PulldownList, self).setEditable(editable)
+        if editable:
+            if self.backgroundText:
+                self.lineEdit().setPlaceholderText(str(self.backgroundText))
+            self.lineEdit().textEdited.connect(self._emitPulldownTextEdited)
+            #GST this cures a bug where the text background overwrites the popup button...
+            self.lineEdit().setStyleSheet('background: transparent')
 
     def focusOutEvent(self, ev) -> None:
         super(PulldownList, self).focusOutEvent(ev)

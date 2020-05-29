@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-28 21:13:36 +0100 (Thu, May 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 12:40:09 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -451,6 +451,9 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         self.select(current, blockSignals=True)
         self.pulldownList.update()
         self.pulldownList.blockSignals(False)
+
+    def getTexts(self):
+        return tuple(self.pulldownList.itemText(ii) for ii in range(self.pulldownList.count()))
 
     def setCallback(self, callback):
         """Set the callback for the doubleSpinBox

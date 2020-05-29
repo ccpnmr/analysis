@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-28 21:13:36 +0100 (Thu, May 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 12:40:09 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -103,7 +103,10 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
                                 break
                         else:
                             if this is not None:
-                                this.connect(partial(self._queueSetValue, attr, attrType, getFunction, setFunction, presetFunction, callback, row))
+                                # attach the connect signal and store in the widget
+                                queueCallback = partial(self._queueSetValue, attr, attrType, getFunction, setFunction, presetFunction, callback, row)
+                                this.connect(queueCallback)
+                                newWidget._queueCallback = queueCallback
 
                 if callback:
                     newWidget.setCallback(callback=partial(callback, self))

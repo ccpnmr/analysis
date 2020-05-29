@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-29 12:54:50 +0100 (Fri, May 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 13:34:07 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -160,17 +160,20 @@ class SampleComponentPopup(AttributeEditorPopupABC):
             self.name.setEnabled(False)
             self.labelling.setEnabled(False)
         else:
-            self._setVisibleState(True)
             self.Selectsource.radioButtons.buttonGroup.buttonClicked.connect(self._changeSource)
             self.Currentsubstances.pulldownList.activated.connect(self._fillInfoFromSubstance)
 
         self.labelling.pulldownList.activated.connect(self._labellingSpecialCases)
 
+        self._firstSize = self.sizeHint()
+        self._size = self.sizeHint()
+        self._setDialogSize()
+
     def _setVisibleState(self, fromSubstances):
         if fromSubstances:
-            self.Currentsubstances.setVisible(True)
+            self.Currentsubstances.setEnabled(True)
         else:
-            self.Currentsubstances.setVisible(False)
+            self.Currentsubstances.setEnabled(False)
             self.labelling.setEnabled(True)
 
     def _changeSource(self, button):

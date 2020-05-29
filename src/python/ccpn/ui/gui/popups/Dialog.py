@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-28 11:18:20 +0100 (Thu, May 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 12:54:50 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,7 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.ui.gui.lib.ChangeStateHandler import ChangeDict
+from ccpn.ui.gui.widgets.Spacer import Spacer
 
 
 def _updateGl(self, spectrumList):
@@ -123,6 +124,8 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         # self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         # self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        # Spacer(self, 2, 2, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+        #        grid=(1, 1))
 
         self.mainWidget.setContentsMargins(0, 0, 0, 0)
         self.mainWidget.getLayout().setSpacing(DEFAULTSPACING)
@@ -171,10 +174,10 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             self.setFixedWidth(_size.width())
         if self.FIXEDHEIGHT:
             self.setFixedHeight(_size.height())
-        self.resize(_size)
 
         self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Fixed if self.FIXEDWIDTH else QtWidgets.QSizePolicy.Preferred,
                                       QtWidgets.QSizePolicy.Fixed if self.FIXEDHEIGHT else QtWidgets.QSizePolicy.Preferred, )
+        self.resize(_size)
 
     def setOkButton(self, callback=None, text=None,
                     tipText='Apply changes and close',

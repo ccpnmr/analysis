@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-28 21:13:36 +0100 (Thu, May 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 14:03:47 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,19 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
-from ccpn.ui.gui.widgets.DateTime import DateTime
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
-from ccpn.util.AttrDict import AttrDict
-from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
-from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.core.Sample import Sample
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
     RadioButtonsCompoundWidget, SpinBoxCompoundWidget
@@ -48,7 +36,6 @@ CONCENTRATION_UNIT = ['µM', 'mM', 'nM', 'pM']
 VOLUME_UNIT = ['µL', 'mL', 'nL', 'pL']
 MASS_UNIT = ['µg', 'kg', 'g', 'mg', 'ng', 'pg']
 SAMPLE_STATES = ['Liquid', 'Solid', 'Ordered', 'Powder', 'Crystal', 'Other']
-
 AMOUNT_UNIT = ['L', 'g', 'mole']
 
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-22 19:02:19 +0100 (Fri, May 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 14:03:46 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,12 +25,9 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-
 from ccpn.core.Complex import Complex
 from ccpn.ui.gui.widgets.PulldownListsForObjects import ComplexPulldown
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
-
-from ccpn.util.Logging import getLogger
 
 
 class ComplexEditorPopup(_GroupEditorPopupABC):
@@ -38,7 +35,7 @@ class ComplexEditorPopup(_GroupEditorPopupABC):
     A popup to create and manage Complexes
     """
     KLASS = Complex
-    KLASS_ITEM_ATTRIBUTE = 'chains' # Attribute in KLASS containing items
+    KLASS_ITEM_ATTRIBUTE = 'chains'  # Attribute in KLASS containing items
     KLASS_PULLDOWN = ComplexPulldown
 
     PROJECT_NEW_METHOD = 'newComplex'  # Method of Project to create new KLASS instance
@@ -47,8 +44,8 @@ class ComplexEditorPopup(_GroupEditorPopupABC):
     PLURAL_GROUPED_NAME = 'Complexes'
     SINGULAR_GROUP_NAME = 'Complex'
 
-    ITEM_PID_KEY='MC'
-    GROUP_PID_KEY= 'MX'
+    ITEM_PID_KEY = 'MC'
+    GROUP_PID_KEY = 'MX'
 
     def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, size=(500, 350), **kwds):
         """
@@ -56,4 +53,3 @@ class ComplexEditorPopup(_GroupEditorPopupABC):
         """
         super().__init__(parent=parent, mainWindow=mainWindow, editMode=editMode, obj=obj,
                          defaultItems=defaultItems, size=size, **kwds)
-

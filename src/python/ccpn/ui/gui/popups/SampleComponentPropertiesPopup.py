@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-29 13:34:07 +0100 (Fri, May 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 14:03:47 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,25 +25,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import concentrationUnits
-from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
 from ccpn.util.AttrDict import AttrDict
-from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
-from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.core.SampleComponent import SampleComponent
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
-    RadioButtonsCompoundWidget, SpinBoxCompoundWidget, PulldownListCompoundWidget
+    RadioButtonsCompoundWidget, PulldownListCompoundWidget
 
 
 SELECT = '> Select <'
@@ -103,15 +90,6 @@ class SampleComponentPopup(AttributeEditorPopupABC):
         self.Currentsubstances.pulldownList.setData(substancePulldownData)
 
     klass = SampleComponent  # The class whose properties are edited/displayed
-    # attributes = []
-    # _editAttributes = [('name', EntryCompoundWidget, getattr, None, None, None, {'backgroundText': '> Enter name <'}),
-    #                    ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-    #                    ('labelling', PulldownListCompoundWidget, getattr, setattr, _getLabelling, None, {'editable': False}),
-    #                    ('role', PulldownListCompoundWidget, getattr, setattr, _getRoleTypes, None, {'editable': False}),
-    #                    ('concentrationUnit', PulldownListCompoundWidget, getattr, setattr, _getConcentrationUnits, None, {'editable': False}),
-    #                    ('concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
-    #                    ]
-
     attributes = [('Select source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
                                                                                          'selectedInd': 1,
                                                                                          'direction'  : 'h'}),
@@ -143,7 +121,7 @@ class SampleComponentPopup(AttributeEditorPopupABC):
         self.sample = sample
         self.sampleComponent = sampleComponent
 
-        if newSampleComponent == True:
+        if newSampleComponent:
             obj = _blankContainer(self)
         else:
             obj = sampleComponent

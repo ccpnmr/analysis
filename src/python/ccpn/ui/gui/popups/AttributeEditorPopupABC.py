@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-29 12:40:09 +0100 (Fri, May 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 14:03:46 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,6 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 from string import whitespace
 from functools import partial
-from collections import OrderedDict
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.util.Common import makeIterableList
@@ -154,7 +153,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
                         # call the preset function for the widget (e.g. populate pulldowns with modified list)
                         _presetFunction(self, self.obj)
 
-                    if getFunction:     # and self.EDITMODE:
+                    if getFunction:  # and self.EDITMODE:
                         # set the current value
                         value = getFunction(self.obj, attr, None)
                         attrSetter(self.edits[attr], value)
@@ -181,7 +180,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
             attrGetter = CommonWidgetsEdits[attrType.__name__][ATTRGETTER]
             value = attrGetter(self.edits[attr])
 
-            if getFunction:     # and self.EDITMODE:
+            if getFunction:  # and self.EDITMODE:
                 oldValue = getFunction(self.obj, attr, None)
                 if value != oldValue:
                     return partial(self._setValue, attr, setFunction, value)

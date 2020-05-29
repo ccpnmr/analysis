@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-28 16:10:26 +0100 (Thu, May 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 14:03:46 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,7 @@ class ChainPopup(SimpleAttributeEditorPopupABC):
     klass = Chain
     attributes = [('name', getattr, setattr, {'backgroundText': '> Enter name <'}),
                   ('comment', getattr, setattr, {'backgroundText': '> Optional <'}),
-                  ('compoundName', getattr, None,    {}),
+                  ('compoundName', getattr, None, {}),
                   # ('isCyclic',     getattr, None,    {}),
                   ('nmrChain', getattr, None, {}),
                   ]

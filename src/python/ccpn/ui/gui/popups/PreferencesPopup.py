@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 14:03:47 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -138,8 +138,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self._populate()
 
         tabs = tuple(self.tabWidget.widget(ii) for ii in range(self.tabWidget.count()))
-        w = max(tab.sizeHint().width() for tab in tabs) + 20
+        w = max(tab.sizeHint().width() for tab in tabs) + 40
         h = max(tab.sizeHint().height() for tab in tabs)
+        h = max((h, 700))
         self._size = QtCore.QSize(w, h)
         self.setMinimumWidth(w)
         self.setMaximumWidth(w * 1.5)
@@ -190,7 +191,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
             for strip in display.strips:
                 with strip.blockWidgetSignals():
-
                     # NOTE:ED - should only set those values that have changed
 
                     strip.symbolLabelling = self.application.preferences.general.annotationType
@@ -320,7 +320,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                    (self._setSpectrumTabWidgets, 'Spectrum'),
                                    (self._setExternalProgramsTabWidgets, 'External Programs')):
             fr = ScrollableFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
-                                          scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
+                                 scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
 
             self.tabWidget.addTab(fr.scrollArea, tabName)
             tabFunc(parent=fr)
@@ -492,7 +492,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         #                                                    selectedInd=annType,
         #                                                    callback=self._setAnnotations,
         #                                                    direction='horizontal',
-        #                                                    grid=(row, 1), hAlign='l',
+        #                                                    grid=(row, 1), hAlign='l', gridSpan=(1, 2),
         #                                                    tipTexts=None,
         #                                                    )
 
@@ -548,7 +548,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         Spacer(parent, 15, 2,
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
-               grid=(row, 1), gridSpan=(row, 1))
+               grid=(row, 1), gridSpan=(1, 1))
 
     def _populate(self):
         """Populate the widgets in the tabs
@@ -777,12 +777,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.dropFactorData.valueChanged.connect(self._queueSetDropFactor)
 
         row += 1
-        self.dropFactorLabel = Label(parent, text="1D Peak Picking Factor",tipText='Increase to filter out more', grid=(row, 0))
+        self.dropFactorLabel = Label(parent, text="1D Peak Picking Factor", tipText='Increase to filter out more', grid=(row, 0))
         self.peakFactor1D = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
         self.peakFactor1D.setMinimumWidth(LineEditsMinimumWidth)
         self.peakFactor1D.valueChanged.connect(self._queueSetDropFactor1D)
-
-
 
         row += 1
         volumeIntegralLimit = self.preferences.general.volumeIntegralLimit
@@ -800,7 +798,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                               # selectedInd=PEAKFITTINGDEFAULTS.index(peakFittingMethod),
                                               callback=self._queueSetPeakFittingMethod,
                                               direction='h',
-                                              grid=(row, 1), hAlign='l',
+                                              grid=(row, 1), hAlign='l', gridSpan=(1, 2),
                                               tipTexts=None,
                                               )
 
@@ -863,7 +861,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                           # selectedInd=matchAxisCode,
                                           callback=self._queueSetMatchAxisCode,
                                           direction='h',
-                                          grid=(row, 1), hAlign='l',
+                                          grid=(row, 1), hAlign='l', gridSpan=(1, 2),
                                           tipTexts=None,
                                           )
 
@@ -874,7 +872,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                 # selectedInd=axisOrderingOptions,
                                                 callback=self._queueSetAxisOrderingOptions,
                                                 direction='h',
-                                                grid=(row, 1), hAlign='l',
+                                                grid=(row, 1), hAlign='l', gridSpan=(1, 2),
                                                 tipTexts=None,
                                                 )
 
@@ -895,7 +893,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                        # selectedInd=zoomCentre,
                                        callback=self._queueSetZoomCentre,
                                        direction='h',
-                                       grid=(row, 1), hAlign='l',
+                                       grid=(row, 1), hAlign='l', gridSpan=(1, 2),
                                        tipTexts=None,
                                        )
         # self.zoomCentre.setEnabled(False)
@@ -923,6 +921,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showZoomXLimitApplyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.zoomXLimitApply)
         self.showZoomXLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomXLimitApply'))
 
+        # self._toggleGeneralOptions('zoomXLimitApply', True)
         # self._toggleGeneralOptions('zoomXLimitApply', True)
         # self.showZoomXLimitApplyBox.setChecked(True)
         # self.showZoomXLimitApplyBox.setEnabled(False)
@@ -952,7 +951,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         #                                 selectedInd=matchAxisCode,
         #                                 callback=self._setMatchAxisCode,
         #                                 direction='v',
-        #                                 grid=(row, 1), hAlign='l',
+        #                                 grid=(row, 1), hAlign='l', gridSpan=(1, 2),
         #                                 tipTexts=None,
         #                                 )
 
@@ -972,12 +971,12 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         self.aspectRatioModeLabel = Label(parent, text="Aspect Ratio Mode", grid=(row, 0))
         self.aspectRatioModeData = RadioButtons(parent, texts=['Free', 'Locked', 'Fixed'],
-                                            # selectedInd=annType,
-                                            callback=self._queueSetAspectRatioMode,
-                                            direction='horizontal',
-                                            grid=(row, 1), hAlign='l',
-                                            tipTexts=None,
-                                            )
+                                                # selectedInd=annType,
+                                                callback=self._queueSetAspectRatioMode,
+                                                direction='h',
+                                                grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                                tipTexts=None,
+                                                )
 
         row += 1
         self.aspectLabel = {}
@@ -989,8 +988,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useSearchBoxModeLabel = Label(parent, text="Use Search Box Widths: ", grid=(row, 0))
         self.useSearchBoxModeBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.searchBoxWidthsSettings.useSearchBoxMode)
         self.useSearchBoxModeBox.toggled.connect(self._queueSetUseSearchBoxMode)
-        self.useSearchBoxModeLabel.setToolTip('Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
-        self.useSearchBoxModeBox.setToolTip('Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
+        self.useSearchBoxModeLabel.setToolTip(
+                'Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
+        self.useSearchBoxModeBox.setToolTip(
+                'Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
 
         row += 1
         self.useSearchBoxDoFitLabel = Label(parent, text="Apply Peak Fitting Method\n after Snap To Extrema: ", grid=(row, 0))
@@ -1040,8 +1041,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Peak Id'],
                                             # selectedInd=annType,
                                             callback=self._queueSetAnnotations,
-                                            direction='horizontal',
-                                            grid=(row, 1), hAlign='l',
+                                            direction='h',
+                                            grid=(row, 1), hAlign='l', gridSpan=(1, 2),
                                             tipTexts=None,
                                             )
         row += 1
@@ -1051,7 +1052,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                    # selectedInd=symbol,
                                    callback=self._queueSetSymbol,
                                    direction='h',
-                                   grid=(row, 1), hAlign='l',
+                                   grid=(row, 1), hAlign='l', gridSpan=(1, 2),
                                    tipTexts=None,
                                    )
 
@@ -1114,7 +1115,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                #         multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0,
                                                callback=self._queueSetMultipletAveraging,
                                                direction='h',
-                                               grid=(row, 1), hAlign='l',
+                                               grid=(row, 1), hAlign='l', gridSpan=(1, 2),
                                                tipTexts=None,
                                                )
 
@@ -2049,7 +2050,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.editorFontData.setText(fontName)
             # add the font change to the apply queue
             self._queueSetEditorFont()
-            
+
     @queueStateChange(_verifyPopupApply)
     def _queueSetModuleFont(self):
         value = self.moduleFontData.getText()
@@ -2071,7 +2072,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.moduleFontData.setText(fontName)
             # add the font change to the apply queue
             self._queueSetModuleFont()
-            
+
     @queueStateChange(_verifyPopupApply)
     def _queueSetMessageFont(self):
         value = self.messageFontData.getText()

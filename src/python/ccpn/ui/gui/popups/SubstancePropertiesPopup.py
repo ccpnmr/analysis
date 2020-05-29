@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-27 20:01:38 +0100 (Wed, May 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 16:18:31 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -34,8 +35,9 @@ from ccpn.ui.gui.widgets.CompoundView import CompoundView
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
-from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
-from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC, HiddenAttributeEditorPopupABC
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget, \
+    CompoundViewCompoundWidget
 from ccpn.core.Substance import Substance
 
 
@@ -53,18 +55,213 @@ SELECT = '> Select <'
 LESS_BUTTON = 'Show less'
 MORE_BUTTON = 'Show more'
 
+TYPENEW = 'Type_New'
+LABELLING = ['None', TYPENEW, '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 'ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
+BUTTONSTATES = ['New', 'From Existing']
 
-class SubstancePropertiesPopup2(AttributeEditorPopupABC):
+from ccpn.util.AttrDict import AttrDict
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
+    RadioButtonsCompoundWidget, PulldownListCompoundWidget, SpinBoxCompoundWidget
+
+
+class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
+    """
+    Substance attributes editor popup
+    """
+
+    def _getLabelling(self, obj):
+        """Populate the labelling pulldown
+        """
+        labels = LABELLING.copy()
+        newLabel = str(self.obj.labelling)
+        if newLabel not in labels:
+            labels.append(newLabel)
+        self.labelling.modifyTexts(labels)
+        self.labelling.select(newLabel or 'None')
+
+    def _getCurrentSubstances(self, obj):
+        """Populate the current substances pulldown
+        """
+        substancePulldownData = [SELECT]
+        for substance in self.project.substances:
+            substancePulldownData.append(str(substance.id))
+        self.Currentsubstances.pulldownList.setData(substancePulldownData)
+
+    def _getSpectrum(self, obj):
+        """Populate the spectrum pulldown
+        """
+        spectrumPulldownData = [SELECT]
+        for spectrum in self.project.spectra:
+            spectrumPulldownData.append(str(spectrum.pid))
+        self.referenceSpectra.pulldownList.setData(spectrumPulldownData)
+
     klass = Substance
-    attributes = [('pid', EntryCompoundWidget, getattr, None, None, None, {}),
-                  ('nmrChain', PulldownListCompoundWidget, getattr, setattr, None, None, {}),
-                  ('sequenceCode', EntryCompoundWidget, getattr, setattr, None, None, {}),
-                  ('residueType', PulldownListCompoundWidget, getattr, setattr, None, None, {}),
+    attributes = [('Select source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
+                                                                                         'selectedInd': 1,
+                                                                                         'direction'  : 'h'}),
+                  ('Current substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
+                  ('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                  ('labelling', PulldownListCompoundWidget, getattr, setattr, _getLabelling, None, {'editable': True}),
                   ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                  ('chemicalName', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                  ('_NEWHIDDENGROUP more options', None, None, None, None, None, None),
+                  ('referenceSpectra', PulldownListCompoundWidget, getattr, setattr, _getSpectrum, None, {'editable': False}),
+                  ('smiles', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                  ('empiricalFormula', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                  ('molecularMass', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                  ('userCode', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                  ('casNumber', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                  ('atomCount', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                  ('bondCount', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                  ('ringCount', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                  ('hBondDonorCount', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                  ('hBondAcceptorCount', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                  ('polarSurfaceArea', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                  ('logPartitionCoefficient', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                  ('compoundView', CompoundViewCompoundWidget, None, None, None, None, {}),
                   ]
+    DISCARDITEMS = ['Select source', 'Current substances', 'compoundView']
+
+    hWidth = 150
+    USESCROLLWIDGET = True
+    FIXEDWIDTH = False
+    FIXEDHEIGHT = False
+
+    def __init__(self, parent=None, mainWindow=None,
+                 substance=None, sampleComponent=None, newSubstance=False, **kwds):
+        """
+        Initialise the widget
+        """
+        self.EDITMODE = not newSubstance
+        self.WINDOWPREFIX = 'New ' if newSubstance else 'Edit '
+
+        if newSubstance:
+            obj = _blankContainer(self)
+        else:
+            obj = substance
+
+        self.sampleComponent = sampleComponent
+        self.substance = substance
+
+        # initialise the widgets in the popup
+        super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, **kwds)
+
+        # attach callbacks to the new/fromSubstances radioButton
+        if self.EDITMODE:
+            self.Selectsource.setEnabled(False)
+            self.Currentsubstances.setEnabled(False)
+            self.Selectsource.setVisible(False)
+            self.Currentsubstances.setVisible(False)
+            self.name.setEnabled(False)
+            self.labelling.setEnabled(False)
+        else:
+            self.Selectsource.radioButtons.buttonGroup.buttonClicked.connect(self._changeSource)
+            self.Currentsubstances.pulldownList.activated.connect(self._fillInfoFromSubstance)
+
+        self.labelling.pulldownList.activated.connect(self._labellingSpecialCases)
+        self.smiles.entry.textEdited.connect(self._smilesChanged)
+        self._initialiseCompoundView()
+
+        self._firstSize = self.sizeHint()
+        self._size = self.sizeHint()
+        self.mainWidget.getLayout().setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+        self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        self._setDialogSize()
+
+    def _setEnabledState(self, fromSubstances):
+        if fromSubstances:
+            self.Currentsubstances.setEnabled(True)
+        else:
+            self.Currentsubstances.setEnabled(False)
+            self.labelling.setEnabled(True)
+
+    def _changeSource(self, button):
+        self._setEnabledState(True if button.get() == BUTTONSTATES[1] else False)
+
+    def _fillInfoFromSubstance(self, index):
+        selected = self.Currentsubstances.getText()
+        if selected != SELECT:
+            substance = self.project.getByPid('SU:' + selected)
+            if substance:
+                self.name.setText(str(substance.name))
+                newLabel = str(substance.labelling)
+                if newLabel not in self.labelling.getTexts():
+                    self.labelling.pulldownList.addItem(text=newLabel)
+                self.labelling.pulldownList.set(newLabel or 'None')
+                self.labelling.setEnabled(False)
+        else:
+            self.name.setText('')
+            self.labelling.pulldownList.setIndex(0)
+            self.labelling.setEnabled(True)
+
+        if hasattr(self.name, '_queueCallback'):
+            self.name._queueCallback()
+        if hasattr(self.labelling, '_queueCallback'):
+            self.labelling._queueCallback()
+
+    def _labellingSpecialCases(self, index):
+        selected = self.labelling.pulldownList.currentText()
+        if selected == TYPENEW:
+            self.labelling.pulldownList.setEditable(True)
+        else:
+            self.labelling.pulldownList.setEditable(False)
+
+    def _populate(self):
+        super()._populate()
+        self.labelling.setEnabled(True)
+        self.labelling.pulldownList.setEditable(False)
+
+    def _applyAllChanges(self, changes):
+        super()._applyAllChanges(changes)
+
+        # if new substance then call the new method - self.obj is container of new attributes
+        if not self.EDITMODE:
+            # remove unnecessary attributes
+            for item in self.DISCARDITEMS:
+                if item in self.obj:
+                    del self.obj[item]
+            print('>>> CREATE NEW SUBSTANCE')
+
+    def _initialiseCompoundView(self):
+        view = self.compoundView.compoundView
+        if self.obj:
+            smiles = self.obj.smiles
+            if smiles is None:
+                smiles = 'H'
+            else:
+                smiles = smiles
+        else:
+            smiles = ''
+        view.setSmiles(smiles)
+        # resize to the new items
+        view.scene.setSceneRect(view.scene.itemsBoundingRect())
+        view.centerView()
+        # view.updateAll()
+
+    def _smilesChanged(self, value):
+        if value:
+            view = self.compoundView.compoundView
+            view.setSmiles(value)
+            # resize to the new items
+            view.scene.setSceneRect(view.scene.itemsBoundingRect())
+            view.centerView()
+            # view.updateAll()
 
 
-class SubstancePropertiesPopup(CcpnDialog):
+class _blankContainer(AttrDict):
+    """
+    Class to simulate a blank object in new/edit popup.
+    """
+
+    def __init__(self, popupClass):
+        """Create a list of attributes from the container class
+        """
+        super().__init__()
+        for attr in popupClass.attributes:
+            self[attr[0]] = None
+
+
+class SubstancePropertiesPopup2(CcpnDialog):
 
     def __init__(self, parent=None, mainWindow=None,
                  substance=None, sampleComponent=None, newSubstance=False, **kwds):

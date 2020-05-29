@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-29 14:03:46 +0100 (Fri, May 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 16:18:31 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -64,8 +64,6 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         """
         Initialise the widget
         """
-        from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
-
         super().__init__(parent, setLayout=True,
                          windowTitle=self.WINDOWPREFIX + self.klass.className, **kwds)
 
@@ -75,13 +73,39 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         self.current = mainWindow.application.current
         self.obj = obj
 
-        row = 0
+        # create the list of widgets and set the callbacks for each
+        self._setAttributeWidgets()
+
+        # set up the required buttons for the dialog
+        self.setOkButton(callback=self._okClicked, enabled=False)
+        self.setCancelButton(callback=self._cancelClicked)
+        self.setHelpButton(callback=self._helpClicked, enabled=False)
+        if self.ENABLEREVERT:
+            self.setRevertButton(callback=self._revertClicked, enabled=False)
+        self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
+
+        # populate the widgets
+        self._populate()
+
+        # set the links to the buttons
+        self.__postInit__()
+        self._okButton = self.dialogButtons.button(self.OKBUTTON)
+        self._cancelButton = self.dialogButtons.button(self.CANCELBUTTON)
+        self._helpButton = self.dialogButtons.button(self.HELPBUTTON)
+        self._revertButton = self.dialogButtons.button(self.RESETBUTTON)
+
+    def _setAttributeWidgets(self):
+        """Create the attributes in the main widget area
+        """
+        from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
+
         self.edits = {}  # An (attributeName, widgetType) dict
 
         # create the list of widgets and set the callbacks for each
+        row = 0
         for attr, attrType, getFunction, setFunction, presetFunction, callback, kwds in self.attributes:
             editable = setFunction is not None
-            newWidget = attrType(self.mainWidget, mainWindow=mainWindow, labelText=attr, editable=editable,
+            newWidget = attrType(self.mainWidget, mainWindow=self.mainWindow, labelText=attr, editable=editable,
                                  grid=(row, 0), fixedWidths=(self.hWidth, None), compoundKwds=kwds)  #, **kwds)
 
             # remove whitespaces to give the attribute name in the class
@@ -114,24 +138,6 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
 
             setattr(self, attr, newWidget)
             row += 1
-
-        # set up the required buttons for the dialog
-        self.setOkButton(callback=self._okClicked, enabled=False)
-        self.setCancelButton(callback=self._cancelClicked)
-        self.setHelpButton(callback=self._helpClicked, enabled=False)
-        if self.ENABLEREVERT:
-            self.setRevertButton(callback=self._revertClicked, enabled=False)
-        self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
-
-        # populate the widgets
-        self._populate()
-
-        # set the links to the buttons
-        self.__postInit__()
-        self._okButton = self.dialogButtons.button(self.OKBUTTON)
-        self._cancelButton = self.dialogButtons.button(self.CANCELBUTTON)
-        self._helpButton = self.dialogButtons.button(self.HELPBUTTON)
-        self._revertButton = self.dialogButtons.button(self.RESETBUTTON)
 
     def _populate(self):
         """Populate the widgets in the popup
@@ -198,3 +204,76 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         Not required here
         """
         pass
+
+
+NEWHIDDENGROUP = '_NEWHIDDENGROUP'
+CLOSEHIDDENGROUP = '_CLOSEHIDDENGROUP'
+from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
+
+
+class HiddenAttributeEditorPopupABC(AttributeEditorPopupABC):
+    """
+    Abstract base class to implement a popup for editing properties
+    Attribute list can contain '_NEWHIDDENGROUP' to set a new group and '_CLOSEHIDDENGROUP' to close a group
+    """
+
+    def _setAttributeWidgets(self):
+        """Create the attributes in the main widget area
+        """
+        from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
+
+        self.edits = {}  # An (attributeName, widgetType) dict
+
+        # create the list of widgets and set the callbacks for each
+        row = 0
+        currentWidget = self.mainWidget
+        history = []
+
+        for attr, attrType, getFunction, setFunction, presetFunction, callback, kwds in self.attributes:
+
+            if attr.startswith(NEWHIDDENGROUP):
+                history.insert(0, (currentWidget, row))
+
+                name = attr[len(NEWHIDDENGROUP)+1:]
+                currentWidget = MoreLessFrame(currentWidget, name=name, grid=(row, 0), showMore=False, showBorder=False).contentsWidget
+                row = 0
+
+            elif attr.startswith(CLOSEHIDDENGROUP):
+                currentWidget, row = history.pop(0)
+                row += 1
+
+            else:
+                editable = setFunction is not None
+                newWidget = attrType(currentWidget, mainWindow=self.mainWindow, labelText=attr, editable=editable,
+                                     grid=(row, 0), fixedWidths=(self.hWidth, None), compoundKwds=kwds)  #, **kwds)
+
+                # remove whitespaces to give the attribute name in the class
+                attr = attr.translate({ord(c): None for c in whitespace})
+
+                # connect the signal
+                if attrType and attrType.__name__ in CommonWidgetsEdits:
+                    attrSignalTypes = CommonWidgetsEdits[attrType.__name__][ATTRSIGNAL]
+
+                    for attrST in makeIterableList(attrSignalTypes):
+                        this = newWidget
+
+                        # iterate through the attributeName to get the signals to connect to (for compound widgets)
+                        if attrST:
+                            for th in attrST.split('.'):
+                                this = getattr(this, th, None)
+                                if this is None:
+                                    break
+                            else:
+                                if this is not None:
+                                    # attach the connect signal and store in the widget
+                                    queueCallback = partial(self._queueSetValue, attr, attrType, getFunction, setFunction, presetFunction, callback, row)
+                                    this.connect(queueCallback)
+                                    newWidget._queueCallback = queueCallback
+
+                    if callback:
+                        newWidget.setCallback(callback=partial(callback, self))
+
+                self.edits[attr] = newWidget
+
+                setattr(self, attr, newWidget)
+                row += 1

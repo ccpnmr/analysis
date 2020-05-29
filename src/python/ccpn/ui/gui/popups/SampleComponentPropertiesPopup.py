@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-29 14:03:47 +0100 (Fri, May 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 16:18:31 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -147,7 +147,7 @@ class SampleComponentPopup(AttributeEditorPopupABC):
         self._size = self.sizeHint()
         self._setDialogSize()
 
-    def _setVisibleState(self, fromSubstances):
+    def _setEnabledState(self, fromSubstances):
         if fromSubstances:
             self.Currentsubstances.setEnabled(True)
         else:
@@ -155,7 +155,7 @@ class SampleComponentPopup(AttributeEditorPopupABC):
             self.labelling.setEnabled(True)
 
     def _changeSource(self, button):
-        self._setVisibleState(True if button.get() == BUTTONSTATES[1] else False)
+        self._setEnabledState(True if button.get() == BUTTONSTATES[1] else False)
 
     def _fillInfoFromSubstance(self, index):
         selected = self.Currentsubstances.getText()

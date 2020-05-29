@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-29 12:40:09 +0100 (Fri, May 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-29 16:18:31 +0100 (Fri, May 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.CompoundBaseWidget import CompoundBaseWidget
+from ccpn.ui.gui.widgets.CompoundView import CompoundView
 from ccpn.util.Colour import spectrumColours
 from ccpn.core.lib.Notifiers import Notifier
 
@@ -243,7 +244,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
       ------------      ------------------------
       left:             Label       Entry
 
-      right:            Entry    Label
+      right:            Entry       Label
 
       top:              Label
                         Entry
@@ -551,9 +552,9 @@ class SpinBoxCompoundWidget(CompoundBaseWidget):
 
       orientation       widget layout
       ------------      ------------------------
-      left:             Label          DoubleSpinBox
+      left:             Label           SpinBox
 
-      right:            SpinBox  Label
+      right:            SpinBox         Label
 
       top:              Label
                         SpinBox
@@ -642,7 +643,7 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
     Compound class comprising a Label and a DoubleSpinBox, combined in a CompoundBaseWidget (i.e. a Frame)
 
       orientation       widget layout
-      ------------      ------------------------
+      ------------      ----------------------------
       left:             Label          DoubleSpinBox
 
       right:            DoubleSpinBox  Label
@@ -736,7 +737,7 @@ class ScientificSpinBoxCompoundWidget(CompoundBaseWidget):
     Compound class comprising a Label and a scientificSpinBox, combined in a CompoundBaseWidget (i.e. a Frame)
 
       orientation       widget layout
-      ------------      ------------------------
+      ------------      -------------------------------------
       left:             Label               ScientificSpinBox
 
       right:            ScientificSpinBox   Label
@@ -932,7 +933,7 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
     Compound class comprising a Label and a RadioButtons box, combined in a CompoundBaseWidget (i.e. a Frame)
 
       orientation       widget layout
-      ------------      ------------------------
+      ------------      ----------------------------
       left:             Label           RadioButtons
 
       right:            RadioButtons    Label
@@ -1017,6 +1018,74 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
         """Convenience: set the radioButtons selected text
         """
         self.radioButtons.set(value)
+
+
+class CompoundViewCompoundWidget(CompoundBaseWidget):
+    """
+    Compound class comprising a Label and an compoundView, combined in a CompoundBaseWidget (i.e. a Frame)
+
+      orientation       widget layout
+      ------------      ----------------------------
+      left:             Label           compoundView
+
+      right:            compoundView    Label
+
+      top:              Label
+                        compoundView
+
+      bottom:           compoundView
+                        Label
+
+    """
+    layoutDict = dict(
+            # grid positions for label and checkBox for the different orientations
+            left=[(0, 0), (0, 1)],
+            right=[(0, 1), (0, 0)],
+            top=[(0, 0), (1, 0)],
+            bottom=[(1, 0), (0, 0)],
+            )
+
+    def __init__(self, parent=None, mainWindow=None,
+                 showBorder=False, orientation='left',
+                 minimumWidths=None, maximumWidths=None, fixedWidths=None,
+                 labelText='',
+                 callback=None, editable=False, compoundKwds=None,
+                 **kwds):
+        """
+        :param parent: parent widget
+        :param showBorder: flag to display the border of Frame (True, False)
+        :param orientation: flag to determine the orientation of the labelText relative to the RadioButtons widget.
+                            Allowed values: 'left', 'right', 'top', 'bottom'
+        :param minimumWidths: tuple of two values specifying the minimum width of the Label and RadioButtons widget, respectively
+        :param maximumWidths: tuple of two values specifying the maximum width of the Label and RadioButtons widget, respectively
+        :param labelText: Text for the Label
+        :param kwds: (optional) keyword, value pairs for the gridding of Frame
+        """
+        CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                    showBorder=showBorder, **kwds)
+
+        self.label = Label(parent=self, text=labelText, vAlign='center')
+        self._addWidget(self.label)
+
+        hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
+        viewKwds = {'hAlign': hAlign,
+                    'smiles': ''
+                    }
+        viewKwds.update(compoundKwds or {})
+        self.compoundView = CompoundView(parent=self, **viewKwds)
+
+        self._addWidget(self.compoundView)
+        self.setObjectName(labelText)
+
+        if minimumWidths is not None:
+            self.setMinimumWidths(minimumWidths)
+
+        if maximumWidths is not None:
+            self.setMinimumWidths(maximumWidths)
+
+        if fixedWidths is not None:
+            self.setFixedWidths(fixedWidths)
+
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication

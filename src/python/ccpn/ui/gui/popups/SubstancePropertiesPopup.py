@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-29 16:18:31 +0100 (Fri, May 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-30 09:59:57 +0100 (Sat, May 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,8 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.popups.Dialog import CcpnDialog, handleDialogApply
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC, HiddenAttributeEditorPopupABC
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget, \
-    CompoundViewCompoundWidget
+    CompoundViewCompoundWidget\
+    #, ListViewCompoundWidget
 from ccpn.core.Substance import Substance
 
 
@@ -98,15 +99,15 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
     klass = Substance
     attributes = [('Select source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
                                                                                          'selectedInd': 1,
-                                                                                         'direction'  : 'h'}),
+                                                                                         'direction'  : 'h',
+                                                                                         'hAlign'     : 'l'}),
                   ('Current substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
                   ('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
                   ('labelling', PulldownListCompoundWidget, getattr, setattr, _getLabelling, None, {'editable': True}),
                   ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                  ('chemicalName', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
-                  ('_NEWHIDDENGROUP more options', None, None, None, None, None, None),
-                  ('referenceSpectra', PulldownListCompoundWidget, getattr, setattr, _getSpectrum, None, {'editable': False}),
-                  ('smiles', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                  ('_NEWHIDDENGROUP More options', None, None, None, None, None, None),
+                  # ('synonyms', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                  # ('referenceSpectra', EntryCompoundWidget, getattr, setattr, None, None, {}),
                   ('empiricalFormula', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
                   ('molecularMass', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
                   ('userCode', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
@@ -118,9 +119,13 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
                   ('hBondAcceptorCount', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
                   ('polarSurfaceArea', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
                   ('logPartitionCoefficient', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                  ('_CLOSEHIDDENGROUP', None, None, None, None, None, None),
+                  ('_NEWHIDDENGROUP Compound view', None, None, None, None, None, None),
+                  ('smiles', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
                   ('compoundView', CompoundViewCompoundWidget, None, None, None, None, {}),
+                  ('_CLOSEHIDDENGROUP', None, None, None, None, None, None),
                   ]
-    DISCARDITEMS = ['Select source', 'Current substances', 'compoundView']
+    DISCARDITEMS = ['Select source', 'Current substances', 'compoundView', '_NEWHIDDENGROUP', 'name', 'labelling']
 
     hWidth = 150
     USESCROLLWIDGET = True
@@ -212,15 +217,29 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
         self.labelling.pulldownList.setEditable(False)
 
     def _applyAllChanges(self, changes):
-        super()._applyAllChanges(changes)
 
-        # if new substance then call the new method - self.obj is container of new attributes
-        if not self.EDITMODE:
-            # remove unnecessary attributes
-            for item in self.DISCARDITEMS:
-                if item in self.obj:
-                    del self.obj[item]
-            print('>>> CREATE NEW SUBSTANCE')
+        if self.EDITMODE:
+            super()._applyAllChanges(changes)
+
+        else:
+            # if new substance then call the new method - self.obj is container of new attributes
+
+            # # remove unnecessary attributes
+            # for item in list(self.obj.keys()):
+            #     if any(item.startswith(prefix) for prefix in self.DISCARDITEMS):
+            #         del self.obj[item]
+            #
+            name = self.name.getText()
+            labelling = self.labelling.getText()
+            #
+            # objKwds = self.obj.copy()
+            # objKwds.update({'name'     : name,
+            #                 'labelling': labelling})
+            substance = self.project.newSubstance(name=name, labelling=labelling)
+            for k, val in self.obj.items():
+                if not any(k.startswith(prefix) for prefix in self.DISCARDITEMS):
+                    print('>>> ATTRIBUTE {} {}'.format(k, val))
+                    setattr(substance, k, val)
 
     def _initialiseCompoundView(self):
         view = self.compoundView.compoundView
@@ -236,7 +255,7 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
         # resize to the new items
         view.scene.setSceneRect(view.scene.itemsBoundingRect())
         view.centerView()
-        # view.updateAll()
+        view.updateAll()
 
     def _smilesChanged(self, value):
         if value:
@@ -245,7 +264,7 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
             # resize to the new items
             view.scene.setSceneRect(view.scene.itemsBoundingRect())
             view.centerView()
-            # view.updateAll()
+            view.updateAll()
 
 
 class _blankContainer(AttrDict):

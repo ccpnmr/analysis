@@ -398,6 +398,12 @@ class PipelineDropArea(DockArea):
                 boxes.append(self.orderedBoxes(obj.widget(i)))
             return boxes
 
+    def _restoreState(self, state):
+        try:
+            self.restoreState(state)
+        except Exception as err:
+            getLogger().warning('Error restoring pipeline. %s' %err)
+
     def closeAll(self):
         for guiPipe in self.currentGuiPipes:
             guiPipe.close()

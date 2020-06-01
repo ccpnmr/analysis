@@ -31,6 +31,7 @@ import collections
 import json
 import time
 import os
+from collections import OrderedDict as od
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.Spectrum import Spectrum
@@ -286,8 +287,8 @@ class GuiPipeline(CcpnModule, Pipeline):
         #
         row = 0
         self.pipelineReNameLabel = Label(self.inputFrame, 'Name', grid=(row,0))
-        self.pipelineReNameTextEdit = LineEdit(self.inputFrame, str(self.pipelineNameLabel.text()), grid=(row,1))
-        self.pipelineReNameTextEdit.editingFinished.connect(self._renamePipelineCallback)
+        self.pipelineReNameTextEdit = LineEdit(self.inputFrame, PipelineName, grid=(row,1))
+        # self.pipelineReNameTextEdit.editingFinished.connect(self._renamePipelineCallback)
         row +=1
         self.inputDataLabel = Label(self.inputFrame, 'Input Data', grid=(row,0))
         self.inputDataList = ListWidget(self.inputFrame, acceptDrops=True, grid=(row,1))
@@ -315,12 +316,12 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
     def _createSaveOpenButtonGroup(self):
-        self.pipelineNameLabel = Label(self, PipelineName)
+        # self.pipelineNameLabel = Label(self, PipelineName)
         self.saveOpenButtons = ButtonList(self, texts=['', ''],
                                           callbacks=[self._openSavedPipeline, self._savePipeline],
                                           icons=[self.openRecentIcon, self.saveIcon],
                                           tipTexts=['', ''], direction='H')
-        self.saveOpenFrameLayout.addWidget(self.pipelineNameLabel)
+        # self.saveOpenFrameLayout.addWidget(self.pipelineNameLabel)
 
         self.goButton = Button(self, text='', icon=self.goIcon, callback=self._runPipeline)
         self._addMenuToOpenButton()
@@ -598,22 +599,66 @@ class GuiPipeline(CcpnModule, Pipeline):
         ''' used to auto-restore when opening/saving modules in projects'''
         return self._savePipeline()
 
+    @property
+    def _settingsDict(self):
+
+        dd = od([
+            ['name', [self.pipelineReNameTextEdit, self.pipelineReNameTextEdit.get, self.pipelineReNameTextEdit.set]],
+            ['inputData', [self.inputDataList, self.inputDataList.getTexts, self.inputDataList.setTexts]],
+            ['savePath', [self.savePipelineLineEdit, self.savePipelineLineEdit.get, self.savePipelineLineEdit.setText]],
+            ['autoActive', [self.autoActiveCheckBox,self.autoActiveCheckBox.get, self.autoActiveCheckBox.set]],
+            ['addPosit',[self.addBoxPosition, self.addBoxPosition.get, self.addBoxPosition.set]]
+        ])
+        return dd
+
+    def _setSavedWidgetParameters(self,  values:dict={}):
+        '''
+        sets the extra widget which are saved in a pipeline file:
+        name
+        inputData
+        savePath
+        autoActive
+        addPosit
+        '''
+        for key, value in values.items():
+            widgetList = self._settingsDict.get(key)
+            if widgetList is not None:
+                widget, getValue, setValue =  widgetList
+                setValue(value)
+
+    def _getSavingWidgetParameters(self):
+        '''
+        get the extra widget values to save in a pipeline file:
+        name
+        inputData
+        savePath
+        autoActive
+        addPosit
+        '''
+        dd = od([[x,None] for x in self._settingsDict])
+        for key, widgetList in self._settingsDict.items():
+                widget, getValue, setValue =  widgetList
+                dd[key] = getValue()
+        return dd
+
     def _openSavedPipeline(self, path=None):
         if not path:
             path = self._getPathFromDialogBox()
-        state, guiPipesState = self._openJsonFile(path)
+        state, guiPipesState, others = self._openJsonFile(path)
         self._closeAllGuiPipes()
+        self._setSavedWidgetParameters(od(others))
 
         for item in guiPipesState:
             guiPipeClassName, guiPipeName, widgetsState, isActive = item
             guiPipeClass = self._getGuiPipeClassFromClassName(guiPipeClassName)
-            guiPipe = guiPipeClass(parent=self, application=self.application, name=guiPipeName)
-            guiPipe.restoreWidgetsState(**widgetsState)
-            guiPipe.setActive(isActive)
+            if guiPipeClass:
+                guiPipe = guiPipeClass(parent=self, application=self.application, name=guiPipeName)
+                guiPipe.restoreWidgetsState(**widgetsState)
+                guiPipe.setActive(isActive)
 
-            self.pipelineArea.addBox(guiPipe)
+                self.pipelineArea.addBox(guiPipe)
 
-        self.pipelineArea.restoreState(state)
+        self.pipelineArea._restoreState(state)
 
     def _savePipeline(self):
         '''jsonData = [{pipelineArea.state}, [guiPipesState]]   '''
@@ -622,6 +667,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.jsonData = []
         self.jsonData.append(self.pipelineArea.saveState())
         self.jsonData.append(guiPipesState)
+        self.jsonData.append(list(self._getSavingWidgetParameters().items()))
         pipelineFilePath = self._saveToJson()
         return pipelineFilePath
         # else:
@@ -639,7 +685,7 @@ class GuiPipeline(CcpnModule, Pipeline):
             getLogger().debug(
                     'Saving path not existing. %s. Directory path changed to default %s' % (str(self.savePipelineLineEdit.lineEdit.text()), savingPath))
             self.savePipelineLineEdit.lineEdit.setText(str(savingPath))
-        pipelineName = str(self.pipelineNameLabel.text())
+        pipelineName = str(self.pipelineReNameTextEdit.get())
         if not savingPath.endswith('.json'):
             # try:
             if savingPath.endswith('/'):
@@ -657,7 +703,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         with open(pipelineFilePath, 'w') as fp:
             json.dump(self.jsonData, fp, indent=2)
             fp.close()
-            print('File saved in: '+pipelineFilePath)
+            getLogger().info('Pipeline File saved in: '+pipelineFilePath)
             # self.project._logger.info('File saved in: ' + pipelineFilePath)
         # except:
         #   getLogger().warning('File not saved. Insert a valid directory path. E.g /Users/user1/Desktop/')
@@ -751,9 +797,9 @@ class GuiPipeline(CcpnModule, Pipeline):
             for guiPipe in guiPipes:
                 guiPipe._updateWidgets()
 
-    def _renamePipelineCallback(self,):
-        self.pipelineName = self.pipelineReNameTextEdit.get()
-        self.pipelineNameLabel.set(self.pipelineName)
+    # def _renamePipelineCallback(self,):
+    #     self.pipelineName = self.pipelineReNameTextEdit.get()
+    #     self.pipelineNameLabel.set(self.pipelineName)
 
     def _addPipeDirectionCallback(self):
         value = self.addBoxPosition.getSelectedText()

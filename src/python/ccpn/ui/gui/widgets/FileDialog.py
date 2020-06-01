@@ -505,7 +505,7 @@ class LineEditButtonDialog(Widget):
     def _openFileDialog(self):
         self.fileDialog = FileDialog(self, fileMode=self.fileMode, text=self.textDialog,
                                      acceptMode=QtWidgets.QFileDialog.AcceptOpen, directory=self.directory, filter=self.filter)
-
+        self.fileDialog._show()
         selectedFile = self.fileDialog.selectedFile()
         if selectedFile:
             self.lineEdit.setText(str(selectedFile))

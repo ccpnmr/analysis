@@ -1478,9 +1478,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # self.testPymolPathButton.setText('test')
 
     def _getPymolPath(self):
+        # NB native dialog on OSX does not show contentens of an .app dir.
+        # Therefore cannot navigate and set the exec file that is needed for the correct usage of PyMOL!
         dialog = FileDialog(self, text='Select File',
-                            preferences=self.preferences,
+                            useNative=False,
+                            directory=str(self.pymolPath.get()),
+                            # preferences=self.preferences, # Do not use native
                             pathID=USEROTHERPATH)
+        dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
         dialog._show()
         file = dialog.selectedFile()
         if file:

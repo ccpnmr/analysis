@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-28 13:57:25 +0100 (Thu, May 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 09:33:18 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -436,7 +436,7 @@ class UpdateAgent(object):
         elif os.path.exists(os.path.dirname(currentFilePath)):
             isDifferent = True
         else:
-            # this is a hack so that updates that don't belong are excluded
+            # NOTE:ED - was originally False to stop new directories being created, but needed now
             isDifferent = True
 
         return isDifferent

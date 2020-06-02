@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-27 20:01:38 +0100 (Wed, May 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 03:01:12 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,8 @@ __date__ = "$Date: 2020-05-27 16:32:49 +0000 (Wed, May 27, 2020) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtCore, QtGui
+from functools import partial
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import ActiveLabel, Label
@@ -43,6 +45,7 @@ class MoreLessFrame(Frame):
         self.mainWindow = mainWindow
         self._name = name
         self._showMore = showMore
+        self._callback = None
 
         self._minusIcon = Icon('icons/minus')
         self._plusIcon = Icon('icons/plus')
@@ -59,6 +62,7 @@ class MoreLessFrame(Frame):
         self.openButton.setSelectionCallback(self._toggleContents)
 
         self._showContents(showMore)
+        self._lastSize = QtCore.QSize(self.sizeHint())
 
     def _showContents(self, visible):
         self.contentsWidget.setVisible(visible)
@@ -69,6 +73,14 @@ class MoreLessFrame(Frame):
         else:
             self.openButton.setPixmap(self._plusIcon.pixmap(18, 18))
             self.setMaximumHeight(24)
+
+        if self._callback:
+            self._callback(self)
+
+    def setCallback(self, callback):
+        """Set a callback to the frame from the parent
+        """
+        self._callback = callback
 
     def _toggleContents(self):
         visible = not self.contentsWidget.isVisible()
@@ -87,3 +99,8 @@ class MoreLessFrame(Frame):
 
         self._name = value
         self.label.setText(value)
+
+    # def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
+    #     self._lastSize = QtCore.QSize(self.sizeHint())
+    #     print('>>>RESIZEEVENT', self._lastSize)
+    #     super(MoreLessFrame, self).resizeEvent(a0)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-29 16:18:31 +0100 (Fri, May 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 03:01:12 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -187,14 +187,23 @@ class SampleComponentPopup(AttributeEditorPopupABC):
 
     def _populate(self):
         super()._populate()
-        self.labelling.setEnabled(True)
-        self.labelling.pulldownList.setEditable(False)
+        if not self.EDITMODE:
+            self.labelling.setEnabled(True)
+            self.labelling.pulldownList.setEditable(False)
 
     def _applyAllChanges(self, changes):
-        super()._applyAllChanges(changes)
+        if self.EDITMODE:
+            super()._applyAllChanges(changes)
 
-        # if new sampleComponent then call the new method - self.obj is container of new attributes
+            # name = self.name.getText()
+            # labelling = self.name.getText()
+            # if name != self.obj.name or labelling != self.obj.labelling:
+            #     self.obj.rename(name=name, labelling=labelling)
+
         if not self.EDITMODE:
+            # if new sampleComponent then call the new method - self.obj is container of new attributes
+            super()._applyAllChanges(changes)
+
             # remove unnecessary attributes
             for item in self.DISCARDITEMS:
                 if item in self.obj:

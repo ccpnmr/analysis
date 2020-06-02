@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-29 14:03:47 +0100 (Fri, May 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 03:01:12 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -146,6 +146,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.setMaximumWidth(w * 1.5)
 
         self.__postInit__()
+        self._okButton = self.getButton(self.OKBUTTON)
         self._applyButton = self.getButton(self.APPLYBUTTON)
         self._revertButton = self.getButton(self.RESETBUTTON)
 
@@ -159,7 +160,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         revertState = False
         allChanges = True if self._changes else False
 
-        return changeState(self, allChanges, applyState, revertState, None, self._applyButton, self._revertButton, self._currentNumApplies)
+        return changeState(self, allChanges, applyState, revertState, self._okButton, self._applyButton, self._revertButton, self._currentNumApplies)
 
     def getActiveTabList(self):
         """Return the list of active tabs
@@ -182,6 +183,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # retrieve the original preferences
         self.preferences = deepcopy(self._lastPrefs)
         self._populate()
+        self._okButton.setEnabled(False)
         self._applyButton.setEnabled(False)
         self._revertButton.setEnabled(False)
 

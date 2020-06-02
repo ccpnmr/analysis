@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-30 09:59:57 +0100 (Sat, May 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 03:01:12 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -88,13 +88,44 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
             substancePulldownData.append(str(substance.id))
         self.Currentsubstances.pulldownList.setData(substancePulldownData)
 
-    def _getSpectrum(self, obj):
+    def _getSpectrum(self, attr, default):
+        """change the value from the substance object into a pid for the pulldown
+        """
+        value = getattr(self, attr, default)
+        if value and len(value) > 0:
+            return value[0].pid
+
+    def _setSpectrum(self, attr, value):
+        """change the pid for the pulldown into the tuple for the substance object
+        """
+        spectrum = self.project.getByPid(value)
+        if spectrum:
+            setattr(self, attr, (spectrum,))
+        else:
+            setattr(self, attr, [])
+
+    def _getCurrentSpectra(self, obj):
         """Populate the spectrum pulldown
         """
         spectrumPulldownData = [SELECT]
         for spectrum in self.project.spectra:
             spectrumPulldownData.append(str(spectrum.pid))
         self.referenceSpectra.pulldownList.setData(spectrumPulldownData)
+
+    def _getSynonym(self, attr, default):
+        """change the value from the substance object into a str for the synonym
+        """
+        value = getattr(self, attr, default)
+        if value and len(value) > 0:
+            return str(value[0])
+
+    def _setSynonym(self, attr, value):
+        """change the str for the synonym into the tuple for the substance object
+        """
+        if value:
+            setattr(self, attr, (str(value),))
+        else:
+            setattr(self, attr, [])
 
     klass = Substance
     attributes = [('Select source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
@@ -106,8 +137,8 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
                   ('labelling', PulldownListCompoundWidget, getattr, setattr, _getLabelling, None, {'editable': True}),
                   ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ('_NEWHIDDENGROUP More options', None, None, None, None, None, None),
-                  # ('synonyms', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
-                  # ('referenceSpectra', EntryCompoundWidget, getattr, setattr, None, None, {}),
+                  ('synonyms', EntryCompoundWidget, _getSynonym, _setSynonym, None, None, {'backgroundText': ''}),
+                  ('referenceSpectra', PulldownListCompoundWidget, _getSpectrum, _setSpectrum, _getCurrentSpectra, None, {'editable': False}),
                   ('empiricalFormula', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
                   ('molecularMass', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
                   ('userCode', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
@@ -126,7 +157,22 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
                   ('_CLOSEHIDDENGROUP', None, None, None, None, None, None),
                   ]
     DISCARDITEMS = ['Select source', 'Current substances', 'compoundView', '_NEWHIDDENGROUP', 'name', 'labelling']
-
+    VALIDATTRS = ['comment',
+                  'synonyms',
+                  'referenceSpectra',
+                  'empiricalFormula',
+                  'molecularMass',
+                  'userCode',
+                  'casNumber',
+                  'atomCount',
+                  'bondCount',
+                  'ringCount',
+                  'hBondDonorCount',
+                  'hBondAcceptorCount',
+                  'polarSurfaceArea',
+                  'logPartitionCoefficient',
+                  'smiles',
+                  ]
     hWidth = 150
     USESCROLLWIDGET = True
     FIXEDWIDTH = False
@@ -149,7 +195,7 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
         self.substance = substance
 
         # initialise the widgets in the popup
-        super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, **kwds)
+        super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, size=(500, 100), **kwds)
 
         # attach callbacks to the new/fromSubstances radioButton
         if self.EDITMODE:
@@ -157,8 +203,8 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
             self.Currentsubstances.setEnabled(False)
             self.Selectsource.setVisible(False)
             self.Currentsubstances.setVisible(False)
-            self.name.setEnabled(False)
-            self.labelling.setEnabled(False)
+            self.name.setEnabled(True)                  # False
+            self.labelling.setEnabled(True)             # False
         else:
             self.Selectsource.radioButtons.buttonGroup.buttonClicked.connect(self._changeSource)
             self.Currentsubstances.pulldownList.activated.connect(self._fillInfoFromSubstance)
@@ -172,6 +218,16 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
         self.mainWidget.getLayout().setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
         self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
         self._setDialogSize()
+
+        self._moreLessFrames = []
+        for item in self.findChildren(MoreLessFrame):
+            item.setCallback(self._moreLessCallback)
+            # assume all are initially closed
+            self._moreLessFrames.append(item)
+
+        self._baseSize = self.sizeHint()
+        for item in self._moreLessFrames:
+            self._baseSize -= item.sizeHint()
 
     def _setEnabledState(self, fromSubstances):
         if fromSubstances:
@@ -193,7 +249,7 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
                 if newLabel not in self.labelling.getTexts():
                     self.labelling.pulldownList.addItem(text=newLabel)
                 self.labelling.pulldownList.set(newLabel or 'None')
-                self.labelling.setEnabled(False)
+                self.labelling.setEnabled(True)                         # False
         else:
             self.name.setText('')
             self.labelling.pulldownList.setIndex(0)
@@ -220,7 +276,10 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
 
         if self.EDITMODE:
             super()._applyAllChanges(changes)
-
+            name = self.name.getText()
+            labelling = self.labelling.getText()
+            if name != self.obj.name or labelling != self.obj.labelling:
+                self.obj.rename(name=name, labelling=labelling)
         else:
             # if new substance then call the new method - self.obj is container of new attributes
 
@@ -232,14 +291,27 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
             name = self.name.getText()
             labelling = self.labelling.getText()
             #
+            # # objKwds = AttrDict((k, val) for k, val in self.obj if k in self.VALIDATTRS)
             # objKwds = self.obj.copy()
             # objKwds.update({'name'     : name,
             #                 'labelling': labelling})
-            substance = self.project.newSubstance(name=name, labelling=labelling)
-            for k, val in self.obj.items():
-                if not any(k.startswith(prefix) for prefix in self.DISCARDITEMS):
-                    print('>>> ATTRIBUTE {} {}'.format(k, val))
-                    setattr(substance, k, val)
+            # substance = self.project.newSubstance(**objKwds)
+
+            # substance = self.project.newSubstance(name=name, labelling=labelling)
+            # for k, val in self.obj.items():
+            #     if not any(k.startswith(prefix) for prefix in self.DISCARDITEMS):
+            #         setattr(substance, k, val)
+            self.obj = self.project.newSubstance(name=name, labelling=labelling)
+            super()._applyAllChanges(changes)
+
+    def _setValue(self, attr, setFunction, value):
+        """Function for setting the attribute, called by _applyAllChanges
+
+        This can be subclassed to completely disable writing to the object
+        as maybe required in a new object
+        """
+        if attr in self.VALIDATTRS:
+            setFunction(self.obj, attr, value)
 
     def _initialiseCompoundView(self):
         view = self.compoundView.compoundView
@@ -252,19 +324,27 @@ class SubstancePropertiesPopup(HiddenAttributeEditorPopupABC):
         else:
             smiles = ''
         view.setSmiles(smiles)
-        # resize to the new items
-        view.scene.setSceneRect(view.scene.itemsBoundingRect())
-        view.centerView()
-        view.updateAll()
+        # NOTE:ED - initial size has been moved to resizeEvent in compoundWidget
 
     def _smilesChanged(self, value):
         if value:
             view = self.compoundView.compoundView
             view.setSmiles(value)
             # resize to the new items
-            view.scene.setSceneRect(view.scene.itemsBoundingRect())
-            view.centerView()
             view.updateAll()
+            view.scene.setSceneRect(view.scene.itemsBoundingRect())
+            view.resetView()
+            view.zoomLevel = 1.0
+
+    def _moreLessCallback(self, moreLessFrame):
+        """Resize the dialog to contain the opened/closed moreLessFrames
+        """
+        _size = QtCore.QSize(self._baseSize)
+        for item in self._moreLessFrames:
+            _size += item.sizeHint()
+
+        _size.setWidth(self.width())
+        self.resize(_size)
 
 
 class _blankContainer(AttrDict):
@@ -280,7 +360,7 @@ class _blankContainer(AttrDict):
             self[attr[0]] = None
 
 
-class SubstancePropertiesPopup2(CcpnDialog):
+class SubstancePropertiesPopupOLD(CcpnDialog):
 
     def __init__(self, parent=None, mainWindow=None,
                  substance=None, sampleComponent=None, newSubstance=False, **kwds):

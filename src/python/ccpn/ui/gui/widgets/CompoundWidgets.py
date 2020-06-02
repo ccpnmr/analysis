@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-30 09:59:57 +0100 (Sat, May 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 03:01:12 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1070,10 +1070,12 @@ class CompoundViewCompoundWidget(CompoundBaseWidget):
 
         hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
         viewKwds = {'hAlign': hAlign,
-                    'smiles': ''
+                    'smiles': '',
                     }
         viewKwds.update(compoundKwds or {})
         self.compoundView = CompoundView(parent=self, **viewKwds)
+        self.compoundView.resize(200, 250)
+        self._initSize = None
 
         self._addWidget(self.compoundView)
         self.setObjectName(labelText)
@@ -1086,6 +1088,19 @@ class CompoundViewCompoundWidget(CompoundBaseWidget):
 
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
+
+    def minimumSizeHint(self) -> QtCore.QSize:
+        return QtCore.QSize(200, 250)
+
+    def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
+        super().resizeEvent(a0)
+        if self._initSize is None:
+            view = self.compoundView
+            view.updateAll()
+            view.scene.setSceneRect(view.scene.itemsBoundingRect())
+            view.resetView()
+            view.zoomLevel = 1.0
+            self._initSize = True
 
 
 if __name__ == '__main__':

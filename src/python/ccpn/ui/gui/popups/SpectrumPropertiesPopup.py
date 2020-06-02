@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-27 16:10:33 +0100 (Wed, May 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 03:01:12 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -153,6 +153,7 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
                 self.project._undo.undo()
 
         self._populate()
+        self._okButton.setEnabled(False)
         self._applyButton.setEnabled(False)
         self._revertButton.setEnabled(False)
 
@@ -294,7 +295,7 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
         tabs = self.getActiveTabList()
         allChanges = any(t._changes for t in tabs if t is not None)
 
-        return changeState(self, allChanges, applyState, revertState, None, self._applyButton, self._revertButton, self._currentNumApplies)
+        return changeState(self, allChanges, applyState, revertState, self._okButton, self._applyButton, self._revertButton, self._currentNumApplies)
 
     def getActiveTabList(self):
         """Return the list of active tabs
@@ -352,7 +353,7 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
         tabs = self.getActiveTabList()
         allChanges = any(t._changes for t in tabs if t is not None)
 
-        return changeState(self, allChanges, applyState, revertState, None, self._applyButton, self._revertButton, self._currentNumApplies)
+        return changeState(self, allChanges, applyState, revertState, self._okButton, self._applyButton, self._revertButton, self._currentNumApplies)
 
     def _tabClicked(self, index):
         """Callback for clicking a tab - needed for refilling the checkboxes and populating the pulldown
@@ -428,7 +429,7 @@ class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
         tabs = self.getActiveTabList()
         allChanges = any(t._changes for t in tabs if t is not None)
 
-        return changeState(self, allChanges, applyState, revertState, None, self._applyButton, self._revertButton, self._currentNumApplies)
+        return changeState(self, allChanges, applyState, revertState, self._okButton, self._applyButton, self._revertButton, self._currentNumApplies)
 
     def _tabClicked(self, index):
         """Callback for clicking a tab - needed for refilling the checkboxes and populating the pulldown

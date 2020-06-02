@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-10 18:38:00 +0000 (Mon, February 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 11:48:18 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,7 @@ from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.widgets.MessageDialog import showError
+from ccpn.ui.gui.widgets.MessageDialog import showError, showWarning
 # This import initializes relative paths for QT style-sheets.  Do not remove!
 from ccpn.framework.PathsAndUrls import userPreferencesPath
 
@@ -58,6 +58,7 @@ QtCore.qInstallMessageHandler(qtMessageHandler)
 class _MyAppProxyStyle(QtWidgets.QProxyStyle):
     """Class to handle resizing icons in menus
     """
+
     def pixelMetric(self, QStyle_PixelMetric, option=None, widget=None):
         if QStyle_PixelMetric == QtWidgets.QStyle.PM_SmallIconSize:
             return 18
@@ -99,7 +100,7 @@ class Gui(Ui):
         myStyle = _MyAppProxyStyle(styles.create('fusion'))
         # # QtWidgets.QApplication.setStyle(myStyle)
         #
-        self.qtApp.setStyle(myStyle)        # styles.create('fusion'))
+        self.qtApp.setStyle(myStyle)  # styles.create('fusion'))
 
     def initialize(self, mainWindow):
         """UI operations done after every project load/create"""
@@ -331,10 +332,21 @@ class Gui(Ui):
     def _execUpdates(self):
         sys.stderr.write('==> Gui update\n')
         from ccpn.framework.update.UpdatePopup import UpdatePopup
+        from ccpn.util import Url
 
-        updatePopup = UpdatePopup(parent=self.mainWindow, mainWindow=self.mainWindow)
-        self.mainWindow.show()
-        updatePopup.exec_()
+        # check valid internet connection first
+        if Url.checkInternetConnection():
+            self.updatePopup = UpdatePopup(parent=self.mainWindow, mainWindow=self.mainWindow)
+            self.updatePopup.show()
+            self.updatePopup.exec_()
+
+            # if updates have been installed then popup the quit dialog with no cancel button
+            if self.updatePopup._numUpdatesInstalled > 0:
+                self.mainWindow._closeWindowFromUpdate(disableCancel=True)
+
+        else:
+            showWarning('Check For Updates',
+                        'Could not connect to the update server, please check your internet connection.')
 
 
 #######################################################################################
@@ -532,7 +544,7 @@ class Strip1d(coreClass, _GuiStrip1d):
             # strips are arranged in a row
             # self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
 
-            if True:            #tilePosition is None:
+            if True:  #tilePosition is None:
                 self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
                 self.tilePosition = (0, stripIndex)
             else:
@@ -543,7 +555,7 @@ class Strip1d(coreClass, _GuiStrip1d):
             # strips are arranged in a column
             # self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
 
-            if True:            #tilePosition is None:
+            if True:  #tilePosition is None:
                 self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
                 self.tilePosition = (0, stripIndex)
             else:
@@ -587,7 +599,7 @@ class StripNd(coreClass, _GuiStripNd):
             # strips are arranged in a row
             # self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
 
-            if True:            #tilePosition is None:
+            if True:  #tilePosition is None:
                 self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
                 self.tilePosition = (0, stripIndex)
             else:
@@ -598,7 +610,7 @@ class StripNd(coreClass, _GuiStripNd):
             # strips are arranged in a column
             # self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
 
-            if True:            #tilePosition is None:
+            if True:  #tilePosition is None:
                 self.spectrumDisplay.stripFrame.layout().addWidget(self, stripIndex, 0)
                 self.tilePosition = (0, stripIndex)
             else:

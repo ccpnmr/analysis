@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 16:38:03 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 09:52:53 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,10 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
+from re import finditer
+from collections import Counter, OrderedDict
+from itertools import zip_longest
+import copy
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QDataStream, Qt, QVariant
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
@@ -40,12 +44,7 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.core.lib.ContextManagers import undoBlock
-
-from re import finditer
-
-from collections import Counter, OrderedDict
-from itertools import zip_longest
-import copy
+from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 
 
 DEFAULTSPACING = (3, 3)
@@ -429,6 +428,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     BUTTON_FILTER = 'Filter by:'
     BUTTON_CANCEL = 'Cancel'
+    SETREVERTBUTTON = True
 
     USE_TAB = None
     NUMBER_TABS = 0
@@ -440,7 +440,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
     # leftListChanged = pyqtSignal(tuple)
     # rightListChanged = pyqtSignal(tuple)
 
-    def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, **kwds):
+    def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, size=(600, 350), **kwds):
         """
         Initialise the widget, note defaultItems is only used for create
         """
@@ -455,7 +455,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self._acceptButtonText = 'Save changes to %s' % self.PLURAL_GROUPED_NAME
 
         super().__init__(parent=parent, windowTitle=title, setLayout=True, margins=(0, 0, 0, 0),
-                         spacing=(5, 5), size=(900, 1600), **kwds)
+                         spacing=(5, 5), size=size, **kwds)
 
         self.errorIcon = Icon('icons/exclamation_small')
 
@@ -510,6 +510,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self._connectLists()
         self._populateLists()
 
+        self._applyButton.setEnabled(False)
+        self._revertButton.setEnabled(False)
+
         # # one cannot be a copy of the other unless its a deep copy...
         # # this is easier
         # self._previousState = self._getPreviousState()
@@ -520,12 +523,14 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         #
         # self.connectModels()
         # self._updateStateOnSelection()
+        # self.setMinimumSize(self.sizeHint())
+        # self.resize(500, 350)  # change to a calculation rather than a guess
 
     def _populateLists(self):
         # one cannot be a copy of the other unless its a deep copy...
         # this is easier
         self._previousState = self._getPreviousState()
-        self._updatedState = copy.deepcopy(self._getPreviousState())
+        self._updatedState = copy.deepcopy(self._previousState)
 
         self._previousNames = {key: key for key in self._previousState}
         self._updatedNames = dict(self._previousNames)
@@ -539,8 +544,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
     def _getChangeState(self):
         """Get the change state from the _changes dict
         """
-        # MUST BE SUBCLASSED
-        raise NotImplementedError("Code error: function not implemented")
+        # changes not required here, just need to define which buttons to disable after revert
+        return changeState(self, False, False, False, None, self._applyButton, self._revertButton, 0)
 
     def _getPreviousState(self):
         result = {}
@@ -550,7 +555,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                 #GST do I need to filter object in an undo state, if so could we add some interface for this...
                 object = self.project._pid2Obj.get(self.GROUP_PID_KEY)[key]
                 items = [elem.pid for elem in getattr(object, self.PROJECT_ITEM_ATTRIBUTE)]
-                result[key] = items
+                comment = object.comment or None
+                result[key] = {'spectra': items,
+                               'comment': comment}
         return result
 
     def _setLeftWidgets(self):
@@ -558,13 +565,17 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         # self.leftTopLabel = Label(self._dialogWidget, '', bold=True, grid=(0, 0), gridSpan=(1, 3))
 
         if not self.editMode:
-            labelName = 'New %s Name' % self.GROUP_NAME
+            labelName = 'New %s name' % self.GROUP_NAME
         else:
-            labelName = 'Name'
+            labelName = 'name'
 
         row = 1
         self.nameLabel = Label(self._dialogWidget, labelName, grid=(row, 0))
-        self.nameEdit = LineEdit(self._dialogWidget, backgroundText='%s Name' % self.GROUP_NAME, textAlignment='left', grid=(1, 1))
+        self.nameEdit = LineEdit(self._dialogWidget, backgroundText='%s Name' % self.GROUP_NAME, textAlignment='left', grid=(row, 1))
+
+        row += 1
+        self.commentLabel = Label(self._dialogWidget, 'comment', grid=(row, 0))
+        self.commentEdit = LineEdit(self._dialogWidget, backgroundText='> Optional <', textAlignment='left', grid=(row, 1))
 
         # GST need something better than this..!
         self.nameEdit.setFixedWidth(self._FIXEDWIDTH * 1.5)
@@ -596,6 +607,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     def connectModels(self):
         self.nameEdit.textChanged.connect(self._updateNameOnEdit)
+        self.commentEdit.textChanged.connect(self._updateCommentOnEdit)
         self.leftListWidget.model().dataChanged.connect(self._updateModelsOnEdit)
         self.leftListWidget.model().rowsRemoved.connect(self._updateModelsOnEdit)
         self.leftListWidget.model().rowsInserted.connect(self._updateModelsOnEdit)
@@ -603,6 +615,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     def disconnectModels(self):
         self.nameEdit.textChanged.disconnect(self._updateNameOnEdit)
+        self.commentEdit.textChanged.disconnect(self._updateCommentOnEdit)
         self.leftListWidget.model().dataChanged.disconnect(self._updateModelsOnEdit)
         self.leftListWidget.model().rowsRemoved.disconnect(self._updateModelsOnEdit)
         self.leftListWidget.model().rowsInserted.disconnect(self._updateModelsOnEdit)
@@ -610,7 +623,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     def _setRightWidgets(self):
 
-        row = 3
+        row = 4
         self.addSpacer(0, 5, grid=(row, 0), gridSpan=(1, 3), parent=self._dialogWidget)
 
         row += 1
@@ -656,85 +669,6 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             pids.remove(self._editedObject.pid)
         return pids
 
-    # def _setApplyButtons(self):
-    #     self.applyButtons = ButtonBoxList(self._dialogWidget, texts=[self.BUTTON_CANCEL, self._acceptButtonText],
-    #                                       callbacks=[self._cancel, self._applyAndClose],
-    #                                       tipTexts=['Cancel the New/Edit operation',
-    #                                                 'Apply according to current settings and close'],
-    #                                       direction='h', hAlign='r', ok=self._acceptButtonText, cancel=self.BUTTON_CANCEL,
-    #                                       grid=(9, 1), gridSpan=(1, 2))
-
-    # def _addWidgetsToLayout(self):
-    #     # Add left Widgets on Main layout
-    #     layout = self._dialogWidget.getLayout()
-    #
-    #     label_column = 0
-    #     left_column = 1
-    #
-    #     layout.setColumnStretch(label_column, 0)
-    #     layout.setColumnStretch(left_column, 1000)
-    #
-    #     row = 0
-    #     if self.editMode:
-    #         layout.addWidget(self.leftPullDownLabel, row, label_column)
-    #         self.leftPullDownLabel.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
-    #
-    #         layout.addWidget(self.leftPullDown, row, left_column, QtCore.Qt.AlignLeft)
-    #
-    #         row += 1  #2
-    #
-    #     layout.addWidget(self.nameLabel, row, label_column)
-    #     self.nameLabel.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
-    #
-    #     self.nameEditBorder = Frame(self._dialogWidget, setLayout=True)
-    #     layout.addWidget(self.nameEditBorder, row, left_column)
-    #     self.nameEditBorder.layout().addWidget(self.nameEdit, 0, 0)
-    #     self.nameEditBorder.layout().setContentsMargins(2, 0, 0, 0)
-    #     self.nameEditBorder.layout().setAlignment(self.nameEdit, QtCore.Qt.AlignLeft)
-    #     self.nameEditBorder.setFocusProxy(self.nameEdit)
-    #     # layout.addWidget(self.nameEdit, row, left_column)
-    #     row += 1
-    #
-    #     self.addSpacer(0, 5, grid=(row, 0), gridSpan=(1, 3))
-    #
-    #     row += 1
-    #     layout.setRowStretch(row, 1000)
-    #     layout.addWidget(self.selectionLabel, row, label_column)
-    #     layout.setAlignment(self.selectionLabel, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-    #
-    #     self._doublePane = Widget(self._dialogWidget, setLayout=True)
-    #     self._doublePane.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
-    #
-    #     layout.addWidget(self._doublePane, row, left_column, 1, 1)
-    #     self.rightListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
-    #     self._doublePane.getLayout().addWidget(self.leftItemsLabel, 0, 0)
-    #     layout.setAlignment(self.leftItemsLabel, QtCore.Qt.AlignLeft)
-    #     self._doublePane.getLayout().addWidget(self.rightItemsLabel, 0, 1)
-    #     layout.setAlignment(self.rightItemsLabel, QtCore.Qt.AlignLeft)
-    #     self._doublePane.getLayout().addWidget(self.rightListFeedbackWidget, 1, 0)
-    #     self._doublePane.getLayout().addWidget(self.leftListFeedbackWidget, 1, 1)
-    #     self._doublePane.getLayout().setRowStretch(1, 1000)
-    #     self.leftListWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
-    #
-    #     row += 2
-    #     self._selectionFrame = Widget(self._dialogWidget, setLayout=True, )
-    #     layout.addWidget(self._selectionFrame, row, left_column)
-    #     filterLayout = self._selectionFrame.getLayout()
-    #     # filterLayout.addWidget(self.rightRadioButtons, 0, 0)
-    #     filterLayout.addWidget(self.rightFilterLabel, 0, 0)
-    #     filterLayout.addWidget(self.rightPullDown, 0, 1)
-    #     filterLayout.setColumnStretch(2, 1)
-    #
-    #     row += 1
-    #
-    #     layout.addWidget(self.errorFrame, row, left_column, 1, 1)
-    #
-    #     row += 1
-    #     self.addSpacer(0, 10, grid=(row, 0), gridSpan=(1, 1))
-    #
-    #     row += 1
-    #     layout.addWidget(self.applyButtons, row, label_column, 1, 2, QtCore.Qt.AlignRight)
-
     def _connectLists(self):
         self.leftListWidget.setPartner(self.rightListWidget)
         self.rightListWidget.setPartner(self.leftListWidget)
@@ -762,7 +696,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         obj = self._editedObject
         if obj is None:
             return None
-        return self._updatedState[obj.name]
+        state = self._updatedState[obj.name]
+        return state.get('spectra')
 
     @property
     def _projectObjectItems(self) -> list:
@@ -774,6 +709,17 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             return None
         return getattr(self.project, self.PROJECT_ITEM_ATTRIBUTE)
 
+    @property
+    def _editedObjectComment(self) -> str:
+        """Convenience to get the comment
+        Returns list or None on error
+        """
+        obj = self._editedObject
+        if obj is None:
+            return None
+        state = self._updatedState[obj.name]
+        return state.get('comment')
+
     def _setAcceptButtonState(self):
         if self.editMode and self._dirty:
             # self.applyButtons.setButtonEnabled(self._acceptButtonText, True)
@@ -784,12 +730,15 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         if self.editMode and self._editedObject:
             key = self._editedObject.name
             items = self._groupedObjects
+            comment = self.commentEdit.text() or None
         else:
             key = self.nameEdit.text()
             items = self._groupedObjects
-
+            comment = self.commentEdit.text() or None
         if len(key) > 0:
-            result = {key: items}
+            result = {key: {'spectra': items,
+                            'comment': comment}
+                      }
 
         return result
 
@@ -812,6 +761,16 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             editedObjectName = self._editedObject.name
             newName = self.nameEdit.text()
             self._updatedNames[editedObjectName] = newName
+
+        self._updateButton()
+
+    def _updateCommentOnEdit(self, *args, **kwargs):
+
+        currentEdits = self._currentEditorState()
+
+        if self.editMode and self._editedObject != None:
+            for id, selections in currentEdits.items():
+                self._updatedState[id] = selections
 
         self._updateButton()
 
@@ -867,7 +826,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
     def _checkForEmptyGroups(self):
 
         badKeys = []
-        for key, values in self._updatedState.items():
+        for key, selection in self._updatedState.items():
+            values = selection.get('spectra')
             values = self.filterEmptyText(values)
             if len(values) == 0:
                 badKeys.append(key)
@@ -1006,10 +966,10 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                 enabled = False
                 self.errors.append(message)
 
-            check, message = self._checkForEmptyGroups()
-            if check:
-                enabled = False
-                self.errors.append(message)
+            # check, message = self._checkForEmptyGroups()
+            # if check:
+            #     enabled = False
+            #     self.errors.append(message)
 
             check, message = self._checkForTrailingSpacesName()
             if check:
@@ -1018,6 +978,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         # self.applyButtons.setButtonEnabled(self._acceptButtonText, enabled)
         self._applyButton.setEnabled(enabled)
+
+        if self.SETREVERTBUTTON:
+            self._revertButton.setEnabled(True)
 
         self._emptyErrorFrame()
 
@@ -1072,31 +1035,36 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         """Update Left
         """
 
-        if self.editMode:
+        # block widget signals to stop feedback loops
+        with self.blockWidgetSignals():
+            if self.editMode:
 
-            self.leftPullDownLabel.show()
-            self.leftPullDown.show()
-            self.rightPullDown.setEnabled(len(self.leftPullDown.getObjects()) > 0)
-            obj = self._editedObject
-            if obj is not None:
-                name = self._updatedNames[obj.name]
-                self.nameEdit.setText(name)
-                self._setLeftListWidgetItems(self._editedObjectItems)
-                self.nameEdit.setEnabled(True)
-                self.leftListWidget.setEnabled(True)
-                self.rightListWidget.setEnabled(True)
+                self.leftPullDownLabel.show()
+                self.leftPullDown.show()
+                self.rightPullDown.setEnabled(len(self.leftPullDown.getObjects()) > 0)
+                obj = self._editedObject
+                if obj is not None:
+                    name = self._updatedNames[obj.name]
+                    self.nameEdit.setText(name)
+                    self.commentEdit.setText(self._editedObjectComment)
+                    self._setLeftListWidgetItems(self._editedObjectItems)
+                    self.nameEdit.setEnabled(True)
+                    self.leftListWidget.setEnabled(True)
+                    self.rightListWidget.setEnabled(True)
+                else:
+                    self.nameEdit.setText('')
+                    self.commentEdit.setText('')
+                    self.leftListWidget.clear()
+                    self.nameEdit.setEnabled(False)
+                    self.leftListWidget.setEnabled(False)
+                    self.rightListWidget.setEnabled(False)
+
             else:
-                self.nameEdit.setText('')
                 self.leftListWidget.clear()
-                self.nameEdit.setEnabled(False)
-                self.leftListWidget.setEnabled(False)
-                self.rightListWidget.setEnabled(False)
-
-        else:
-            self.leftListWidget.clear()
-            if self.defaultItems is not None:
-                self._setLeftListWidgetItems(self.defaultItems)
-            self.nameEdit.setText('')
+                if self.defaultItems is not None:
+                    self._setLeftListWidgetItems(self.defaultItems)
+                self.nameEdit.setText('')
+                self.commentEdit.setText('')
 
     def _updateRight(self):
         """Update Right
@@ -1129,6 +1097,10 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
     def _leftPullDownCallback(self, value=None):
         """Callback when selecting the left spectrumGroup pulldown item"""
+        obj = self.project.getByPid(value)
+        if obj:
+            # set the new object
+            self.obj = obj
         self._updateStateOnSelection()
 
     def _rightPullDownCallback(self, value=None):
@@ -1141,7 +1113,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             previousState = self._previousState[key]
             if state == previousState:
                 continue
-            result[key] = [self.project.getByPid(pid) for pid in state]
+            result[key] = {'spectra': [self.project.getByPid(pid) for pid in (state.get('spectra') or [])],
+                           'comment': state.get('comment')}
         return result
 
     def _getRenames(self):
@@ -1152,6 +1125,10 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                 result[name] = rename
 
         return result
+
+    # def _revertClicked(self):
+    #     super()._revertClicked()
+    #     self._populate()
 
     def _applyChanges(self):
         """
@@ -1166,11 +1143,13 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             try:
                 if self.editMode:
                     # edit mode
-                    for name, items in updateList.items():
+                    for name, state in updateList.items():
+                        items = state.get('spectra')
                         pid = '%s:%s' % (self.GROUP_PID_KEY, name)
                         obj = self.project.getByPid(pid)
 
                         setattr(obj, self.KLASS_ITEM_ATTRIBUTE, items)
+                        obj.comment = state.get('comment')
 
                     for name in renameList:
                         pid = '%s:%s' % (self.GROUP_PID_KEY, name)
@@ -1181,18 +1160,25 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
                     # call the post init routine to populate any new values as necessary
                     if self.GROUPEDITOR_INIT_METHOD:
-                        self.GROUPEDITOR_INIT_METHOD()
+                        for name, state in updateList.items():
+                            pid = '%s:%s' % (self.GROUP_PID_KEY, name)
+                            obj = self.project.getByPid(pid)
+                            if obj == self.obj:
+                                self.GROUPEDITOR_INIT_METHOD()
 
                 else:
                     # new mode
                     newState = self._currentEditorState()
                     if newState:
                         name = list(newState.keys())[0]
-                        items = list(newState.values())[0]
-                        func = getattr(self.project, self.PROJECT_NEW_METHOD)
-                        self.obj = func(name, items)
+                        state = list(newState.values())[0]
+                        items = state.get('spectra')
+                        comment = state.get('comment')
 
-                        # call the post init routine to populate any new values as necessary
+                        func = getattr(self.project, self.PROJECT_NEW_METHOD)
+                        self.obj = func(name, items, comment=comment)
+
+                        # call the post init routine to populate any new values as necessary - only the current object
                         if self.GROUPEDITOR_INIT_METHOD:
                             self.GROUPEDITOR_INIT_METHOD()
 

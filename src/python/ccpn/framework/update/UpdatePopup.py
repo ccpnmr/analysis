@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-17 16:48:35 +0100 (Fri, April 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.util.Update import UpdateAgent
 
@@ -48,7 +49,16 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
         # keep focus on this window
         self.setModal(True)
 
+        # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.preferences = mainWindow.application.preferences
+        else:
+            self.application = None
+            self.project = None
+            self.preferences = None
 
         version = QtCore.QCoreApplication.applicationVersion()
         UpdateAgent.__init__(self, version, dryRun=False,
@@ -93,6 +103,16 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
         icons = ('icons/redo.png', 'icons/dialog-apply.png', 'icons/window-close.png')
         self.buttonList = ButtonList(self.mainWidget, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row, 0), gridSpan=(1, 3))
         row += 1
+
+        if self.preferences:
+            checkAtStartup = CheckBoxCompoundWidget(self.mainWidget,
+                                                    grid=(row, 0), hAlign='left', gridSpan=(1, 3),
+                                                    # fixedWidths=(None, 30),
+                                                    orientation='right',
+                                                    labelText='Check for updates at startup',
+                                                    checked=self.preferences.general.checkUpdatesAtStartup,
+                                                    callback=self._checkAtStartupCallback)
+            row += 1
 
         self.infoBox = TextEditor(self.mainWidget, grid=(row, 0), gridSpan=(1, 3))  # NOTE:ED - do not set valign here
         # self.infoBox.setVisible(False)
@@ -173,7 +193,7 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
         self._refreshQT()
 
     def _hideInfoBox(self):
-        self.setFixedHeight(160)
+        self.setFixedHeight(180)
         self.infoBox.hide()
         self._refreshQT()
 
@@ -189,6 +209,10 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
         # force a refresh of the popup - makes the updating look a little cleaner
         self.repaint()
         QtWidgets.QApplication.processEvents()
+
+    def _checkAtStartupCallback(self, value):
+        if self.preferences:
+            self.preferences.general.checkUpdatesAtStartup = value
 
 
 if __name__ == '__main__':

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 14:00:17 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 09:52:53 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,8 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
 from ccpn.core.lib.ContextManagers import undoStackBlocking
+from ccpn.ui.gui.lib.ChangeStateHandler import ChangeDict
+from ccpn.ui.gui.widgets.Spacer import Spacer
 
 
 def _updateGl(self, spectrumList):
@@ -89,14 +91,18 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         Base._init(self, setLayout=setLayout, **kwds)
 
         if orientation not in ORIENTATIONLIST:
-            raise TypeError('Error: orientation not in %s', ORIENTATIONLIST)
+            raise TypeError('orientation not in {}'.format(ORIENTATIONLIST))
 
         self.setWindowTitle(windowTitle)
         self.setContentsMargins(*DEFAULTMARGINS)
         self.getLayout().setSpacing(0)
 
         self._orientation = orientation
-        self._size = size
+        # get the initial size as a QSize
+        try:
+            self._size = QtCore.QSize(*size) if size else None
+        except Exception as es:
+            raise TypeError('bad size {}'.format(size))
 
         # set up the mainWidget area
         self.mainWidget = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
@@ -115,9 +121,14 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             self._scrollArea.setStyleSheet("""ScrollArea { border: 0px; background: transparent; }""")
 
         # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         # self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         # self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        # Spacer(self, 2, 2, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+        #        grid=(1, 1))
+
+        # self._frameOptionsNested.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
+        # self.mainWidget.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
 
         self.mainWidget.setContentsMargins(0, 0, 0, 0)
         self.mainWidget.getLayout().setSpacing(DEFAULTSPACING)
@@ -129,7 +140,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self._currentNumApplies = 0
 
         # clear the changes list
-        self._changes = {}
+        self._changes = ChangeDict()
 
         self.setDefaultButton()
 
@@ -143,6 +154,8 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self._setButtons()
         self._setDialogSize()
 
+        if self.getButton(self.OKBUTTON):
+            self.getButton(self.OKBUTTON).setEnabled(False)
         if self.getButton(self.APPLYBUTTON):
             self.getButton(self.APPLYBUTTON).setEnabled(False)
         if self.getButton(self.RESETBUTTON):
@@ -151,25 +164,23 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     def _setDialogSize(self):
         """Set the fixed/free dialog size from size or sizeHint
         """
-        size = None
+        # get the initial size as a QSize
+        try:
+            size = self._size if isinstance(self._size, QtCore.QSize) else QtCore.QSize(*self._size) if self._size else None
+        except Exception as es:
+            raise TypeError('bad size {}'.format(self._size))
 
-        # check whether the size has been defined
-        if self._size is not None:
-            if not isinstance(self._size, (tuple, list, QtCore.QSize)):
-                raise TypeError('size is not defined correctly: %s' % str(self._size))
-            if isinstance(self._size, (tuple, list)) and len(self._size) != 2:
-                raise TypeError('size is not the correct length: %s' % str(self._size))
-
-            size = self._size if isinstance(self._size, QtCore.QSize) else QtCore.QSize(*self._size)
-
-        # set the fixed sized policies as requird
+        _size = QtCore.QSize(size.width() if size else self.sizeHint().width(),
+                             size.height() if size else self.sizeHint().height())
+        # set the fixed sized policies as required
         if self.FIXEDWIDTH:
-            self.setFixedWidth(size.width() if size else self.sizeHint().width())
+            self.setFixedWidth(_size.width())
         if self.FIXEDHEIGHT:
-            self.setFixedHeight(size.height() if size else self.sizeHint().height())
+            self.setFixedHeight(_size.height())
 
         self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Fixed if self.FIXEDWIDTH else QtWidgets.QSizePolicy.Preferred,
                                       QtWidgets.QSizePolicy.Fixed if self.FIXEDHEIGHT else QtWidgets.QSizePolicy.Preferred, )
+        self.resize(_size)
 
     def setOkButton(self, callback=None, text=None,
                     tipText='Apply changes and close',
@@ -221,10 +232,10 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                                texts=text, tipTexts=tipText, icons=icon,
                                enabledStates=enabled, visibleStates=visible)
 
-    def  setDiscardButton(self, callback=None, text=None,
-                           tipText='Discard changes',
-                           icon='icons/orange-apply',
-                           enabled=True, visible=True):
+    def setDiscardButton(self, callback=None, text=None,
+                         tipText='Discard changes',
+                         icon='icons/orange-apply',
+                         enabled=True, visible=True):
         """Add an Apply button to the dialog box
         """
         return self._addButton(buttons=self.DISCARDBUTTON, callbacks=callback,
@@ -302,10 +313,27 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                 self.project._undo.undo()
 
         self._populate()
-        if self.dialogButtons.button(self.APPLYBUTTON):
-            self.dialogButtons.button(self.APPLYBUTTON).setEnabled(False)
-        if self.dialogButtons.button(self.RESETBUTTON):
-            self.dialogButtons.button(self.RESETBUTTON).setEnabled(False)
+
+        if not hasattr(self, GETCHANGESTATE):
+            raise RuntimeError('widget {} must have changes defined'.format(self))
+        _getChanges = getattr(self, GETCHANGESTATE)
+        if not callable(_getChanges):
+            raise RuntimeError('changes method for {} not correctly defined'.format(self))
+
+        # get the information from the popup - which must handle its own nested _changes
+        _changes = _getChanges()
+        if not _changes:
+            return
+        popup, changeState, applyState, revertState, okButton, applyButton, revertButton, numApplies = _changes
+
+        if popup:
+            # disable the required buttons
+            if okButton:
+                okButton.setEnabled(False)
+            if applyButton:
+                applyButton.setEnabled(False)
+            if revertButton:
+                revertButton.setEnabled(False)
 
     def _cancelClicked(self):
         """Cancel button signal comes here
@@ -390,7 +418,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             return False
 
         # remove all changes
-        self._changes = {}
+        self._changes.clear()
 
         self._currentNumApplies += 1
         if self.dialogButtons.button(self.RESETBUTTON):
@@ -528,6 +556,10 @@ def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
     if not callable(_getChanges):
         raise RuntimeError('changes method for {} not correctly defined'.format(self))
 
+    # _changes must  be a ChangeDict and be enabled to accept changes from the gui
+    if not self._changes.enabled:
+        return
+
     # if attributeName is defined use as key to dict to store change functions
     # append postFixes if need to differentiate partial functions
     if attributeName:
@@ -556,16 +588,19 @@ def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
             self._changeSettings()
 
     # get the information from the popup - which must handle its own nested _changes
-    popup, changeState, applyState, revertState, applyButton, revertButton, numApplies = _getChanges()
+    _changes = _getChanges()
+    if not _changes:
+        return
+
+    popup, changeState, applyState, revertState, okButton, applyButton, revertButton, numApplies = _changes
 
     if popup:
-        _applyButton = applyButton if applyButton else popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Apply)
-        _revertButton = revertButton if revertButton else popup.dialogButtons.button(QtWidgets.QDialogButtonBox.Reset)
-
-        # set button states depending on number of changes
+        # set button states depending on number of changes - ok button or apply button can be selected
         applyChanges = changeState and applyState
         revertChanges = changeState or revertState
-        if _applyButton:
-            _applyButton.setEnabled(applyChanges)
-        if _revertButton:
-            _revertButton.setEnabled(revertChanges or numApplies)
+        if okButton:
+            okButton.setEnabled(applyChanges)
+        if applyButton:
+            applyButton.setEnabled(applyChanges)
+        if revertButton:
+            revertButton.setEnabled(revertChanges or numApplies)

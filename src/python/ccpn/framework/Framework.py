@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-22 15:30:27 +0100 (Wed, April 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -377,11 +377,12 @@ class Framework(NotifierBase):
             project = self.newProject()
         self._updateCheckableMenuItems()
 
+        if self.preferences.general.checkUpdatesAtStartup:
+            if not self.ui._checkUpdates():
+              return
+
         if not self.ui._checkRegistration():
             return
-
-        # if not self.ui._checkUpdates():
-        #   return
 
         # Needed in case project load failed
         if not project:

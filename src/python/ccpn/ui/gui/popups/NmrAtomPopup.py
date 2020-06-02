@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 17:43:01 +0100 (Mon, March 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 09:52:53 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -71,7 +71,8 @@ class NmrAtomPopup(AttributeEditorPopupABC):
                   ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {}),
                   ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ]
-    hWidth = 130
+
+    hWidth = 120
 
     def _applyAllChanges(self, changes):
         """Apply all changes - update nmrAtom name

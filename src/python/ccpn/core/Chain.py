@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:27 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -180,7 +180,7 @@ class Chain(AbstractWrapperObject):
         with undoBlock():
             try:
                 newApiChain = copySubTree(apiChain, apiMolSystem, maySkipCrosslinks=True,
-                                         topObjectParameters=topObjectParameters)
+                                          topObjectParameters=topObjectParameters)
             except Exception as es:
 
                 # put in an error trap but now doesn't seem to re-create the error
@@ -316,6 +316,7 @@ class Chain(AbstractWrapperObject):
     #
     #     super().delete()
 
+
 #=========================================================================================
 
 @newObject(Chain)
@@ -325,10 +326,10 @@ def _newApiChain(self: Project, apiMolecule, shortName, role, comment):
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
                                         details=comment)
 
-
     result = self._project._data2Obj[newApiChain]
 
     return result
+
 
 # @newObject(Chain)
 @undoBlock()
@@ -391,7 +392,9 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
                 if not isinstance(s, str):
                     raise TypeError('sequence element is not a valid string: %s' % str(s))
                 elif len(s) != 3:
-                    raise TypeError('sequence elements must be 3 characters each, e.g., "ala ala ala"\nor sequence must be a single string, try removing spaces and return characters: %s' % str(s))
+                    raise TypeError(
+                        'sequence elements must be 3 characters each, e.g., "ala ala ala"\nor sequence must be a single string, try removing spaces and return characters: %s' % str(
+                            s))
                 elif not s.isalpha():
                     raise TypeError('sequence element contains bad characters: %s' % str(s))
 

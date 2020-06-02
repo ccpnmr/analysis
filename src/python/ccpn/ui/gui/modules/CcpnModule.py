@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 10:38:39 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -68,7 +68,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, Chec
     ColourSelectionWidget, LineEditPopup, ListCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import _PulldownABC
 from ccpn.core.lib.Notifiers import NotifierBase
-from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget, SpinBoxCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.Entry import Entry
 
@@ -131,6 +131,8 @@ CommonWidgetsEdits = {
                                                ('doubleSpinBox.valueChanged')),
     ScientificSpinBoxCompoundWidget.__name__: (ScientificSpinBoxCompoundWidget.getValue, ScientificSpinBoxCompoundWidget.setValue,
                                                ('scientificSpinBox.valueChanged')),
+    SpinBoxCompoundWidget.__name__          : (SpinBoxCompoundWidget.getValue, SpinBoxCompoundWidget.setValue,
+                                               ('spinBox.valueChanged')),
 
     SelectorWidget.__name__                 : (SelectorWidget.getText, SelectorWidget.select, None),
     InputPulldown.__name__                  : (InputPulldown.currentText, InputPulldown.set, None),
@@ -140,8 +142,8 @@ CommonWidgetsEdits = {
 
     EntryCompoundWidget.__name__            : (EntryCompoundWidget.getText, EntryCompoundWidget.setText, 'entry.textEdited'),
     NmrChainPulldown.__name__               : (NmrChainPulldown.getText, NmrChainPulldown.select, 'pulldownList.activated'),
-    RadioButtonsCompoundWidget.__name__     : (
-        RadioButtonsCompoundWidget.getIndex, RadioButtonsCompoundWidget.setIndex, 'radioButtons.buttonGroup.buttonClicked'),
+    RadioButtonsCompoundWidget.__name__     : (RadioButtonsCompoundWidget.getIndex, RadioButtonsCompoundWidget.setIndex,
+                                               'radioButtons.buttonGroup.buttonClicked'),
 
     # ADD TABLES
     # ADD Others

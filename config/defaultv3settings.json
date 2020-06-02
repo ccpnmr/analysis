@@ -91,7 +91,8 @@
         "exportDpi"                            : 300,
         "editorFont"                           : "Monaco",
         "moduleFont"                           : "Helvetica",
-        "messageFont"                          : "Lucida Grande"
+        "messageFont"                          : "Lucida Grande",
+        "checkUpdatesAtStartup"                : true
     },
     "proxySettings"    : {
         "useProxy"         : false,

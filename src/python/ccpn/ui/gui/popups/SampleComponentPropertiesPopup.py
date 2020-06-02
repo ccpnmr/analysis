@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:53 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-02 13:24:15 +0100 (Tue, June 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -46,6 +46,8 @@ class SampleComponentPopup(AttributeEditorPopupABC):
     """
     SampleComponent attributes editor popup
     """
+
+    LABELEDITING = True
 
     def _get(self, attr, default):
         """change the value from the sample object into an index for the radioButton
@@ -183,13 +185,13 @@ class SampleComponentPopup(AttributeEditorPopupABC):
         if selected == TYPENEW:
             self.labelling.pulldownList.setEditable(True)
         else:
-            self.labelling.pulldownList.setEditable(False)
+            self.labelling.pulldownList.setEditable(self.LABELEDITING)
 
     def _populate(self):
         super()._populate()
         if not self.EDITMODE:
             self.labelling.setEnabled(True)
-            self.labelling.pulldownList.setEditable(False)
+            self.labelling.pulldownList.setEditable(self.LABELEDITING)
 
     def _applyAllChanges(self, changes):
         if self.EDITMODE:

@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:30 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-06-03 15:13:56 +0100 (Wed, June 03, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,7 +37,7 @@ from ccpn.util.Constants import DEFAULT_LABELLING
 from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpnmodel.ccpncore.api.ccp.lims.Sample import SampleComponent as ApiSampleComponent
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpn.core.lib.ContextManagers import newObject
+from ccpn.core.lib.ContextManagers import newObject, newObjectList
 from ccpn.util.Logging import getLogger
 
 
@@ -235,11 +235,11 @@ SpectrumHit.sampleComponent = property(getter, None, None,
 del getter
 
 
-@newObject(SampleComponent)
+@newObjectList(('SampleComponent', 'Substance'))
 def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, role: str = None,  # ejb
                         concentration: float = None, concentrationError: float = None,
                         concentrationUnit: str = None, purity: float = None, comment: str = None,
-                        serial: int = None) -> SampleComponent:
+                        serial: int = None) -> typing.Union['SampleComponent', typing.Tuple]:
     """Create new SampleComponent within Sample.
 
     Automatically creates the corresponding Substance if the name is not already taken.
@@ -290,7 +290,10 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
         raise ValueError("SampleComponent.concentrationUnit must be in the list: %s" % Constants.concentrationUnits)  # ejb
 
     apiSample = self._wrappedData
-    substance = self._project.fetchSubstance(name=name, labelling=labelling)
+    existingSubstances = [substance for substance in self._project.substances if (substance.name == name and substance.labelling == labelling)]
+    if len(existingSubstances) > 1:
+        raise RuntimeError('Too many identical substances')
+    substance = existingSubstances[0] if existingSubstances else self._project.fetchSubstance(name=name, labelling=labelling)
 
     # NB - using substance._wrappedData.labelling because we need the API labelling value,
     # which is different for the default case
@@ -310,7 +313,12 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
             getLogger().warning("Could not reset serial of %s to %s - keeping original value"
                                 % (result, serial))
 
-    return result
+    # first element in the list must be the primary object
+    if existingSubstances:
+        return (result,)
+    else:
+        # need to notify that a substance has also been created
+        return (result, substance)
 
 
 #EJB 20181204: moved to Sample

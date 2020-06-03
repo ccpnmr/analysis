@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2018-12-20 15:53:00 +0000 (Thu, December 20, 2018) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-06-03 15:13:56 +0100 (Wed, June 03, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,16 +25,15 @@ __date__ = "$Date: 2018-12-20 15:44:34 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-import sys
 import decorator
 import inspect
 from contextlib import contextmanager
 from collections import Iterable
 from functools import partial
-from inspect import signature, Parameter
 from ccpn.core.lib import Util as coreUtil
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
+from ccpn.util.Common import makeIterableList
 
 
 @contextmanager
@@ -909,6 +908,58 @@ def newObject(klass):
 
         result._finaliseAction('create')
         return result
+
+    return theDecorator
+
+
+def newObjectList(klasses):
+    """A decorator wrap a newObject method's of the various classes in an undo block and calls
+    result._finalise('create') for each object in the results list
+    klasses is a list of strings of type klass.__class__.__name__ to remove restriction on circular imports
+    The primary object (first in the list) is returned and must be the first type in klasses list
+    """
+    from ccpn.core.lib import Undo
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+
+        application = getApplication()  # pass it in to reduce overhead
+
+        with notificationBlanking(application=application):
+            with undoStackBlocking(application=application) as addUndoItem:
+                results = func(*args, **kwds)
+                if not (results and results[0].__class__.__name__ == klasses[0]):
+                    raise RuntimeError('Expected an object of class %s, obtained %s' % (repr(klasses[0]), results[0].__class__))
+
+                for result in results:
+                    if not result.__class__.__name__ in klasses:
+                        raise RuntimeError('Expected an object in class types %s, obtained %s' % (klasses, result.__class__))
+
+                    # retrieve list of created api objects from the result
+                    apiObjectsCreated = result._getApiObjectTree()
+                    addUndoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
+                                                    obj=result, trigger='delete', preExecution=True,
+                                                    objsToBeDeleted=apiObjectsCreated),
+                                redo=BlankedPartial(result._wrappedData.root._unDelete,
+                                                    topObjectsToCheck=(result._wrappedData.topObject,),
+                                                    obj=result, trigger='create', preExecution=False,
+                                                    objsToBeUnDeleted=apiObjectsCreated)
+                                )
+
+                    _storeNewObjectCurrent(result, addUndoItem)
+                    # if hasattr(result, CURRENT_ATTRIBUTE_NAME):
+                    #     storeObj = _ObjectStore(result)
+                    #     addUndoItem(undo=storeObj._storeCurrentSelectedObject,
+                    #                 redo=storeObj._restoreCurrentSelectedObject,
+                    #                 )
+
+        # handle notifying all objects in the list - e.g. sampleComponent also makes a substance
+        for result in results:
+            result._finaliseAction('create')
+        # return the primary object
+        return results[0] if result else None
 
     return theDecorator
 

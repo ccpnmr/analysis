@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:53 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-03 15:50:42 +0100 (Wed, June 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -76,6 +76,9 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     CLOSEBUTTONTEXT = 'Close'
     APPLYBUTTONTEXT = 'Apply'
     OKBUTTONTEXT = 'OK'
+
+    # ok button is disabled on __init__ if the revert button has been enabled, requires call to __postInit__
+    DISABLEOK = False
 
     USESCROLLWIDGET = False
     FIXEDWIDTH = True
@@ -154,7 +157,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self._setButtons()
         self._setDialogSize()
 
-        if self.getButton(self.OKBUTTON):
+        if self.getButton(self.OKBUTTON) and self.DISABLEOK:
             self.getButton(self.OKBUTTON).setEnabled(False)
         if self.getButton(self.APPLYBUTTON):
             self.getButton(self.APPLYBUTTON).setEnabled(False)
@@ -218,6 +221,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                         enabled=True, visible=True):
         """Add a Revert button to the dialog box
         """
+        self.DISABLEOK = True
         return self._addButton(buttons=self.RESETBUTTON, callbacks=callback,
                                texts=text, tipTexts=tipText, icons=icon,
                                enabledStates=enabled, visibleStates=visible)

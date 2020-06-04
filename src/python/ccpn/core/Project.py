@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-13 20:25:46 +0100 (Wed, May 13, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-04 15:35:10 +0100 (Thu, June 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1496,9 +1496,13 @@ class Project(AbstractWrapperObject):
 
         for spectrum in self.spectra:
             if not spectrum.noiseLevel:
-                setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-                                          setPositiveContours=True, setNegativeContours=True,
-                                          useSameMultiplier=True)
+
+                try:
+                    setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
+                                              setPositiveContours=True, setNegativeContours=True,
+                                              useSameMultiplier=True)
+                except Exception as es:
+                    getLogger().warning('Cannot set noise levels for spectrum {}'.format(spectrum.pid))
 
     #===========================================================================================
     # new'Object' and other methods

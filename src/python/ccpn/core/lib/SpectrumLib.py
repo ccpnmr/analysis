@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-06-04 15:35:10 +0100 (Thu, June 04, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -172,6 +172,7 @@ def align2HSQCs(refSpectrum, querySpectrum, refPeakListIdx=-1, queryPeakListIdx=
 
     return shifts, correctedValues
 
+
 def _estimate1DSpectrumSNR(spectrum, engine='max'):
     '''
 
@@ -182,7 +183,7 @@ def _estimate1DSpectrumSNR(spectrum, engine='max'):
     :return:
     :rtype:
     '''
-    engines = {'max':np.max, 'mean':np.mean, 'std':np.std}
+    engines = {'max': np.max, 'mean': np.mean, 'std': np.std}
     from ccpn.core.PeakList import estimateSNR_1D
 
     if engine in engines:
@@ -191,9 +192,10 @@ def _estimate1DSpectrumSNR(spectrum, engine='max'):
         func = np.max
         print('Engine not recognised. Using Default')
     _snr = estimateSNR_1D(noiseLevels=[spectrum.noiseLevel, spectrum.negativeNoiseLevel],
-                                   signalPoints=[func(spectrum.intensities)])
+                          signalPoints=[func(spectrum.intensities)])
 
     return _snr[0]
+
 
 # refSpectrum = project.spectra[]
 # querySpectrum = project.spectra[]
@@ -726,7 +728,7 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                               setPositiveContours=True, setNegativeContours=True,
                               useDefaultMultiplier=True, useDefaultLevels=True, useDefaultContourBase=False,
                               useSameMultiplier=True,
-                              defaultMultiplier = DEFAULTMULTIPLIER, defaultLevels=DEFAULTLEVELS, defaultContourBase=DEFAULTCONTOURBASE):
+                              defaultMultiplier=DEFAULTMULTIPLIER, defaultLevels=DEFAULTLEVELS, defaultContourBase=DEFAULTCONTOURBASE):
     """Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum
     """
 
@@ -759,6 +761,9 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
     # exit if nothing set
     if not (setNoiseLevel or setPositiveContours or setNegativeContours):
         return
+
+    if any(x != 'Frequency' for x in spectrum.dimensionTypes):
+        raise NotImplementedError("setContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes,))
 
     # get specLimits for all dimensions
     specLimits = list(spectrum.spectrumLimits)
@@ -828,7 +833,7 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
 
                 if setPositiveContours:
                     try:
-                        spectrum.positiveContourBase = base         # do
+                        spectrum.positiveContourBase = base  # do
                         spectrum.positiveContourFactor = posMult
                     except Exception as es:
 
@@ -852,11 +857,12 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
 
                     spectrum.negativeContourCount = negLevels
 
+
 def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
                               setPositiveContours=False, setNegativeContours=False,
                               useDefaultMultiplier=True, useDefaultLevels=True, useDefaultContourBase=False,
                               useSameMultiplier=True,
-                              defaultMultiplier = DEFAULTMULTIPLIER, defaultLevels=DEFAULTLEVELS, defaultContourBase=DEFAULTCONTOURBASE):
+                              defaultMultiplier=DEFAULTMULTIPLIER, defaultLevels=DEFAULTLEVELS, defaultContourBase=DEFAULTCONTOURBASE):
     """Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum
     """
 
@@ -889,6 +895,9 @@ def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
     # # exit if nothing set
     # if not (setNoiseLevel or setPositiveContours or setNegativeContours):
     #     return [None] * 5
+
+    if any(x != 'Frequency' for x in spectrum.dimensionTypes):
+        raise NotImplementedError("getContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes,))
 
     # get specLimits for all dimensions
     specLimits = list(spectrum.spectrumLimits)
@@ -958,7 +967,7 @@ def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
                         negMult = pow(abs(mn / negBase), 1 / negLevels) if negBase else 0.0
 
                 if not setPositiveContours:
-                    posBase = posMult = posLevels =  None
+                    posBase = posMult = posLevels = None
 
                 if not setNegativeContours:
                     negBase = negMult = negLevels = None

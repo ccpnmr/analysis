@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:48 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-06-04 16:56:47 +0100 (Thu, June 04, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -77,17 +77,31 @@ class ExperimentTypePopup(CcpnDialog):
         for spectrumIndex, spectrum in enumerate(spectra):
             axisCodes = []
             for isotopeCode in spectrum.isotopeCodes:
-                axisCodes.append(''.join([char for char in isotopeCode if not char.isdigit()]))
+                axisCodes.append(''.join([char for char in isotopeCode if not char.isdigit()] if isotopeCode else '*'))
 
+            # atomCodes = tuple(ax if ax is not None else '*' for ax in sorted(axisCodes))
             atomCodes = tuple(sorted(axisCodes))
-            self.pulldownItems = list(self.experimentTypes[spectrum.dimensionCount].get(atomCodes).keys())
+
+            itemFilter = self.experimentTypes[spectrum.dimensionCount].get(atomCodes)
+
+            # add the widgets
             spLabel = Label(self.scrollAreaWidgetContents, text=spectrum.pid, grid=(spectrumIndex, 0))
             self.spPulldown = FilteringPulldownList(self.scrollAreaWidgetContents, grid=(spectrumIndex, 1),
-                                                    callback=partial(self._setExperimentType, spectrum, atomCodes),
-                                                    texts=self.pulldownItems)
+                                                    callback=partial(self._setExperimentType, spectrum, atomCodes),)
+
+            if itemFilter:
+                # populate pullDown with filtered experimentTypes
+                self.pulldownItems = list(itemFilter.keys())
+                self.spPulldown.setData(texts=self.pulldownItems)
+            else:
+                # populate pullDown with all experimentTypes
+                self.pulldownItems = list(vv for vals in self.experimentTypes[spectrum.dimensionCount].values() for vv in vals.keys())
+                self.spPulldown.setData(texts=self.pulldownItems)
+
             self.spPulldown.lineEdit().editingFinished.connect(partial(self.editedExpTypeChecker, self.spPulldown, self.pulldownItems))
             # self.spPulldown._completer.setCompletionMode(QtGui.QCompleter.InlineCompletion &~  QtGui.QCompleter.UnfilteredPopupCompletion)
             self.spPulldowns.append(self.spPulldown)
+
             spButton = Button(self.scrollAreaWidgetContents, grid=(spectrumIndex, 2),
                               callback=partial(self.raiseExperimentFilterPopup,
                                                spectrum, spectrumIndex, atomCodes),

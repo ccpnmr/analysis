@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-05 19:27:53 +0100 (Fri, June 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3285,3 +3285,103 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
             preferences = json.load(fp, object_hook=AttrDict)
 
     return preferences
+
+
+if __name__ == '__main__':
+
+    # from sandbox.Geerten.Refactored.framework import Framework
+    # from sandbox.Geerten.Refactored.programArguments import Arguments
+
+    from ccpn.framework.Framework import Framework
+    from ccpn.framework.Framework import Arguments
+
+
+    _makeMainWindowVisible = False
+
+
+    class MyProgramme(Framework):
+        "My first app"
+        pass
+
+
+    myArgs = Arguments()
+    myArgs.noGui = False
+    myArgs.debug = True
+
+    application = MyProgramme('MyProgramme', '3.0.1', args=myArgs)
+    ui = application.ui
+    ui.initialize(ui.mainWindow)  # ui.mainWindow not needed for refactored?
+
+    if _makeMainWindowVisible:
+        ui.mainWindow._updateMainWindow(newProject=True)
+        ui.mainWindow.show()
+        QtWidgets.QApplication.setActiveWindow(ui.mainWindow)
+
+    # register the programme
+    from ccpn.framework.Application import ApplicationContainer
+
+
+    container = ApplicationContainer()
+    container.register(application)
+    application.useFileLogger = True
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    from xml.etree import ElementTree
+    from ccpn.util.Path import aPath
+
+    # active parser to include comments in import/export
+    parser = ElementTree.XMLParser(target=ElementTree.TreeBuilder(insert_comments=True))
+
+    # read in the file
+    filePath = aPath('/Users/ejb66/Documents/CcpNmrData/sh3_tutorial_LabPtn.ccpn/ccpnv3/ccp/nmr/Nmr/sh3_tutorial+sh3_tutorial_vicky_2009-04-16-10-58-30-845_00001.xml')
+    tree = ElementTree.parse(filePath, parser)
+
+    # list of elements to remove from file
+    includeElems = ['LMOL.LabeledMolecule', 'LMOL.LabeledMixture.name', 'NMR.Experiment.labeledMixtures', 'LMOL.exo-LabeledMixture', 'NMR.Experiment.refExperiment']
+
+    indent = 0
+    def printRecur(parent):
+        """Recursively prints the tree
+        """
+        global indent
+
+        if parent.tag in includeElems:
+            print('_' * indent + '{}'.format(parent.tag.title().strip()))
+
+        indent += 4
+        for lm in list(parent):
+            printRecur(lm)
+        indent -= 4
+
+    def deleteRecur(parent):
+        """Recursively deletes elements in the tree
+        """
+        for lm in list(parent):
+            deleteRecur(lm)
+
+        for lm in list(parent):
+            if lm.tag in includeElems:
+                parent.remove(lm)
+                print('_' * indent + 'DELETE {}'.format(lm.tag.title().strip()))
+
+    # print the tree
+    root = tree.getroot()
+    printRecur(root)
+
+    # delete tags
+    deleteRecur(root)
+
+    # print again to test
+    printRecur(root)
+
+    # NOTE:ED - needs swapping round when working
+    fileName = filePath.basename
+    renameFileName = fileName+'_OLD'
+    renameFilePath =  (filePath.parent / renameFileName).assureSuffix('.xml')
+
+    # write out the modified file
+    tree.write(renameFilePath, encoding='UTF-8', xml_declaration=True)
+    with open(renameFilePath, "a+") as fp:
+        # added for completeness
+        fp.write('\n<!--End of Memops Data-->')

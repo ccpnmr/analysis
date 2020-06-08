@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-08 13:33:52 +0100 (Mon, June 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-08 13:52:45 +0100 (Mon, June 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,8 @@ from functools import partial
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.util.Common import makeIterableList
-from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
+from ccpn.ui.gui.lib.ChangeStateHandler import changeState
+from ccpn.util.OrderedSet import OrderedSet
 
 
 ATTRGETTER = 0
@@ -301,7 +302,7 @@ class AttributeABC():
 
         parentRoot.edits[attr] = newWidget
         if self._queueStates:
-            parentRoot._VALIDATTRS.append(attr)
+            parentRoot._VALIDATTRS.add(attr)
 
         # add the popup attribute corresponding to attr
         setattr(parentRoot, attr, newWidget)
@@ -352,7 +353,6 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
     """
     Abstract base class to implement a popup for editing complex properties
     """
-    _VALIDATTRS = []
     attributes = VList([])  # A container holding a list of attributes/containers
                             # each attribute is of type (attributeName, getFunction, setFunction, kwds) tuples;
                             # or a container type VList/HList/MoreLess
@@ -379,6 +379,7 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
         """Create the attributes in the main widget area
         """
         self.edits = {}  # An (attributeName, widgetType) dict
+        self._VALIDATTRS = OrderedSet()
 
         # raise an error if the top object is not a container
         if not isinstance(self.attributes, AttributeABC):

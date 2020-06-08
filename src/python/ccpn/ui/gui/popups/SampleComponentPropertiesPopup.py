@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-03 15:13:56 +0100 (Wed, June 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-08 13:33:52 +0100 (Mon, June 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,8 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.util.Constants import concentrationUnits
-from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
-from ccpn.util.AttrDict import AttrDict
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import ComplexAttributeEditorPopupABC, VList, _blankContainer
 from ccpn.core.SampleComponent import SampleComponent
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
     RadioButtonsCompoundWidget, PulldownListCompoundWidget
@@ -42,7 +41,7 @@ BUTTONSTATES = ['New', 'From Substances']
 WIDTH = 150
 
 
-class SampleComponentPopup(AttributeEditorPopupABC):
+class SampleComponentPopup(ComplexAttributeEditorPopupABC):
     """
     SampleComponent attributes editor popup
     """
@@ -92,20 +91,26 @@ class SampleComponentPopup(AttributeEditorPopupABC):
         self.Currentsubstances.pulldownList.setData(substancePulldownData)
 
     klass = SampleComponent  # The class whose properties are edited/displayed
-    attributes = [('Select source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
-                                                                                         'selectedInd': 1,
-                                                                                         'direction'  : 'h'}),
-                  ('Current substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
-                  ('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                  ('labelling', PulldownListCompoundWidget, getattr, setattr, _getLabelling, None, {'editable': True}),
-                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                  ('role', PulldownListCompoundWidget, getattr, setattr, _getRoleTypes, None, {'editable': False}),
-                  ('concentrationUnit', PulldownListCompoundWidget, getattr, setattr, _getConcentrationUnits, None, {'editable': False}),
-                  ('concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
-                  ]
-    DISCARDITEMS = ['Select source', 'Current substances']
+    HWIDTH = 150
+    attributes = VList([VList([('Select source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
+                                                                                                      'selectedInd': 1,
+                                                                                                      'direction'  : 'h',
+                                                                                                      'hAlign'     : 'l'}),
+                               ('Current substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
+                               ],
+                              queueStates=False,
+                              hWidth=HWIDTH,
+                              ),
+                        ('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                        ('labelling', PulldownListCompoundWidget, getattr, setattr, _getLabelling, None, {'editable': True}),
+                        ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                        ('role', PulldownListCompoundWidget, getattr, setattr, _getRoleTypes, None, {'editable': False}),
+                        ('concentrationUnit', PulldownListCompoundWidget, getattr, setattr, _getConcentrationUnits, None, {'editable': False}),
+                        ('concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                        ],
+                       hWidth=HWIDTH,
+                       )
 
-    hWidth = 150
     FIXEDWIDTH = True
     FIXEDHEIGHT = True
     ENABLEREVERT = True
@@ -197,30 +202,12 @@ class SampleComponentPopup(AttributeEditorPopupABC):
         if self.EDITMODE:
             super()._applyAllChanges(changes)
 
-            # name = self.name.getText()
-            # labelling = self.name.getText()
-            # if name != self.obj.name or labelling != self.obj.labelling:
-            #     self.obj.rename(name=name, labelling=labelling)
-
         if not self.EDITMODE:
             # if new sampleComponent then call the new method - self.obj is container of new attributes
             super()._applyAllChanges(changes)
 
-            # remove unnecessary attributes
-            for item in self.DISCARDITEMS:
-                if item in self.obj:
+            for item in list(self.obj.keys()):
+                # remove items that are not required in newSampleComponent parameters
+                if item not in self._VALIDATTRS:
                     del self.obj[item]
             self.sample.newSampleComponent(**self.obj)
-
-
-class _blankContainer(AttrDict):
-    """
-    Class to simulate a blank object in new/edit popup.
-    """
-
-    def __init__(self, popupClass):
-        """Create a list of attributes from the container class
-        """
-        super().__init__()
-        for attr in popupClass.attributes:
-            self[attr[0]] = None

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-08 13:33:52 +0100 (Mon, June 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtCore
 from string import whitespace
 from functools import partial
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
@@ -43,6 +44,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
     """
     Abstract base class to implement a popup for editing properties
     """
+
     klass = None  # The class whose properties are edited/displayed
     attributes = []  # A list of (attributeName, getFunction, setFunction, kwds) tuples;
 
@@ -209,71 +211,255 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
 NEWHIDDENGROUP = '_NEWHIDDENGROUP'
 CLOSEHIDDENGROUP = '_CLOSEHIDDENGROUP'
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
+from ccpn.util.LabelledEnum import LabelledEnum
+from collections import namedtuple
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.util.AttrDict import AttrDict
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
+    RadioButtonsCompoundWidget, PulldownListCompoundWidget, SpinBoxCompoundWidget
 
 
-class HiddenAttributeEditorPopupABC(AttributeEditorPopupABC):
+AttributeItem = namedtuple('AttributeItem', ('attr', 'attrType', 'getFunction', 'setFunction', 'presetFunction', 'callback', 'kwds',))
+
+
+class AttributeListType(LabelledEnum):
+    VERTICAL = 0, 'vertical'
+    HORIZONTAL = 1, 'horizontal'
+    MORELESS = 2, 'moreLess'
+    TABFRAME = 3, 'tabFrame'
+    TAB = 4, 'tab'
+    EMPTYFRAME = 5, 'frame'
+
+
+class AttributeABC():
+    ATTRIBUTELISTTYPE = AttributeListType.VERTICAL
+
+    def __init__(self, attributeList, queueStates=True, newContainer=True, hWidth=100, **kwds):
+        self._attributes = attributeList
+        self._row = 0
+        self._col = 0
+        self._queueStates = queueStates
+        self._newContainer = newContainer
+        self._container = None
+        self._kwds = kwds
+        self._hWidth = hWidth
+
+    def createContainer(self, parent, attribParent, grid=None, gridSpan=(1, 1)):
+        # create the new container here, including gridSpan?
+        if attribParent:
+            grid = attribParent.nextGridPosition()
+            attribParent.nextPosition()
+        else:
+            grid = (0, 0)
+
+        self._container = Frame(parent, setLayout=True, grid=grid, **self._kwds)
+        self._container.getLayout().setAlignment(QtCore.Qt.AlignTop)
+        self.nextPosition()
+        return self._container
+
+    def addAttribItem(self, parentRoot, attribItem):
+        # add a new widget to the current container
+        if not self._container:
+            raise RuntimeError('Container not instantiated')
+
+        from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
+
+        # add widget here
+        attr, attrType, getFunction, setFunction, presetFunction, callback, kwds = attribItem
+
+        editable = setFunction is not None
+        newWidget = attrType(self._container, mainWindow=parentRoot.mainWindow,
+                             labelText=attr, editable=editable,
+                             grid=(self._row, self._col),
+                             fixedWidths=(self._hWidth, None), compoundKwds=kwds)  #, **kwds)
+
+        # remove whitespaces to give the attribute name in the class
+        attr = attr.translate({ord(c): None for c in whitespace})
+
+        # connect the signal
+        if attrType and attrType.__name__ in CommonWidgetsEdits:
+            attrSignalTypes = CommonWidgetsEdits[attrType.__name__][ATTRSIGNAL]
+
+            for attrST in makeIterableList(attrSignalTypes):
+                this = newWidget
+
+                # iterate through the attributeName to get the signals to connect to (for compound widgets)
+                if attrST:
+                    for th in attrST.split('.'):
+                        this = getattr(this, th, None)
+                        if this is None:
+                            break
+                    else:
+                        if this is not None:
+                            # attach the connect signal and store in the widget
+                            queueCallback = partial(parentRoot._queueSetValue, attr, attrType, getFunction, setFunction, presetFunction, callback, self._row)
+                            this.connect(queueCallback)
+                            newWidget._queueCallback = queueCallback
+
+            if callback:
+                newWidget.setCallback(callback=partial(callback, self))
+
+        parentRoot.edits[attr] = newWidget
+        if self._queueStates:
+            parentRoot._VALIDATTRS.append(attr)
+
+        # add the popup attribute corresponding to attr
+        setattr(parentRoot, attr, newWidget)
+        self.nextPosition()
+
+    def nextPosition(self):
+        """Move the pointer to the next position
+        """
+        self._row += 1
+
+    def nextGridPosition(self):
+        return (self._row, self._col)
+
+
+class VList(AttributeABC):
+    # contains everything from the baseClass
+    pass
+
+
+class HList(AttributeABC):
+    ATTRIBUTELISTTYPE = AttributeListType.HORIZONTAL
+
+    def nextPosition(self):
+        """Move the pointer to the next position
+        """
+        self._col += 1
+
+
+class MoreLess(AttributeABC):
+    ATTRIBUTELISTTYPE = AttributeListType.MORELESS
+
+    def createContainer(self, parent, attribParent, grid=None, gridSpan=(1, 1)):
+        # create the new container here, including gridSpan?
+        if attribParent:
+            grid = attribParent.nextGridPosition()
+            attribParent.nextPosition()
+        else:
+            grid = (0, 0)
+
+        _frame = MoreLessFrame(parent, name='<MoreLess>', showMore=False, showBorder=False, grid=grid, **self._kwds)
+        self._container = _frame.contentsWidget
+        self._container.getLayout().setAlignment(QtCore.Qt.AlignTop)
+        self.nextPosition()
+        return self._container
+
+
+class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
     """
-    Abstract base class to implement a popup for editing properties
-    Attribute list can contain '_NEWHIDDENGROUP' to set a new group and '_CLOSEHIDDENGROUP' to close a group
+    Abstract base class to implement a popup for editing complex properties
     """
+    _VALIDATTRS = []
+    attributes = VList([])  # A container holding a list of attributes/containers
+                            # each attribute is of type (attributeName, getFunction, setFunction, kwds) tuples;
+                            # or a container type VList/HList/MoreLess
+
+    def _setAttributeSet(self, parentWidget, attribParent, attribContainer):
+
+        # start by making new container
+        attribContainer.createContainer(parentWidget, attribParent)
+
+        for attribItem in attribContainer._attributes:
+
+            if isinstance(attribItem, AttributeABC):
+                # recurse into the list
+                self._setAttributeSet(attribContainer._container, attribContainer, attribItem)
+
+            elif isinstance(attribItem, tuple):
+                # add widget
+                attribContainer.addAttribItem(self, attribItem)
+
+            else:
+                raise RuntimeError('Container not type defined')
 
     def _setAttributeWidgets(self):
         """Create the attributes in the main widget area
         """
-        from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
-
         self.edits = {}  # An (attributeName, widgetType) dict
 
+        # raise an error if the top object is not a container
+        if not isinstance(self.attributes, AttributeABC):
+            raise RuntimeError('Container not type defined')
+
         # create the list of widgets and set the callbacks for each
-        row = 0
-        currentWidget = self.mainWidget
-        history = []
+        self._setAttributeSet(self.mainWidget, None, self.attributes)
 
-        for attr, attrType, getFunction, setFunction, presetFunction, callback, kwds in self.attributes:
+    def _populateIterator(self, attribList):
+        from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
 
-            if attr.startswith(NEWHIDDENGROUP):
-                history.insert(0, (currentWidget, row))
+        for attribItem in attribList._attributes:
 
-                name = attr[len(NEWHIDDENGROUP)+1:]
-                currentWidget = MoreLessFrame(currentWidget, name=name, grid=(row, 0), showMore=False, showBorder=False).contentsWidget
-                row = 0
+            if isinstance(attribItem, AttributeABC):
+                # must be another subgroup of attributes - AttributeABC
+                self._populateIterator(attribItem)
 
-            elif attr.startswith(CLOSEHIDDENGROUP):
-                currentWidget, row = history.pop(0)
-                row += 1
-
-            else:
-                editable = setFunction is not None
-                newWidget = attrType(currentWidget, mainWindow=self.mainWindow, labelText=attr, editable=editable,
-                                     grid=(row, 0), fixedWidths=(self.hWidth, None), compoundKwds=kwds)  #, **kwds)
+            elif isinstance(attribItem, tuple):
+                # these are now in the containerList
+                attr, attrType, getFunction, _, _presetFunction, _, _ = attribItem
 
                 # remove whitespaces to give the attribute name in the class
                 attr = attr.translate({ord(c): None for c in whitespace})
 
-                # connect the signal
-                if attrType and attrType.__name__ in CommonWidgetsEdits:
-                    attrSignalTypes = CommonWidgetsEdits[attrType.__name__][ATTRSIGNAL]
+                # populate the widget
+                if attr in self.edits and attrType and attrType.__name__ in CommonWidgetsEdits:
+                    thisEdit = CommonWidgetsEdits[attrType.__name__]
+                    attrSetter = thisEdit[ATTRSETTER]
 
-                    for attrST in makeIterableList(attrSignalTypes):
-                        this = newWidget
+                    if _presetFunction:
+                        # call the preset function for the widget (e.g. populate pulldowns with modified list)
+                        _presetFunction(self, self.obj)
 
-                        # iterate through the attributeName to get the signals to connect to (for compound widgets)
-                        if attrST:
-                            for th in attrST.split('.'):
-                                this = getattr(this, th, None)
-                                if this is None:
-                                    break
-                            else:
-                                if this is not None:
-                                    # attach the connect signal and store in the widget
-                                    queueCallback = partial(self._queueSetValue, attr, attrType, getFunction, setFunction, presetFunction, callback, row)
-                                    this.connect(queueCallback)
-                                    newWidget._queueCallback = queueCallback
+                    if getFunction:  # and self.EDITMODE:
+                        # set the current value
+                        value = getFunction(self.obj, attr, None)
+                        attrSetter(self.edits[attr], value)
 
-                    if callback:
-                        newWidget.setCallback(callback=partial(callback, self))
+            else:
+                raise RuntimeError('Container type not defined')
 
-                self.edits[attr] = newWidget
+    def _populate(self):
 
-                setattr(self, attr, newWidget)
-                row += 1
+        self._changes.clear()
+        with self._changes.blockChanges():
+            # start with the top object - must be a container class
+            self._populateIterator(self.attributes)
+
+    def _setValue(self, attr, setFunction, value):
+        """Function for setting the attribute, called by _applyAllChanges
+
+        This can be subclassed to completely disable writing to the object
+        as maybe required in a new object
+        """
+        if attr in self._VALIDATTRS:
+            setFunction(self.obj, attr, value)
+
+
+class _blankContainer(AttrDict):
+    """
+    Class to simulate a blank object in new/edit popup.
+    """
+
+    def _setAttributes(self, attribList):
+        for attribItem in attribList._attributes:
+
+            if isinstance(attribItem, AttributeABC):
+                # must be another subgroup of attributes - AttributeABC
+                self._setAttributes(attribItem)
+
+            elif isinstance(attribItem, tuple):
+                self[attribItem[0]] = None
+
+            else:
+                raise RuntimeError('Container type not defined')
+
+    def __init__(self, popupClass):
+        """Create a list of attributes from the container class
+        """
+        super().__init__()
+        self._popupClass = popupClass
+
+        self._setAttributes(popupClass.attributes)
+        print(self.__dict__)

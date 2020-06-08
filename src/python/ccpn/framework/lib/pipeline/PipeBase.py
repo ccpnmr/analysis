@@ -45,6 +45,7 @@ PIPE_GENERIC = 'Generic'
 PIPE_OUTPUTS = 'Outputs'
 PIPE_USER = 'User'
 
+PIPE_CATEGORY = 'pipeCategory'
 PIPE_CATEGORIES = [PIPE_ANALYSIS,
                    PIPE_ASSIGN,
                    PIPE_SCREEN,

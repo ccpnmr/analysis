@@ -55,7 +55,7 @@ from collections import OrderedDict
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.util.Logging import getLogger
-from ccpn.framework.lib.pipeline.PipeBase import PIPE_CATEGORIES
+from ccpn.framework.lib.pipeline.PipeBase import PIPE_CATEGORIES, PIPE_CATEGORY
 from functools import partial
 from ccpn.ui.gui.widgets.Font import Font
 from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
@@ -902,7 +902,7 @@ class PipesTree(QtWidgets.QTreeWidget, Base):
         '''
         self.clear()
         from collections import defaultdict
-        allPipes = [(p.pipeCategory, p.pipeName) for p in self.guiPipeline.pipes]
+        allPipes = [(p.pipeCategory, p.pipeName) for p in self.guiPipeline.pipes if hasattr(p, PIPE_CATEGORY)]
         d = defaultdict(list)
         for k, v in allPipes:
             d[k].append(v)

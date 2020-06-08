@@ -35,7 +35,7 @@ from ccpn.ui.gui.widgets.Base import Base
 class BarGraphWidget(Widget):
 
     def __init__(self, parent, application=None, xValues=None, yValues=None, colour='r',
-                 objects=None, threshouldLine=0.01, backgroundColour='w', **kwds):
+                 objects=None, threshouldLine=0, backgroundColour='w', **kwds):
         super().__init__(parent, **kwds)
 
         self.application = application

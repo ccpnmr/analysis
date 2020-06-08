@@ -422,7 +422,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.thresholdLAbel = Label(self.scrollAreaWidgetContents, text='Threshold value', grid=(i, 0))
     self.thresholdFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
 
-    self.thresholdSpinBox = DoubleSpinbox(self.thresholdFrame, value=None, step=0.01,
+    self.thresholdSpinBox = DoubleSpinbox(self.thresholdFrame, value=DefaultThreshould, step=0.01,
                                           decimals=3, callback=self._updateThresholdLineValue,
                                           tipText='Threshold value for deltas',
                                           grid=(0, 0))
@@ -430,6 +430,8 @@ class ChemicalShiftsMapping(CcpnModule):
                                   tipText='Default: STD of deltas',
                                   grid=(0, 1))
     self.thresholdButton.setMaximumWidth(50)
+    v = self.thresholdSpinBox.get()
+    self.barGraphWidget.xLine.setPos(v)
 
     i += 1
     self.scaleBindingC = Label(self.scrollAreaWidgetContents, text='Scale binding curves', grid=(i, 0))
@@ -1511,7 +1513,7 @@ class ChemicalShiftsMapping(CcpnModule):
       return
 
     if self.barGraphWidget.xLine:
-      self.thresholdLinePos = self.thresholdSpinBox.value()
+      self.thresholdLinePos = self.barGraphWidget.xLine.pos().y()
 
       if self.nmrResidueTable._dataFrameObject:
         for nmrResidue in self.nmrResidueTable._dataFrameObject.objects:

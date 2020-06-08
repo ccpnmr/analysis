@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-05 19:27:53 +0100 (Fri, June 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-08 13:34:26 +0100 (Mon, June 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3382,6 +3382,7 @@ if __name__ == '__main__':
 
     # write out the modified file
     tree.write(renameFilePath, encoding='UTF-8', xml_declaration=True)
-    with open(renameFilePath, "a+") as fp:
-        # added for completeness
-        fp.write('\n<!--End of Memops Data-->')
+
+    # with open(renameFilePath, "a+") as fp:
+    #     # added for completeness
+    #     fp.write('\n<!--End of Memops Data-->')

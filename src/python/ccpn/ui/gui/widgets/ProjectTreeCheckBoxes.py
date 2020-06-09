@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-20 13:05:54 +0100 (Wed, May 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-09 15:59:25 +0100 (Tue, June 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -105,7 +105,9 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         Note._pluralLinkName         : QtCore.Qt.Checked
         }
 
-    def __init__(self, parent=None, project=None, maxSize=(250, 300), includeProject=False, enableCheckboxes=True, **kwds):
+    def __init__(self, parent=None, project=None, maxSize=(250, 300),
+                 includeProject=False, enableCheckboxes=True, multiSelect=False,
+                 **kwds):
         """Initialise the widget
         """
         super().__init__(parent)
@@ -117,6 +119,10 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         self.project = project
         self.includeProject = includeProject
         self._enableCheckboxes = enableCheckboxes
+        self.multiSelect = multiSelect
+        if self.multiSelect:
+            self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+
         self.header().hide()
         if self.project is not None:
             self._populateTreeView()

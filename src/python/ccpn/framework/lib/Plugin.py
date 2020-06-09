@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 01:56:07 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-09 12:52:32 +0100 (Tue, June 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -84,12 +84,10 @@ class Plugin(ABC):
         """
         from ccpn.plugins import loadedPlugins, loadedUserPlugins
 
-        # if cls.CCPNPLUGIN:
-        #     loadedPlugins.append(cls)
-        # else:
-        #     loadedUserPlugins.append(cls)
-        loadedPlugins.append(cls)
-
+        if cls.CCPNPLUGIN:
+            loadedPlugins.append(cls)
+        else:
+            loadedUserPlugins.append(cls)
 
     def __init__(self, application=None):
         self.guiModule = self.__class__.guiModule

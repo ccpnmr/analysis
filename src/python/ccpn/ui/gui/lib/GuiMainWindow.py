@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:06:38 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-09 01:56:08 +0100 (Tue, June 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,8 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, setInitialPath
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
-from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU
+from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, \
+    USERMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU
 from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
@@ -421,10 +422,12 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._fillPredefinedLayoutMenu()
         self._fillRecentMacrosMenu()
         #TODO:ED needs fixing
-        self._fillPluginsMenu()  # ejb - nothing to show, and crash anyway
+        self._fillCcpnPluginsMenu()
+        self._fillUserPluginsMenu()
 
         self._attachModulesMenuAction()
         self._attachCCPNMacrosMenuAction()
+        # self._attachUserMacrosMenuAction()
         self._attachTutorialsMenuAction()
 
     def _attachModulesMenuAction(self):
@@ -438,6 +441,12 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # so it is always up-to-date
         modulesMenu = self.searchMenuAction(CCPNMACROSMENU)
         modulesMenu.aboutToShow.connect(self._fillCCPNMacrosMenu)
+
+    def _attachUserMacrosMenuAction(self):
+        # add a connect to call _fillUserMacrosMenu when the menu item is about to show
+        # so it is always up-to-date
+        modulesMenu = self.searchMenuAction(USERMACROSMENU)
+        modulesMenu.aboutToShow.connect(self._fillUserMacrosMenu)
 
     def _attachTutorialsMenuAction(self):
         # add a connect to call _fillTutorialsMenu when the menu item is about to show
@@ -755,8 +764,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Clear',
                                           callback=self.application.clearRecentMacros))
 
-    def _addPluginSubMenu(self, Plugin):
-        targetMenu = pluginsMenu = self.searchMenuAction(CCPNPLUGINSMENU)
+    def _addPluginSubMenu(self, MENU, Plugin):
+        targetMenu = pluginsMenu = self.searchMenuAction(MENU)
         if '...' in Plugin.PLUGINNAME:
             package, name = Plugin.PLUGINNAME.split('...')
             try:
@@ -821,6 +830,26 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 modulesMenu.addAction(Action(modulesMenu, text=os.path.basename(filename),
                                              callback=partial(self._runCCPNMacro, file, self)))
 
+    def _fillUserMacrosMenu(self):
+        modulesMenu = self.searchMenuAction(USERMACROSMENU)
+        modulesMenu.clear()
+
+        macroPath = self.application.preferences.general.userMacroPath
+        from os import walk
+
+        # read the macros file directory - only top level
+        macroFiles = []
+        for (dirpath, dirnames, filenames) in walk(os.path.expanduser(macroPath)):
+            macroFiles.extend([os.path.join(dirpath, filename) for filename in filenames])
+            break
+
+        for file in macroFiles:
+            filename, fileExt = os.path.splitext(file)
+
+            if fileExt == '.py':
+                modulesMenu.addAction(Action(modulesMenu, text=os.path.basename(filename),
+                                             callback=partial(self._runUserMacro, file, self)))
+
     def _runCCPNMacro(self, filename, modulesMenu):
         """Run a CCPN macro from the populated menu
         """
@@ -829,6 +858,15 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         except Exception as es:
             Logging.getLogger().warning('Error running CCPN Macro: %s' % str(filename))
+
+    def _runUserMacro(self, filename, modulesMenu):
+        """Run a User macro from the populated menu
+        """
+        try:
+            self.application.runMacro(filename)
+
+        except Exception as es:
+            Logging.getLogger().warning('Error running User Macro: %s' % str(filename))
 
     def _fillTutorialsMenu(self):
         modulesMenu = self.searchMenuAction(TUTORIALSMENU)
@@ -910,24 +948,53 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             if mode != SELECT:
                 self.setMouseMode(SELECT)
 
-    def _fillPluginsMenu(self):
+    def _fillCcpnPluginsMenu(self):
 
         from ccpn.plugins import loadedPlugins
 
         pluginsMenu = self.searchMenuAction(CCPNPLUGINSMENU)
         pluginsMenu.clear()
         for Plugin in loadedPlugins:
-            self._addPluginSubMenu(Plugin)
+            self._addPluginSubMenu(CCPNPLUGINSMENU, Plugin)
         pluginsMenu.addSeparator()
         pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
-                                     callback=self._reloadPlugins))
+                                     callback=self._reloadCcpnPlugins))
 
-    def _reloadPlugins(self):
+    def _reloadCcpnPlugins(self):
         from ccpn import plugins
         from importlib import reload
+        from ccpn.util.Path import aPath
 
         reload(plugins)
-        self._fillPluginsMenu()
+
+        pluginUserPath = self.application.preferences.general.userPluginPath
+        import importlib.util
+
+        filePaths = [(aPath(r) / file) for r,d,f in os.walk(aPath(pluginUserPath)) for file in f if os.path.splitext(file)[1] == '.py']
+
+        for filePath in filePaths:
+            # iterate and load the .py files in the plugins directory
+            spec = importlib.util.spec_from_file_location(".", filePath)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+
+        self._fillCcpnPluginsMenu()
+        self._fillUserPluginsMenu()
+
+    def _fillUserPluginsMenu(self):
+
+        from ccpn.plugins import loadedUserPlugins
+
+        pluginsMenu = self.searchMenuAction(PLUGINSMENU)
+        pluginsMenu.clear()
+        for Plugin in loadedUserPlugins:
+            self._addPluginSubMenu(PLUGINSMENU, Plugin)
+        pluginsMenu.addSeparator()
+        pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
+                                     callback=self._reloadUserPlugins))
+
+    def _reloadUserPlugins(self):
+        self._reloadCcpnPlugins()
 
     def startPlugin(self, Plugin):
         plugin = Plugin(application=self.application)

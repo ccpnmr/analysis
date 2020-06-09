@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-19 17:42:33 +0000 (Thu, March 19, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-09 01:56:08 +0100 (Tue, June 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,7 @@ from ccpn.framework.Translation import translator
 SHOWMODULESMENU = 'Show/hide Modules'
 MACROSMENU = 'User Macros'
 CCPNMACROSMENU = 'Run CCPN Macros'
+USERMACROSMENU = 'Run User Macros'
 TUTORIALSMENU = 'Tutorials'
 PLUGINSMENU = 'User Plugins'
 CCPNPLUGINSMENU = 'CCPN Plugins'

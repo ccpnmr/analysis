@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-08 13:34:26 +0100 (Mon, June 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-09 01:56:07 +0100 (Tue, June 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -77,7 +77,7 @@ from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import catchExceptions
-from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU
+from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, USERMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
 
 import faulthandler
 
@@ -1339,6 +1339,10 @@ class Framework(NotifierBase):
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
                 ])),
+            # (USERMACROSMENU, ([
+            #     ("None", None, [('checkable', True),
+            #                     ('checked', False)])
+            #     ])),
             (),
             ("Define Macro Shortcuts...", self.defineUserShortcuts, [('shortcut', 'du')]),
             ("Submit Macro...", self.showSubmitMacroPopup)
@@ -1346,8 +1350,8 @@ class Framework(NotifierBase):
                    ))
 
         ms.append(('Plugins', [
-            # (PLUGINSMENU, ()),
             (CCPNPLUGINSMENU, ()),
+            (PLUGINSMENU, ()),
             ]
                    ))
 
@@ -3329,6 +3333,7 @@ if __name__ == '__main__':
 
     from xml.etree import ElementTree
     from ccpn.util.Path import aPath
+    from ccpn.util.SafeFilename import getSafeFilename
 
     # active parser to include comments in import/export
     parser = ElementTree.XMLParser(target=ElementTree.TreeBuilder(insert_comments=True))
@@ -3381,7 +3386,8 @@ if __name__ == '__main__':
     renameFilePath =  (filePath.parent / renameFileName).assureSuffix('.xml')
 
     # write out the modified file
-    tree.write(renameFilePath, encoding='UTF-8', xml_declaration=True)
+    safeName = aPath(getSafeFilename(renameFilePath))
+    tree.write(safeName, encoding='UTF-8', xml_declaration=True)
 
     # with open(renameFilePath, "a+") as fp:
     #     # added for completeness

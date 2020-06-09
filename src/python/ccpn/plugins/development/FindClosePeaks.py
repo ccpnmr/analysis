@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-26 16:21:23 +0000 (Wed, February 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-09 01:56:07 +0100 (Tue, June 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -310,6 +310,7 @@ class FindClosePeaksGuiPlugin(PluginModule):
 class FindClosePeaksPlugin(Plugin):
     PLUGINNAME = 'Find Close Peaks'
     guiModule = FindClosePeaksGuiPlugin
+    CCPNPLUGIN = True
 
     def run(self, **kwargs):
         ''' Insert here the script for running Tsar '''

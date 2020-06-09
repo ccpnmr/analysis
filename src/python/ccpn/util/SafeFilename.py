@@ -4,7 +4,7 @@ Functions to append a number to the end of a filename if it already exists
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:59 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-06-09 01:56:08 +0100 (Tue, June 09, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,8 +42,21 @@ def _iter_incrementing_file_names(path):
     """
     yield path
     prefix, ext = os.path.splitext(path)
-    for i in itertools.count(start=1, step=1):
-        yield prefix + '({0})'.format(i) + ext
+
+    import re
+
+    # def name_ends_with_digit(filename):
+    #     matches = [m for m in re.finditer('\(([\d]+)\)$', os.path.splitext(path)[0])]
+
+    num = 1
+    matches = [m for m in re.finditer('\(([\d]+)\)$', prefix)]
+    if matches:
+        span = matches[-1].span()
+        num = 1 + int(prefix[span[0]+1:span[1]-1])
+        prefix = prefix[:span[0]]
+
+    for i in itertools.count(start=num, step=1):
+        yield '{}({}){}'.format(prefix, i, ext)
 
 
 @contextmanager

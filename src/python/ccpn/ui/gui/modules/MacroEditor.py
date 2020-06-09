@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:06:38 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-09 01:56:08 +0100 (Tue, June 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -65,6 +65,7 @@ class MacroEditor(CcpnModule):
         if self._pythonConsole is None:
             self._pythonConsole = IpythonConsole(self.mainWindow)
 
+        self._DIALOGID = USERMACROSPATH
         if useCcpnMacros:
             self.macroPath = macroPath
         else:
@@ -200,7 +201,7 @@ class MacroEditor(CcpnModule):
                             filter='*.py',
                             preferences=self.preferences,
                             initialPath=self.macroPath,
-                            pathID=USERMACROSPATH)
+                            pathID=self._DIALOGID)
         dialog._show()
         filePath = dialog.selectedFile()
 
@@ -227,7 +228,7 @@ class MacroEditor(CcpnModule):
                             filter='*.py',
                             preferences=self.preferences,
                             initialPath=self.macroPath,
-                            pathID=USERMACROSPATH)
+                            pathID=self._DIALOGID)
         dialog._show()
         filePath = dialog.selectedFile()
         self._openPath(filePath)

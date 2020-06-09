@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-08 13:33:52 +0100 (Mon, June 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-09 10:47:46 +0100 (Tue, June 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -148,6 +148,7 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
                                   ('logPartitionCoefficient', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
                                   ],
                                  hWidth=HWIDTH,
+                                 name='Advanced',
                                  ),
                         MoreLess([VList([('smiles', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''})],
                                         hWidth=HWIDTH,
@@ -157,6 +158,7 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
                                         hWidth=HWIDTH,
                                         ),
                                   ],
+                                 name='Compound View',
                                  ),
                         ],
                        hWidth=HWIDTH,

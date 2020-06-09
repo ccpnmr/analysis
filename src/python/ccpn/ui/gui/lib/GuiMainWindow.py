@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 01:56:08 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-09 10:47:46 +0100 (Tue, June 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -422,8 +422,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._fillPredefinedLayoutMenu()
         self._fillRecentMacrosMenu()
         #TODO:ED needs fixing
-        self._fillCcpnPluginsMenu()
-        self._fillUserPluginsMenu()
+        self._reloadCcpnPlugins()
+        # self._fillCcpnPluginsMenu()
+        # self._fillUserPluginsMenu()
 
         self._attachModulesMenuAction()
         self._attachCCPNMacrosMenuAction()

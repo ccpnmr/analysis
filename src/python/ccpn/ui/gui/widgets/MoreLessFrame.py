@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:54 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 12:10:38 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,18 +26,20 @@ __date__ = "$Date: 2020-05-27 16:32:49 +0000 (Wed, May 27, 2020) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtGui
-from functools import partial
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import ActiveLabel, Label
+from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 
 
 class MoreLessFrame(Frame):
     """
     Widget that contains a button to expand/contract show more/less subframe containing more options
     """
+    DEFAULTMARGINS = (0, 2, 0, 0)  # l, t, r, b
 
-    def __init__(self, parent, mainWindow=None, name=None, showMore=True, setLayout=None, **kwds):
+    def __init__(self, parent, mainWindow=None, name=None, showMore=True, setLayout=None,
+                 showBorder=True, borderColour=None, _frameMargins=DEFAULTMARGINS, **kwds):
         """Initialise the widget
         """
         super().__init__(parent=parent, setLayout=True, **kwds)
@@ -46,33 +48,39 @@ class MoreLessFrame(Frame):
         self._name = name
         self._showMore = showMore
         self._callback = None
+        self._showBorder = showBorder
+        self._borderColour = borderColour or QtGui.QColor(getColours()[BORDERNOFOCUS])
 
         self._minusIcon = Icon('icons/minus')
         self._plusIcon = Icon('icons/plus')
 
         row = 0
-        self.openButton = ActiveLabel(self, mainWindow=self.mainWindow, grid=(row, 0))
-        self.openButton.setFixedSize(18, 18)
-        self.openButton.setPixmap(self._minusIcon.pixmap(18, 18))
-        self.label = Label(self, text=name or '', grid=(row, 1))
-        self.label.setFixedHeight(24)
+        self._openButton = ActiveLabel(self, mainWindow=self.mainWindow, grid=(row, 0))
+        self._openButton.setFixedSize(18, 18)
+        self._openButton.setPixmap(self._minusIcon.pixmap(18, 18))
+        self._label = Label(self, text=name or '', grid=(row, 1))
+        self._labelHeight = self._label.sizeHint().height()
+        self._label.setFixedHeight(self._labelHeight)
 
         row += 1
-        self.contentsWidget = Frame(self, setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 2))
-        self.openButton.setSelectionCallback(self._toggleContents)
+        self._contentsFrame = Frame(self, setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 2))
+        self._openButton.setSelectionCallback(self._toggleContents)
 
+        self.setContentsMargins(*_frameMargins)
         self._showContents(showMore)
         self._lastSize = QtCore.QSize(self.sizeHint())
 
     def _showContents(self, visible):
-        self.contentsWidget.setVisible(visible)
+        """Toggle visibility of the contents widget
+        """
+        self._contentsFrame.setVisible(visible)
         if visible:
-            self.openButton.setPixmap(self._minusIcon.pixmap(18, 18))
+            self._openButton.setPixmap(self._minusIcon.pixmap(18, 18))
             # arbitrary large height
             self.setMaximumHeight(2000)
         else:
-            self.openButton.setPixmap(self._plusIcon.pixmap(18, 18))
-            self.setMaximumHeight(24)
+            self._openButton.setPixmap(self._plusIcon.pixmap(18, 18))
+            self.setMaximumHeight(self.sizeHint().height())
 
         if self._callback:
             self._callback(self)
@@ -83,14 +91,16 @@ class MoreLessFrame(Frame):
         self._callback = callback
 
     def _toggleContents(self):
-        visible = not self.contentsWidget.isVisible()
+        """Toggle visibility of the contents
+        """
+        visible = not self._contentsFrame.isVisible()
         self._showContents(visible)
 
     @property
     def name(self):
-        """Set/get the name of the more/less widget
+        """Set/get the name of the widget
         """
-        return self.label.get()
+        return self._label.get()
 
     @name.setter
     def name(self, value):
@@ -98,9 +108,37 @@ class MoreLessFrame(Frame):
             raise TypeError('name {} must be a string'.format(value))
 
         self._name = value
-        self.label.setText(value)
+        self._label.setText(value)
 
-    # def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
-    #     self._lastSize = QtCore.QSize(self.sizeHint())
-    #     print('>>>RESIZEEVENT', self._lastSize)
-    #     super(MoreLessFrame, self).resizeEvent(a0)
+    @property
+    def contentsFrame(self):
+        """Get the contents frame
+        """
+        return self._contentsFrame
+
+    def paintEvent(self, ev):
+        """Paint the top border
+        """
+        if not self._showBorder:
+            return
+
+        # create a painter over the widget - shrink by 1 pixel to draw correctly
+        p = QtGui.QPainter(self)
+        rgn = self.rect()
+        rgn = QtCore.QRect(rgn.x(), rgn.y(), rgn.width() - 1, rgn.height() - 1)
+
+        # get the size of the box to draw in and define the point list
+        _size = self._label.sizeHint()
+        h, w = _size.height(), _size.width() + self._openButton.sizeHint().width()
+        offset = w
+        points = [QtCore.QPoint(0, 0),
+                  QtCore.QPoint(offset, 0),
+                  QtCore.QPoint(offset, 0),
+                  QtCore.QPoint(offset + h - 1, h - 1),
+                  QtCore.QPoint(offset + h - 1, h - 1),
+                  QtCore.QPoint(rgn.width() - 1, h - 1), ]
+
+        # draw the border
+        p.setPen(QtGui.QPen(self._borderColour, 1))
+        p.drawLines(*points)
+        p.end()

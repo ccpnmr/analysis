@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 13:01:53 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 12:10:38 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -120,29 +120,29 @@ class FilterLabeledMixturesGuiPlugin(PluginModule):
         self.userWorkingPathData.textChanged.connect(self._setUserWorkingPath)
 
         row += 1
-        _frame = MoreLessFrame(parent, name='Xml Files', showMore=True, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
+        _frame = MoreLessFrame(parent, name='Xml Files', showMore=True, grid=(row, 0), gridSpan=(1, 3))
         _row = 0
-        self.xmlFileData = ListWidget(_frame.contentsWidget, grid=(_row, 0), gridSpan=(1, 3), hPolicy='minimum', vPolicy='minimum')
+        self.xmlFileData = ListWidget(_frame.contentsFrame, grid=(_row, 0), gridSpan=(1, 3), hPolicy='minimum', vPolicy='minimum')
         self.xmlFileData.setDragEnabled(False)
         self.xmlFileData.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
 
         row += 1
-        _frame = MoreLessFrame(parent, name='Filter Tags', showMore=False, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
+        _frame = MoreLessFrame(parent, name='Filter Tags', showMore=False, grid=(row, 0), gridSpan=(1, 3))
         _row = 0
-        self.xmlLabel = Label(_frame.contentsWidget, "Filter Tags ", grid=(_row, 0))
-        self.xmlFilterData = ListWidget(_frame.contentsWidget, grid=(_row, 1), gridSpan=(1, 2), hPolicy='minimum', vPolicy='minimum')
+        self.xmlLabel = Label(_frame.contentsFrame, "Filter Tags ", grid=(_row, 0))
+        self.xmlFilterData = ListWidget(_frame.contentsFrame, grid=(_row, 1), gridSpan=(1, 2), hPolicy='minimum', vPolicy='minimum')
         self.xmlFilterData.setDragEnabled(False)
         self.xmlFilterData.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
         self.xmlLabel.setFixedSize(self.xmlLabel.sizeHint())
 
         row += 1
-        _frame = MoreLessFrame(parent, name='Filter Log', showMore=False, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
+        _frame = MoreLessFrame(parent, name='Filter Log', showMore=False, grid=(row, 0), gridSpan=(1, 3))
         _row = 0
         # self.wordWrapLabel = Label(_frame.contentsWidget, text="Wordwrap ", grid=(_row, 0))
         # self.wordWrapData = CheckBox(_frame.contentsWidget, grid=(_row, 1), checked=False)
         #
         self.wordWrapData = CheckBoxCompoundWidget(
-                _frame.contentsWidget,
+                _frame.contentsFrame,
                 grid=(_row, 0), hAlign='left',
                 #minimumWidths=(colwidth, 0),
                 fixedWidths=(None, 30),
@@ -153,7 +153,7 @@ class FilterLabeledMixturesGuiPlugin(PluginModule):
                 )
 
         _row += 1
-        self.xmlFilterLogData = TextEditor(_frame.contentsWidget, grid=(_row, 0), gridSpan=(1, 3))
+        self.xmlFilterLogData = TextEditor(_frame.contentsFrame, grid=(_row, 0), gridSpan=(1, 3))
         self.xmlFilterLogData.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.xmlFilterLogData.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
         # self.wordWrapData.toggled.connect(partial(self._toggleWordWrap, self.xmlFilterLogData))

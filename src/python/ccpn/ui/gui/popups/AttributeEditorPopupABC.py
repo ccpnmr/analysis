@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 10:47:46 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 12:10:38 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -342,8 +342,8 @@ class MoreLess(AttributeABC):
         else:
             grid = (0, 0)
 
-        _frame = MoreLessFrame(parent, showMore=False, showBorder=False, grid=grid, **self._kwds)
-        self._container = _frame.contentsWidget
+        _frame = MoreLessFrame(parent, showMore=False, grid=grid, **self._kwds)
+        self._container = _frame.contentsFrame
         self._container.getLayout().setAlignment(QtCore.Qt.AlignTop)
         self.nextPosition()
         return self._container

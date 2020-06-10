@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-22 14:48:54 +0100 (Wed, April 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 12:10:38 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,8 +31,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-"""Common utilities
-"""
 
 import datetime
 import os
@@ -40,9 +38,9 @@ import random
 import sys
 import string
 import itertools
-from collections import Iterable
+from collections import Iterable, OrderedDict
+from ccpn.util.OrderedSet import OrderedSet
 from . import Constants
-from collections import OrderedDict
 
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
@@ -881,3 +879,93 @@ def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatche
             found.append(sorted(foundCodes, key=_SortByMatch)[0][1] if foundCodes else None)
 
     return tuple(found)
+
+
+class PrintFormatter(object):
+    """
+    Class to produce formatted strings from objects
+    Includes OrderedDict and OrderedSet
+    Objects not added to formatter will return their repr object
+    """
+    def __init__(self):
+        """Initilise the class
+        """
+        self.types = {}
+        self.htchar = '    '
+        self.lfchar = '\n'
+        self.indent = 0
+
+        # add objects to the formatter
+        self.setFormatter(object, self.__class__.formatObject)
+        self.setFormatter(dict, self.__class__.formatDict)
+        self.setFormatter(list, self.__class__.formatList)
+        self.setFormatter(tuple, self.__class__.formatTuple)
+        self.setFormatter(OrderedDict, self.__class__.formatOrderedDict)
+        self.setFormatter(OrderedSet, self.__class__.formatOrderedSet)
+
+    def setFormatter(self, obj, callback):
+        """Register an object class to formatter
+        """
+        self.types[obj] = callback
+
+    def __call__(self, value, **args):
+        """Call method to produce output string
+        """
+        for key in args:
+            setattr(self, key, args[key])
+        formatter = self.types[type(value) if type(value) in self.types else object]
+        return formatter(self, value, self.indent)
+
+    def formatObject(self, value, indent):
+        """Fallback method for objects not registered with formatter
+        """
+        return repr(value)
+
+    def formatDict(self, value, indent):
+        """Output format for dict
+        """
+        items = [
+            self.lfchar + self.htchar * (indent + 1) + repr(key) + ': ' +
+            (self.types[type(value[key]) if type(value[key]) in self.types else object])(self, value[key], indent + 1)
+            for key in value
+            ]
+        return '{{{0}}}'.format(','.join(items) + self.lfchar + self.htchar * indent)
+
+    def formatList(self, value, indent):
+        """Output format for list
+        """
+        items = [
+            self.lfchar + self.htchar * (indent + 1) + (self.types[type(item) if type(item) in self.types else object])(self, item, indent + 1)
+            for item in value
+            ]
+        return '[{0}]'.format(','.join(items) + self.lfchar + self.htchar * indent)
+
+    def formatTuple(self, value, indent):
+        """Output format for tuple
+        """
+        items = [
+            self.lfchar + self.htchar * (indent + 1) + (self.types[type(item) if type(item) in self.types else object])(self, item, indent + 1)
+            for item in value
+            ]
+        return '({0})'.format(','.join(items) + self.lfchar + self.htchar * indent)
+
+    def formatOrderedDict(self, value, indent):
+        """Output format for OrderedDict (collections.OrderedDict)
+        """
+        items = [
+            self.lfchar + self.htchar * (indent + 1) +
+            "(" + repr(key) + ', ' + (self.types[
+                type(value[key]) if type(value[key]) in self.types else object
+            ])(self, value[key], indent + 1) + ")"
+            for key in value
+            ]
+        return 'OrderedDict([{0}])'.format(','.join(items) + self.lfchar + self.htchar * indent)
+
+    def formatOrderedSet(self, value, indent):
+        """Output format for OrderedSet (ccpn.util.OrderedSet)
+        """
+        items = [
+            self.lfchar + self.htchar * (indent + 1) + (self.types[type(item) if type(item) in self.types else object])(self, item, indent + 1)
+            for item in value
+            ]
+        return 'OrderedSet([{0}])'.format(','.join(items) + self.lfchar + self.htchar * indent)

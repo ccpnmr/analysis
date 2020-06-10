@@ -4,7 +4,7 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-09-20 17:23:41 +0100 (Wed, September 20, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-06-11 12:16:13 +0100 (Thu, June 11, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,6 +42,7 @@ from ccpn.util.Logging import getLogger
 
 # Value used for sorting with no offset - puts no_offset just before offset +0
 SORT_NO_OFFSET = -0.1
+ASSIGNEDPEAKSCHANGED = '_assignedPeaksChanged'
 
 
 class NmrResidue(AbstractWrapperObject):
@@ -353,7 +354,7 @@ class NmrResidue(AbstractWrapperObject):
                     # [NmrChain] -> [Value]
 
                     # newApiNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
-                    
+
                     # need the V3 operator here for the undo/redo to fire correctly
                     newV3nmrChain = self.project.newNmrChain(isConnected=True)
                     newApiNmrChain = newV3nmrChain._apiNmrChain
@@ -476,9 +477,9 @@ class NmrResidue(AbstractWrapperObject):
                     for resonanceGroup in reversed(stretch):
                         resonanceGroup.directNmrChain = defaultChain
                     # delete empty chain
-                    
+
                     # apiNmrChain.delete()
-                    
+
                     # need the V3 operator here for the undo/redo to fire correctly
                     V3nmrChain = self.project._data2Obj[apiNmrChain]
                     V3nmrChain.delete()
@@ -724,7 +725,7 @@ class NmrResidue(AbstractWrapperObject):
                     # need the V3 operator here for the undo/redo to fire correctly
                     V3nmrChain = self.project._data2Obj[apiNmrChain]
                     V3nmrChain.delete()
-                    
+
                 else:
 
                     apiResonanceGroup.moveDirectNmrChain(defaultChain, 'tail')
@@ -839,7 +840,7 @@ class NmrResidue(AbstractWrapperObject):
                 for rg in reversed(stretch):
                     # reversed to add residues back in proper order (they are added to end)
                     rg.directNmrChain = defaultChain
-                    
+
                 # apiNmrChain.delete()
 
                 # need the V3 operator here for the undo/redo to fire correctly
@@ -1076,6 +1077,10 @@ class NmrResidue(AbstractWrapperObject):
                 newApiResonanceGroup = result._wrappedData
 
                 if not residueType or result.residueType == residueType:
+
+                    # keep a log of changed peaks
+                    changedAssigned = {}
+
                     # Move or merge the NmrAtoms across and delete the current NmrResidue
                     for resonance in apiResonanceGroup.resonances:
                         newResonance = newApiResonanceGroup.findFirstResonance(implName=resonance.name)
@@ -1084,6 +1089,17 @@ class NmrResidue(AbstractWrapperObject):
                         else:
                             # WARNING. This step is NOT undoable, and clears the undo stack
                             clearUndo = True
+
+                            # insert the new attached nmrAtoms - deleted and new will be included so tables can update with deleted peaks/nmrAtoms
+                            # hopefully traitlets will solve notifier problems
+                            _nmrAtom = self.project._data2Obj.get(newResonance)
+                            if _nmrAtom:
+                                changedAssigned |= set(_nmrAtom.assignedPeaks)
+                            _nmrAtom = self.project._data2Obj.get(resonance)
+                            if _nmrAtom:
+                                changedAssigned |= set(_nmrAtom.assignedPeaks)
+                            setattr(self, ASSIGNEDPEAKSCHANGED, tuple(changedAssigned))
+
                             newResonance.absorbResonance(resonance)
 
                     apiResonanceGroup.delete()
@@ -1150,6 +1166,17 @@ class NmrResidue(AbstractWrapperObject):
         if action in ['rename']:
             for xx in self.offsetNmrResidues:
                 xx._finaliseAction('rename')
+
+        if action in ['rename', 'delete', 'change']:
+            # if the assignedPeaks have changed then notifier the peaks
+            # This contains the pre-post set to handle updating the peakTable/spectrumDisplay
+            peaks = getattr(self, ASSIGNEDPEAKSCHANGED, None)
+            if peaks:
+                for peak in peaks:
+                    if not (peak.isDeleted or peak._flaggedForDelete):
+                        peak._finaliseAction(action='change')
+            setattr(self, ASSIGNEDPEAKSCHANGED, None)
+
 
     def _delete(self):
         """Delete object, with all contained objects and underlying data.
@@ -1504,6 +1531,7 @@ def _renameNmrResidue(self: Project, apiResonanceGroup: ApiResonanceGroup):
     nmrResidue._finaliseAction('rename')
     # for xx in nmrResidue.offsetNmrResidues:
     #     xx._finaliseAction('rename')
+
 
 # 20190501:ED haven't investigated this properly
 # but not tested fully - but moved the offsetNmrResidue._finaliseAction into nmrResidue._finaliseAction

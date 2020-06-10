@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-01 14:03:21 +0100 (Wed, April 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 12:16:13 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -548,6 +548,7 @@ class Peak(AbstractWrapperObject):
                 for nmrAtom in nmrAtoms:
                     if not (nmrAtom.isDeleted or nmrAtom._flaggedForDelete):
                         nmrAtom._finaliseAction(action=action)
+            setattr(self, DIMENSIONNMRATOMSCHANGED, None)
 
     #=========================================================================================
     # CCPN functions

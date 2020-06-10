@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-22 11:35:30 +0100 (Wed, April 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 12:16:12 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,9 @@ from ccpn.util.Common import name2IsotopeCode
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, renameObjectContextManager
 from ccpn.util.Logging import getLogger
+
+
+ASSIGNEDPEAKSCHANGED = '_assignedPeaksChanged'
 
 
 class NmrAtom(AbstractWrapperObject):
@@ -266,6 +269,12 @@ class NmrAtom(AbstractWrapperObject):
 
                     elif mergeToExisting:
                         clearUndo = True
+
+                        # insert the new attached nmrAtoms - deleted and new will be included so tables can update with deleted peaks/nmrAtoms
+                        # hopefully traitlets will solve notifier problems
+                        changedAssigned = tuple(set(self.assignedPeaks) | set(result.assignedPeaks))
+                        setattr(self, ASSIGNEDPEAKSCHANGED, changedAssigned)
+
                         result._wrappedData.absorbResonance(self._apiResonance)
                         self._project._logger.warning("Merging (1) %s into %s. Merging is NOT undoable."
                                                       % (oldPid, result.longPid))
@@ -293,6 +302,12 @@ class NmrAtom(AbstractWrapperObject):
                 elif mergeToExisting:
                     # WARNING if we get here undo is no longer possible
                     clearUndo = True
+
+                    # insert the new attached nmrAtoms - deleted and new will be included so tables can update with deleted peaks/nmrAtoms
+                    # hopefully traitlets will solve notifier problems
+                    changedAssigned = tuple(set(self.assignedPeaks) | set(result.assignedPeaks))
+                    setattr(self, ASSIGNEDPEAKSCHANGED, changedAssigned)
+
                     result._wrappedData.absorbResonance(self._apiResonance)
                     self._project._logger.warning("Merging (2) %s into %s. Merging is NOT undoable."
                                                   % (oldPid, result.longPid))
@@ -331,6 +346,15 @@ class NmrAtom(AbstractWrapperObject):
             for cs in self.chemicalShifts:
                 cs._finaliseAction(action=action)
 
+            # if the assignedPeaks have changed then notifier the peaks
+            # This contains the pre-post set to handle updating the peakTable/spectrumDisplay
+            peaks = getattr(self, ASSIGNEDPEAKSCHANGED, None)
+            if peaks:
+                for peak in peaks:
+                    if not (peak.isDeleted or peak._flaggedForDelete):
+                        peak._finaliseAction(action='change')
+            setattr(self, ASSIGNEDPEAKSCHANGED, None)
+
     def _setIsotopeCode(self, value):
         # value must be defined, if not set then can set to arbitrary value '?'
         # this means it can still be set at any isotopeCode later, otherwise need to undo or create new nmrAtom
@@ -351,7 +375,7 @@ class NmrAtom(AbstractWrapperObject):
 
             isotopeChanged = False
             isotopeCode = self._wrappedData.isotopeCode
-            newIsotopeCode = name2IsotopeCode(value)            # this could be None for undefined
+            newIsotopeCode = name2IsotopeCode(value)  # this could be None for undefined
             if newIsotopeCode is not None:
                 if isotopeCode == '?':
                     self._wrappedData.isotopeCode = newIsotopeCode

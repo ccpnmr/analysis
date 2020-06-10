@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:53 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-10 13:19:16 +0100 (Wed, June 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -88,9 +88,8 @@ class NmrAtomPopup(AttributeEditorPopupABC):
             merge = self.MergetoExisting.isChecked()
 
             if not merge and self.project.getByPid('NA:%s.%s' % (nmrResidue.id, atomName)):
-                showWarning('Merge must be selected', 'Cannot re-assign NmrAtom to an existing '
-                                                      'NmrAtom of another NmrResidue without merging')
-
+                # raise error to notify popup
+                raise ValueError('Cannot re-assign NmrAtom to an existing NmrAtom of another NmrResidue without merging')
             else:
                 self.obj.assignTo(chainCode=nmrResidue.nmrChain.shortName,
                                   sequenceCode=nmrResidue.sequenceCode,

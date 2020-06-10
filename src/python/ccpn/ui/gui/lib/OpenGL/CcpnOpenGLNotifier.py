@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 17:01:59 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 12:14:55 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -51,6 +51,7 @@ class GLNotifier(QtWidgets.QWidget):
     GLTOPAXISVALUE = 'topAxis'
     GLLEFTAXISVALUE = 'leftAxis'
     GLRIGHTAXISVALUE = 'rightAxis'
+    GLASPECTRATIOS = 'aspectRatios'
     GLSTRIPROW = 'stripRow'
     GLSTRIPCOLUMN = 'stripColumn'
     GLSTRIPZOOMALL = 'stripZoomAll'
@@ -155,7 +156,8 @@ class GLNotifier(QtWidgets.QWidget):
 
     def _emitXAxisChanged(self, source=None, strip=None, spectrumDisplay=None,
                           axisB=None, axisT=None, axisL=None, axisR=None,
-                          row=None, column=None, stripAxes=None, zoomAll=False):
+                          row=None, column=None, stripAxes=None, zoomAll=False,
+                          aspectRatios=None):
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: spectrumDisplay or (strip.spectrumDisplay if strip else None),
@@ -164,6 +166,7 @@ class GLNotifier(QtWidgets.QWidget):
                                                 GLNotifier.GLLEFTAXISVALUE  : axisL,
                                                 GLNotifier.GLRIGHTAXISVALUE : axisR,
                                                 GLNotifier.GLSTRIPAXES      : stripAxes,
+                                                GLNotifier.GLASPECTRATIOS   : aspectRatios,
                                                 GLNotifier.GLSTRIPROW       : row,
                                                 GLNotifier.GLSTRIPCOLUMN    : column,
                                                 GLNotifier.GLSTRIPZOOMALL   : zoomAll}
@@ -172,7 +175,8 @@ class GLNotifier(QtWidgets.QWidget):
 
     def _emitYAxisChanged(self, source=None, strip=None, spectrumDisplay=None,
                           axisB=None, axisT=None, axisL=None, axisR=None,
-                          row=None, column=None, stripAxes=None, zoomAll=False):
+                          row=None, column=None, stripAxes=None, zoomAll=False,
+                          aspectRatios=None):
         aDict = {GLNotifier.GLSOURCE         : source,
                  GLNotifier.GLSTRIP          : strip,
                  GLNotifier.GLSPECTRUMDISPLAY: spectrumDisplay or (strip.spectrumDisplay if strip else None),
@@ -181,6 +185,7 @@ class GLNotifier(QtWidgets.QWidget):
                                                 GLNotifier.GLLEFTAXISVALUE  : axisL,
                                                 GLNotifier.GLRIGHTAXISVALUE : axisR,
                                                 GLNotifier.GLSTRIPAXES      : stripAxes,
+                                                GLNotifier.GLASPECTRATIOS   : aspectRatios,
                                                 GLNotifier.GLSTRIPROW       : row,
                                                 GLNotifier.GLSTRIPCOLUMN    : column,
                                                 GLNotifier.GLSTRIPZOOMALL   : zoomAll}

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-09 19:05:49 +0000 (Mon, March 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 12:14:55 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -24,11 +24,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import QUrl
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.util.Common import isWindowsOS
 import os
 import posixpath
+
 
 class CcpnWebView(CcpnModule):
     className = 'CcpnWebView'
@@ -42,8 +43,9 @@ class CcpnWebView(CcpnModule):
         super().__init__(mainWindow=mainWindow, name=name)
 
         self.webView = QWebEngineView()
+        self.webView.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True)
         self.addWidget(self.webView, 0, 0, 1, 1)  # make it the first item
-        # self.webView.loadFinished.connect(self._on_load_finished)
+        urlPath = urlPath or ''
 
         # NOTE:ED - need to remove windows separators
         urlPath = urlPath.replace(os.sep, posixpath.sep)
@@ -53,18 +55,33 @@ class CcpnWebView(CcpnModule):
         self.webView.load(QUrl(urlPath))
         self.webView.show()
 
-    # def _on_load_finished(self, *args):
-    #     print('>>>_on_load_finished')
-    #     self.webView.show()
-
-    # def _closeModule(self):
-    #   """
-    #   CCPN-INTERNAL: used to close the module
-    #   """
-    #   super(CcpnWebView, self)._closeModule()
-
     def close(self):
         """
         Close the table from the commandline
         """
         self._closeModule()
+
+
+if __name__ == '__main__':
+    from PyQt5 import QtWidgets
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
+
+
+    app = TestApplication()
+    win = QtWidgets.QMainWindow()
+
+    moduleArea = CcpnModuleArea(mainWindow=None)
+    module = CcpnWebView(mainWindow=None, name='My Module')
+    moduleArea.addModule(module)
+
+    win.setCentralWidget(moduleArea)
+    win.resize(1000, 500)
+    win.setWindowTitle('Testing %s' % module.moduleName)
+    win.show()
+
+    app.start()
+    win.close()
+
+    # example on how to use a javascript viewer can be found here
+    # https://code.tutsplus.com/tutorials/how-to-create-a-pdf-viewer-in-javascript--cms-32505

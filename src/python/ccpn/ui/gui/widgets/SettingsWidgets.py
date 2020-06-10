@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-03 22:11:57 +0100 (Fri, April 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 12:14:55 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -109,7 +110,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                               selectedInd=xAxisUnits,
                                               callback=self._settingsChanged,
                                               direction='h',
-                                              grid=(row, 1), hAlign='l',
+                                              grid=(row, 1), gridSpan=(1, 3), hAlign='l',
                                               tipTexts=None,
                                               )
         # for button in self.xAxisUnitsButtons.radioButtons:
@@ -125,7 +126,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                               selectedInd=yAxisUnits,
                                               callback=self._settingsChanged,
                                               direction='h',
-                                              grid=(row, 1), hAlign='l',
+                                              grid=(row, 1), gridSpan=(1, 3), hAlign='l',
                                               tipTexts=None)
         # for button in self.yAxisUnitsButtons.radioButtons:
         #     button.setObjectName(button.objectName()+'_y')
@@ -140,31 +141,44 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                                       selectedInd=_aspectRatioMode,
                                                       callback=self._aspectRatioModeChanged,
                                                       direction='horizontal',
-                                                      grid=(row, 1), hAlign='l',
+                                                      grid=(row, 1), gridSpan=(1, 3), hAlign='l',
                                                       tipTexts=None,
                                                       )
 
         row += 1
+        Label(parent, text='Current Fixed', grid=(row, 1))
+        Label(parent, text='Screen', grid=(row, 2))
+
+        row += 1
         self.aspectLabel = {}
         self.aspectData = {}
+        self.aspectScreen = {}
         self.aspectLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
         self.aspectDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+        self.aspectScreenFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 2))
 
-        self.aspectLabel = {}
-        self.aspectData = {}
         self._removeWidget(self.aspectLabelFrame)
         self._removeWidget(self.aspectDataFrame)
+        self._removeWidget(self.aspectScreenFrame)
+
         for ii, aspect in enumerate(sorted(_aspectRatios.keys())):
             aspectValue = _aspectRatios[aspect]
             self.aspectLabel[aspect] = Label(self.aspectLabelFrame, text=aspect, grid=(ii, 0), hAlign='r')
+
             self.aspectData[aspect] = ScientificDoubleSpinBox(self.aspectDataFrame, min=1, grid=(ii, 0), hAlign='l')
             self.aspectData[aspect].setValue(aspectValue)
             self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
-            if aspect == _baseAspectRatioAxisCode:
+            if aspect[0] == _baseAspectRatioAxisCode[0]:
                 self.aspectData[aspect].setEnabled(False)
             else:
                 self.aspectData[aspect].setEnabled(True)
                 self.aspectData[aspect].valueChanged.connect(partial(self._settingsChangeAspect, aspect))
+
+            self.aspectScreen[aspect] = Label(self.aspectScreenFrame, text=aspect, grid=(ii, 0), hAlign='l')
+            self.aspectScreen[aspect].setText(self.aspectData[aspect].textFromValue(aspectValue))
+
+        row += 1
+        self.setFromScreenButton = Button(parent, text='Set from Screen', grid=(row, 2), callback=self._setAspectFromScreen)
 
         if not self._spectrumDisplay.is1D:
             row += 1
@@ -174,7 +188,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                        selectedInd=symbolType,
                                        callback=self._symbolsChanged,
                                        direction='h',
-                                       grid=(row, 1), hAlign='l',
+                                       grid=(row, 1), gridSpan=(1, 3), hAlign='l',
                                        tipTexts=None,
                                        )
 
@@ -185,7 +199,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                                 selectedInd=annotationType,
                                                 callback=self._symbolsChanged,
                                                 direction='horizontal',
-                                                grid=(row, 1), hAlign='l',
+                                                grid=(row, 1), gridSpan=(1, 3), hAlign='l',
                                                 tipTexts=None,
                                                 )
 
@@ -212,7 +226,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                                     selectedInd=stripArrangement,
                                                     callback=self._stripArrangementChanged,
                                                     direction='horizontal',
-                                                    grid=(row, 1), hAlign='l',
+                                                    grid=(row, 1), gridSpan=(1, 3), hAlign='l',
                                                     tipTexts=None,
                                                     icons=[('icons/strip-row', (24, 24)),
                                                            ('icons/strip-column', (24, 24)),
@@ -227,14 +241,16 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         row += 1
         self._spacer = Spacer(parent, 5, 5,
                               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-                              grid=(row, 2), gridSpan=(1, 1))
+                              grid=(row, 4), gridSpan=(1, 1))
 
         self._parent.setContentsMargins(5, 5, 5, 5)
 
-        # connect to the lock changed pyqtSignal
+        # connect to the lock/symbol/ratio changed pyqtSignals
         self._GLSignals = GLNotifier(parent=self._parent)
         self._GLSignals.glAxisLockChanged.connect(self._lockAspectRatioChangedInDisplay)
         self._GLSignals.glSymbolsChanged.connect(self._symbolsChangedInDisplay)
+        self._GLSignals.glXAxisChanged.connect(self._aspectRatioChangedInDisplay)
+        self._GLSignals.glYAxisChanged.connect(self._aspectRatioChangedInDisplay)
 
     def getValues(self):
         """Return a dict containing the current settings
@@ -263,6 +279,9 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         """
         self._settingsChanged()
 
+    def _setAspectFromScreen(self, *args):
+        pass
+
     @pyqtSlot()
     def _settingsChanged(self):
         """Handle changing the X axis units
@@ -275,6 +294,13 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         """
         if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
             self.useAspectRatioModeButtons.setIndex(aDict[GLNotifier.GLVALUES][0])
+
+    @pyqtSlot(dict)
+    def _aspectRatioChangedInDisplay(self, aDict):
+        """Respond to an external change in the aspect ratio of a strip
+        """
+        if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
+            aspectRatios = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLASPECTRATIOS]
 
     @pyqtSlot()
     def _symbolsChanged(self):

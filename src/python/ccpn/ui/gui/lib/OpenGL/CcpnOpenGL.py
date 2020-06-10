@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-20 16:05:25 +0100 (Mon, April 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 12:14:55 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1104,7 +1104,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.GLSignals._emitXAxisChanged(source=self, strip=self.strip,
                                                  axisB=self.axisB, axisT=self.axisT,
                                                  axisL=self.axisL, axisR=self.axisR,
-                                                 row=tilePos[0], column=tilePos[1])
+                                                 row=tilePos[0], column=tilePos[1],
+                                                 aspectRatios=self._aspectRatios)
 
                 self._rescaleXAxis()
                 self._storeZoomHistory()
@@ -1146,7 +1147,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.GLSignals._emitYAxisChanged(source=self, strip=self.strip,
                                                  axisB=self.axisB, axisT=self.axisT,
                                                  axisL=self.axisL, axisR=self.axisR,
-                                                 row=tilePos[0], column=tilePos[1])
+                                                 row=tilePos[0], column=tilePos[1],
+                                                 aspectRatios=self._aspectRatios)
 
                 self._rescaleYAxis()
                 self._storeZoomHistory()

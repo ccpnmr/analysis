@@ -881,12 +881,14 @@ def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatche
     return tuple(found)
 
 
+
 class PrintFormatter(object):
     """
     Class to produce formatted strings from objects
     Includes OrderedDict and OrderedSet
     Objects not added to formatter will return their repr object
     """
+
     def __init__(self):
         """Initilise the class
         """
@@ -900,8 +902,9 @@ class PrintFormatter(object):
         self.setFormatter(dict, self.__class__.formatDict)
         self.setFormatter(list, self.__class__.formatList)
         self.setFormatter(tuple, self.__class__.formatTuple)
-        self.setFormatter(OrderedDict, self.__class__.formatOrderedDict)
+        self.setFormatter(set, self.__class__.formatSet)
         self.setFormatter(OrderedSet, self.__class__.formatOrderedSet)
+        self.setFormatter(OrderedDict, self.__class__.formatOrderedDict)
 
     def setFormatter(self, obj, callback):
         """Register an object class to formatter
@@ -919,7 +922,14 @@ class PrintFormatter(object):
     def formatObject(self, value, indent):
         """Fallback method for objects not registered with formatter
         """
-        return repr(value)
+        from base64 import b64encode
+        import pickle
+
+        if isinstance(value, (list, dict, str, int, float, bool, complex, type(None))):
+            return repr(value)
+        else:
+            # and finally non-recognised object
+            return "{{'__pythonObject': '{0}'}}".format(b64encode(pickle.dumps(value)).decode('utf-8'))
 
     def formatDict(self, value, indent):
         """Output format for dict
@@ -959,7 +969,17 @@ class PrintFormatter(object):
             ])(self, value[key], indent + 1) + ")"
             for key in value
             ]
-        return 'OrderedDict([{0}])'.format(','.join(items) + self.lfchar + self.htchar * indent)
+        # return 'OrderedDict([{0}])'.format(','.join(items) + self.lfchar + self.htchar * indent)
+        return "{{'__orderedDict': [{0}]}}".format(','.join(items) + self.lfchar + self.htchar * indent)
+
+    def formatSet(self, value, indent):
+        """Output format for set(not recognised by Json)
+        """
+        items = [
+            self.lfchar + self.htchar * (indent + 1) + (self.types[type(item) if type(item) in self.types else object])(self, item, indent + 1)
+            for item in value
+            ]
+        return '{{{0}}}'.format(','.join(items) + self.lfchar + self.htchar * indent)
 
     def formatOrderedSet(self, value, indent):
         """Output format for OrderedSet (ccpn.util.OrderedSet)
@@ -968,7 +988,83 @@ class PrintFormatter(object):
             self.lfchar + self.htchar * (indent + 1) + (self.types[type(item) if type(item) in self.types else object])(self, item, indent + 1)
             for item in value
             ]
-        return 'OrderedSet([{0}])'.format(','.join(items) + self.lfchar + self.htchar * indent)
+        # return 'OrderedSet([{0}])'.format(','.join(items) + self.lfchar + self.htchar * indent)
+        return "{{'__orderedSet': [{0}]}}".format(','.join(items) + self.lfchar + self.htchar * indent)
+
+    @classmethod
+    def literal_eval(cls, node_or_string):
+        """
+        Safely evaluate an expression node or a string containing a Python
+        expression.  The string or node provided may only consist of the following
+        Python literal structures: strings, bytes, numbers, tuples, lists, dicts,
+        sets, booleans, and None.
+        """
+        from ast import parse, Expression, Constant, UnaryOp, UAdd, USub, Tuple, \
+            List, Set, Dict, Call, Add, Sub, BinOp
+
+        if isinstance(node_or_string, str):
+            node_or_string = parse(node_or_string, mode='eval')
+        if isinstance(node_or_string, Expression):
+            node_or_string = node_or_string.body
+
+        def _convert_object(node):
+            from base64 import b64decode
+            import pickle
+
+            if isinstance(node, Constant):
+                if type(node.value) in (str,):
+                    return pickle.loads(b64decode(node.value.encode('utf-8')))
+
+            raise ValueError('malformed python object: ' + repr(node))
+
+        def _convert_num(node):
+            if isinstance(node, Constant):
+                if type(node.value) in (int, float, complex):
+                    return node.value
+            raise ValueError('malformed node or string: ' + repr(node))
+
+        def _convert_signed_num(node):
+            if isinstance(node, UnaryOp) and isinstance(node.op, (UAdd, USub)):
+                operand = _convert_num(node.operand)
+                if isinstance(node.op, UAdd):
+                    return + operand
+                else:
+                    return - operand
+            return _convert_num(node)
+
+        def _convert(node):
+            if isinstance(node, Constant):
+                return node.value
+            elif isinstance(node, Tuple):
+                return tuple(map(_convert, node.elts))
+            elif isinstance(node, List):
+                return list(map(_convert, node.elts))
+            elif isinstance(node, Set):
+                return set(map(_convert, node.elts))
+            elif isinstance(node, Dict):
+                # special cases for OrderedSet/OrderedDict/PythonObject
+                if len(node.keys) == 1 and node.keys[0].value == '__orderedSet':
+                    return OrderedSet(map(_convert, node.values[0].elts))
+                elif len(node.keys) == 1 and node.keys[0].value == '__orderedDict':
+                    return OrderedDict(list(map(_convert, node.values[0].elts)))
+                elif len(node.keys) == 1 and node.keys[0].value == '__pythonObject':
+                    return _convert_object(node.values[0])
+                else:
+                    return dict(zip(map(_convert, node.keys),
+                                    map(_convert, node.values)))
+            elif isinstance(node, Call):
+                return
+            elif isinstance(node, BinOp) and isinstance(node.op, (Add, Sub)):
+                left = _convert_signed_num(node.left)
+                right = _convert_num(node.right)
+                if isinstance(left, (int, float)) and isinstance(right, complex):
+                    if isinstance(node.op, Add):
+                        return left + right
+                    else:
+                        return left - right
+            return _convert_signed_num(node)
+
+        return _convert(node_or_string)
 
 
 def greekKey(word):

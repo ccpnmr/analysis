@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 12:10:38 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 21:38:13 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1263,7 +1263,7 @@ if __name__ == '__main__':
                 "floatItem": 1.23000001
                 }
             },
-        "Boolean1"  : True,
+        "Boolean1"  : (True, False),
         }
 
     options.identical = False
@@ -1282,57 +1282,55 @@ if __name__ == '__main__':
         print("Error: data cannot contain xml tags '{}' at pos {}".format(pos.group(), pos.span()))
 
 
-    # class PythonObjectEncoder(json.JSONEncoder):
-    #     """
-    #     Class to allow the serialisation of sets/OrderedSets/complex/OrderedDicts
-    #     """
-    #
-    #     def default(self, obj):
-    #         """Default method for encoding to json
-    #         """
-    #         from base64 import b64encode
-    #         import pickle
-    #
-    #         if isinstance(obj, OrderedSet):
-    #             return {"__orderedSet": list(obj)}
-    #         # elif isinstance(obj, OD):
-    #         #     return {"__orderedDict": [(k, val) for k, val in obj.items()]}
-    #         elif isinstance(obj, set):
-    #             return {"__set": list(obj)}
-    #         elif isinstance(obj, complex):
-    #             return {"__complex": str(obj)}
-    #         elif isinstance(obj, (list, dict, str, int, float, bool, type(None))):
-    #             return super().default(obj)
-    #         return {'__python_object': b64encode(pickle.dumps(obj)).decode('utf-8')}
-    #
-    #     @staticmethod
-    #     def as_python_object(dct):
-    #         """Method to decode contents of Json files with sets/OrderedSets/complex/OrderedDicts
-    #         In here so that I don't lose it :)
-    #
-    #         # NOTE:ED - keep this is it may be the reverse of Formatter class above
-    #
-    #         """
-    #         from base64 import b64decode
-    #         import pickle
-    #
-    #         if '__set' in dct:
-    #             return set(dct['__set'])
-    #         elif '__orderedSet' in dct:
-    #             return OrderedSet(dct['__orderedSet'])
-    #         elif '__complex' in dct:
-    #             return complex(dct['__complex'])
-    #         elif '__orderedDict' in dct:
-    #             return OD(dct['__orderedDict'])
-    #         elif '__python_object' in dct:
-    #             return pickle.loads(b64decode(dct['__python_object'].encode('utf-8')))
-    #         return dct
-    #
-    # dd = json.dumps(OD([('help', 12.0)]), indent=4, cls=PythonObjectEncoder)
-    # dd = json.dumps(testDict2, indent=4, cls=PythonObjectEncoder)
-    # # print(dd)
-    # recover = json.loads(dd, object_hook=PythonObjectEncoder.as_python_object)
-    # print(recover)
+    class PythonObjectEncoder(json.JSONEncoder):
+        """
+        Class to allow the serialisation of sets/OrderedSets/complex/OrderedDicts
+        DOESN'T WORK
+        """
+
+        def default(self, obj):
+            """Default method for encoding to json
+            """
+            from base64 import b64encode
+            import pickle
+
+            if isinstance(obj, OrderedSet):
+                return {"__orderedSet": list(obj)}
+            # elif isinstance(obj, OD):
+            #     return {"__orderedDict": [(k, val) for k, val in obj.items()]}
+            elif isinstance(obj, set):
+                return {"__set": list(obj)}
+            elif isinstance(obj, complex):
+                return {"__complex": str(obj)}
+            elif isinstance(obj, (list, dict, str, int, float, bool, type(None))):
+                return super().default(obj)
+            return {'__python_object': b64encode(pickle.dumps(obj)).decode('utf-8')}
+
+        @staticmethod
+        def as_python_object(dct):
+            """Method to decode contents of Json files with sets/OrderedSets/complex/OrderedDicts
+            In here so that I don't lose it :)
+
+            # NOTE:ED - keep this is it may be the reverse of Formatter class above
+
+            """
+            from base64 import b64decode
+            import pickle
+
+            if '__set' in dct:
+                return set(dct['__set'])
+            elif '__orderedSet' in dct:
+                return OrderedSet(dct['__orderedSet'])
+            elif '__complex' in dct:
+                return complex(dct['__complex'])
+            elif '__orderedDict' in dct:
+                return OD(dct['__orderedDict'])
+            elif '__python_object' in dct:
+                return pickle.loads(b64decode(dct['__python_object'].encode('utf-8')))
+            return dct
 
     pretty = PrintFormatter()
-    print(pretty(testDict2))
+    dd = pretty(testDict2)
+    print('DD ', dd)
+    recover = PrintFormatter.literal_eval(dd)
+    print('RECOVER ', recover)

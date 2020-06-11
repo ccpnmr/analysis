@@ -881,7 +881,6 @@ def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatche
     return tuple(found)
 
 
-
 class PrintFormatter(object):
     """
     Class to produce formatted strings from objects
@@ -959,19 +958,6 @@ class PrintFormatter(object):
             ]
         return '({0})'.format(','.join(items) + self.lfchar + self.htchar * indent)
 
-    def formatOrderedDict(self, value, indent):
-        """Output format for OrderedDict (collections.OrderedDict)
-        """
-        items = [
-            self.lfchar + self.htchar * (indent + 1) +
-            "(" + repr(key) + ', ' + (self.types[
-                type(value[key]) if type(value[key]) in self.types else object
-            ])(self, value[key], indent + 1) + ")"
-            for key in value
-            ]
-        # return 'OrderedDict([{0}])'.format(','.join(items) + self.lfchar + self.htchar * indent)
-        return "{{'__orderedDict': [{0}]}}".format(','.join(items) + self.lfchar + self.htchar * indent)
-
     def formatSet(self, value, indent):
         """Output format for set(not recognised by Json)
         """
@@ -990,6 +976,19 @@ class PrintFormatter(object):
             ]
         # return 'OrderedSet([{0}])'.format(','.join(items) + self.lfchar + self.htchar * indent)
         return "{{'__orderedSet': [{0}]}}".format(','.join(items) + self.lfchar + self.htchar * indent)
+
+    def formatOrderedDict(self, value, indent):
+        """Output format for OrderedDict (collections.OrderedDict)
+        """
+        items = [
+            self.lfchar + self.htchar * (indent + 1) +
+            "(" + repr(key) + ', ' + (self.types[
+                type(value[key]) if type(value[key]) in self.types else object
+            ])(self, value[key], indent + 1) + ")"
+            for key in value
+            ]
+        # return 'OrderedDict([{0}])'.format(','.join(items) + self.lfchar + self.htchar * indent)
+        return "{{'__orderedDict': [{0}]}}".format(','.join(items) + self.lfchar + self.htchar * indent)
 
     @classmethod
     def literal_eval(cls, node_or_string):

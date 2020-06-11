@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 21:38:13 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 21:43:28 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1328,6 +1328,7 @@ if __name__ == '__main__':
             elif '__python_object' in dct:
                 return pickle.loads(b64decode(dct['__python_object'].encode('utf-8')))
             return dct
+
 
     pretty = PrintFormatter()
     dd = pretty(testDict2)

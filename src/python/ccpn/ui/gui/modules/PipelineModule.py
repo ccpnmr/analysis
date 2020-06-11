@@ -94,7 +94,7 @@ class PipelineWorker(QtCore.QObject):
 
     def stop(self):
         self._isRunning = False
-        getLogger().warning('Pipeline Thread stopped')
+        # getLogger().warning('Pipeline Thread stopped')
 
 
 class GuiPipeline(CcpnModule, Pipeline):
@@ -533,6 +533,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
         self.project._logger.info('Pipeline: Finished.')
         # showInfo('Pipeline','Finished')
+        self.pipelineWorker.stop()
 
 
 

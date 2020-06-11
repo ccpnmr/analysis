@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 12:16:13 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 17:05:03 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1177,6 +1177,10 @@ class NmrResidue(AbstractWrapperObject):
                         peak._finaliseAction(action='change')
             setattr(self, ASSIGNEDPEAKSCHANGED, None)
 
+        if action in ['rename', 'delete', 'create']:
+            # don't think I need a change here
+            for nmrAtom in self.nmrAtoms:
+                nmrAtom._finaliseAction(action=action)
 
     def _delete(self):
         """Delete object, with all contained objects and underlying data.

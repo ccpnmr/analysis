@@ -78,12 +78,37 @@
  <tr>
   <td>Create Mark at cursor position</td>
   <td><span class="action">MK</span></td>
-  <td><span class="action">MC</span></td>
+  <td><span class="action">MC MX MY</span></td>
+ </tr>
+ <tr>
+  <td>Create Mark along X-axis at cursor position</td>
+  <td><span class="action">MX</span></td>
+  <td><span class="action">MY MK MC</span></td>
+ </tr>
+ <tr>
+  <td>Create Mark along Y-axis at cursor position</td>
+  <td><span class="action">MY</span></td>
+  <td><span class="action">MX MK MC</span></td>
  </tr>
  <tr>
   <td>Clear All Marks</td>
   <td><span class="action">MC</span></td>
-  <td><span class="action">MK</span></td>
+  <td><span class="action">MK MX MY PM PX PY</span></td>
+ </tr>
+ <tr>
+  <td>Create Marks through selected peaks</td>
+  <td><span class="action">PM</span></td>
+  <td><span class="action">PX PY MC</span></td>
+ </tr>
+ <tr>
+  <td>Create Marks along X-axis through selected peaks</td>
+  <td><span class="action">PX</span></td>
+  <td><span class="action">PY PM MC</span></td>
+ </tr>
+ <tr>
+  <td>Create Marks along Y-axis through selected peaks</td>
+  <td><span class="action">PY</span></td>
+  <td><span class="action">PX PM MC</span></td>
  </tr>
  <tr>
   <td>Navigate to Peak position</td>
@@ -204,6 +229,11 @@
   <td>Cycle Peak Symbols</td>
   <td><span class="action">PS</span></td>
   <td><span class="action">PL</span></td>
+ </tr>
+ <tr>
+  <td>Set Contour Levels</td>
+  <td><span class="action">CO</span></td>
+  <td></td>
  </tr>
  <tr>
   <td></td>
@@ -372,7 +402,12 @@
  </tr>
  <tr>
   <td>Peak Assigner</td>
-  <td><span class="action">AA</span></td>
+  <td><span class="action">AP</span></td>
+  <td></td>
+ </tr>
+ <tr>
+  <td>NmrAtom Assigner</td>
+  <td><span class="action">AN</span></td>
   <td></td>
  </tr>
  <tr>
@@ -423,11 +458,6 @@
  <tr>
   <td>Sequence Graph</td>
   <td><span class="action">SG</span></td>
-  <td></td>
- </tr>
- <tr>
-  <td>Atom Assigner</td>
-  <td><span class="action">AS</span></td>
   <td></td>
  </tr>
  <tr>
@@ -505,6 +535,31 @@
   <td>Copy display with Y-Z Axes Flipped</td>
   <td><span class="action">YZ</span></td>
      <td><span class="action">XY, XZ</span></td>
+ </tr>
+ <tr>
+  <td>Estimate Noise</td>
+  <td><span class="action">EN</span></td>
+     <td><span class="action"></span></td>
+ </tr>
+ <tr>
+  <td>Move up a z-plane</td>
+  <td><span class="action">ZZ</span></td>
+     <td><span class="action">XX</span></td>
+ </tr>
+ <tr>
+  <td>Move down a z-plane</td>
+  <td><span class="action">XX</span></td>
+     <td><span class="action">ZZ</span></td>
+ </tr>
+ <tr>
+  <td>Raise contour level</td>
+  <td><span class="action">QQ</span></td>
+     <td><span class="action">WW</span></td>
+ </tr>
+ <tr>
+  <td>Lower contour level</td>
+  <td><span class="action">WW</span></td>
+     <td><span class="action">QQ</span></td>
  </tr>
  <tr>
   <td></td>

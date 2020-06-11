@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:53 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 12:01:35 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -111,8 +111,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
         _colourTabs1d = [self._colourTabs1d.widget(tt) for tt in range(self._colourTabs1d.count())]
         _colourTabsNd = [self._colourTabsNd.widget(tt) for tt in range(self._colourTabsNd.count())]
-        if not (_colourTabs1d or _colourTabsNd):
-            raise RuntimeError("Code error: tabs not implemented")
+        # if not (_colourTabs1d or _colourTabsNd):
+        #     raise RuntimeError("Code error: tabs not implemented")
 
         _allTabs = self.getActiveTabList()
 
@@ -284,7 +284,6 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
         self.connectSignals()
         self.setSizeGripEnabled(False)
-        # self._applyButton.setEnabled(False)
 
     def connectSignals(self):
         # connect to changes in the spectrumGroup
@@ -401,7 +400,9 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             pidList = [str(spec.pid) for spec in self._defaultSpectra]
 
             revertState = (pidState != pidList) or (editName != defaultName) or (editComment != defaultComment)
-            applyState = (True if pidState else False) and (True if editName else False)  # and revertState
+            # applyState = (True if pidState else False) and (True if editName else False)  # and revertState
+            # only need a name, can now have an empty group
+            applyState = (True if editName else False)  # and revertState
 
             tabs = self.getActiveTabList()
             allChanges = any(t._changes for t in tabs if t is not None)

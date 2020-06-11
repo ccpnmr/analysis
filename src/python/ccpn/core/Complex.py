@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-11 12:01:35 +0100 (Thu, June 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -158,7 +158,7 @@ class Complex(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(Complex)
-def _newComplex(self: Project, name: str, chains=(), serial: int = None) -> Complex:
+def _newComplex(self: Project, name: str, chains=(), serial: int = None, comment: str = None) -> Complex:
     """Create new Complex.
 
     See the Complex class for details.
@@ -166,6 +166,7 @@ def _newComplex(self: Project, name: str, chains=(), serial: int = None) -> Comp
     :param name:
     :param chains:
     :param serial: optional serial number.
+    :param comment: optional comment.
     :return: a new Complex instance.
     """
 
@@ -179,6 +180,9 @@ def _newComplex(self: Project, name: str, chains=(), serial: int = None) -> Comp
     result = self._data2Obj.get(self._wrappedData.molSystem.newChainGroup(name=name))
     if result is None:
         raise RuntimeError('Unable to generate new Complex item')
+
+    if comment:
+        result.comment = comment
 
     if serial is not None:
         try:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 21:43:28 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-12 10:23:54 +0100 (Fri, June 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ import json
 from functools import partial
 from collections import OrderedDict as OD
 from ccpn.util.Common import PrintFormatter
-from ccpn.util.OrderedSet import OrderedSet
+from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERNEFPATH
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from PyQt5 import QtGui, QtWidgets, QtCore
@@ -1260,7 +1260,9 @@ if __name__ == '__main__':
             },
         "nestedDict": {
             "nestedDictItems": {
-                "floatItem": 1.23000001
+                "floatItem": 1.23000001,
+                "frozen": frozenset([67, 78]),
+                "frOrdered": FrozenOrderedSet([34,45])
                 }
             },
         "Boolean1"  : (True, False),

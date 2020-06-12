@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 15:15:03 +0100 (Mon, March 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-12 16:00:40 +0100 (Fri, June 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -390,7 +390,7 @@ class NmrResidueTable(GuiTable):
                                className=self.attributeName,
                                tableSelection='_nmrChain',
                                rowClass=NmrResidue,
-                               cellClassNames=[(NmrAtom, 'nmrResidue')],            #, (Peak, 'assignments')],
+                               cellClassNames=(NmrAtom, 'nmrResidue'),
                                tableName='nmrChain', rowName='nmrResidue',
                                changeFunc=self.displayTableForNmrChain,
                                updateFunc=self._update,

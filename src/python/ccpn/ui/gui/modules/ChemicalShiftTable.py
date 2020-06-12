@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 17:05:03 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-12 16:00:40 +0100 (Fri, June 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -293,7 +293,7 @@ class ChemicalShiftTable(GuiTable):
                                className=self.attributeName,
                                tableSelection='chemicalShiftList',
                                rowClass=ChemicalShift,
-                               cellClassNames=(NmrAtom, 'chemicalShifts'),     # handled by the _finaliseAction notifier system
+                               cellClassNames=(NmrAtom, 'chemicalShifts'),
                                tableName='chemicalShiftList', rowName='chemicalShift',
                                changeFunc=self.displayTableForChemicalShift,
                                updateFunc=self._update,
@@ -434,18 +434,15 @@ class ChemicalShiftTable(GuiTable):
         return (len(set(x for x in peaks
                         if x.peakList.chemicalShiftList is chemicalShiftList)))
 
-    # this is now deprecated and replaced by notifers in _finaliseAction - may do this for all tables
-    # def getCellToRows(self, cellItem, attribute):
-    #     """Get the list of objects which cellItem maps to for this table
-    #     """
-    #     # this is a step towards making guiTableABC and subclass for each table
-    #     chemicalShifts = ()
-    #     if self.chemicalShiftList:
-    #         # chemicalShifts = tuple(set([cs for cs in self.chemicalShiftList.chemicalShifts if cs.nmrAtom and cellItem in cs.nmrAtom.assignedPeaks]))
-    #         chemicalShifts = tuple(set([cs for cs in self.chemicalShiftList.chemicalShifts if cs.nmrAtom is cellItem]))
-    #
-    #     print('>>>>>>chemicalShift on nmrAtom', cellItem, chemicalShifts)
-    #     return chemicalShifts
+    def getCellToRows(self, cellItem, attribute):
+        """Get the list of objects which cellItem maps to for this table
+        To be subclassed as required
+        """
+        # classItem is usually a type such as PeakList, MultipletList
+        # with an attribute such as peaks/peaks
+
+        # this is a step towards making guiTableABC and subclass for each table
+        return getattr(cellItem, attribute, []), None
 
     @staticmethod
     def _stLamFloat(row, name):

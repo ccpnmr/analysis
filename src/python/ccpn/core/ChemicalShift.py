@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2019-12-05 15:46:05 +0000 (Thu, December 05, 2019) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-06-12 16:00:40 +0100 (Fri, June 12, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -138,20 +138,6 @@ class ChemicalShift(AbstractWrapperObject):
         # NB this is NOT the right sorting order, but sorting on atomId is not possible at the API level
         measurements = [mm for mm in parent._wrappedData.measurements if mm.resonance is not None]
         return sorted(measurements, key=operator.attrgetter('resonance.serial'))
-
-    # def _finaliseAction(self, action: str):
-    #     """Subclassed to handle associated multiplets
-    #     """
-    #     super()._finaliseAction(action=action)
-    #
-    #     # if this peak is changed or deleted then it's multiplets/integral need to CHANGE
-    #     # create required as undo may return peak to a multiplet list
-    #     if action in ['change']:
-    #         csl = self.chemicalShiftList
-    #         peaks = self.nmrAtom.assignedPeaks if self.nmrAtom else []
-    #         if not len(set(x for x in peaks if x.peakList.chemicalShiftList is csl)):
-    #             print('>>>delete chemicalShift', self)
-    #             self.delete()
 
     #=========================================================================================
     # CCPN functions

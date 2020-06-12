@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 12:16:12 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-12 16:00:40 +0100 (Fri, June 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -342,9 +342,12 @@ class NmrAtom(AbstractWrapperObject):
         super()._finaliseAction(action=action)
 
         # propagate the rename to associated ChemicalShift instances
-        if action in ['rename', 'delete', 'change']:
+        if action in ['rename', 'delete', 'change', 'create']:
             for cs in self.chemicalShifts:
-                cs._finaliseAction(action=action)
+                if cs and not (cs.isDeleted or cs._flaggedForDelete):
+                    # copy same action to the chemicalShift as one-one relation
+                    # so delete => delete and create => create
+                    cs._finaliseAction(action=action)
 
             # if the assignedPeaks have changed then notifier the peaks
             # This contains the pre-post set to handle updating the peakTable/spectrumDisplay

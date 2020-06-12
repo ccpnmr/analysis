@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-20 17:00:33 +0100 (Wed, May 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-12 16:00:40 +0100 (Fri, June 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2056,7 +2056,7 @@ GuiTable::item::selected {
         # with an attribute such as peaks/peaks
 
         # this is a step towards making guiTableABC and subclass for each table
-        return getattr(cellItem, attribute, [])
+        return getattr(cellItem, attribute, []), Notifier.CHANGE
 
     def _updateCellCallback(self, attr, data):
         """
@@ -2072,37 +2072,38 @@ GuiTable::item::selected {
             # cells = getattr(cellData, attr)
             cells = makeIterableList(cellData)
 
-            #self._silenceCallback = True
             _update = False
-
             for cell in cells:
                 callbacktypes = self._tableData['cellClassNames']
                 rowObj = None
+                _triggerType = Notifier.CHANGE
                 if isinstance(callbacktypes, list):
+
                     for cBack in callbacktypes:
 
                         # check if row is the correct type of class
                         if isinstance(cell, cBack[OBJECT_CLASS]):
                             # rowObj = getattr(cell, cBack[OBJECT_PARENT])
-                            rowObj = self.getCellToRows(cell, cBack[OBJECT_PARENT])
                             rowCallback = cBack[OBJECT_PARENT]
+                            rowObj, _triggerType = self.getCellToRows(cell, rowCallback)
                             break
                 else:
                     try:
-                        rowObj = getattr(cell, callbacktypes[OBJECT_PARENT])
+                        rowCallback = callbacktypes[OBJECT_PARENT]
+                        rowObj, _triggerType = self.getCellToRows(cell, rowCallback)
                     except Exception as es:
                         pass
 
-                    rowCallback = callbacktypes[OBJECT_PARENT]
-
                 # concatenate the list - will always return a list
                 rowObjs = makeIterableList(rowObj)
+                # rowObjs = [obj for obj in rowObjs if obj and not (obj.isDeleted or obj._flaggedForDelete)]
 
                 # update the correct row by calling row handler
                 for rowObj in rowObjs:
                     newData = data.copy()
                     newData[Notifier.OBJECT] = rowObj
-                    newData[Notifier.TRIGGER] = Notifier.CHANGE
+                    newData[Notifier.TRIGGER] = _triggerType or data[Notifier.TRIGGER]            # Notifier.CHANGE
+                    newData['_calledFromCell'] = cell
 
                     # check whether we are the row object or still a cell object
                     cellType = self._tableData['rowClass']

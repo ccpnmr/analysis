@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-12 10:23:54 +0100 (Fri, June 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-15 11:03:09 +0100 (Mon, June 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1335,5 +1335,5 @@ if __name__ == '__main__':
     pretty = PrintFormatter()
     dd = pretty(testDict2)
     print('DD ', dd)
-    recover = PrintFormatter.literal_eval(dd)
+    recover = pretty.literal_eval(dd)
     print('RECOVER ', recover)

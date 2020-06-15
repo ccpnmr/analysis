@@ -893,6 +893,7 @@ class PrintFormatter(object):
         """Initialise the class
         """
         self.types = {}
+        self.evals = {}
         self.htchar = '    '
         self.lfchar = '\n'
         self.indent = 0
@@ -906,11 +907,18 @@ class PrintFormatter(object):
         for klass in (OrderedSet, frozenset, FrozenOrderedSet):
             self.setFormatter(klass, partial(self.__class__.formatSetType, klassName=klass.__name__))
         self.setFormatter(OrderedDict, self.__class__.formatOrderedDict)
+        for klass in (OrderedDict, OrderedSet, frozenset, FrozenOrderedSet, self.PythonObject):
+            self.setLiteralEval(klass)
 
     def setFormatter(self, obj, callback):
         """Register an object class to formatter
         """
         self.types[obj] = callback
+
+    def setLiteralEval(self, obj):
+        """Register a literalEval object class to formatter
+        """
+        self.evals[obj.__name__] = obj
 
     def __call__(self, value, **args):
         """Call method to produce output string
@@ -930,8 +938,9 @@ class PrintFormatter(object):
             # return python recognised objects if not already processed
             return repr(value)
         else:
-            # and finally non-recognised object
-            return "{{'__PythonObject': '{0}'}}".format(b64encode(pickle.dumps(value)).decode('utf-8'))
+            # and finally catch any non-recognised object
+            return "PythonObject('{0}')".format(b64encode(pickle.dumps(value)).decode('utf-8'))
+            # return "{{'__PythonObject': '{0}'}}".format(b64encode(pickle.dumps(value)).decode('utf-8'))
 
     def formatDict(self, value, indent):
         """Output format for dict
@@ -980,8 +989,8 @@ class PrintFormatter(object):
             self.lfchar + self.htchar * (indent + 1) + (self.types[type(item) if type(item) in self.types else object])(self, item, indent + 1)
             for item in value
             ]
-        # return '{0}}([{1}])'.format(klass, ','.join(items) + self.lfchar + self.htchar * indent)
-        return "{{'__{0}': [{1}]}}".format(klassName, ','.join(items) + self.lfchar + self.htchar * indent)
+        return '{0}([{1}])'.format(klassName, ','.join(items) + self.lfchar + self.htchar * indent)
+        # return "{{'__{0}': [{1}]}}".format(klassName, ','.join(items) + self.lfchar + self.htchar * indent)
 
     def formatOrderedDict(self, value, indent):
         """Output format for OrderedDict (collections.OrderedDict)
@@ -993,11 +1002,19 @@ class PrintFormatter(object):
             ])(self, value[key], indent + 1) + ")"
             for key in value
             ]
-        # return 'OrderedDict([{0}])'.format(','.join(items) + self.lfchar + self.htchar * indent)
-        return "{{'__OrderedDict': [{0}]}}".format(','.join(items) + self.lfchar + self.htchar * indent)
+        return 'OrderedDict([{0}])'.format(','.join(items) + self.lfchar + self.htchar * indent)
+        # return "{{'__OrderedDict': [{0}]}}".format(','.join(items) + self.lfchar + self.htchar * indent)
 
-    @classmethod
-    def literal_eval(cls, node_or_string):
+    def PythonObject(self, value):
+        """Call method to produce object from pickled string
+        """
+        from base64 import b64decode
+        import pickle
+
+        if type(value) in (str,):
+            return pickle.loads(b64decode(value.encode('utf-8')))
+
+    def literal_eval(self, node_or_string):
         """
         Safely evaluate an expression node or a string containing a Python
         expression.  The string or node provided may only consist of the following
@@ -1012,15 +1029,15 @@ class PrintFormatter(object):
         if isinstance(node_or_string, Expression):
             node_or_string = node_or_string.body
 
-        def _convert_object(node):
-            from base64 import b64decode
-            import pickle
-
-            if isinstance(node, Constant):
-                if type(node.value) in (str,):
-                    return pickle.loads(b64decode(node.value.encode('utf-8')))
-
-            raise ValueError('malformed python object: ' + repr(node))
+        # def _convert_object(node):
+        #     from base64 import b64decode
+        #     import pickle
+        #
+        #     if isinstance(node, Constant):
+        #         if type(node.value) in (str,):
+        #             return pickle.loads(b64decode(node.value.encode('utf-8')))
+        #
+        #     raise ValueError('malformed python object: ' + repr(node))
 
         def _convert_num(node):
             if isinstance(node, Constant):
@@ -1037,6 +1054,12 @@ class PrintFormatter(object):
                     return - operand
             return _convert_num(node)
 
+        def _convert_LiteralEval(node, klass):
+            if isinstance(node, Call) and node.func.id == klass.__name__:
+                mapList = list(map(_convert, node.args))
+                if mapList:
+                    return klass(mapList[0])
+
         def _convert(node):
             if isinstance(node, Constant):
                 return node.value
@@ -1047,22 +1070,26 @@ class PrintFormatter(object):
             elif isinstance(node, Set):
                 return set(map(_convert, node.elts))
             elif isinstance(node, Dict):
-                # special cases for OrderedDict/OrderedSet/frozenset/FrozenOrderedSet/PythonObject
-                if len(node.keys) == 1 and node.keys[0].value == '__OrderedDict':
-                    return OrderedDict(list(map(_convert, node.values[0].elts)))
-                elif len(node.keys) == 1 and node.keys[0].value == '__OrderedSet':
-                    return OrderedSet(map(_convert, node.values[0].elts))
-                elif len(node.keys) == 1 and node.keys[0].value == '__frozenset':
-                    return frozenset(map(_convert, node.values[0].elts))
-                elif len(node.keys) == 1 and node.keys[0].value == '__FrozenOrderedSet':
-                    return FrozenOrderedSet(map(_convert, node.values[0].elts))
-                elif len(node.keys) == 1 and node.keys[0].value == '__PythonObject':
-                    return _convert_object(node.values[0])
-                else:
-                    return dict(zip(map(_convert, node.keys),
-                                    map(_convert, node.values)))
+
+                # # special cases for OrderedDict/OrderedSet/frozenset/FrozenOrderedSet/PythonObject
+                # if len(node.keys) == 1 and node.keys[0].value == '__OrderedDict':
+                #     return OrderedDict(list(map(_convert, node.values[0].elts)))
+                # elif len(node.keys) == 1 and node.keys[0].value == '__OrderedSet':
+                #     return OrderedSet(map(_convert, node.values[0].elts))
+                # elif len(node.keys) == 1 and node.keys[0].value == '__frozenset':
+                #     return frozenset(map(_convert, node.values[0].elts))
+                # elif len(node.keys) == 1 and node.keys[0].value == '__FrozenOrderedSet':
+                #     return FrozenOrderedSet(map(_convert, node.values[0].elts))
+                # elif len(node.keys) == 1 and node.keys[0].value == '__PythonObject':
+                #     return _convert_object(node.values[0])
+                # else:
+
+                return dict(zip(map(_convert, node.keys),
+                                map(_convert, node.values)))
             elif isinstance(node, Call):
-                return
+                if node.func.id in self.evals:
+                    return _convert_LiteralEval(node, self.evals[node.func.id])
+
             elif isinstance(node, BinOp) and isinstance(node.op, (Add, Sub)):
                 left = _convert_signed_num(node.left)
                 right = _convert_num(node.right)

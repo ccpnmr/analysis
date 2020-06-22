@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 12:14:55 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-22 18:18:17 +0100 (Mon, June 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -350,6 +350,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._axesVisible = True
         self._aspectRatios = {}
+        self._lockedAspectRatios = {}
 
         self._fixedAspectX = 1.0
         self._fixedAspectY = 1.0
@@ -570,6 +571,18 @@ class CcpnGLWidget(QOpenGLWidget):
         self.pixelY = (self.axisT - self.axisB) / vpheight
         self.deltaX = 1.0 / vpwidth
         self.deltaY = 1.0 / vpheight
+
+        # calculate the aspect ratios for the current screen
+        self._lockedAspectRatios = self._aspectRatios.copy()
+        kx = self._getValidAspectRatioKey(self.axisCodes[0])
+        ky = self._getValidAspectRatioKey(self.axisCodes[1])
+        base = self._preferences._baseAspectRatioAxisCode
+        if kx == base:
+            if ky != base:
+                self._lockedAspectRatios[ky] = self._lockedAspectRatios[kx] * self.pixelY / self.pixelX
+        elif ky == base:
+            if kx != base:
+                self._lockedAspectRatios[kx] = self._lockedAspectRatios[ky] * self.pixelX / self.pixelY
 
         self.symbolX = abs(self._symbolSize * self.pixelX)
         self.symbolY = abs(self._symbolSize * self.pixelY)
@@ -912,10 +925,27 @@ class CcpnGLWidget(QOpenGLWidget):
         else:
             return 1.0
 
+    def _getValidAspectRatioKey(self, axisCode):
+        """Get the valid key from the axis ratios dict - valid for _aspectRatios and _lockedAspectRatios
+        """
+        va = [ax for ax in self._aspectRatios.keys() if ax.upper()[0] == axisCode.upper()[0]]
+        if va and len(va) > 0:
+            return va[0]
+
+    def _getValidLockedAspectRatio(self, axisCode):
+        va = [ax for ax in self._lockedAspectRatios.keys() if ax.upper()[0] == axisCode.upper()[0]]
+        if va and len(va) > 0:
+            return self._lockedAspectRatios[va[0]]
+        else:
+            return 1.0
+
     def resizeGL(self, w, h):
         # must be set here to catch the change of screen
         self.refreshDevicePixelRatio()
         self._resizeGL(w, h)
+        if self._aspectRatioMode == 0:
+            self.GLSignals._emitXAxisChanged(source=self, strip=self.strip,
+                                             aspectRatios=self._lockedAspectRatios)
 
     def _resizeGL(self, w, h):
         self.w = w
@@ -1105,7 +1135,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                  axisB=self.axisB, axisT=self.axisT,
                                                  axisL=self.axisL, axisR=self.axisR,
                                                  row=tilePos[0], column=tilePos[1],
-                                                 aspectRatios=self._aspectRatios)
+                                                 aspectRatios=self._lockedAspectRatios)
 
                 self._rescaleXAxis()
                 self._storeZoomHistory()
@@ -1148,7 +1178,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                  axisB=self.axisB, axisT=self.axisT,
                                                  axisL=self.axisL, axisR=self.axisR,
                                                  row=tilePos[0], column=tilePos[1],
-                                                 aspectRatios=self._aspectRatios)
+                                                 aspectRatios=self._lockedAspectRatios)
 
                 self._rescaleYAxis()
                 self._storeZoomHistory()
@@ -6027,6 +6057,9 @@ class CcpnGLWidget(QOpenGLWidget):
             row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
             col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
 
+            if any(val is None for val in (axisL, axisR, row, col)):
+                return
+
             if self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
 
                 if self.spectrumDisplay.stripArrangement == 'Y':
@@ -6204,6 +6237,9 @@ class CcpnGLWidget(QOpenGLWidget):
             row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
             col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
 
+            if any(val is None for val in (axisB, axisT, row, col)):
+                return
+
             if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]):
 
                 if self.spectrumDisplay.stripArrangement == 'Y':
@@ -6248,7 +6284,10 @@ class CcpnGLWidget(QOpenGLWidget):
             axisR = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLRIGHTAXISVALUE]
             row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
             col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
-            zoomAll = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPZOOMALL]
+            # zoomAll = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPZOOMALL]
+
+            if any(val is None for val in (axisB, axisT, axisL, axisR, row, col)):
+                return
 
             if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]) and \
                     self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):

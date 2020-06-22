@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-19 17:41:33 +0100 (Fri, June 19, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-22 18:18:17 +0100 (Mon, June 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -165,7 +165,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             aspectValue = _aspectRatios[aspect]
             self.aspectLabel[aspect] = Label(self.aspectLabelFrame, text=aspect, grid=(ii, 0), hAlign='r')
 
-            self.aspectData[aspect] = ScientificDoubleSpinBox(self.aspectDataFrame, min=1, grid=(ii, 0), hAlign='l')
+            self.aspectData[aspect] = ScientificDoubleSpinBox(self.aspectDataFrame, min=1, grid=(ii, 0), hAlign='l', decimals=2)
             self.aspectData[aspect].setValue(aspectValue)
             self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
             if aspect[0] == _baseAspectRatioAxisCode[0]:
@@ -179,7 +179,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         row += 1
         self.setFromScreenButton = Button(parent, text='Set from Screen', grid=(row, 2), callback=self._setAspectFromScreen)
-        self.setFromScreenButton.setEnabled(False)
 
         if not self._spectrumDisplay.is1D:
             row += 1
@@ -273,15 +272,29 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
     def _aspectRatioModeChanged(self):
         """Set the current aspect ratio mode
         """
+        self._updateLockedSettings()
         self._settingsChanged()
 
-    def _settingsChangeAspect(self, aspect, value):
+    def _updateLockedSettings(self):
+        if self.useAspectRatioModeButtons.getIndex() == 2:
+            with self.aspectScreenFrame.blockWidgetSignals():
+                for aspect, data in self.aspectData.items():
+                    if aspect in self.aspectScreen:
+                        self.aspectScreen[aspect].setText(data.text())
+
+    def _settingsChangeAspect(self, *args):
         """Set the aspect ratio for the axes
         """
+        self._updateLockedSettings()
         self._settingsChanged()
 
     def _setAspectFromScreen(self, *args):
-        pass
+        with self.aspectDataFrame.blockWidgetSignals():
+            for aspect, label in self.aspectScreen.items():
+                if aspect in self.aspectData:
+                    self.aspectData[aspect].setValue(self.aspectData[aspect].valueFromText(label.text()))
+
+        self._settingsChanged()
 
     @pyqtSlot()
     def _settingsChanged(self):
@@ -295,13 +308,21 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         """
         if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
             self.useAspectRatioModeButtons.setIndex(aDict[GLNotifier.GLVALUES][0])
+            self._updateLockedSettings()
 
     @pyqtSlot(dict)
     def _aspectRatioChangedInDisplay(self, aDict):
         """Respond to an external change in the aspect ratio of a strip
         """
         if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
-            aspectRatios = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLASPECTRATIOS]
+            _aspectRatios = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLASPECTRATIOS]
+            if not _aspectRatios:
+                return
+
+            for aspect in sorted(_aspectRatios.keys()):
+                aspectValue = _aspectRatios[aspect]
+                if aspect in self.aspectScreen and aspect in self.aspectData:
+                    self.aspectScreen[aspect].setText(self.aspectData[aspect].textFromValue(aspectValue))
 
     @pyqtSlot()
     def _symbolsChanged(self):

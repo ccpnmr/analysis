@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 17:01:59 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-22 18:18:17 +0100 (Mon, June 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1664,6 +1664,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
             col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
 
+            if any(val is None for val in (axisL, axisR, row, col)):
+                return
+
             tilePos = self.tilePosition
 
             if self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
@@ -1789,6 +1792,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
             col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
 
+            if any(val is None for val in (axisB, axisT, row, col)):
+                return
+
             tilePos = self.tilePosition
 
             if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]):
@@ -1834,6 +1840,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             axisR = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLRIGHTAXISVALUE]
             row = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPROW]
             col = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLSTRIPCOLUMN]
+
+            if any(val is None for val in (axisB, axisT, axisL, axisR, row, col)):
+                return
 
             tilePos = self.tilePosition
 
@@ -2720,13 +2729,28 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             self._rescaleAllAxes()
 
     def _getValidAspectRatio(self, axisCode):
-        va = [ax for ax in self._preferences.aspectRatios.keys() if ax.upper()[0] == axisCode.upper()[0]]
-        return self._preferences.aspectRatios[va[0]]
+        if self.spectrumDisplay and self.spectrumDisplay.strips and len(self.spectrumDisplay.strips) > 0:
+            strip = self.spectrumDisplay.strips[0]
+            if not (strip.isDeleted or strip._flaggedForDelete):
+                ratios = strip._CcpnGLWidget._aspectRatios
+
+                va = [ax for ax in ratios.keys() if ax.upper()[0] == axisCode.upper()[0]]
+                if va and len(va) > 0:
+                    return ratios[va[0]]
+        return 1.0
 
     def resizeGL(self, w, h):
         # must be set here to catch the change of screen
         self.refreshDevicePixelRatio()
         self._resizeGL(w, h)
+        if self._aspectRatioMode == 0:
+            ratios = None
+            if self.spectrumDisplay and self.spectrumDisplay.strips and len(self.spectrumDisplay.strips) > 0:
+                strip = self.spectrumDisplay.strips[0]
+                if not (strip.isDeleted or strip._flaggedForDelete):
+                    ratios = strip._CcpnGLWidget._lockedAspectRatios
+            self.GLSignals._emitXAxisChanged(source=self, strip=None,
+                                             aspectRatios=ratios)
 
     def rescale(self, rescaleOverlayText=True, rescaleMarksRulers=True,
                 rescaleIntegralLists=True, rescaleRegions=True,
@@ -2837,7 +2861,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         """
 
         # make the list of ordered spectrumViews
-        self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.spectrumDisplay.strips[0].spectrumViews)
+        self._ordering = []
+        if self.spectrumDisplay and self.spectrumDisplay.strips and len(self.spectrumDisplay.strips) > 0:
+            strip = self.spectrumDisplay.strips[0]
+            if not (strip.isDeleted or strip._flaggedForDelete):
+                self._ordering = self.spectrumDisplay.orderedSpectrumViews(strip.spectrumViews)
 
         self._ordering = [specView for specView in self._ordering]
 
@@ -2988,10 +3016,17 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self.axisR = mbx - zoomOut * (mbx - self.axisR)
 
             if not self._aspectRatioMode:
+                ratios = None
+                if self.spectrumDisplay and self.spectrumDisplay.strips and len(self.spectrumDisplay.strips) > 0:
+                    strip = self.spectrumDisplay.strips[0]
+                    if not (strip.isDeleted or strip._flaggedForDelete):
+                        ratios = strip._CcpnGLWidget._lockedAspectRatios
+
                 self.GLSignals._emitXAxisChanged(source=self, strip=None, spectrumDisplay=self.spectrumDisplay,
                                                  axisB=self.axisB, axisT=self.axisT,
                                                  axisL=self.axisL, axisR=self.axisR,
-                                                 row=tilePos[0], column=tilePos[1])
+                                                 row=tilePos[0], column=tilePos[1],
+                                                 aspectRatios=ratios)
 
                 self._rescaleXAxis()
                 # self._storeZoomHistory()
@@ -3030,10 +3065,17 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self.axisT = mby - zoomOut * (mby - self.axisT)
 
             if not self._aspectRatioMode:
+                ratios = None
+                if self.spectrumDisplay and self.spectrumDisplay.strips and len(self.spectrumDisplay.strips) > 0:
+                    strip = self.spectrumDisplay.strips[0]
+                    if not (strip.isDeleted or strip._flaggedForDelete):
+                        ratios = strip._CcpnGLWidget._lockedAspectRatios
+
                 self.GLSignals._emitYAxisChanged(source=self, strip=None, spectrumDisplay=self.spectrumDisplay,
                                                  axisB=self.axisB, axisT=self.axisT,
                                                  axisL=self.axisL, axisR=self.axisR,
-                                                 row=tilePos[0], column=tilePos[1])
+                                                 row=tilePos[0], column=tilePos[1],
+                                                 aspectRatios=ratios)
 
                 self._rescaleYAxis()
                 # self._storeZoomHistory()

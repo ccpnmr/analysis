@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:54 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-22 18:18:17 +0100 (Mon, June 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,18 @@ KEYVALIDATELIST = (QtCore.Qt.Key_Return,
                    QtCore.Qt.Key_Up,
                    QtCore.Qt.Key_Down,
                    QtCore.Qt.Key_Left,
-                   QtCore.Qt.Key_Right)
+                   QtCore.Qt.Key_Right,
+                   QtCore.Qt.Key_0,
+                   QtCore.Qt.Key_1,
+                   QtCore.Qt.Key_2,
+                   QtCore.Qt.Key_3,
+                   QtCore.Qt.Key_4,
+                   QtCore.Qt.Key_5,
+                   QtCore.Qt.Key_6,
+                   QtCore.Qt.Key_7,
+                   QtCore.Qt.Key_8,
+                   QtCore.Qt.Key_9,
+                   )
 
 
 class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):

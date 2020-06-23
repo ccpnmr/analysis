@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-15 14:29:16 +0100 (Fri, May 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-23 15:18:27 +0100 (Tue, June 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -103,28 +103,22 @@ class FrozenOrderedSet(collections.abc.MutableSet):
             for value in iterable:
                 self._frozenAdd(value)
 
-    def add(self, value):
-        """Add an element."""
-        raise NotImplementedError('Operation not allowed on {}'.format(self.__class__.__name__))
+    def _immutable(self, *args, **kws):
+        """Raise error when performing illegal operation on immutable object
+        """
+        raise RuntimeError('Operation not allowed on {} - object is immutable'.format(self.__class__.__name__))
 
-    def discard(self, value):
-        """Remove an element."""
-        raise NotImplementedError('Operation not allowed on {}'.format(self.__class__.__name__))
-
-    def remove(self, value):
-        """Remove an element."""
-        raise NotImplementedError('Operation not allowed on {}'.format(self.__class__.__name__))
-
-    def pop(self, last=True):
-        """Return the popped value."""
-        raise NotImplementedError('Operation not allowed on {}'.format(self.__class__.__name__))
-
-    def clear(self):
-        """Clear the OrderedSet."""
-        raise NotImplementedError('Operation not allowed on {}'.format(self.__class__.__name__))
+    __setitem__ = _immutable
+    __delitem__ = _immutable
+    add = _immutable
+    discard = _immutable
+    remove = _immutable
+    pop = _immutable
+    clear = _immutable
 
     def _frozenAdd(self, key):
-        """Add elements during initial creation, frozen at all other times"""
+        """Add elements during initial creation, frozen at all other times
+        """
         if key not in self.map:
             end = self.end
             curr = end[1]
@@ -162,6 +156,7 @@ class FrozenOrderedSet(collections.abc.MutableSet):
 
 
 if __name__ == '__main__':
+    # quick for now, but should use some nosetests
     s = OrderedSet('abracadaba')
     t = OrderedSet('simsalabim')
     print('OR - {}'.format(s | t))

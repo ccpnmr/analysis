@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-23 19:31:40 +0100 (Tue, June 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-23 19:33:36 +0100 (Tue, June 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1123,7 +1123,7 @@ if __name__ == '__main__':
     dialog.fillPopup()
 
     # NOTE:ED - add routines here to set up the mapping between the different nef file loaded
-    # dialog.exec_()
+    dialog.exec_()
 
     import ccpn.util.nef.nef as Nef
 

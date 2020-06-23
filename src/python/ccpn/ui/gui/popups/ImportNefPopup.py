@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-15 11:03:09 +0100 (Mon, June 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-23 19:31:40 +0100 (Tue, June 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ from functools import partial
 from collections import OrderedDict as OD
 from ccpn.util.Common import PrintFormatter
 from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
+from ccpn.util.FrozenDict import FrozenDict
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERNEFPATH
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from PyQt5 import QtGui, QtWidgets, QtCore
@@ -1122,7 +1123,7 @@ if __name__ == '__main__':
     dialog.fillPopup()
 
     # NOTE:ED - add routines here to set up the mapping between the different nef file loaded
-    dialog.exec_()
+    # dialog.exec_()
 
     import ccpn.util.nef.nef as Nef
 
@@ -1259,11 +1260,11 @@ if __name__ == '__main__':
                              ]]
             },
         "nestedDict": {
-            "nestedDictItems": {
+            "nestedDictItems": FrozenDict({
                 "floatItem": 1.23000001,
-                "frozen": frozenset([67, 78]),
-                "frOrdered": FrozenOrderedSet([34,45])
-                }
+                "frozen"   : frozenset([67, 78]),
+                "frOrdered": FrozenOrderedSet([34, 45])
+                })
             },
         "Boolean1"  : (True, False),
         }
@@ -1333,6 +1334,14 @@ if __name__ == '__main__':
 
 
     pretty = PrintFormatter()
+    # testDict2 = FrozenDict({1: 3, "nestedDict": {
+    #     "nestedDictItems": FrozenDict({
+    #         "floatItem": [1.23000001, 'a', 'b'],
+    #         "frozen"   : frozenset({67, 78}),
+    #         "frOrdered": FrozenOrderedSet([34, 45])
+    #         })
+    #     },
+    #                         })
     dd = pretty(testDict2)
     print('DD ', dd)
     recover = pretty.literal_eval(dd)

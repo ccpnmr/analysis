@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-23 18:26:47 +0100 (Tue, June 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-23 19:31:40 +0100 (Tue, June 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,7 @@ import itertools
 from functools import partial
 from collections import Iterable, OrderedDict
 from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
+from ccpn.util.FrozenDict import FrozenDict
 from . import Constants
 
 
@@ -904,10 +905,13 @@ class PrintFormatter(object):
         self.setFormatter(list, self.__class__.formatList)
         self.setFormatter(tuple, self.__class__.formatTuple)
         self.setFormatter(set, self.__class__.formatSet)
-        for klass in (OrderedSet, frozenset, FrozenOrderedSet):
-            self.setFormatter(klass, partial(self.__class__.formatSetType, klassName=klass.__name__))
+        self.setFormatter(OrderedSet, partial(self.__class__.formatListType, klassName=OrderedSet.__name__))
+        self.setFormatter(FrozenOrderedSet, partial(self.__class__.formatListType, klassName=FrozenOrderedSet.__name__))
+        self.setFormatter(frozenset, partial(self.__class__.formatSetType, klassName=frozenset.__name__))
         self.setFormatter(OrderedDict, self.__class__.formatOrderedDict)
-        for klass in (OrderedDict, OrderedSet, frozenset, FrozenOrderedSet, self.PythonObject):
+        self.setFormatter(FrozenDict, self.__class__.formatFrozenDict)
+        # add objects to the literal_eval list
+        for klass in (OrderedDict, OrderedSet, frozenset, FrozenOrderedSet, FrozenDict, self.PythonObject):
             self.setLiteralEval(klass)
 
     def setFormatter(self, obj, callback):
@@ -940,46 +944,34 @@ class PrintFormatter(object):
         else:
             # and finally catch any non-recognised object
             return "PythonObject('{0}')".format(b64encode(pickle.dumps(value)).decode('utf-8'))
-            # return "{{'__PythonObject': '{0}'}}".format(b64encode(pickle.dumps(value)).decode('utf-8'))
 
-    def formatDict(self, value, indent):
-        """Output format for dict
+    def formatDictBase(self, value, indent, formatString=''):
+        """Output format for dict/FrozenDict
         """
         items = [
             self.lfchar + self.htchar * (indent + 1) + repr(key) + ': ' +
             (self.types[type(value[key]) if type(value[key]) in self.types else object])(self, value[key], indent + 1)
             for key in value
             ]
-        return '{{{0}}}'.format(','.join(items) + self.lfchar + self.htchar * indent)
+        return formatString.format(','.join(items) + self.lfchar + self.htchar * indent)
 
-    def formatList(self, value, indent):
+    formatDict = partial(formatDictBase, formatString='{{{0}}}')
+    formatFrozenDict = partial(formatDictBase, formatString='FrozenDict({{{0}}})')
+
+    def formatBase(self, value, indent, formatString=''):
         """Output format for list
         """
         items = [
             self.lfchar + self.htchar * (indent + 1) + (self.types[type(item) if type(item) in self.types else object])(self, item, indent + 1)
             for item in value
             ]
-        return '[{0}]'.format(','.join(items) + self.lfchar + self.htchar * indent)
+        return formatString.format(','.join(items) + self.lfchar + self.htchar * indent)
 
-    def formatTuple(self, value, indent):
-        """Output format for tuple
-        """
-        items = [
-            self.lfchar + self.htchar * (indent + 1) + (self.types[type(item) if type(item) in self.types else object])(self, item, indent + 1)
-            for item in value
-            ]
-        return '({0})'.format(','.join(items) + self.lfchar + self.htchar * indent)
+    formatList = partial(formatBase, formatString='[{0}]')
+    formatTuple = partial(formatBase, formatString='({0})')
+    formatSet = partial(formatBase, formatString='{{{0}}}')
 
-    def formatSet(self, value, indent):
-        """Output format for set (not recognised by Json)
-        """
-        items = [
-            self.lfchar + self.htchar * (indent + 1) + (self.types[type(item) if type(item) in self.types else object])(self, item, indent + 1)
-            for item in value
-            ]
-        return '{{{0}}}'.format(','.join(items) + self.lfchar + self.htchar * indent)
-
-    def formatSetType(self, value, indent, klassName=None):
+    def formatKlassBase(self, value, indent, klassName=None, formatString=''):
         """Output format for set of type klass
         currently   ccpn.util.OrderedSet.OrderedSet
                     frozenset
@@ -989,8 +981,10 @@ class PrintFormatter(object):
             self.lfchar + self.htchar * (indent + 1) + (self.types[type(item) if type(item) in self.types else object])(self, item, indent + 1)
             for item in value
             ]
-        return '{0}([{1}])'.format(klassName, ','.join(items) + self.lfchar + self.htchar * indent)
-        # return "{{'__{0}': [{1}]}}".format(klassName, ','.join(items) + self.lfchar + self.htchar * indent)
+        return formatString.format(klassName, ','.join(items) + self.lfchar + self.htchar * indent)
+
+    formatListType = partial(formatKlassBase, formatString='{0}([{1}])')
+    formatSetType = partial(formatKlassBase, formatString='{0}({{{1}}})')
 
     def formatOrderedDict(self, value, indent):
         """Output format for OrderedDict (collections.OrderedDict)
@@ -1003,7 +997,6 @@ class PrintFormatter(object):
             for key in value
             ]
         return 'OrderedDict([{0}])'.format(','.join(items) + self.lfchar + self.htchar * indent)
-        # return "{{'__OrderedDict': [{0}]}}".format(','.join(items) + self.lfchar + self.htchar * indent)
 
     def PythonObject(self, value):
         """Call method to produce object from pickled string
@@ -1070,20 +1063,6 @@ class PrintFormatter(object):
             elif isinstance(node, Set):
                 return set(map(_convert, node.elts))
             elif isinstance(node, Dict):
-
-                # # special cases for OrderedDict/OrderedSet/frozenset/FrozenOrderedSet/PythonObject
-                # if len(node.keys) == 1 and node.keys[0].value == '__OrderedDict':
-                #     return OrderedDict(list(map(_convert, node.values[0].elts)))
-                # elif len(node.keys) == 1 and node.keys[0].value == '__OrderedSet':
-                #     return OrderedSet(map(_convert, node.values[0].elts))
-                # elif len(node.keys) == 1 and node.keys[0].value == '__frozenset':
-                #     return frozenset(map(_convert, node.values[0].elts))
-                # elif len(node.keys) == 1 and node.keys[0].value == '__FrozenOrderedSet':
-                #     return FrozenOrderedSet(map(_convert, node.values[0].elts))
-                # elif len(node.keys) == 1 and node.keys[0].value == '__PythonObject':
-                #     return _convert_object(node.values[0])
-                # else:
-
                 return dict(zip(map(_convert, node.keys),
                                 map(_convert, node.values)))
             elif isinstance(node, Call):

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NMR Exchange Format (NEF)</title>
+    <style >.action {color: #803594; font-weight:bold;}</style>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div><img src="CCPN.png" alt="CCPN Logo" height="50"></div>
+<br>
+<div class="headerBar">NMR Exchange Format (NEF)</div>
+<div class="tutorial">
+<h2>NMR Exchange Format (NEF)</h2>
+<p>The NMR field has traditionally used a large variety of program specific file formats. This has made it difficult for software packages to inter-operate and has complicated data-archiving and retrieval. To address these challenges, the developers of a large number of NMR software packages have united to develop a single, universal file format, the NMR Exchange Format "NEF", and have committed to make their software NEF compatible (<a href="https://www.nature.com/articles/nsmb.3041">Gutmanas et al. 2015</a> ).</p>
+<p>The main advantage of NEF is that allows the most common types of NMR data, such as chemical shifts, peak lists and restraint lists to be stored in a single file. In addition, NEF files can be extended to contain additional programme-specific information. It also ensures proper handling of stereospecific and non-stereospecific assignments so that no information is lost.</p>
+<p>NEF uses the STAR file format. STAR files have a defined structure and only certain terms are allowed. This makes it easy to be use as an archival format for many types of biological data. It is also more humanly readable than some other format types (e.g. XML). Examples include NMR-STAR, used by the <a href="http://www.bmrb.wisc.edu/">Biological Nuclear Magnetic Resonance Data Bank (BMRB)</a> and mmCIF which is now the only accepted format for molecular coordinate deposition in <a href="https://www.rcsb.org/">Protein Data Bank</a>.</p>
+<h3>Key characteristics</h3>
+    <p>There are few characteristic features of the NEF format, the two most noticeable ones are:
+        <br>1. Data names start with an underscore, we will refer to these as <span class="action">tags</span>.
+        <br>2. There are a few reserved keywords (common to all STAR-type files): <span class="action">data_</span>, <span class="action">loop_</span>, <span class="action">save_</span> and <span class="action">stop_</span>.</p>
+    <p>NEF files always start with the keyword <span class="action">data_</span> followed by a project description (e.g. <span class="action">data_peptide_project</span> in the example below). This indicates the start of the data block. NEF files should only have one data block per file.
+    <h3>Saveframes</h3>
+    <p>Data are organised in sections called <span class="action">saveframes</span>. Saveframes start with the keyword <span class="action">save_</span> followed by the <span class="action">framecode</span>, which is unique for this saveframe. Chemical shift lists, peak lists or restraint list are examples of data that have a specific saveframe in which they are placed and identified by specific tags (names). For example, chemical shifts are listed in the saveframe <span class="action">save_nef_chemical_shift_list</span>.</p>
+    <p>The data within a saveframe are composed of tags and loops.</p>
+    <h3>Tags</h3>
+    <p>Tags in a NEF file list the information that is needed or helpful for the particular section. Each tag in a saveframe must be unique.</p>
+    <p>The NEF format has a number of mandatory and optional tags for each saveframe, these are detailed in Commented_Example.nef and mmcif_nef.dic.</p>
+    <p>For example, in the <span class="action">nef_nmr_spectrum_hsqc</span> saveframe there are four tags that must be specified:</p>
+    <pre>
+    save_nef_nmr_spectrum_hsqc
+
+      _nef_nmr_spectrum.sf_category                   nef_nmr_spectrum
+      _nef_nmr_spectrum.sf_framecode                  nef_nmr_spectrum_hsqc
+      _nef_nmr_spectrum.num_dimensions                2
+      _nef_nmr_spectrum.chemical_shift_list           nef_chemical_shift_list_bmr5844
+    </pre>
+    <p>In addition more information can be listed as well:</p>
+    <pre>
+      _nef_nmr_spectrum.experiment_type               hsqc
+      _nef_nmr_spectrum.ccpn_positive_contour_count   10
+      _nef_nmr_spectrum.ccpn_spectrum_comment         ''
+      _nef_nmr_spectrum.ccpn_spectrum_file_path       /Users/user/Documents/spectra/hsqc.spc
+      _nef_nmr_spectrum.ccpn_file_type                Azara
+    </pre>
+    <p>The tags in the above example consist of two parts. The first part is identical for all tags in this saveframe (<span class="action">_nef_nmr_spectrum</span>) and is specified at the beginning of the saveframe (<span class="action">_nef_nmr_spectrum.sf_category</span> has the value <span class="action">nef_nmr_spectrum</span>). What follows after the dot gives more of an indication about the information provided by the tag.</p>
+   <p>Another thing worth noticing is that there are two types of tags. <span class="action">_nef_nmr_spectrum.experiment_type</span> is described in the NEF documentation and is universal for all programmes reading and writing the NEF files. <span class="action">_nef_nmr_spectrum.ccpn_spectrum_comment</span>  is a programme-specific addition to the <span class="action">_nef_nmr_spectrum</span> saveframe, in which information relevant to CcpNmr Analysis can be stored. Other programs are free to skip this information. During the NEF export a user can select whether to include or exclude the optional tags (the <span class="action">ccpn_</span> tags in the example here).</p>
+   <p>Values for tags need to be enclosed in quotes if they contain a space, tab, vertical tab, or newline in the value.</p>
+   <h3>Loops</h3>
+   <p>As there can only be one of each tag in a saveframe, it is not possible to include data such as peak lists where there are multiple values for each tag (<span class="action">peak_number</span>, for instance, could have thousands of values). To include this type of data (essentially tabular data) we need to output them as a <span class="action">loop</span> in a saveframe. A loop is a set of tags with multiple values and is used in NEF to store tabular data.</p>
+   <p>The NEF specification lists the loops and tags that are mandatory and non-mandatory.</p>
+   <p>Loops start with the <span class="action">loop_</span>  keyword followed by tags in separate rows and then by values in a space delimited format. The end of the loop is marked with the keyword <span class="action">stop_</span>. You can think of tags in loops as the headings for columns in the table.</p>
+<pre>
+      loop_
+         _nef_sequence.index
+         _nef_sequence.chain_code
+         _nef_sequence.sequence_code
+         _nef_sequence.residue_name
+         _nef_sequence.linking
+         _nef_sequence.residue_variant
+         _nef_sequence.ccpn_comment
+
+         1   A  1   MET  start   .  .
+         2   A  2   LYS  middle  .  .
+         3   A  3   ILE  middle  .  'conserved'
+         4   A  4   ILE  end     .  .
+         5   A  5   CA   single  .  .
+         6   B  1   ATP  single  .  .
+      stop_
+</pre>
+
+<h3>Mandatory and optional content</h3>
+   <p>As mentioned above, saveframes, loops and tags may be mandatory or optional. The mandatory ones are of particular importance if your NEF file is to be used for the deposition into databases (e.g. BMRB or PDB). When CcpNmr Analysis exports a NEF file all the mandatory tags are present by default.</p>
+   <p>The important thing to remember is that although saveframes listing restraints or peaks are not mandatory, if the user chooses to include them in a NEF file, the saveframe must list the tags and loops that are mandatory for those specific saveframes. (Luckily most programmes take care of this automatically.)</p>
+   <h3>Programme-specific saveframes and raw_data saveframes</h3>
+   <p>In addition to including extra information within the NEF saveframes with the appropriate extension to the <span class="action">_nef</span> tag, extra saveframes and loops specific to a particular programme can be added to the NEF file.</p>
+   <p>For example:</p>
+   <pre>
+   save_ccpn_assignment
+
+      _ccpn_assignment.sf_category   ccpn_assignment
+      _ccpn_assignment.sf_framecode  ccpn_assignment
+
+      loop_
+         _nmr_chain.short_name
+         _nmr_chain.serial
+         _nmr_chain.label
+         _nmr_chain.is_connected
+         _nmr_chain.comment
+
+         @-  1  @-  false  'Default NmrChain, used for ResonanceGroups not in other chains. Cannot be deleted or renamed.'
+         A   2  @2  false  .
+      stop_
+   save_
+</pre>
+   <p>This is particularly useful when a program is capable of harvesting information produced by another programme, for instance as a result of a structure calculation.</p>
+
+   <h2>Annotated Example file</h2>
+   <h4>Section 1: NMR meta data (mandatory)</h4>
+   <p>Only one of these saveframes is allowed per project</p>
+<pre>
+    data_peptide_project
+
+      save_nef_nmr_meta_data
+
+          _nef_nmr_meta_data.sf_category      nef_nmr_meta_data
+          _nef_nmr_meta_data.sf_framecode     nef_nmr_meta_data
+          _nef_nmr_meta_data.format_name      nmr_exchange_format
+          _nef_nmr_meta_data.format_version   1.1
+          _nef_nmr_meta_data.program_name     AnalysisAssign
+          _nef_nmr_meta_data.program_version  3.0.1.1
+          _nef_nmr_meta_data.creation_date    2020-06-14T20:53:22.311917
+         _nef_nmr_meta_data.uuid              AnalysisAssign-2020-06-14T20:53:22.311917-1956756036
+      save_</pre>
+
+   <p>We hope that in the near future this section will also include run history:</p>
+   <pre>
+      loop_
+         _nef_run_history.run_number
+         _nef_run_history.program_name
+         _nef_run_history.program_version
+         _nef_run_history.script_name
+
+         1   ARIA       2.3   .
+         2   UNIO       .     .
+         3   Xplor_NIH  3.0.2 refine.py
+
+      stop_
+   </pre>
+
+<h4>Section 2: Molecular system (mandatory)</h4>
+   <p>Only one of these saveframes is allowed per data block as all molecules can be included in a single loop.</p>
+<pre>
+   save_nef_molecular_system
+
+      _nef_molecular_system.sf_category   nef_molecular_system
+      _nef_molecular_system.sf_framecode  nef_molecular_system
+
+      loop_
+         _nef_sequence.index
+         _nef_sequence.chain_code
+         _nef_sequence.sequence_code
+         _nef_sequence.residue_name
+         _nef_sequence.linking
+         _nef_sequence.residue_variant
+         _nef_sequence.ccpn_comment
+
+         1   A  1   MET  start   .  .
+         2   A  2   LYS  middle  .  .
+         3   A  3   ILE  middle  .  'conserved'
+         4   A  4   ILE  end     .  .
+         5   A  5   CA   single  .  .
+         6   B  1   ATP  single  .  .
+      stop_
+   save_
+</pre>
+   <p>In the above example, Chain A is a peptide in complex with a calcium (CA) and Chain B is free ATP.</p>
+
+
+<h4>Section 3: Chemical shift table (mandatory)</h4>
+   <p>There can be more than one of these saveframes in a single NEF file. Note how the <span class="action">_nef_chemical_shift_list.sf_category</span> tag specifies the saveframe type (<span class="action">_nef_chemical_shift_list</span>) and the <span class="action">_nef_chemical_shift_list.sf_framecode</span> tag specifies the name of that particular saveframe (<span class="action">_nef_chemical_shift_list.sf_category</span>).</p>
+<pre>
+   save_nef_chemical_shift_list_bmr5844
+
+      _nef_chemical_shift_list.sf_category   nef_chemical_shift_list
+      _nef_chemical_shift_list.sf_framecode  nef_chemical_shift_list_bmr5844
+      _nef_chemical_shift_list.ccpn_serial   1
+      _nef_chemical_shift_list.ccpn_comment  ''
+
+      loop_
+         _nef_chemical_shift.chain_code
+         _nef_chemical_shift.sequence_code
+         _nef_chemical_shift.residue_name
+         _nef_chemical_shift.atom_name
+         _nef_chemical_shift.value
+         _nef_chemical_shift.value_uncertainty
+         _nef_chemical_shift.element
+         _nef_chemical_shift.isotope_number
+         _nef_chemical_shift.ccpn_figure_of_merit
+         _nef_chemical_shift.ccpn_comment
+
+         @-  @88  .    H@955  9.639446186  0  H  1   1  .
+         @-  @89  .    N@956  112.0508243  0  N  15  1  .
+         A   1    MET  C      170.978      0  C  13  1  .
+         A   1    MET  CA     55.193       0  C  13  1  .
+         A   1    MET  CB     34.019       0  C  13  1  .
+         A   1    MET  CG     31.136       0  C  13  1  .
+         A   1    MET  HA     3.823        0  H  1   1  .
+         A   1    MET  HB2    1.956        0  H  1   1  .
+         A   1    MET  HB3    1.976        0  H  1   1  .
+         A   1    MET  HG2    2.151        0  H  1   1  .
+         A   1    MET  HG3    2.036        0  H  1   1  .
+         A   2    LYS  C      174.608      0  C  13  1  .
+         A   2    LYS  CA     54.206       0  C  13  1  .
+         A   2    LYS  CB     35.916       0  C  13  1  .
+         A   2    LYS  CD     29.373       0  C  13  1  .
+         A   2    LYS  CE     42.086       0  C  13  1  .
+         A   2    LYS  CG     24.011       0  C  13  1  .
+         A   2    LYS  H      8.56         0  H  1   1  .
+         A   2    LYS  HA     4.62         0  H  1   1  .
+         A   2    LYS  HBx    1.494        0  H  1   1  .
+         A   2    LYS  HBy    1.329        0  H  1   1  .
+         A   2    LYS  HDx    1.604        0  H  1   1  .
+         A   2    LYS  HDy    1.651        0  H  1   1  .
+         A   2    LYS  HE%    2.909        0  H  1   1  .
+         A   2    LYS  HGx    1.384        0  H  1   1  .
+         A   2    LYS  HGy    1.223        0  H  1   1  .
+         A   2    LYS  N      122.783      0  N  15  1  .
+         A   3    ILE  C      176.569      0  C  13  1  .
+         A   3    ILE  CA     62.565       0  C  13  1  .
+         A   3    ILE  CB     38.792       0  C  13  1  .
+         A   3    ILE  CD1    14.332       0  C  13  1  .
+         A   3    ILE  CG1    27.255       0  C  13  1  .
+         A   3    ILE  CG2    17.2         0  C  13  1  .
+         A   3    ILE  H      8.373        0  H  1   1  .
+         A   3    ILE  HA     3.659        0  H  1   1  .
+         A   3    ILE  HB     1.486        0  H  1   1  .
+         A   3    ILE  HD1%   0.775        0  H  1   1  .
+         A   3    ILE  HG1x   0.781        0  H  1   1  .
+         A   3    ILE  HG1y   0.06         0  H  1   1  .
+         A   3    ILE  HG2%   0.595        0  H  1   1  .
+         A   3    ILE  N      120.076      0  N  15  1  .
+         A   4    ILE  C      176.194      0  C  13  1  .
+         A   4    ILE  CA     60.586       0  C  13  1  .
+         A   4    ILE  CB     37.466       0  C  13  1  .
+         A   4    ILE  CD1    10.304       0  C  13  1  .
+         A   4    ILE  CG1    26.368       0  C  13  1  .
+         A   4    ILE  CG2    16.57        0  C  13  1  .
+         A   4    ILE  H      8.543345299  0  H  1   1  .
+         A   4    ILE  HA     4.135        0  H  1   1  .
+         A   4    ILE  HB     1.613        0  H  1   1  .
+         A   4    ILE  HD1%   0.64         0  H  1   1  .
+         A   4    ILE  HG1x   1.164        0  H  1   1  .
+         A   4    ILE  HG1y   1.025        0  H  1   1  .
+         A   4    ILE  HG2%   0.802        0  H  1   1  .
+         A   4    ILE  N      127.239      0  N  15  1  .
+      stop_
+   save_
+</pre>
+<p>The first two shifts (with <span class="action">chain_code</span> set as temporary using <span class="action">@</span>) are unassigned but observed resonances.</p>
+   <p>Note that 1 MET has sterospecifically assigned atoms HB2/3 and HG2/3. Some of the other protons have non-degenerate AND non-steroespecific assignments (for example <span class="action">2 LYS HBx</span> and <span class="action">HBy</span>). The 2 LYS HE2 and HE3 signals overlap (are degenerate) and so therefore these protons are given a wildcard - <span class="action">HE%</span>.</p>
+
+   <h4>Section 4: Distance restraint list(s)</h4>
+   <p>There must be a separate saveframe for each restraint list.</p>
+<pre>
+   save_nef_distance_restraint_list_1pqx_mr
+
+      _nef_distance_restraint_list.sf_category     nef_distance_restraint_list
+      _nef_distance_restraint_list.sf_framecode    nef_distance_restraint_list_1pqx_mr
+      _nef_distance_restraint_list.potential_type  undefined
+      _nef_distance_restraint_list.restraint_origin  .
+      _nef_distance_restraint_list.ccpn_tensor_chain_code  .
+      _nef_distance_restraint_list.ccpn_tensor_sequence_code  .
+      _nef_distance_restraint_list.ccpn_tensor_residue_name  .
+      _nef_distance_restraint_list.ccpn_tensor_magnitude  0
+      _nef_distance_restraint_list.ccpn_tensor_rhombicity  0
+      _nef_distance_restraint_list.ccpn_tensor_isotropic_value  0
+      _nef_distance_restraint_list.ccpn_serial     1
+      _nef_distance_restraint_list.ccpn_dataset_serial  1
+      _nef_distance_restraint_list.ccpn_unit       .
+      _nef_distance_restraint_list.ccpn_comment    ''
+
+      loop_
+         _nef_distance_restraint.index
+         _nef_distance_restraint.restraint_id
+         _nef_distance_restraint.restraint_combination_id
+         _nef_distance_restraint.chain_code_1
+         _nef_distance_restraint.sequence_code_1
+         _nef_distance_restraint.residue_name_1
+         _nef_distance_restraint.atom_name_1
+         _nef_distance_restraint.chain_code_2
+         _nef_distance_restraint.sequence_code_2
+         _nef_distance_restraint.residue_name_2
+         _nef_distance_restraint.atom_name_2
+         _nef_distance_restraint.weight
+         _nef_distance_restraint.target_value
+         _nef_distance_restraint.target_value_uncertainty
+         _nef_distance_restraint.lower_linear_limit
+         _nef_distance_restraint.lower_limit
+         _nef_distance_restraint.upper_limit
+         _nef_distance_restraint.upper_linear_limit
+         _nef_distance_restraint.ccpn_figure_of_merit
+         _nef_distance_restraint.ccpn_comment
+
+          1    55    .  A  1   MET  HA    A  1   MET  HG2   1  4    .  .  1.8  5    .  .  .
+          2    56    .  A  1   MET  HA    A  1   MET  HG3   1  4    .  .  1.8  5    .  .  .
+          3    57    .  A  1   MET  HA    A  2   LYS  H     1  3    .  .  1.8  3.5  .  .  .
+          4    68    .  A  2   LYS  HA    A  3   ILE  H     1  2.5  .  .  1.8  2.9  .  .  .
+          5    69    .  A  2   LYS  HBx   A  2   LYS  HD%   1  4    .  .  1.8  7    .  .  .
+          6    69    .  A  2   LYS  HBy   A  2   LYS  HD%   1  4    .  .  1.8  7    .  .  .
+          7    70    .  A  2   LYS  HB%   A  2   LYS  HE%   1  4    .  .  1.8  7    .  .  .
+          8    71    .  A  2   LYS  HB%   A  3   ILE  H     1  4    .  .  1.8  6    .  .  .
+          9    77    .  A  2   LYS  HE%   A  4   ILE  HD1%  1  4    .  .  1.8  7    .  .  .
+         10    93    .  A  3   ILE  HA    A  5   SER  H     1  4    .  .  1.8  5    .  .  .
+         11    108   .  A  3   ILE  HG2%  A  4   ILE  H     1  4    .  .  1.8  6    .  .  .
+         12    109   .  A  3   ILE  HG2%  A  4   ILE  HA    1  4    .  .  1.8  6    .  .  .
+         13    110   .  A  3   ILE  HG2%  A  2   LYS  HDx   1  4    .  .  1.8  7    .  .  .
+         14    110   .  A  3   ILE  HG2%  A  2   LYS  HDy   1  4    .  .  1.8  7    .  .  .
+      stop_
+   save_
+</pre>
+   <p>The first column (index) is a effectively a line number that does not persist when data are re-exported.</p>
+   <p>The second column gives the restraint ID and lines with the same restraint_id (e.g. restraint 69 and 110) are combined into a single restraint (an ambiguous restraint).</p>
+
+   <h4>Section 5: Dihedral restraint list</h4>
+<pre>
+   save_nef_dihedral_restraint_list_Dih-1pqx_mr
+
+      _nef_dihedral_restraint_list.sf_category     nef_dihedral_restraint_list
+      _nef_dihedral_restraint_list.sf_framecode    nef_dihedral_restraint_list_Dih-1pqx_mr
+      _nef_dihedral_restraint_list.potential_type  undefined
+      _nef_dihedral_restraint_list.restraint_origin  .
+      _nef_dihedral_restraint_list.ccpn_tensor_chain_code  .
+      _nef_dihedral_restraint_list.ccpn_tensor_sequence_code  .
+      _nef_dihedral_restraint_list.ccpn_tensor_residue_name  .
+      _nef_dihedral_restraint_list.ccpn_tensor_magnitude  0
+      _nef_dihedral_restraint_list.ccpn_tensor_rhombicity  0
+      _nef_dihedral_restraint_list.ccpn_tensor_isotropic_value  0
+      _nef_dihedral_restraint_list.ccpn_serial     2
+      _nef_dihedral_restraint_list.ccpn_dataset_serial  1
+      _nef_dihedral_restraint_list.ccpn_unit       .
+      _nef_dihedral_restraint_list.ccpn_comment    ''
+
+      loop_
+         _nef_dihedral_restraint.index
+         _nef_dihedral_restraint.restraint_id
+         _nef_dihedral_restraint.restraint_combination_id
+         _nef_dihedral_restraint.chain_code_1
+         _nef_dihedral_restraint.sequence_code_1
+         _nef_dihedral_restraint.residue_name_1
+         _nef_dihedral_restraint.atom_name_1
+         _nef_dihedral_restraint.chain_code_2
+         _nef_dihedral_restraint.sequence_code_2
+         _nef_dihedral_restraint.residue_name_2
+         _nef_dihedral_restraint.atom_name_2
+         _nef_dihedral_restraint.chain_code_3
+         _nef_dihedral_restraint.sequence_code_3
+         _nef_dihedral_restraint.residue_name_3
+         _nef_dihedral_restraint.atom_name_3
+         _nef_dihedral_restraint.chain_code_4
+         _nef_dihedral_restraint.sequence_code_4
+         _nef_dihedral_restraint.residue_name_4
+         _nef_dihedral_restraint.atom_name_4
+         _nef_dihedral_restraint.weight
+         _nef_dihedral_restraint.target_value
+         _nef_dihedral_restraint.target_value_uncertainty
+         _nef_dihedral_restraint.lower_linear_limit
+         _nef_dihedral_restraint.lower_limit
+         _nef_dihedral_restraint.upper_limit
+         _nef_dihedral_restraint.upper_linear_limit
+         _nef_dihedral_restraint.name
+         _nef_dihedral_restraint.ccpn_figure_of_merit
+         _nef_dihedral_restraint.ccpn_comment
+
+         1    1    .  A  2   LYS  C  A  3   ILE  N   A  3   ILE  CA  A  3   ILE  C  1  -40      0  .  -170     90      .  PHI  .  .
+         2    2    .  A  3   ILE  C  A  4   ILE  N   A  4   ILE  CA  A  4   ILE  C  1  -120     0  .  -155     -85     .  PHI  .  .
+         3    3    .  A  4   ILE  C  A  5   SER  N   A  5   SER  CA  A  5   SER  C  1  -35      0  .  180      110     .  PHI  .  .
+      stop_
+   save_
+</pre>
+
+   <h4>Section 6: Peak list</h4>
+<pre>
+   save_nef_nmr_spectrum_hsqc
+
+      _nef_nmr_spectrum.sf_category                   nef_nmr_spectrum
+      _nef_nmr_spectrum.sf_framecode                  nef_nmr_spectrum_hsqc
+      _nef_nmr_spectrum.num_dimensions                2
+      _nef_nmr_spectrum.chemical_shift_list           nef_chemical_shift_list_bmr5844
+      _nef_nmr_spectrum.experiment_classification     .
+      _nef_nmr_spectrum.experiment_type               hsqc
+      _nef_nmr_spectrum.ccpn_positive_contour_count   10
+      _nef_nmr_spectrum.ccpn_positive_contour_base    201207.9761
+      _nef_nmr_spectrum.ccpn_positive_contour_factor  1.414214
+      _nef_nmr_spectrum.ccpn_positive_contour_colour  '#008080'
+      _nef_nmr_spectrum.ccpn_negative_contour_count   10
+      _nef_nmr_spectrum.ccpn_negative_contour_base    -201207.9761
+      _nef_nmr_spectrum.ccpn_negative_contour_factor  1.414214
+      _nef_nmr_spectrum.ccpn_negative_contour_colour  '#DA70D6'
+      _nef_nmr_spectrum.ccpn_slice_colour             '#008080'
+      _nef_nmr_spectrum.ccpn_spectrum_scale           1
+      _nef_nmr_spectrum.ccpn_spinning_rate            .
+      _nef_nmr_spectrum.ccpn_spectrum_comment         ''
+      _nef_nmr_spectrum.ccpn_spectrum_file_path       /Users/Documents/spectra/hsqc.spc
+      _nef_nmr_spectrum.ccpn_sample                   .
+      _nef_nmr_spectrum.ccpn_file_header_size         0
+      _nef_nmr_spectrum.ccpn_file_number_type         float
+      _nef_nmr_spectrum.ccpn_file_complex_stored_by   dimension
+      _nef_nmr_spectrum.ccpn_file_scale_factor        1
+      _nef_nmr_spectrum.ccpn_file_is_big_endian       false
+      _nef_nmr_spectrum.ccpn_file_byte_number         4
+      _nef_nmr_spectrum.ccpn_file_has_block_padding   true
+      _nef_nmr_spectrum.ccpn_file_block_header_size   0
+      _nef_nmr_spectrum.ccpn_file_type                Azara
+      _nef_nmr_spectrum.ccpn_peaklist_serial          1
+      _nef_nmr_spectrum.ccpn_peaklist_comment         ''
+      _nef_nmr_spectrum.ccpn_peaklist_name            .
+      _nef_nmr_spectrum.ccpn_peaklist_is_simulated    false
+      _nef_nmr_spectrum.ccpn_peaklist_symbol_colour   '#7a7a7a'
+      _nef_nmr_spectrum.ccpn_peaklist_symbol_style    cross
+      _nef_nmr_spectrum.ccpn_peaklist_text_colour     '#7a7a7a'
+
+      loop_
+         _nef_spectrum_dimension.dimension_id
+         _nef_spectrum_dimension.axis_unit
+         _nef_spectrum_dimension.axis_code
+         _nef_spectrum_dimension.spectrometer_frequency
+         _nef_spectrum_dimension.spectral_width
+         _nef_spectrum_dimension.value_first_point
+         _nef_spectrum_dimension.folding
+         _nef_spectrum_dimension.absolute_peak_positions
+         _nef_spectrum_dimension.is_acquisition
+         _nef_spectrum_dimension.ccpn_axis_code
+
+         1  ppm  1H   600.13     16.66305634  13.06118752  circular  true  .  H
+         2  ppm  15N  60.810663  32.88896883  134.8013663  circular  true  .  N
+      stop_
+
+      loop_
+         _ccpn_spectrum_dimension.dimension_id
+         _ccpn_spectrum_dimension.point_count
+         _ccpn_spectrum_dimension.reference_point
+         _ccpn_spectrum_dimension.total_point_count
+         _ccpn_spectrum_dimension.point_offset
+         _ccpn_spectrum_dimension.assignment_tolerance
+         _ccpn_spectrum_dimension.lower_aliasing_limit
+         _ccpn_spectrum_dimension.higher_aliasing_limit
+         _ccpn_spectrum_dimension.measurement_type
+         _ccpn_spectrum_dimension.phase_0
+         _ccpn_spectrum_dimension.phase_1
+         _ccpn_spectrum_dimension.window_function
+         _ccpn_spectrum_dimension.lorentzian_broadening
+         _ccpn_spectrum_dimension.gaussian_broadening
+         _ccpn_spectrum_dimension.sine_window_shift
+         _ccpn_spectrum_dimension.dimension_is_complex
+         _ccpn_spectrum_dimension.dimension_block_size
+
+         1  2048  1022.5  2048  0  0.03  -3.601868814  13.06118752  Shift  .  .  .  .  .  .  false  128
+         2  512   256.5   512   0  0.4   101.9123975   134.8013663  Shift  .  .  .  .  .  .  false  32
+      stop_
+
+      loop_
+         _nef_peak.index
+         _nef_peak.peak_id
+         _nef_peak.volume
+         _nef_peak.volume_uncertainty
+         _nef_peak.height
+         _nef_peak.height_uncertainty
+         _nef_peak.position_1
+         _nef_peak.position_uncertainty_1
+         _nef_peak.position_2
+         _nef_peak.position_uncertainty_2
+         _nef_peak.chain_code_1
+         _nef_peak.sequence_code_1
+         _nef_peak.residue_name_1
+         _nef_peak.atom_name_1
+         _nef_peak.chain_code_2
+         _nef_peak.sequence_code_2
+         _nef_peak.residue_name_2
+         _nef_peak.atom_name_2
+         _nef_peak.ccpn_figure_of_merit
+         _nef_peak.ccpn_linked_integral
+         _nef_peak.ccpn_annotation
+         _nef_peak.ccpn_comment
+
+         1   1   .  .  834937.5     .  9.490027923  .  117.3867211  .  .   .    .  .      .   .    .  .      1  .  .  .
+         2   2   .  .  948166.375   .  8.32004415   .  117.3874266  .  .   .    .  .      .   .    .  .      1  .  .  .
+         3   3   .  .  943940.125   .  8.453563153  .  117.1876314  .  .   .    .  .      .   .    .  .      1  .  .  .
+         4   4   .  .  634254.5625  .  8.994014548  .  116.9376709  .  .   .    .  .      .   .    .  .      1  .  .  .
+         5   5   .  .  883868.9375  .  9.143328712  .  116.7997058  .  .   .    .  .      .   .    .  .      1  .  .  .
+         6   6   .  .  807720.3125  .  8.543345299  .  116.4114358  .  .   .    .  .      .   .    .  .      1  .  .  .
+         7   7   .  .  807321.375   .  8.703871524  .  116.2422154  .  .   .    .  .      .   .    .  .      1  .  .  .
+         8   8   .  .  816018.5     .  8.729876115  .  115.273359   .  .   .    .  .      .   .    .  .      1  .  .  .
+         9   9   .  .  974045.125   .  8.902105597  .  115.0619393  .  .   .    .  .      .   .    .  .      1  .  .  .
+         10  10  .  .  700148.4375  .  8.262551535  .  114.8766033  .  .   .    .  .      .   .    .  .      1  .  .  .
+         11  11  .  .  818619.6875  .  9.001829507  .  113.9872401  .  .   .    .  .      .   .    .  .      1  .  .  .
+         12  12  .  .  883822       .  8.364161275  .  112.2296637  .  .   .    .  .      .   .    .  .      1  .  .  .
+         13  13  .  .  716563.125   .  9.639446186  .  112.0508243  .  @-  @88  .  H@955  @-  @89  .  N@956  1  .  .  .
+      stop_
+
+   save_
+</pre>
+<p>Each <span class="action">_nef_nmr_spectrum</span> saveframe can contain only one peak list. The entire saveframe, including the spectrum description, must be duplicated to include an additional peak list for a particular spectrum.</p>
+   <p>Each spectrum must be associated with a chemical shift list.</p>
+
+   <h4>Section 7: Programme-specific data</h4>
+   <p>Some programmes will also output their own saveframes. CcpNmr Analysis, for example, can output a several saveframes which (in combination with the NEF specified saveframes above) allows it to restore a full ccpn project when read in to CcpNmr Analysis.</p>
+<pre>
+   save_ccpn_assignment
+
+      _ccpn_assignment.sf_category   ccpn_assignment
+      _ccpn_assignment.sf_framecode  ccpn_assignment
+
+      loop_
+         _nmr_chain.short_name
+         _nmr_chain.serial
+         _nmr_chain.label
+         _nmr_chain.is_connected
+         _nmr_chain.comment
+
+         @-  1  @-  false  'Default NmrChain, used for ResonanceGroups not in other chains. Cannot be deleted or renamed.'
+         A   2  @2  false  .
+      stop_
+
+      loop_
+         _nmr_residue.chain_code
+         _nmr_residue.sequence_code
+         _nmr_residue.residue_name
+         _nmr_residue.serial
+         _nmr_residue.comment
+
+         @-  @88  .    88  .
+         @-  @89  .    89  .
+         A   1    MET  1   .
+         A   2    LYS  2   .
+         A   3    ILE  3   .
+         A   4    ILE  4   .
+      stop_
+
+      loop_
+         _nmr_atom.chain_code
+         _nmr_atom.sequence_code
+         _nmr_atom.serial
+         _nmr_atom.name
+         _nmr_atom.isotope_code
+         _nmr_atom.comment
+
+         @-  @88  955  H@955  1H   .
+         @-  @89  956  N@956  15N  .
+         A   1    1    HA     1H   HA
+         A   1    2    HB2    1H   HBx
+         A   1    3    HB3    1H   HBy
+         A   1    4    HG2    1H   HGx
+         A   1    5    HG3    1H   HGy
+         A   1    6    C      13C  C
+         A   1    7    CA     13C  CA
+         A   1    8    CB     13C  CB
+         A   1    9    CG     13C  CG
+         A   2    10   H      1H   H
+         A   2    11   HA     1H   HA
+         A   2    12   HBx    1H   HBx
+         A   2    13   HBy    1H   HBy
+         A   2    14   HGx    1H   HGx
+         A   2    15   HGy    1H   HGy
+         A   2    16   HDx    1H   HDx
+         A   2    17   HDy    1H   HDy
+         A   2    18   HE%    1H   HE%
+         A   2    19   C      13C  C
+         A   2    20   CA     13C  CA
+         A   2    21   CB     13C  CB
+         A   2    22   CG     13C  CG
+         A   2    23   CD     13C  CD
+         A   2    24   CE     13C  CE
+         A   2    25   N      15N  N
+         A   3    26   H      1H   H
+         A   3    27   HA     1H   HA
+         A   3    28   HB     1H   HB
+         A   3    29   HG1x   1H   HG1x
+         A   3    30   HG1y   1H   HG1y
+         A   3    31   HG2%   1H   HG2%
+         A   3    32   HD1%   1H   HD1%
+         A   3    33   C      13C  C
+         A   3    34   CA     13C  CA
+         A   3    35   CB     13C  CB
+         A   3    36   CG1    13C  CG1
+         A   3    37   CG2    13C  CG2
+         A   3    38   CD1    13C  CD1
+         A   3    39   N      15N  N
+         A   4    40   H      1H   H
+         A   4    41   HA     1H   HA
+         A   4    42   HB     1H   HB
+         A   4    43   HG1x   1H   HG1x
+         A   4    44   HG1y   1H   HG1y
+         A   4    45   HG2%   1H   HG2%
+         A   4    46   HD1%   1H   HD1%
+         A   4    47   C      13C  C
+         A   4    48   CA     13C  CA
+         A   4    49   CB     13C  CB
+         A   4    50   CG1    13C  CG1
+         A   4    51   CG2    13C  CG2
+         A   4    52   CD1    13C  CD1
+         A   4    53   N      15N  N
+      stop_
+   save_
+
+
+   save_ccpn_additional_data
+
+      _ccpn_additional_data.sf_category   ccpn_additional_data
+      _ccpn_additional_data.sf_framecode  ccpn_additional_data
+
+      loop_
+         _ccpn_internal_data.ccpn_object_pid
+         _ccpn_internal_data.internal_data_string
+
+         PeakList:hsqc.1
+;{
+  "meritSettings": {
+    "meritEnabled": false
+  }
+}
+;
+         Spectrum:hsqc
+;{
+  "spectrumAxesOrdering": {
+    "spectrumPreferredAxisOrdering": [
+      0,
+      1
+    ]
+  },
+  "includePositiveContours": true,
+  "includeNegativeContours": false,
+  "spectrumAliasing": {
+    "displayFoldedContours": true,
+    "visibleAliasingRange": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "aliasingRange": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  }
+}
+;
+      stop_
+   save_
+</pre>
+
+
+</div>
+</body>
+</html>

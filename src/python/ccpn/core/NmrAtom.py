@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-12 16:00:40 +0100 (Fri, June 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-23 18:26:47 +0100 (Tue, June 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -34,8 +34,9 @@ from ccpn.core.lib.Util import AtomIdTuple
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Constants
 from ccpn.util.Common import name2IsotopeCode
+from ccpn.util.Constants import PSEUDO_ATOM_NAMES
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, renameObjectContextManager
+from ccpn.core.lib.ContextManagers import newObject, undoBlock, renameObjectContextManager
 from ccpn.util.Logging import getLogger
 
 
@@ -386,10 +387,32 @@ class NmrAtom(AbstractWrapperObject):
                 elif newIsotopeCode != isotopeCode:
                     raise ValueError("Cannot rename %s type NmrAtom to %s - invalid isotopeCode" % (isotopeCode, value))
 
-            try:
-                self._wrappedData.name = value
-            except Exception as es:
-                raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
+                try:
+                    self._wrappedData.name = value
+                except Exception as es:
+                    if isotopeChanged:
+                        # revert the isotopeCode
+                        self._wrappedData.isotopeCode = isotopeCode
+                    raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
+
+            elif value and value[0] in PSEUDO_ATOM_NAMES:
+                newIsotopeCode = PSEUDO_ATOM_NAMES[value[0]]
+                if isotopeCode == '?':
+                    self._wrappedData.isotopeCode = newIsotopeCode
+                    isotopeChanged = True
+                elif newIsotopeCode != isotopeCode:
+                    raise ValueError("Cannot rename %s type NmrAtom to %s - invalid isotopeCode" % (isotopeCode, value))
+
+                # NOTE:ED - this is a hack to allow setting Q pseudoAtom types to isotopeCode 1H
+                #           could actually be used to bypass all name checking in the api
+                self._wrappedData.__dict__['isotopeCode'] = '1H'
+                self._wrappedData.__dict__['implName'] = value
+
+            else:
+                try:
+                    self._wrappedData.name = value
+                except Exception as es:
+                    raise ValueError("Cannot rename %s type NmrAtom to %s" % (isotopeCode, value))
 
             if isotopeChanged:
                 addUndoItem(redo=partial(self._setIsotopeCode, newIsotopeCode))
@@ -533,6 +556,11 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
         except ValueError:
             getLogger().warning("Could not reset serial of %s to %s - keeping original value"
                                 % (result, serial))
+
+    if name and name[0] in PSEUDO_ATOM_NAMES:
+        # NOTE:ED - this is a hack to allow setting Q pseudoAtom types to isotopeCode 1H
+        #           could actually be used to bypass all name checking in the api
+        obj.__dict__['isotopeCode'] = PSEUDO_ATOM_NAMES[name[0]]
 
     return result
 

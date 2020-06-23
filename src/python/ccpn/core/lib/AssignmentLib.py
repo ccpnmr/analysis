@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-22 14:48:54 +0100 (Wed, April 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-23 18:26:47 +0100 (Tue, June 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,9 @@ NEF_ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CG', 'CG1', 'CG2', 'CGx', 'CGy',
                           'HG3', 'HGx', 'HGx%', 'HGy', 'HGy%', 'HD1', 'HD1%', 'HD2', 'HD21', 'HD22',
                           'HD2x', 'HD2y', 'HD2%', 'HD3', 'HDx', 'HDx%', 'HDy', 'HDy%', 'HE', 'HE1', 'HE2',
                           'HE21', 'HE22', 'HE2x', 'HE2y', 'HE3', 'HEx', 'HEy', 'HE%', 'HZ', 'HZ2', 'HZ3', 'HZ%',
-                          'HH', 'HH11', 'HH12', 'HH1x', 'HH1y', 'HH2', 'HH21', 'HH22', 'HH2x', 'HH2y']}
+                          'HH', 'HH11', 'HH12', 'HH1x', 'HH1y', 'HH2', 'HH21', 'HH22', 'HH2x', 'HH2y',
+                          'QA', 'QB', 'QD', 'QE', 'QG', 'QH', 'QH1', 'QH2', 'QR', 'QZ'
+                          ]}
 
 from ccpn.util import Common as commonUtil, Constants
 from typing import Sequence
@@ -95,7 +97,7 @@ def assignAlphas(nmrResidue: NmrResidue, peaks: typing.List[Peak], axisCode='C')
     if len(peaks) > 1:
         lowestP = [i for i in peaks if i.height == min([j.height for j in peaks])]
         highestP = [i for i in peaks if i.height == max([j.height for j in peaks])]
-        peaks = lowestP+highestP
+        peaks = lowestP + highestP
         chain = nmrResidue.nmrChain
         newNmrResidue = chain.fetchNmrResidue(nmrResidue.sequenceCode + '-1')
         a3 = newNmrResidue.fetchNmrAtom(name='CA')

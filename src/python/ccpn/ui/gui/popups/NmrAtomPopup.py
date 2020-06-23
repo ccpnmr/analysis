@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-23 15:18:27 +0100 (Tue, June 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-23 18:26:47 +0100 (Tue, June 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,14 +25,10 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.util.OrderedSet import OrderedSet
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
-from ccpn.core.lib.AssignmentLib import NEF_ATOM_NAMES
-from ccpn.util.Common import isotopeCode2Nucleus
+from ccpn.util.Common import greekKey, getIsotopeListFromCode
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget, CheckBoxCompoundWidget
-from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrResiduePulldown
 
 
 class NmrAtomPopup(AttributeEditorPopupABC):
@@ -44,17 +40,12 @@ class NmrAtomPopup(AttributeEditorPopupABC):
         """Populate the nmrAtom pulldown
         """
         isotopeCode = self.obj.isotopeCode
-        if isotopeCode in NEF_ATOM_NAMES:
-            atomNames = list([atomName for atomName in NEF_ATOM_NAMES[isotopeCode]])
-        else:
-            # atomNames = sorted(set([x for y in NEF_ATOM_NAMES.values() for x in y]))
-            keys = sorted(NEF_ATOM_NAMES.keys(), key=lambda kk: kk.strip('0123456789'))
-            atomNames = list(OrderedSet([atomName for key in keys for atomName in NEF_ATOM_NAMES[key]]))
+        atomNames = getIsotopeListFromCode(isotopeCode)
 
         if self.obj.name not in atomNames:
             atomNames.insert(0, self.obj.name)
 
-        self.nmrAtomname.modifyTexts(atomNames)
+        self.nmrAtomname.modifyTexts(sorted(list(set(atomNames)), key=greekKey))
         if self.obj.name:
             self.nmrAtomname.select(self.obj.name)
 
@@ -66,7 +57,7 @@ class NmrAtomPopup(AttributeEditorPopupABC):
 
     klass = NmrAtom
     attributes = [('pid', EntryCompoundWidget, getattr, None, None, None, {}),
-                  ('nmrAtom name', PulldownListCompoundWidget, getattr, None, _getNmrAtomTypes, None, {'editable' : False}),
+                  ('nmrAtom name', PulldownListCompoundWidget, getattr, None, _getNmrAtomTypes, None, {'editable' : True}),
                   ('nmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNmrResidueTypes, None, {}),
                   ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {}),
                   ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),

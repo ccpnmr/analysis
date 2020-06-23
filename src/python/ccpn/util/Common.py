@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 12:10:38 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-23 18:26:47 +0100 (Tue, June 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -969,3 +969,30 @@ class PrintFormatter(object):
             for item in value
             ]
         return 'OrderedSet([{0}])'.format(','.join(items) + self.lfchar + self.htchar * indent)
+
+
+def greekKey(word):
+    """Sort key for sorting a list by the equivalent greek letter
+    """
+    greekSort = '0123456789@ABGDEZHQIKLMNXOPRSTUFCYWabgdezhqiklmnxoprstufcyw'
+    greekLetterCount = len(greekSort)
+
+    key = (0,)
+    if word:
+        key = (ord(word[0]),)
+        key += tuple(greekSort.index(c) if c in greekSort else greekLetterCount for c in word[1:])
+    return key
+
+
+def getIsotopeListFromCode(isotopeCode):
+    """Return a list of defined atom names based on the isotopeCode
+    """
+    from ccpn.core.lib.AssignmentLib import NEF_ATOM_NAMES
+
+    if isotopeCode in NEF_ATOM_NAMES:
+        atomNames = [atomName for atomName in NEF_ATOM_NAMES[isotopeCode]]
+    else:
+        keys = sorted(NEF_ATOM_NAMES.keys(), key=lambda kk: kk.strip('0123456789'))
+        atomNames = list(OrderedSet([atomName for key in keys for atomName in NEF_ATOM_NAMES[key]]))
+
+    return atomNames

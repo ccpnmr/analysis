@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-29 15:21:46 +0100 (Wed, April 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-23 18:26:47 +0100 (Tue, June 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ import re
 
 from collections import namedtuple
 from collections import OrderedDict
+
 
 ERRORSTRING = 'BADVALUE'
 MOUSEDICTSTRIP = 'strip'
@@ -546,6 +547,10 @@ isotopeRecords = OrderedDict((
     ('239Pu', IsotopeRecord('239Pu', 94, 239, True, 'Pu', 'Plutonium', 0.5, 0.406, 0, 0)),
     ('243Am', IsotopeRecord('243Am', 95, 243, True, 'Am', 'Americium', 2.5, 0.6, 0, 2.86)),
     ))
+
+PSEUDO_ATOM_NAME = 'Q'
+PSEUDO_ATOM_NAMES = {PSEUDO_ATOM_NAME: '1H'}
+PSEUDO_ATOMS = ['QA', 'QB', 'QD', 'QE', 'QG', 'QH', 'QH1', 'QH2', 'QR', 'QZ']
 
 # default isotopes and nucleus codes
 for isotopCode in isotopeRecords:

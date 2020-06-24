@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:53 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-24 14:48:32 +0100 (Wed, June 24, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1071,9 +1071,9 @@ class DimensionsTab(Widget):
 
         self._pointCountsLabels = [i for i in range(dimensions)]
         self._dimensionTypesLabels = [i for i in range(dimensions)]
-        self._spectralWidthsLabels = [i for i in range(dimensions)]
-        self._spectralWidthsHzLabels = [i for i in range(dimensions)]
-        self._spectrometerFrequenciesLabels = [i for i in range(dimensions)]
+        self.spectralWidthsData = [i for i in range(dimensions)]
+        self.spectralWidthsHzData = [i for i in range(dimensions)]
+        self.spectrometerFrequenciesData = [i for i in range(dimensions)]
 
         self.spectralReferencingData = [i for i in range(dimensions)]
         self.spectralReferencingDataPoints = [i for i in range(dimensions)]
@@ -1164,41 +1164,44 @@ class DimensionsTab(Widget):
                                                   grid=(row, i + 1), vAlign='t', hAlign='l')
 
             row += 1
-            self._spectralWidthsLabels[i] = Label(self,  #text=str("%.3f" % (spectrum.spectralWidths[i] or 0.0)),
-                                                  grid=(row, i + 1), vAlign='t', hAlign='l')
+            self.spectralWidthsData[i] = ScientificDoubleSpinBox(self, grid=(row, i + 1), vAlign='t', hAlign='l', decimals=3, step=0.1)
+            self.spectralWidthsData[i].valueChanged.connect(partial(self._queueSetSpectralWidths, spectrum, i,
+                                                                         self.spectralWidthsData[i].textFromValue))
 
             row += 1
-            self._spectralWidthsHzLabels[i] = Label(self,  #text=str("%.3f" % (spectrum.spectralWidthsHz[i] or 0.0)),
-                                                    grid=(row, i + 1), vAlign='t', hAlign='l')
+            self.spectralWidthsHzData[i] = ScientificDoubleSpinBox(self, grid=(row, i + 1), vAlign='t', hAlign='l', decimals=3, step=0.1)
+            self.spectralWidthsHzData[i].valueChanged.connect(partial(self._queueSetSpectralWidthsHz, spectrum, i,
+                                                                         self.spectralWidthsHzData[i].textFromValue))
 
             row += 1
-            self._spectrometerFrequenciesLabels[i] = Label(self,  #text=str("%.3f" % (spectrum.spectrometerFrequencies[i] or 0.0)),
-                                                           grid=(row, i + 1), vAlign='t', hAlign='l')
+            self.spectrometerFrequenciesData[i] = ScientificDoubleSpinBox(self, grid=(row, i + 1), vAlign='t', hAlign='l', decimals=3, step=0.1)
+            self.spectrometerFrequenciesData[i].valueChanged.connect(partial(self._queueSetSpectrometerFrequencies, spectrum, i,
+                                                                         self.spectrometerFrequenciesData[i].textFromValue))
 
             row += 1
             # value = spectrum.referenceValues[i]
-            self.spectralReferencingData[i] = DoubleSpinbox(self, grid=(row, i + 1), vAlign='t', hAlign='l', decimals=3, step=0.1)
+            self.spectralReferencingData[i] = ScientificDoubleSpinBox(self, grid=(row, i + 1), vAlign='t', hAlign='l', decimals=3, step=0.1)
             # self.spectralReferencingData[i].setValue(value)
             self.spectralReferencingData[i].valueChanged.connect(partial(self._queueSetDimensionReferencing, spectrum, i,
                                                                          self.spectralReferencingData[i].textFromValue))
 
             row += 1
             # value = spectrum.referencePoints[i]
-            self.spectralReferencingDataPoints[i] = DoubleSpinbox(self, grid=(row, i + 1), vAlign='t', hAlign='l', decimals=3, step=0.1)
+            self.spectralReferencingDataPoints[i] = ScientificDoubleSpinBox(self, grid=(row, i + 1), vAlign='t', hAlign='l', decimals=3, step=0.1)
             # self.spectralReferencingDataPoints[i].setValue(value)
             self.spectralReferencingDataPoints[i].valueChanged.connect(partial(self._queueSetPointDimensionReferencing, spectrum, i,
                                                                                self.spectralReferencingDataPoints[i].textFromValue))
 
             row += 1
             # value = spectrum.assignmentTolerances[i]
-            self.spectralAssignmentToleranceData[i] = DoubleSpinbox(self, grid=(row, i + 1), hAlign='l', decimals=3, step=0.1)
+            self.spectralAssignmentToleranceData[i] = ScientificDoubleSpinBox(self, grid=(row, i + 1), hAlign='l', decimals=3, step=0.1)
             # self.spectralAssignmentToleranceData[i].setValue(value)
             self.spectralAssignmentToleranceData[i].valueChanged.connect(partial(self._queueSetAssignmentTolerances, spectrum, i,
                                                                                  self.spectralAssignmentToleranceData[i].textFromValue))
 
             row += 1
             # value = spectrum.doubleCrosshairOffsets[i]
-            self.spectralDoubleCursorOffset[i] = DoubleSpinbox(self, grid=(row, i + 1), hAlign='l', decimals=3, step=0.1)
+            self.spectralDoubleCursorOffset[i] = ScientificDoubleSpinBox(self, grid=(row, i + 1), hAlign='l', decimals=3, step=0.1)
             # self.spectralDoubleCursorOffset[i].setValue(value)
             self.spectralDoubleCursorOffset[i].valueChanged.connect(partial(self._queueSetDoubleCursorOffset, spectrum, i,
                                                                             self.spectralDoubleCursorOffset[i].textFromValue))
@@ -1338,9 +1341,19 @@ class DimensionsTab(Widget):
 
                 self._pointCountsLabels[i].setText(str(self.spectrum.pointCounts[i]))
                 self._dimensionTypesLabels[i].setText(self.spectrum.dimensionTypes[i])
-                self._spectralWidthsLabels[i].setText(str("%.3f" % (self.spectrum.spectralWidths[i] or 0.0)))
-                self._spectralWidthsHzLabels[i].setText(str("%.3f" % (self.spectrum.spectralWidthsHz[i] or 0.0)))
-                self._spectrometerFrequenciesLabels[i].setText(str("%.3f" % (self.spectrum.spectrometerFrequencies[i] or 0.0)))
+
+                # self._spectralWidthsLabels[i].setText(str("%.3f" % (self.spectrum.spectralWidths[i] or 0.0)))
+                # self._spectralWidthsHzLabels[i].setText(str("%.3f" % (self.spectrum.spectralWidthsHz[i] or 0.0)))
+                # self._spectrometerFrequenciesLabels[i].setText(str("%.3f" % (self.spectrum.spectrometerFrequencies[i] or 0.0)))
+
+                value = self.spectrum.spectralWidths[i]
+                self.spectralWidthsData[i].setValue(value or 0.0)
+
+                value = self.spectrum.spectralWidthsHz[i]
+                self.spectralWidthsHzData[i].setValue(value or 0.0)
+
+                value = self.spectrum.spectrometerFrequencies[i]
+                self.spectrometerFrequenciesData[i].setValue(value or 0.0)
 
                 value = self.spectrum.referenceValues[i]
                 self.spectralReferencingData[i].setValue(value or 0.0)
@@ -1453,6 +1466,49 @@ class DimensionsTab(Widget):
 
         self.pythonConsole.writeConsoleCommand("spectrum.isotopeCodes = {0}".format(isotopeCodes), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.referenceValues = {0}".format(isotopeCodes))
+
+    #~~~~~~~~~~~~~~~~~~~
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetSpectralWidths(self, spectrum, dim, textFromValue, value):
+        specValue = textFromValue(spectrum.spectralWidths[dim])
+        if textFromValue(value) != specValue:
+            return partial(self._setSpectralWidths, spectrum, dim, value)
+
+    def _setSpectralWidths(self, spectrum, dim, value):
+        spectralWidths = list(spectrum.spectralWidths)
+        spectralWidths[dim] = float(value)
+        spectrum.spectralWidths = spectralWidths
+        self.pythonConsole.writeConsoleCommand("spectrum.spectralWidths = {0}".format(spectralWidths), spectrum=spectrum)
+        self._writeLoggingMessage("spectrum.spectralWidths = {0}".format(spectralWidths))
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetSpectralWidthsHz(self, spectrum, dim, textFromValue, value):
+        specValue = textFromValue(spectrum.spectralWidthsHz[dim])
+        if textFromValue(value) != specValue:
+            return partial(self._setSpectralWidthsHz, spectrum, dim, value)
+
+    def _setSpectralWidthsHz(self, spectrum, dim, value):
+        spectralWidthsHz = list(spectrum.spectralWidthsHz)
+        spectralWidthsHz[dim] = float(value)
+        spectrum.spectralWidthsHz = spectralWidthsHz
+        self.pythonConsole.writeConsoleCommand("spectrum.spectralWidthsHz = {0}".format(spectralWidthsHz), spectrum=spectrum)
+        self._writeLoggingMessage("spectrum.spectralWidthsHz = {0}".format(spectralWidthsHz))
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetSpectrometerFrequencies(self, spectrum, dim, textFromValue, value):
+        specValue = textFromValue(spectrum.spectrometerFrequencies[dim])
+        if textFromValue(value) != specValue:
+            return partial(self._setSpectrometerFrequencies, spectrum, dim, value)
+
+    def _setSpectrometerFrequencies(self, spectrum, dim, value):
+        spectrometerFrequencies = list(spectrum.spectrometerFrequencies)
+        spectrometerFrequencies[dim] = float(value)
+        spectrum.spectrometerFrequencies = spectrometerFrequencies
+        self.pythonConsole.writeConsoleCommand("spectrum.spectrometerFrequencies = {0}".format(spectrometerFrequencies), spectrum=spectrum)
+        self._writeLoggingMessage("spectrum.spectrometerFrequencies = {0}".format(spectrometerFrequencies))
+
+    #~~~~~~~~~~~~~~~~~~~
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetDimensionReferencing(self, spectrum, dim, textFromValue, value):

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-23 19:33:36 +0100 (Tue, June 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-24 16:12:01 +0100 (Wed, June 24, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1266,7 +1266,7 @@ if __name__ == '__main__':
                 "frOrdered": FrozenOrderedSet([34, 45])
                 })
             },
-        "Boolean1"  : (True, False),
+        "Boolean1"  : (True, None, False),
         }
 
     options.identical = False
@@ -1333,15 +1333,17 @@ if __name__ == '__main__':
             return dct
 
 
+    # testDict2 = FrozenDict({
+    #     1: 3, "nestedDict": {
+    #         "nestedDictItems": FrozenDict({
+    #             "floatItem": [1.23000001, 'a', 'b'],
+    #             "frozen"   : frozenset({67, 78}),
+    #             "frOrdered": FrozenOrderedSet([34, 45, PrintFormatter()])
+    #             })
+    #         },
+    #     })
+
     pretty = PrintFormatter()
-    # testDict2 = FrozenDict({1: 3, "nestedDict": {
-    #     "nestedDictItems": FrozenDict({
-    #         "floatItem": [1.23000001, 'a', 'b'],
-    #         "frozen"   : frozenset({67, 78}),
-    #         "frOrdered": FrozenOrderedSet([34, 45])
-    #         })
-    #     },
-    #                         })
     dd = pretty(testDict2)
     print('DD ', dd)
     recover = pretty.literal_eval(dd)

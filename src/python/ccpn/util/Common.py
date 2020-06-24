@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-23 19:31:40 +0100 (Tue, June 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-24 16:12:01 +0100 (Wed, June 24, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -885,55 +885,66 @@ def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatche
 
 class PrintFormatter(object):
     """
-    Class to produce formatted strings from objects
-    Includes OrderedDict, OrderedSet, frozenset, FrozenOrderedSet
-    Objects not added to formatter will return their repr object
+    Class to produce formatted strings from python objects.
+
+    Includes standard python objects: list, dict, str, int, float, bool, type(None)
+    and additional objects: OrderedDict, OrderedSet, frozenset, FrozenOrderedSet, FrozenDict
+
+    Objects not added to formatter will return a pickled object if ALLOWPICKLE is True, otherwise None
     """
+    TAB = '    '
+    CRLF = '\n'
+    ALLOWPICKLE = True
 
     def __init__(self):
         """Initialise the class
         """
-        self.types = {}
-        self.evals = {}
-        self.htchar = '    '
-        self.lfchar = '\n'
+        self.registeredFormats = {}
+        self.literalEvals = {}
         self.indent = 0
 
+        # list of default registered objects
+        _registrations = {object          : PrintFormatter.formatObject,
+                          dict            : PrintFormatter.formatDict,
+                          list            : PrintFormatter.formatList,
+                          tuple           : PrintFormatter.formatTuple,
+                          set             : PrintFormatter.formatSet,
+                          OrderedSet      : partial(PrintFormatter.formatListType, klassName=OrderedSet.__name__),
+                          FrozenOrderedSet: partial(PrintFormatter.formatListType, klassName=FrozenOrderedSet.__name__),
+                          frozenset       : partial(PrintFormatter.formatSetType, klassName=frozenset.__name__),
+                          OrderedDict     : PrintFormatter.formatOrderedDict,
+                          FrozenDict      : PrintFormatter.formatFrozenDict,
+                          }
+
         # add objects to the formatter
-        self.setFormatter(object, self.__class__.formatObject)
-        self.setFormatter(dict, self.__class__.formatDict)
-        self.setFormatter(list, self.__class__.formatList)
-        self.setFormatter(tuple, self.__class__.formatTuple)
-        self.setFormatter(set, self.__class__.formatSet)
-        self.setFormatter(OrderedSet, partial(self.__class__.formatListType, klassName=OrderedSet.__name__))
-        self.setFormatter(FrozenOrderedSet, partial(self.__class__.formatListType, klassName=FrozenOrderedSet.__name__))
-        self.setFormatter(frozenset, partial(self.__class__.formatSetType, klassName=frozenset.__name__))
-        self.setFormatter(OrderedDict, self.__class__.formatOrderedDict)
-        self.setFormatter(FrozenDict, self.__class__.formatFrozenDict)
+        for obj, func in _registrations.items():
+            self.registerFormat(obj, func)
+
         # add objects to the literal_eval list
         for klass in (OrderedDict, OrderedSet, frozenset, FrozenOrderedSet, FrozenDict, self.PythonObject):
-            self.setLiteralEval(klass)
+            self.registerLiteralEval(klass)
 
-    def setFormatter(self, obj, callback):
+    def registerFormat(self, obj, callback):
         """Register an object class to formatter
         """
-        self.types[obj] = callback
+        self.registeredFormats[obj] = callback
 
-    def setLiteralEval(self, obj):
+    def registerLiteralEval(self, obj):
         """Register a literalEval object class to formatter
         """
-        self.evals[obj.__name__] = obj
+        self.literalEvals[obj.__name__] = obj
 
     def __call__(self, value, **args):
         """Call method to produce output string
         """
         for key in args:
             setattr(self, key, args[key])
-        formatter = self.types[type(value) if type(value) in self.types else object]
+        formatter = self.registeredFormats[type(value) if type(value) in self.registeredFormats else object]
         return formatter(self, value, self.indent)
 
     def formatObject(self, value, indent):
         """Fallback method for objects not registered with formatter
+        Returns 'None' if allowPickle is False
         """
         from base64 import b64encode
         import pickle
@@ -941,19 +952,20 @@ class PrintFormatter(object):
         if isinstance(value, (list, dict, str, int, float, bool, complex, type(None))):
             # return python recognised objects if not already processed
             return repr(value)
-        else:
+        elif self.ALLOWPICKLE:
             # and finally catch any non-recognised object
             return "PythonObject('{0}')".format(b64encode(pickle.dumps(value)).decode('utf-8'))
+        return repr(None)
 
     def formatDictBase(self, value, indent, formatString=''):
         """Output format for dict/FrozenDict
         """
         items = [
-            self.lfchar + self.htchar * (indent + 1) + repr(key) + ': ' +
-            (self.types[type(value[key]) if type(value[key]) in self.types else object])(self, value[key], indent + 1)
+            self.CRLF + self.TAB * (indent + 1) + repr(key) + ': ' +
+            (self.registeredFormats[type(value[key]) if type(value[key]) in self.registeredFormats else object])(self, value[key], indent + 1)
             for key in value
             ]
-        return formatString.format(','.join(items) + self.lfchar + self.htchar * indent)
+        return formatString.format(','.join(items) + self.CRLF + self.TAB * indent)
 
     formatDict = partial(formatDictBase, formatString='{{{0}}}')
     formatFrozenDict = partial(formatDictBase, formatString='FrozenDict({{{0}}})')
@@ -962,10 +974,11 @@ class PrintFormatter(object):
         """Output format for list
         """
         items = [
-            self.lfchar + self.htchar * (indent + 1) + (self.types[type(item) if type(item) in self.types else object])(self, item, indent + 1)
+            self.CRLF + self.TAB * (indent + 1) +
+            (self.registeredFormats[type(item) if type(item) in self.registeredFormats else object])(self, item, indent + 1)
             for item in value
             ]
-        return formatString.format(','.join(items) + self.lfchar + self.htchar * indent)
+        return formatString.format(','.join(items) + self.CRLF + self.TAB * indent)
 
     formatList = partial(formatBase, formatString='[{0}]')
     formatTuple = partial(formatBase, formatString='({0})')
@@ -978,10 +991,11 @@ class PrintFormatter(object):
                     ccpn.util.OrderedSet.FrozenOrderedSet
         """
         items = [
-            self.lfchar + self.htchar * (indent + 1) + (self.types[type(item) if type(item) in self.types else object])(self, item, indent + 1)
+            self.CRLF + self.TAB * (indent + 1) +
+            (self.registeredFormats[type(item) if type(item) in self.registeredFormats else object])(self, item, indent + 1)
             for item in value
             ]
-        return formatString.format(klassName, ','.join(items) + self.lfchar + self.htchar * indent)
+        return formatString.format(klassName, ','.join(items) + self.CRLF + self.TAB * indent)
 
     formatListType = partial(formatKlassBase, formatString='{0}([{1}])')
     formatSetType = partial(formatKlassBase, formatString='{0}({{{1}}})')
@@ -990,21 +1004,22 @@ class PrintFormatter(object):
         """Output format for OrderedDict (collections.OrderedDict)
         """
         items = [
-            self.lfchar + self.htchar * (indent + 1) +
-            "(" + repr(key) + ', ' + (self.types[
-                type(value[key]) if type(value[key]) in self.types else object
+            self.CRLF + self.TAB * (indent + 1) +
+            "(" + repr(key) + ', ' + (self.registeredFormats[
+                type(value[key]) if type(value[key]) in self.registeredFormats else object
             ])(self, value[key], indent + 1) + ")"
             for key in value
             ]
-        return 'OrderedDict([{0}])'.format(','.join(items) + self.lfchar + self.htchar * indent)
+        return 'OrderedDict([{0}])'.format(','.join(items) + self.CRLF + self.TAB * indent)
 
     def PythonObject(self, value):
         """Call method to produce object from pickled string
+        Returns None if allowPickle is False
         """
         from base64 import b64decode
         import pickle
 
-        if type(value) in (str,):
+        if type(value) in (str,) and self.ALLOWPICKLE:
             return pickle.loads(b64decode(value.encode('utf-8')))
 
     def literal_eval(self, node_or_string):
@@ -1021,16 +1036,6 @@ class PrintFormatter(object):
             node_or_string = parse(node_or_string, mode='eval')
         if isinstance(node_or_string, Expression):
             node_or_string = node_or_string.body
-
-        # def _convert_object(node):
-        #     from base64 import b64decode
-        #     import pickle
-        #
-        #     if isinstance(node, Constant):
-        #         if type(node.value) in (str,):
-        #             return pickle.loads(b64decode(node.value.encode('utf-8')))
-        #
-        #     raise ValueError('malformed python object: ' + repr(node))
 
         def _convert_num(node):
             if isinstance(node, Constant):
@@ -1066,8 +1071,8 @@ class PrintFormatter(object):
                 return dict(zip(map(_convert, node.keys),
                                 map(_convert, node.values)))
             elif isinstance(node, Call):
-                if node.func.id in self.evals:
-                    return _convert_LiteralEval(node, self.evals[node.func.id])
+                if node.func.id in self.literalEvals:
+                    return _convert_LiteralEval(node, self.literalEvals[node.func.id])
 
             elif isinstance(node, BinOp) and isinstance(node.op, (Add, Sub)):
                 left = _convert_signed_num(node.left)

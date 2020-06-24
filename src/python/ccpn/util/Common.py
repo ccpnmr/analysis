@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-24 16:12:01 +0100 (Wed, June 24, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-24 17:34:03 +0100 (Wed, June 24, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -39,10 +39,11 @@ import sys
 import string
 import itertools
 from functools import partial
-from collections import Iterable, OrderedDict
+from collections.abc import Iterable
+from collections import OrderedDict
 from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
 from ccpn.util.FrozenDict import FrozenDict
-from . import Constants
+from ccpn.util import Constants
 
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
@@ -1112,3 +1113,44 @@ def getIsotopeListFromCode(isotopeCode):
         atomNames = list(OrderedSet([atomName for key in keys for atomName in NEF_ATOM_NAMES[key]]))
 
     return atomNames
+
+
+if __name__ == '__main__':
+    """Test the output from the printFormatter and recover as the python object
+    """
+
+    testDict = {
+        "Boolean2"  : True,
+        "DictOuter" : {
+            "ListSet"    : [[0, {1, 2, 3, 4, 5.00000000001, 'more strings'}],
+                            [0, 1000000.0],
+                            ['Another string', 0.0]],
+            "String1"    : 'this is a string',
+            "nestedLists": [[0, 0],
+                            [0, 1 + 2.00000001j],
+                            [0, (1, 2, 3, 4, 5, 6), OrderedDict((
+                                ("ListSetInner", [[0, OrderedSet([1, 2, 3, 4, 5.00000001, 'more inner strings'])],
+                                                  [0, 1000000.0],
+                                                  {'Another inner string', 0.0}]),
+                                ("String1Inner", 'this is an inner string'),
+                                ("nestedListsInner", [[0, 0],
+                                                      [0, 1 + 2.00000001j],
+                                                      [0, (1, 2, 3, 4, 5, 6)]])
+                                ))
+                             ]]
+            },
+        "nestedDict": {
+            "nestedDictItems": FrozenDict({
+                "floatItem": 1.23000001,
+                "frozen"   : frozenset([67, 78]),
+                "frOrdered": FrozenOrderedSet([34, 45])
+                })
+            },
+        "Boolean1"  : (True, None, False),
+        }
+
+    pretty = PrintFormatter()
+    dd = pretty(testDict)
+    print('dataDict string: \n{}'.format(dd))
+    recover = pretty.literal_eval(dd)
+    print('Recovered python object: {} '.format(recover))

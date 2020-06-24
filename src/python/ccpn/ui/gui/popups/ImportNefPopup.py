@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-24 16:12:01 +0100 (Wed, June 24, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-24 17:34:03 +0100 (Wed, June 24, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1109,9 +1109,6 @@ if __name__ == '__main__':
     nefReader.testPrint(project, _loader._nefDict, selection=None)
     nefReader.testErrors(project, _loader._nefDict, selection=None)
 
-    from ccpn.ui.gui.popups.ImportNefPopup import ImportNefPopup
-
-
     app = QtWidgets.QApplication(['testApp'])
     # run the dialog
     dialog = ImportNefPopup(parent=ui.mainWindow, mainWindow=ui.mainWindow,
@@ -1168,9 +1165,6 @@ if __name__ == '__main__':
     #         for obj in getattr(project, name):
     #             pidList.append(obj.pid)
 
-    nefWriter = CcpnNefIo.CcpnNefWriter(project)
-    localNefDict = nefWriter.exportProject(expandSelection=True, pidList=None)
-
     from ccpn.util.AttrDict import AttrDict
 
 
@@ -1181,170 +1175,7 @@ if __name__ == '__main__':
     options.maxRows = 5
     options.places = 8
 
-    # sys.setrecursionlimit(10000)
+    nefWriter = CcpnNefIo.CcpnNefWriter(project)
+    localNefDict = nefWriter.exportProject(expandSelection=True, pidList=None)
     result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
     Nef.printCompareList(result, 'LOADED', 'local', options)
-
-    # # NOTE:ED - extract information from the saveframes as sets and dicts
-    # frame = _loader.getSaveFrame('ccpn_assignment')
-    # if frame is not None:
-    #     nmrChains, nmrResidues, nmrAtoms = nefReader.content_ccpn_assignment(project, frame._nefFrame)
-    #     print('nmrChains: ')
-    #     for val in nmrChains:
-    #         print(val)
-    #     print('nmrResidues: ')
-    #     for val in list(nmrResidues)[:4]:
-    #         print(val)
-    #     print('nmrAtoms: ')
-    #     for val in list(nmrAtoms)[:4]:
-    #         print(val)
-    #
-    # frame = _loader.getSaveFrame('nef_molecular_system')
-    # if frame is not None:
-    #     data = nefReader.content_nef_molecular_system(project, frame._nefFrame)
-    #     chains, residues = data['nef_sequence']
-    #     print('chains: ')
-    #     for val in chains:
-    #         print(val)
-    #     print('residues: ')
-    #     for val in list(residues)[:4]:
-    #         print(val)
-
-    # set up a test dict
-    testDict1 = {
-        "Boolean1"  : True,
-        "Boolean2"  : True,
-        "DictOuter" : {
-            "String1"    : 'This is a string',
-            "ListSet"    : [[0, {1, 2, 3, 4, 5.00, 'More strings'}],
-                            [0, 1000000],
-                            ['Another string', 0]],
-            "nestedLists": [[0, 0],
-                            [0, 1 + 2j],
-                            [0, (1, 2, 3, 4, 5, 6), {
-                                "nestedListsInner": [[0, 0],
-                                                     [0, 1 + 2.00000001j],
-                                                     [0, (1, 2, 3, 4, 5, 6)]],
-                                "ListSetInner"    : [[0, {1, 2, 3, 4, 5, 'more INNER strings'}],
-                                                     [0, 1000000.0],
-                                                     ['Another inner string', 0.0]],
-                                "String1Inner"    : 'this is a inner string',
-                                }
-                             ]]
-            },
-        "nestedDict": {
-            "nestedDictItems": {
-                "floatItem": 1.23
-                }
-            }
-        }
-
-    testDict2 = {
-        "Boolean2"  : True,
-        "DictOuter" : {
-            "ListSet"    : [[0, {1, 2, 3, 4, 5.00000000001, 'more strings'}],
-                            [0, 1000000.0],
-                            ['Another string', 0.0]],
-            "String1"    : 'this is a string',
-            "nestedLists": [[0, 0],
-                            [0, 1 + 2.00000001j],
-                            [0, (1, 2, 3, 4, 5, 6), OD((
-                                ("ListSetInner", [[0, OrderedSet([1, 2, 3, 4, 5.00000001, 'more inner strings'])],
-                                                  [0, 1000000.0],
-                                                  {'Another inner string', 0.0}]),
-                                ("String1Inner", 'this is a inner string'),
-                                ("nestedListsInner", [[0, 0],
-                                                      [0, 1 + 2.00000001j],
-                                                      [0, (1, 2, 3, 4, 5, 6)]])
-                                ))
-                             ]]
-            },
-        "nestedDict": {
-            "nestedDictItems": FrozenDict({
-                "floatItem": 1.23000001,
-                "frozen"   : frozenset([67, 78]),
-                "frOrdered": FrozenOrderedSet([34, 45])
-                })
-            },
-        "Boolean1"  : (True, None, False),
-        }
-
-    options.identical = False
-    options.ignoreCase = True
-    options.almostEqual = True
-    options.maxRows = 5
-    options.places = 8
-    print(Nef._compareObjects(testDict1, testDict2, options))
-    print('{} {}'.format(testDict1, testDict2))
-
-    import re
-
-
-    pos = re.search('[<>]', str(testDict2), re.MULTILINE)
-    if pos:
-        print("Error: data cannot contain xml tags '{}' at pos {}".format(pos.group(), pos.span()))
-
-
-    class PythonObjectEncoder(json.JSONEncoder):
-        """
-        Class to allow the serialisation of sets/OrderedSets/complex/OrderedDicts
-        DOESN'T WORK
-        """
-
-        def default(self, obj):
-            """Default method for encoding to json
-            """
-            from base64 import b64encode
-            import pickle
-
-            if isinstance(obj, OrderedSet):
-                return {"__orderedSet": list(obj)}
-            # elif isinstance(obj, OD):
-            #     return {"__orderedDict": [(k, val) for k, val in obj.items()]}
-            elif isinstance(obj, set):
-                return {"__set": list(obj)}
-            elif isinstance(obj, complex):
-                return {"__complex": str(obj)}
-            elif isinstance(obj, (list, dict, str, int, float, bool, type(None))):
-                return super().default(obj)
-            return {'__python_object': b64encode(pickle.dumps(obj)).decode('utf-8')}
-
-        @staticmethod
-        def as_python_object(dct):
-            """Method to decode contents of Json files with sets/OrderedSets/complex/OrderedDicts
-            In here so that I don't lose it :)
-
-            # NOTE:ED - keep this is it may be the reverse of Formatter class above
-
-            """
-            from base64 import b64decode
-            import pickle
-
-            if '__set' in dct:
-                return set(dct['__set'])
-            elif '__orderedSet' in dct:
-                return OrderedSet(dct['__orderedSet'])
-            elif '__complex' in dct:
-                return complex(dct['__complex'])
-            elif '__orderedDict' in dct:
-                return OD(dct['__orderedDict'])
-            elif '__python_object' in dct:
-                return pickle.loads(b64decode(dct['__python_object'].encode('utf-8')))
-            return dct
-
-
-    # testDict2 = FrozenDict({
-    #     1: 3, "nestedDict": {
-    #         "nestedDictItems": FrozenDict({
-    #             "floatItem": [1.23000001, 'a', 'b'],
-    #             "frozen"   : frozenset({67, 78}),
-    #             "frOrdered": FrozenOrderedSet([34, 45, PrintFormatter()])
-    #             })
-    #         },
-    #     })
-
-    pretty = PrintFormatter()
-    dd = pretty(testDict2)
-    print('DD ', dd)
-    recover = pretty.literal_eval(dd)
-    print('RECOVER ', recover)

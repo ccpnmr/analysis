@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-24 17:34:03 +0100 (Wed, June 24, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-25 13:16:38 +0100 (Thu, June 25, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1056,8 +1056,22 @@ if __name__ == '__main__':
     _loader2.loadValidateDictionary(VALIDATEDICT)
 
     # validate
-    print(_loader.name, _loader.isValid)
-    print(_loader2.name, _loader2.isValid)
+    valid = _loader.isValid
+    if not valid:
+        errLog = _loader.validErrorLog
+        for k, val in errLog.items():
+            if val:
+                print('>>> {} : {}'.format(k, val))
+
+    valid = _loader2.isValid
+    if not valid:
+        errLog = _loader2.validErrorLog
+        for k, val in errLog.items():
+            if val:
+                print('>>> {} : {}'.format(k, val))
+
+    import sys
+    sys.exit(0)
 
     # simple test print of saveframes
     names = _loader.getSaveFrameNames(returnType=Nef.NEF_RETURNALL)

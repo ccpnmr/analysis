@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-21 23:15:21 +0100 (Thu, May 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-25 15:53:44 +0100 (Thu, June 25, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2093,8 +2093,8 @@ class CcpnNefWriter:
         if transfers:
             for tt in transfers:
                 loop.newRow(dict(zip(['dimension_1', 'dimension_2', 'transfer_type', 'is_indirect'], tt)))
-        else:
-            del result[loopName]
+        # else:
+        #     del result[loopName]
 
         # Remove superfluous tags
         removeNameEndings = ('_1', '_2', '_3', '_4', '_5', '_6', '_7', '_8', '_9',
@@ -4949,7 +4949,7 @@ class CcpnNefReader:
             # get per-dimension data - NB these are mandatory and cannot be worked around
             dimensionData = self.read_nef_spectrum_dimension(project,
                                                              saveFrame['nef_spectrum_dimension'])
-            # read  dimension transfer data
+            # read dimension transfer data
             loopName = 'nef_spectrum_dimension_transfer'
             # Those are treated elsewhere
             loop = saveFrame.get(loopName)
@@ -4999,7 +4999,8 @@ class CcpnNefReader:
         # Load remaining loops, with spectrum as parent
         for loopName in loopNames:
             if loopName not in ('nef_spectrum_dimension', 'ccpn_spectrum_dimension',  #'nef_peak',
-                                'nef_spectrum_dimension_transfer'):
+                                'nef_spectrum_dimension_transfer',
+                                ):
                 # Those are treated elsewhere
                 loop = saveFrame.get(loopName)
                 if loop:
@@ -5071,7 +5072,8 @@ class CcpnNefReader:
 
             self._verifyLoops(spectrum, saveFrame, dimensionCount=saveFrame['num_dimensions'],
                               excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension',  #'nef_peak',
-                                           'nef_spectrum_dimension_transfer'))
+                                           'nef_spectrum_dimension_transfer',
+                                           ))
 
     verifiers['nef_nmr_spectrum'] = verify_nef_nmr_spectrum
 
@@ -5117,7 +5119,8 @@ class CcpnNefReader:
 
         self._contentLoops(project, saveFrame, name=spectrumName, itemLength=saveFrame['num_dimensions'],
                            excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension',  #'nef_peak',
-                                        'nef_spectrum_dimension_transfer'))
+                                        'nef_spectrum_dimension_transfer',
+                                        ))
         self.updateContent(saveFrame, result)
 
     contents['nef_nmr_spectrum'] = content_nef_nmr_spectrum
@@ -5162,6 +5165,8 @@ class CcpnNefReader:
                     result.append(SpectrumLib.MagnetisationTransferTuple(*ll))
         #
         return result
+
+    # importers['nef_spectrum_dimension_transfer'] = load_nef_spectrum_dimension_transfer
 
     def process_nef_spectrum_dimension_transfer(self, spectrum: Spectrum,
                                                 dataLists: Sequence[Sequence]):

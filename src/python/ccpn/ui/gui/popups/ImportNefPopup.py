@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-25 13:16:38 +0100 (Thu, June 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-25 15:53:45 +0100 (Thu, June 25, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1026,14 +1026,17 @@ if __name__ == '__main__':
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
-    TESTNEF2 = '/Users/ejb66/Documents/nefTestProject0.nef'
+    # TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
+    # TESTNEF2 = '/Users/ejb66/Documents/nefTestProject0.nef'
 
     # TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
     # TESTNEF2 = '/Users/ejb66/Documents/nefTestProject.nef'
 
     # TESTNEF = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
-    # TESTNEF2 = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
+    # TESTNEF2 = '/Users/ejb66/Documents/CcpNmrData/nefTestProject0.nef'
+
+    TESTNEF = '/Users/ejb66/Documents/TutorialProject2.nef'
+    TESTNEF2 = '/Users/ejb66/Documents/CcpNmrData/nefTestProject0.nef'
 
     # TESTNEF = '/Users/ejb66/Desktop/Ccpn_v2_testNef_a1.nef'
     # TESTNEF2 = '/Users/ejb66/Desktop/Ccpn_v2_testNef_a1.nef'
@@ -1069,9 +1072,6 @@ if __name__ == '__main__':
         for k, val in errLog.items():
             if val:
                 print('>>> {} : {}'.format(k, val))
-
-    import sys
-    sys.exit(0)
 
     # simple test print of saveframes
     names = _loader.getSaveFrameNames(returnType=Nef.NEF_RETURNALL)

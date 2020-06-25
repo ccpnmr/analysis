@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 12:14:55 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-25 10:46:02 +0100 (Thu, June 25, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -43,8 +43,10 @@ class CcpnWebView(CcpnModule):
         super().__init__(mainWindow=mainWindow, name=name)
 
         self.webView = QWebEngineView()
-        self.webView.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True)
-        self.addWidget(self.webView, 0, 0, 1, 1)  # make it the first item
+        # self.webView.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True)
+        # self.addWidget(self.webView, 0, 0, 1, 1)  # make it the first item
+        self.mainWidget.getLayout().addWidget(self.webView, 0, 0)
+
         urlPath = urlPath or ''
 
         # NOTE:ED - need to remove windows separators
@@ -83,5 +85,15 @@ if __name__ == '__main__':
     app.start()
     win.close()
 
-    # example on how to use a javascript viewer can be found here
-    # https://code.tutsplus.com/tutorials/how-to-create-a-pdf-viewer-in-javascript--cms-32505
+    # # example on how to use a javascript viewer can be found here
+    # # https://code.tutsplus.com/tutorials/how-to-create-a-pdf-viewer-in-javascript--cms-32505
+    #
+    # # PDFJS = 'file:///path/to/pdfjs-1.9.426-dist/web/viewer.html'
+    # PDFJS = 'file:///Users/ejb66/Downloads/pdfjs-2.4.456-dist/web/viewer.html'
+    # # PDFJS = 'file:///usr/share/pdf.js/web/viewer.html'
+    # PDF = 'file:///path/to/my/sample.pdf'
+    #
+    # class Window(QWebEngineView):
+    #     def __init__(self):
+    #         super(Window, self).__init__()
+    #         self.load(QtCore.QUrl.fromUserInput('{}?file={}'.format(PDFJS, PDF)))

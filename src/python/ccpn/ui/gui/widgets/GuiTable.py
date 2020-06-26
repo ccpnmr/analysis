@@ -571,7 +571,7 @@ GuiTable::item::selected {
         else:
             from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 
-            othersClassNames = list(set([obj.className for obj in others]))
+            othersClassNames = list(set([obj.className for obj in others if hasattr(obj, 'className')]))
             if len(othersClassNames) > 0:
                 if len(othersClassNames) == 1:
                     title, msg = 'Dropped wrong item.', 'Do you want to open the %s in a new module?' % ''.join(othersClassNames)
@@ -649,18 +649,21 @@ GuiTable::item::selected {
                 #     # return the highlight to the previous selection
                 #     self._highLightObjs(objList)
 
-                if obj and objList:
+                if obj is not None and objList:
                     # store the data for the clicked row
                     data = {}
                     for cc in range(self.columnCount()):
                         colName = self.horizontalHeaderItem(cc).text()
                         data[colName] = self.item(row, cc).value
+                    targetName = None
+                    if hasattr(obj, 'className'):
+                        targetName = obj.className
 
                     objIndex = item.index
                     data = CallBack(theObject=self._dataFrameObject,
                                     object=objList if self.multiSelect else obj,  # single object or multi-selection
                                     index=objIndex,
-                                    targetName=obj.className,
+                                    targetName=targetName,
                                     trigger=CallBack.DOUBLECLICK,
                                     row=row,
                                     col=col,
@@ -752,11 +755,13 @@ GuiTable::item::selected {
         # skip selection if it already exists and hasn't changed
         # BUT, annoyingly, need an extra case for a single click on an already selected item
         objList = self.getSelectedObjects()
-        if objList and self._lastSelection is not None and \
-                self._lastSelection['selection'] is not None and \
-                set(objList) == set(self._lastSelection['selection']):
-            if mouseDrag:
-                return
+        try:
+            if objList and self._lastSelection is not None and \
+                    self._lastSelection['selection'] is not None and \
+                    set(objList) == set(self._lastSelection['selection']):
+                if mouseDrag:
+                    return
+        except Exception as e :print(e)
 
         # update selection
         self._lastSelection = {'clicked'       : self.currentItem(),
@@ -768,21 +773,26 @@ GuiTable::item::selected {
 
             # get whether current row is defined
             item = self.currentItem()
+            targetName = ''
+            if objList is not None:
+                if len(objList)>0:
+                    if hasattr(objList[0], 'className'):
+                        targetName=objList[0].className
 
-            if item and objList and self._selectionCallback:
-                data = CallBack(theObject=self._dataFrameObject,
-                                object=objList,
-                                index=0,
-                                targetName=objList[0].className,
-                                trigger=CallBack.CLICK,
-                                row=0,
-                                col=0,
-                                rowItem=None)
+                    if item and objList and self._selectionCallback:
+                        data = CallBack(theObject=self._dataFrameObject,
+                                        object=objList,
+                                        index=0,
+                                        targetName=targetName,
+                                        trigger=CallBack.CLICK,
+                                        row=0,
+                                        col=0,
+                                        rowItem=None)
 
-                self._selectionCallback(data)
+                        self._selectionCallback(data)
 
-            else:
-                self.clearSelection()
+                    else:
+                        self.clearSelection()
 
     def _checkBoxTableCallback(self, itemSelection):
 
@@ -797,12 +807,14 @@ GuiTable::item::selected {
 
         obj = self.getSelectedObjects(selection)
         obj = obj[0] if obj else None
-
-        if obj:
+        targetName = None
+        if hasattr(obj, 'className'):
+            targetName = obj.className
+        if obj is not None:
             data = CallBack(theObject=self._dataFrameObject,
                             object=obj,
                             index=0,
-                            targetName=obj.className,
+                            targetName=targetName,
                             trigger=CallBack.CLICK,
                             row=itemSelection.row(),
                             col=itemSelection.column(),
@@ -1062,7 +1074,7 @@ GuiTable::item::selected {
                     obj = self.getSelectedObjects(selection)
                     obj = obj[0] if obj else None
 
-                    if obj:
+                    if obj is not None:
                         self._lastSelection = {'clicked'       : self.currentItem(),
                                                'selection'     : [obj],
                                                'modelSelection': self.selectionModel().selectedIndexes(),
@@ -1376,6 +1388,24 @@ GuiTable::item::selected {
         # outside of the with to spawn a repaint
         self.show()
 
+    def getDataFromFrame(self, table, df, colDefs, hiddenColumns=None):
+        """
+        """
+        objects = []
+        allItems = []
+        for index, row in df.iterrows():
+            listItem = OrderedDict()
+            for header in colDefs.columns:
+                listItem[header.headerText] = header.getValue(row)
+            allItems.append(listItem)
+            objects.append(row)
+
+        return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings),
+                               objectList=objects or [],
+                               columnDefs=colDefs or [],
+                               hiddenColumns=hiddenColumns or [],
+                               table=table)
+
     def getDataFrameFromList(self, table=None,
                              buildList=None,
                              colDefs=None,
@@ -1411,7 +1441,6 @@ GuiTable::item::selected {
 
             # indexList[str(col)] = obj
             # objectList[obj.pid] = col
-
         return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings),
                                objectList=objects or [],
                                # indexList=indexList,
@@ -1623,6 +1652,12 @@ GuiTable::item::selected {
         return rows
 
     def getSelectedObjects(self, fromSelection=None):
+        '''
+
+        :param fromSelection:
+        :return: get a list of table objects. If the table has a header called pid, the object is a ccpn Core obj like Peak,
+         otherwise is a Pandas series object.
+        '''
 
         model = self.selectionModel()
 
@@ -1637,20 +1672,24 @@ GuiTable::item::selected {
                 row = iSelect.row()
                 col = iSelect.column()
                 if self._dataFrameObject:
-                    colName = self.horizontalHeaderItem(col).text()
-                    if colName == 'Pid':
+                    if len(self._dataFrameObject._objects) > 0:
+                        if isinstance(self._dataFrameObject._objects[0], pd.Series):
+                            df = self._dataFrameObject.dataFrame
+                            selectedObjects.append(df.iloc[row])
+                        else:
+                            colName = self.horizontalHeaderItem(col).text()
+                            if colName == 'Pid':
+                                if row not in rows:
+                                    rows.append(row)
+                                    objIndex = model.model().data(iSelect)
 
-                        if row not in rows:
-                            rows.append(row)
-                            objIndex = model.model().data(iSelect)
+                                    # if str(objIndex) in self._dataFrameObject.indexList:
+                                    # obj = self._dataFrameObject.indexList[str(objIndex)]  # item.index needed
+                                    # selectedObjects.append(obj)
 
-                            # if str(objIndex) in self._dataFrameObject.indexList:
-                            # obj = self._dataFrameObject.indexList[str(objIndex)]  # item.index needed
-                            # selectedObjects.append(obj)
-
-                            obj = self.project.getByPid(objIndex)
-                            if obj:
-                                selectedObjects.append(obj)
+                                    obj = self.project.getByPid(objIndex)
+                                    if obj:
+                                        selectedObjects.append(obj)
 
             return selectedObjects
         else:
@@ -1688,14 +1727,17 @@ GuiTable::item::selected {
         with self._tableBlockSignals('selectObjects'):
 
             selectionModel = self.selectionModel()
-            if objList:
-
+            if objList is not None:
                 selectionModel.clearSelection()
                 for obj in objList:
-                    row = self._dataFrameObject.find(self, str(obj.pid))
-                    if row is not None:
-                        selectionModel.select(self.model().index(row, 0),
-                                              selectionModel.Select | selectionModel.Rows)
+                    if hasattr(obj, 'pid'):
+                        row = self._dataFrameObject.find(self, str(obj.pid))
+                        if row is not None:
+                            selectionModel.select(self.model().index(row, 0),
+                                                  selectionModel.Select | selectionModel.Rows)
+
+                    else:
+                        print('AAA',objList)
 
     def selectIndex(self, idx, doCallback=True):
         model = self.model()

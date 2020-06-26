@@ -30,6 +30,7 @@ from functools import partial
 import collections
 import json
 import time
+from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
 import os
 from collections import OrderedDict as od
 from ccpn.util.Logging import getLogger
@@ -57,6 +58,7 @@ from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipesTree
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.pipes import loadedPipes as LP
+import threading
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
@@ -69,32 +71,6 @@ applicationPipeLabel = '-- Application Pipes --'
 otherPipeLabel = '-- General Pipes --'
 PipelineName = 'NewPipeline'
 PipelinePath = 'PipelinePath'
-
-
-class PipelineWorker(QtCore.QObject):
-    'Object managing the  auto run pipeline simulation'
-
-    stepIncreased = QtCore.pyqtSignal(int)
-
-    def __init__(self):
-        super(PipelineWorker, self).__init__()
-        self._step = 0
-        self._isRunning = True
-        self._maxSteps = 200000
-
-    def task(self):
-        if not self._isRunning:
-            self._isRunning = True
-            self._step = 0
-
-        while self._step < self._maxSteps and self._isRunning == True:
-            self._step += 1
-            self.stepIncreased.emit(self._step)
-            time.sleep(0.1)  # if this time is too small or disabled you won't be able to stop the thread!
-
-    def stop(self):
-        self._isRunning = False
-        # getLogger().warning('Pipeline Thread stopped')
 
 
 class GuiPipeline(CcpnModule, Pipeline):
@@ -143,14 +119,9 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.currentGuiPipesNames = []
         self.pipelineTemplates = templates
 
-        # start the pipelineWorker
-        self._setPipelineThread()
-        self.pipelineWorker.stepIncreased.connect(self._runPipeline)
-
         # set the graphics
         self._setIcons()
         self._setMainLayout()
-
 
         # set notifier
         if self.project is not None:
@@ -279,7 +250,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.mainLayout.addLayout(self.pipelineAreaLayout)
 
         self._createSaveOpenButtonGroup()
-        self._createPipelineWidgets()
+        self._addPipelineDropArea()
         self._createInputWidgets()
         self._createSettingsWidgets()
 
@@ -342,11 +313,6 @@ class GuiPipeline(CcpnModule, Pipeline):
             templatesItem.setMenu(subMenu)
         openButton.setMenu(menu)
 
-    def _createPipelineWidgets(self):
-        self._addGoButtonWidget()
-        self._addPipelineDropArea()
-
-
     def _addPipesSearchWidget(self, row):
         bText = 'Search Pipe. Return to add selected'
 
@@ -398,24 +364,6 @@ class GuiPipeline(CcpnModule, Pipeline):
     def callbackResultWidget(self):
         selectedTreeItems = self.pipeTreeWidget.selectedItems()
         self.pipeTreeWidget.selectItems(self._resultWidget.getSelectedTexts())
-
-
-    def _addGoButtonWidget(self):
-        '''
-        First Two button are reserved for autoRun mode. They are hidden if the setting autoRun is not checked.
-        NB the stop callback needs to be a lambda call
-
-        '''
-        # self.threadButtons = ButtonList(self, texts=['', '', ''], icons=[self.stopIcon, self.goIcon, self.goIcon, ],
-        #                                 callbacks=[lambda: self.pipelineWorker.stop(), self.pipelineWorker.task, self._runPipeline],
-        #                                 hAlign='c')
-
-        # self.threadButtons.buttons[0].hide()
-        # self.threadButtons.buttons[1].hide()
-        # self.threadButtons.setStyleSheet(transparentStyle)
-        # self.goAreaLayout.addWidget(self.threadButtons, )
-        # self.goAreaLayout.addStretch(1)
-        # self.threadButtons.setEnabled(False)
 
     def _addPipelineDropArea(self):
         self.pipelineArea = PipelineDropArea(self, guiPipeline=self,  mainWindow=self.mainWindow)
@@ -509,22 +457,55 @@ class GuiPipeline(CcpnModule, Pipeline):
                     newGuiPipe.label.checkBox.setChecked(autoActive)
                     return
 
+    def runPipeline(self):
+        '''Run all pipes in the specified order '''
+        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
+
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                self._kwargs = {}
+                if len(self.queue) > 0:
+                    for pipe in self.queue:
+                        if pipe is not None:
+                            self.updateInputData = False
+                            pipe.inputData = self.inputData
+                            pipe.spectrumGroups = self.spectrumGroups
+                            result = pipe.runPipe(self.inputData)
+                            # if not result: # that means the ran pipe does not return a valid data to use as input for next pipes
+                            #   break
+                            self.inputData = result or set()
+
+                return self.inputData
+
     def _runPipeline(self):
+        self.goButton.setEnabled(False)
         self.project._logger.info('Pipeline: Started.')
         self.queue = []
         if self.inputData:
             if len(self.pipelineArea.findAll()[1]) > 0:
                 guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
-                for guiPipe in guiPipes:
-                    print('GuiPipe:', guiPipe)
-                    if guiPipe.isActive:
-                        guiPipe.pipe.isActive = True
-                        guiPipe.pipe._kwargs = guiPipe.widgetsState
-                        self.queue.append(guiPipe.pipe)
-
-                    else:
-                        guiPipe.pipe.isActive = False
-            self.runPipeline()
+                with undoBlockWithoutSideBar():
+                    with notificationEchoBlocking():
+                        self._kwargs = {}
+                        if len(guiPipes) > 0:
+                            for guiPipe in guiPipes:
+                                pipe = guiPipe.pipe
+                                if guiPipe.isActive:
+                                    pipe.isActive = True
+                                    pipe._kwargs = guiPipe.widgetsState
+                                    pipe = guiPipe.pipe
+                                    self.queue.append(guiPipe.pipe)
+                                    self.updateInputData = False
+                                    pipe.inputData = self.inputData
+                                    pipe.spectrumGroups = self.spectrumGroups
+                                    result = pipe.runPipe(self.inputData)
+                                    print(guiPipe.pipeName)
+                                    print(guiPipe._kwargs)
+                                    print(self._kwargs)
+                                    # time.sleep(11.3)  # seconds
+                                    self.inputData = result or set()
+                                else:
+                                    pipe.isActive = False
         else:
             self.project._logger.info('Pipeline: No input data.')
             showWarning('Pipeline', 'No input data')
@@ -533,7 +514,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
         self.project._logger.info('Pipeline: Finished.')
         # showInfo('Pipeline','Finished')
-        self.pipelineWorker.stop()
+        self.goButton.setEnabled(True)
 
 
 
@@ -565,12 +546,6 @@ class GuiPipeline(CcpnModule, Pipeline):
             if guiPipe.pipeName == name:
                 return guiPipe
 
-    ####################################_________ Thread  SETUP ____________##############################################
-    def _setPipelineThread(self):
-        self.pipelineThread = QtCore.QThread()
-        self.pipelineThread.start()
-        self.pipelineWorker = PipelineWorker()
-        self.pipelineWorker.moveToThread(self.pipelineThread)
 
     ####################################_________ Saving Restoring  SETUP ____________####################################
     def _openJsonFile(self, path):

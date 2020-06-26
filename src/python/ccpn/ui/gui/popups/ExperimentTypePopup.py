@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-04 16:56:47 +0100 (Thu, June 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-26 12:13:45 +0100 (Fri, June 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -22,36 +22,42 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
-
+from PyQt5 import QtCore
+from functools import partial
 from ccpn.ui.gui.popups.ExperimentFilterPopup import ExperimentFilterPopup
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 
-from functools import partial
-from ccpn.ui.gui.widgets.Spacer import Spacer
+
+def _getAtomCodes(spectrum):
+    """CCPN internal. Used in Spectrum Popup. Gets all the experiment type names to set the pulldown widgets
+    """
+    axisCodes = []
+    for isotopeCode in spectrum.isotopeCodes:
+        axisCodes.append(''.join([char for char in isotopeCode if not char.isdigit()] if isotopeCode else '*'))
+    atomCodes = tuple(sorted(axisCodes))
+    return atomCodes
 
 
 def _getExperimentTypes(project, spectrum):
-    ''' CCPN internal. Used in Spectrum Popup. Gets all the experiment type names to set the pulldown widgets'''
-    axisCodes = []
-    for isotopeCode in spectrum.isotopeCodes:
-        axisCodes.append(''.join([char for char in isotopeCode if not char.isdigit()]))
-    atomCodes = tuple(sorted(axisCodes))
+    """ CCPN internal. Used in Spectrum Popup. Gets all the experiment type names to set the pulldown widgets
+    """
+    atomCodes = _getAtomCodes(spectrum)
     return project._experimentTypeMap[spectrum.dimensionCount].get(atomCodes)
-    # return list(project._experimentTypeMap[spectrum.dimensionCount].get(atomCodes).keys())
 
 
-class ExperimentTypePopup(CcpnDialog):
+class ExperimentTypePopup(CcpnDialogMainWidget):
+
+    USESCROLLWIDGET = True
+    FIXEDWIDTH = True
+
     def __init__(self, parent=None, mainWindow=None, title: str = 'Experiment Type Selection', **kwds):
 
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow
         if mainWindow:
@@ -64,45 +70,29 @@ class ExperimentTypePopup(CcpnDialog):
         self.experimentTypes = self.project._experimentTypeMap
         self.spPulldowns = []
 
-        self.scrollArea = ScrollArea(self, setLayout=True, grid=(0, 0))
-        self.scrollArea.setWidgetResizable(True)
-
-        self.scrollAreaWidgetContents = Frame(self, setLayout=True, showBorder=False)
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-
-        self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-        self.scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.scrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
-
         for spectrumIndex, spectrum in enumerate(spectra):
-            axisCodes = []
-            for isotopeCode in spectrum.isotopeCodes:
-                axisCodes.append(''.join([char for char in isotopeCode if not char.isdigit()] if isotopeCode else '*'))
-
-            # atomCodes = tuple(ax if ax is not None else '*' for ax in sorted(axisCodes))
-            atomCodes = tuple(sorted(axisCodes))
-
-            itemFilter = self.experimentTypes[spectrum.dimensionCount].get(atomCodes)
+            atomCodes = _getAtomCodes(spectrum)
+            itemFilter = _getExperimentTypes(spectrum.project, spectrum)
 
             # add the widgets
-            spLabel = Label(self.scrollAreaWidgetContents, text=spectrum.pid, grid=(spectrumIndex, 0))
-            self.spPulldown = FilteringPulldownList(self.scrollAreaWidgetContents, grid=(spectrumIndex, 1),
+            spLabel = Label(self.mainWidget, text=spectrum.pid, grid=(spectrumIndex, 0))
+            spPulldown = FilteringPulldownList(self.mainWidget, grid=(spectrumIndex, 1),
                                                     callback=partial(self._setExperimentType, spectrum, atomCodes),)
 
             if itemFilter:
                 # populate pullDown with filtered experimentTypes
-                self.pulldownItems = list(itemFilter.keys())
-                self.spPulldown.setData(texts=self.pulldownItems)
+                pulldownItems = list(itemFilter.keys())
+                spPulldown.setData(texts=pulldownItems)
+
             else:
                 # populate pullDown with all experimentTypes
-                self.pulldownItems = list(vv for vals in self.experimentTypes[spectrum.dimensionCount].values() for vv in vals.keys())
-                self.spPulldown.setData(texts=self.pulldownItems)
+                pulldownItems = list(vv for vals in self.experimentTypes[spectrum.dimensionCount].values() for vv in vals.keys())
+                spPulldown.setData(texts=pulldownItems)
 
-            self.spPulldown.lineEdit().editingFinished.connect(partial(self.editedExpTypeChecker, self.spPulldown, self.pulldownItems))
-            # self.spPulldown._completer.setCompletionMode(QtGui.QCompleter.InlineCompletion &~  QtGui.QCompleter.UnfilteredPopupCompletion)
-            self.spPulldowns.append(self.spPulldown)
+            spPulldown.lineEdit().editingFinished.connect(partial(self.editedExpTypeChecker, spPulldown, pulldownItems))
+            self.spPulldowns.append(spPulldown)
 
-            spButton = Button(self.scrollAreaWidgetContents, grid=(spectrumIndex, 2),
+            spButton = Button(self.mainWidget, grid=(spectrumIndex, 2),
                               callback=partial(self.raiseExperimentFilterPopup,
                                                spectrum, spectrumIndex, atomCodes),
                               hPolicy='fixed', icon='icons/applications-system')
@@ -118,22 +108,18 @@ class ExperimentTypePopup(CcpnDialog):
             # spectrum.experimentName and spectrum.experimentType
 
             text = spectrum.experimentName
-            text = priorityNameRemapping.get(text, text)
-            if text not in self.pulldownItems:
+            if text not in pulldownItems:
                 text = spectrum.experimentType
             # apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
             # text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
             text = priorityNameRemapping.get(text, text)
-            self.spPulldown.setCurrentIndex(self.spPulldown.findText(text))
+            spPulldown.setCurrentIndex(spPulldown.findText(text))
 
-        Spacer(self.scrollAreaWidgetContents, 2, 2,
-               QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
-               grid=(len(spectra), 2), gridSpan=(1, 1))
+        self.setCloseButton(callback=self.accept)
+        self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
+        self.__postInit__()
 
-        self.buttonBox = Button(self, grid=(1, 0), text='Close',
-                                callback=self.accept, hAlign='r', vAlign='b')
-
-        self.setWindowTitle(title)
+        # self.setWindowTitle(title)
         # self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding)
         self.setMinimumHeight(200)
         self.setFixedWidth(self.sizeHint().width()+24)

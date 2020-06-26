@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:53 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-26 12:13:45 +0100 (Fri, June 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -36,12 +36,14 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.popups.Dialog import handleDialogApply, CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoStackBlocking, queueStateChange
 from ccpn.core.PMIListABC import MERITENABLED, MERITTHRESHOLD, \
     SYMBOLCOLOUR, TEXTCOLOUR, LINECOLOUR, MERITCOLOUR
 from ccpn.util.AttrDict import AttrDict
+from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 
 
@@ -190,8 +192,10 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         _colourPulldownList = PulldownList(self.mainWidget, grid=(row, 1))
         Colour.fillColourPulldown(_colourPulldownList, allowAuto=True)
         pulldowns.append((_colourLabel, _colourPulldownList, attrib))
+        _colourButton = Button(self.mainWidget, vAlign='t', hAlign='l', grid=(row, 2), hPolicy='fixed',
+                              callback=partial(self._queueSetColourButton, _colourPulldownList), icon='icons/colours')
 
-        _colourPulldownList.activated.connect(partial(self._queueSetColour, _colourPulldownList, attrib, row))
+        _colourPulldownList.currentIndexChanged.connect(partial(self._queueSetColour, _colourPulldownList, attrib, row))
 
     def _getSettings(self):
         """Fill the settings dict from the listView object
@@ -314,6 +318,12 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def _fillPullDowns(self):
+        for item in self._colourPulldowns:
+            _, pl, attrib = item
+
+            fillColourPulldown(pl, allowAuto=False)
+
     @queueStateChange(_verifyPopupApply)
     def _queueSetValue(self, attr, getFunction, setFunction, dim):
         """Queue the function for setting the attribute in the calling object
@@ -327,6 +337,15 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         """Function for setting the attribute, called by _applyAllChanges
         """
         setFunction(self.ccpnList, attr, value)
+
+    def _queueSetColourButton(self, pulldown):
+        dialog = ColourDialog(self)
+
+        newColour = dialog.getColor()
+        if newColour:
+            addNewColour(newColour)
+            self._fillPullDowns()
+            pulldown.setCurrentText(spectrumColours[newColour.name()])
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetColour(self, pl, attrib, dim):

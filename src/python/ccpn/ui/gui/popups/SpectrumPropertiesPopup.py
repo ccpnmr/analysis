@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-24 14:48:32 +0100 (Wed, June 24, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-26 12:13:45 +0100 (Fri, June 26, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -575,7 +575,7 @@ class GeneralTab(Widget):
             # self.spectrumType.setData(texts=list(experimentTypes.keys()), objects=list(experimentTypes.values()))
 
             # Added to account for renaming of experiments
-            self.spectrumType.activated.connect(partial(self._queueSetSpectrumType, spectrum))
+            self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
             # if spectrum.experimentType is not None:
             #     self.spectrumType.select(spectrum.experimentType)
             row += 1
@@ -645,7 +645,7 @@ class GeneralTab(Widget):
             # text = priorityNameRemapping.get(text, text)
             # self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
 
-            self.spectrumType.activated.connect(partial(self._queueSetSpectrumType, spectrum))
+            self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
             # self.spectrumType.setMinimumWidth(self.pathData.width() * 1.95)
             # self.spectrumType.setFixedHeight(25)
             row += 1

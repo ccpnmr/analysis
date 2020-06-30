@@ -1327,8 +1327,6 @@ class Framework(NotifierBase):
 
         ms.append(('Macro', [
             ("New", self.showMacroEditor),
-            # ("New from Console", self.newMacroFromConsole, [('enabled', False)]),  #Not available yet
-            # ("New from Log", None, [('enabled', False)]),  #Not available yet
             (),
             ("Open...", self.openMacroOnEditor),
             (),
@@ -2934,34 +2932,7 @@ class Framework(NotifierBase):
         self.editor = MacroEditor(mainWindow=mainWindow, useCcpnMacros=True)
         mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
         self.editor._openMacroFile()
-        # mainWindow.pythonConsole.writeConsoleCommand("application.showMacroEditor()")
-        # getLogger().info("application.showMacroEditor()")
 
-    def newMacroFromConsole(self):
-        """
-        Displays macro editor with contents of python console inside.
-        """
-        # editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
-        #FIXME:ED - haven't checked this properly
-        mainWindow = self.ui.mainWindow
-        self.editor = MacroEditor(mainWindow=mainWindow)
-        self.editor.textBox.set(mainWindow.pythonConsole.textEditor.toPlainText())
-        mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
-
-    # FIXME:ED - haven't checked this properly. Broken
-    def newMacroFromLog(self):
-        """
-        Displays macro editor with contents of the log.
-        """
-        # editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
-        #FIXME:ED - haven't checked this properly
-        mainWindow = self.ui.mainWindow
-        self.editor = MacroEditor(mainWindow=mainWindow)
-        with open(getLogger().logPath, 'r') as fp:
-            l = fp.readlines()
-        text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
-        self.editor.textBox.setText(text)
-        mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
 
     def defineUserShortcuts(self):
 

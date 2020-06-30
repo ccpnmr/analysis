@@ -34,20 +34,17 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
+from ccpn.ui.gui.widgets.QPythonEditor import PyCodeEditor
 from ccpn.framework.PathsAndUrls import macroPath
+from pyqode.python.widgets import PyConsole, PyInteractiveConsole
+import sys
+from pyqode.core.api import TextHelper
 
 
 class MacroEditor(CcpnModule):
     """
-    This module will create a temp python file when you press the run button and will execute it from the console.
-    A file will be created in the temporary  macro directory .ccpn/macros
-    and will be automatically deleted after the macro is ran.
-    The user can decide to save as a in a new file location.
-
-    The macro name is the file name on the disk (without the .py extension).
-    NB. If you open an existing file.py and modify it, the changes are not automatically re-written on the disk.
-     All changes WILL BE LOST if not save them. Automatic saving of a .py file can be dangerous for the users.
+    Macro editor will run Python Files only.
+    Other text files
 
     """
     includeSettingsWidget = False
@@ -57,19 +54,29 @@ class MacroEditor(CcpnModule):
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
         self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
-        self.preferences = self.application.preferences
-        self._pythonConsole = self.mainWindow.pythonConsole
-        if self._pythonConsole is None:
-            self._pythonConsole = IpythonConsole(self.mainWindow)
+        self.application = None
+        self.project = None
+        self.current = None
+        self.preferences = None
+        self._pythonConsole = None
+        self.macroPath = ''
+        self._editor_windows = []
+
+        if self.mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+            self.preferences = self.application.preferences
+            self._pythonConsole = self.mainWindow.pythonConsole
+            if self._pythonConsole is None:
+                self._pythonConsole = IpythonConsole(self.mainWindow)
 
         self._DIALOGID = USERMACROSPATH
         if useCcpnMacros:
             self.macroPath = macroPath
         else:
-            self.macroPath = self.preferences.general.userMacroPath
+            if self.preferences:
+                self.macroPath = self.preferences.general.userMacroPath
 
         self._isTempMacro = True
         self._originalOpenedFile = None
@@ -78,13 +85,14 @@ class MacroEditor(CcpnModule):
         self.mainWidget.layout().setContentsMargins(10, 10, 10, 10)
 
         hGrid = 0
+
         self.namelabel = Label(self.mainWidget, 'Macro Name', grid=(hGrid, 0))
         self.nameLineEdit = LineEdit(self.mainWidget, grid=(0, 1))
         # self.nameLineEdit.editingFinished().connect(self._changedName)
 
         hGrid += 1
         # macro editing area
-        self.textBox = QCodeEditor(self.mainWidget, grid=(hGrid, 0), acceptDrops=True, gridSpan=(1, 2))
+        self.textEditor = PyCodeEditor(self.mainWidget, grid=(hGrid, 0), acceptDrops=True, gridSpan=(1, 2))
 
         hGrid += 1
         self.buttonBox = ButtonList(self, texts=['Open', 'save', 'Save As', 'Run'],
@@ -96,10 +104,10 @@ class MacroEditor(CcpnModule):
 
         self._setFileName(self.filePath)
 
-        # self.textBox.editingFinished.connect(self._saveMacro)  # automatic saving
+        # self.textEditor.editingFinished.connect(self._saveMacro)  # automatic saving
         # self.nameLineEdit.editingFinished.connect(self._macroNameChanged)  # automatic renaming the fileName
 
-        self.droppedNotifier = GuiNotifier(self.textBox,
+        self.droppedNotifier = GuiNotifier(self.textEditor,
                                            [GuiNotifier.DROPEVENT], [DropBase.URLS],
                                            self._processDroppedItems)
 
@@ -110,7 +118,7 @@ class MacroEditor(CcpnModule):
         urls = data.get('urls', [])
         if len(urls) == 1:
             filePath = urls[0]
-            if len(self.textBox.get()) > 0:
+            if len(self.textEditor.get()) > 0:
                 ok = MessageDialog.showYesNoWarning('Open new macro', 'Replace the current macro?')
                 if ok:
                     self._openPath(filePath)
@@ -138,6 +146,23 @@ class MacroEditor(CcpnModule):
         self.filePath = filePath
         return filePath
 
+    def _openEditor(self, path, line):
+        '''
+        used for navigating to error in the macro.
+        '''
+        editor = self.textEditor
+        editor.file.restore_cursor = False
+        editor.file.open(path)
+        TextHelper(editor).goto_line(line)
+        editor.show()
+        self._editor_windows.append(editor)
+
+    def _runOnTempIPythonConsole(self):
+        console = PyInteractiveConsole()
+        console.open_file_requested.connect(self._openEditor)
+        console.start_process(sys.executable, [os.path.join(os.getcwd(), self.filePath)])
+        console.show()
+
     def _runMacro(self):
         if self._pythonConsole is not None:
             if self.filePath:
@@ -150,7 +175,8 @@ class MacroEditor(CcpnModule):
             self._pythonConsole._runMacro(self.filePath)
             self._deleteTempMacro(self.filePath)
         else:
-            MessageDialog.showWarning('', 'No Console available')
+            # Used when running the editor outiside of Analyis. Run from an external IpythonConsole
+            self._runOnTempIPythonConsole()
 
     def _saveMacro(self):
         """
@@ -181,12 +207,12 @@ class MacroEditor(CcpnModule):
             getLogger().debug("Trying to remove a temporary Macro file which does not exist")
 
     def saveToPdf(self):
-        self.textBox.saveToPDF()
+        self.textEditor.saveToPDF()
 
     def _saveTextToFile(self, filePath):
         if filePath:
             with open(filePath, 'w') as f:
-                f.write(self.textBox.toPlainText())
+                f.write(self.textEditor.toPlainText())
                 f.close()
 
     def _saveMacroAs(self):
@@ -194,7 +220,7 @@ class MacroEditor(CcpnModule):
         Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.
         """
 
-        newText = self.textBox.toPlainText()
+        newText = self.textEditor.toPlainText()
         dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
                             acceptMode=FileDialog.AcceptSave, selectFile=self.nameLineEdit.text(),
                             # directory=self.macroPath,
@@ -239,15 +265,15 @@ class MacroEditor(CcpnModule):
         if filePath:
             if filePath.endswith('.py'):
                 with open(filePath, 'r') as f:
-                    self.textBox.clear()
+                    self.textEditor.clear()
                     for line in f.readlines():
-                        self.textBox.insertPlainText(line)
+                        self.textEditor.insertPlainText(line)
                     self.macroFile = f
                     self.filePath = filePath
                     self._originalOpenedFile = filePath
                     self._isTempMacro = False
             else:
-                MessageDialog.showMessage('Format Not Recognised', 'On MacroEditor you can drop only a *.py file type')
+                MessageDialog.showMessage('Format Not Supported.', 'On MacroEditor you can only use a *.py file type')
 
     def _setFileName(self, filePath):
 
@@ -281,8 +307,8 @@ if __name__ == '__main__':
     win = QtWidgets.QMainWindow()
 
     moduleArea = CcpnModuleArea(mainWindow=None)
-
-    module = MacroEditor(mainWindow=None)
+    tf = '/Users/luca/AnalysisV3/src/python/ccpn/ui/gui/widgets/TestModule.py'
+    module = MacroEditor(mainWindow=None, filePath=tf)
 
     moduleArea.addModule(module)
 

@@ -107,6 +107,15 @@ class ShortcutWidget(Frame):
             shortcutDict[shortcut] = function
         return shortcutDict
 
+    def _addToFirstAvailableShortCut(self, filePath):
+        layout = self.layout()
+        if filePath not in self.getShortcuts().values():
+            for i in range(layout.rowCount()):
+                functionWidget = layout.itemAtPosition(i, 1).widget()
+                if functionWidget.get() == '':
+                    functionWidget.set('runMacro("%s")' % filePath)
+                    return
+
     def _getMacroFile(self, index):
         shortcutLineEdit = self.widgets[index][1]
         if os.path.exists('/'.join(shortcutLineEdit.text().split('/')[:-1])):

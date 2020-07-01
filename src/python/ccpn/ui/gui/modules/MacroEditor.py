@@ -264,7 +264,7 @@ class MacroEditor(CcpnModule):
                             ['text', 'Add to shortcut'],
                             ['toolTip', 'Add macro to a shortcut'],
                             ['icon',  Icon('icons/shortcut')],
-                            ['callback', self._linkToShortCut],
+                            ['callback', self._addToShortcuts],
                             ['enabled', True]
                         ])],
                         (),
@@ -327,6 +327,14 @@ class MacroEditor(CcpnModule):
             else:
                 self.toolbar.addSeparator()
 
+    def _addToShortcuts(self):
+        if self.application:
+            from ccpn.ui.gui.popups.ShortcutsPopup import ShortcutsPopup
+            sp = ShortcutsPopup(self, mainWindow=self.mainWindow)
+            sp.shortcutWidget._addToFirstAvailableShortCut(self.filePath)
+            sp.exec()
+        else:
+            MessageDialog.showMessage('Set shortcuts','This option is availble only within Analysis')
 
     def _processDroppedItems(self, data):
         """
@@ -347,12 +355,6 @@ class MacroEditor(CcpnModule):
                 self._setFileName()
         else:
             MessageDialog.showMessage('', 'Drop only a file at the time')
-
-    def _linkToShortCut(self):
-        if self.preferences:
-            MessageDialog.showNotImplementedMessage()
-        else:
-            MessageDialog.showNotImplementedMessage()
 
     def _createTemporaryFile(self, name=None):
         if name is None:

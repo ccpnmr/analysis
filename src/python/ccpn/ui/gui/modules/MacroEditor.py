@@ -77,8 +77,6 @@ class MacroEditor(CcpnModule):
         self._tempFile = None             # a temp file holder, used when the filePath is not specified
         self.userMacroDirPath = None      # dir path containing user Macros. from preferences if defined otherwise from .ccpn/macros
 
-
-
         if self.mainWindow:               # is running in Analysis
             self.application = mainWindow.application
             self.project = mainWindow.application.project
@@ -121,12 +119,12 @@ class MacroEditor(CcpnModule):
         self.textEditor = PyCodeEditor(self.mainWidget, grid=(hGrid, 0), acceptDrops=True, gridSpan=(1, 2))
         self.searchReplacePanel = self.textEditor.panels.get('SearchAndReplacePanel')
         self.fileWatcher = self.textEditor.modes.get('FileWatcherMode')
-        # self.fileWatcher._timer.setInterval(1)
-        self.fileWatcher.on_state_changed(False)
+        if self.fileWatcher:
+            self.fileWatcher.on_state_changed(False)
         self.textEditor.focused_in.connect(self._focusInEvent)
-
         self.textEditor.textChanged.connect(self._textedChanged)
 
+        #
         self.openPath(self.filePath)
         self._setFileName()
         self._setToolBar()
@@ -162,8 +160,6 @@ class MacroEditor(CcpnModule):
         """
         Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.
         """
-
-
         dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
                             acceptMode=FileDialog.AcceptSave, selectFile=self._filenameLineEdit.text(),
                             filter='*.py',
@@ -250,6 +246,7 @@ class MacroEditor(CcpnModule):
                     if sa in reply:
                         self.saveMacroAs()
                     if rf in reply:
+                        self._removeMacroFromCurrent()
                         self.openPath(self.filePath)
                 return
 
@@ -283,14 +280,14 @@ class MacroEditor(CcpnModule):
                             ['text', 'Find'],
                             ['toolTip', ''],
                             ['icon', Icon('icons/find')],
-                            ['callback', self.searchReplacePanel.on_search],
+                            ['callback', self._showFindWidgets],
                             ['enabled', True]
                         ])],
                         ['Replace', od([
                             ['text', 'Find and Replace'],
                             ['toolTip', 'Find and Replace'],
                             ['icon',Icon('icons/find-replace')],
-                            ['callback', self.searchReplacePanel.on_search_and_replace],
+                            ['callback', self._showFindReplaceWidgets],
                             ['enabled', True]
                         ])],
                         (),
@@ -327,6 +324,14 @@ class MacroEditor(CcpnModule):
 
         )
         return toolBarDefs
+
+    def _showFindWidgets(self):
+        if self.searchReplacePanel:
+            self.searchReplacePanel.on_search()
+
+    def _showFindReplaceWidgets(self):
+        if self.searchReplacePanel:
+            self.searchReplacePanel.on_search_and_replace()
 
     def _setToolBar(self):
         for v in self._getToolBarDefs():
@@ -419,8 +424,10 @@ class MacroEditor(CcpnModule):
             with open(filePath, 'w') as f:
                 f.write(self.textEditor.toPlainText())
                 f.close()
-        self._lastSaved = self.textEditor.toPlainText()
-        self._setFileName()
+        if self.filePath:
+            self._lastSaved = self.textEditor.toPlainText()
+            self._lastTimestp = os.stat(self.filePath).st_mtime
+            self._setFileName()
 
 
 

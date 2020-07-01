@@ -141,8 +141,7 @@ class MacroEditor(CcpnModule):
             if self.autoOpenPythonConsole:
                 self._openPythonConsoleModule()
             if self.filePath:
-                if not self.filePath in self.preferences.recentMacros and not self._tempFile:
-                    self.preferences.recentMacros.append(self.filePath)
+                self.preferences.recentMacros.append(self.filePath)
                 self._pythonConsole._runMacro(self.filePath)
         else:
             # Used when running the editor outiside of Analyis. Run from an external IpythonConsole

@@ -34,7 +34,7 @@ UNCHECKED = QtCore.Qt.Unchecked
 
 class CheckBoxes(Widget):
 
-    def __init__(self, parent, texts=None, selectedInd=None, exclusive=False,
+    def __init__(self, parent, texts=None, selectedInd=None, exclusive=False, selectAll=None, deselectAll=None,
                  callback=None, direction='h', tipTexts=None, **kwds):
 
         super().__init__(parent, setLayout=True, **kwds)
@@ -57,6 +57,10 @@ class CheckBoxes(Widget):
         checkBoxGroup.buttonClicked.connect(self._callback)
 
         self.setCallback(callback)
+        if selectAll:
+            self.selectAll()
+        if deselectAll:
+            self.deselectAll()
 
     def setCheckBoxes(self, texts=None, selectedInd=None, direction='h', tipTexts=None):
         """Change the checkBoxes in the checkBox group

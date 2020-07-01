@@ -708,8 +708,10 @@ GuiTable::item::selected {
                 item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
                 state = 2 if val else 0
                 item.setCheckState(state)
+                self.setItem(row, col, item)
+                item.setValue('')
 
-            if isinstance(val, list or tuple):
+            elif isinstance(val, list or tuple):
 
                 pulldown = PulldownList(None, **self._pulldownKwds)
                 pulldown.setMaximumWidth(300)
@@ -755,13 +757,16 @@ GuiTable::item::selected {
         # skip selection if it already exists and hasn't changed
         # BUT, annoyingly, need an extra case for a single click on an already selected item
         objList = self.getSelectedObjects()
-        try:
-            if objList and self._lastSelection is not None and \
-                    self._lastSelection['selection'] is not None and \
-                    set(objList) == set(self._lastSelection['selection']):
-                if mouseDrag:
-                    return
-        except Exception as e :print(e)
+        if objList is not None:
+            if len(objList) > 0:
+                if not isinstance(objList[0], pd.Series):
+                    # not sure how to handle this for series
+                    if objList and self._lastSelection is not None and \
+                            self._lastSelection['selection'] is not None and \
+                            set(objList) == set(self._lastSelection['selection']):
+                        if mouseDrag:
+                            return
+
 
         # update selection
         self._lastSelection = {'clicked'       : self.currentItem(),
@@ -822,7 +827,8 @@ GuiTable::item::selected {
                             checked=state)
             textHeader = self.horizontalHeaderItem(itemSelection.column()).text()
             if textHeader:
-                self._dataFrameObject.setObjAttr(textHeader, obj, state)
+                if not isinstance(obj, pd.Series):
+                    self._dataFrameObject.setObjAttr(textHeader, obj, state)
                 # setattr(objList[0], textHeader, state)
         else:
             data = CallBack(theObject=self._dataFrameObject,
@@ -1766,6 +1772,10 @@ GuiTable::item::selected {
             model = self.model()
 
             if selection:
+                if len(selection)>0:
+                    if isinstance(selection[0], pd.Series):
+                        # not sure how to handle this
+                        return
                 uniqObjs = set(selection)
 
                 # rowObjs = []
@@ -2528,6 +2538,18 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
                 if func and obj:
                     func(obj, text)
             else:
+                func = self._parent._dataFrameObject.setEditValues[col]
+                if len(self._parent._dataFrameObject._objects) > 0:
+                    if isinstance(self._parent._dataFrameObject._objects[0], pd.Series):
+                        df = self._parent._dataFrameObject.dataFrame
+                        obj = df.iloc[row]
+                        if func and obj is not None:
+                            result = func(obj, text)
+                            df.iloc[row] = result
+                            self._parent._dataFrameObject.dataFrame = df
+                            self._parent.setTableFromDataFrameObject(dataFrameObject=self._parent._dataFrameObject,
+                                                                     columnDefs=self._parent._dataFrameObject._columnDefinitions)
+
                 getLogger().debug('table %s does not contain a Pid' % self)
                 # return super(GuiTableDelegate, self).setModelData(widget, mode, index)
 

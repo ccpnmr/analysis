@@ -39,7 +39,13 @@ from ccpn.framework.PathsAndUrls import macroPath
 from pyqode.python.widgets import PyConsole, PyInteractiveConsole
 import sys
 from pyqode.core.api import TextHelper
-
+from collections import OrderedDict as od
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.ToolBar import ToolBar
+from ccpn.ui.gui.widgets.Action import Action
+import ntpath
+import tempfile
+from pathlib import Path
 
 class MacroEditor(CcpnModule):
     """
@@ -49,6 +55,7 @@ class MacroEditor(CcpnModule):
     """
     includeSettingsWidget = False
     className = 'MacroEditor'
+
 
     def __init__(self, mainWindow=None, name='Macro Editor', filePath=None, useCcpnMacros=False):
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
@@ -60,9 +67,19 @@ class MacroEditor(CcpnModule):
         self.preferences = None
         self._pythonConsole = None
         self.macroPath = ''
-        self._editor_windows = []
+        self._editor_windows = []         # used when running the macro externally on Analysis
+        self._preEditorText = ''          # text as appeared the first time the file was opened
+        self.autoOpenPythonConsole = True # When run: always open the PythonConsole module to see the output.
+        self._lastTimestp = None          # used to check if the file has been changed externally
+        self._DIALOGID = USERMACROSPATH
+        self.filePath = filePath          # working filePath. If None, it will be created
+        self._tempFile = None             # a temp file holder, used when the filePath is not specified
 
-        if self.mainWindow:
+        if not self.filePath:
+            self._tempFile = tempfile.NamedTemporaryFile(suffix='.py')
+            self.filePath = self._tempFile.name
+
+        if self.mainWindow:               # is running in Analysis
             self.application = mainWindow.application
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
@@ -71,45 +88,245 @@ class MacroEditor(CcpnModule):
             if self._pythonConsole is None:
                 self._pythonConsole = IpythonConsole(self.mainWindow)
 
-        self._DIALOGID = USERMACROSPATH
         if useCcpnMacros:
             self.macroPath = macroPath
         else:
             if self.preferences:
                 self.macroPath = self.preferences.general.userMacroPath
 
-        self._isTempMacro = True
-        self._originalOpenedFile = None
-
+        ### Gui settings ###
         self.mainWidget.layout().setSpacing(5)
         self.mainWidget.layout().setContentsMargins(10, 10, 10, 10)
-
         hGrid = 0
-
-        self.namelabel = Label(self.mainWidget, 'Macro Name', grid=(hGrid, 0))
-        self.nameLineEdit = LineEdit(self.mainWidget, grid=(0, 1))
-        # self.nameLineEdit.editingFinished().connect(self._changedName)
-
+        self.toolbar = ToolBar(self.mainWidget, grid=(hGrid, 0), gridSpan=(1, 2))
+        hGrid += 1
+        self.filePathLabel = Label(self.mainWidget, hAlign='l', grid=(hGrid, 0))
+        self._fileNameButtons = ButtonList(self.mainWidget, texts=['Save As...'],
+                                           callbacks=[self.saveMacroAs],
+                                           icons=[Icon('icons/saveAs')],
+                                           hAlign='r',
+                                           grid=(hGrid, 1))
+        self._filenameLineEdit = LineEdit(self.mainWidget, grid=(hGrid, 1))
+        self._filenameLineEdit.hide() # this is used only to store and restore the widgets
         hGrid += 1
         # macro editing area
         self.textEditor = PyCodeEditor(self.mainWidget, grid=(hGrid, 0), acceptDrops=True, gridSpan=(1, 2))
+        self.searchReplacePanel = self.textEditor.panels.get('SearchAndReplacePanel')
+        self.fileWatcher = self.textEditor.modes.get('FileWatcherMode')
+        # self.fileWatcher._timer.setInterval(1)
+        self.fileWatcher.on_state_changed(False)
+        self.textEditor.focused_in.connect(self._focusInEvent)
 
-        hGrid += 1
-        self.buttonBox = ButtonList(self, texts=['Open', 'save', 'Save As', 'Run'],
-                                    callbacks=[self._openMacroFile, self._saveMacro, self._saveMacroAs, self._runMacro], grid=(hGrid, 1))
+        self.textEditor.textChanged.connect(self._textedChanged)
 
-        self.filePath = filePath
-        if self.filePath:  # if  a path is specified then opens it
-            self._openPath(self.filePath)
-
-        self._setFileName(self.filePath)
-
-        # self.textEditor.editingFinished.connect(self._saveMacro)  # automatic saving
-        # self.nameLineEdit.editingFinished.connect(self._macroNameChanged)  # automatic renaming the fileName
-
+        self.openPath(self.filePath)
+        self._setFileName()
+        self._setToolBar()
         self.droppedNotifier = GuiNotifier(self.textEditor,
                                            [GuiNotifier.DROPEVENT], [DropBase.URLS],
                                            self._processDroppedItems)
+
+    ### Public methods
+
+    def run(self):
+        if self._pythonConsole is not None:
+            if self.autoOpenPythonConsole:
+                self._openPythonConsoleModule()
+            if self.filePath:
+                if not self.filePath in self.preferences.recentMacros and not self._tempFile:
+                    self.preferences.recentMacros.append(self.filePath)
+                self._pythonConsole._runMacro(self.filePath)
+        else:
+            # Used when running the editor outiside of Analyis. Run from an external IpythonConsole
+            self._runOnTempIPythonConsole()
+
+    def saveMacro(self):
+        """
+        Saves the text inside the textbox to a file, if a file path is not specified, a save file dialog
+        appears for specification of the file path.
+        """
+        if not self.filePath:
+            self.saveMacroAs()
+
+        else:
+            self._saveTextToFile()
+
+    def saveMacroAs(self):
+        """
+        Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.
+        """
+
+
+        dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
+                            acceptMode=FileDialog.AcceptSave, selectFile=self._filenameLineEdit.text(),
+                            # directory=self.macroPath,
+                            filter='*.py',
+                            preferences=self.preferences,
+                            initialPath=self.macroPath,
+                            pathID=self._DIALOGID)
+        dialog._show()
+        filePath = dialog.selectedFile()
+
+        if filePath:
+            self._saveTextToFile()
+            self._setFileName()
+            self.filePath = filePath
+        else:
+            self._checkFileStauts()
+
+    def exportToPdf(self):
+        self.textEditor.saveToPDF()
+
+    def openPath(self, filePath):
+
+        if filePath:
+            if filePath.endswith('.py'):
+                if self._isInCurrent(filePath):
+                    MessageDialog.showMessage('Already Opened.', 'This file is already opened in the project')
+                    return
+                else:
+                    with open(filePath, 'r') as f:
+                        self.textEditor.textChanged.disconnect()
+                        self.textEditor.clear()
+                        for line in f.readlines():
+                            self.textEditor.insertPlainText(line)
+                        # self.macroFile = f
+                        self._removeCurrentMacro()
+                        self.filePath = filePath
+                        self._preEditorText = self.textEditor.get()
+                        self._lastTimestp = None
+                        self._setCurrentMacro()
+                        self.textEditor.textChanged.connect(self._textedChanged)
+            else:
+                MessageDialog.showMessage('Format Not Supported.', 'On MacroEditor you can only use a *.py file type')
+
+    def revertChanges(self):
+        self.textEditor.clear()
+        self.textEditor.insertPlainText(self._preEditorText)
+
+
+    def _textedChanged(self, *args):
+
+        self.saveMacro()
+        self.textEditor._on_text_changed()
+        self._lastTimestp = os.stat(self.filePath).st_mtime
+
+    def _focusInEvent(self, *ags):
+        self._checkFileStauts(*ags)
+
+    def _checkFileStauts(self, *args):
+        nf = 'File not found. Deleted or renamed externally. It will be recreated automatically'
+        if not os.path.exists(self.filePath):
+            getLogger().warning(nf)
+            self.saveMacro()
+            return
+        if self.filePath is None:
+            getLogger().warning(nf)
+            self.saveMacro()
+            return
+        if os.path.exists(self.filePath):
+            now = os.stat(self.filePath).st_mtime
+            kc = "Keep current version"
+            sa = "Save as..."
+            rf = "Reload file"
+            if self._lastTimestp:
+                if now != self._lastTimestp:
+                    self._lastTimestp = now
+                    reply = MessageDialog.showMulti(title='Warning', message='Detected an external change to the file.'
+                                            ,texts=[kc, sa, rf])
+                    if kc in reply:
+                        self.saveMacro()
+                    if sa in reply:
+                        self.saveMacroAs()
+                    if rf in reply:
+                        self.openPath(self.filePath)
+                return
+
+
+    def _getToolBarDefs(self):
+
+        toolBarDefs = (
+                        ['Open', od([
+                            ['text', 'Open'],
+                            ['toolTip', 'Open a Python File'],
+                            ['icon', Icon('icons/document_open_recent')],
+                            ['callback', self._openMacroFile],
+                            ['enabled', True]
+                        ])],
+                        ['Export', od([
+                            ['text', 'Export'],
+                            ['toolTip', 'Export code to PDF'],
+                            ['icon', Icon('icons/export')],
+                            ['callback', self.exportToPdf],
+                            ['enabled', True]
+                        ])],
+                        ['Add to shortcut', od([
+                            ['text', 'Add to shortcut'],
+                            ['toolTip', 'Add macro to a shortcut'],
+                            ['icon',  Icon('icons/shortcut')],
+                            ['callback', self._linkToShortCut],
+                            ['enabled', True]
+                        ])],
+                        (),
+                        ['Find', od([
+                            ['text', 'Find'],
+                            ['toolTip', ''],
+                            ['icon', Icon('icons/find')],
+                            ['callback', self.searchReplacePanel.on_search],
+                            ['enabled', True]
+                        ])],
+                        ['Replace', od([
+                            ['text', 'Find and Replace'],
+                            ['toolTip', 'Find and Replace'],
+                            ['icon',Icon('icons/find-replace')],
+                            ['callback', self.searchReplacePanel.on_search_and_replace],
+                            ['enabled', True]
+                        ])],
+                        (),
+                        ['Undo', od([
+                            ['text', 'Undo'],
+                            ['toolTip', ''],
+                            ['icon', Icon('icons/undo')],
+                            ['callback',self.textEditor.undo],
+                            ['enabled', True]
+                        ])],
+                        ['Redo', od([
+                            ['text', 'Redo'],
+                            ['toolTip', ''],
+                            ['icon', Icon('icons/redo')],
+                            ['callback', self.textEditor.redo],
+                            ['enabled', True]
+                        ])],
+                        ['Revert', od([
+                            ['text', 'Revert'],
+                            ['toolTip', 'Revert all changes to initial state'],
+                            ['icon', Icon('icons/revert4')],
+                            ['callback', self.revertChanges],
+                            ['enabled', True]
+                        ])],
+                        (),
+                        ['Run', od([
+                            ['text', 'Run'],
+                            ['toolTip', 'Run the macro in the IpythonConsole.\nShortcut: cmd(ctrl)+r'],
+                            ['icon', Icon('icons/play')],
+                            ['callback', self.run],
+                            ['enabled', True],
+                            ['shortcut', '⌃r']
+                        ])],
+
+        )
+        return toolBarDefs
+
+    def _setToolBar(self):
+        for v in self._getToolBarDefs():
+            if len(v)==2:
+                if isinstance(v[1], od):
+                    action = Action(self, **v[1])
+                    action.setObjectName(v[0])
+                    self.toolbar.addAction(action)
+            else:
+                self.toolbar.addSeparator()
+
 
     def _processDroppedItems(self, data):
         """
@@ -121,15 +338,21 @@ class MacroEditor(CcpnModule):
             if len(self.textEditor.get()) > 0:
                 ok = MessageDialog.showYesNoWarning('Open new macro', 'Replace the current macro?')
                 if ok:
-                    self._openPath(filePath)
-                    self._setFileName(filePath)
+                    self.openPath(filePath)
+                    self._setFileName()
                 else:
                     return
             else:
-                self._openPath(filePath)
-                self._setFileName(filePath)
+                self.openPath(filePath)
+                self._setFileName()
         else:
             MessageDialog.showMessage('', 'Drop only a file at the time')
+
+    def _linkToShortCut(self):
+        if self.preferences:
+            MessageDialog.showNotImplementedMessage()
+        else:
+            MessageDialog.showNotImplementedMessage()
 
     def _createTemporaryFile(self, name=None):
         if name is None:
@@ -146,7 +369,7 @@ class MacroEditor(CcpnModule):
         self.filePath = filePath
         return filePath
 
-    def _openEditor(self, path, line):
+    def _openTemp(self, path, line):
         '''
         used for navigating to error in the macro.
         '''
@@ -159,45 +382,39 @@ class MacroEditor(CcpnModule):
 
     def _runOnTempIPythonConsole(self):
         console = PyInteractiveConsole()
-        console.open_file_requested.connect(self._openEditor)
+        console.open_file_requested.connect(self._openTemp)
         console.start_process(sys.executable, [os.path.join(os.getcwd(), self.filePath)])
         console.show()
 
-    def _runMacro(self):
-        if self._pythonConsole is not None:
-            if self.filePath:
-                # self._pythonConsole._runMacro(self.filePath)
-                if not self.filePath in self.preferences.recentMacros and not self._isTempMacro:
-                    self.preferences.recentMacros.append(self.filePath)
+    def _openPythonConsoleModule(self):
+        from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
+        if self.mainWindow.pythonConsoleModule is None:  # No pythonConsole module detected, so create one.
+            self.mainWindow.moduleArea.addModule(PythonConsoleModule(self.mainWindow), 'bottom')
 
-            self.filePath = self._createTemporaryFile()
-            self._saveTextToFile(self.filePath)
-            self._pythonConsole._runMacro(self.filePath)
-            self._deleteTempMacro(self.filePath)
-        else:
-            # Used when running the editor outiside of Analyis. Run from an external IpythonConsole
-            self._runOnTempIPythonConsole()
 
-    def _saveMacro(self):
-        """
-        Saves the text inside the textbox to a file, if a file path is not specified, a save file dialog
-        appears for specification of the file path.
-        """
-
-        if not self.filePath:
-            self._saveMacroAs()
-
-        if self._originalOpenedFile:
-            if self._getFileNameFromPath(self._originalOpenedFile) != self.nameLineEdit.get():
-                self._saveMacroAs()
-            else:
-                self._saveTextToFile(self._originalOpenedFile)
 
     def _macroNameChanged(self):
         if self.filePath:
-            if self.nameLineEdit.get() != '':
-                self.filePath = self.filePath.replace(self._getFileNameFromPath(self.filePath), self.nameLineEdit.get())
-                self._saveMacro()
+            if self._filenameLineEdit.get() != '':
+                dirName = ntpath.dirname(self.filePath)
+                oldFileName = Path(self.filePath).stem
+                newName = self._filenameLineEdit.get()
+                newName = os.path.splitext(newName)[0]
+                if oldFileName != newName:
+                    if self._tempFile:
+                        if self._tempFile.name == self.filePath:
+                            self.saveMacroAs()
+                            return
+                    if newName.isalnum():
+                        self.filePath = os.path.join(dirName, newName)
+                        self._setFileName()
+                        self.saveMacro()
+                        self._lastName = newName
+                        return
+                    else:
+                        self._setFileName()
+                        MessageDialog.showError('Name not allowed.', 'Try to use "Save As"')
+
 
     def _deleteTempMacro(self, filePath):
         if os.path.exists(filePath):
@@ -206,41 +423,18 @@ class MacroEditor(CcpnModule):
         else:
             getLogger().debug("Trying to remove a temporary Macro file which does not exist")
 
-    def saveToPdf(self):
-        self.textEditor.saveToPDF()
 
-    def _saveTextToFile(self, filePath):
-        if filePath:
-            with open(filePath, 'w') as f:
-                f.write(self.textEditor.toPlainText())
-                f.close()
-
-    def _saveMacroAs(self):
-        """
-        Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.
-        """
-
-        newText = self.textEditor.toPlainText()
-        dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
-                            acceptMode=FileDialog.AcceptSave, selectFile=self.nameLineEdit.text(),
-                            # directory=self.macroPath,
-                            filter='*.py',
-                            preferences=self.preferences,
-                            initialPath=self.macroPath,
-                            pathID=self._DIALOGID)
-        dialog._show()
-        filePath = dialog.selectedFile()
-
+    def _saveTextToFile(self):
+        filePath = self.filePath
         if filePath:
             if not filePath.endswith('.py'):
                 filePath += '.py'
             with open(filePath, 'w') as f:
-                f.write(newText)
+                f.write(self.textEditor.toPlainText())
                 f.close()
+        self._setFileName()
 
-        if filePath:
-            self.nameLineEdit.set(self._getFileNameFromPath(filePath))
-            self.filePath = filePath
+
 
     def _openMacroFile(self):
         """
@@ -257,42 +451,37 @@ class MacroEditor(CcpnModule):
                             pathID=self._DIALOGID)
         dialog._show()
         filePath = dialog.selectedFile()
-        self._openPath(filePath)
-        self._setFileName(filePath)
+        self.openPath(filePath)
+        self._setFileName()
 
-    def _openPath(self, filePath):
+    def _setFileName(self):
+        if self.filePath:
+            self._filenameLineEdit.set(str(self.filePath))
+            self.filePathLabel.set(str(self.filePath))
 
-        if filePath:
-            if filePath.endswith('.py'):
-                with open(filePath, 'r') as f:
-                    self.textEditor.clear()
-                    for line in f.readlines():
-                        self.textEditor.insertPlainText(line)
-                    self.macroFile = f
-                    self.filePath = filePath
-                    self._originalOpenedFile = filePath
-                    self._isTempMacro = False
-            else:
-                MessageDialog.showMessage('Format Not Supported.', 'On MacroEditor you can only use a *.py file type')
+    def _isInCurrent(self, filePath):
+        if self.current:
+            if filePath in self.current.macroFiles:
+                return True
+        return False
 
-    def _setFileName(self, filePath):
+    def _setCurrentMacro(self):
+        if self.current:
+            self.current.macroFiles += (self.filePath,)
 
-        fileName = self._getFileNameFromPath(filePath)
-        self.nameLineEdit.set(str(fileName))
-
-    def _getFileNameFromPath(self, filePath):
-        if isinstance(filePath, str):
-            if filePath.endswith('.py'):
-                path = filePath.split('/')
-                fileName = path[-1].split('.')[0]
-                return fileName
+    def _removeCurrentMacro(self):
+        if self._isInCurrent(self.filePath):
+            self.current.removeMacroFile(self.filePath)
 
     def _closeModule(self):
         """Re-implementation of closeModule  """
-        ok = MessageDialog.showYesNoWarning('Close Macro', 'Do you want save?')
-        if ok:
-            self._saveMacro()
-
+        if self._preEditorText != self.textEditor.get():
+            ok = MessageDialog.showYesNoWarning('Close Macro', 'Do you want save?')
+            if ok:
+                self.saveMacro()
+        if self._tempFile:
+            self._tempFile.close()
+        self._removeCurrentMacro()
         super()._closeModule()
 
 
@@ -308,7 +497,7 @@ if __name__ == '__main__':
 
     moduleArea = CcpnModuleArea(mainWindow=None)
     tf = '/Users/luca/AnalysisV3/src/python/ccpn/ui/gui/widgets/TestModule.py'
-    module = MacroEditor(mainWindow=None, filePath=tf)
+    module = MacroEditor(mainWindow=None, filePath=None)
 
     moduleArea.addModule(module)
 

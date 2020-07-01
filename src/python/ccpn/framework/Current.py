@@ -55,6 +55,7 @@ from ccpn.ui._implementation.Strip import Strip
 SingularOnly = 'singularOnly'
 Remove = 'remove'
 PCAcomponents = 'pcaComponents'
+MacroFiles = 'macroFiles'
 
 _currentClasses = {
     SpectrumGroup    : {SingularOnly: True},
@@ -79,6 +80,7 @@ _currentExtraFields = {
     'cursorPositions': {'singularOnly': True, 'docTemplate': 'last cursor %s - (posX,posY) tuple'},
     'axisCodes'      : {'singularOnly': True, 'docTemplate': 'last selected %s'},
     PCAcomponents    : {'docTemplate': 'last selected %s, of any obj kind'},
+    MacroFiles       : {'docTemplate': 'last selected %s, of any obj kind'},
     }
 
 # Fields in current (there is a current.xyz attribute with related functions

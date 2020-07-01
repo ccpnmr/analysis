@@ -2918,11 +2918,19 @@ class Framework(NotifierBase):
         Displays macro editor.
         """
         mainWindow = self.ui.mainWindow
-        self.editor = MacroEditor(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
-        self.editor._openMacroFile()
-        # mainWindow.pythonConsole.writeConsoleCommand("application.showMacroEditor()")
-        # getLogger().info("application.showMacroEditor()")
+        dialog = FileDialog(text='Open Macro', fileMode=FileDialog.ExistingFile,
+                            acceptMode=FileDialog.AcceptOpen,
+                            # directory=self.macroPath,
+                            filter='*.py',
+                            preferences=self.preferences,
+                            initialPath=self.preferences.general.userMacroPath,
+                            pathID=USERMACROSPATH)
+        dialog._show()
+        filePath = dialog.selectedFile()
+        if filePath is not None:
+            macroEditor = MacroEditor(mainWindow=mainWindow, filePath=filePath)
+            mainWindow.moduleArea.addModule(macroEditor, position='top', relativeTo=mainWindow.moduleArea)
+
 
     def openCcpnMacroOnEditor(self):
         """

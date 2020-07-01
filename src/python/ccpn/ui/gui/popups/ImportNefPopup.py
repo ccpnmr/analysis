@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-25 15:53:45 +0100 (Thu, June 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-01 19:47:12 +0100 (Wed, July 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -210,14 +210,15 @@ class NefDictFrame(Frame):
         # self._paneSplitter.setStyleSheet("QSplitter::handle { background-color: gray }")
         self._paneSplitter.setSizes([10000, 15000])
 
-        # treeFrame (left frame)
-        self._treeOptionsFrame = Frame(self._treeFrame, setLayout=True, showBorder=False, grid=(0, 0))
-        self.buttonCCPN = CheckBox(self._treeOptionsFrame, checked=True,
-                                   text='include CCPN tags',
-                                   grid=(0, 0), hAlign='l')
-        self.buttonExpand = CheckBox(self._treeOptionsFrame, checked=False,
-                                     text='expand selection',
-                                     grid=(1, 0), hAlign='l')
+        # # treeFrame (left frame)
+        # self._treeOptionsFrame = Frame(self._treeFrame, setLayout=True, showBorder=False, grid=(0, 0))
+        # self.buttonCCPN = CheckBox(self._treeOptionsFrame, checked=True,
+        #                            text='include CCPN tags',
+        #                            grid=(0, 0), hAlign='l')
+        # self.buttonExpand = CheckBox(self._treeOptionsFrame, checked=False,
+        #                              text='expand selection',
+        #                              grid=(1, 0), hAlign='l')
+
         self.nefTreeView = ImportTreeCheckBoxes(self._treeFrame, project=self.project, grid=(1, 0),
                                                 includeProject=True, enableCheckboxes=self._enableCheckboxes,
                                                 multiSelect=True)
@@ -565,7 +566,9 @@ class NefDictFrame(Frame):
             newName = lineEdit.get()
             try:
                 # call the correct rename function based on the item clicked
-                newName = func(self._nefReader, self.project, self._nefDict, saveFrame,
+                newName = func(self._nefReader, self.project,
+                               self._nefDict, self._contentCompareDataBlock or self._nefDict,
+                               saveFrame,
                                itemName=itemName, newName=newName if not autoRename else None)
             except Exception as es:
                 showWarning('Rename', str(es))
@@ -788,6 +791,7 @@ class NefDictFrame(Frame):
         # # clicking the checkbox also comes here
         # self._colourTreeView()
         #
+
         saveFrame = item.data(1, 0)
         if saveFrame:
             if hasattr(saveFrame, '_content'):
@@ -976,6 +980,21 @@ class ImportNefPopup(CcpnDialogMainWidget):
         for obj, nefWindow in self._nefWindows.items():
             nefWindow._fillPopup(obj)
 
+            for itm in nefWindow.nefTreeView.traverseTree():
+                nefWindow._nefTreeClickedCallback(itm, 0)
+                nefWindow.nefTreeView.setCurrentItem(itm)
+                print('>>> TREECLICKED')
+                break
+
+        thisNefDict = None
+        for obj, nefWindow in self._nefWindows.items():
+            if isinstance(obj, Project):
+                thisNefDict = nefWindow._nefDict
+
+        if thisNefDict:
+            for obj, nefWindow in self._nefWindows.items():
+                nefWindow._contentCompareDataBlock = thisNefDict
+
     def exec_(self) -> int:
         # NOTE:ED - this will do for the moment
         self.resize(*self._size)
@@ -1032,11 +1051,11 @@ if __name__ == '__main__':
     # TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
     # TESTNEF2 = '/Users/ejb66/Documents/nefTestProject.nef'
 
-    # TESTNEF = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
-    # TESTNEF2 = '/Users/ejb66/Documents/CcpNmrData/nefTestProject0.nef'
-
-    TESTNEF = '/Users/ejb66/Documents/TutorialProject2.nef'
+    TESTNEF = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
     TESTNEF2 = '/Users/ejb66/Documents/CcpNmrData/nefTestProject0.nef'
+
+    # TESTNEF = '/Users/ejb66/Documents/TutorialProject2.nef'
+    # TESTNEF2 = '/Users/ejb66/Documents/CcpNmrData/nefTestProject0.nef'
 
     # TESTNEF = '/Users/ejb66/Desktop/Ccpn_v2_testNef_a1.nef'
     # TESTNEF2 = '/Users/ejb66/Desktop/Ccpn_v2_testNef_a1.nef'

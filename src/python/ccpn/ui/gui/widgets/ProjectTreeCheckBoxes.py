@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 15:59:25 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-01 19:47:12 +0100 (Wed, July 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -48,7 +48,7 @@ from ccpn.util.nef import Specification
 from ccpn.util.nef import StarIo
 from ccpn.util.OrderedSet import OrderedSet
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
-from ccpn.core.lib.CcpnNefIo import _traverse, nef2CcpnMap, _isALoop
+from ccpn.core.lib.CcpnNefCommon import _traverse, nef2CcpnMap, _isALoop
 
 
 # TODO These should maybe be consolidated with the same constants in CcpnNefIo
@@ -304,6 +304,32 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
             for itemTree in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
                 for i in range(itemTree.childCount()):
                     itemTree.child(i).setCheckState(0, QtCore.Qt.Unchecked)
+
+    def traverseTree(self, root=None, preOrder=True, childrenOnly=True):
+        """Traverse the tree items in preOrder/postOrder
+        InOrder does not apply as the tree currently does not have left/right branches
+
+        :param root: root of the tree, if None defaults to the invisibleRootItem
+        :param preOrder: True/False; True yields the nodes first
+        :param childrenOnly: True/False; only yield items that are at the bottom of a branch,
+                            i.e., no further descendents
+        :return: yields tree items at each iteration
+        """
+        def recurse(parent):
+            for chCount in range(parent.childCount()):
+                child = parent.child(chCount)
+                # if preOrder then yield the node first
+                if preOrder and (child.childCount() == 0 or not childrenOnly):
+                    yield child
+                if child.childCount():
+                    yield from recurse(child)
+                # if preOrder then yield the node last
+                if not preOrder and (child.childCount() == 0 or not childrenOnly):
+                    yield child
+
+        root = root or self.invisibleRootItem()
+        if root is not None:
+            yield from recurse(root)
 
 
 class ExportTreeCheckBoxes(ProjectTreeCheckBoxes):
@@ -627,7 +653,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
             content(self, project, saveFrame, saveFrame['sf_category'])
 
     def fillTreeView(self, nefDict):
-        _traverse(self.project, nefDict, traverseFunc=self._fillFunc)
+        _traverse(self, self.project, nefDict, traverseFunc=self._fillFunc)
 
     def findSection(self, value, _parent=None):
         """Find the required section in the tree
@@ -637,6 +663,9 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
             found = [item for item in found if item.parent() == _parent]
         if found and len(found) == 1:
             return found[0]
+
+    def getFirstChild(self):
+        pass
 
 
 class PrintTreeCheckBoxes(ProjectTreeCheckBoxes):

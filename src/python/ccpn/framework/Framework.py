@@ -2937,7 +2937,7 @@ class Framework(NotifierBase):
         Displays macro editor.
         """
         mainWindow = self.ui.mainWindow
-        self.editor = MacroEditor(mainWindow=mainWindow, useCcpnMacros=True)
+        self.editor = MacroEditor(mainWindow=mainWindow)
         mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
         self.editor._openMacroFile()
 

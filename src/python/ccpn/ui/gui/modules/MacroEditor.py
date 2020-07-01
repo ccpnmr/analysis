@@ -35,7 +35,7 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.QPythonEditor import PyCodeEditor
-from ccpn.framework.PathsAndUrls import macroPath
+from ccpn.framework.PathsAndUrls import macroPath as ccpnMacroPath
 from pyqode.python.widgets import PyConsole, PyInteractiveConsole
 import sys
 from pyqode.core.api import TextHelper
@@ -57,7 +57,7 @@ class MacroEditor(CcpnModule):
     className = 'MacroEditor'
 
 
-    def __init__(self, mainWindow=None, name='Macro Editor', filePath=None, useCcpnMacros=False):
+    def __init__(self, mainWindow=None, name='Macro Editor', filePath=None):
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
         self.mainWindow = mainWindow
@@ -66,18 +66,18 @@ class MacroEditor(CcpnModule):
         self.current = None
         self.preferences = None
         self._pythonConsole = None
-        self.macroPath = ''
+        self.ccpnMacroPath = ccpnMacroPath
         self._editor_windows = []         # used when running the macro externally on Analysis
-        self._preEditorText = ''          # text as appeared the first time the file was opened
         self.autoOpenPythonConsole = True # When run: always open the PythonConsole module to see the output.
+        self._preEditorText = ''          # text as appeared the first time the file was opened
         self._lastTimestp = None          # used to check if the file has been changed externally
+        self._lastSaved = None
         self._DIALOGID = USERMACROSPATH
         self.filePath = filePath          # working filePath. If None, it will be created
         self._tempFile = None             # a temp file holder, used when the filePath is not specified
+        self.userMacroDirPath = None      # dir path containing user Macros. from preferences if defined otherwise from .ccpn/macros
 
-        if not self.filePath:
-            self._tempFile = tempfile.NamedTemporaryFile(suffix='.py')
-            self.filePath = self._tempFile.name
+
 
         if self.mainWindow:               # is running in Analysis
             self.application = mainWindow.application
@@ -88,13 +88,21 @@ class MacroEditor(CcpnModule):
             if self._pythonConsole is None:
                 self._pythonConsole = IpythonConsole(self.mainWindow)
 
-        if useCcpnMacros:
-            self.macroPath = macroPath
-        else:
-            if self.preferences:
-                self.macroPath = self.preferences.general.userMacroPath
+        if self.preferences:
+            self.userMacroDirPath = self.preferences.general.userMacroPath
+        if self.userMacroDirPath is None and self.application:
+            self.userMacroDirPath = self.application.tempMacrosPath
 
-        ### Gui settings ###
+        if not self.filePath:
+            if self.userMacroDirPath is None:
+                self._tempFile = tempfile.NamedTemporaryFile(suffix='.py')
+                self.filePath = self._tempFile.name
+            else:
+                # within AnalysisV3
+                self._tempFile = tempfile.NamedTemporaryFile(prefix='macro_', dir=self.userMacroDirPath, suffix='.py')
+                self.filePath = self._tempFile.name
+
+           ### Gui settings ###
         self.mainWidget.layout().setSpacing(5)
         self.mainWidget.layout().setContentsMargins(10, 10, 10, 10)
         hGrid = 0
@@ -126,7 +134,7 @@ class MacroEditor(CcpnModule):
                                            [GuiNotifier.DROPEVENT], [DropBase.URLS],
                                            self._processDroppedItems)
 
-    ### Public methods
+
 
     def run(self):
         if self._pythonConsole is not None:
@@ -159,18 +167,23 @@ class MacroEditor(CcpnModule):
 
         dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
                             acceptMode=FileDialog.AcceptSave, selectFile=self._filenameLineEdit.text(),
-                            # directory=self.macroPath,
                             filter='*.py',
-                            preferences=self.preferences,
-                            initialPath=self.macroPath,
-                            pathID=self._DIALOGID)
+                            directory=self.userMacroDirPath,
+                            # preferences=self.preferences,
+                            # initialPath=self.userMacroDirPath,
+                            # pathID=self._DIALOGID
+                            )
         dialog._show()
         filePath = dialog.selectedFile()
-
-        if filePath:
-            self._saveTextToFile()
-            self._setFileName()
+        if filePath is not None:
+            if not filePath.endswith('.py'):
+                filePath += '.py'
+            if self.filePath != filePath:
+                self._removeMacroFromCurrent()
+                self._closeTempFile()
             self.filePath = filePath
+            self._saveTextToFile()
+            self.openPath(filePath)
         else:
             self._checkFileStauts()
 
@@ -191,7 +204,7 @@ class MacroEditor(CcpnModule):
                         for line in f.readlines():
                             self.textEditor.insertPlainText(line)
                         # self.macroFile = f
-                        self._removeCurrentMacro()
+                        self._removeMacroFromCurrent()
                         self.filePath = filePath
                         self._preEditorText = self.textEditor.get()
                         self._lastTimestp = None
@@ -206,7 +219,6 @@ class MacroEditor(CcpnModule):
 
 
     def _textedChanged(self, *args):
-
         self.saveMacro()
         self.textEditor._on_text_changed()
         self._lastTimestp = os.stat(self.filePath).st_mtime
@@ -393,38 +405,12 @@ class MacroEditor(CcpnModule):
         if self.mainWindow.pythonConsoleModule is None:  # No pythonConsole module detected, so create one.
             self.mainWindow.moduleArea.addModule(PythonConsoleModule(self.mainWindow), 'bottom')
 
-
-
-    def _macroNameChanged(self):
-        if self.filePath:
-            if self._filenameLineEdit.get() != '':
-                dirName = ntpath.dirname(self.filePath)
-                oldFileName = Path(self.filePath).stem
-                newName = self._filenameLineEdit.get()
-                newName = os.path.splitext(newName)[0]
-                if oldFileName != newName:
-                    if self._tempFile:
-                        if self._tempFile.name == self.filePath:
-                            self.saveMacroAs()
-                            return
-                    if newName.isalnum():
-                        self.filePath = os.path.join(dirName, newName)
-                        self._setFileName()
-                        self.saveMacro()
-                        self._lastName = newName
-                        return
-                    else:
-                        self._setFileName()
-                        MessageDialog.showError('Name not allowed.', 'Try to use "Save As"')
-
-
     def _deleteTempMacro(self, filePath):
         if os.path.exists(filePath):
             os.remove(filePath)
             self.filePath = None
         else:
             getLogger().debug("Trying to remove a temporary Macro file which does not exist")
-
 
     def _saveTextToFile(self):
         filePath = self.filePath
@@ -434,6 +420,7 @@ class MacroEditor(CcpnModule):
             with open(filePath, 'w') as f:
                 f.write(self.textEditor.toPlainText())
                 f.close()
+        self._lastSaved = self.textEditor.toPlainText()
         self._setFileName()
 
 
@@ -446,11 +433,12 @@ class MacroEditor(CcpnModule):
 
         dialog = FileDialog(self, text='Open Macro', fileMode=FileDialog.ExistingFile,
                             acceptMode=FileDialog.AcceptOpen,
-                            # directory=self.macroPath,
                             filter='*.py',
+                            directory=self.userMacroDirPath or self.ccpnMacroPath,
                             preferences=self.preferences,
-                            initialPath=self.macroPath,
-                            pathID=self._DIALOGID)
+                            initialPath=self.userMacroDirPath,
+                            pathID=self._DIALOGID
+                            )
         dialog._show()
         filePath = dialog.selectedFile()
         self.openPath(filePath)
@@ -471,19 +459,31 @@ class MacroEditor(CcpnModule):
         if self.current:
             self.current.macroFiles += (self.filePath,)
 
-    def _removeCurrentMacro(self):
+    def _removeMacroFromCurrent(self):
         if self._isInCurrent(self.filePath):
             self.current.removeMacroFile(self.filePath)
 
+    def _isDirty(self):
+
+        if self._preEditorText != self.textEditor.get():
+            if self._lastSaved == self.textEditor.get():
+                return False
+            return True
+        return False
+
+    def _closeTempFile(self):
+        if self._tempFile:
+            if self.textEditor.get() == '': # delete empty temp
+                self._tempFile.close()
+
     def _closeModule(self):
         """Re-implementation of closeModule  """
-        if self._preEditorText != self.textEditor.get():
+        if self._isDirty():
             ok = MessageDialog.showYesNoWarning('Close Macro', 'Do you want save?')
             if ok:
                 self.saveMacro()
-        if self._tempFile:
-            self._tempFile.close()
-        self._removeCurrentMacro()
+        self._closeTempFile()
+        self._removeMacroFromCurrent()
         super()._closeModule()
 
 

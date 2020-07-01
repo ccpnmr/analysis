@@ -30,6 +30,10 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERMACROSPATH
 from pyqode.python.widgets import PyCodeEdit
 
+# import warnings
+# with warnings.catch_warnings():
+#     warnings.filterwarnings("ignore", message='Unimplemented completion icon_type:')
+
 
 
 #########################################################################################

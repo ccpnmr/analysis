@@ -47,6 +47,10 @@ import ntpath
 import tempfile
 from pathlib import Path
 
+
+_filenameLineEdit = '_filenameLineEdit'
+
+
 class MacroEditor(CcpnModule):
     """
     Macro editor will run Python Files only.
@@ -113,7 +117,9 @@ class MacroEditor(CcpnModule):
                                            hAlign='r',
                                            grid=(hGrid, 1))
         self._filenameLineEdit = LineEdit(self.mainWidget, grid=(hGrid, 1))
-        self._filenameLineEdit.hide() # this is used only to store and restore the widgets
+        self._filenameLineEdit.hide()
+        setattr(self, _filenameLineEdit, LineEdit(self.mainWidget, grid=(hGrid, 1)))
+        getattr(self, _filenameLineEdit).hide() #  this is used only to store and restore the widgets
         hGrid += 1
         # macro editing area
         self.textEditor = PyCodeEditor(self.mainWidget, grid=(hGrid, 0), acceptDrops=True, gridSpan=(1, 2))
@@ -161,7 +167,7 @@ class MacroEditor(CcpnModule):
         Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.
         """
         dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
-                            acceptMode=FileDialog.AcceptSave, selectFile=self._filenameLineEdit.text(),
+                            acceptMode=FileDialog.AcceptSave, selectFile=self.filePath,
                             filter='*.py',
                             directory=self.userMacroDirPath,
                             # preferences=self.preferences,
@@ -204,6 +210,7 @@ class MacroEditor(CcpnModule):
                         self._preEditorText = self.textEditor.get()
                         self._lastTimestp = None
                         self._setCurrentMacro()
+                        self._setFileName()
                         self.textEditor.textChanged.connect(self._textedChanged)
             else:
                 MessageDialog.showMessage('Format Not Supported.', 'On MacroEditor you can only use a *.py file type')
@@ -362,11 +369,17 @@ class MacroEditor(CcpnModule):
             if len(self.textEditor.get()) > 0:
                 ok = MessageDialog.showYesNoWarning('Open new macro', 'Replace the current macro?')
                 if ok:
+                    if self.filePath != filePath:
+                        self._removeMacroFromCurrent()
+                        self._closeTempFile()
                     self.openPath(filePath)
                     self._setFileName()
                 else:
                     return
             else:
+                if self.filePath != filePath:
+                    self._removeMacroFromCurrent()
+                    self._closeTempFile()
                 self.openPath(filePath)
                 self._setFileName()
         else:
@@ -481,6 +494,36 @@ class MacroEditor(CcpnModule):
         if self._tempFile:
             if self.textEditor.get() == '': # delete empty temp
                 self._tempFile.close()
+
+    def restoreWidgetsState(self, **widgetsState):
+        """
+        Restore the gui params. To Call it: _setParams(**{"variableName":"value"})
+
+
+
+        :param widgetsState:
+        """
+
+        self._setNestedWidgetsAttrToModule()
+        widgetsState = od(sorted(widgetsState.items()))
+        for variableName, value in widgetsState.items():
+            try:
+                widget = getattr(self, str(variableName))
+                if variableName == _filenameLineEdit:
+                    if isinstance(widget, LineEdit):
+                        if value is not None:
+                            if self.filePath != value:
+                                self._removeMacroFromCurrent()
+                                self._closeTempFile()
+                                print(self.filePath, value, '@@')
+
+                            self.openPath(value)
+                            print(self.filePath, value, '##')
+                        continue
+
+
+            except Exception as e:
+                getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
 
     def _closeModule(self):
         """Re-implementation of closeModule  """

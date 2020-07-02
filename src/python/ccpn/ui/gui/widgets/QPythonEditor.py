@@ -67,6 +67,10 @@ class PyCodeEditor(PyCodeEdit, Base):
             printer.setOutputFileName(filename)
             self.document().print_(printer)
 
+    def enterEvent(self, event):
+        self.setFocus()
+        super(PyCodeEditor, self).enterEvent(event)
+
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication

@@ -525,6 +525,8 @@ class MacroEditor(CcpnModule):
             except Exception as e:
                 getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
 
+
+
     def _closeModule(self):
         """Re-implementation of closeModule  """
         if self._isDirty():

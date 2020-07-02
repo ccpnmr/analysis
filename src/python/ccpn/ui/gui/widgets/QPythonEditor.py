@@ -24,7 +24,7 @@ __date__ = "$Date: 2020-05-15 09:30:25 +0000 (Fri, May 15, 2020) $"
 
 
 
-from PyQt5.QtCore import QRegExp
+from PyQt5 import QtGui
 from PyQt5 import QtPrintSupport
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERMACROSPATH
@@ -34,8 +34,8 @@ from pyqode.python.widgets import PyCodeEdit
 # with warnings.catch_warnings():
 #     warnings.filterwarnings("ignore", message='Unimplemented completion icon_type:')
 
-
-
+marginColour = QtGui.QColor('lightgrey')
+marginPosition = 100
 #########################################################################################
 ################################  Editor Widget  ########################################
 #########################################################################################
@@ -44,6 +44,10 @@ class PyCodeEditor(PyCodeEdit, Base):
     def __init__(self, parent=None, **kwds):
         super().__init__(parent)
         Base._init(self, **kwds)
+        self.rightMarginMode = self.modes.get('RightMarginMode')
+        if self.rightMarginMode:
+            self.rightMarginMode.color = marginColour
+            self.rightMarginMode.position = marginPosition
 
     def get(self):
         return self.toPlainText()

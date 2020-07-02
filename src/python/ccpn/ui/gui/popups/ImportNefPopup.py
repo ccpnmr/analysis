@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-02 18:48:13 +0100 (Thu, July 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-02 18:51:48 +0100 (Thu, July 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -544,6 +544,8 @@ class NefDictFrame(Frame):
             mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
             plural, singular = mapping
             _auto = partial(self._autoRename, item=item, parentName=plural, lineEdit=None, saveFrame=saveFrame, autoRename=True)
+            _auto()
+            return
 
         # cat = saveFrame.get('sf_category')
         # prefix = prefix or ''
@@ -834,7 +836,16 @@ class NefDictFrame(Frame):
 
         # # clicking the checkbox also comes here
         # self._colourTreeView()
-        #
+
+        # # NOTE:ED - hopefully this is correct for autoRename
+        # saveFrame = item.data(1, 0)
+        # mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(item.parent().data(0, 0))
+        # primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(item.parent().data(0, 0)) or saveFrame.get('sf_category')
+        # if primaryHandler:
+        #     handler = self.handleSaveFrames.get(primaryHandler)
+        #     if handler is not None:
+        #         # handler(self, saveFrame, item)
+        #         handler(self, item, _handleAutoRename=True)
 
         saveFrame = item.data(1, 0)
         if saveFrame and hasattr(saveFrame, '_content'):

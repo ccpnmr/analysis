@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-01 19:47:12 +0100 (Wed, July 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-02 15:27:52 +0100 (Thu, July 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1897,6 +1897,18 @@ class CcpnNefReader(CcpnNefContent):
         #
         return result
 
+    def _mergeSaveFramesInOrder(self, od1: OD, od2: OD) -> OD:
+        result = OD(((x, []) for x in saveFrameReadingOrder))
+        for k in result:
+            ll1 = od1.get(k, [])
+            ll2 = od2.get(k, [])
+
+            ll2 = [val for val in ll2 if val not in ll1]
+            result[k] = ll1 + ll2
+
+        # result = OD((k1, list(set(val1) | set(val2))) for k1, val1 in od1.items() for k2, val2 in od2.items() if k1 == k2)
+        return result
+
     # def verifyProject(self, project: Project, dataBlock: StarIo.NmrDataBlock,
     #                   projectIsEmpty: bool = True,
     #                   selection: typing.Optional[dict] = None):
@@ -2942,19 +2954,14 @@ class CcpnNefReader(CcpnNefContent):
             root[1] = first[0] = dct._OrderedDict__map[key] = [root, first, key]
             dict_setitem(dct, key, value)
 
-    def _getNewName(self, dataBlock: StarIo.NmrDataBlock, saveFrame, itemName, newName, contentItem, descriptor):
+    def _getNewName(self, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...], saveFrame, itemName, newName, contentItem, descriptor):
 
-        if dataBlock:
+        currentItems = set()
+        for dataBlock in contentDataBlocks:
             _contentFrame = dataBlock.get(saveFrame.name)
-            _content = getattr(_contentFrame, '_content', []) if _contentFrame else []
-        else:
-            _content = getattr(saveFrame, '_content', [])
-
-        # if not _content:
-        #     raise RuntimeError('_content not defined')
-
-        # itemName is the current item name
-        currentItems = _content.get(contentItem) or []
+            _content = getattr(_contentFrame, '_content', {}) if _contentFrame else {}
+            # itemName is the current item
+            currentItems |= (_content.get(contentItem) or set())
 
         if newName:
             # check not in the current list
@@ -2968,7 +2975,7 @@ class CcpnNefReader(CcpnNefContent):
 
         return newName
 
-    def _getNewNameDataBlock(self, dataBlock: StarIo.NmrDataBlock, saveFrame: StarIo.NmrSaveFrame,
+    def _getNewNameDataBlock(self, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...], saveFrame: StarIo.NmrSaveFrame,
                              itemName, newName, contentItem, descriptor):
 
         def incrementName(name):
@@ -2986,17 +2993,18 @@ class CcpnNefReader(CcpnNefContent):
 
             return name + Pid.IDSEP + '1'
 
-        if dataBlock:
-            _contentFrame = dataBlock.get(saveFrame.name)
-            _content = getattr(_contentFrame, '_content', []) if _contentFrame else []
-        else:
-            raise RuntimeError('dataBlock not defined')
+        # if dataBlock:
+        #     _content = getattr(dataBlock, '_content', {})
+        #     # itemName is the current item name
+        #     currentItems = getattr(_content, 'loopSet', [])
+        # else:
+        #     raise RuntimeError('dataBlock not defined')
 
-        # if _content is None:
-        #     raise RuntimeError('_content not defined')
-
-        # itemName is the current item name
-        currentItems = dataBlock._content.loopSet or []
+        currentItems = set()
+        for dataBlock in contentDataBlocks:
+            _content = getattr(dataBlock, '_content', {})
+            # itemName is the current item
+            currentItems |= set(getattr(_content, 'loopSet', []))
 
         if newName:
             # check not in the current list
@@ -3010,8 +3018,21 @@ class CcpnNefReader(CcpnNefContent):
 
         return newName
 
+    def _renameDataBlock(self, dataBlock, saveFrame, newFrameName):
+        """Rename the key of a datBlock because the saveFrame.name has changed in the connected saveFrame
+        """
+        data = [(k, val) for k, val in dataBlock.items()]
+        for ii, (k, val) in enumerate(data):
+            if val == saveFrame:
+                data[ii] = (newFrameName, val)
+                # should only be one
+                break
+        newData = OD((k, val) for k, val in data)
+        dataBlock.clear()
+        dataBlock.update(newData)
+
     def rename_saveframe(self, project: Project,
-                         dataBlock: StarIo.NmrDataBlock, contentDataBlock: StarIo.NmrDataBlock,
+                         dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
                          saveFrame: StarIo.NmrSaveFrame,
                          itemName=None, newName=None):
         """Rename a saveFrame
@@ -3025,7 +3046,16 @@ class CcpnNefReader(CcpnNefContent):
 
         _frameID = _saveFrameNameFromCategory(saveFrame)
         framecode, frameName, subName, prefix, postfix, preSerial, postSerial, category = _frameID
-        frames = self._getSaveFramesInOrder(contentDataBlock)
+
+        frames = None
+        for contentBlock in contentDataBlocks:
+            framesBlock = self._getSaveFramesInOrder(contentBlock)
+            if not frames:
+                frames = framesBlock
+            else:
+                # merge the frames dict
+                frames = self._mergeSaveFramesInOrder(frames, framesBlock)
+
         frameList = frames.get(category) or []
         frameNames = [_saveFrameNameFromCategory(frame).framecode for frame in frameList]
 
@@ -3056,7 +3086,7 @@ class CcpnNefReader(CcpnNefContent):
             return newName
 
     def rename_nef_molecular_system(self, project: Project,
-                                    dataBlock: StarIo.NmrDataBlock, contentDataBlock: StarIo.NmrDataBlock,
+                                    dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
                                     saveFrame: StarIo.NmrSaveFrame,
                                     itemName=None, newName=None):
         """Rename a chain in a nef_sequence
@@ -3068,7 +3098,7 @@ class CcpnNefReader(CcpnNefContent):
         if not itemName or newName == itemName:
             return
 
-        newName = self._getNewName(contentDataBlock, saveFrame, itemName, newName, 'nef_sequence_chain_code', 'Chain')
+        newName = self._getNewName(contentDataBlocks, saveFrame, itemName, newName, 'nef_sequence_chain_code', 'Chain')
 
         # NOTE:ED - check which are chains and which are nmr_chains
         _frameID = _saveFrameNameFromCategory(saveFrame)
@@ -3088,7 +3118,7 @@ class CcpnNefReader(CcpnNefContent):
         return newName
 
     def rename_ccpn_assignment(self, project: Project,
-                               dataBlock: StarIo.NmrDataBlock, contentDataBlock: StarIo.NmrDataBlock,
+                               dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
                                saveFrame: StarIo.NmrSaveFrame,
                                itemName=None, newName=None):
         """Rename an nmr_chain in a ccpn_assignment
@@ -3098,7 +3128,7 @@ class CcpnNefReader(CcpnNefContent):
         if not itemName or newName == itemName:
             return
 
-        newName = self._getNewName(contentDataBlock, saveFrame, itemName, newName, 'nmr_chain', 'NmrChain')
+        newName = self._getNewName(contentDataBlocks, saveFrame, itemName, newName, 'nmr_chain', 'NmrChain')
 
         # NOTE:ED - check which are chains and which are nmr_chains
         loopList = ('nmr_chain', 'nmr_residue', 'nmr_atom')
@@ -3113,7 +3143,7 @@ class CcpnNefReader(CcpnNefContent):
         return newName
 
     def rename_ccpn_note(self, project: Project,
-                         dataBlock: StarIo.NmrDataBlock, contentDataBlock: StarIo.NmrDataBlock,
+                         dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
                          saveFrame: StarIo.NmrSaveFrame,
                          itemName=None, newName=None):
         """Rename a ccpn_note in ccpn_notes
@@ -3123,7 +3153,7 @@ class CcpnNefReader(CcpnNefContent):
         if not itemName or newName == itemName:
             return
 
-        newName = self._getNewName(contentDataBlock, saveFrame, itemName, newName, 'ccpn_notes', 'Note')
+        newName = self._getNewName(contentDataBlocks, saveFrame, itemName, newName, 'ccpn_notes', 'Note')
 
         loopList = ('ccpn_note')
         replaceList = ('name')
@@ -3132,7 +3162,7 @@ class CcpnNefReader(CcpnNefContent):
 
         return newName
 
-    def _getNewListName(self, dataBlock: StarIo.NmrDataBlock, saveFrame, itemName, newName, contentItem, descriptor):
+    def _getNewListName(self, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...], saveFrame, itemName, newName, contentItem, descriptor):
 
         def incrementName(name):
             """Add '.1' to name or change suffix '.n' to '.(n+1) 
@@ -3149,17 +3179,12 @@ class CcpnNefReader(CcpnNefContent):
 
             return name + Pid.IDSEP + '1'
 
-        if dataBlock:
+        currentItems = set()
+        for dataBlock in contentDataBlocks:
             _contentFrame = dataBlock.get(saveFrame.name)
-            _content = getattr(_contentFrame, '_content', []) if _contentFrame else []
-        else:
-            _content = getattr(saveFrame, '_content', [])
-
-        # if not _content:
-        #     raise RuntimeError('_content not defined')
-
-        # itemName is the current item
-        currentItems = _content.get(contentItem) or []
+            _content = getattr(_contentFrame, '_content', {}) if _contentFrame else {}
+            # itemName is the current item
+            currentItems |= (_content.get(contentItem) or set())
 
         if newName:
             # check not in the current list
@@ -3173,7 +3198,7 @@ class CcpnNefReader(CcpnNefContent):
 
         return newName
 
-    def _getNewSerial(self, dataBlock: StarIo.NmrDataBlock, saveFrame, itemSerial, newSerial, contentItem, descriptor):
+    def _getNewSerial(self, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...], saveFrame, itemSerial, newSerial, contentItem, descriptor):
 
         def incrementSerial(serial):
             """Add '.1' to serial or change suffix '.n' to '.(n+1) 
@@ -3187,17 +3212,12 @@ class CcpnNefReader(CcpnNefContent):
                 pass
             return '1'
 
-        if dataBlock:
+        currentItems = set()
+        for dataBlock in contentDataBlocks:
             _contentFrame = dataBlock.get(saveFrame.name)
-            _content = getattr(_contentFrame, '_content', []) if _contentFrame else []
-        else:
-            _content = getattr(saveFrame, '_content', [])
-
-        # if not _content:
-        #     raise RuntimeError('_content not defined')
-
-        # itemSerial is the current item
-        currentItems = _content.get(contentItem) or []
+            _content = getattr(_contentFrame, '_content', {}) if _contentFrame else {}
+            # itemName is the current item
+            currentItems |= (_content.get(contentItem) or set())
 
         if newSerial:
             # check not in the current list
@@ -3212,7 +3232,7 @@ class CcpnNefReader(CcpnNefContent):
         return newSerial
 
     def rename_ccpn_list(self, project: Project,
-                         dataBlock: StarIo.NmrDataBlock, contentDataBlock: StarIo.NmrDataBlock,
+                         dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
                          saveFrame: StarIo.NmrSaveFrame,
                          itemName=None, newName=None, _lowerCaseName='none'):
         """Rename a ccpn_list in a ccpn_assignment
@@ -3224,7 +3244,7 @@ class CcpnNefReader(CcpnNefContent):
             return
 
         _upperCaseName = _lowerCaseName.capitalize()
-        newName = self._getNewListName(contentDataBlock, saveFrame, itemName, newName, 'ccpn_{}_list'.format(_lowerCaseName), '{}List'.format(_upperCaseName))
+        newName = self._getNewListName(contentDataBlocks, saveFrame, itemName, newName, 'ccpn_{}_list'.format(_lowerCaseName), '{}List'.format(_upperCaseName))
 
         try:
             # split name into spectrum.serial
@@ -3258,7 +3278,7 @@ class CcpnNefReader(CcpnNefContent):
         return newName
 
     def rename_ccpn_peak_cluster_list(self, project: Project,
-                                      dataBlock: StarIo.NmrDataBlock, contentDataBlock: StarIo.NmrDataBlock,
+                                      dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
                                       saveFrame: StarIo.NmrSaveFrame,
                                       itemName=None, newName=None):
         """Rename a ccpn_note in ccpn_notes
@@ -3268,7 +3288,7 @@ class CcpnNefReader(CcpnNefContent):
         if not itemName or newName == itemName:
             return
 
-        newName = self._getNewSerial(contentDataBlock, saveFrame, itemName, newName, 'ccpn_peak_cluster', 'PeakCluster')
+        newName = self._getNewSerial(contentDataBlocks, saveFrame, itemName, newName, 'ccpn_peak_cluster', 'PeakCluster')
 
         try:
             oldSerial = int(itemName)
@@ -3285,7 +3305,7 @@ class CcpnNefReader(CcpnNefContent):
         return newName
 
     def rename_ccpn_substance(self, project: Project,
-                              dataBlock: StarIo.NmrDataBlock, contentDataBlock: StarIo.NmrDataBlock,
+                              dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
                               saveFrame: StarIo.NmrSaveFrame,
                               itemName=None, newName=None):
         """Rename a ccpn_substance
@@ -3317,7 +3337,16 @@ class CcpnNefReader(CcpnNefContent):
 
         _frameID = _saveFrameNameFromCategory(saveFrame)
         framecode, frameName, subName, prefix, postfix, preSerial, postSerial, category = _frameID
-        frames = self._getSaveFramesInOrder(contentDataBlock)
+
+        frames = None
+        for contentBlock in contentDataBlocks:
+            framesBlock = self._getSaveFramesInOrder(contentBlock)
+            if not frames:
+                frames = framesBlock
+            else:
+                # merge the frames dict
+                frames = self._mergeSaveFramesInOrder(frames, framesBlock)
+
         frameCats = frames.get(category) or []
         frameList = [_saveFrameNameFromCategory(frame).framecode for frame in frameCats]
 
@@ -3392,7 +3421,7 @@ class CcpnNefReader(CcpnNefContent):
         return newName
 
     def rename_ccpn_peak_list(self, project: Project,
-                              dataBlock: StarIo.NmrDataBlock, contentDataBlock: StarIo.NmrDataBlock,
+                              dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
                               saveFrame: StarIo.NmrSaveFrame,
                               itemName=None, newName=None, _lowerCaseName='none'):
         """Rename a ccpn_list in a ccpn_assignment
@@ -3404,7 +3433,7 @@ class CcpnNefReader(CcpnNefContent):
             return
 
         _upperCaseName = _lowerCaseName.capitalize()
-        newName = self._getNewNameDataBlock(contentDataBlock, saveFrame, itemName, newName, 'ccpn_{}_list'.format(_lowerCaseName), '{}List'.format(_upperCaseName))
+        newName = self._getNewNameDataBlock(contentDataBlocks, saveFrame, itemName, newName, 'ccpn_{}_list'.format(_lowerCaseName), '{}List'.format(_upperCaseName))
 
         try:
             # split name into spectrum.serial
@@ -3456,6 +3485,8 @@ class CcpnNefReader(CcpnNefContent):
         self.searchReplaceList(project, dataBlock, True, None, (subName, oldSerial), (subName, newSerial), replace=True,
                                frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
+        # need to rename the key in dataBlock
+        self._renameDataBlock(dataBlock, saveFrame, newFrameCode)
         return newName
 
     renames['nef_chemical_shift_list'] = rename_saveframe
@@ -4377,15 +4408,17 @@ class CcpnNefReader(CcpnNefContent):
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, row['integral_list_serial']])
             integralID = '_'.join([_ID, listName])
 
-            integral = serial2creatorFunc[row['integral_list_serial']](parameters['serial'])
-            if integral is not None:
-                self.error('{} - Integral {} already exists'.format(_ID, integral), loop, (integral,))
-                _rowErrors.add(loop.data.index(row))
+            integralFunc = serial2creatorFunc.get(row['integral_list_serial'])
+            if integralFunc:
+                integral = integralFunc(parameters['serial'])
+                if integral is not None:
+                    self.error('{} - Integral {} already exists'.format(_ID, integral), loop, (integral,))
+                    _rowErrors.add(loop.data.index(row))
 
-                if integralID not in parentFrame._rowErrors:
-                    parentFrame._rowErrors[integralID] = OrderedSet([loop.data.index(row)])
-                else:
-                    parentFrame._rowErrors[integralID].add(loop.data.index(row))
+                    if integralID not in parentFrame._rowErrors:
+                        parentFrame._rowErrors[integralID] = OrderedSet([loop.data.index(row)])
+                    else:
+                        parentFrame._rowErrors[integralID].add(loop.data.index(row))
 
     verifiers['ccpn_integral'] = verify_ccpn_integral
 
@@ -4431,8 +4464,9 @@ class CcpnNefReader(CcpnNefContent):
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, row['multiplet_list_serial']])
             multipletID = '_'.join([_ID, listName])
 
-            try:
-                multiplet = serial2creatorFunc[row['multiplet_list_serial']](parameters['serial'])
+            multFunc = serial2creatorFunc.get(row['multiplet_list_serial'])
+            if multFunc:
+                multiplet = multFunc(parameters['serial'])
                 if multiplet is not None:
                     self.error('ccpn_multiplet - Multiplet {} already exists'.format(multiplet), loop, (multiplet,))
                     _rowErrors.add(loop.data.index(row))
@@ -4441,8 +4475,6 @@ class CcpnNefReader(CcpnNefContent):
                         parentFrame._rowErrors[multipletID] = OrderedSet([loop.data.index(row)])
                     else:
                         parentFrame._rowErrors[multipletID].add(loop.data.index(row))
-            except Exception as es:
-                print('>>>>>> verify_ccpn_multiplet {}'.format(es))
 
     verifiers['ccpn_multiplet'] = verify_ccpn_multiplet
 
@@ -4452,8 +4484,8 @@ class CcpnNefReader(CcpnNefContent):
         result = []
 
         # Get name map for per-dimension attributes
-        max = spectrum.dimensionCount + 1
-        serial2creatorFunc = dict((x.serial, x.newMultiplet) for x in spectrum.multipletLists)
+        # max = spectrum.dimensionCount + 1
+        # serial2creatorFunc = dict((x.serial, x.newMultiplet) for x in spectrum.multipletLists)
 
         # mapping = nef2CcpnMap[loop.name]
         # map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-01 19:47:12 +0100 (Wed, July 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-02 15:27:52 +0100 (Thu, July 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -85,6 +85,14 @@ TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
 ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
 COLOURALLCOLUMNS = False
 
+NEFFRAMEKEY_IMPORT = 'import'
+NEFFRAMEKEY_ENABLECHECKBOXES = 'enableCheckBoxes'
+NEFFRAMEKEY_ENABLERENAME = 'enableRename'
+NEFDICTFRAMEKEYS = {NEFFRAMEKEY_IMPORT          : (Nef.NefImporter, Project),
+                    NEFFRAMEKEY_ENABLECHECKBOXES: bool,
+                    NEFFRAMEKEY_ENABLERENAME    : bool}
+NEFDICTFRAMEKEYS_REQUIRED = (NEFFRAMEKEY_IMPORT,)
+
 
 class NefDictFrame(Frame):
     """
@@ -95,7 +103,7 @@ class NefDictFrame(Frame):
     _setBadSaveFrames = {}
     DEFAULTMARGINS = (8, 8, 8, 8)  # l, t, r, b
 
-    def __init__(self, parent=None, mainWindow=None, nefObject=None, enableCheckboxes=False,
+    def __init__(self, parent=None, mainWindow=None, nefObject=None, enableCheckboxes=False, enableRename=False,
                  showBorder=True, borderColour=None, _splitterMargins=DEFAULTMARGINS, **kwds):
         """Initialise the widget"""
         super().__init__(parent, setLayout=True, spacing=DEFAULTSPACING, **kwds)
@@ -118,6 +126,7 @@ class NefDictFrame(Frame):
         self.showBorder = showBorder
         self._borderColour = borderColour or QtGui.QColor(getColours()[BORDERNOFOCUS])
         self._enableCheckboxes = enableCheckboxes
+        self._enableRename = enableRename
 
         # set the nef object - nefLoader/nefDict
         self._initialiseNefLoader(nefObject, _ignoreError=True)
@@ -134,6 +143,9 @@ class NefDictFrame(Frame):
 
         # needs to be done this way otherwise _splitterMargins is 'empty' or clashes with frame stylesheet
         self.setContentsMargins(*_splitterMargins)
+
+        # define the list of dicts for comparing object names
+        self._contentCompareDataBlocks = ()
 
     def paintEvent(self, ev):
         """Paint the border to the screen
@@ -542,6 +554,8 @@ class NefDictFrame(Frame):
             if tableColourFunc is not None:
                 tableColourFunc(self, saveFrame, item)
 
+        self.frameOptionsFrame.setVisible(self._enableRename)
+
         self.logData.clear()
         pretty = PrintFormatter()
         self.logData.append(('CONTENTS DICT'))
@@ -566,8 +580,12 @@ class NefDictFrame(Frame):
             newName = lineEdit.get()
             try:
                 # call the correct rename function based on the item clicked
+
+                # TODO:ED make a new contentCompareDict that contains a merge of left and right windows
+                #       don't need to merge, just make a list of dicts to compare against :)
+
                 newName = func(self._nefReader, self.project,
-                               self._nefDict, self._contentCompareDataBlock or self._nefDict,
+                               self._nefDict, self._contentCompareDataBlocks,
                                saveFrame,
                                itemName=itemName, newName=newName if not autoRename else None)
             except Exception as es:
@@ -937,9 +955,11 @@ class ImportNefPopup(CcpnDialogMainWidget):
         self.mainWidget.getLayout().addWidget(self.paneSplitter, 0, 0)
 
         self._nefWindows = OD()
-        for obj, enableCheckboxes in self.nefObjects:
+        for obj, enableCheckboxes, enableRename in self.nefObjects:
             # add a new nefDictFrame for each of the objects in the list (project or nefImporter)
-            newWindow = NefDictFrame(self, mainWindow=self.mainWindow, nefObject=obj, grid=(0, 0), showBorder=True, enableCheckboxes=enableCheckboxes)
+            newWindow = NefDictFrame(self, mainWindow=self.mainWindow, nefObject=obj, grid=(0, 0), showBorder=True,
+                                     enableCheckboxes=enableCheckboxes,
+                                     enableRename=enableRename)
             self._nefWindows[obj] = newWindow
             self.paneSplitter.addWidget(newWindow)
 
@@ -951,10 +971,29 @@ class ImportNefPopup(CcpnDialogMainWidget):
 
     def setNefObjects(self, nefObjects):
         # create a list of nef dictionary objects here and add to splitter
-        self.nefObjects = tuple(obj for obj in nefObjects if isinstance(obj, tuple)
-                                and len(obj) == 2
-                                and isinstance(obj[0], (Nef.NefImporter, Project))
-                                and isinstance(obj[1], bool))
+        # self.nefObjects = tuple(obj for obj in nefObjects if isinstance(obj, tuple)
+        #                         and len(obj) == 3
+        #                         and isinstance(obj[0], (Nef.NefImporter, Project))
+        #                         and isinstance(obj[1], bool)
+        #                         and isinstance(obj[2], bool))
+        self.nefObjects = ()
+        if not isinstance(nefObjects, (tuple, list)):
+            raise TypeError('nefObjects {} must be a list/tuple'.format(nefObjects))
+        for checkObj in nefObjects:
+            if not isinstance(checkObj, dict):
+                raise TypeError('nefDictFrame object {} must be a dict'.format(checkObj))
+
+            for k, val in checkObj:
+                if k not in NEFDICTFRAMEKEYS.keys():
+                    raise TypeError('nefDictFrame object {} contains a bad key {}'.format(checkObj, k))
+                if not isinstance(val, (NEFDICTFRAMEKEYS[k])):
+                    raise TypeError('nefDictFrame key {} must be of type {}'.format(k, NEFDICTFRAMEKEYS[k]))
+            missingKeys = list([kk for kk in NEFDICTFRAMEKEYS_REQUIRED if kk not in checkObj.keys()])
+            if missingKeys:
+                raise TypeError('nefDictFrame missing keys {}'.format(repr(missingKeys)))
+
+            self.nefObjects.append(checkObj)
+
         if len(self.nefObjects) != len(nefObjects):
             getLogger().warning('nefObjects contains bad items {}'.format(nefObjects))
 
@@ -983,22 +1022,23 @@ class ImportNefPopup(CcpnDialogMainWidget):
             for itm in nefWindow.nefTreeView.traverseTree():
                 nefWindow._nefTreeClickedCallback(itm, 0)
                 nefWindow.nefTreeView.setCurrentItem(itm)
-                print('>>> TREECLICKED')
                 break
 
-        thisNefDict = None
+        # NOTE:ED - temporary function to create a contentCompare from the two nef windows
+        nefDictTuple = ()
         for obj, nefWindow in self._nefWindows.items():
-            if isinstance(obj, Project):
-                thisNefDict = nefWindow._nefDict
-
-        if thisNefDict:
+            nefDictTuple += (nefWindow._nefDict,)
+        if nefDictTuple:
             for obj, nefWindow in self._nefWindows.items():
-                nefWindow._contentCompareDataBlock = thisNefDict
+                nefWindow._contentCompareDataBlocks = nefDictTuple
 
     def exec_(self) -> int:
         # NOTE:ED - this will do for the moment
         self.resize(*self._size)
         return super(ImportNefPopup, self).exec_()
+
+    def _createContentCompare(self):
+        pass
 
 
 if __name__ == '__main__':
@@ -1146,8 +1186,13 @@ if __name__ == '__main__':
     # run the dialog
     dialog = ImportNefPopup(parent=ui.mainWindow, mainWindow=ui.mainWindow,
                             # nefObjects=(_loader,))
-                            nefObjects=((project, False),
-                                        (_loader2, True),))
+                            nefObjects=({NEFFRAMEKEY_IMPORT          : project,
+                                         NEFFRAMEKEY_ENABLECHECKBOXES: False,
+                                         NEFFRAMEKEY_ENABLERENAME    : False},
+                                        {NEFFRAMEKEY_IMPORT          : _loader2,
+                                         NEFFRAMEKEY_ENABLECHECKBOXES: True,
+                                         NEFFRAMEKEY_ENABLERENAME    : True})
+                            )
 
     dialog._initialiseProject(ui.mainWindow, application, project)
     dialog.fillPopup()
@@ -1156,7 +1201,6 @@ if __name__ == '__main__':
     dialog.exec_()
 
     import ccpn.util.nef.nef as Nef
-
 
     # NOTE:ED - by default pidList=None selects everything in the project
     # from ccpn.core.Chain import Chain

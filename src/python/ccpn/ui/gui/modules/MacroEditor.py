@@ -46,7 +46,7 @@ from ccpn.ui.gui.widgets.Action import Action
 import ntpath
 import tempfile
 from pathlib import Path
-
+from ccpn.util.Path import aPath
 
 _filenameLineEdit = '_filenameLineEdit'
 
@@ -101,7 +101,7 @@ class MacroEditor(CcpnModule):
                 self.filePath = self._tempFile.name
             else:
                 # within AnalysisV3
-                self._tempFile = tempfile.NamedTemporaryFile(prefix='macro_', dir=self.userMacroDirPath, suffix='.py')
+                self._tempFile = tempfile.NamedTemporaryFile(prefix='macro_', dir=aPath(self.userMacroDirPath), suffix='.py')
                 self.filePath = self._tempFile.name
 
            ### Gui settings ###

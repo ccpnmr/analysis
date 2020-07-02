@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-02 18:39:01 +0100 (Thu, July 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-02 18:48:13 +0100 (Thu, July 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -532,16 +532,23 @@ class NefDictFrame(Frame):
     # def handle_nef_chemical_shift_list(self, saveFrame, item):
     # def handle_nef_molecular_system(self, saveFrame, item):
     def handle_treeView_selection(self, item, prefix=None, mappingCode=None,
-                                  errorCode=None, tableColourFunc=None):
+                                  errorCode=None, tableColourFunc=None, _handleAutoRename=False):
         # check if the current saveFrame exists; i.e., category exists as row = [0]
         itemName = item.data(0, 0)
         saveFrame = item.data(1, 0)
 
-        cat = saveFrame.get('sf_category')
-        prefix = prefix or ''
+        # NOTE:ED - test autoRename
+        if _handleAutoRename:
+            mappingCode = mappingCode or ''
+            errorCode = errorCode or ''
+            mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
+            plural, singular = mapping
+            _auto = partial(self._autoRename, item=item, parentName=plural, lineEdit=None, saveFrame=saveFrame, autoRename=True)
+
+        # cat = saveFrame.get('sf_category')
+        # prefix = prefix or ''
         mappingCode = mappingCode or ''
         errorCode = errorCode or ''
-
         mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
 
         _content = getattr(saveFrame, '_content', None)
@@ -584,7 +591,7 @@ class NefDictFrame(Frame):
     def _rename(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False):
         """Handle clicking a rename button
         """
-        if not (lineEdit and item):
+        if not item:
             return
 
         itemName = item.data(0, 0)
@@ -595,7 +602,8 @@ class NefDictFrame(Frame):
         func = self._nefReader.renames.get(primaryHandler)
         if func is not None:
 
-            newName = lineEdit.get()
+            # take from lineEdit if exists, otherwise assume autorename (for the minute)
+            newName = lineEdit.get() if lineEdit else None
             try:
                 # call the correct rename function based on the item clicked
 

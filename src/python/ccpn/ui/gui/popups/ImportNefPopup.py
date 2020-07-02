@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-02 18:18:49 +0100 (Thu, July 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-02 18:39:01 +0100 (Thu, July 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -531,16 +531,18 @@ class NefDictFrame(Frame):
 
     # def handle_nef_chemical_shift_list(self, saveFrame, item):
     # def handle_nef_molecular_system(self, saveFrame, item):
-    def handle_treeView_selection(self, saveFrame, item, prefix=None, mappingCode=None,
+    def handle_treeView_selection(self, item, prefix=None, mappingCode=None,
                                   errorCode=None, tableColourFunc=None):
         # check if the current saveFrame exists; i.e., category exists as row = [0]
+        itemName = item.data(0, 0)
+        saveFrame = item.data(1, 0)
+
         cat = saveFrame.get('sf_category')
         prefix = prefix or ''
         mappingCode = mappingCode or ''
         errorCode = errorCode or ''
 
         mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
-        itemName = item.data(0, 0)
 
         _content = getattr(saveFrame, '_content', None)
         _errors = getattr(saveFrame, '_rowErrors', {})
@@ -869,7 +871,8 @@ class NefDictFrame(Frame):
                 if primaryHandler:
                     handler = self.handleSaveFrames.get(primaryHandler)
                     if handler is not None:
-                        handler(self, saveFrame, item)
+                        # handler(self, saveFrame, item)
+                        handler(self, item)
 
         # clicking the checkbox also comes here - above loop may set item._badName
         self._colourTreeView()

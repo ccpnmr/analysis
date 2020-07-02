@@ -271,7 +271,7 @@ class MacroEditor(CcpnModule):
                         ['Export', od([
                             ['text', 'Export'],
                             ['toolTip', 'Export code to PDF'],
-                            ['icon', Icon('icons/export')],
+                            ['icon', Icon('icons/pdf')],
                             ['callback', self.exportToPdf],
                             ['enabled', True]
                         ])],

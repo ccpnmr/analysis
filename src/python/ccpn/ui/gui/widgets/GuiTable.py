@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-12 16:00:40 +0100 (Fri, June 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-02 18:18:49 +0100 (Thu, July 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -822,7 +822,8 @@ GuiTable::item::selected {
                             col=itemSelection.column(),
                             rowItem=itemSelection,
                             checked=state)
-        self._checkBoxCallback(data)
+        if self._checkBoxCallback:
+            self._checkBoxCallback(data)
 
     def hideDefaultColumns(self):
         """If the table is empty then check visible headers against the last header hidden list
@@ -1557,9 +1558,12 @@ GuiTable::item::selected {
         if self.application and self.application.preferences:
             preferences = self.application.preferences
             workingPath = preferences.general.userWorkingPath
-        else:
+        elif self.project:
             preferences = None
             workingPath = self.project.path
+        else:
+            preferences = None
+            workingPath = '~'
 
         self.saveDialog = FileDialog(selectFile='ccpnTable.xlsx',  # default saving name
                                      fileMode=FileDialog.AnyFile,

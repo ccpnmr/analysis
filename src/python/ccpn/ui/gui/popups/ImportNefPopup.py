@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-02 15:27:52 +0100 (Thu, July 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-02 18:18:49 +0100 (Thu, July 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -85,12 +85,18 @@ TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
 ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
 COLOURALLCOLUMNS = False
 
-NEFFRAMEKEY_IMPORT = 'import'
+NEFFRAMEKEY_IMPORT = 'nefObject'
 NEFFRAMEKEY_ENABLECHECKBOXES = 'enableCheckBoxes'
 NEFFRAMEKEY_ENABLERENAME = 'enableRename'
-NEFDICTFRAMEKEYS = {NEFFRAMEKEY_IMPORT          : (Nef.NefImporter, Project),
-                    NEFFRAMEKEY_ENABLECHECKBOXES: bool,
-                    NEFFRAMEKEY_ENABLERENAME    : bool}
+NEFFRAMEKEY_ENABLEFILTERFRAME = 'enableFilterFrame'
+NEFFRAMEKEY_ENABLEMOUSEMENU = 'enableMouseMenu'
+
+NEFDICTFRAMEKEYS = {NEFFRAMEKEY_IMPORT           : (Nef.NefImporter, Project),
+                    NEFFRAMEKEY_ENABLECHECKBOXES : bool,
+                    NEFFRAMEKEY_ENABLERENAME     : bool,
+                    NEFFRAMEKEY_ENABLEFILTERFRAME: bool,
+                    NEFFRAMEKEY_ENABLEMOUSEMENU  : bool,
+                    }
 NEFDICTFRAMEKEYS_REQUIRED = (NEFFRAMEKEY_IMPORT,)
 
 
@@ -103,7 +109,8 @@ class NefDictFrame(Frame):
     _setBadSaveFrames = {}
     DEFAULTMARGINS = (8, 8, 8, 8)  # l, t, r, b
 
-    def __init__(self, parent=None, mainWindow=None, nefObject=None, enableCheckboxes=False, enableRename=False,
+    def __init__(self, parent=None, mainWindow=None,
+                 nefObject=None, enableCheckBoxes=False, enableRename=False, enableFilterFrame=False, enableMouseMenu=False,
                  showBorder=True, borderColour=None, _splitterMargins=DEFAULTMARGINS, **kwds):
         """Initialise the widget"""
         super().__init__(parent, setLayout=True, spacing=DEFAULTSPACING, **kwds)
@@ -125,8 +132,10 @@ class NefDictFrame(Frame):
         self._primaryProject = True
         self.showBorder = showBorder
         self._borderColour = borderColour or QtGui.QColor(getColours()[BORDERNOFOCUS])
-        self._enableCheckboxes = enableCheckboxes
+        self._enableCheckBoxes = enableCheckBoxes
         self._enableRename = enableRename
+        self._enableFilterFrame = enableFilterFrame
+        self._enableMouseMenu = enableMouseMenu
 
         # set the nef object - nefLoader/nefDict
         self._initialiseNefLoader(nefObject, _ignoreError=True)
@@ -206,6 +215,10 @@ class NefDictFrame(Frame):
     def _setWidgets(self):
         """Setup the unpopulated widgets for the frame
         """
+        self.headerFrame = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
+        self.headerLabel = Label(self.headerFrame, text='FRAMEFRAME', grid=(0, 0))
+
+        # add the pane for the treeview/tables
         self._paneSplitter = Splitter(self, setLayout=True, horizontal=True)
 
         # set the top frames
@@ -213,7 +226,7 @@ class NefDictFrame(Frame):
         self._infoFrame = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
 
         # must be added this way to fill the frame
-        self.getLayout().addWidget(self._paneSplitter, 0, 0)
+        self.getLayout().addWidget(self._paneSplitter, 1, 0)
         self._paneSplitter.addWidget(self._treeFrame)
         self._paneSplitter.addWidget(self._infoFrame)
         self._paneSplitter.setChildrenCollapsible(False)
@@ -232,7 +245,8 @@ class NefDictFrame(Frame):
         #                              grid=(1, 0), hAlign='l')
 
         self.nefTreeView = ImportTreeCheckBoxes(self._treeFrame, project=self.project, grid=(1, 0),
-                                                includeProject=True, enableCheckboxes=self._enableCheckboxes,
+                                                includeProject=True, enableCheckBoxes=self._enableCheckBoxes,
+                                                enableMouseMenu=self._enableMouseMenu,
                                                 multiSelect=True)
 
         # info frame (right frame)
@@ -240,11 +254,11 @@ class NefDictFrame(Frame):
         self._frameOptionsNested = Frame(self._infoFrame, setLayout=True, showBorder=False, grid=(1, 0))
         self.frameOptionsFrame = Frame(self._frameOptionsNested, setLayout=True, showBorder=False, grid=(1, 0))
         self.fileFrame = Frame(self._infoFrame, setLayout=True, showBorder=False, grid=(2, 0))
-        _frame = MoreLessFrame(self._infoFrame, name='Filter Log', showMore=False, grid=(3, 0), gridSpan=(1, 1))
+        self._filterLogFrame = MoreLessFrame(self._infoFrame, name='Filter Log', showMore=False, grid=(3, 0), gridSpan=(1, 1))
 
         _row = 0
         self.wordWrapData = CheckBoxCompoundWidget(
-                _frame.contentsFrame,
+                self._filterLogFrame.contentsFrame,
                 grid=(_row, 0), hAlign='left',
                 #minimumWidths=(colwidth, 0),
                 fixedWidths=(None, 30),
@@ -255,7 +269,7 @@ class NefDictFrame(Frame):
                 #self._toggleWordWrap,
                 )
         _row += 1
-        self.logData = TextEditor(_frame.contentsFrame, grid=(_row, 0), gridSpan=(1, 3))
+        self.logData = TextEditor(self._filterLogFrame.contentsFrame, grid=(_row, 0), gridSpan=(1, 3))
         self.logData.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.logData.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
 
@@ -273,6 +287,7 @@ class NefDictFrame(Frame):
         # set the subframe to be ignored and minimum to stop the widgets overlapping - remember this for other places
         self._frameOptionsNested.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
         self.frameOptionsFrame.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        self.headerFrame.getLayout().setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
 
         # options frame
         pass
@@ -548,7 +563,8 @@ class NefDictFrame(Frame):
                          partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame, autoRename=True))
             tipTexts = ('Rename', 'Automatically rename to the next available\n - dependent on saveframe type')
             self.buttonList = ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
-                                         grid=(row, 2), gridSpan=(1, 1), direction='v')
+                                         grid=(row, 2), gridSpan=(1, 1), direction='v',
+                                         setLastButtonFocus=False)
             row += 1
 
             if tableColourFunc is not None:
@@ -811,9 +827,8 @@ class NefDictFrame(Frame):
         #
 
         saveFrame = item.data(1, 0)
-        if saveFrame:
-            if hasattr(saveFrame, '_content'):
-
+        if saveFrame and hasattr(saveFrame, '_content'):
+            with self.blockWidgetSignals():
                 # add a table from the saveframe attributes
                 loop = StarIo.NmrLoop(name=saveFrame.name, columns=('attribute', 'value'))
                 for k, v in saveFrame.items():
@@ -858,6 +873,7 @@ class NefDictFrame(Frame):
 
         # clicking the checkbox also comes here - above loop may set item._badName
         self._colourTreeView()
+        self._filterLogFrame.setVisible(self._enableFilterFrame)
 
     def _addTableToFrame(self, _data, _name):
         """Add a new gui table into a moreLess frame to hold a nef loop
@@ -955,12 +971,16 @@ class ImportNefPopup(CcpnDialogMainWidget):
         self.mainWidget.getLayout().addWidget(self.paneSplitter, 0, 0)
 
         self._nefWindows = OD()
-        for obj, enableCheckboxes, enableRename in self.nefObjects:
+        for nefObj in self.nefObjects:
+            # for obj, enableCheckBoxes, enableRename in self.nefObjects:
+
             # add a new nefDictFrame for each of the objects in the list (project or nefImporter)
-            newWindow = NefDictFrame(self, mainWindow=self.mainWindow, nefObject=obj, grid=(0, 0), showBorder=True,
-                                     enableCheckboxes=enableCheckboxes,
-                                     enableRename=enableRename)
-            self._nefWindows[obj] = newWindow
+            newWindow = NefDictFrame(self, mainWindow=self.mainWindow, grid=(0, 0), showBorder=True,
+                                     # nefObject=obj,
+                                     # enableCheckBoxes=enableCheckBoxes,
+                                     # enableRename=enableRename,
+                                     **nefObj)
+            self._nefWindows[nefObj[NEFFRAMEKEY_IMPORT]] = newWindow
             self.paneSplitter.addWidget(newWindow)
 
     def _populate(self):
@@ -983,7 +1003,7 @@ class ImportNefPopup(CcpnDialogMainWidget):
             if not isinstance(checkObj, dict):
                 raise TypeError('nefDictFrame object {} must be a dict'.format(checkObj))
 
-            for k, val in checkObj:
+            for k, val in checkObj.items():
                 if k not in NEFDICTFRAMEKEYS.keys():
                     raise TypeError('nefDictFrame object {} contains a bad key {}'.format(checkObj, k))
                 if not isinstance(val, (NEFDICTFRAMEKEYS[k])):
@@ -992,7 +1012,7 @@ class ImportNefPopup(CcpnDialogMainWidget):
             if missingKeys:
                 raise TypeError('nefDictFrame missing keys {}'.format(repr(missingKeys)))
 
-            self.nefObjects.append(checkObj)
+            self.nefObjects += (checkObj,)
 
         if len(self.nefObjects) != len(nefObjects):
             getLogger().warning('nefObjects contains bad items {}'.format(nefObjects))
@@ -1186,12 +1206,14 @@ if __name__ == '__main__':
     # run the dialog
     dialog = ImportNefPopup(parent=ui.mainWindow, mainWindow=ui.mainWindow,
                             # nefObjects=(_loader,))
-                            nefObjects=({NEFFRAMEKEY_IMPORT          : project,
-                                         NEFFRAMEKEY_ENABLECHECKBOXES: False,
-                                         NEFFRAMEKEY_ENABLERENAME    : False},
-                                        {NEFFRAMEKEY_IMPORT          : _loader2,
-                                         NEFFRAMEKEY_ENABLECHECKBOXES: True,
-                                         NEFFRAMEKEY_ENABLERENAME    : True})
+                            nefObjects=({NEFFRAMEKEY_IMPORT: project,
+                                         },
+                                        {NEFFRAMEKEY_IMPORT           : _loader2,
+                                         NEFFRAMEKEY_ENABLECHECKBOXES : True,
+                                         NEFFRAMEKEY_ENABLERENAME     : True,
+                                         NEFFRAMEKEY_ENABLEFILTERFRAME: True,
+                                         NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
+                                         })
                             )
 
     dialog._initialiseProject(ui.mainWindow, application, project)

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-01 19:47:12 +0100 (Wed, July 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-02 18:18:49 +0100 (Thu, July 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,7 @@ from ccpn.util.nef import StarIo
 from ccpn.util.OrderedSet import OrderedSet
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpn.core.lib.CcpnNefCommon import _traverse, nef2CcpnMap, _isALoop
+from ccpn.ui.gui.widgets.Menu import Menu
 
 
 # TODO These should maybe be consolidated with the same constants in CcpnNefIo
@@ -106,7 +107,8 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         }
 
     def __init__(self, parent=None, project=None, maxSize=(250, 300),
-                 includeProject=False, enableCheckboxes=True, multiSelect=False,
+                 includeProject=False, enableCheckBoxes=True, multiSelect=False,
+                 enableMouseMenu=False,
                  **kwds):
         """Initialise the widget
         """
@@ -118,7 +120,10 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         self.projectItem = None
         self.project = project
         self.includeProject = includeProject
-        self._enableCheckboxes = enableCheckboxes
+        self._enableCheckBoxes = enableCheckBoxes
+        self._enableMouseMenu = enableMouseMenu
+        self._currentContextMenu = None
+
         self.multiSelect = multiSelect
         if self.multiSelect:
             self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
@@ -157,7 +162,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
             # add the project as the top of the tree - allows to un/select all
             self.projectItem = QtWidgets.QTreeWidgetItem(self.invisibleRootItem())
             self.projectItem.setText(0, self.project.name)
-            if self._enableCheckboxes:
+            if self._enableCheckBoxes:
                 self.projectItem.setFlags(self.projectItem.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
             else:
                 self.projectItem.setFlags(self.projectItem.flags() & ~(QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable))
@@ -172,22 +177,22 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
 
                 for obj in getattr(self.project, name):
                     child = QtWidgets.QTreeWidgetItem(item)
-                    if self._enableCheckboxes:
+                    if self._enableCheckBoxes:
                         child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
                     else:
                         child.setFlags(child.flags() & ~QtCore.Qt.ItemIsUserCheckable)
                     child.setData(1, 0, obj)
                     child.setText(0, obj.pid)
-                    if self._enableCheckboxes:
+                    if self._enableCheckBoxes:
                         child.setCheckState(0, QtCore.Qt.Unchecked)
 
                 item.setExpanded(False)
                 if name in self.lockedItems:
                     item.setDisabled(True)
-                    if self._enableCheckboxes:
+                    if self._enableCheckBoxes:
                         item.setCheckState(0, self.lockedItems[name])
                 else:
-                    if self._enableCheckboxes:
+                    if self._enableCheckBoxes:
                         item.setCheckState(0, QtCore.Qt.Checked)
 
     def _setFocusColour(self, focusColour=None, noFocusColour=None):
@@ -285,14 +290,14 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
     def selectObjects(self, pids):
         """Handle changing the state of checkboxes
         """
-        if self._enableCheckboxes:
+        if self._enableCheckBoxes:
             items = self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive)
             for item in items:
                 if item.text(0) in pids:
                     item.setCheckState(0, QtCore.Qt.Checked)
 
     def _clicked(self, *args):
-        if self._enableCheckboxes:
+        if self._enableCheckBoxes:
             for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
                 if item.text(0) in self.lockedItems:
                     item.setCheckState(0, self.lockedItems[item.text(0)])
@@ -300,7 +305,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
     def _uncheckAll(self, includeRoot=False):
         """Clear all selection
         """
-        if self._enableCheckboxes:
+        if self._enableCheckBoxes:
             for itemTree in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
                 for i in range(itemTree.childCount()):
                     itemTree.child(i).setCheckState(0, QtCore.Qt.Unchecked)
@@ -330,6 +335,22 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         root = root or self.invisibleRootItem()
         if root is not None:
             yield from recurse(root)
+
+    def mouseReleaseEvent(self, event):
+        """Re-implementation of the mouse press event so right click can be used to delete items from the
+        sidebar.
+        """
+        if event.button() == QtCore.Qt.RightButton and self._enableMouseMenu:
+            self.raiseContextMenu(event)
+            event.accept()
+        else:
+            super().mouseReleaseEvent(event)
+
+    def raiseContextMenu(self, ev):
+        """Handle raising  context menu for a treeview object
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
 
 
 class ExportTreeCheckBoxes(ProjectTreeCheckBoxes):
@@ -441,7 +462,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
             # add the project as the top of the tree - allows to un/select all
             self.projectItem = QtWidgets.QTreeWidgetItem(self.invisibleRootItem())
             self.projectItem.setText(0, self.project.name)
-            if self._enableCheckboxes:
+            if self._enableCheckBoxes:
                 self.projectItem.setFlags(self.projectItem.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
             else:
                 self.projectItem.setFlags(self.projectItem.flags() & ~(QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable))
@@ -452,7 +473,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
             if hasattr(self.project, name):  # just to be safe
                 item = QtWidgets.QTreeWidgetItem(self.headerItem)
                 item.setText(0, name)
-                if self._enableCheckboxes:
+                if self._enableCheckBoxes:
                     item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
                 else:
                     item.setFlags(item.flags() & ~(QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable))
@@ -468,10 +489,10 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                 item.setExpanded(False)
                 if name in self.lockedItems:
                     item.setDisabled(True)
-                    if self._enableCheckboxes:
+                    if self._enableCheckBoxes:
                         item.setCheckState(0, self.lockedItems[name])
                 else:
-                    if self._enableCheckboxes:
+                    if self._enableCheckBoxes:
                         item.setCheckState(0, QtCore.Qt.Checked)
 
     # NOTE:ED - define methods here to match CcpnNefIo
@@ -520,13 +541,13 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                     #           i.e. Chains = saveFrame._content['chain_code'] from nefToTreeViewMapping
                     for listItem in thisList:
                         child = QtWidgets.QTreeWidgetItem(found[0])
-                        if self._enableCheckboxes:
+                        if self._enableCheckBoxes:
                             child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
                         else:
                             child.setFlags(child.flags() & ~QtCore.Qt.ItemIsUserCheckable)
                         child.setData(1, 0, saveFrame)
                         child.setText(0, str(listItem))
-                        if self._enableCheckboxes:
+                        if self._enableCheckBoxes:
                             child.setCheckState(0, QtCore.Qt.Unchecked)
 
     def _contentLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag=None,
@@ -666,6 +687,59 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
     def getFirstChild(self):
         pass
+
+    def raiseContextMenu(self, event: QtGui.QMouseEvent):
+        """Creates and raises a context menu enabling items to be deleted from the sidebar.
+        """
+        menu = self._getContextMenu(event)
+        if menu:
+            menu.move(event.globalPos().x(), event.globalPos().y() + 10)
+            menu.exec()
+
+    def _getContextMenu(self, event):
+        """Build a menu for renaming tree items
+        """
+        contextMenu = Menu('', self, isFloatWidget=True)
+
+        _itemPressed = self.itemAt(event.pos())
+        if _itemPressed.childCount() != 0 and len(self.selectedItems()) == 1:
+            contextMenu.addItem("AutoRename All in Group", callback=partial(self._autoRenameAll, _itemPressed))
+            contextMenu.addItem("Autorename Checked in Group", callback=partial(self._autoRenameSelected, _itemPressed))
+            contextMenu.addSeparator()
+
+        contextMenu.addItem("Check Selected", callback=partial(self._checkSelected, True))
+        contextMenu.addItem("Uncheck Selected", callback=partial(self._checkSelected, False))
+
+        return contextMenu
+
+    def _autoRename(self, groupItems):
+        for child in groupItems:
+            pass
+
+    def _autoRenameAll(self, treeItem, *args):
+        """Tree item autorename all in subtree
+        """
+        children = [child for child in self.traverseTree(treeItem)]
+        self._autoRename(children)
+
+    def _autoRenameSelected(self, treeItem, *args):
+        """Tree item autorename selected in subtree
+        """
+        children = [child for child in self.traverseTree(treeItem) if child.checkState(0) == QtCore.Qt.Checked]
+        self._autoRename(children)
+
+    def _checkSelected(self, checked, *args):
+        """Tree item check/uncheck selected
+        """
+        for item in self.selectedItems():
+            item.setCheckState(0, QtCore.Qt.Checked if checked else QtCore.Qt.Unchecked)
+
+    # def setContextMenu(self, menu):
+    #     if isinstance(menu, Menu):
+    #         self._currentContextMenu = menu
+    #         return menu
+    #     else:
+    #         raise TypeError('not a correct menu type')
 
 
 class PrintTreeCheckBoxes(ProjectTreeCheckBoxes):

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-02 18:18:49 +0100 (Thu, July 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-03 18:50:46 +0100 (Fri, July 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,8 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import ActiveLabel, Label
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
+
+PIXMAPWIDTH = 18
 
 
 class MoreLessFrame(Frame):
@@ -56,12 +58,12 @@ class MoreLessFrame(Frame):
 
         row = 0
         self._openButton = ActiveLabel(self, mainWindow=self.mainWindow, grid=(row, 0))
-        self._openButton.setFixedSize(18, 18)
-        self._openButton.setPixmap(self._minusIcon.pixmap(18, 18))
+        self._openButton.setFixedSize(PIXMAPWIDTH, PIXMAPWIDTH)
+        self._openButton.setPixmap(self._minusIcon.pixmap(PIXMAPWIDTH, PIXMAPWIDTH))
         self._label = Label(self, text=name or '', grid=(row, 1))
         self._labelHeight = self._label.sizeHint().height()
         self._label.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Fixed)
-        self._label.setFixedHeight(self._labelHeight)
+        # self._label.setFixedHeight(self._labelHeight)
 
         row += 1
         self._contentsFrame = Frame(self, setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 2))
@@ -132,9 +134,9 @@ class MoreLessFrame(Frame):
         _size = self._label.sizeHint()
         h, w = _size.height(), _size.width() + self._openButton.sizeHint().width()
         offset = w
-        points = [QtCore.QPoint(0, 0),
-                  QtCore.QPoint(offset + 1, 0),
-                  QtCore.QPoint(offset + 1, 0),
+        points = [QtCore.QPoint(0, 1),
+                  QtCore.QPoint(offset + 2, 1),
+                  QtCore.QPoint(offset + 2, 1),
                   QtCore.QPoint(offset + h, h - 1),
                   QtCore.QPoint(offset + h + 1, h - 1),
                   QtCore.QPoint(rgn.width() + 1, h - 1), ]

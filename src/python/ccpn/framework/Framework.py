@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 15:59:25 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-03 18:50:46 +0100 (Fri, July 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1852,7 +1852,7 @@ class Framework(NotifierBase):
                 return
 
             with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s'):
-                self._loadNefFile(path=path, makeNewProject=False)
+                self._importNefFile(path=path, makeNewProject=False)
 
             # try:
             #     for path in paths:
@@ -1861,6 +1861,63 @@ class Framework(NotifierBase):
             #     getLogger().warning('Error Importing Nef File: %s' % str(es))
             #     if self._isInDebugMode:
             #         raise es
+
+    def _importNefFile(self, path: str, makeNewProject=True) -> Project:
+        """Load Project from NEF file at path, and do necessary setup"""
+
+        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
+        from ccpn.ui.gui.popups.ImportNefPopup import ImportNefPopup, NEFFRAMEKEY_ENABLERENAME, \
+            NEFFRAMEKEY_IMPORT, NEFFRAMEKEY_ENABLEMOUSEMENU, NEFDICTFRAMEKEYS, NEFFRAMEKEY_PATHNAME, \
+            NEFDICTFRAMEKEYS_REQUIRED, NEFFRAMEKEY_ENABLEFILTERFRAME, NEFFRAMEKEY_ENABLECHECKBOXES
+        from ccpn.util.nef import NefImporter as Nef
+        from ccpn.framework.PathsAndUrls import nefValidationPath
+
+        # dataBlock = self.nefReader.getNefData(path)
+
+        _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
+        _loader.loadFile(path)
+        _loader.loadValidateDictionary(nefValidationPath)
+
+        # verify popup here
+        selection = None
+
+        dialog = ImportNefPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                nefObjects=({NEFFRAMEKEY_IMPORT: self.project,
+                                             },
+                                            {NEFFRAMEKEY_IMPORT           : _loader,
+                                             NEFFRAMEKEY_ENABLECHECKBOXES : True,
+                                             NEFFRAMEKEY_ENABLERENAME     : True,
+                                             NEFFRAMEKEY_ENABLEFILTERFRAME: True,
+                                             NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
+                                             NEFFRAMEKEY_PATHNAME         : path,
+                                             })
+                                )
+        dialog.fillPopup()
+        dialog.setActiveNefWindow(1)
+        if dialog.exec_():
+
+            selection = dialog._saveFrameSelection
+            _nefReader = dialog.getActiveNefReader()
+
+            if makeNewProject:
+                if self.project is not None:
+                    self._closeProject()
+                self.project = self.newProject(_loader._nefDict.name)
+
+            self.project._wrappedData.shiftAveraging = False
+            # with suspendSideBarNotifications(project=self.project):
+
+            with undoBlock():
+                with notificationEchoBlocking():
+                    with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s'):
+                        # need datablock selector here, with subset selection dependent on datablock type
+
+                        _nefReader.importNewProject(self.project, _loader._nefDict, selection)
+
+            self.project._wrappedData.shiftAveraging = True
+
+            getLogger().info('==> Loaded NEF file: "%s"' % (path,))
+            return self.project
 
     def _exportNEF(self):
         """

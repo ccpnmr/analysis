@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-24 17:34:03 +0100 (Wed, June 24, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-03 18:50:46 +0100 (Fri, July 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -580,7 +580,15 @@ def resetSerial(apiObject, newSerial):
         return
 
     elif newSerial in downdict:
-        raise ValueError("Cannot reset serial to %s - value already in use" % newSerial)
+        # get the identifier of the v3 object
+        from ccpn.framework.Application import getApplication
+        getApp = getApplication()
+        v3obj = None
+        if getApp:
+            project = getApp.project
+            if project and apiObject in project._data2Obj:
+                v3obj = project._data2Obj[apiObject]
+        raise ValueError("Cannot reset serial to %s - value already in use (%s)" % (newSerial, v3obj or apiObject))
 
     else:
         maxSerial = serialDict[downlink]

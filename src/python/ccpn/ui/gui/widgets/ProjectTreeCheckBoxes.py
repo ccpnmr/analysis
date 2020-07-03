@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-02 18:18:49 +0100 (Thu, July 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-03 18:50:46 +0100 (Fri, July 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -61,6 +61,7 @@ CCPNTAG = 'ccpn'
 SKIPPREFIXES = 'skipPrefixes'
 EXPANDSELECTION = 'expandSelection'
 SPECTRA = 'spectra'
+RENAMEACTION = 'rename'
 
 
 class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
@@ -108,7 +109,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
 
     def __init__(self, parent=None, project=None, maxSize=(250, 300),
                  includeProject=False, enableCheckBoxes=True, multiSelect=False,
-                 enableMouseMenu=False,
+                 enableMouseMenu=False, pathName=None,
                  **kwds):
         """Initialise the widget
         """
@@ -122,6 +123,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         self.includeProject = includeProject
         self._enableCheckBoxes = enableCheckBoxes
         self._enableMouseMenu = enableMouseMenu
+        self._pathName = pathName
         self._currentContextMenu = None
 
         self.multiSelect = multiSelect
@@ -134,9 +136,26 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
 
         self.itemClicked.connect(self._clicked)
 
+        self._actionCallbacks = {}
+
         self._setFocusColour()
         self._backgroundColour = self.invisibleRootItem().background(0)
         self._foregroundColour = self.invisibleRootItem().foreground(0)
+
+    def setActionCallback(self, name, func=None):
+        """Add an action to the callback dict
+        """
+        if name:
+            if func:
+                self._actionCallbacks[name] = func
+            else:
+                if name in self._actionCallbacks:
+                    del self._actionCallbacks[name]
+
+    def clearActionCallbacks(self):
+        """Clear the action callback dict
+        """
+        self._actionCallback = {}
 
     def setBackgroundForRow(self, item, colour):
         """Set the background colour for all items in the row
@@ -461,7 +480,10 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         if self.includeProject:
             # add the project as the top of the tree - allows to un/select all
             self.projectItem = QtWidgets.QTreeWidgetItem(self.invisibleRootItem())
-            self.projectItem.setText(0, self.project.name)
+            if self._pathName:
+                self.projectItem.setText(0, self._pathName)
+            else:
+                self.projectItem.setText(0, self.project.name)
             if self._enableCheckBoxes:
                 self.projectItem.setFlags(self.projectItem.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
             else:
@@ -681,7 +703,9 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         """
         found = self.findItems(value, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive)
         if _parent:
-            found = [item for item in found if item.parent() == _parent]
+            found = [item for item in found
+                     if (isinstance(_parent, str) and item.parent().data(0, 0) == _parent) or
+                     (isinstance(_parent, QtWidgets.QTreeWidgetItem) and item.parent() == _parent)]
         if found and len(found) == 1:
             return found[0]
 
@@ -703,29 +727,53 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
         _itemPressed = self.itemAt(event.pos())
         if _itemPressed.childCount() != 0 and len(self.selectedItems()) == 1:
+            contextMenu.addItem("AutoRename All Conflicts in Group", callback=partial(self._autoRenameAllConflicts, _itemPressed), enabled=False)
+            contextMenu.addSeparator()
             contextMenu.addItem("AutoRename All in Group", callback=partial(self._autoRenameAll, _itemPressed))
             contextMenu.addItem("Autorename Checked in Group", callback=partial(self._autoRenameSelected, _itemPressed))
             contextMenu.addSeparator()
+        elif _itemPressed.childCount() == 0 and len(self.selectedItems()) == 1:
+            contextMenu.addItem("AutoRename", callback=partial(self._autoRenameSingle, _itemPressed), enabled=True)
+            contextMenu.addSeparator()
 
+        contextMenu.addItem("Check All Conflicts in Selection", callback=partial(self._checkSelected, True), enabled=False)
+        contextMenu.addItem("Uncheck All Conflicts in Selection", callback=partial(self._checkSelected, False), enabled=False)
+        contextMenu.addSeparator()
         contextMenu.addItem("Check Selected", callback=partial(self._checkSelected, True))
         contextMenu.addItem("Uncheck Selected", callback=partial(self._checkSelected, False))
 
         return contextMenu
 
     def _autoRename(self, groupItems):
-        for child in groupItems:
-            pass
+        """Call the rename action on the child nodes
+        """
+        if RENAMEACTION in self._actionCallbacks:
+            for childItem in groupItems:
+                name, saveFrame, treeParent = childItem
+                self._actionCallbacks[RENAMEACTION](name, saveFrame, treeParent)
+
+    def _autoRenameSingle(self, treeItem, *args):
+        """Tree item autorename all conflicts in subtree
+        """
+        children = [(child.data(0, 0), child.data(1, 0), child.parent().data(0, 0)) for child in (treeItem,)]
+        self._autoRename(children)
+
+    def _autoRenameAllConflicts(self, treeItem, *args):
+        """Tree item autorename all conflicts in subtree
+        """
+        children = [(child.data(0, 0), child.data(1, 0), child.parent().data(0, 0)) for child in self.traverseTree(treeItem)]
+        self._autoRename(children)
 
     def _autoRenameAll(self, treeItem, *args):
         """Tree item autorename all in subtree
         """
-        children = [child for child in self.traverseTree(treeItem)]
+        children = [(child.data(0, 0), child.data(1, 0), child.parent().data(0, 0)) for child in self.traverseTree(treeItem)]
         self._autoRename(children)
 
     def _autoRenameSelected(self, treeItem, *args):
         """Tree item autorename selected in subtree
         """
-        children = [child for child in self.traverseTree(treeItem) if child.checkState(0) == QtCore.Qt.Checked]
+        children = [(child.data(0, 0), child.data(1, 0), child.parent().data(0, 0)) for child in self.traverseTree(treeItem) if child.checkState(0) == QtCore.Qt.Checked]
         self._autoRename(children)
 
     def _checkSelected(self, checked, *args):

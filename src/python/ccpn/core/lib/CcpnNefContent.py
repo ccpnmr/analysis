@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-01 19:47:12 +0100 (Wed, July 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-03 18:50:46 +0100 (Fri, July 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -464,7 +464,9 @@ class CcpnNefContent:
 
         mapping = nef2CcpnMap[nefSequence]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-        for row in saveFrame[nefSequence].data:
+        _sequence = saveFrame.get(nefSequence)
+        data = _sequence.data if _sequence and hasattr(_sequence, 'data') else []
+        for row in data:
             results[chainCode].add(row['chain_code'])
             if row.get(compoundName):
                 results[compoundName].add(row.get(compoundName))

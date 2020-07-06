@@ -2567,6 +2567,13 @@ class GuiTableFrame(Frame):
         self.guiTable = GuiTable(self, *args, **kwargs)
         self.searchWidget = None
 
+def _getValueByHeader(row, header):
+    return row[header]
+
+def _setValueByHeader(row, header, value):
+    row = row.copy()
+    row[header] = value
+    return row
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Icon import Icon

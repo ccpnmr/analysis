@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 12:28:23 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 12:42:37 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -4368,7 +4368,6 @@ class CcpnNefReader(CcpnNefContent):
             parameters = _parametersFromLoopRow(row, map2)
 
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, parameters['serial']])
-            print('>>> load multipletList {}'.format(listName))
             if not self._checkImport(saveFrame, listName, checkID='_importMultiplets'):
                 continue
 
@@ -4501,7 +4500,6 @@ class CcpnNefReader(CcpnNefContent):
             parameters = _parametersFromLoopRow(row, map2)
 
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, row['multiplet_list_serial']])
-            print('>>> load multiplet {}'.format(listName))
             if not self._checkImport(saveFrame, listName, checkID='_importMultiplets'):
                 continue
 
@@ -4570,7 +4568,6 @@ class CcpnNefReader(CcpnNefContent):
             # mPeak = row['peak_pid']
 
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [pSpectrum, mList])
-            print('>>> load multipletPeaks {}'.format(listName))
             if not self._checkImport(saveFrame, listName, checkID='_importMultiplets'):
                 continue
 

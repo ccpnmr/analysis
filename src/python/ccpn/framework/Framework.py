@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-03 18:50:46 +0100 (Fri, July 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 12:03:25 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -76,7 +76,7 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import catchExceptions
+from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar
 from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, USERMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
 
 import faulthandler
@@ -1852,7 +1852,10 @@ class Framework(NotifierBase):
                 return
 
             with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s'):
-                self._importNefFile(path=path, makeNewProject=False)
+
+                with undoBlockWithoutSideBar():
+                    self._importNefFile(path=path, makeNewProject=False)
+                self.ui.mainWindow.sideBar.buildTree(self.project)
 
             # try:
             #     for path in paths:

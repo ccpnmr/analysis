@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 14:28:15 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 18:20:35 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -5320,7 +5320,10 @@ class CcpnNefReader(CcpnNefContent):
                 nmrChain = project.getNmrChain(coreConstants.defaultNmrChainCode)
             else:
                 nmrChain = creatorFunc(**parameters)
-            nmrChain.resetSerial(row['serial'])
+            try:
+                nmrChain.resetSerial(row['serial'])
+            except Exception as es:
+                pass
             nmrChains[parameters['shortName']] = nmrChain
 
         # # resume notifiers again
@@ -5369,7 +5372,10 @@ class CcpnNefReader(CcpnNefContent):
             # nmrChain = nmrChains[chainCode]
             nmrChain = project.fetchNmrChain(chainCode)
             nmrResidue = nmrChain.newNmrResidue(**parameters)
-            nmrResidue.resetSerial(row['serial'])
+            try:
+                nmrResidue.resetSerial(row['serial'])
+            except Exception as es:
+                pass
             # NB former call was BROKEN!
             # modelUtil.resetSerial(nmrResidue, row['serial'], 'nmrResidues')
             nmrResidues[(chainCode, parameters['sequenceCode'])] = nmrResidue
@@ -5388,7 +5394,10 @@ class CcpnNefReader(CcpnNefContent):
             sequenceCode = row['sequence_code']
             nmrResidue = nmrResidues[(chainCode, sequenceCode)]
             nmrAtom = nmrResidue.newNmrAtom(**parameters)
-            nmrAtom.resetSerial(row['serial'])
+            try:
+                nmrAtom.resetSerial(row['serial'])
+            except Exception as es:
+                pass
             # NB former call was BROKEN!
             # modelUtil.resetSerial(nmrAtom, row['serial'], 'nmrAtoms')
 
@@ -5455,6 +5464,33 @@ class CcpnNefReader(CcpnNefContent):
                     else:
                         saveFrame._rowErrors[itemID].add(loop.data.index(row))
 
+            sequenceCode = row['sequence_code']
+            if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
+                # this is a reserved name
+                serial = int(sequenceCode[1:])
+                obj = project._wrappedData.findFirstResonanceGroup(serial=serial)
+                if obj is not None:
+                    self.error('{} - NmrResidue sequenceCode @{} already exists'.format(_ID, serial), saveFrame, (None,))
+                    _nmrResidueErrors.add(loop.data.index(row))
+                    itemID = '_'.join([nmrResidueLoopName, chainCode])
+                    if itemID not in saveFrame._rowErrors:
+                        saveFrame._rowErrors[itemID] = OrderedSet([loop.data.index(row)])
+                    else:
+                        saveFrame._rowErrors[itemID].add(loop.data.index(row))
+
+                    _chainLoop = saveFrame[nmrChainLoopName]
+                    for _chainRow in _chainLoop.data:
+                        _parameters = _parametersFromLoopRow(_chainRow, map2)
+                        _name = _parameters['shortName']
+                        if _name == chainCode:
+                            _nmrChainErrors.add(_chainLoop.data.index(_chainRow))
+                            _nmrChainSerial.add(chainCode)
+                            itemID = '_'.join([nmrChainLoopName, chainCode])
+                            if itemID not in saveFrame._rowErrors:
+                                saveFrame._rowErrors[itemID] = OrderedSet([_chainLoop.data.index(_chainRow)])
+                            else:
+                                saveFrame._rowErrors[itemID].add(loop.data.index(row))
+
         # read nmr_atom loop
         mapping = nef2CcpnMap[nmrAtomLoopName]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
@@ -5475,6 +5511,17 @@ class CcpnNefReader(CcpnNefContent):
                         saveFrame._rowErrors[itemID] = OrderedSet([loop.data.index(row)])
                     else:
                         saveFrame._rowErrors[itemID].add(loop.data.index(row))
+
+            if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
+                # this is a reserved name
+                serial = int(sequenceCode[1:])
+                self.error('{} - NmrAtom sequenceCode @{} already exists'.format(_ID, serial), saveFrame, (None,))
+                _nmrAtomErrors.add(loop.data.index(row))
+                itemID = '_'.join([nmrAtomLoopName, chainCode])
+                if itemID not in saveFrame._rowErrors:
+                    saveFrame._rowErrors[itemID] = OrderedSet([loop.data.index(row)])
+                else:
+                    saveFrame._rowErrors[itemID].add(loop.data.index(row))
 
     verifiers['ccpn_assignment'] = verify_ccpn_assignment
     verifiers['nmr_chain'] = _noLoopVerify
@@ -5507,7 +5554,10 @@ class CcpnNefReader(CcpnNefContent):
                                                                      Constants.isoTimeFormat)
             serial = row.get('serial')
             if serial is not None:
-                obj.resetSerial(serial)
+                try:
+                    obj.resetSerial(serial)
+                except:
+                    pass
         #
         return result
 

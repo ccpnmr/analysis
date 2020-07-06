@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 17:05:03 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 18:20:34 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1422,20 +1422,23 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
         if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
             # this is a reserved name
             serial = int(sequenceCode[1:])
-            if nmrProject.findFirstResonanceGroup(serial=serial) is None:
+            obj = nmrProject.findFirstResonanceGroup(serial=serial)
+            if obj is None:
                 # The implied serial is free - we can set it
                 sequenceCode = None
             else:
                 # Name clashes with existing NmrResidue
-                tempSerial = nmrProject.findFirstResonanceGroup(serial=serial)  # ejb - error here
                 raise ValueError("Cannot create NmrResidue with reserved name %s" % sequenceCode)
-
+                # # NOTE:ED - renumber the current nmrResidue
+                # serial = obj.parent._serialDict['resonanceGroups'] + 1
+        else:
+            dd['sequenceCode'] = sequenceCode
     else:
         # Just create new ResonanceGroup with default-type name
         sequenceCode = None
 
     # Create ResonanceGroup
-    dd['sequenceCode'] = sequenceCode
+    # dd['sequenceCode'] = sequenceCode
     apiResonanceGroup = nmrProject.newResonanceGroup(**dd)
     result = self._project._data2Obj.get(apiResonanceGroup)
     if result is None:

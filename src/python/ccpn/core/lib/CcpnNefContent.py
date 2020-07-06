@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-03 18:50:46 +0100 (Fri, July 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 18:20:35 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -80,10 +80,12 @@ class CcpnNefContent:
         nmrChainLoopName = 'nmr_chain'
         nmrResidueLoopName = 'nmr_residue'
         nmrAtomLoopName = 'nmr_atom'
+        nmrSequenceCodeName = 'nmr_sequence_codes'
 
         nmrChains = OrderedSet()
         nmrResidues = OrderedSet()
         nmrAtoms = OrderedSet()
+        nmrSequenceCodes = OrderedSet()
 
         # read nmr_chain loop - add the details to nmrChain list
         mapping = nef2CcpnMap[nmrChainLoopName]
@@ -105,6 +107,10 @@ class CcpnNefContent:
             nmrResidues.add((chainCode, sequenceCode, residueName))
             tempResidueDict[(chainCode, sequenceCode)] = residueName
 
+            # NOTE:ED - keep a record of the serial/seqeunce code types
+            if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
+                nmrSequenceCodes.add(sequenceCode)
+
         # read nmr_residue loop - add the details to nmrChain/nmrResidue/nmrAtom lists
         tempResidueDict = {}
         mapping = nef2CcpnMap[nmrAtomLoopName]
@@ -116,9 +122,10 @@ class CcpnNefContent:
             name = row['name']
             nmrAtoms.add((chainCode, sequenceCode, tempResidueDict.get((chainCode, sequenceCode)), name))
 
-        self.storeContent(saveFrame, {nmrChainLoopName  : nmrChains,
-                                      nmrResidueLoopName: nmrResidues,
-                                      nmrAtomLoopName   : nmrAtoms})
+        self.storeContent(saveFrame, {nmrChainLoopName   : nmrChains,
+                                      nmrResidueLoopName : nmrResidues,
+                                      nmrAtomLoopName    : nmrAtoms,
+                                      nmrSequenceCodeName: nmrSequenceCodes})
 
     contents['ccpn_assignment'] = content_ccpn_assignment
     contents['nmr_chain'] = _noLoopContent

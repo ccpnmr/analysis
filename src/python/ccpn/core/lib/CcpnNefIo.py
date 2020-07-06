@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 11:47:16 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 12:28:23 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -5540,7 +5540,7 @@ class CcpnNefReader(CcpnNefContent):
             pid, data = row.values()
             obj = project.getByPid(pid)
             if obj is None:
-                getLogger().warning('Loading NEF additional data: unable to find object "%s"' % pid)
+                getLogger().debug2('Loading NEF additional data: unable to find object "%s"' % pid)
             else:
                 obj._ccpnInternalData = jsonIo.loads(data)
 
@@ -5556,7 +5556,7 @@ class CcpnNefReader(CcpnNefContent):
             pid, data = row.values()
             obj = project.getByPid(pid)
             if obj is None:
-                getLogger().warning('Loading NEF additional data: unable to find object "%s"' % pid)
+                getLogger().debug2('Loading NEF additional data: unable to find object "%s"' % pid)
             else:
                 data = obj._ccpnInternalData
                 if data:

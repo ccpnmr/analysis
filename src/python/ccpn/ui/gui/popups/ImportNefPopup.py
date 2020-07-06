@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 11:47:17 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 14:28:16 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -62,6 +62,7 @@ from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.framework.PathsAndUrls import nefValidationPath
 
 
 INVALIDTEXTROWSELECTCOLOUR = QtGui.QColor('crimson')
@@ -1092,6 +1093,7 @@ class NefDictFrame(Frame):
         """
         if not self._nefLoader:
             self._nefLoader = Nef.NefImporter(errorLogging=Nef.el.NEF_STANDARD, hidePrefix=True)
+
             if not self.project:
                 raise TypeError('Project is not defined')
             self._nefWriter = CcpnNefIo.CcpnNefWriter(self.project)
@@ -1104,6 +1106,7 @@ class NefDictFrame(Frame):
         self._nefLoader._attachClear(self._nefReader.clearSaveFrames)
         self._nefLoader._clearNef(self.project, self._nefDict)
         self._nefLoader._contentNef(self.project, self._nefDict, selection=None)
+        self._nefLoader.loadValidateDictionary(nefValidationPath)
         if not self._primaryProject:
             warnings, errors = self._nefLoader._verifyNef(self.project, self._nefDict, selection=None)
 
@@ -1115,6 +1118,7 @@ class NefDictFrame(Frame):
         self._populate()
 
     def getItemsToImport(self):
+        self._nefReader.setImportAll(False)
         treeItems = [item for item in self.nefTreeView.traverseTree() if item.checkState(0) == QtCore.Qt.Checked]
         selection = [item.data(1, 0) for item in treeItems] or [None]
 
@@ -1250,7 +1254,9 @@ class ImportNefPopup(CcpnDialogMainWidget):
         if isinstance(value, int) and 0 <= value < len(self._nefWindows):
             self._activeImportWindow = value
         else:
-            raise TypeError('Invalid window number, must be 0{}{}'.format('-' if len(self._nefWindows) > 1 else '', len(self._nefWindows) - 1))
+            ll = len(self._nefWindows)
+            raise TypeError('Invalid window number, must be 0{}{}'.format('-' if ll > 1 else '',
+                                                                          (ll - 1) if ll > 1 else ''))
 
     def getActiveNefReader(self):
         """Get teh current active nef reader for the dialog
@@ -1367,22 +1373,21 @@ if __name__ == '__main__':
     # TESTNEF = '/Users/ejb66/Desktop/Ccpn_v2_testNef_a1.nef'
     # TESTNEF2 = '/Users/ejb66/Desktop/Ccpn_v2_testNef_a1.nef'
 
-    # VALIDATEDICT = '/Users/ejb66/PycharmProjects/Git/NEF/specification/mmcif_nef.dic'
-    VALIDATEDICT = '/Users/ejb66/Desktop/mmcif_nef_v1_1.dic'
+    # VALIDATEDICT = '/Users/ejb66/PycharmProjects/Git/AnalysisV3/src/python/ccpn/util/nef/NEF/specification/mmcif_nef_v1_1.dic'
+    # VALIDATEDICT = '/Users/ejb66/Desktop/mmcif_nef_v1_1.dic'
     DEFAULTNAME = 'default'
 
     from ccpn.util.nef import NefImporter as Nef
 
-
     # load the file and the validate dict
     _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
     _loader.loadFile(TESTNEF)
-    _loader.loadValidateDictionary(VALIDATEDICT)
+    _loader.loadValidateDictionary(nefValidationPath)
 
     # load the file and the validate dict
     _loader2 = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
     _loader2.loadFile(TESTNEF2)
-    _loader2.loadValidateDictionary(VALIDATEDICT)
+    _loader2.loadValidateDictionary(nefValidationPath)
 
     # validate
     valid = _loader.isValid
@@ -1399,12 +1404,12 @@ if __name__ == '__main__':
             if val:
                 print('>>> {} : {}'.format(k, val))
 
-    # simple test print of saveframes
-    names = _loader.getSaveFrameNames(returnType=Nef.NEF_RETURNALL)
-    for name in names:
-        print(name)
-        saveFrame = _loader.getSaveFrame(name)
-        print(saveFrame)
+    # # simple test print of saveframes
+    # names = _loader.getSaveFrameNames(returnType=Nef.NEF_RETURNALL)
+    # for name in names:
+    #     print(name)
+    #     saveFrame = _loader.getSaveFrame(name)
+    #     print(saveFrame)
 
     # create a list of which saveframes to load, with a parameters dict for each
     loadDict = {'nef_molecular_system'     : {},
@@ -1432,19 +1437,8 @@ if __name__ == '__main__':
 
     with notificationEchoBlocking():
         with catchExceptions(application=application, errorStringTemplate='Error loading Nef file: %s'):
-            # need datablock selector here, with subset selection dependent on datablock type
-
+            nefReader.setImportAll(True)
             _loader._importNef(project, _loader._nefDict, selection=None)
-            # warnings, errors = _loader._verifyNef(project, _loader2._nefDict, selection=None)
-            # if not (warnings or errors):
-            #     _loader._importNef(project, _loader2._nefDict, selection=None)
-            # else:
-            #     # for msg in warnings or ('','',''):
-            #     #     print('  >>', msg)
-            #     for msg in errors or ('', '', ''):
-            #         print(msg[0])
-            #
-            # result = _loader._contentNef(project, _loader2._nefDict, selection=None)
 
     nefReader.testPrint(project, _loader._nefDict, selection=None)
     nefReader.testErrors(project, _loader._nefDict, selection=None)
@@ -1461,7 +1455,8 @@ if __name__ == '__main__':
                                          NEFFRAMEKEY_ENABLEFILTERFRAME: True,
                                          NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
                                          NEFFRAMEKEY_PATHNAME         : TESTNEF2,
-                                         })
+                                         }
+                                        )
                             )
 
     dialog._initialiseProject(ui.mainWindow, application, project)

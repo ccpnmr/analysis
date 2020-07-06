@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 12:42:37 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 14:28:15 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1843,9 +1843,7 @@ class CcpnNefReader(CcpnNefContent):
         self._saveFrameName = None
         self.warnings = []
         self.errors = []
-        self._importAll = False
-        self._importDict = {}
-
+        self.setImportAll(True)
         self.testing = testing
 
         # Map for resolving crosslinks in NEF file
@@ -1859,6 +1857,16 @@ class CcpnNefReader(CcpnNefContent):
         self.defaultNmrChain = None
         self.mainDataSetSerial = None
         self.defaultChemicalShiftList = None
+
+    def setImportAll(self, value):
+        """Set/clear the importAll status - used for importing subset of nef file
+        Must be done prior to any content/verify/import
+        """
+        if not isinstance(value, bool):
+            raise TypeError('{} must be a bool'.format(value))
+
+        self._importAll = value
+        self._importDict = {}
 
     def getNefData(self, path: str):
         """Get NEF data structure from file"""
@@ -3971,7 +3979,8 @@ class CcpnNefReader(CcpnNefContent):
                     for row in data
                     ]
             else:
-                transferData = []
+                # transferData = []
+                raise ValueError("nef_spectrum_dimension_transfer is missing or empty")
 
             spectrum = createSpectrum(project, spectrumName, spectrumParameters, dimensionData,
                                       transferData=transferData)

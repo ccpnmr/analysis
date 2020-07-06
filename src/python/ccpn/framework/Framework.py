@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 12:03:25 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 14:28:16 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1912,7 +1912,7 @@ class Framework(NotifierBase):
 
             with undoBlock():
                 with notificationEchoBlocking():
-                    with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s'):
+                    with catchExceptions(application=self, errorStringTemplate='Error importing Nef file: %s'):
                         # need datablock selector here, with subset selection dependent on datablock type
 
                         _nefReader.importNewProject(self.project, _loader._nefDict, selection)

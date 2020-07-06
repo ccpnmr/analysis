@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-03 18:50:46 +0100 (Fri, July 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 11:47:17 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -582,6 +582,7 @@ def resetSerial(apiObject, newSerial):
     elif newSerial in downdict:
         # get the identifier of the v3 object
         from ccpn.framework.Application import getApplication
+
         getApp = getApplication()
         v3obj = None
         if getApp:

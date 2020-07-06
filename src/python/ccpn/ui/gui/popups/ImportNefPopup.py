@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-03 18:50:46 +0100 (Fri, July 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 11:47:17 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERNEFPATH
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ImportTreeCheckBoxes, RENAMEACTION
+from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ImportTreeCheckBoxes, RENAMEACTION, BADITEMACTION
 from ccpn.ui.gui.popups.ExportDialog import ExportDialog
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -111,7 +111,7 @@ class NefDictFrame(Frame):
     handleSaveFrames = {}
     _setBadSaveFrames = {}
     applyCheckBoxes = {}
-    
+
     DEFAULTMARGINS = (8, 8, 8, 8)  # l, t, r, b
 
     def __init__(self, parent=None, mainWindow=None,
@@ -165,6 +165,9 @@ class NefDictFrame(Frame):
 
         # add the rename action to the treeview actions
         self.nefTreeView.setActionCallback(RENAMEACTION, self._autoRenameItem)
+
+        # add the rename action to the treeview actions
+        self.nefTreeView.setActionCallback(BADITEMACTION, self._checkBadItem)
 
     def paintEvent(self, ev):
         """Paint the border to the screen
@@ -368,11 +371,11 @@ class NefDictFrame(Frame):
                     # get the saveFrame associated with this item
                     itemName = childItem.data(0, 0)
                     saveFrame = childItem.data(1, 0)
-                    parentGroup = childItem.parent().data(0, 0)
+                    parentGroup = childItem.parent().data(0, 0) if childItem.parent() else repr(None)
 
                     # NOTE:ED - need a final check on this
                     _errorName = getattr(saveFrame, '_rowErrors', None) and saveFrame._rowErrors.get(saveFrame['sf_category'])
-                    if _errorName and childItem.data(0, 0) in _errorName:  # itemName
+                    if _errorName and itemName in _errorName:  # itemName
                         _sectionError = True
 
                     loops = self._nefReader._getLoops(self.project, saveFrame)
@@ -565,7 +568,7 @@ class NefDictFrame(Frame):
         return _bad
 
     def apply_checkBox_item(self, name=None, saveFrame=None, parentGroup=None, prefix=None, mappingCode=None,
-                           checkID='_importRows'):
+                            checkID='_importRows'):
         # check if the current saveFrame exists; i.e., category exists as row = [0]
         item = self.nefTreeView.findSection(name, parentGroup)
         if not item:
@@ -654,12 +657,18 @@ class NefDictFrame(Frame):
             return
 
         itemName = item.data(0, 0)
+        parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
         cat = saveFrame.get('sf_category')
 
         # find the primary handler class for the clicked item, .i.e. chains/peakLists etc.
-        primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(item.parent().data(0, 0)) or saveFrame.get('sf_category')
+        primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
         func = self._nefReader.renames.get(primaryHandler)
         if func is not None:
+
+            # NOTE:ED - remember tree checkbox selection
+            _checks = [[_itm.data(0, 0), _itm.data(1, 0), _itm.parent().data(0, 0) if _itm.parent() else repr(None)]
+                       for _itm in self.nefTreeView.traverseTree()
+                       if _itm.checkState(0) == QtCore.Qt.Checked]
 
             # take from lineEdit if exists, otherwise assume autorename (for the minute)
             newName = lineEdit.get() if lineEdit else None
@@ -681,7 +690,17 @@ class NefDictFrame(Frame):
                 self.nefTreeView._populateTreeView(self.project)
                 self._fillPopup(self._nefDict)
 
-                # _parent = self.nefTreeView._contentParent(self.project, saveFrame, cat)
+                for ii, (_name, _, _treeParent) in enumerate(_checks):
+                    if _treeParent == parentGroup and _name == itemName:
+                        _name = newName
+
+                    _parent = self.nefTreeView.findSection(_treeParent)
+                    if _parent:
+                        _checkItem = self.nefTreeView.findSection(_name, _parent)
+                        if _checkItem:
+                            _checkItem.setCheckState(0, QtCore.Qt.Checked)
+
+                # _parent = self.nefTreeView._contentParent(self.project, saveFrame, cat)\
                 _parent = self.nefTreeView.findSection(parentName)
                 if _parent:
                     newItem = self.nefTreeView.findSection(newName, _parent)
@@ -887,84 +906,86 @@ class NefDictFrame(Frame):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     applyCheckBoxes['nef_sequence'] = partial(apply_checkBox_item,
-                                               prefix='nef_sequence_',
-                                               mappingCode='nef_sequence_chain_code',
+                                              prefix='nef_sequence_',
+                                              mappingCode='nef_sequence_chain_code',
                                               )
 
     applyCheckBoxes['nef_chemical_shift_list'] = partial(apply_checkBox_item,
-                                                          prefix='nef_chemical_shift_',
-                                                          mappingCode='nef_chemical_shift_list',
-                                                          )
+                                                         prefix='nef_chemical_shift_',
+                                                         mappingCode='nef_chemical_shift_list',
+                                                         )
 
     applyCheckBoxes['nef_distance_restraint_list'] = partial(apply_checkBox_item,
-                                                              prefix='nef_distance_restraint_',
-                                                              mappingCode='nef_distance_restraint_list',
-                                                              )
+                                                             prefix='nef_distance_restraint_',
+                                                             mappingCode='nef_distance_restraint_list',
+                                                             )
 
     applyCheckBoxes['nef_dihedral_restraint_list'] = partial(apply_checkBox_item,
-                                                              prefix='nef_dihedral_restraint_',
-                                                              mappingCode='nef_dihedral_restraint_list',
-                                                              )
+                                                             prefix='nef_dihedral_restraint_',
+                                                             mappingCode='nef_dihedral_restraint_list',
+                                                             )
 
     applyCheckBoxes['nef_rdc_restraint_list'] = partial(apply_checkBox_item,
-                                                         prefix='nef_rdc_restraint_',
-                                                         mappingCode='nef_rdc_restraint_list',
-                                                         )
+                                                        prefix='nef_rdc_restraint_',
+                                                        mappingCode='nef_rdc_restraint_list',
+                                                        )
 
     applyCheckBoxes['ccpn_restraint_list'] = partial(apply_checkBox_item,
-                                                      prefix='ccpn_restraint_',
-                                                      mappingCode='ccpn_restraint_list',
-                                                      )
-
-    applyCheckBoxes['ccpn_sample'] = partial(apply_checkBox_item,
-                                              prefix='ccpn_sample_component_',
-                                              mappingCode='ccpn_sample',
-                                              )
-
-    applyCheckBoxes['ccpn_complex'] = partial(apply_checkBox_item,
-                                               prefix='ccpn_complex_chain_',
-                                               mappingCode='ccpn_complex',
-                                               )
-
-    applyCheckBoxes['ccpn_spectrum_group'] = partial(apply_checkBox_item,
-                                                      prefix='ccpn_group_spectrum_',
-                                                      mappingCode='ccpn_spectrum_group',
-                                                      )
-
-    applyCheckBoxes['ccpn_note'] = partial(apply_checkBox_item,
-                                            prefix='ccpn_note_',
-                                            mappingCode='ccpn_notes',
-                                            )
-
-    applyCheckBoxes['ccpn_peak_list'] = partial(apply_checkBox_item,
-                                                 prefix='nef_peak_',
-                                                 mappingCode='nef_peak',
-                                                 )
-
-    applyCheckBoxes['ccpn_integral_list'] = partial(apply_checkBox_item,
-                                                     prefix='ccpn_integral_',
-                                                     mappingCode='ccpn_integral_list',
+                                                     prefix='ccpn_restraint_',
+                                                     mappingCode='ccpn_restraint_list',
                                                      )
 
+    applyCheckBoxes['ccpn_sample'] = partial(apply_checkBox_item,
+                                             prefix='ccpn_sample_component_',
+                                             mappingCode='ccpn_sample',
+                                             )
+
+    applyCheckBoxes['ccpn_complex'] = partial(apply_checkBox_item,
+                                              prefix='ccpn_complex_chain_',
+                                              mappingCode='ccpn_complex',
+                                              )
+
+    applyCheckBoxes['ccpn_spectrum_group'] = partial(apply_checkBox_item,
+                                                     prefix='ccpn_group_spectrum_',
+                                                     mappingCode='ccpn_spectrum_group',
+                                                     )
+
+    applyCheckBoxes['ccpn_note'] = partial(apply_checkBox_item,
+                                           prefix='ccpn_note_',
+                                           mappingCode='ccpn_notes',
+                                           )
+
+    applyCheckBoxes['ccpn_peak_list'] = partial(apply_checkBox_item,
+                                                prefix='nef_peak_',
+                                                mappingCode='nef_peak',
+                                                )
+
+    applyCheckBoxes['ccpn_integral_list'] = partial(apply_checkBox_item,
+                                                    prefix='ccpn_integral_',
+                                                    mappingCode='ccpn_integral_list',
+                                                    checkID='_importIntegrals',
+                                                    )
+
     applyCheckBoxes['ccpn_multiplet_list'] = partial(apply_checkBox_item,
-                                                      prefix='ccpn_multiplet_',
-                                                      mappingCode='ccpn_multiplet_list',
-                                                      )
+                                                     prefix='ccpn_multiplet_',
+                                                     mappingCode='ccpn_multiplet_list',
+                                                     checkID='_importMultiplets',
+                                                     )
 
     applyCheckBoxes['ccpn_peak_cluster_list'] = partial(apply_checkBox_item,
-                                                         prefix='ccpn_peak_cluster_',
-                                                         mappingCode='ccpn_peak_cluster',
-                                                         )
+                                                        prefix='ccpn_peak_cluster_',
+                                                        mappingCode='ccpn_peak_cluster',
+                                                        )
 
     applyCheckBoxes['nmr_chain'] = partial(apply_checkBox_item,
-                                            prefix='nmr_chain_',
-                                            mappingCode='nmr_chain',
-                                            )
+                                           prefix='nmr_chain_',
+                                           mappingCode='nmr_chain',
+                                           )
 
     applyCheckBoxes['ccpn_substance'] = partial(apply_checkBox_item,
-                                                 prefix='ccpn_substance_synonym_',
-                                                 mappingCode='ccpn_substance',
-                                                 )
+                                                prefix='ccpn_substance_synonym_',
+                                                mappingCode='ccpn_substance',
+                                                )
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -978,7 +999,19 @@ class NefDictFrame(Frame):
             handler = self.handleSaveFrames.get(primaryHandler)
             if handler is not None:
                 # handler(self, saveFrame, item)
-                handler(self, name=name, saveFrame=saveFrame, parentGroup=parentGroup, _handleAutoRename=True)         #, item)
+                handler(self, name=name, saveFrame=saveFrame, parentGroup=parentGroup, _handleAutoRename=True)  #, item)
+
+    def _checkBadItem(self, name, saveFrame, parentGroup):
+        if not saveFrame:
+            return
+
+        mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
+        primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
+        if primaryHandler:
+            handler = self._setBadSaveFrames.get(primaryHandler)
+            if handler is not None:
+                # handler(self, saveFrame, item)
+                return handler(self, name=name, saveFrame=saveFrame, parentGroup=parentGroup, )  #, item)
 
     def _nefTreeClickedCallback(self, item, column=0):
         """Handle clicking on an item in the nef tree
@@ -993,7 +1026,7 @@ class NefDictFrame(Frame):
         saveFrame = item.data(1, 0)
         if saveFrame and hasattr(saveFrame, '_content'):
             with self.blockWidgetSignals():
-                parentGroup = item.parent().data(0, 0)
+                parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
 
                 # add a table from the saveframe attributes
                 loop = StarIo.NmrLoop(name=saveFrame.name, columns=('attribute', 'value'))
@@ -1090,7 +1123,7 @@ class NefDictFrame(Frame):
 
             itemName = item.data(0, 0)
             saveFrame = item.data(1, 0)
-            parentGroup = item.parent().data(0, 0)
+            parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
 
             # mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
             handlerMapping = self.nefTreeView.nefProjectToHandlerMapping
@@ -1217,7 +1250,7 @@ class ImportNefPopup(CcpnDialogMainWidget):
         if isinstance(value, int) and 0 <= value < len(self._nefWindows):
             self._activeImportWindow = value
         else:
-            raise TypeError('Invalid window number, must be 0{}{}'.format('-' if len(self._nefWindows) > 1 else '', len(self._nefWindows)-1))
+            raise TypeError('Invalid window number, must be 0{}{}'.format('-' if len(self._nefWindows) > 1 else '', len(self._nefWindows) - 1))
 
     def getActiveNefReader(self):
         """Get teh current active nef reader for the dialog
@@ -1247,9 +1280,10 @@ class ImportNefPopup(CcpnDialogMainWidget):
             nefWindow._fillPopup(obj)
 
             for itm in nefWindow.nefTreeView.traverseTree():
-                nefWindow._nefTreeClickedCallback(itm, 0)
-                nefWindow.nefTreeView.setCurrentItem(itm)
-                break
+                if itm.data(0, 0) not in nefWindow.nefTreeView.nefProjectToSaveFramesMapping:
+                    nefWindow._nefTreeClickedCallback(itm, 0)
+                    nefWindow.nefTreeView.setCurrentItem(itm)
+                    break
 
         # NOTE:ED - temporary function to create a contentCompare from the two nef windows
         nefDictTuple = ()

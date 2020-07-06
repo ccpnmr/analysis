@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-03 18:50:46 +0100 (Fri, July 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 11:47:16 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2492,8 +2492,11 @@ class CcpnNefReader(CcpnNefContent):
                         dd = []
                         for name in addLoopAttribs:
                             dd.append(saveFrame.get(name))
+
+                        # if loop and hasattr(loop, 'data'):
                         verify(self, project, loop, saveFrame, *dd, **kwds)
                     else:
+                        # if loop and hasattr(loop, 'data'):
                         verify(self, project, loop, saveFrame, **kwds)
 
     def _noLoopVerify(self, project: Project, loop: StarIo.NmrLoop, *arg, **kwds):
@@ -2595,7 +2598,17 @@ class CcpnNefReader(CcpnNefContent):
 
     def _checkImport(self, saveFrame, checkItem, checkID='_importRows'):
         if not self._importAll:
-            _importList = self._importDict.get(saveFrame.name)
+
+            # ejb - need to remove the rogue `n` at the beginning of the name if it exists
+            #       as it is passed into the namespace and gets added iteratively every save
+            #       next three lines remove all occurrences of `n` from name
+            import re
+
+            name = saveFrame.name
+            regex = u'\`\d*`+?'
+            name = re.sub(regex, '', name)  # substitute with ''
+
+            _importList = self._importDict.get(name)  # need to remove any trailing `<n>`
             if _importList:
                 _importRows = _importList.get(checkID) or []
                 if checkItem not in _importRows:
@@ -3426,9 +3439,7 @@ class CcpnNefReader(CcpnNefContent):
                                    loopSearchList=loopList, rowSearchList=replaceList)
 
             # remove the old saveFrame in the dataBlock and replace with the new
-            # NOTE:ED - may need to check dict ordering here
-            del dataBlock[oldFramecode]
-            dataBlock[newSaveFrameName] = saveFrame
+            self._renameDataBlock(dataBlock, saveFrame, newSaveFrameName)
 
             return Pid.IDSEP.join([name, newLabelling])
 
@@ -3460,7 +3471,8 @@ class CcpnNefReader(CcpnNefContent):
             return
 
         _upperCaseName = _lowerCaseName.capitalize()
-        newName = self._getNewNameDataBlock(contentDataBlocks, saveFrame, itemName, newName, 'ccpn_{}_list'.format(_lowerCaseName), '{}List'.format(_upperCaseName))
+        newName = self._getNewNameDataBlock(contentDataBlocks, saveFrame, itemName, newName, 'ccpn_{}_list'.format(_lowerCaseName),
+                                            '{}List'.format(_upperCaseName))
 
         try:
             # split name into spectrum.serial
@@ -3675,8 +3687,11 @@ class CcpnNefReader(CcpnNefContent):
                     # NBNB HACK: the restrain loop reader needs an itemLength.
                     # There are no other loops currently, but if there ever is they will not need this
                     itemLength = saveFrame.get('restraint_item_length')
+
+                    # if loop and hasattr(loop, 'data'):
                     importer(self, result, loop, saveFrame, itemLength)
                 else:
+                    # if loop and hasattr(loop, 'data'):
                     importer(self, result, loop, saveFrame)
         #
         return result
@@ -4256,6 +4271,12 @@ class CcpnNefReader(CcpnNefContent):
         creatorFunc = spectrum.newPeakList
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+
+            # NOTE:ED - adding flags to restrict importing to the selection
+            serial = parameters.get('serial')
+            if not self._checkImport(saveFrame, serial):
+                continue
+
             peakList = creatorFunc(**parameters)
             # peakList.resetSerial(row['serial'])
             # NB former call was BROKEN!
@@ -4298,6 +4319,11 @@ class CcpnNefReader(CcpnNefContent):
         creatorFunc = spectrum.newIntegralList
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, parameters['serial']])
+            if not self._checkImport(saveFrame, listName, checkID='_importIntegrals'):
+                continue
+
             integralList = creatorFunc(**parameters)
             # integralList.resetSerial(row['serial'])
             # NB former call was BROKEN!
@@ -4340,6 +4366,12 @@ class CcpnNefReader(CcpnNefContent):
         creatorFunc = spectrum.newMultipletList
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, parameters['serial']])
+            print('>>> load multipletList {}'.format(listName))
+            if not self._checkImport(saveFrame, listName, checkID='_importMultiplets'):
+                continue
+
             multipletList = creatorFunc(**parameters)
             # multipletList.resetSerial(row['serial'])
             # NB former call was BROKEN!
@@ -4391,6 +4423,11 @@ class CcpnNefReader(CcpnNefContent):
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, row['integral_list_serial']])
+            if not self._checkImport(saveFrame, listName, checkID='_importIntegrals'):
+                continue
+
             integral = serial2creatorFunc[row['integral_list_serial']](**parameters)
 
             # integral.slopes = tuple(row.get(x) for x in multipleAttributes['slopes'])
@@ -4462,6 +4499,12 @@ class CcpnNefReader(CcpnNefContent):
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, row['multiplet_list_serial']])
+            print('>>> load multiplet {}'.format(listName))
+            if not self._checkImport(saveFrame, listName, checkID='_importMultiplets'):
+                continue
+
             multiplet = serial2creatorFunc[row['multiplet_list_serial']]()  #**parameters)
 
             if row['slopes']:
@@ -4526,6 +4569,11 @@ class CcpnNefReader(CcpnNefContent):
             mPeak = Pid.IDSEP.join(('' if x is None else str(x)) for x in ['PK:' + pSpectrum, pList, pSerial])
             # mPeak = row['peak_pid']
 
+            listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [pSpectrum, mList])
+            print('>>> load multipletPeaks {}'.format(listName))
+            if not self._checkImport(saveFrame, listName, checkID='_importMultiplets'):
+                continue
+
             mlList = [ml for ml in spectrum.multipletLists if ml.serial == mList]
             mlts = [mt for ml in mlList for mt in ml.multiplets if mt.serial == mSerial]
             peak = spectrum.project.getByPid(mPeak)
@@ -4569,6 +4617,12 @@ class CcpnNefReader(CcpnNefContent):
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+
+            # NOTE:ED - adding flags to restrict importing to the selection
+            serial = parameters.get('serial')
+            if not self._checkImport(saveFrame, str(serial)):
+                continue
+
             obj = creatorFunc(**parameters)
 
             # load time stamps and serial = must bypass the API, as they are frozen
@@ -4581,14 +4635,19 @@ class CcpnNefReader(CcpnNefContent):
         loop = saveFrame[loopName]
 
         for row in loop.data:
-            pSerial = row['peak_cluster_serial']
+            pClSerial = row['peak_cluster_serial']
             pSpectrum = row['peak_spectrum']
             pList = row['peak_list_serial']
             pSerial = row['peak_serial']
+
+            # NOTE:ED - adding flags to restrict importing to the selection
+            if not self._checkImport(saveFrame, str(pClSerial)):
+                continue
+
             pPeak = Pid.IDSEP.join(('' if x is None else str(x)) for x in ['PK:' + pSpectrum, pList, pSerial])
             # pPeak = row['peak_pid']
 
-            pcs = [pc for pc in project.peakClusters if pc.serial == pSerial]
+            pcs = [pc for pc in project.peakClusters if pc.serial == pClSerial]
             peak = project.getByPid(pPeak)
             if pcs and peak:
                 pcs[0].addPeaks(peak)
@@ -4657,7 +4716,8 @@ class CcpnNefReader(CcpnNefContent):
     verifiers['ccpn_peak_cluster_peaks'] = verify_ccpn_peak_cluster_peaks
 
     # def load_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop) -> List[Peak]:
-    def load_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame, peakListId=None) -> List[Peak]:  # NOTE:ED - new calling parameter
+    def load_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame, peakListId=None) -> List[
+        Peak]:  # NOTE:ED - new calling parameter
         """Serves to load nef_peak loop"""
 
         result = []
@@ -5236,8 +5296,8 @@ class CcpnNefReader(CcpnNefContent):
         nmrChains = {}
         nmrResidues = {}
 
-        # ejb - stop notifiers from generating spurious items in the sidebar
-        project.blankNotification()
+        # # ejb - stop notifiers from generating spurious items in the sidebar
+        # project.blankNotification()
 
         # read nmr_chain loop
         mapping = nef2CcpnMap[nmrChainLoopName]
@@ -5245,6 +5305,11 @@ class CcpnNefReader(CcpnNefContent):
         creatorFunc = project.newNmrChain
         for row in saveFrame[nmrChainLoopName].data:
             parameters = _parametersFromLoopRow(row, map2)
+
+            # NOTE:ED - adding flags to restrict importing to the selection
+            if not self._checkImport(saveFrame, parameters.get('shortName')):
+                continue
+
             if parameters['shortName'] == coreConstants.defaultNmrChainCode:
                 nmrChain = project.getNmrChain(coreConstants.defaultNmrChainCode)
             else:
@@ -5252,8 +5317,8 @@ class CcpnNefReader(CcpnNefContent):
             nmrChain.resetSerial(row['serial'])
             nmrChains[parameters['shortName']] = nmrChain
 
-        # resume notifiers again
-        project.unblankNotification()
+        # # resume notifiers again
+        # project.unblankNotification()
 
         # read nmr_residue loop
         mapping = nef2CcpnMap[nmrResidueLoopName]
@@ -5290,6 +5355,11 @@ class CcpnNefReader(CcpnNefContent):
             parameters['residueType'] = row.get('residue_name')
             # NB chainCode None is not possible here (for ccpn data)
             chainCode = row['chain_code']
+
+            # NOTE:ED - adding flags to restrict importing to the selection
+            if not self._checkImport(saveFrame, chainCode):
+                continue
+
             # nmrChain = nmrChains[chainCode]
             nmrChain = project.fetchNmrChain(chainCode)
             nmrResidue = nmrChain.newNmrResidue(**parameters)
@@ -5304,6 +5374,11 @@ class CcpnNefReader(CcpnNefContent):
         for row in saveFrame[nmrAtomLoopName].data:
             parameters = _parametersFromLoopRow(row, map2)
             chainCode = row['chain_code']
+
+            # NOTE:ED - adding flags to restrict importing to the selection
+            if not self._checkImport(saveFrame, chainCode):
+                continue
+
             sequenceCode = row['sequence_code']
             nmrResidue = nmrResidues[(chainCode, sequenceCode)]
             nmrAtom = nmrResidue.newNmrAtom(**parameters)

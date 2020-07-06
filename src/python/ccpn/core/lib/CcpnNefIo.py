@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 18:20:35 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 19:58:15 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3023,6 +3023,22 @@ class CcpnNefReader(CcpnNefContent):
 
         return newName
 
+    def _getNewSequence(self, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...], saveFrame, itemName, newName, contentItem, prefix, _highCount):
+
+        currentItems = set()
+        for dataBlock in contentDataBlocks:
+            _contentFrame = dataBlock.get(saveFrame.name)
+            _content = getattr(_contentFrame, '_content', {}) if _contentFrame else {}
+            # itemName is the current item
+            currentItems |= (_content.get(contentItem) or set())
+
+        # iterate through the names to find the first that is not taken yet
+        newName = int(itemName[len(prefix):])
+        _newHighCount = max(_highCount, max(*currentItems) if currentItems else 1) + 1
+        newName = '{}{}'.format(prefix, _newHighCount)
+
+        return newName, _newHighCount
+
     def _getNewNameDataBlock(self, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...], saveFrame: StarIo.NmrSaveFrame,
                              itemName, newName, contentItem, descriptor):
 
@@ -3189,6 +3205,76 @@ class CcpnNefReader(CcpnNefContent):
                            loopSearchList=loopList, rowSearchList=replaceList)
 
         return newName
+
+    def rename_ccpn_assignment_sequence_code(self, project: Project,
+                                             dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
+                                             saveFrame: StarIo.NmrSaveFrame,
+                                             itemName=None, newName=None):
+        """Rename sequenceCode/serial number for @<n> nmrResidues
+        """
+        nmrChainLoopName = 'nmr_chain'
+        nmrResidueLoopName = 'nmr_residue'
+        nmrAtomLoopName = 'nmr_atom'
+        nmrSequenceCodeName = 'nmr_sequence_codes'
+        nmrAtomCodeName = 'nmr_atom_names'
+
+        nmrChains = OrderedSet()
+        nmrResidues = OrderedSet()
+        nmrAtoms = OrderedSet()
+        nmrSequenceCodes = OrderedSet()
+
+        # read nmr_residue loop - add the details to nmrChain/nmrResidue/nmrAtom lists
+        tempResidueDict = {}
+        _highestSequenceCount = 0
+
+        mapping = nef2CcpnMap[nmrResidueLoopName]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in saveFrame[nmrResidueLoopName].data:
+            parameters = _parametersFromLoopRow(row, map2)
+            chainCode = row['chain_code']
+            sequenceCode = row['sequence_code']
+
+            # NOTE:ED - change sequenceCode
+            if chainCode == itemName and sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
+
+                newSequence, _highestSequenceCount = self._getNewSequence(contentDataBlocks, saveFrame, sequenceCode, None, 'nmr_sequence_codes', '@', _highestSequenceCount)
+
+                # replace sequenceCode/serial
+                loopList = ('nmr_residue', 'nmr_atom', 'nef_chemical_shift')
+                replaceList = ('chain_code', 'sequence_code')
+                self.searchReplaceList(project, dataBlock, True, None, (chainCode, sequenceCode), (chainCode, newSequence), replace=True,
+                                       attributeSearchList=replaceList,
+                                       loopSearchList=loopList, rowSearchList=replaceList)
+                loopList = ('nmr_residue',)
+                replaceList = ('chain_code', 'serial')
+                self.searchReplaceList(project, dataBlock, True, None, (chainCode, int(sequenceCode[1:])), (chainCode, int(newSequence[1:])), replace=True,
+                                       attributeSearchList=replaceList,
+                                       loopSearchList=loopList, rowSearchList=replaceList)
+
+        mapping = nef2CcpnMap[nmrAtomLoopName]
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in saveFrame[nmrAtomLoopName].data:
+            parameters = _parametersFromLoopRow(row, map2)
+            chainCode = row['chain_code']
+            sequenceCode = row['sequence_code']
+            name = row['name']
+
+            # NOTE:ED - change name
+            if chainCode == itemName and name[0:2] == '?@' and name[2:].isdigit():
+
+                newName, _highestSequenceCount = self._getNewSequence(contentDataBlocks, saveFrame, name, None, 'nmr_atom_names', '?@', _highestSequenceCount)
+
+                # replace sequenceCode/serial
+                loopList = ('nmr_atom',)
+                replaceList = ('chain_code', 'name')
+                self.searchReplaceList(project, dataBlock, True, None, (chainCode, name), (chainCode, newName), replace=True,
+                                       attributeSearchList=replaceList,
+                                       loopSearchList=loopList, rowSearchList=replaceList)
+                loopList = ('nmr_atom',)
+                replaceList = ('chain_code', 'serial')
+                self.searchReplaceList(project, dataBlock, True, None, (chainCode, int(name[2:])), (chainCode, int(newName[2:])), replace=True,
+                                       attributeSearchList=replaceList,
+                                       loopSearchList=loopList, rowSearchList=replaceList)
 
     def rename_ccpn_note(self, project: Project,
                          dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
@@ -3546,6 +3632,7 @@ class CcpnNefReader(CcpnNefContent):
     renames['ccpn_spectrum_group'] = rename_saveframe
     renames['nef_sequence'] = rename_nef_molecular_system
     renames['nmr_chain'] = rename_ccpn_assignment
+    renames['nmr_sequence_code'] = rename_ccpn_assignment_sequence_code
     renames['ccpn_integral_list'] = partial(rename_ccpn_list, _lowerCaseName='integral')
     renames['ccpn_multiplet_list'] = partial(rename_ccpn_list, _lowerCaseName='multiplet')
     renames['ccpn_peak_list'] = partial(rename_ccpn_peak_list, _lowerCaseName='peak')

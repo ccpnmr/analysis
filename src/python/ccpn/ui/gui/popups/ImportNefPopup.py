@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 14:28:16 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 19:58:15 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -573,7 +573,7 @@ class NefDictFrame(Frame):
         # check if the current saveFrame exists; i.e., category exists as row = [0]
         item = self.nefTreeView.findSection(name, parentGroup)
         if not item:
-            print('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
+            # print('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
             return
         itemName = item.data(0, 0)
 
@@ -593,7 +593,7 @@ class NefDictFrame(Frame):
 
         item = self.nefTreeView.findSection(name, parentGroup)
         if not item:
-            print('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
+            # print('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
             return
         itemName = item.data(0, 0)
         saveFrame = item.data(1, 0)
@@ -638,6 +638,16 @@ class NefDictFrame(Frame):
                                          grid=(row, 2), gridSpan=(1, 1), direction='v',
                                          setLastButtonFocus=False)
             row += 1
+
+            if saveFrame.get('sf_category') == 'ccpn_assignment':
+                # NOTE:ED - new buttons just for nmrChain/nmrResidue/nmrAtom to rename bad sequenceCodes
+                texts = ('Auto Rename SequenceCodes',)
+                callbacks = (partial(self._renameSequenceCode, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame, autoRename=True),)
+                tipTexts = ('Automatically rename to the next available',)
+                self.buttonList = ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
+                                             grid=(row, 1), gridSpan=(1, 2), direction='v',
+                                             setLastButtonFocus=False)
+                row += 1
 
             if tableColourFunc is not None:
                 tableColourFunc(self, saveFrame, item)
@@ -684,7 +694,64 @@ class NefDictFrame(Frame):
                                saveFrame,
                                itemName=itemName, newName=newName if not autoRename else None)
             except Exception as es:
-                showWarning('Rename', str(es))
+                showWarning('Rename SaveFrame', str(es))
+            else:
+
+                # everything okay - rebuild all for now, could make selective later
+                self.nefTreeView._populateTreeView(self.project)
+                self._fillPopup(self._nefDict)
+
+                for ii, (_name, _, _treeParent) in enumerate(_checks):
+                    if _treeParent == parentGroup and _name == itemName:
+                        _name = newName
+
+                    _parent = self.nefTreeView.findSection(_treeParent)
+                    if _parent:
+                        _checkItem = self.nefTreeView.findSection(_name, _parent)
+                        if _checkItem:
+                            _checkItem.setCheckState(0, QtCore.Qt.Checked)
+
+                # _parent = self.nefTreeView._contentParent(self.project, saveFrame, cat)\
+                _parent = self.nefTreeView.findSection(parentName)
+                if _parent:
+                    newItem = self.nefTreeView.findSection(newName, _parent)
+                    if newItem:
+                        self._nefTreeClickedCallback(newItem, 0)
+
+    def _renameSequenceCode(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False):
+        """Handle clicking a rename button
+        """
+        if not item:
+            return
+
+        itemName = item.data(0, 0)
+        parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
+        cat = saveFrame.get('sf_category')
+
+        # find the primary handler class for the clicked item, .i.e. chains/peakLists etc.
+        primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
+        func = self._nefReader.renames.get('nmr_sequence_code')
+        if func is not None:
+
+            # NOTE:ED - remember tree checkbox selection
+            _checks = [[_itm.data(0, 0), _itm.data(1, 0), _itm.parent().data(0, 0) if _itm.parent() else repr(None)]
+                       for _itm in self.nefTreeView.traverseTree()
+                       if _itm.checkState(0) == QtCore.Qt.Checked]
+
+            # take from lineEdit if exists, otherwise assume autorename (for the minute)
+            newName = lineEdit.get() if lineEdit else None
+            try:
+                # call the correct rename function based on the item clicked
+
+                # TODO:ED make a new contentCompareDict that contains a merge of left and right windows
+                #       don't need to merge, just make a list of dicts to compare against :)
+
+                newName = func(self._nefReader, self.project,
+                               self._nefDict, self._contentCompareDataBlocks,
+                               saveFrame,
+                               itemName=itemName, newName=newName if not autoRename else None)
+            except Exception as es:
+                showWarning('Rename SaveFrame', str(es))
             else:
 
                 # everything okay - rebuild all for now, could make selective later
@@ -1072,8 +1139,9 @@ class NefDictFrame(Frame):
                         # handler(self, saveFrame, item)
                         handler(self, name=itemName, saveFrame=saveFrame, parentGroup=parentGroup)
 
-        # clicking the checkbox also comes here - above loop may set item._badName
-        self._colourTreeView()
+                # clicking the checkbox also comes here - above loop may set item._badName
+                self._colourTreeView()
+
         self._filterLogFrame.setVisible(self._enableFilterFrame)
 
     def _addTableToFrame(self, _data, _name):

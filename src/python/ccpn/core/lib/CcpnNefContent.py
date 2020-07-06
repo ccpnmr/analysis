@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 18:20:35 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 19:58:15 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -81,11 +81,13 @@ class CcpnNefContent:
         nmrResidueLoopName = 'nmr_residue'
         nmrAtomLoopName = 'nmr_atom'
         nmrSequenceCodeName = 'nmr_sequence_codes'
+        nmrAtomCodeName = 'nmr_atom_names'
 
         nmrChains = OrderedSet()
         nmrResidues = OrderedSet()
         nmrAtoms = OrderedSet()
         nmrSequenceCodes = OrderedSet()
+        nmrAtomCodes = OrderedSet()
 
         # read nmr_chain loop - add the details to nmrChain list
         mapping = nef2CcpnMap[nmrChainLoopName]
@@ -107,9 +109,9 @@ class CcpnNefContent:
             nmrResidues.add((chainCode, sequenceCode, residueName))
             tempResidueDict[(chainCode, sequenceCode)] = residueName
 
-            # NOTE:ED - keep a record of the serial/seqeunce code types
+            # NOTE:ED - keep a record of the serial/sequence code types
             if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
-                nmrSequenceCodes.add(sequenceCode)
+                nmrSequenceCodes.add(int(sequenceCode[1:]))
 
         # read nmr_residue loop - add the details to nmrChain/nmrResidue/nmrAtom lists
         tempResidueDict = {}
@@ -122,10 +124,16 @@ class CcpnNefContent:
             name = row['name']
             nmrAtoms.add((chainCode, sequenceCode, tempResidueDict.get((chainCode, sequenceCode)), name))
 
+            # NOTE:ED - keep a record of the serial/sequence code types
+            if name[0:2] == '?@' and name[2:].isdigit():
+                nmrAtomCodes.add(int(name[2:]))
+
         self.storeContent(saveFrame, {nmrChainLoopName   : nmrChains,
                                       nmrResidueLoopName : nmrResidues,
                                       nmrAtomLoopName    : nmrAtoms,
-                                      nmrSequenceCodeName: nmrSequenceCodes})
+                                      nmrSequenceCodeName: nmrSequenceCodes,
+                                      nmrAtomCodeName    : nmrAtomCodes,
+                                      })
 
     contents['ccpn_assignment'] = content_ccpn_assignment
     contents['nmr_chain'] = _noLoopContent

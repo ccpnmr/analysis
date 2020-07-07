@@ -1676,7 +1676,6 @@ GuiTable::item::selected {
         if selection:
             selectedObjects = []
             rows = []
-            _rowSeen = False
             for iSelect in selection:
                 row = iSelect.row()
                 col = iSelect.column()
@@ -1684,10 +1683,10 @@ GuiTable::item::selected {
                     if len(self._dataFrameObject._objects) > 0:
                         if isinstance(self._dataFrameObject._objects[0], pd.Series):
                             df = self._dataFrameObject.dataFrame
-                            if not _rowSeen:
-                                _rowSeen = True #otherwise gets a copy while loops through the columns
+                            if row not in rows:
+                                rows.append(row) #otherwise gets a copy while loops through the columns
                                 selectedObjects.append(df.iloc[row])
-                                continue
+
                         else:
                             colName = self.horizontalHeaderItem(col).text()
                             if colName == 'Pid':
@@ -1703,6 +1702,7 @@ GuiTable::item::selected {
                                     if obj:
                                         selectedObjects.append(obj)
 
+            print(len(selectedObjects))
             return selectedObjects
         else:
             return None

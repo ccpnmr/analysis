@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-07 14:11:09 +0100 (Tue, July 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-07 14:44:01 +0100 (Tue, July 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -5666,10 +5666,10 @@ class CcpnNefReader(CcpnNefContent):
                     else:
                         saveFrame._rowErrors[itemID].add(loop.data.index(row))
 
+                    # add the error to the chain loop
                     _chainLoop = saveFrame[nmrChainLoopName]
                     for _chainRow in _chainLoop.data:
-                        _parameters = _parametersFromLoopRow(_chainRow, map2)
-                        _name = _parameters['shortName']
+                        _name = _chainRow.get('short_name')
                         if _name == chainCode:
                             _nmrChainErrors.add(_chainLoop.data.index(_chainRow))
                             _nmrChainSerial.add(chainCode)
@@ -5677,7 +5677,8 @@ class CcpnNefReader(CcpnNefContent):
                             if itemID not in saveFrame._rowErrors:
                                 saveFrame._rowErrors[itemID] = OrderedSet([_chainLoop.data.index(_chainRow)])
                             else:
-                                saveFrame._rowErrors[itemID].add(loop.data.index(row))
+                                saveFrame._rowErrors[itemID].add(_chainLoop.data.index(_chainRow))
+                            break
 
         # read nmr_atom loop
         mapping = nef2CcpnMap[nmrAtomLoopName]
@@ -5700,16 +5701,19 @@ class CcpnNefReader(CcpnNefContent):
                     else:
                         saveFrame._rowErrors[itemID].add(loop.data.index(row))
 
+            # add the error to the atom loop
             if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
                 # this is a reserved name
                 serial = int(sequenceCode[1:])
-                self.error('{} - NmrAtom sequenceCode @{} already exists'.format(_ID, serial), saveFrame, (None,))
-                _nmrAtomErrors.add(loop.data.index(row))
-                itemID = '_'.join([nmrAtomLoopName, chainCode])
-                if itemID not in saveFrame._rowErrors:
-                    saveFrame._rowErrors[itemID] = OrderedSet([loop.data.index(row)])
-                else:
-                    saveFrame._rowErrors[itemID].add(loop.data.index(row))
+                obj = project._wrappedData.findFirstResonanceGroup(serial=serial)
+                if obj is not None:
+                    self.error('{} - NmrAtom sequenceCode @{} already exists'.format(_ID, serial), saveFrame, (None,))
+                    _nmrAtomErrors.add(loop.data.index(row))
+                    itemID = '_'.join([nmrAtomLoopName, chainCode])
+                    if itemID not in saveFrame._rowErrors:
+                        saveFrame._rowErrors[itemID] = OrderedSet([loop.data.index(row)])
+                    else:
+                        saveFrame._rowErrors[itemID].add(loop.data.index(row))
 
     verifiers['ccpn_assignment'] = verify_ccpn_assignment
     verifiers['nmr_chain'] = _noLoopVerify

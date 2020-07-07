@@ -1666,18 +1666,17 @@ GuiTable::item::selected {
 
         :param fromSelection:
         :return: get a list of table objects. If the table has a header called pid, the object is a ccpn Core obj like Peak,
-         otherwise is a Pandas series object.
+         otherwise is a Pandas series object corresponding to the selected row(s).
         '''
 
         model = self.selectionModel()
-
         # selects all the items in the row
         selection = fromSelection if fromSelection else model.selectedIndexes()
 
         if selection:
             selectedObjects = []
             rows = []
-
+            _rowSeen = False
             for iSelect in selection:
                 row = iSelect.row()
                 col = iSelect.column()
@@ -1685,7 +1684,10 @@ GuiTable::item::selected {
                     if len(self._dataFrameObject._objects) > 0:
                         if isinstance(self._dataFrameObject._objects[0], pd.Series):
                             df = self._dataFrameObject.dataFrame
-                            selectedObjects.append(df.iloc[row])
+                            if not _rowSeen:
+                                _rowSeen = True #otherwise gets a copy while loops through the columns
+                                selectedObjects.append(df.iloc[row])
+                                continue
                         else:
                             colName = self.horizontalHeaderItem(col).text()
                             if colName == 'Pid':

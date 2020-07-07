@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 19:58:15 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-07 14:11:10 +0100 (Tue, July 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -65,10 +65,13 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.framework.PathsAndUrls import nefValidationPath
 
 
-INVALIDTEXTROWSELECTCOLOUR = QtGui.QColor('crimson')
-INVALIDTEXTROWNOSELECTCOLOUR = QtGui.QColor('darkorange')
-INVALIDTABLEFILLCOLOUR = QtGui.QColor('lightpink')
-INVALIDTABLEFILLSELECTCOLOUR = QtGui.QColor('salmon')
+INVALIDTEXTROWCHECKCOLOUR = QtGui.QColor('crimson')
+INVALIDTEXTROWNOCHECKCOLOUR = QtGui.QColor('darkorange')
+INVALIDBUTTONCHECKCOLOUR = QtGui.QColor('lightpink')              # button background
+INVALIDBUTTONNOCHECKCOLOUR = QtGui.QColor('navajowhite')              # button background
+# INVALIDTABLEFILLSELECTCOLOUR = QtGui.QColor('salmon')
+INVALIDTABLEFILLCHECKCOLOUR = QtGui.QColor('lightpink')
+INVALIDTABLEFILLNOCHECKCOLOUR = QtGui.QColor('navajowhite')
 
 CHAINS = 'chains'
 NMRCHAINS = 'nmrChains'
@@ -404,17 +407,17 @@ class NefDictFrame(Frame):
                                 _rowError = handler(self, name=itemName, saveFrame=saveFrame, parentGroup=parentGroup)
 
                     if _rowError:
-                        childColour = INVALIDTEXTROWSELECTCOLOUR if childItem.checkState(0) else INVALIDTEXTROWNOSELECTCOLOUR
+                        childColour = INVALIDTEXTROWCHECKCOLOUR if childItem.checkState(0) else INVALIDTEXTROWNOCHECKCOLOUR
                     self.nefTreeView.setForegroundForRow(childItem, childColour)
 
                 if _sectionError:
-                    sectionColour = INVALIDTEXTROWSELECTCOLOUR if pluralItem.checkState(0) else INVALIDTEXTROWNOSELECTCOLOUR
+                    sectionColour = INVALIDTEXTROWCHECKCOLOUR if pluralItem.checkState(0) else INVALIDTEXTROWNOCHECKCOLOUR
                     if pluralItem.checkState(0):
                         _projectError = True
                 self.nefTreeView.setForegroundForRow(pluralItem, sectionColour)
 
         if _projectError:
-            projectColour = INVALIDTEXTROWSELECTCOLOUR if projectItem.checkState(0) else INVALIDTEXTROWNOSELECTCOLOUR
+            projectColour = INVALIDTEXTROWCHECKCOLOUR if projectItem.checkState(0) else INVALIDTEXTROWNOCHECKCOLOUR
         self.nefTreeView.setForegroundForRow(projectItem, projectColour)
 
     def table_nef_molecular_system(self, saveFrame, item):
@@ -428,12 +431,14 @@ class NefDictFrame(Frame):
             return
 
         if _errors:
+            _fillColour = INVALIDTABLEFILLCHECKCOLOUR if item.checkState(0) else INVALIDTABLEFILLNOCHECKCOLOUR
+
             # colour rows by extra colour
             chainErrors = _errors.get('nef_sequence_' + itemName)
             if chainErrors:
                 table = self._nefTables.get('nef_sequence')
                 for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, INVALIDTABLEFILLSELECTCOLOUR)
+                    table.setRowBackgroundColour(rowIndex, _fillColour)
 
     def table_ccpn_assignment(self, saveFrame, item, listName=None):
         tables = ['nmr_chain', 'nmr_residue', 'nmr_atom']
@@ -447,13 +452,15 @@ class NefDictFrame(Frame):
             return
 
         if _errors:
+            _fillColour = INVALIDTABLEFILLCHECKCOLOUR if item.checkState(0) else INVALIDTABLEFILLNOCHECKCOLOUR
+
             for tableName in tables:
                 # colour rows by extra colour
                 chainErrors = _errors.get('_'.join([tableName, itemName]))
                 if chainErrors:
                     table = self._nefTables.get(tableName)
                     for rowIndex in chainErrors:
-                        table.setRowBackgroundColour(rowIndex, INVALIDTABLEFILLSELECTCOLOUR)
+                        table.setRowBackgroundColour(rowIndex, _fillColour)
 
     def table_lists(self, saveFrame, item, listName, postFix='list'):
         itemName = item.data(0, 0)
@@ -466,17 +473,19 @@ class NefDictFrame(Frame):
             return
 
         if _errors:
+            _fillColour = INVALIDTABLEFILLCHECKCOLOUR if item.checkState(0) else INVALIDTABLEFILLNOCHECKCOLOUR
+
             # colour rows by extra colour
             chainErrors = _errors.get('_'.join([listName, itemName]))
             if chainErrors:
                 table = self._nefTables.get(listName)
                 for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, INVALIDTABLEFILLSELECTCOLOUR)
+                    table.setRowBackgroundColour(rowIndex, _fillColour)
             chainErrors = _errors.get('_'.join([listName, postFix, itemName]))
             if chainErrors:
                 table = self._nefTables.get('_'.join([listName, postFix]))
                 for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, INVALIDTABLEFILLSELECTCOLOUR)
+                    table.setRowBackgroundColour(rowIndex, _fillColour)
 
     def table_peak_lists(self, saveFrame, item, listName=None):
         listItemName = 'nef_peak'
@@ -491,17 +500,19 @@ class NefDictFrame(Frame):
             return
 
         if _errors:
+            _fillColour = INVALIDTABLEFILLCHECKCOLOUR if item.checkState(0) else INVALIDTABLEFILLNOCHECKCOLOUR
+
             # colour rows by extra colour
             chainErrors = _errors.get('_'.join([listItemName, itemName]))
             if chainErrors:
                 table = self._nefTables.get(listItemName)
                 for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, INVALIDTABLEFILLSELECTCOLOUR)
+                    table.setRowBackgroundColour(rowIndex, _fillColour)
             chainErrors = _errors.get('_'.join([listName, 'list', itemName]))
             if chainErrors:
                 table = self._nefTables.get('_'.join([listName, 'list']))
                 for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, INVALIDTABLEFILLSELECTCOLOUR)
+                    table.setRowBackgroundColour(rowIndex, _fillColour)
 
     def table_peak_clusters(self, saveFrame, item, listName=None):
         listItemName = 'ccpn_peak_cluster'
@@ -516,17 +527,19 @@ class NefDictFrame(Frame):
             return
 
         if _errors:
+            _fillColour = INVALIDTABLEFILLCHECKCOLOUR if item.checkState(0) else INVALIDTABLEFILLNOCHECKCOLOUR
+
             # colour rows by extra colour
             chainErrors = _errors.get('_'.join([listItemName, itemName]))
             if chainErrors:
                 table = self._nefTables.get(listItemName)
                 for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, INVALIDTABLEFILLSELECTCOLOUR)
+                    table.setRowBackgroundColour(rowIndex, _fillColour)
             chainErrors = _errors.get('_'.join([listName, 'peaks', itemName]))
             if chainErrors:
                 table = self._nefTables.get('_'.join([listName, 'peaks']))
                 for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, INVALIDTABLEFILLSELECTCOLOUR)
+                    table.setRowBackgroundColour(rowIndex, _fillColour)
 
     def table_ccpn_notes(self, saveFrame, item):
         itemName = item.data(0, 0)
@@ -539,12 +552,14 @@ class NefDictFrame(Frame):
             return
 
         if _errors:
+            _fillColour = INVALIDTABLEFILLCHECKCOLOUR if item.checkState(0) else INVALIDTABLEFILLNOCHECKCOLOUR
+
             # colour rows by extra colour
             chainErrors = _errors.get('ccpn_note_' + itemName)
             if chainErrors:
                 table = self._nefTables.get('ccpn_note')
                 for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, INVALIDTABLEFILLSELECTCOLOUR)
+                    table.setRowBackgroundColour(rowIndex, _fillColour)
 
     def _set_bad_saveframe(self, name=None, saveFrame=None, parentGroup=None, prefix=None, mappingCode=None,
                            errorCode=None, tableColourFunc=None):
@@ -617,6 +632,8 @@ class NefDictFrame(Frame):
         _content = getattr(saveFrame, '_content', None)
         _errors = getattr(saveFrame, '_rowErrors', {})
         if _content and mapping:
+            _fillColour = INVALIDBUTTONCHECKCOLOUR if item.checkState(0) else INVALIDBUTTONNOCHECKCOLOUR
+
             plural, singular = mapping
 
             row = 0
@@ -627,7 +644,7 @@ class NefDictFrame(Frame):
 
             if errorCode in _errors and itemName in _errors[errorCode]:
                 palette = saveFrameData.palette()
-                palette.setColor(QtGui.QPalette.Base, INVALIDTABLEFILLCOLOUR)
+                palette.setColor(QtGui.QPalette.Base, _fillColour)
                 saveFrameData.setPalette(palette)
 
             texts = ('Rename', 'Auto Rename')
@@ -771,7 +788,7 @@ class NefDictFrame(Frame):
                 # _parent = self.nefTreeView._contentParent(self.project, saveFrame, cat)\
                 _parent = self.nefTreeView.findSection(parentName)
                 if _parent:
-                    newItem = self.nefTreeView.findSection(newName, _parent)
+                    newItem = self.nefTreeView.findSection(newName or itemName, _parent)
                     if newItem:
                         self._nefTreeClickedCallback(newItem, 0)
 
@@ -1094,6 +1111,8 @@ class NefDictFrame(Frame):
         saveFrame = item.data(1, 0)
         if saveFrame and hasattr(saveFrame, '_content'):
             with self.blockWidgetSignals():
+                _fillColour = INVALIDTABLEFILLNOCHECKCOLOUR if item.checkState(0) else INVALIDTABLEFILLNOCHECKCOLOUR
+
                 parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
 
                 # add a table from the saveframe attributes
@@ -1128,7 +1147,7 @@ class NefDictFrame(Frame):
                         badRows = list(saveFrame._rowErrors[loop.name])
 
                         for rowIndex in badRows:
-                            table.setRowBackgroundColour(rowIndex, INVALIDTABLEFILLCOLOUR)
+                            table.setRowBackgroundColour(rowIndex, _fillColour)
 
                     self._tableSplitter.addWidget(frame)
                     self._nefWidgets.append(frame)
@@ -1143,6 +1162,8 @@ class NefDictFrame(Frame):
                 self._colourTreeView()
 
         self._filterLogFrame.setVisible(self._enableFilterFrame)
+        self.nefTreeView.setCurrentItem(item)
+        self.nefTreeView.update()
 
     def _addTableToFrame(self, _data, _name):
         """Add a new gui table into a moreLess frame to hold a nef loop

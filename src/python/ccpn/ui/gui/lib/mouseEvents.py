@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-19 17:48:51 +0000 (Thu, March 19, 2020) $"
+__dateModified__ = "$dateModified: 2020-06-09 19:56:35 +0100 (Tue, June 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -271,7 +271,7 @@ def makeDragEvent(self, dataDict, text, action=QtCore.Qt.CopyAction):
 
     from ccpn.framework.Application import getApplication
     getApp = getApplication()
-    if getApp:
+    if getApp and hasattr(getApp, '_fontSettings'):
         dragLabel.setFont(getApp._fontSettings.textFontLarge)
 
     dragLabel.setStyleSheet('color: %s' % (getColours()[LABEL_FOREGROUND]))

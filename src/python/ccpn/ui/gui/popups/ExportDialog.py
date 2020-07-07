@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-22 17:06:31 +0100 (Wed, April 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-05-04 18:45:05 +0100 (Mon, May 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -60,9 +60,14 @@ class ExportDialog(CcpnDialog):
         Initialise the widget
         """
         self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = None
+            self.project = None
+            self.current = None
 
         selectFile = os.path.basename(selectFile) if selectFile else None
 
@@ -84,11 +89,6 @@ class ExportDialog(CcpnDialog):
                 raise TypeError("Error: preferences incorrectly defined")
 
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
-
-        self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
 
         # the top frame to contain user defined widgets
         self.options = Frame(self, setLayout=True, grid=(0, 0))
@@ -179,7 +179,8 @@ class ExportDialog(CcpnDialog):
                                             selectFile=self._dialogSelectFile,
                                             filter=self._dialogFilter,
                                             # initialPath=self._dialogPath,       # self._dialogPreferences.general.userWorkingPath,
-                                            pathID=self._dialogPathID)            # USEREXPORTPATH)
+                                            pathID=self._dialogPathID,
+                                            confirmOverwrite=False)            # USEREXPORTPATH)
 
     def initialise(self, userFrame):
         """Initialise the frame containing the user widgets
@@ -276,7 +277,7 @@ class ExportDialog(CcpnDialog):
         if selectedFile:
             self.saveText.setText(str(selectedFile))
             self._dialogSelectFile = str(selectedFile)
-            self.pathEdited = False  # path has been reset
+            self.pathEdited = True                      #False  # path has been reset
 
     def _save(self):
         self.accept()

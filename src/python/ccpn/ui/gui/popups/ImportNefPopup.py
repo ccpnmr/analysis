@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 12:10:38 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 19:58:15 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,15 +26,17 @@ __date__ = "$Date: 2020-05-04 17:15:05 +0000 (Mon, May 04, 2020) $"
 #=========================================================================================
 
 import json
+import os
 from functools import partial
 from collections import OrderedDict as OD
 from ccpn.util.Common import PrintFormatter
-from ccpn.util.OrderedSet import OrderedSet
+from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
+from ccpn.util.FrozenDict import FrozenDict
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERNEFPATH
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ImportTreeCheckBoxes
+from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ImportTreeCheckBoxes, RENAMEACTION, BADITEMACTION
 from ccpn.ui.gui.popups.ExportDialog import ExportDialog
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -60,6 +62,7 @@ from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.framework.PathsAndUrls import nefValidationPath
 
 
 INVALIDTEXTROWSELECTCOLOUR = QtGui.QColor('crimson')
@@ -84,6 +87,22 @@ TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
 ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
 COLOURALLCOLUMNS = False
 
+NEFFRAMEKEY_IMPORT = 'nefObject'
+NEFFRAMEKEY_ENABLECHECKBOXES = 'enableCheckBoxes'
+NEFFRAMEKEY_ENABLERENAME = 'enableRename'
+NEFFRAMEKEY_ENABLEFILTERFRAME = 'enableFilterFrame'
+NEFFRAMEKEY_ENABLEMOUSEMENU = 'enableMouseMenu'
+NEFFRAMEKEY_PATHNAME = 'pathName'
+
+NEFDICTFRAMEKEYS = {NEFFRAMEKEY_IMPORT           : (Nef.NefImporter, Project),
+                    NEFFRAMEKEY_ENABLECHECKBOXES : bool,
+                    NEFFRAMEKEY_ENABLERENAME     : bool,
+                    NEFFRAMEKEY_ENABLEFILTERFRAME: bool,
+                    NEFFRAMEKEY_ENABLEMOUSEMENU  : bool,
+                    NEFFRAMEKEY_PATHNAME         : str,
+                    }
+NEFDICTFRAMEKEYS_REQUIRED = (NEFFRAMEKEY_IMPORT,)
+
 
 class NefDictFrame(Frame):
     """
@@ -92,9 +111,13 @@ class NefDictFrame(Frame):
     EDITMODE = True
     handleSaveFrames = {}
     _setBadSaveFrames = {}
+    applyCheckBoxes = {}
+
     DEFAULTMARGINS = (8, 8, 8, 8)  # l, t, r, b
 
-    def __init__(self, parent=None, mainWindow=None, nefObject=None, enableCheckboxes=False,
+    def __init__(self, parent=None, mainWindow=None,
+                 nefObject=None, enableCheckBoxes=False, enableRename=False,
+                 enableFilterFrame=False, enableMouseMenu=False, pathName=None,
                  showBorder=True, borderColour=None, _splitterMargins=DEFAULTMARGINS, **kwds):
         """Initialise the widget"""
         super().__init__(parent, setLayout=True, spacing=DEFAULTSPACING, **kwds)
@@ -116,7 +139,11 @@ class NefDictFrame(Frame):
         self._primaryProject = True
         self.showBorder = showBorder
         self._borderColour = borderColour or QtGui.QColor(getColours()[BORDERNOFOCUS])
-        self._enableCheckboxes = enableCheckboxes
+        self._enableCheckBoxes = enableCheckBoxes
+        self._enableRename = enableRename
+        self._enableFilterFrame = enableFilterFrame
+        self._enableMouseMenu = enableMouseMenu
+        self._pathName = pathName
 
         # set the nef object - nefLoader/nefDict
         self._initialiseNefLoader(nefObject, _ignoreError=True)
@@ -133,6 +160,15 @@ class NefDictFrame(Frame):
 
         # needs to be done this way otherwise _splitterMargins is 'empty' or clashes with frame stylesheet
         self.setContentsMargins(*_splitterMargins)
+
+        # define the list of dicts for comparing object names
+        self._contentCompareDataBlocks = ()
+
+        # add the rename action to the treeview actions
+        self.nefTreeView.setActionCallback(RENAMEACTION, self._autoRenameItem)
+
+        # add the rename action to the treeview actions
+        self.nefTreeView.setActionCallback(BADITEMACTION, self._checkBadItem)
 
     def paintEvent(self, ev):
         """Paint the border to the screen
@@ -193,15 +229,22 @@ class NefDictFrame(Frame):
     def _setWidgets(self):
         """Setup the unpopulated widgets for the frame
         """
+        self.headerFrame = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
+        self.headerLabel = Label(self.headerFrame, text='FRAMEFRAME', grid=(0, 0))
+
+        # add the pane for the treeview/tables
         self._paneSplitter = Splitter(self, setLayout=True, horizontal=True)
+
+        # add the pane for the treeview/tables
+        self._treeSplitter = Splitter(self, setLayout=True, horizontal=False)
 
         # set the top frames
         self._treeFrame = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
         self._infoFrame = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
 
         # must be added this way to fill the frame
-        self.getLayout().addWidget(self._paneSplitter, 0, 0)
-        self._paneSplitter.addWidget(self._treeFrame)
+        self.getLayout().addWidget(self._paneSplitter, 1, 0)
+        self._paneSplitter.addWidget(self._treeSplitter)
         self._paneSplitter.addWidget(self._infoFrame)
         self._paneSplitter.setChildrenCollapsible(False)
         self._paneSplitter.setStretchFactor(0, 1)
@@ -209,16 +252,27 @@ class NefDictFrame(Frame):
         # self._paneSplitter.setStyleSheet("QSplitter::handle { background-color: gray }")
         self._paneSplitter.setSizes([10000, 15000])
 
-        # treeFrame (left frame)
-        self._treeOptionsFrame = Frame(self._treeFrame, setLayout=True, showBorder=False, grid=(0, 0))
-        self.buttonCCPN = CheckBox(self._treeOptionsFrame, checked=True,
-                                   text='include CCPN tags',
-                                   grid=(0, 0), hAlign='l')
-        self.buttonExpand = CheckBox(self._treeOptionsFrame, checked=False,
-                                     text='expand selection',
-                                     grid=(1, 0), hAlign='l')
+        self._treeSplitter.addWidget(self._treeFrame)
+        # self._treeSplitter.addWidget(self._infoFrame)
+        self._treeSplitter.setChildrenCollapsible(False)
+        self._treeSplitter.setStretchFactor(0, 1)
+        self._treeSplitter.setStretchFactor(1, 2)
+        # self._treeSplitter.setStyleSheet("QSplitter::handle { background-color: gray }")
+        self._treeSplitter.setSizes([10000, 15000])
+
+        # # treeFrame (left frame)
+        # self._treeOptionsFrame = Frame(self._treeFrame, setLayout=True, showBorder=False, grid=(0, 0))
+        # self.buttonCCPN = CheckBox(self._treeOptionsFrame, checked=True,
+        #                            text='include CCPN tags',
+        #                            grid=(0, 0), hAlign='l')
+        # self.buttonExpand = CheckBox(self._treeOptionsFrame, checked=False,
+        #                              text='expand selection',
+        #                              grid=(1, 0), hAlign='l')
+
         self.nefTreeView = ImportTreeCheckBoxes(self._treeFrame, project=self.project, grid=(1, 0),
-                                                includeProject=True, enableCheckboxes=self._enableCheckboxes,
+                                                includeProject=True, enableCheckBoxes=self._enableCheckBoxes,
+                                                enableMouseMenu=self._enableMouseMenu,
+                                                pathName=os.path.basename(self._pathName) if self._pathName else None,
                                                 multiSelect=True)
 
         # info frame (right frame)
@@ -226,11 +280,12 @@ class NefDictFrame(Frame):
         self._frameOptionsNested = Frame(self._infoFrame, setLayout=True, showBorder=False, grid=(1, 0))
         self.frameOptionsFrame = Frame(self._frameOptionsNested, setLayout=True, showBorder=False, grid=(1, 0))
         self.fileFrame = Frame(self._infoFrame, setLayout=True, showBorder=False, grid=(2, 0))
-        _frame = MoreLessFrame(self._infoFrame, name='Filter Log', showMore=False, grid=(3, 0), gridSpan=(1, 1))
+        self._filterLogFrame = MoreLessFrame(self._infoFrame, name='Filter Log', showMore=False, grid=(3, 0), gridSpan=(1, 1))
+        self._treeSplitter.addWidget(self._filterLogFrame)
 
         _row = 0
         self.wordWrapData = CheckBoxCompoundWidget(
-                _frame.contentsFrame,
+                self._filterLogFrame.contentsFrame,
                 grid=(_row, 0), hAlign='left',
                 #minimumWidths=(colwidth, 0),
                 fixedWidths=(None, 30),
@@ -241,7 +296,7 @@ class NefDictFrame(Frame):
                 #self._toggleWordWrap,
                 )
         _row += 1
-        self.logData = TextEditor(_frame.contentsFrame, grid=(_row, 0), gridSpan=(1, 3))
+        self.logData = TextEditor(self._filterLogFrame.contentsFrame, grid=(_row, 0), gridSpan=(1, 3))
         self.logData.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.logData.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
 
@@ -259,6 +314,7 @@ class NefDictFrame(Frame):
         # set the subframe to be ignored and minimum to stop the widgets overlapping - remember this for other places
         self._frameOptionsNested.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
         self.frameOptionsFrame.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        self.headerFrame.getLayout().setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
 
         # options frame
         pass
@@ -280,6 +336,12 @@ class NefDictFrame(Frame):
                     self.nefTreeView.fillTreeView(self._nefLoader._nefDict)
                     self.nefTreeView.expandAll()
 
+                if self._pathName:
+                    self.headerLabel.setText(self._pathName)
+                elif self.project:
+                    self.headerLabel.setText(self.project.name)
+                else:
+                    self.headerLabel.setText('')
                 self._colourTreeView()
 
     def _colourTreeView(self):
@@ -308,11 +370,13 @@ class NefDictFrame(Frame):
                     childColour = self.nefTreeView._foregroundColour
 
                     # get the saveFrame associated with this item
+                    itemName = childItem.data(0, 0)
                     saveFrame = childItem.data(1, 0)
+                    parentGroup = childItem.parent().data(0, 0) if childItem.parent() else repr(None)
 
                     # NOTE:ED - need a final check on this
                     _errorName = getattr(saveFrame, '_rowErrors', None) and saveFrame._rowErrors.get(saveFrame['sf_category'])
-                    if _errorName and childItem.data(0, 0) in _errorName:  # itemName
+                    if _errorName and itemName in _errorName:  # itemName
                         _sectionError = True
 
                     loops = self._nefReader._getLoops(self.project, saveFrame)
@@ -320,7 +384,7 @@ class NefDictFrame(Frame):
                     for loop in loops:
 
                         # get the group name add fetch the correct mapping
-                        mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(childItem.parent().data(0, 0))
+                        mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
                         if mapping and loop.name not in mapping:
                             continue
 
@@ -332,12 +396,12 @@ class NefDictFrame(Frame):
                             _sectionError = True
                             # _projectError = True
 
-                    primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(childItem.parent().data(0, 0)) or saveFrame.get('sf_category')
+                    primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
                     if primaryHandler:
                         if primaryHandler in self._setBadSaveFrames:
                             handler = self._setBadSaveFrames[primaryHandler]
                             if handler is not None:
-                                _rowError = handler(self, saveFrame, childItem)
+                                _rowError = handler(self, name=itemName, saveFrame=saveFrame, parentGroup=parentGroup)
 
                     if _rowError:
                         childColour = INVALIDTEXTROWSELECTCOLOUR if childItem.checkState(0) else INVALIDTEXTROWNOSELECTCOLOUR
@@ -482,14 +546,18 @@ class NefDictFrame(Frame):
                 for rowIndex in chainErrors:
                     table.setRowBackgroundColour(rowIndex, INVALIDTABLEFILLSELECTCOLOUR)
 
-    def _set_bad_saveframe(self, saveFrame, item, prefix=None, mappingCode=None,
+    def _set_bad_saveframe(self, name=None, saveFrame=None, parentGroup=None, prefix=None, mappingCode=None,
                            errorCode=None, tableColourFunc=None):
         # check if the current saveFrame exists; i.e., category exists as row = [0]
+        item = self.nefTreeView.findSection(name, parentGroup)
+        if not item:
+            print('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
+            return
+        itemName = item.data(0, 0)
+
         mappingCode = mappingCode or ''
         errorCode = errorCode or ''
-
         mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
-        itemName = item.data(0, 0)
 
         _content = getattr(saveFrame, '_content', None)
         _errors = getattr(saveFrame, '_rowErrors', {})
@@ -500,18 +568,51 @@ class NefDictFrame(Frame):
 
         return _bad
 
-    # def handle_nef_chemical_shift_list(self, saveFrame, item):
-    # def handle_nef_molecular_system(self, saveFrame, item):
-    def handle_treeView_selection(self, saveFrame, item, prefix=None, mappingCode=None,
-                                  errorCode=None, tableColourFunc=None):
+    def apply_checkBox_item(self, name=None, saveFrame=None, parentGroup=None, prefix=None, mappingCode=None,
+                            checkID='_importRows'):
         # check if the current saveFrame exists; i.e., category exists as row = [0]
-        cat = saveFrame.get('sf_category')
-        prefix = prefix or ''
+        item = self.nefTreeView.findSection(name, parentGroup)
+        if not item:
+            # print('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
+            return
+        itemName = item.data(0, 0)
+
+        _importList = self._nefReader._importDict.get(saveFrame.name)
+        if not _importList:
+            _importList = self._nefReader._importDict[saveFrame.name] = {}
+
+        if not _importList.get(checkID):
+            _importList[checkID] = (itemName,)
+        else:
+            _importList[checkID] += (itemName,)
+
+    def handle_treeView_selection(self, name=None, saveFrame=None, parentGroup=None, prefix=None, mappingCode=None,
+                                  errorCode=None, tableColourFunc=None, _handleAutoRename=False):
+
+        # check if the current saveFrame exists; i.e., category exists as row = [0]
+
+        item = self.nefTreeView.findSection(name, parentGroup)
+        if not item:
+            # print('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
+            return
+        itemName = item.data(0, 0)
+        saveFrame = item.data(1, 0)
+
+        # NOTE:ED - call autoRename
+        if _handleAutoRename:
+            mappingCode = mappingCode or ''
+            errorCode = errorCode or ''
+            mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
+            plural, singular = mapping
+            _auto = partial(self._rename, item=item, parentName=plural, lineEdit=None, saveFrame=saveFrame, autoRename=True)
+            _auto()
+            return
+
+        # cat = saveFrame.get('sf_category')
+        # prefix = prefix or ''
         mappingCode = mappingCode or ''
         errorCode = errorCode or ''
-
         mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
-        itemName = item.data(0, 0)
 
         _content = getattr(saveFrame, '_content', None)
         _errors = getattr(saveFrame, '_rowErrors', {})
@@ -534,11 +635,24 @@ class NefDictFrame(Frame):
                          partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame, autoRename=True))
             tipTexts = ('Rename', 'Automatically rename to the next available\n - dependent on saveframe type')
             self.buttonList = ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
-                                         grid=(row, 2), gridSpan=(1, 1), direction='v')
+                                         grid=(row, 2), gridSpan=(1, 1), direction='v',
+                                         setLastButtonFocus=False)
             row += 1
+
+            if saveFrame.get('sf_category') == 'ccpn_assignment':
+                # NOTE:ED - new buttons just for nmrChain/nmrResidue/nmrAtom to rename bad sequenceCodes
+                texts = ('Auto Rename SequenceCodes',)
+                callbacks = (partial(self._renameSequenceCode, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame, autoRename=True),)
+                tipTexts = ('Automatically rename to the next available',)
+                self.buttonList = ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
+                                             grid=(row, 1), gridSpan=(1, 2), direction='v',
+                                             setLastButtonFocus=False)
+                row += 1
 
             if tableColourFunc is not None:
                 tableColourFunc(self, saveFrame, item)
+
+        self.frameOptionsFrame.setVisible(self._enableRename)
 
         self.logData.clear()
         pretty = PrintFormatter()
@@ -550,36 +664,118 @@ class NefDictFrame(Frame):
     def _rename(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False):
         """Handle clicking a rename button
         """
-        if not (lineEdit and item):
+        if not item:
             return
 
         itemName = item.data(0, 0)
+        parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
         cat = saveFrame.get('sf_category')
 
         # find the primary handler class for the clicked item, .i.e. chains/peakLists etc.
-        primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(item.parent().data(0, 0)) or saveFrame.get('sf_category')
+        primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
         func = self._nefReader.renames.get(primaryHandler)
         if func is not None:
 
-            newName = lineEdit.get()
+            # NOTE:ED - remember tree checkbox selection
+            _checks = [[_itm.data(0, 0), _itm.data(1, 0), _itm.parent().data(0, 0) if _itm.parent() else repr(None)]
+                       for _itm in self.nefTreeView.traverseTree()
+                       if _itm.checkState(0) == QtCore.Qt.Checked]
+
+            # take from lineEdit if exists, otherwise assume autorename (for the minute)
+            newName = lineEdit.get() if lineEdit else None
             try:
                 # call the correct rename function based on the item clicked
-                newName = func(self._nefReader, self.project, self._nefDict, saveFrame,
+
+                # TODO:ED make a new contentCompareDict that contains a merge of left and right windows
+                #       don't need to merge, just make a list of dicts to compare against :)
+
+                newName = func(self._nefReader, self.project,
+                               self._nefDict, self._contentCompareDataBlocks,
+                               saveFrame,
                                itemName=itemName, newName=newName if not autoRename else None)
             except Exception as es:
-                showWarning('Rename', str(es))
+                showWarning('Rename SaveFrame', str(es))
             else:
 
                 # everything okay - rebuild all for now, could make selective later
                 self.nefTreeView._populateTreeView(self.project)
                 self._fillPopup(self._nefDict)
 
-                # _parent = self.nefTreeView._contentParent(self.project, saveFrame, cat)
+                for ii, (_name, _, _treeParent) in enumerate(_checks):
+                    if _treeParent == parentGroup and _name == itemName:
+                        _name = newName
+
+                    _parent = self.nefTreeView.findSection(_treeParent)
+                    if _parent:
+                        _checkItem = self.nefTreeView.findSection(_name, _parent)
+                        if _checkItem:
+                            _checkItem.setCheckState(0, QtCore.Qt.Checked)
+
+                # _parent = self.nefTreeView._contentParent(self.project, saveFrame, cat)\
                 _parent = self.nefTreeView.findSection(parentName)
                 if _parent:
                     newItem = self.nefTreeView.findSection(newName, _parent)
                     if newItem:
                         self._nefTreeClickedCallback(newItem, 0)
+
+    def _renameSequenceCode(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False):
+        """Handle clicking a rename button
+        """
+        if not item:
+            return
+
+        itemName = item.data(0, 0)
+        parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
+        cat = saveFrame.get('sf_category')
+
+        # find the primary handler class for the clicked item, .i.e. chains/peakLists etc.
+        primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
+        func = self._nefReader.renames.get('nmr_sequence_code')
+        if func is not None:
+
+            # NOTE:ED - remember tree checkbox selection
+            _checks = [[_itm.data(0, 0), _itm.data(1, 0), _itm.parent().data(0, 0) if _itm.parent() else repr(None)]
+                       for _itm in self.nefTreeView.traverseTree()
+                       if _itm.checkState(0) == QtCore.Qt.Checked]
+
+            # take from lineEdit if exists, otherwise assume autorename (for the minute)
+            newName = lineEdit.get() if lineEdit else None
+            try:
+                # call the correct rename function based on the item clicked
+
+                # TODO:ED make a new contentCompareDict that contains a merge of left and right windows
+                #       don't need to merge, just make a list of dicts to compare against :)
+
+                newName = func(self._nefReader, self.project,
+                               self._nefDict, self._contentCompareDataBlocks,
+                               saveFrame,
+                               itemName=itemName, newName=newName if not autoRename else None)
+            except Exception as es:
+                showWarning('Rename SaveFrame', str(es))
+            else:
+
+                # everything okay - rebuild all for now, could make selective later
+                self.nefTreeView._populateTreeView(self.project)
+                self._fillPopup(self._nefDict)
+
+                for ii, (_name, _, _treeParent) in enumerate(_checks):
+                    if _treeParent == parentGroup and _name == itemName:
+                        _name = newName
+
+                    _parent = self.nefTreeView.findSection(_treeParent)
+                    if _parent:
+                        _checkItem = self.nefTreeView.findSection(_name, _parent)
+                        if _checkItem:
+                            _checkItem.setCheckState(0, QtCore.Qt.Checked)
+
+                # _parent = self.nefTreeView._contentParent(self.project, saveFrame, cat)\
+                _parent = self.nefTreeView.findSection(parentName)
+                if _parent:
+                    newItem = self.nefTreeView.findSection(newName, _parent)
+                    if newItem:
+                        self._nefTreeClickedCallback(newItem, 0)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     handleSaveFrames['nef_sequence'] = partial(handle_treeView_selection,
                                                prefix='nef_sequence_',
@@ -775,7 +971,117 @@ class NefDictFrame(Frame):
                                                   errorCode='ccpn_substance',
                                                   tableColourFunc=None)
 
-    def _nefTreeClickedCallback(self, item, column):
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    applyCheckBoxes['nef_sequence'] = partial(apply_checkBox_item,
+                                              prefix='nef_sequence_',
+                                              mappingCode='nef_sequence_chain_code',
+                                              )
+
+    applyCheckBoxes['nef_chemical_shift_list'] = partial(apply_checkBox_item,
+                                                         prefix='nef_chemical_shift_',
+                                                         mappingCode='nef_chemical_shift_list',
+                                                         )
+
+    applyCheckBoxes['nef_distance_restraint_list'] = partial(apply_checkBox_item,
+                                                             prefix='nef_distance_restraint_',
+                                                             mappingCode='nef_distance_restraint_list',
+                                                             )
+
+    applyCheckBoxes['nef_dihedral_restraint_list'] = partial(apply_checkBox_item,
+                                                             prefix='nef_dihedral_restraint_',
+                                                             mappingCode='nef_dihedral_restraint_list',
+                                                             )
+
+    applyCheckBoxes['nef_rdc_restraint_list'] = partial(apply_checkBox_item,
+                                                        prefix='nef_rdc_restraint_',
+                                                        mappingCode='nef_rdc_restraint_list',
+                                                        )
+
+    applyCheckBoxes['ccpn_restraint_list'] = partial(apply_checkBox_item,
+                                                     prefix='ccpn_restraint_',
+                                                     mappingCode='ccpn_restraint_list',
+                                                     )
+
+    applyCheckBoxes['ccpn_sample'] = partial(apply_checkBox_item,
+                                             prefix='ccpn_sample_component_',
+                                             mappingCode='ccpn_sample',
+                                             )
+
+    applyCheckBoxes['ccpn_complex'] = partial(apply_checkBox_item,
+                                              prefix='ccpn_complex_chain_',
+                                              mappingCode='ccpn_complex',
+                                              )
+
+    applyCheckBoxes['ccpn_spectrum_group'] = partial(apply_checkBox_item,
+                                                     prefix='ccpn_group_spectrum_',
+                                                     mappingCode='ccpn_spectrum_group',
+                                                     )
+
+    applyCheckBoxes['ccpn_note'] = partial(apply_checkBox_item,
+                                           prefix='ccpn_note_',
+                                           mappingCode='ccpn_notes',
+                                           )
+
+    applyCheckBoxes['ccpn_peak_list'] = partial(apply_checkBox_item,
+                                                prefix='nef_peak_',
+                                                mappingCode='nef_peak',
+                                                )
+
+    applyCheckBoxes['ccpn_integral_list'] = partial(apply_checkBox_item,
+                                                    prefix='ccpn_integral_',
+                                                    mappingCode='ccpn_integral_list',
+                                                    checkID='_importIntegrals',
+                                                    )
+
+    applyCheckBoxes['ccpn_multiplet_list'] = partial(apply_checkBox_item,
+                                                     prefix='ccpn_multiplet_',
+                                                     mappingCode='ccpn_multiplet_list',
+                                                     checkID='_importMultiplets',
+                                                     )
+
+    applyCheckBoxes['ccpn_peak_cluster_list'] = partial(apply_checkBox_item,
+                                                        prefix='ccpn_peak_cluster_',
+                                                        mappingCode='ccpn_peak_cluster',
+                                                        )
+
+    applyCheckBoxes['nmr_chain'] = partial(apply_checkBox_item,
+                                           prefix='nmr_chain_',
+                                           mappingCode='nmr_chain',
+                                           )
+
+    applyCheckBoxes['ccpn_substance'] = partial(apply_checkBox_item,
+                                                prefix='ccpn_substance_synonym_',
+                                                mappingCode='ccpn_substance',
+                                                )
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def _autoRenameItem(self, name, saveFrame, parentGroup):
+        if not saveFrame:
+            return
+
+        mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
+        primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
+        if primaryHandler:
+            handler = self.handleSaveFrames.get(primaryHandler)
+            if handler is not None:
+                # handler(self, saveFrame, item)
+                handler(self, name=name, saveFrame=saveFrame, parentGroup=parentGroup, _handleAutoRename=True)  #, item)
+
+    def _checkBadItem(self, name, saveFrame, parentGroup):
+        if not saveFrame:
+            return
+
+        mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
+        primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
+        if primaryHandler:
+            handler = self._setBadSaveFrames.get(primaryHandler)
+            if handler is not None:
+                # handler(self, saveFrame, item)
+                return handler(self, name=name, saveFrame=saveFrame, parentGroup=parentGroup, )  #, item)
+
+    def _nefTreeClickedCallback(self, item, column=0):
         """Handle clicking on an item in the nef tree
         """
         self._nefTables = {}
@@ -784,12 +1090,11 @@ class NefDictFrame(Frame):
         self._nefWidgets = []
         self._removeWidget(self.frameOptionsFrame, removeTopWidget=False)
 
-        # # clicking the checkbox also comes here
-        # self._colourTreeView()
-        #
+        itemName = item.data(0, 0)
         saveFrame = item.data(1, 0)
-        if saveFrame:
-            if hasattr(saveFrame, '_content'):
+        if saveFrame and hasattr(saveFrame, '_content'):
+            with self.blockWidgetSignals():
+                parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
 
                 # add a table from the saveframe attributes
                 loop = StarIo.NmrLoop(name=saveFrame.name, columns=('attribute', 'value'))
@@ -797,13 +1102,13 @@ class NefDictFrame(Frame):
                     if not (k.startswith('_') or isinstance(v, StarIo.NmrLoop)):
                         loop.newRow((k, v))
                 _name, _data = saveFrame.name, loop.data
-                frame, table = self._addTableToFrame(_data, _name)
+                frame, table = self._addTableToFrame(_data, _name.upper())
                 self._tableSplitter.addWidget(frame)
                 self._nefWidgets.append(frame)
 
                 # get the group name add fetch the correct mapping
-                mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(item.parent().data(0, 0))
-                primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(item.parent().data(0, 0)) or saveFrame.get('sf_category')
+                mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
+                primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
 
                 # add tables from the loops in the saveframe
                 loops = self._nefReader._getLoops(self.project, saveFrame)
@@ -831,10 +1136,13 @@ class NefDictFrame(Frame):
                 if primaryHandler:
                     handler = self.handleSaveFrames.get(primaryHandler)
                     if handler is not None:
-                        handler(self, saveFrame, item)
+                        # handler(self, saveFrame, item)
+                        handler(self, name=itemName, saveFrame=saveFrame, parentGroup=parentGroup)
 
-        # clicking the checkbox also comes here - above loop may set item._badName
-        self._colourTreeView()
+                # clicking the checkbox also comes here - above loop may set item._badName
+                self._colourTreeView()
+
+        self._filterLogFrame.setVisible(self._enableFilterFrame)
 
     def _addTableToFrame(self, _data, _name):
         """Add a new gui table into a moreLess frame to hold a nef loop
@@ -853,6 +1161,7 @@ class NefDictFrame(Frame):
         """
         if not self._nefLoader:
             self._nefLoader = Nef.NefImporter(errorLogging=Nef.el.NEF_STANDARD, hidePrefix=True)
+
             if not self.project:
                 raise TypeError('Project is not defined')
             self._nefWriter = CcpnNefIo.CcpnNefWriter(self.project)
@@ -865,6 +1174,7 @@ class NefDictFrame(Frame):
         self._nefLoader._attachClear(self._nefReader.clearSaveFrames)
         self._nefLoader._clearNef(self.project, self._nefDict)
         self._nefLoader._contentNef(self.project, self._nefDict, selection=None)
+        self._nefLoader.loadValidateDictionary(nefValidationPath)
         if not self._primaryProject:
             warnings, errors = self._nefLoader._verifyNef(self.project, self._nefDict, selection=None)
 
@@ -874,6 +1184,30 @@ class NefDictFrame(Frame):
             getLogger().warning(str(es))
 
         self._populate()
+
+    def getItemsToImport(self):
+        self._nefReader.setImportAll(False)
+        treeItems = [item for item in self.nefTreeView.traverseTree() if item.checkState(0) == QtCore.Qt.Checked]
+        selection = [item.data(1, 0) for item in treeItems] or [None]
+
+        self._nefReader._importDict = {}
+        for item in treeItems:
+
+            itemName = item.data(0, 0)
+            saveFrame = item.data(1, 0)
+            parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
+
+            # mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
+            handlerMapping = self.nefTreeView.nefProjectToHandlerMapping
+            if handlerMapping and saveFrame:
+                primaryHandler = handlerMapping.get(parentGroup) or saveFrame.get('sf_category')
+                if primaryHandler:
+                    handler = self.applyCheckBoxes.get(primaryHandler)
+                    if handler is not None:
+                        # handler(self, saveFrame, item)
+                        handler(self, name=itemName, saveFrame=saveFrame, parentGroup=parentGroup)  #, item)
+
+        return selection
 
 
 class ImportNefPopup(CcpnDialogMainWidget):
@@ -918,6 +1252,10 @@ class ImportNefPopup(CcpnDialogMainWidget):
         # populate the widgets
         self._populate()
 
+        # object to contain items that ar to be imported
+        self._saveFrameSelection = None
+        self._activeImportWindow = None
+
         # enable the buttons
         self.setOkButton(callback=self._okClicked, tipText='Okay')
         self.setCloseButton(callback=self.reject, tipText='Close')
@@ -932,10 +1270,16 @@ class ImportNefPopup(CcpnDialogMainWidget):
         self.mainWidget.getLayout().addWidget(self.paneSplitter, 0, 0)
 
         self._nefWindows = OD()
-        for obj, enableCheckboxes in self.nefObjects:
+        for nefObj in self.nefObjects:
+            # for obj, enableCheckBoxes, enableRename in self.nefObjects:
+
             # add a new nefDictFrame for each of the objects in the list (project or nefImporter)
-            newWindow = NefDictFrame(self, mainWindow=self.mainWindow, nefObject=obj, grid=(0, 0), showBorder=True, enableCheckboxes=enableCheckboxes)
-            self._nefWindows[obj] = newWindow
+            newWindow = NefDictFrame(self, mainWindow=self.mainWindow, grid=(0, 0), showBorder=True,
+                                     # nefObject=obj,
+                                     # enableCheckBoxes=enableCheckBoxes,
+                                     # enableRename=enableRename,
+                                     **nefObj)
+            self._nefWindows[nefObj[NEFFRAMEKEY_IMPORT]] = newWindow
             self.paneSplitter.addWidget(newWindow)
 
     def _populate(self):
@@ -946,12 +1290,46 @@ class ImportNefPopup(CcpnDialogMainWidget):
 
     def setNefObjects(self, nefObjects):
         # create a list of nef dictionary objects here and add to splitter
-        self.nefObjects = tuple(obj for obj in nefObjects if isinstance(obj, tuple)
-                                and len(obj) == 2
-                                and isinstance(obj[0], (Nef.NefImporter, Project))
-                                and isinstance(obj[1], bool))
+        # self.nefObjects = tuple(obj for obj in nefObjects if isinstance(obj, tuple)
+        #                         and len(obj) == 3
+        #                         and isinstance(obj[0], (Nef.NefImporter, Project))
+        #                         and isinstance(obj[1], bool)
+        #                         and isinstance(obj[2], bool))
+        self.nefObjects = ()
+        if not isinstance(nefObjects, (tuple, list)):
+            raise TypeError('nefObjects {} must be a list/tuple'.format(nefObjects))
+        for checkObj in nefObjects:
+            if not isinstance(checkObj, dict):
+                raise TypeError('nefDictFrame object {} must be a dict'.format(checkObj))
+
+            for k, val in checkObj.items():
+                if k not in NEFDICTFRAMEKEYS.keys():
+                    raise TypeError('nefDictFrame object {} contains a bad key {}'.format(checkObj, k))
+                if not isinstance(val, (NEFDICTFRAMEKEYS[k])):
+                    raise TypeError('nefDictFrame key {} must be of type {}'.format(k, NEFDICTFRAMEKEYS[k]))
+            missingKeys = list([kk for kk in NEFDICTFRAMEKEYS_REQUIRED if kk not in checkObj.keys()])
+            if missingKeys:
+                raise TypeError('nefDictFrame missing keys {}'.format(repr(missingKeys)))
+
+            self.nefObjects += (checkObj,)
+
         if len(self.nefObjects) != len(nefObjects):
             getLogger().warning('nefObjects contains bad items {}'.format(nefObjects))
+
+    def setActiveNefWindow(self, value):
+        """Set the number of the current active nef window for returning values from the dialog
+        """
+        if isinstance(value, int) and 0 <= value < len(self._nefWindows):
+            self._activeImportWindow = value
+        else:
+            ll = len(self._nefWindows)
+            raise TypeError('Invalid window number, must be 0{}{}'.format('-' if ll > 1 else '',
+                                                                          (ll - 1) if ll > 1 else ''))
+
+    def getActiveNefReader(self):
+        """Get teh current active nef reader for the dialog
+        """
+        return list(self._nefWindows.values())[self._activeImportWindow]._nefReader
 
     def _initialiseProject(self, mainWindow, application, project):
         """Initialise the project setting - only required for testing
@@ -975,10 +1353,33 @@ class ImportNefPopup(CcpnDialogMainWidget):
         for obj, nefWindow in self._nefWindows.items():
             nefWindow._fillPopup(obj)
 
+            for itm in nefWindow.nefTreeView.traverseTree():
+                if itm.data(0, 0) not in nefWindow.nefTreeView.nefProjectToSaveFramesMapping:
+                    nefWindow._nefTreeClickedCallback(itm, 0)
+                    nefWindow.nefTreeView.setCurrentItem(itm)
+                    break
+
+        # NOTE:ED - temporary function to create a contentCompare from the two nef windows
+        nefDictTuple = ()
+        for obj, nefWindow in self._nefWindows.items():
+            nefDictTuple += (nefWindow._nefDict,)
+        if nefDictTuple:
+            for obj, nefWindow in self._nefWindows.items():
+                nefWindow._contentCompareDataBlocks = nefDictTuple
+
     def exec_(self) -> int:
         # NOTE:ED - this will do for the moment
         self.resize(*self._size)
         return super(ImportNefPopup, self).exec_()
+
+    def _createContentCompare(self):
+        pass
+
+    def _okClicked(self):
+        """Accept the dialog, set the selection list _selectedSaveFrames to the required items
+        """
+        self._saveFrameSelection = list(self._nefWindows.values())[self._activeImportWindow].getItemsToImport()
+        self.accept()
 
 
 if __name__ == '__main__':
@@ -1025,45 +1426,58 @@ if __name__ == '__main__':
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
-    TESTNEF2 = '/Users/ejb66/Documents/nefTestProject0.nef'
+    # TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
+    # TESTNEF2 = '/Users/ejb66/Documents/nefTestProject0.nef'
 
     # TESTNEF = '/Users/ejb66/Documents/nefTestProject.nef'
     # TESTNEF2 = '/Users/ejb66/Documents/nefTestProject.nef'
 
-    # TESTNEF = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
-    # TESTNEF2 = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
+    TESTNEF = '/Users/ejb66/Documents/CcpNmrData/nefTestProject.nef'
+    TESTNEF2 = '/Users/ejb66/Documents/CcpNmrData/nefTestProject0.nef'
+
+    # TESTNEF = '/Users/ejb66/Documents/TutorialProject2.nef'
+    # TESTNEF2 = '/Users/ejb66/Documents/CcpNmrData/nefTestProject0.nef'
 
     # TESTNEF = '/Users/ejb66/Desktop/Ccpn_v2_testNef_a1.nef'
     # TESTNEF2 = '/Users/ejb66/Desktop/Ccpn_v2_testNef_a1.nef'
 
-    # VALIDATEDICT = '/Users/ejb66/PycharmProjects/Git/NEF/specification/mmcif_nef.dic'
-    VALIDATEDICT = '/Users/ejb66/Desktop/mmcif_nef_v1_1.dic'
+    # VALIDATEDICT = '/Users/ejb66/PycharmProjects/Git/AnalysisV3/src/python/ccpn/util/nef/NEF/specification/mmcif_nef_v1_1.dic'
+    # VALIDATEDICT = '/Users/ejb66/Desktop/mmcif_nef_v1_1.dic'
     DEFAULTNAME = 'default'
 
     from ccpn.util.nef import NefImporter as Nef
 
-
     # load the file and the validate dict
     _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
     _loader.loadFile(TESTNEF)
-    _loader.loadValidateDictionary(VALIDATEDICT)
+    _loader.loadValidateDictionary(nefValidationPath)
 
     # load the file and the validate dict
     _loader2 = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
     _loader2.loadFile(TESTNEF2)
-    _loader2.loadValidateDictionary(VALIDATEDICT)
+    _loader2.loadValidateDictionary(nefValidationPath)
 
     # validate
-    print(_loader.name, _loader.isValid)
-    print(_loader2.name, _loader2.isValid)
+    valid = _loader.isValid
+    if not valid:
+        errLog = _loader.validErrorLog
+        for k, val in errLog.items():
+            if val:
+                print('>>> {} : {}'.format(k, val))
 
-    # simple test print of saveframes
-    names = _loader.getSaveFrameNames(returnType=Nef.NEF_RETURNALL)
-    for name in names:
-        print(name)
-        saveFrame = _loader.getSaveFrame(name)
-        print(saveFrame)
+    valid = _loader2.isValid
+    if not valid:
+        errLog = _loader2.validErrorLog
+        for k, val in errLog.items():
+            if val:
+                print('>>> {} : {}'.format(k, val))
+
+    # # simple test print of saveframes
+    # names = _loader.getSaveFrameNames(returnType=Nef.NEF_RETURNALL)
+    # for name in names:
+    #     print(name)
+    #     saveFrame = _loader.getSaveFrame(name)
+    #     print(saveFrame)
 
     # create a list of which saveframes to load, with a parameters dict for each
     loadDict = {'nef_molecular_system'     : {},
@@ -1091,41 +1505,37 @@ if __name__ == '__main__':
 
     with notificationEchoBlocking():
         with catchExceptions(application=application, errorStringTemplate='Error loading Nef file: %s'):
-            # need datablock selector here, with subset selection dependent on datablock type
-
+            nefReader.setImportAll(True)
             _loader._importNef(project, _loader._nefDict, selection=None)
-            # warnings, errors = _loader._verifyNef(project, _loader2._nefDict, selection=None)
-            # if not (warnings or errors):
-            #     _loader._importNef(project, _loader2._nefDict, selection=None)
-            # else:
-            #     # for msg in warnings or ('','',''):
-            #     #     print('  >>', msg)
-            #     for msg in errors or ('', '', ''):
-            #         print(msg[0])
-            #
-            # result = _loader._contentNef(project, _loader2._nefDict, selection=None)
 
     nefReader.testPrint(project, _loader._nefDict, selection=None)
     nefReader.testErrors(project, _loader._nefDict, selection=None)
-
-    from ccpn.ui.gui.popups.ImportNefPopup import ImportNefPopup
-
 
     app = QtWidgets.QApplication(['testApp'])
     # run the dialog
     dialog = ImportNefPopup(parent=ui.mainWindow, mainWindow=ui.mainWindow,
                             # nefObjects=(_loader,))
-                            nefObjects=((project, False),
-                                        (_loader2, True),))
+                            nefObjects=({NEFFRAMEKEY_IMPORT: project,
+                                         },
+                                        {NEFFRAMEKEY_IMPORT           : _loader2,
+                                         NEFFRAMEKEY_ENABLECHECKBOXES : True,
+                                         NEFFRAMEKEY_ENABLERENAME     : True,
+                                         NEFFRAMEKEY_ENABLEFILTERFRAME: True,
+                                         NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
+                                         NEFFRAMEKEY_PATHNAME         : TESTNEF2,
+                                         }
+                                        )
+                            )
 
     dialog._initialiseProject(ui.mainWindow, application, project)
     dialog.fillPopup()
+    dialog.setActiveNefWindow(1)
 
     # NOTE:ED - add routines here to set up the mapping between the different nef file loaded
-    dialog.exec_()
+    val = dialog.exec_()
+    print('>>> dialog exit {}'.format(val))
 
     import ccpn.util.nef.nef as Nef
-
 
     # NOTE:ED - by default pidList=None selects everything in the project
     # from ccpn.core.Chain import Chain
@@ -1167,9 +1577,6 @@ if __name__ == '__main__':
     #         for obj in getattr(project, name):
     #             pidList.append(obj.pid)
 
-    nefWriter = CcpnNefIo.CcpnNefWriter(project)
-    localNefDict = nefWriter.exportProject(expandSelection=True, pidList=None)
-
     from ccpn.util.AttrDict import AttrDict
 
 
@@ -1180,159 +1587,7 @@ if __name__ == '__main__':
     options.maxRows = 5
     options.places = 8
 
-    # sys.setrecursionlimit(10000)
+    nefWriter = CcpnNefIo.CcpnNefWriter(project)
+    localNefDict = nefWriter.exportProject(expandSelection=True, pidList=None)
     result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
-    Nef.printCompareList(result, 'LOADED', 'local', options)
-
-    # # NOTE:ED - extract information from the saveframes as sets and dicts
-    # frame = _loader.getSaveFrame('ccpn_assignment')
-    # if frame is not None:
-    #     nmrChains, nmrResidues, nmrAtoms = nefReader.content_ccpn_assignment(project, frame._nefFrame)
-    #     print('nmrChains: ')
-    #     for val in nmrChains:
-    #         print(val)
-    #     print('nmrResidues: ')
-    #     for val in list(nmrResidues)[:4]:
-    #         print(val)
-    #     print('nmrAtoms: ')
-    #     for val in list(nmrAtoms)[:4]:
-    #         print(val)
-    #
-    # frame = _loader.getSaveFrame('nef_molecular_system')
-    # if frame is not None:
-    #     data = nefReader.content_nef_molecular_system(project, frame._nefFrame)
-    #     chains, residues = data['nef_sequence']
-    #     print('chains: ')
-    #     for val in chains:
-    #         print(val)
-    #     print('residues: ')
-    #     for val in list(residues)[:4]:
-    #         print(val)
-
-    # set up a test dict
-    testDict1 = {
-        "Boolean1"  : True,
-        "Boolean2"  : True,
-        "DictOuter" : {
-            "String1"    : 'This is a string',
-            "ListSet"    : [[0, {1, 2, 3, 4, 5.00, 'More strings'}],
-                            [0, 1000000],
-                            ['Another string', 0]],
-            "nestedLists": [[0, 0],
-                            [0, 1 + 2j],
-                            [0, (1, 2, 3, 4, 5, 6), {
-                                "nestedListsInner": [[0, 0],
-                                                     [0, 1 + 2.00000001j],
-                                                     [0, (1, 2, 3, 4, 5, 6)]],
-                                "ListSetInner"    : [[0, {1, 2, 3, 4, 5, 'more INNER strings'}],
-                                                     [0, 1000000.0],
-                                                     ['Another inner string', 0.0]],
-                                "String1Inner"    : 'this is a inner string',
-                                }
-                             ]]
-            },
-        "nestedDict": {
-            "nestedDictItems": {
-                "floatItem": 1.23
-                }
-            }
-        }
-
-    testDict2 = {
-        "Boolean2"  : True,
-        "DictOuter" : {
-            "ListSet"    : [[0, {1, 2, 3, 4, 5.00000000001, 'more strings'}],
-                            [0, 1000000.0],
-                            ['Another string', 0.0]],
-            "String1"    : 'this is a string',
-            "nestedLists": [[0, 0],
-                            [0, 1 + 2.00000001j],
-                            [0, (1, 2, 3, 4, 5, 6), OD((
-                                ("ListSetInner", [[0, OrderedSet([1, 2, 3, 4, 5.00000001, 'more inner strings'])],
-                                                  [0, 1000000.0],
-                                                  {'Another inner string', 0.0}]),
-                                ("String1Inner", 'this is a inner string'),
-                                ("nestedListsInner", [[0, 0],
-                                                      [0, 1 + 2.00000001j],
-                                                      [0, (1, 2, 3, 4, 5, 6)]])
-                                ))
-                             ]]
-            },
-        "nestedDict": {
-            "nestedDictItems": {
-                "floatItem": 1.23000001
-                }
-            },
-        "Boolean1"  : True,
-        }
-
-    options.identical = False
-    options.ignoreCase = True
-    options.almostEqual = True
-    options.maxRows = 5
-    options.places = 8
-    print(Nef._compareObjects(testDict1, testDict2, options))
-    print('{} {}'.format(testDict1, testDict2))
-
-    import re
-
-
-    pos = re.search('[<>]', str(testDict2), re.MULTILINE)
-    if pos:
-        print("Error: data cannot contain xml tags '{}' at pos {}".format(pos.group(), pos.span()))
-
-
-    # class PythonObjectEncoder(json.JSONEncoder):
-    #     """
-    #     Class to allow the serialisation of sets/OrderedSets/complex/OrderedDicts
-    #     """
-    #
-    #     def default(self, obj):
-    #         """Default method for encoding to json
-    #         """
-    #         from base64 import b64encode
-    #         import pickle
-    #
-    #         if isinstance(obj, OrderedSet):
-    #             return {"__orderedSet": list(obj)}
-    #         # elif isinstance(obj, OD):
-    #         #     return {"__orderedDict": [(k, val) for k, val in obj.items()]}
-    #         elif isinstance(obj, set):
-    #             return {"__set": list(obj)}
-    #         elif isinstance(obj, complex):
-    #             return {"__complex": str(obj)}
-    #         elif isinstance(obj, (list, dict, str, int, float, bool, type(None))):
-    #             return super().default(obj)
-    #         return {'__python_object': b64encode(pickle.dumps(obj)).decode('utf-8')}
-    #
-    #     @staticmethod
-    #     def as_python_object(dct):
-    #         """Method to decode contents of Json files with sets/OrderedSets/complex/OrderedDicts
-    #         In here so that I don't lose it :)
-    #
-    #         # NOTE:ED - keep this is it may be the reverse of Formatter class above
-    #
-    #         """
-    #         from base64 import b64decode
-    #         import pickle
-    #
-    #         if '__set' in dct:
-    #             return set(dct['__set'])
-    #         elif '__orderedSet' in dct:
-    #             return OrderedSet(dct['__orderedSet'])
-    #         elif '__complex' in dct:
-    #             return complex(dct['__complex'])
-    #         elif '__orderedDict' in dct:
-    #             return OD(dct['__orderedDict'])
-    #         elif '__python_object' in dct:
-    #             return pickle.loads(b64decode(dct['__python_object'].encode('utf-8')))
-    #         return dct
-    #
-    # dd = json.dumps(OD([('help', 12.0)]), indent=4, cls=PythonObjectEncoder)
-    # dd = json.dumps(testDict2, indent=4, cls=PythonObjectEncoder)
-    # # print(dd)
-    # recover = json.loads(dd, object_hook=PythonObjectEncoder.as_python_object)
-    # print(recover)
-
-    pretty = PrintFormatter()
-    print(pretty(testDict2))
+    # Nef.printCompareList(result, 'LOADED', 'local', options)

@@ -1899,6 +1899,23 @@ class Project(AbstractWrapperObject):
         return _fetchNefSubstance(self, sequence=sequence, name=name, **kwds)
 
     @logCommand('project.')
+    def getNefSubstance(self, sequence: typing.Sequence[dict], name: str = None, **kwds):
+        """Get existing Substance that matches sequence of NEF rows and/or name
+
+        See the Substance class for details.
+
+        Optional keyword arguments can be passed in; see Substance._fetchNefSubstance for details.
+
+        :param self:
+        :param sequence:
+        :param name:
+        :return: a new Nef Substance instance.
+        """
+        from ccpn.core.Substance import _getNefSubstance
+
+        return _getNefSubstance(self, sequence=sequence, name=name, **kwds)
+
+    @logCommand('project.')
     def createPolymerSubstance(self, sequence: typing.Sequence[str], name: str,
                                labelling: str = None, userCode: str = None, smiles: str = None,
                                synonyms: typing.Sequence[str] = (), comment: str = None,
@@ -1976,3 +1993,17 @@ class Project(AbstractWrapperObject):
         from ccpn.core.ChemicalShiftList import _newChemicalShiftList
 
         return _newChemicalShiftList(self, name=name, spectra=spectra, **kwds)
+
+    @logCommand('project.')
+    def getChemicalShiftList(self, name: str = None, **kwds):
+        """Get existing ChemicalShiftList.
+
+        See the ChemicalShiftList class for details.
+
+        :param name:
+        :param spectra:
+        :return: a new ChemicalShiftList instance.
+        """
+        from ccpn.core.ChemicalShiftList import _getChemicalShiftList
+
+        return _getChemicalShiftList(self, name=name, **kwds)

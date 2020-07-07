@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:27 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-04-23 19:03:39 +0100 (Thu, April 23, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -298,6 +298,56 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
             self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
                                          % (result, serial))
 
+    return result
+
+
+def _getChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', autoUpdate: bool = True,
+                          isSimulated: bool = False, serial: int = None, comment: str = None,
+                          spectra=()) -> ChemicalShiftList:
+    """Create new ChemicalShiftList.
+
+    See the ChemicalShiftList class for details.
+
+    :param name:
+    :param unit:
+    :param autoUpdate:
+    :param isSimulated:
+    :param comment:
+    :param serial: optional serial number.
+    :return: a new ChemicalShiftList instance.
+    """
+
+    # EJB 20181212: this is from refactored
+    # GWV 20181210: deal with already existing names by incrementing
+    # name = name.translate(Pid.remapSeparators)
+    # # find a name that is unique
+    # found = (self.getChemicalShiftList(name) is not None)
+    # while found:
+    #     name = commonUtil.incrementName(name)
+    #     found = (self.getChemicalShiftList(name) is not None)
+
+    if spectra:
+        getByPid = self._project.getByPid
+        spectra = [getByPid(x) if isinstance(x, str) else x for x in spectra]
+
+    if not name:
+        # Make default name
+        nextNumber = len(self.chemicalShiftLists)
+        chemName = self._defaultName(ChemicalShiftList)
+        name = '%s_%s' % (chemName, nextNumber) if nextNumber > 0 else chemName
+
+    if not isinstance(name, str):
+        raise TypeError("ChemicalShiftList name must be a string")  # ejb catch non-string
+    if Pid.altCharacter in name:
+        raise ValueError("Character %s not allowed in ChemicalShiftList name" % Pid.altCharacter)
+
+    dd = {'name': name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
+          'details': comment}
+    if spectra:
+        dd.update({'experiments': OrderedSet([spec._wrappedData.experiment for spec in spectra])})
+
+    apiChemicalShiftList = self._wrappedData.getShiftList(**dd)
+    result = self._data2Obj.get(apiChemicalShiftList)
     return result
 
 

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 01:56:07 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-06 14:28:16 +0100 (Mon, July 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -76,7 +76,7 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import catchExceptions
+from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar
 from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, USERMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
 
 import faulthandler
@@ -379,7 +379,7 @@ class Framework(NotifierBase):
 
         if self.preferences.general.checkUpdatesAtStartup:
             if not self.ui._checkUpdates():
-              return
+                return
 
         if not self.ui._checkRegistration():
             return
@@ -1562,14 +1562,9 @@ class Framework(NotifierBase):
         with undoBlock():
             with notificationEchoBlocking():
                 with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s'):
+                    # need datablock selector here, with subset selection dependent on datablock type
+
                     self.nefReader.importNewProject(self.project, dataBlock)
-                # try:
-                #     self.nefReader.importNewProject(self.project, dataBlock)
-                # except Exception as es:
-                #     getLogger().warning('Error loading Nef file: %s' % str(es))
-                #     if self._isInDebugMode:
-                #         raise es
-                # # finally:
 
         self.project._wrappedData.shiftAveraging = True
 
@@ -1846,7 +1841,7 @@ class Framework(NotifierBase):
             dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
                                 acceptMode=FileDialog.AcceptOpen,
                                 filter=filter,
-                                preferences = self.preferences,
+                                preferences=self.preferences,
                                 initialPath=self.preferences.general.userWorkingPath,
                                 pathID=USERNEFPATH)
             dialog._show()
@@ -1855,7 +1850,10 @@ class Framework(NotifierBase):
                 return
 
             with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s'):
-                self._loadNefFile(path=path, makeNewProject=False)
+
+                with undoBlockWithoutSideBar():
+                    self._importNefFile(path=path, makeNewProject=False)
+                self.ui.mainWindow.sideBar.buildTree(self.project)
 
             # try:
             #     for path in paths:
@@ -1864,6 +1862,63 @@ class Framework(NotifierBase):
             #     getLogger().warning('Error Importing Nef File: %s' % str(es))
             #     if self._isInDebugMode:
             #         raise es
+
+    def _importNefFile(self, path: str, makeNewProject=True) -> Project:
+        """Load Project from NEF file at path, and do necessary setup"""
+
+        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
+        from ccpn.ui.gui.popups.ImportNefPopup import ImportNefPopup, NEFFRAMEKEY_ENABLERENAME, \
+            NEFFRAMEKEY_IMPORT, NEFFRAMEKEY_ENABLEMOUSEMENU, NEFDICTFRAMEKEYS, NEFFRAMEKEY_PATHNAME, \
+            NEFDICTFRAMEKEYS_REQUIRED, NEFFRAMEKEY_ENABLEFILTERFRAME, NEFFRAMEKEY_ENABLECHECKBOXES
+        from ccpn.util.nef import NefImporter as Nef
+        from ccpn.framework.PathsAndUrls import nefValidationPath
+
+        # dataBlock = self.nefReader.getNefData(path)
+
+        _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
+        _loader.loadFile(path)
+        _loader.loadValidateDictionary(nefValidationPath)
+
+        # verify popup here
+        selection = None
+
+        dialog = ImportNefPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                nefObjects=({NEFFRAMEKEY_IMPORT: self.project,
+                                             },
+                                            {NEFFRAMEKEY_IMPORT           : _loader,
+                                             NEFFRAMEKEY_ENABLECHECKBOXES : True,
+                                             NEFFRAMEKEY_ENABLERENAME     : True,
+                                             NEFFRAMEKEY_ENABLEFILTERFRAME: True,
+                                             NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
+                                             NEFFRAMEKEY_PATHNAME         : path,
+                                             })
+                                )
+        dialog.fillPopup()
+        dialog.setActiveNefWindow(1)
+        if dialog.exec_():
+
+            selection = dialog._saveFrameSelection
+            _nefReader = dialog.getActiveNefReader()
+
+            if makeNewProject:
+                if self.project is not None:
+                    self._closeProject()
+                self.project = self.newProject(_loader._nefDict.name)
+
+            self.project._wrappedData.shiftAveraging = False
+            # with suspendSideBarNotifications(project=self.project):
+
+            with undoBlock():
+                with notificationEchoBlocking():
+                    with catchExceptions(application=self, errorStringTemplate='Error importing Nef file: %s'):
+                        # need datablock selector here, with subset selection dependent on datablock type
+
+                        _nefReader.importNewProject(self.project, _loader._nefDict, selection)
+
+            self.project._wrappedData.shiftAveraging = True
+
+            getLogger().info('==> Loaded NEF file: "%s"' % (path,))
+            return self.project
 
     def _exportNEF(self):
         """
@@ -1878,7 +1933,8 @@ class Framework(NotifierBase):
                                 text="Export to Nef File",
                                 acceptMode=FileDialog.AcceptSave,
                                 preferences=self.preferences,
-                                selectFile=os.path.join(self.preferences.general.userWorkingPath or '~', self.project.name + '.nef'),  # new flag to populate dialog,
+                                selectFile=os.path.join(self.preferences.general.userWorkingPath or '~', self.project.name + '.nef'),
+                                # new flag to populate dialog,
                                 filter='*.nef')
 
         # an exclusion list comes out of the dialog as it
@@ -3307,67 +3363,3 @@ if __name__ == '__main__':
     container = ApplicationContainer()
     container.register(application)
     application.useFileLogger = True
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    from xml.etree import ElementTree
-    from ccpn.util.Path import aPath
-    from ccpn.util.SafeFilename import getSafeFilename
-
-    # active parser to include comments in import/export
-    parser = ElementTree.XMLParser(target=ElementTree.TreeBuilder(insert_comments=True))
-
-    # read in the file
-    filePath = aPath('/Users/ejb66/Documents/CcpNmrData/sh3_tutorial_LabPtn.ccpn/ccpnv3/ccp/nmr/Nmr/sh3_tutorial+sh3_tutorial_vicky_2009-04-16-10-58-30-845_00001.xml')
-    tree = ElementTree.parse(filePath, parser)
-
-    # list of elements to remove from file
-    includeElems = ['LMOL.LabeledMolecule', 'LMOL.LabeledMixture.name', 'NMR.Experiment.labeledMixtures', 'LMOL.exo-LabeledMixture', 'NMR.Experiment.refExperiment']
-
-    indent = 0
-    def printRecur(parent):
-        """Recursively prints the tree
-        """
-        global indent
-
-        if parent.tag in includeElems:
-            print('_' * indent + '{}'.format(parent.tag.title().strip()))
-
-        indent += 4
-        for lm in list(parent):
-            printRecur(lm)
-        indent -= 4
-
-    def deleteRecur(parent):
-        """Recursively deletes elements in the tree
-        """
-        for lm in list(parent):
-            deleteRecur(lm)
-
-        for lm in list(parent):
-            if lm.tag in includeElems:
-                parent.remove(lm)
-                print('_' * indent + 'DELETE {}'.format(lm.tag.title().strip()))
-
-    # print the tree
-    root = tree.getroot()
-    printRecur(root)
-
-    # delete tags
-    deleteRecur(root)
-
-    # print again to test
-    printRecur(root)
-
-    # NOTE:ED - needs swapping round when working
-    fileName = filePath.basename
-    renameFileName = fileName+'_OLD'
-    renameFilePath =  (filePath.parent / renameFileName).assureSuffix('.xml')
-
-    # write out the modified file
-    safeName = aPath(getSafeFilename(renameFilePath))
-    tree.write(safeName, encoding='UTF-8', xml_declaration=True)
-
-    # with open(renameFilePath, "a+") as fp:
-    #     # added for completeness
-    #     fp.write('\n<!--End of Memops Data-->')

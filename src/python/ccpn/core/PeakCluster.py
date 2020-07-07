@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-05-04 17:37:09 +0100 (Mon, May 04, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -174,7 +174,7 @@ class PeakCluster(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(PeakCluster)
-def _newPeakCluster(self: Project, peaks: Sequence[Union['Peak', str]] = None, serial: int = None) -> PeakCluster:
+def _newPeakCluster(self: Project, peaks: Sequence[Union['Peak', str]] = None, annotation: str = None, serial: int = None) -> PeakCluster:
     """Create new PeakCluster.
 
     See the PeakCluster class for details.
@@ -187,9 +187,11 @@ def _newPeakCluster(self: Project, peaks: Sequence[Union['Peak', str]] = None, s
     apiParent = self._wrappedData
     if peaks:
         apiPeakCluster = apiParent.newPeakCluster(clusterType='multiplet',
-                                                  peaks=[p._wrappedData for p in peaks])
+                                                  peaks=[p._wrappedData for p in peaks],
+                                                  annotation=annotation)
     else:
-        apiPeakCluster = apiParent.newPeakCluster(clusterType='multiplet')
+        apiPeakCluster = apiParent.newPeakCluster(clusterType='multiplet',
+                                                  annotation=annotation)
 
     result = self._project._data2Obj.get(apiPeakCluster)
     if result is None:

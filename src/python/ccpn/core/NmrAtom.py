@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-23 18:26:47 +0100 (Tue, June 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-07 09:51:34 +0100 (Tue, July 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -515,6 +515,11 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
                     # Two NmrAtoms both with same @serial. Error
                     raise ValueError("Cannot create NmrAtom:%s.%s - reserved atom name clashes with %s"
                                      % (self._id, name, previous.longPid))
+
+                    # # NOTE:ED - these two lines renumber the current nmrAtom, instead of error
+                    # serial = obj.parent._serialDict['resonances'] + 1
+                    # name = None
+
                 else:
                     # We can renumber obj to free the serial for the new NmrAtom
                     newSerial = obj.parent._serialDict['resonances'] + 1

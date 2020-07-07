@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-07 09:42:42 +0100 (Tue, July 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-07 14:11:09 +0100 (Tue, July 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3285,12 +3285,17 @@ class CcpnNefReader(CcpnNefContent):
         newName = self._getNewName(contentDataBlocks, saveFrame, itemName, newName, 'nmr_chain', 'NmrChain')
 
         # NOTE:ED - check which are chains and which are nmr_chains
-        loopList = ('nmr_chain', 'nmr_residue', 'nmr_atom')
+        loopList = ('nmr_chain', 'nmr_residue', 'nmr_atom', 'nef_peak')
         replaceList = ('chain_code', 'complex_chain_code',
                        'chain_code_1', 'chain_code_2', 'chain_code_3', 'chain_code_4', 'chain_code_5',
                        'chain_code_6', 'chain_code_7', 'chain_code_8', 'chain_code_9', 'chain_code_10',
                        'chain_code_11', 'chain_code_12', 'chain_code_13', 'chain_code_14', 'chain_code_15',
                        'ccpn_tensor_chain_code', 'tensor_chain_code', 'short_name')
+        self.searchReplace(project, dataBlock, True, None, itemName, newName, replace=True,
+                           loopSearchList=loopList, rowSearchList=replaceList)
+
+        loopList = ('nef_chemical_shift')
+        replaceList = ('chain_code', )
         self.searchReplace(project, dataBlock, True, None, itemName, newName, replace=True,
                            loopSearchList=loopList, rowSearchList=replaceList)
 

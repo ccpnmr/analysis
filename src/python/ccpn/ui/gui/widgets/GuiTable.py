@@ -1702,7 +1702,6 @@ GuiTable::item::selected {
                                     if obj:
                                         selectedObjects.append(obj)
 
-            print(len(selectedObjects))
             return selectedObjects
         else:
             return None

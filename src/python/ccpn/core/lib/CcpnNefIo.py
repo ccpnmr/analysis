@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 19:58:15 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-07 09:42:42 +0100 (Tue, July 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -106,6 +106,9 @@ COMPLEXES = 'complexes'
 SPECTRUMGROUPS = 'spectrumGroups'
 NOTES = 'notes'
 PEAKCLUSTERS = 'peakClusters'
+
+POSITIONCERTAINTY = 'position_uncertainty_'
+POSITIONCERTAINTYLEN = len(POSITIONCERTAINTY)
 
 
 # NEf to CCPN tag mapping (and tag order)
@@ -2139,6 +2142,41 @@ class CcpnNefReader(CcpnNefContent):
                     if replace:
                         row[k] = newVal
 
+    def _searchReplaceNumberListLoop(self, project, loop: StarIo.NmrLoop,
+                                     searchFrameCode=None, replaceFrameCode=None, replace=False,
+                                     rowSearchList=None):
+        """Search the loop for occurrences of searchFrameCode and replace if required
+        """
+        # NOTE:ED - special for nef_peaks
+        if not loop:
+            return
+
+        maxPos = positions = 0
+        for rowNum, row in enumerate(loop.data):
+            positions = [int(_val[POSITIONCERTAINTYLEN:]) for _val in row.keys() if isinstance(_val, str) and _val.startswith(POSITIONCERTAINTY)]
+            maxPos = max(positions)
+            break
+
+        print('>>> positions {}'.format(positions))
+
+        for rowNum, row in enumerate(loop.data):
+            for posNum in range(1, maxPos + 1):
+                found = OD()
+                for k, oldVal, newVal in zip(rowSearchList, searchFrameCode, replaceFrameCode):
+                    kNum = '{}_{}'.format(k, posNum)
+
+                    if kNum in row:
+                        val = row.get(kNum)
+                        if val == oldVal:
+                            found[kNum] = (val, newVal)
+
+                # must have found ALL matching in the list
+                if len(found) == len(rowSearchList):
+                    for kNum, (val, newVal) in found.items():
+                        getLogger().debug('found {} {} --> {}'.format(rowNum, kNum, val))
+                        if replace:
+                            row[kNum] = newVal
+
     def _searchReplaceListFrame(self, project, saveFrame: StarIo.NmrSaveFrame,
                                 searchFrameCode=None, replaceFrameCode=None,
                                 replace=False, validFramesOnly=False,
@@ -2181,6 +2219,30 @@ class CcpnNefReader(CcpnNefContent):
                                                 replaceFrameCode=replaceFrameCode, replace=replace,
                                                 rowSearchList=rowSearchList)
 
+    def _searchReplaceNumberListLoops(self, project, saveFrame: StarIo.NmrSaveFrame,
+                                      searchFrameCode=None, replaceFrameCode=None,
+                                      replace=False, validFramesOnly=False,
+                                      frameSearchList=None, attributeSearchList=None,
+                                      loopSearchList=None, rowSearchList=None):
+        """Search the saveFrame for occurrences of searchFrameCode and replace if required
+        MUST BE LIST BASED
+        """
+        if not saveFrame:
+            return
+
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+
+        # search loops as well - will still search for all loops even in ignored saveFrames
+        mapping = nef2CcpnMap[saveFrame.category]
+        for tag, ccpnTag in mapping.items():
+            if ccpnTag == _isALoop:
+                loop = saveFrame.get(tag)
+                if loop and not (loopSearchList and loop.name not in loopSearchList):
+                    self._searchReplaceNumberListLoop(project, loop, searchFrameCode=searchFrameCode,
+                                                      replaceFrameCode=replaceFrameCode, replace=replace,
+                                                      rowSearchList=rowSearchList)
+
     def searchReplaceList(self, project: Project, dataBlock: StarIo.NmrDataBlock,
                           projectIsEmpty: bool = True,
                           selection: typing.Optional[dict] = None,
@@ -2204,6 +2266,34 @@ class CcpnNefReader(CcpnNefContent):
         if searchFrameCode:
             return self.traverseDataBlock(project, dataBlock, True, selection=None,
                                           traverseFunc=partial(self._searchReplaceListFrame,
+                                                               searchFrameCode=searchFrameCode, replaceFrameCode=replaceFrameCode,
+                                                               replace=replace, validFramesOnly=validFramesOnly,
+                                                               frameSearchList=frameSearchList, attributeSearchList=attributeSearchList,
+                                                               loopSearchList=loopSearchList, rowSearchList=rowSearchList))
+
+    def searchReplaceLoopListNumbered(self, project: Project, dataBlock: StarIo.NmrDataBlock,
+                                      projectIsEmpty: bool = True,
+                                      selection: typing.Optional[dict] = None,
+                                      searchFrameCode=None, replaceFrameCode=None,
+                                      replace=False, validFramesOnly=False,
+                                      frameSearchList=None, attributeSearchList=None,
+                                      loopSearchList=None, rowSearchList=None):
+        """Search the saveframes for references to attribute list and row list
+        All saveframes are traversed, attributes are processed for saveFrames in categorySearch list (if exists, or all of empty)
+        All searchframeCodes must match for replace to occur
+
+        e.g. searchFrameCode = ('exampleName', 'exampleLabel')
+            replaceFrameCode = ('newName', 'newLabel')
+
+            attributes to search for are defined in attributeSearchList and rowSearchList
+             ('name', 'labelling')
+
+             Replace will occur if name == exampleName & labelling == exampleLabel
+             in saveFrame attributes and in row of a loop with columns 'name' and 'labelling'
+        """
+        if searchFrameCode:
+            return self.traverseDataBlock(project, dataBlock, True, selection=None,
+                                          traverseFunc=partial(self._searchReplaceNumberListLoops,
                                                                searchFrameCode=searchFrameCode, replaceFrameCode=replaceFrameCode,
                                                                replace=replace, validFramesOnly=validFramesOnly,
                                                                frameSearchList=frameSearchList, attributeSearchList=attributeSearchList,
@@ -3236,8 +3326,8 @@ class CcpnNefReader(CcpnNefContent):
 
             # NOTE:ED - change sequenceCode
             if chainCode == itemName and sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
-
-                newSequence, _highestSequenceCount = self._getNewSequence(contentDataBlocks, saveFrame, sequenceCode, None, 'nmr_sequence_codes', '@', _highestSequenceCount)
+                newSequence, _highestSequenceCount = self._getNewSequence(contentDataBlocks, saveFrame, sequenceCode, None, 'nmr_sequence_codes', '@',
+                                                                          _highestSequenceCount)
 
                 # replace sequenceCode/serial
                 loopList = ('nmr_residue', 'nmr_atom', 'nef_chemical_shift')
@@ -3251,6 +3341,13 @@ class CcpnNefReader(CcpnNefContent):
                                        attributeSearchList=replaceList,
                                        loopSearchList=loopList, rowSearchList=replaceList)
 
+                # special replace sequenceCode/serial in nef_peak
+                loopList = ('nef_peak',)
+                replaceList = ('chain_code', 'sequence_code')
+                self.searchReplaceLoopListNumbered(project, dataBlock, True, None, (chainCode, sequenceCode), (chainCode, newSequence), replace=True,
+                                                   attributeSearchList=replaceList,
+                                                   loopSearchList=loopList, rowSearchList=replaceList)
+
         mapping = nef2CcpnMap[nmrAtomLoopName]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in saveFrame[nmrAtomLoopName].data:
@@ -3261,7 +3358,6 @@ class CcpnNefReader(CcpnNefContent):
 
             # NOTE:ED - change name
             if chainCode == itemName and name[0:2] == '?@' and name[2:].isdigit():
-
                 newName, _highestSequenceCount = self._getNewSequence(contentDataBlocks, saveFrame, name, None, 'nmr_atom_names', '?@', _highestSequenceCount)
 
                 # replace sequenceCode/serial

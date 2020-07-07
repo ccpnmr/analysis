@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 14:28:16 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-07 14:57:21 +0100 (Tue, July 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1828,40 +1828,24 @@ class Framework(NotifierBase):
         return successful
 
     def _importNef(self):
-        #TODO:ED add import routine here, dangerous so add warnings
+        text = 'Import Nef File into Project'
+        filter = '*.nef'
+        dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
+                            acceptMode=FileDialog.AcceptOpen,
+                            filter=filter,
+                            preferences=self.preferences,
+                            initialPath=self.preferences.general.userWorkingPath,
+                            pathID=USERNEFPATH)
+        dialog._show()
+        path = dialog.selectedFile()
+        if not path:
+            return
 
-        ok = MessageDialog.showOkCancelWarning('WARNING',
-                                               'Importing Nef file will merge the Nef file with'
-                                               ' the current project. This can cause conflicts with'
-                                               ' existing objects. USE WITH CAUTION')
+        with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s'):
 
-        if ok:
-            text = 'Import Nef File into Project'
-            filter = '*.nef'
-            dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
-                                acceptMode=FileDialog.AcceptOpen,
-                                filter=filter,
-                                preferences=self.preferences,
-                                initialPath=self.preferences.general.userWorkingPath,
-                                pathID=USERNEFPATH)
-            dialog._show()
-            path = dialog.selectedFile()
-            if not path:
-                return
-
-            with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s'):
-
-                with undoBlockWithoutSideBar():
-                    self._importNefFile(path=path, makeNewProject=False)
-                self.ui.mainWindow.sideBar.buildTree(self.project)
-
-            # try:
-            #     for path in paths:
-            #         self._loadNefFile(path=path, makeNewProject=False)
-            # except Exception as es:
-            #     getLogger().warning('Error Importing Nef File: %s' % str(es))
-            #     if self._isInDebugMode:
-            #         raise es
+            with undoBlockWithoutSideBar():
+                self._importNefFile(path=path, makeNewProject=False)
+            self.ui.mainWindow.sideBar.buildTree(self.project)
 
     def _importNefFile(self, path: str, makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup"""

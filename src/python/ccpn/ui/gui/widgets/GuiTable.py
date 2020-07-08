@@ -1016,6 +1016,7 @@ GuiTable::item::selected {
             else:
                 self._currentRow = None
                 self._currentCol = None
+                self._selectionTableCallback(None) # None selected. Needs callback anyway, so actions can be performed.
 
             # we are selecting from the table
             self._mousePressedPos = event.pos()
@@ -1748,7 +1749,8 @@ GuiTable::item::selected {
                                                   selectionModel.Select | selectionModel.Rows)
 
                     else:
-                        print('AAA',objList)
+                        # todo add other options
+                        return
 
     def selectIndex(self, idx, doCallback=True):
         model = self.model()

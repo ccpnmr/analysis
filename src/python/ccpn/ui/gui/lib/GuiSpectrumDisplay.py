@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-07 00:59:26 +0100 (Tue, April 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-08 19:30:45 +0100 (Wed, July 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,16 +30,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial
 from copy import deepcopy
+from collections import namedtuple
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Sample import Sample
-
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
-from typing import Tuple
-
+from typing import Tuple, Optional
 from ccpn.ui.gui.widgets.Widget import WidgetCorner
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -49,6 +48,8 @@ from ccpn.ui.gui.widgets.SpectrumGroupToolBar import SpectrumGroupToolBar
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea, SpectrumDisplayScrollArea
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
@@ -56,10 +57,12 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget
 from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidgetAxis, GuiNdWidgetAxis
 from ccpn.util.Logging import getLogger
+from ccpn.util.Common import ZPlaneNavigationModes
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
-from ccpn.ui.gui.lib.Strip import GuiStrip
+from ccpn.ui.gui.lib.GuiStrip import GuiStrip, STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT
+
 from ccpn.ui._implementation.PeakListView import PeakListView
 from ccpn.ui._implementation.IntegralListView import IntegralListView
 from ccpn.ui._implementation.MultipletListView import MultipletListView
@@ -75,8 +78,6 @@ from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPN
 
 
 STRIP_SPACING = 5
-STRIP_MINIMUMWIDTH = 100
-STRIP_MINIMUMHEIGHT = STRIP_MINIMUMWIDTH
 AXIS_WIDTH = 30
 AXISUNITS = ['ppm', 'Hz', 'points']
 SPECTRUMGROUPS = 'spectrumGroups'
@@ -335,7 +336,8 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                    # styleSheetTemplate = frameStyleSheetTemplate,
                                                                    # predicate=styleSheetPredicate, mutator=styleSheetMutator,
                                                                    setLayout=True, acceptDrops=False,
-                                                                   scrollBarPolicies=('asNeeded', 'never'))
+                                                                   scrollBarPolicies=('asNeeded', 'never'),
+                                                                   minimumSizes=(STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT))
             self._stripFrameScrollArea.setWidget(self.stripFrame)
             self._stripFrameScrollArea.setWidgetResizable(True)
             self.qtParent.getLayout().addWidget(self._stripFrameScrollArea, stripRow, 0, 1, 7)
@@ -374,8 +376,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
             else:
                 self._bottomGLAxis = GuiNdWidgetAxis(self._stripFrameScrollArea, spectrumDisplay=self, mainWindow=self.mainWindow,
-                                                    drawRightAxis=False, drawBottomAxis=True,
-                                                    fullHeightRightAxis=False, fullWidthBottomAxis=False)
+                                                     drawRightAxis=False, drawBottomAxis=True,
+                                                     fullHeightRightAxis=False, fullWidthBottomAxis=False)
 
                 self._bottomGLAxis.tilePosition = (-1, 0)
                 self._bottomGLAxis.setAxisType(0)
@@ -386,12 +388,17 @@ class GuiSpectrumDisplay(CcpnModule):
             # add a small widget to fill the corner between the widgets
             self._cornerAxis = WidgetCorner(self._stripFrameScrollArea, spectrumDisplay=self, mainWindow=self.mainWindow)
 
-        self.qtParent.getLayout().setContentsMargins(0, 0, 0, 0)
+        self.qtParent.getLayout().setContentsMargins(1, 0, 1, 0)
         self.qtParent.getLayout().setSpacing(0)
         self.lastAxisOnly = mainWindow.application.preferences.general.lastAxisOnly
 
         if not self.is1D:
             self.setVisibleAxes()
+
+        from ccpn.ui.gui.widgets.PlaneToolbar import ZPlaneToolbar
+
+        self.zPlaneFrame = ZPlaneToolbar(self.qtParent, mainWindow, self, showHeader=True, showLabels=True,
+                                         grid=(axisRow, 0), gridSpan=(1, 7), margins=(2, 2, 2, 2))
 
         includeDirection = not self.is1D
         self.phasingFrame = PhasingFrame(parent=self.qtParent,
@@ -402,7 +409,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                          directionCallback=self._changedPhasingDirection,
                                          applyCallback=self._applyPhasing,
                                          grid=(phasingRow, 0), gridSpan=(1, 7), hAlign='top',
-                                         margins=(0, 0, 0, 0), spacing=(0, 0))
+                                         margins=(2, 2, 2, 2), spacing=(0, 0))
         self.phasingFrame.setVisible(False)
 
         # self.stripFrame.setAcceptDrops(True)
@@ -1267,7 +1274,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     # layout.addWidget(widgStrip, 0, m)
 
                     tilePosition = widgStrip.tilePosition
-                    if True:            #tilePosition is None:
+                    if True:  #tilePosition is None:
                         layout.addWidget(widgStrip, 0, m)
                         widgStrip.tilePosition = (0, m)
                     else:
@@ -1280,7 +1287,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     # layout.addWidget(widgStrip, m, 0)
 
                     tilePosition = widgStrip.tilePosition
-                    if True:            #tilePosition is None:
+                    if True:  #tilePosition is None:
                         layout.addWidget(widgStrip, m, 0)
                         widgStrip.tilePosition = (0, m)
                     else:
@@ -1338,7 +1345,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     #     layout.addWidget(widgStrip, 0, m)
 
                     tilePosition = widgStrip.tilePosition
-                    if True:            #tilePosition is None:
+                    if True:  #tilePosition is None:
                         layout.addWidget(widgStrip, 0, m)
                         widgStrip.tilePosition = (0, m)
                     else:
@@ -1351,7 +1358,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     #     layout.addWidget(widgStrip, m, 0)
 
                     tilePosition = widgStrip.tilePosition
-                    if True:            #tilePosition is None:
+                    if True:  #tilePosition is None:
                         layout.addWidget(widgStrip, m, 0)
                         widgStrip.tilePosition = (0, m)
                     else:
@@ -1406,7 +1413,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     # layout.addWidget(widgStrip, 0, m)
 
                     tilePosition = widgStrip.tilePosition
-                    if True:            #tilePosition is None:
+                    if True:  #tilePosition is None:
                         layout.addWidget(widgStrip, 0, m)
                         widgStrip.tilePosition = (0, m)
                     else:
@@ -1419,7 +1426,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     # layout.addWidget(widgStrip, m, 0)
 
                     tilePosition = widgStrip.tilePosition
-                    if True:            #tilePosition is None:
+                    if True:  #tilePosition is None:
                         layout.addWidget(widgStrip, m, 0)
                         widgStrip.tilePosition = (0, m)
                     else:
@@ -1688,7 +1695,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         strips = self.orderedStrips
         newWidth = max(strips[0].width() * factor, STRIP_MINIMUMWIDTH)  # + (0 if self.lastAxisOnly else strips[0].getRightAxisWidth()))
-        axisWidth = 0               #strips[0].getRightAxisWidth() if self.lastAxisOnly else 0
+        axisWidth = 0  #strips[0].getRightAxisWidth() if self.lastAxisOnly else 0
 
         # NOTE:ED - always uniform width with new axis
 
@@ -1722,7 +1729,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         strips = self.orderedStrips
         newHeight = max(strips[0].height() * factor, STRIP_MINIMUMHEIGHT)  # + (0 if self.lastAxisOnly else strips[0].getRightAxisWidth()))
-        axisHeight = 0                  #strips[0].getBottomAxisHeight() if self.lastAxisOnly else 0
+        axisHeight = 0  #strips[0].getBottomAxisHeight() if self.lastAxisOnly else 0
 
         # NOTE:ED - always uniform height with new axis
 
@@ -1877,7 +1884,7 @@ class GuiSpectrumDisplay(CcpnModule):
             if minimumWidth:
                 firstStripWidth = max(firstStripWidth, minimumWidth)
 
-            if True:                    # not self.lastAxisOnly:
+            if True:  # not self.lastAxisOnly:
                 maxCol = 0
                 for wid in self.orderedStrips:
                     index = thisLayout.indexOf(wid)
@@ -1969,7 +1976,7 @@ class GuiSpectrumDisplay(CcpnModule):
             if minimumHeight:
                 firstStripHeight = max(firstStripHeight, minimumHeight)
 
-            if True:                        #not self.lastAxisOnly:
+            if True:  #not self.lastAxisOnly:
                 maxRow = 0
                 for wid in self.orderedStrips:
                     index = thisLayout.indexOf(wid)
@@ -2225,7 +2232,7 @@ class GuiSpectrumDisplay(CcpnModule):
         resList = makeIterableList(nmrResidues)
         nmrs = []
         for nmrRes in resList:
-            if not nmrRes.relativeOffset:               # is not None and nmrResidue.relativeOffset
+            if not nmrRes.relativeOffset:  # is not None and nmrResidue.relativeOffset
                 nmrs.append(self.project.getByPid(nmrRes) if isinstance(nmrRes, str) else nmrRes)
 
         # need to clean up the use of GLNotifier - possibly into AbstractWrapperObject
@@ -2277,6 +2284,60 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # repaint - not sure whether needed here
                 GLSignals.emitPaintEvent()
+
+    def attachZPlaneWidgets(self):
+        """Attach the strip zPlane navigation widgets for the strips to the correct containers
+        """
+        try:
+            _prefsGeneral = self.application.preferences.general
+            _currentStrip = self.application.current.strip
+        except:
+            pass
+        else:
+
+            if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.value:
+
+                for strip in self.strips:
+                    if strip and not (strip.isDeleted or strip._flaggedForDelete):
+                        strip.zPlaneFrame.setVisible(False)
+                        strip.zPlaneFrame._strip = None
+                        for pl in strip.planeAxisBars:
+                            # reattach the widget to the in strip container
+                            pl._attachButton('_axisSelector')
+                            pl._hideAxisSelector()
+
+                _currentStrip = _currentStrip if _currentStrip in self.strips else (self.strips[0] if self.strips else None)
+                if _currentStrip:
+                    self.zPlaneFrame.attachZPlaneWidgets(_currentStrip)
+                self.zPlaneFrame.setVisible(True)
+
+            if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.value:
+                for strip in self.strips:
+                    if strip and not (strip.isDeleted or strip._flaggedForDelete):
+                        for pl in strip.planeAxisBars:
+                            # reattach the widget to the in strip container
+                            pl._attachButton('_axisSelector')
+                            pl._hideAxisSelector()
+
+                        strip.zPlaneFrame.attachZPlaneWidgets(strip)
+                        strip.zPlaneFrame.setVisible(True)
+                self.zPlaneFrame.setVisible(False)
+                self.zPlaneFrame._strip = None
+
+            if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.value:
+                for strip in self.strips:
+                    if strip and not (strip.isDeleted or strip._flaggedForDelete):
+                        strip.zPlaneFrame.setVisible(False)
+                        strip.zPlaneFrame._strip = None
+                        for pl in strip.planeAxisBars:
+                            # reattach the widget to the in strip container
+                            pl._attachButton('_axisSelector')
+                            pl._hideAxisSelector()
+
+                self.zPlaneFrame.setVisible(False)
+                self.zPlaneFrame._strip = None
+
+        self.update()
 
     #===========================================================================================
     # new'Object' and other methods

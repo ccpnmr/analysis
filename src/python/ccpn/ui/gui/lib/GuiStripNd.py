@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-20 16:05:25 +0100 (Mon, April 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-08 19:30:46 +0100 (Wed, July 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -56,9 +56,11 @@ from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMe
 from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
     _getNdIntegralMenu, _getNdMultipletMenu, _getNdAxisMenu
 from ccpn.ui.gui.lib.Strip import copyStripPosition
+from ccpn.util.Common import ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
 from ccpn.util.Common import getAxisCodeMatchIndices
+from ccpn.ui.gui.widgets.PlaneToolbar import ZPlaneToolbar
 
 
 class GuiStripNd(GuiStrip):
@@ -229,10 +231,15 @@ class GuiStripNd(GuiStrip):
         if len(self.orderedAxes) < 3:  # hide if only 2D
             self._stripToolBarWidget.setFixedHeight(0)
 
-        self.setMinimumWidth(150)
-        self.setMinimumHeight(150)
+        # add container for the zPlane navigation widgets for 'Per Strip' mode
+        self.zPlaneFrame = ZPlaneToolbar(self._stripToolBarWidget, self.mainWindow, self, grid=(0, 0), showHeader=True, showLabels=False, margins=(2, 2, 2, 2))
+        if self._preferences.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.value:
+            self.zPlaneFrame.attachZPlaneWidgets(self)
+        self.zPlaneFrame.setVisible(self._preferences.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.value)
 
-        # self._frameGuide.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        if self._preferences.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.value:
+            self.spectrumDisplay.zPlaneFrame.attachZPlaneWidgets(self)
+
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
 
     def _resize(self):

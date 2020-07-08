@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-20 13:06:48 +0100 (Wed, May 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-08 19:30:46 +0100 (Wed, July 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -149,6 +149,7 @@ class GuiStrip1d(GuiStrip):
         self.planeToolbar = None
         # set the axis controlled by the wheelMouse events
         self.activePlaneAxis = None
+        self.zPlaneFrame = None
 
         # a large(ish) unbound widget to contain the text - may need more rows
         self._frameGuide = OpenGLOverlayFrame(self, setLayout=True)

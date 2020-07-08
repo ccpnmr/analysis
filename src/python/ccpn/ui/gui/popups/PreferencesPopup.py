@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:53 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-08 19:30:46 +0100 (Wed, July 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -51,6 +51,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
 from ccpn.util.UserPreferences import UserPreferences
+from ccpn.util.Common import ZPlaneNavigationModes
 from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
@@ -308,6 +309,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # NOTE:ED - quick setting of new background colour for cornerWidget, not very nice should use a notifier
         for specDisplay in self.project.spectrumDisplays:
             specDisplay.setVisibleAxes()
+            specDisplay.attachZPlaneWidgets()
 
     def _setTabs(self):
 
@@ -637,6 +639,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.zoomPercentData.setValue(int(self.preferences.general.zoomPercent))
         self.stripWidthZoomPercentData.setValue(int(self.preferences.general.stripWidthZoomPercent))
         self.aspectRatioModeData.setIndex(self.preferences.general.aspectRatioMode)
+        self.zPlaneNavigationModeData.setIndex(self.preferences.general.zPlaneNavigationMode)
 
         self.showZoomXLimitApplyBox.setChecked(self.preferences.general.zoomXLimitApply)
         self.showZoomYLimitApplyBox.setChecked(self.preferences.general.zoomYLimitApply)
@@ -963,6 +966,19 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        self.zPlaneNavigationModeLabel = Label(parent, text="zPlane Navigation Mode", grid=(row, 0))
+        self.zPlaneNavigationModeData = RadioButtons(parent, texts=[val.description for val in ZPlaneNavigationModes],
+                                                # selectedInd=annType,
+                                                callback=self._queueSetZPlaneNavigationMode,
+                                                direction='h',
+                                                grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                                tipTexts=('Tools are located at the bottom of the spectrumDisplay,\nand will operate on the last strip selected in that spectrumDisplay',
+                                                          'Tools are located at the bottom of each strip',
+                                                          'Tools are displayed in the upper-left corner of each strip display'),
+                                                )
+        self.zPlaneNavigationModeLabel.setToolTip('Select where the zPlane navigation tools are located')
 
         row += 1
         self.aspectRatioModeLabel = Label(parent, text="Aspect Ratio Mode", grid=(row, 0))
@@ -1608,6 +1624,22 @@ class PreferencesPopup(CcpnDialogMainWidget):
     #
     # def _toggleSpectralOptions(self, preference, checked):
     #     self.preferences.spectra[preference] = str(checked)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetZPlaneNavigationMode(self):
+        value = self.zPlaneNavigationModeData.getIndex()
+        if value != self.preferences.general.zPlaneNavigationMode:
+            return partial(self._setZPlaneNavigationMode, value)
+
+    def _setZPlaneNavigationMode(self, value):
+        """
+        Set the zPlaneNavigationMode
+        """
+        # try:
+        #     zPlaneNavigationMode = self.zPlaneNavigationModeData.getIndex()
+        # except:
+        #     return
+        self.preferences.general.zPlaneNavigationMode = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetAspectRatioMode(self):

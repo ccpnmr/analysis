@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-22 18:18:17 +0100 (Mon, June 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-08 19:30:46 +0100 (Wed, July 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -660,7 +660,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # set a minimum size so that the strips resize nicely
         self.setMinimumSize(self.AXIS_MARGINRIGHT + 10, self.AXIS_MARGINBOTTOM + 10)
-
         # initialise the pyqtsignal notifier
         self.GLSignals = GLNotifier(parent=self, strip=None)
 
@@ -2627,7 +2626,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 dPos = cursorCoordinate[0]
 
             else:
-                dPos = pos = self._orderedAxes[n].position  # if n in self._orderedAxes else 0
+                dPos = pos = self._orderedAxes[n].position if (n in self._orderedAxes and
+                                                               not self._orderedAxes[n].isDeleted) else 0
                 # dPos = pos = self.spectrumDisplay.axes[n].position  # if n in self._orderedAxes else 0
 
                 activeOther.append(axisCode)  #[0])

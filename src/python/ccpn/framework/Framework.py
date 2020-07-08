@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 14:28:16 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-08 19:30:45 +0100 (Wed, July 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -833,7 +833,7 @@ class Framework(NotifierBase):
             # resize the stripFrame to the spectrumDisplay - ready for first resize event
             # spectrumDisplay.stripFrame.resize(spectrumDisplay.width() - 2, spectrumDisplay.stripFrame.height())
             spectrumDisplay.showAxes(stretchValue=True, widths=True,
-                                     minimumWidth=GuiStrip.STRIPMINIMUMWIDTH)
+                                     minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
 
         #~~~~~~~~~~~~~~~~
         #

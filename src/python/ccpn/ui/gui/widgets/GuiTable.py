@@ -709,7 +709,8 @@ GuiTable::item::selected {
                 state = 2 if val else 0
                 item.setCheckState(state)
                 self.setItem(row, col, item)
-                item.setValue('')
+                item.setValue('Yes' if val else 'No')
+                item._format = bool
 
             elif isinstance(val, list or tuple):
 
@@ -1010,8 +1011,7 @@ GuiTable::item::selected {
             if item:
                 self._currentRow = item.row()
                 self._currentCol = item.column()
-
-                if isinstance(item.value, bool) and self._checkBoxTableCallback is not None:
+                if item._format == bool and self._checkBoxTableCallback is not None:
                     self._checkBoxTableCallback(item)
             else:
                 self._currentRow = None

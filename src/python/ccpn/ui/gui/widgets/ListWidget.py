@@ -240,6 +240,13 @@ class ListWidget(QtWidgets.QListWidget, Base):
             items.append(self.item(index))
         return items
 
+    def _getItemsFromText(self, text):
+        items = []
+        for item in self.getItems():
+            if item.text() == text:
+                items.append(item)
+        return items
+
     def getTexts(self):
         items = []
         for index in range(self.count()):

@@ -709,7 +709,7 @@ GuiTable::item::selected {
                 state = 2 if val else 0
                 item.setCheckState(state)
                 self.setItem(row, col, item)
-                item.setValue('Yes' if val else 'No')
+                item.setValue('') # errors in getting this in sync with bools or any value
                 item._format = bool
 
             elif isinstance(val, list or tuple):

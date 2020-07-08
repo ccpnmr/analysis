@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-08 19:30:46 +0100 (Wed, July 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-08 19:44:07 +0100 (Wed, July 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -229,7 +229,7 @@ class GuiStripNd(GuiStrip):
                                       EMITIGNORESOURCE: False})
 
         if len(self.orderedAxes) < 3:  # hide if only 2D
-            self._stripToolBarWidget.setFixedHeight(0)
+            self._stripToolBarWidget.setVisible(False)
 
         # add container for the zPlane navigation widgets for 'Per Strip' mode
         self.zPlaneFrame = ZPlaneToolbar(self._stripToolBarWidget, self.mainWindow, self, grid=(0, 0), showHeader=True, showLabels=False, margins=(2, 2, 2, 2))

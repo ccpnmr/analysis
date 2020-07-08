@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-08 19:30:45 +0100 (Wed, July 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-08 19:44:07 +0100 (Wed, July 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -397,8 +397,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
         from ccpn.ui.gui.widgets.PlaneToolbar import ZPlaneToolbar
 
-        self.zPlaneFrame = ZPlaneToolbar(self.qtParent, mainWindow, self, showHeader=True, showLabels=True,
-                                         grid=(axisRow, 0), gridSpan=(1, 7), margins=(2, 2, 2, 2))
+        self._stripToolBarWidget = Frame(parent=self.qtParent, setLayout=True, grid=(axisRow, 0), gridSpan=(1, 7))
+        self.zPlaneFrame = ZPlaneToolbar(self._stripToolBarWidget, mainWindow, self, showHeader=True, showLabels=True,
+                                         grid=(0, 0), gridSpan=(1, 1), margins=(2, 2, 2, 2))
+        if len(self.axisCodes) < 3:
+            self._stripToolBarWidget.setVisible(False)
 
         includeDirection = not self.is1D
         self.phasingFrame = PhasingFrame(parent=self.qtParent,

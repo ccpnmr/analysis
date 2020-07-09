@@ -2571,7 +2571,10 @@ class GuiTableFrame(Frame):
         self.searchWidget = None
 
 def _getValueByHeader(row, header):
-    return row[header]
+    try:
+        return row[header]
+    except Exception as e:
+        getLogger().warn('GuiTable error in getting a value for header %s. Check dataframe Header %s' %(header, e))
 
 def _setValueByHeader(row, header, value):
     row = row.copy()

@@ -3210,10 +3210,10 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._GLIntegrals.drawSymbols(self._spectrumSettings)
                 with self._disableGLAliasing():
                     self._GLIntegrals.drawSymbolRegions(self._spectrumSettings)
+                    self.drawRegions()
 
-            with self._disableGLAliasing():
-                self.drawMarksRulers()
-                self.drawRegions()
+        with self._disableGLAliasing():
+            self.drawMarksRulers()
 
         # change to the text shader
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()

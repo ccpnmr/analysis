@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-08 19:44:07 +0100 (Wed, July 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 10:11:56 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2291,6 +2291,9 @@ class GuiSpectrumDisplay(CcpnModule):
     def attachZPlaneWidgets(self):
         """Attach the strip zPlane navigation widgets for the strips to the correct containers
         """
+        if self.is1D:
+            return
+
         try:
             _prefsGeneral = self.application.preferences.general
             _currentStrip = self.application.current.strip

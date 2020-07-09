@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-08 19:30:46 +0100 (Wed, July 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 10:11:56 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -309,7 +309,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # NOTE:ED - quick setting of new background colour for cornerWidget, not very nice should use a notifier
         for specDisplay in self.project.spectrumDisplays:
             specDisplay.setVisibleAxes()
-            specDisplay.attachZPlaneWidgets()
+            if not specDisplay.is1D:
+                specDisplay.attachZPlaneWidgets()
 
     def _setTabs(self):
 

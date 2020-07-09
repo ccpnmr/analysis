@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-08 19:30:45 +0100 (Wed, July 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 10:11:56 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1062,23 +1062,17 @@ class GuiStrip(Frame):
     def _attachZPlaneWidgets(self):
         """Attach the ZPlane widgets for the curent strip intothe spectrumDisplay axis frame
         """
+        if self.spectrumDisplay.is1D:
+            return
+
         try:
-            print('>>> {} start'.format(self))
             _prefsGeneral = self.application.preferences.general
         except:
             pass
         else:
             spec = self.spectrumDisplay
             if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.value:
-                print('>>> {} 2'.format(self))
                 spec.zPlaneFrame.attachZPlaneWidgets(self)
-
-            elif _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.value:
-                print('>>> {} 4'.format(self))
-                # self.zPlaneFrame.attachZPlaneWidgets(self)
-                # self.zPlaneFrame.setVisible(True)
-
-            print('>>> {} end'.format(self))
 
     def _removeZPlaneWidgets(self):
         """Remove the ZPlane widgets for the curent strip from the spectrumDisplay axis frame

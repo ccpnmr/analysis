@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:30 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-07-09 16:49:59 +0100 (Thu, July 09, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,6 +39,11 @@ from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
+
+
+SAMPLE = 'sample'
+SAMPLEAMOUNTUNITS = 'sampleAmountUnits'
+SAMPLEIONICSTRENGTHUNITS = 'sampleIonicStrengthUnits'
 
 
 class Sample(AbstractWrapperObject):
@@ -251,6 +256,35 @@ class Sample(AbstractWrapperObject):
         #   self._endCommandEchoBlock()
 
         return result
+
+    @property
+    def amountUnits(self) -> str:
+        """amountUnits for sample, one of list AMOUNT_UNITS
+        """
+        value = self.getParameter(SAMPLE, SAMPLEAMOUNTUNITS)
+        return value
+
+    @amountUnits.setter
+    def amountUnits(self, value: str):
+        """Set value for the amountUnits
+        """
+        if not isinstance(value, (str, type(None))):
+            raise ValueError("amountUnits must be a string/None.")
+
+        self.setParameter(SAMPLE, SAMPLEAMOUNTUNITS, value or None)
+
+    @property
+    def ionicStrengthUnits(self) -> str:
+        """ionicStrengthUnits for sample, one of list AMOUNT_UNITS
+        """
+        value = self.getParameter(SAMPLE, SAMPLEIONICSTRENGTHUNITS)
+        return value
+
+    @ionicStrengthUnits.setter
+    def ionicStrengthUnits(self, value: str):
+        """Set value for the amountUnits
+        """
+        self.setParameter(SAMPLE, SAMPLEIONICSTRENGTHUNITS, value or None)
 
     #=========================================================================================
     # Implementation functions

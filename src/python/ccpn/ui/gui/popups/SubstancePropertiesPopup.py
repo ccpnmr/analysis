@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-24 14:48:32 +0100 (Wed, June 24, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 16:49:59 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -32,25 +32,14 @@ from ccpn.ui.gui.widgets.CompoundWidgets import CompoundViewCompoundWidget
 from ccpn.core.Substance import Substance
 
 
-OTHER_UNIT = ['µ', 'm', 'n', 'p']
-CONCENTRATION_UNIT = ['µM', 'mM', 'nM', 'pM']
-VOLUME_UNIT = ['µL', 'mL', 'nL', 'pL']
-MASS_UNIT = ['µg', 'kg', 'g', 'mg', 'ng', 'pg']
-SAMPLE_STATES = ['Liquid', 'Solid', 'Ordered', 'Powder', 'Crystal', 'Other']
-SUBSTANCE_TYPE = ['Molecule', 'Cell', 'Material', 'Composite ', 'Other']
-
 SEP = ', '
-
 SELECT = '> Select <'
-
 LESS_BUTTON = 'Show less'
 MORE_BUTTON = 'Show more'
-
 TYPENEW = 'Type_New'
 LABELLING = ['None', TYPENEW, '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 'ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
 BUTTONSTATES = ['New', 'From Existing']
 
-from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
     RadioButtonsCompoundWidget, PulldownListCompoundWidget, SpinBoxCompoundWidget
 

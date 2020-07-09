@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-23 18:26:47 +0100 (Tue, June 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 16:49:59 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -76,6 +76,12 @@ TEMPERATURE_UNITS = ('K',)
 TIME_UNITS = ('s', 'ms', 'µs', 'ns', 'ps')
 DISTANCE_UNITS = ('µm', 'mm', 'm')
 ALL_UNITS = ('',) + TEMPERATURE_UNITS + MASS_UNITS + VOLUME_UNITS + CONCENTRATION_UNITS + DISTANCE_UNITS + TIME_UNITS
+AMOUNT_UNITS = VOLUME_UNITS + MASS_UNITS + CONCENTRATION_UNITS
+SAMPLE_STATES = ('Liquid', 'Solid', 'Ordered', 'Powder', 'Crystal', 'Other')
+SUBSTANCE_TYPES = ('Molecule', 'Cell', 'Material', 'Composite ', 'Other')
+ALL_CONCENTRATION_UNITS = tuple('{}/{}'.format(val, MASS_UNITS[0]) for val in MASS_UNITS) + \
+                          tuple('{}/{}'.format(val, VOLUME_UNITS[0]) for val in MASS_UNITS) + \
+                          tuple('{}/{}'.format(val, CONCENTRATION_UNITS[0]) for val in MASS_UNITS)
 
 # Default name for natural abundance labelling - given as None externally
 DEFAULT_LABELLING = '_NATURAL_ABUNDANCE'

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 16:49:59 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 19:32:22 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -61,6 +61,12 @@ class SamplePropertiesPopup(ComplexAttributeEditorPopupABC):
         getattr(self, unitType).modifyTexts(units)
         getattr(self, unitType).select(newUnit or '')
 
+    def _setUnits(self, attr, value):
+        """Set the units type with None replacing empty string
+        """
+        value = value if value else None
+        setattr(self, attr, value)
+
     klass = Sample  # The class whose properties are edited/displayed
     HWIDTH = 140
     SHORTWIDTH = 140
@@ -71,13 +77,13 @@ class SamplePropertiesPopup(ComplexAttributeEditorPopupABC):
                         #                                                                     'direction'  : 'h'}),
                         HList([('amount', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
                                ('amountUnits', PulldownListCompoundWidget,
-                                getattr, setattr, partial(_getUnits, unitType='amountUnits', unitList=('',) + AMOUNT_UNITS), None,
+                                getattr, _setUnits, partial(_getUnits, unitType='amountUnits', unitList=('',) + AMOUNT_UNITS), None,
                                 {'editable': False}), ],
                               hWidth=SHORTWIDTH,
                               ),
                         HList([('ionicStrength', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
                                ('ionicStrengthUnits', PulldownListCompoundWidget,
-                                getattr, setattr, partial(_getUnits, unitType='ionicStrengthUnits', unitList=('',) + AMOUNT_UNITS), None,
+                                getattr, _setUnits, partial(_getUnits, unitType='ionicStrengthUnits', unitList=('',) + AMOUNT_UNITS), None,
                                 {'editable': False}), ],
                               hWidth=SHORTWIDTH,
                               ),

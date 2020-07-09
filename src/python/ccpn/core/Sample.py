@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 16:49:59 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 19:32:21 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -39,11 +39,14 @@ from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
+from ccpn.util.Constants import AMOUNT_UNITS
 
 
 SAMPLE = 'sample'
 SAMPLEAMOUNTUNITS = 'sampleAmountUnits'
 SAMPLEIONICSTRENGTHUNITS = 'sampleIonicStrengthUnits'
+DEFAULTAMOUNTUNITS = 'µL'
+DEFAULTIONICSTRENGTHUNITS = 'mM'
 
 
 class Sample(AbstractWrapperObject):
@@ -261,6 +264,11 @@ class Sample(AbstractWrapperObject):
     def amountUnits(self) -> str:
         """amountUnits for sample, one of list AMOUNT_UNITS
         """
+        if not self.hasParameter(SAMPLE, SAMPLEAMOUNTUNITS):
+            # set a default value if it has never been accessed before
+            self.setParameter(SAMPLE, SAMPLEAMOUNTUNITS, DEFAULTAMOUNTUNITS)
+            return DEFAULTAMOUNTUNITS
+
         value = self.getParameter(SAMPLE, SAMPLEAMOUNTUNITS)
         return value
 
@@ -270,13 +278,20 @@ class Sample(AbstractWrapperObject):
         """
         if not isinstance(value, (str, type(None))):
             raise ValueError("amountUnits must be a string/None.")
+        if value not in (None,) + AMOUNT_UNITS:
+            raise ValueError("amountUnits must be of type None/{}".format(AMOUNT_UNITS))
 
-        self.setParameter(SAMPLE, SAMPLEAMOUNTUNITS, value or None)
+        self.setParameter(SAMPLE, SAMPLEAMOUNTUNITS, value)
 
     @property
     def ionicStrengthUnits(self) -> str:
         """ionicStrengthUnits for sample, one of list AMOUNT_UNITS
         """
+        if not self.hasParameter(SAMPLE, SAMPLEIONICSTRENGTHUNITS):
+            # set a default value if it has never been accessed before
+            self.setParameter(SAMPLE, SAMPLEIONICSTRENGTHUNITS, DEFAULTIONICSTRENGTHUNITS)
+            return DEFAULTIONICSTRENGTHUNITS
+
         value = self.getParameter(SAMPLE, SAMPLEIONICSTRENGTHUNITS)
         return value
 
@@ -284,7 +299,12 @@ class Sample(AbstractWrapperObject):
     def ionicStrengthUnits(self, value: str):
         """Set value for the amountUnits
         """
-        self.setParameter(SAMPLE, SAMPLEIONICSTRENGTHUNITS, value or None)
+        if not isinstance(value, (str, type(None))):
+            raise ValueError("ionicStrengthUnits must be a string/None.")
+        if value not in (None,) + AMOUNT_UNITS:
+            raise ValueError("ionicStrengthUnits must be of type None/{}".format(AMOUNT_UNITS))
+
+        self.setParameter(SAMPLE, SAMPLEIONICSTRENGTHUNITS, value)
 
     #=========================================================================================
     # Implementation functions

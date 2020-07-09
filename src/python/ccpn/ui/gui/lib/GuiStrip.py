@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 12:55:47 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 19:32:21 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -51,7 +51,7 @@ from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNG
 
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
-STRIP_MINIMUMWIDTH = 150
+STRIP_MINIMUMWIDTH = 100
 STRIP_MINIMUMHEIGHT = 150
 
 DefaultMenu = 'DefaultMenu'

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 12:55:47 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 19:32:22 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ SCROLLBAR_POLICY_DICT = dict(
 class ScrollArea(QtWidgets.QScrollArea, Base):
 
     def __init__(self, parent, scrollBarPolicies=('asNeeded', 'asNeeded'),
-                 setLayout=True, minimumSizes=(50, 50), scrollDirections = ('horizontal','vertical'), **kwds):
+                 setLayout=True, minimumSizes=(50, 50), scrollDirections=('horizontal', 'vertical'), **kwds):
         super().__init__(parent)
 
         # kwds['setLayout'] = True  # A scrollable area always needs a layout to function
@@ -87,11 +87,16 @@ class SpectrumDisplayScrollArea(ScrollArea):
     The margins are defined to accommodate the axis widgets within the scroll bars
 
     """
+
     def __init__(self, parent, scrollBarPolicies=('asNeeded', 'asNeeded'),
-                 setLayout=True, minimumSizes=(50, 50), **kwds):
+                 setLayout=True, minimumSizes=(50, 50),
+                 spectrumDisplay=None, **kwds):
         """Initialise the widget
         """
+        from ccpn.ui.gui.widgets.Widget import WidgetCorner
+
         super().__init__(parent=parent, scrollBarPolicies=scrollBarPolicies, setLayout=setLayout, minimumSizes=minimumSizes)
+        self._spectrumDisplay = spectrumDisplay
 
     def resizeEvent(self, event):
         """Handle resize event to re-position the axis widgets and corner widget as required
@@ -107,28 +112,33 @@ class SpectrumDisplayScrollArea(ScrollArea):
             from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidgetAxis, GuiNdWidgetAxis
             from ccpn.ui.gui.widgets.Widget import WidgetCorner
 
+            try:
+                offset = self._spectrumDisplay.strips[0]._stripToolBarWidget.height()
+            except:
+                offset = 0
+
+            _width = max(rect.width(), self._minimumSizes[0])
+            _height = max(rect.height(), self._minimumSizes[1]) - offset
+            margins = self._viewportMargins
+
             # search for the axis widgets
             children = self.findChildren((Gui1dWidgetAxis, GuiNdWidgetAxis))
             if children:
-                margins = self._viewportMargins
-
                 for child in children:
                     if child._axisType == 0:
                         # resize the X axis widgets
-                        child.setGeometry(0, rect.height(), max(rect.width(), self._minimumSizes[0]), margins[3])
+                        child.setGeometry(0, rect.height(), _width, margins[3])
                     else:
                         # resize the Y axis widgets
-                        child.setGeometry(rect.width(), 0, margins[2], max(rect.height(), self._minimumSizes[1]))
+                        child.setGeometry(rect.width(), 0, margins[2], _height)
                     child._updateAxes = True
                     child.update()
 
             # search for the corner widget
             children = self.findChildren(WidgetCorner)
             if children:
-
-                margins = self._viewportMargins
                 for child in children:
-                    child.setGeometry(rect.width(), rect.height(), margins[2], margins[3])
+                    child.setGeometry(_width, _height, margins[2], offset)
                     child.update()
 
         except:

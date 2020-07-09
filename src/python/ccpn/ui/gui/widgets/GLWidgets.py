@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 12:55:47 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 19:32:22 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -66,6 +66,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLExternalRegion
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CURSOR_SOURCE_NONE, CURSOR_SOURCE_SELF, CURSOR_SOURCE_OTHER
+from ccpn.ui.gui.lib.GuiStrip import STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT
 
 
 class GuiNdWidget(CcpnGLWidget):
@@ -660,6 +661,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # set a minimum size so that the strips resize nicely
         self.setMinimumSize(self.AXIS_MARGINRIGHT + 10, self.AXIS_MARGINBOTTOM + 10)
+        # if drawRightAxis:
+        #     self.setMinimumSize(self.AXIS_MARGINRIGHT + 10, STRIP_MINIMUMHEIGHT)
+        # else:
+        #     self.setMinimumSize(STRIP_MINIMUMWIDTH, self.AXIS_MARGINBOTTOM + 10)
+
         # initialise the pyqtsignal notifier
         self.GLSignals = GLNotifier(parent=self, strip=None)
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 12:55:47 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 19:32:21 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial
 from copy import deepcopy
 from collections import namedtuple
+from contextlib import contextmanager
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
@@ -337,7 +338,8 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                    # predicate=styleSheetPredicate, mutator=styleSheetMutator,
                                                                    setLayout=True, acceptDrops=False,
                                                                    scrollBarPolicies=('asNeeded', 'never'),
-                                                                   minimumSizes=(STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT))
+                                                                   minimumSizes=(STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT),
+                                                                   spectrumDisplay=self)
             self._stripFrameScrollArea.setWidget(self.stripFrame)
             self._stripFrameScrollArea.setWidgetResizable(True)
             self.qtParent.getLayout().addWidget(self._stripFrameScrollArea, stripRow, 0, 1, 7)
@@ -385,8 +387,8 @@ class GuiSpectrumDisplay(CcpnModule):
                 # self._bottomGLAxis.aspectRatios = self.application.preferences.general.aspectRatios.copy()
                 self._bottomGLAxis.hide()
 
-            # add a small widget to fill the corner between the widgets
-            self._cornerAxis = WidgetCorner(self._stripFrameScrollArea, spectrumDisplay=self, mainWindow=self.mainWindow)
+                # add a small widget to fill the corner between the widgets
+                self._cornerAxis = WidgetCorner(self._stripFrameScrollArea, spectrumDisplay=self, mainWindow=self.mainWindow, background='orange')
 
         self.qtParent.getLayout().setContentsMargins(1, 0, 1, 0)
         self.qtParent.getLayout().setSpacing(0)
@@ -397,7 +399,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         from ccpn.ui.gui.widgets.PlaneToolbar import ZPlaneToolbar
 
-        self._stripToolBarWidget = Frame(parent=self.qtParent, setLayout=True, grid=(axisRow, 0), gridSpan=(1, 7))
+        self._stripToolBarWidget = Frame(parent=self.qtParent, setLayout=True, grid=(axisRow, 0), gridSpan=(1, 7), hAlign='c')
         self.zPlaneFrame = ZPlaneToolbar(self._stripToolBarWidget, mainWindow, self, showHeader=True, showLabels=True,
                                          grid=(0, 0), gridSpan=(1, 1), margins=(2, 2, 2, 2))
         if len(self.axisCodes) < 3:
@@ -1478,54 +1480,55 @@ class GuiSpectrumDisplay(CcpnModule):
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
-                # retrieve list of created items from the api
-                # strangely, this modifies _wrappedData.orderedStrips, and 'removes' the boundStrip by changing the indexing
-                # if it is at the end of apiBoundStrips then it confuses the indexing
-                indexing = [st.stripIndex() for st in self.strips]
+                with self._hideWidget(self.stripFrame):
+                    # retrieve list of created items from the api
+                    # strangely, this modifies _wrappedData.orderedStrips, and 'removes' the boundStrip by changing the indexing
+                    # if it is at the end of apiBoundStrips then it confuses the indexing
+                    indexing = [st.stripIndex() for st in self.strips]
 
-                apiObjectsCreated = strip._getApiObjectTree()
+                    apiObjectsCreated = strip._getApiObjectTree()
 
-                # reset indexing again SHOULD now be okay; i.e. nothing has been 'removed' from apiBoundStrips yet
-                for ii, ind in enumerate(indexing):
-                    self.strips[ii]._setStripIndex(ind)
+                    # reset indexing again SHOULD now be okay; i.e. nothing has been 'removed' from apiBoundStrips yet
+                    for ii, ind in enumerate(indexing):
+                        self.strips[ii]._setStripIndex(ind)
 
-                index = strip.stripIndex()
+                    index = strip.stripIndex()
 
-                # add layout handling to the undo stack
-                addUndoItem(undo=partial(self._redrawAxes, index))
-                addUndoItem(undo=partial(self._restoreStripToLayout, self, strip, index),
-                            redo=partial(self._removeStripFromLayout, self, strip))
-                # add notifier handling for the strip
-                addUndoItem(undo=partial(strip.setBlankingAllNotifiers, False),
-                            redo=partial(strip.setBlankingAllNotifiers, True))
+                    # add layout handling to the undo stack
+                    addUndoItem(undo=partial(self._redrawAxes, index))
+                    addUndoItem(undo=partial(self._restoreStripToLayout, self, strip, index),
+                                redo=partial(self._removeStripFromLayout, self, strip))
+                    # add notifier handling for the strip
+                    addUndoItem(undo=partial(strip.setBlankingAllNotifiers, False),
+                                redo=partial(strip.setBlankingAllNotifiers, True))
 
-                self._removeStripFromLayout(self, strip)
-                strip.setBlankingAllNotifiers(True)
+                    self._removeStripFromLayout(self, strip)
+                    strip.setBlankingAllNotifiers(True)
 
-                #EJB 20181213: old style delete notifiers
-                # # add object delete/undelete to the undo stack
-                # addUndoItem(undo=partial(strip._wrappedData.root._unDelete,
-                #                          apiObjectsCreated, (strip._wrappedData.topObject,)),
-                #             redo=partial(strip._delete)
-                #             )
-                # # delete the strip
-                # strip._delete()
+                    #EJB 20181213: old style delete notifiers
+                    # # add object delete/undelete to the undo stack
+                    # addUndoItem(undo=partial(strip._wrappedData.root._unDelete,
+                    #                          apiObjectsCreated, (strip._wrappedData.topObject,)),
+                    #             redo=partial(strip._delete)
+                    #             )
+                    # # delete the strip
+                    # strip._delete()
 
-                # add object delete/undelete to the undo stack
-                addUndoItem(undo=BlankedPartial(strip._wrappedData.root._unDelete,
-                                                topObjectsToCheck=(strip._wrappedData.topObject,),
-                                                obj=strip, trigger='create', preExecution=False,
-                                                objsToBeUnDeleted=apiObjectsCreated),
-                            redo=BlankedPartial(strip._delete,
-                                                obj=strip, trigger='delete', preExecution=True)
-                            )
+                    # add object delete/undelete to the undo stack
+                    addUndoItem(undo=BlankedPartial(strip._wrappedData.root._unDelete,
+                                                    topObjectsToCheck=(strip._wrappedData.topObject,),
+                                                    obj=strip, trigger='create', preExecution=False,
+                                                    objsToBeUnDeleted=apiObjectsCreated),
+                                redo=BlankedPartial(strip._delete,
+                                                    obj=strip, trigger='delete', preExecution=True)
+                                )
 
-                # delete the strip
-                strip._finaliseAction('delete')
-                with notificationBlanking():
-                    strip._delete()
+                    # delete the strip
+                    strip._finaliseAction('delete')
+                    with notificationBlanking():
+                        strip._delete()
 
-                addUndoItem(redo=partial(self._redrawAxes, deletingStrip=True))
+                    addUndoItem(redo=partial(self._redrawAxes, deletingStrip=True))
 
             # do axis redrawing
             self._redrawAxes(deletingStrip=True)
@@ -1772,55 +1775,56 @@ class GuiSpectrumDisplay(CcpnModule):
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=self._redrawAxes)
+                with self._hideWidget(self.stripFrame):
+                    addUndoItem(undo=self._redrawAxes)
 
-                #EJB 20181213: old style delete notifiers
-                # result = self.strips[index]._clone()
-                # if not isinstance(result, GuiStrip):
-                #     raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))
-                # apiObjectsCreated = result._getApiObjectTree()
-                # # add object delete/undelete to the undo stack
-                # addUndoItem(undo=partial(Undo._deleteAllApiObjects, apiObjectsCreated),
-                #             redo=partial(result._wrappedData.root._unDelete,
-                #                          apiObjectsCreated, (result._wrappedData.topObject,))
-                #             )
+                    #EJB 20181213: old style delete notifiers
+                    # result = self.strips[index]._clone()
+                    # if not isinstance(result, GuiStrip):
+                    #     raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))
+                    # apiObjectsCreated = result._getApiObjectTree()
+                    # # add object delete/undelete to the undo stack
+                    # addUndoItem(undo=partial(Undo._deleteAllApiObjects, apiObjectsCreated),
+                    #             redo=partial(result._wrappedData.root._unDelete,
+                    #                          apiObjectsCreated, (result._wrappedData.topObject,))
+                    #             )
 
-                with notificationBlanking():
-                    # get the visibility of strip to be copied
-                    copyVisible = self.strips[index].header.headerVisible
+                    with notificationBlanking():
+                        # get the visibility of strip to be copied
+                        copyVisible = self.strips[index].header.headerVisible
 
-                    # inserts the strip into the stripFrame here
-                    result = self.strips[index]._clone()
-                    if not isinstance(result, GuiStrip):
-                        raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))
-                result._finaliseAction('create')
+                        # inserts the strip into the stripFrame here
+                        result = self.strips[index]._clone()
+                        if not isinstance(result, GuiStrip):
+                            raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))
+                    result._finaliseAction('create')
 
-                # copy the strip Header if needed
-                # result.header.headerVisible = copyVisible if copyVisible is not None else False
-                # result.header.setLabelVisible(visible=copyVisible if copyVisible is not None else False)
+                    # copy the strip Header if needed
+                    # result.header.headerVisible = copyVisible if copyVisible is not None else False
+                    # result.header.setLabelVisible(visible=copyVisible if copyVisible is not None else False)
 
-                # retrieve list of created items from the api
-                # strangely, this modifies _wrappedData.orderedStrips
-                apiObjectsCreated = result._getApiObjectTree()
-                addUndoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
-                                                obj=result, trigger='delete', preExecution=True,
-                                                objsToBeDeleted=apiObjectsCreated),
-                            redo=BlankedPartial(result._wrappedData.root._unDelete,
-                                                topObjectsToCheck=(result._wrappedData.topObject,),
-                                                obj=result, trigger='create', preExecution=False,
-                                                objsToBeUnDeleted=apiObjectsCreated)
-                            )
+                    # retrieve list of created items from the api
+                    # strangely, this modifies _wrappedData.orderedStrips
+                    apiObjectsCreated = result._getApiObjectTree()
+                    addUndoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
+                                                    obj=result, trigger='delete', preExecution=True,
+                                                    objsToBeDeleted=apiObjectsCreated),
+                                redo=BlankedPartial(result._wrappedData.root._unDelete,
+                                                    topObjectsToCheck=(result._wrappedData.topObject,),
+                                                    obj=result, trigger='create', preExecution=False,
+                                                    objsToBeUnDeleted=apiObjectsCreated)
+                                )
 
-                index = result.stripIndex()
+                    index = result.stripIndex()
 
-                # add notifier handling to the stack
-                addUndoItem(undo=partial(result.setBlankingAllNotifiers, True),
-                            redo=partial(result.setBlankingAllNotifiers, False))
+                    # add notifier handling to the stack
+                    addUndoItem(undo=partial(result.setBlankingAllNotifiers, True),
+                                redo=partial(result.setBlankingAllNotifiers, False))
 
-                # add layout handling to the undo stack
-                addUndoItem(undo=partial(self._removeStripFromLayout, self, result),
-                            redo=partial(self._restoreStripToLayout, self, result, index))
-                addUndoItem(redo=partial(self._redrawAxes, index))
+                    # add layout handling to the undo stack
+                    addUndoItem(undo=partial(self._removeStripFromLayout, self, result),
+                                redo=partial(self._restoreStripToLayout, self, result, index))
+                    addUndoItem(redo=partial(self._redrawAxes, index))
 
             # do axis redrawing
             self._redrawAxes(index)  # this might be getting confused with the ordering
@@ -1940,7 +1944,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
             self.stripFrame.show()
 
-    def _setRowStretches(self, stretchValue=False, scaleFactor=1.0, heights=True, minimumHeight=None, deletingStrip=False):
+    def _setRowStretches(self, stretchValue=False, scaleFactor=1.0, heights=True, minimumHeight=STRIP_MINIMUMHEIGHT, deletingStrip=False):
         """Set the row heights of the strips so that the last strip accommodates the axis bar
         if necessary."""
         widgets = self.stripFrame.children()
@@ -2288,6 +2292,21 @@ class GuiSpectrumDisplay(CcpnModule):
                 # repaint - not sure whether needed here
                 GLSignals.emitPaintEvent()
 
+    @contextmanager
+    def _hideWidget(self, widget):
+        """ A decorator to hide/show the widget
+        """
+        widget.setVisible(False)
+        try:
+            # transfer control to the calling function
+            yield
+
+        except Exception as es:
+            raise es
+
+        finally:
+            widget.setVisible(True)
+
     def attachZPlaneWidgets(self):
         """Attach the strip zPlane navigation widgets for the strips to the correct containers
         """
@@ -2301,47 +2320,49 @@ class GuiSpectrumDisplay(CcpnModule):
             pass
         else:
 
-            if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.value:
+            with self._hideWidget(self.mainWidget):
+                # NOTE:ED - should stop the mainWidget dancing around
+                if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.value:
 
-                for strip in self.strips:
-                    if strip and not (strip.isDeleted or strip._flaggedForDelete):
-                        strip.zPlaneFrame.setVisible(False)
-                        strip.zPlaneFrame._strip = None
-                        for pl in strip.planeAxisBars:
-                            # reattach the widget to the in strip container
-                            pl._attachButton('_axisSelector')
-                            pl._hideAxisSelector()
+                    for strip in self.strips:
+                        if strip and not (strip.isDeleted or strip._flaggedForDelete):
+                            strip.zPlaneFrame.setVisible(False)
+                            strip.zPlaneFrame._strip = None
+                            for pl in strip.planeAxisBars:
+                                # reattach the widget to the in strip container
+                                pl._attachButton('_axisSelector')
+                                pl._hideAxisSelector()
 
-                _currentStrip = _currentStrip if _currentStrip in self.strips else (self.strips[0] if self.strips else None)
-                if _currentStrip:
-                    self.zPlaneFrame.attachZPlaneWidgets(_currentStrip)
-                self.zPlaneFrame.setVisible(True)
+                    _currentStrip = _currentStrip if _currentStrip in self.strips else (self.strips[0] if self.strips else None)
+                    if _currentStrip:
+                        self.zPlaneFrame.attachZPlaneWidgets(_currentStrip)
+                    self.zPlaneFrame.setVisible(True)
 
-            if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.value:
-                for strip in self.strips:
-                    if strip and not (strip.isDeleted or strip._flaggedForDelete):
-                        for pl in strip.planeAxisBars:
-                            # reattach the widget to the in strip container
-                            pl._attachButton('_axisSelector')
-                            pl._hideAxisSelector()
+                if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.value:
+                    self.zPlaneFrame.setVisible(False)
+                    self.zPlaneFrame._strip = None
+                    for strip in self.strips:
+                        if strip and not (strip.isDeleted or strip._flaggedForDelete):
+                            for pl in strip.planeAxisBars:
+                                # reattach the widget to the in strip container
+                                pl._attachButton('_axisSelector')
+                                pl._hideAxisSelector()
 
-                        strip.zPlaneFrame.attachZPlaneWidgets(strip)
-                        strip.zPlaneFrame.setVisible(True)
-                self.zPlaneFrame.setVisible(False)
-                self.zPlaneFrame._strip = None
+                            strip.zPlaneFrame.attachZPlaneWidgets(strip)
+                            strip.zPlaneFrame.setVisible(True)
 
-            if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.value:
-                for strip in self.strips:
-                    if strip and not (strip.isDeleted or strip._flaggedForDelete):
-                        strip.zPlaneFrame.setVisible(False)
-                        strip.zPlaneFrame._strip = None
-                        for pl in strip.planeAxisBars:
-                            # reattach the widget to the in strip container
-                            pl._attachButton('_axisSelector')
-                            pl._hideAxisSelector()
+                if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.value:
+                    for strip in self.strips:
+                        if strip and not (strip.isDeleted or strip._flaggedForDelete):
+                            strip.zPlaneFrame.setVisible(False)
+                            strip.zPlaneFrame._strip = None
+                            for pl in strip.planeAxisBars:
+                                # reattach the widget to the in strip container
+                                pl._attachButton('_axisSelector')
+                                pl._hideAxisSelector()
 
-                self.zPlaneFrame.setVisible(False)
-                self.zPlaneFrame._strip = None
+                    self.zPlaneFrame.setVisible(False)
+                    self.zPlaneFrame._strip = None
 
         self.update()
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-08 19:30:46 +0100 (Wed, July 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 11:57:36 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -86,7 +86,7 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
         # why would you want to set all the positions to the same thing??
         #  strip.orderedAxes[stripAxisIndex].position = positions[0]
 
-        if widths is not None:
+        if widths is not None and strip._CcpnGLWidget.aspectRatioMode == 0:
             try:
                 if widths[ii]:  # FIXME this can be out of range
                     # if this item in the list contains a float, set the axis width to that float value
@@ -124,7 +124,7 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
             if ii < len(positions) and positions[ii]:
                 strip._CcpnGLWidget.setAxisPosition(axisCode=flippedAxisCode, position=positions[ii], update=False)
 
-            if widths is not None:
+            if widths is not None and strip._CcpnGLWidget.aspectRatioMode == 0:
                 if ii < len(widths) and widths[ii]:
 
                     if isinstance(widths[ii], float):

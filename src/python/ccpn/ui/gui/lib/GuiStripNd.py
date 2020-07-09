@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-08 19:44:07 +0100 (Wed, July 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 11:57:35 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -232,7 +232,8 @@ class GuiStripNd(GuiStrip):
             self._stripToolBarWidget.setVisible(False)
 
         # add container for the zPlane navigation widgets for 'Per Strip' mode
-        self.zPlaneFrame = ZPlaneToolbar(self._stripToolBarWidget, self.mainWindow, self, grid=(0, 0), showHeader=True, showLabels=False, margins=(2, 2, 2, 2))
+        self.zPlaneFrame = ZPlaneToolbar(self._stripToolBarWidget, self.mainWindow, self, grid=(0, 0),
+                                         showHeader=False, showLabels=False, margins=(2, 2, 2, 2))
         if self._preferences.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.value:
             self.zPlaneFrame.attachZPlaneWidgets(self)
         self.zPlaneFrame.setVisible(self._preferences.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.value)

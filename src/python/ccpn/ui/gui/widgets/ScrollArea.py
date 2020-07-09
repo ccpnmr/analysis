@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-26 12:02:35 +0000 (Thu, March 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 12:55:47 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -48,6 +48,7 @@ class ScrollArea(QtWidgets.QScrollArea, Base):
         self.setScrollBarPolicies(scrollBarPolicies)
         self.setMinimumSizes(minimumSizes)
         self._scrollDirections = scrollDirections
+        self._minimumSizes = minimumSizes
 
     def setMinimumSizes(self, minimumSizes):
         """Set (minimumWidth, minimumHeight)
@@ -114,11 +115,10 @@ class SpectrumDisplayScrollArea(ScrollArea):
                 for child in children:
                     if child._axisType == 0:
                         # resize the X axis widgets
-                        child.setGeometry(0, rect.height(), rect.width(), margins[3])
+                        child.setGeometry(0, rect.height(), max(rect.width(), self._minimumSizes[0]), margins[3])
                     else:
                         # resize the Y axis widgets
-                        child.setGeometry(rect.width(), 0, margins[2], rect.height())
-
+                        child.setGeometry(rect.width(), 0, margins[2], max(rect.height(), self._minimumSizes[1]))
                     child._updateAxes = True
                     child.update()
 

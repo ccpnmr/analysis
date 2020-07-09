@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-28 17:19:12 +0100 (Tue, April 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 12:55:47 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, DOUBLEAXIS_FULLATOMNAME
+from ccpn.util.Common import ZPlaneNavigationModes
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISASPECTRATIOS, AXISASPECTRATIOMODE, \
@@ -50,8 +51,8 @@ from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNG
 
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
-STRIPMINIMUMWIDTH = 100
-STRIPPLOTMINIMUMWIDTH = 100
+STRIP_MINIMUMWIDTH = 150
+STRIP_MINIMUMHEIGHT = 150
 
 DefaultMenu = 'DefaultMenu'
 PeakMenu = 'PeakMenu'
@@ -91,8 +92,8 @@ class GuiStrip(Frame):
                          spacing=(0, 0), acceptDrops=True  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                          )
 
-        self.setMinimumWidth(150)
-        self.setMinimumHeight(150)
+        self.setMinimumWidth(STRIP_MINIMUMWIDTH)
+        self.setMinimumHeight(STRIP_MINIMUMHEIGHT)
 
         # stripArrangement = getattr(self.spectrumDisplay, 'stripArrangement', None)
         # if stripArrangement == 'X':
@@ -133,8 +134,8 @@ class GuiStrip(Frame):
         # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
         # and GuiStrip1d; will be hidden for 2D's by GuiSpectrumView
         self._stripToolBarWidget = Widget(parent=self, setLayout=True,
-                                          hPolicy='expanding',
-                                          grid=stripToolBarGrid, gridSpan=stripToolBarSpan, spacing=(5, 5))
+                                          grid=stripToolBarGrid, gridSpan=stripToolBarSpan)
+        self._stripToolBarWidget.getLayout().setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
 
         self.viewStripMenu = None
         self.storedZooms = []
@@ -714,14 +715,14 @@ class GuiStrip(Frame):
                         # each element is list of indices to fetch from currentStrip and map to strip
 
                         # permutationList1 = [jj for jj in product(*(ii if ii else (None,) for ii in indices)) if len(set(jj)) == len(strip.axisCodes)]
-                        permutationList1 = [jj for jj in product(*(ii if ii else (None,) for ii in indices))]   # if len(set(jj)) == len(strip.axisCodes)]
+                        permutationList1 = [jj for jj in product(*(ii if ii else (None,) for ii in indices))]  # if len(set(jj)) == len(strip.axisCodes)]
 
                         # print('>>>', strip.pid, indices)
                         for perm in permutationList1:
-                            perm2 = [pp if pp is not None else -(cc+1) for cc, pp in enumerate(perm)]
+                            perm2 = [pp if pp is not None else -(cc + 1) for cc, pp in enumerate(perm)]
                             # print('>>>    ', perm, perm2)
 
-                            if len(set(perm2)) == len(perm2):       # ignore None's
+                            if len(set(perm2)) == len(perm2):  # ignore None's
                                 self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip)
 
                         # menuFunc.addItem(text=' - ')
@@ -1057,6 +1058,33 @@ class GuiStrip(Frame):
         if self.stripLabel:
             self.stripLabel.setLabelColour(CCPNGLWIDGET_HEXHIGHLIGHT if flag else CCPNGLWIDGET_HEXFOREGROUND)
             self.stripLabel.setHighlighted(flag)
+
+    def _attachZPlaneWidgets(self):
+        """Attach the ZPlane widgets for the curent strip intothe spectrumDisplay axis frame
+        """
+        if self.spectrumDisplay.is1D:
+            return
+
+        try:
+            _prefsGeneral = self.application.preferences.general
+        except:
+            pass
+        else:
+            spec = self.spectrumDisplay
+            if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.value:
+                spec.zPlaneFrame.attachZPlaneWidgets(self)
+
+    def _removeZPlaneWidgets(self):
+        """Remove the ZPlane widgets for the curent strip from the spectrumDisplay axis frame
+        """
+        try:
+            _prefsGeneral = self.application.preferences.general
+        except:
+            pass
+        else:
+            spec = self.spectrumDisplay
+            if spec.zPlaneFrame and _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.value:
+                spec.zPlaneFrame.removeZPlaneWidgets()
 
     # GWV 20181127: moved to a single notifier in GuiMainWindow
     # def _highlightCurrentStrip(self, data):

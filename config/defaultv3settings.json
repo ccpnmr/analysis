@@ -92,7 +92,8 @@
         "editorFont"                           : "Monaco",
         "moduleFont"                           : "Helvetica",
         "messageFont"                          : "Lucida Grande",
-        "checkUpdatesAtStartup"                : true
+        "checkUpdatesAtStartup"                : true,
+        "zPlaneNavigationMode"                 : 0
     },
     "proxySettings"    : {
         "useProxy"         : false,

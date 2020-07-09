@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 10:47:46 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-09 12:55:47 +0100 (Thu, July 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1173,13 +1173,15 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #         pass  # GWV: poor solution spectrumDisplay._resetRemoveStripAction()
 
     def _highlightCurrentStrip(self, data):
-        "Callback on current to highlight the strip"
+        """Callback on current to highlight the strip
+        """
         previousStrip = data[Notifier.PREVIOUSVALUE]
         currentStrip = data[Notifier.VALUE]
         if previousStrip and not previousStrip.isDeleted:
             previousStrip._highlightStrip(False)
         if currentStrip and not currentStrip.isDeleted:
             currentStrip._highlightStrip(True)
+            currentStrip._attachZPlaneWidgets()
 
     def printToFile(self):
         self.application.showPrintSpectrumDisplayPopup()

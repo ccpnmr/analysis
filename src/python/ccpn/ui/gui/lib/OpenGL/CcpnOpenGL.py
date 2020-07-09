@@ -3041,13 +3041,13 @@ class CcpnGLWidget(QOpenGLWidget):
             self._GLPeaks.buildSymbols()
             self._GLMultiplets.buildSymbols()
             self._GLIntegrals.buildSymbols()
-
-            if self.buildMarks:
-                self._marksList.renderMode = GLRENDERMODE_REBUILD
-                self.buildMarks = False
-            self.buildMarksRulers()
-
             self.buildRegions()
+
+        if self.buildMarks:
+            self._marksList.renderMode = GLRENDERMODE_REBUILD
+            self.buildMarks = False
+
+        self.buildMarksRulers()
 
         if not self._stackingMode:
             self._GLPeaks.buildLabels()

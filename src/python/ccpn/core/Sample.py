@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 19:32:21 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-10 09:40:39 +0100 (Fri, July 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
-from ccpn.util.Constants import AMOUNT_UNITS
+from ccpn.util.Constants import AMOUNT_UNITS, IONICSTRENGTH_UNITS
 
 
 SAMPLE = 'sample'
@@ -285,7 +285,7 @@ class Sample(AbstractWrapperObject):
 
     @property
     def ionicStrengthUnits(self) -> str:
-        """ionicStrengthUnits for sample, one of list AMOUNT_UNITS
+        """ionicStrengthUnits for sample, one of list IONICSTRENGTH_UNITS
         """
         if not self.hasParameter(SAMPLE, SAMPLEIONICSTRENGTHUNITS):
             # set a default value if it has never been accessed before
@@ -297,12 +297,12 @@ class Sample(AbstractWrapperObject):
 
     @ionicStrengthUnits.setter
     def ionicStrengthUnits(self, value: str):
-        """Set value for the amountUnits
+        """Set value for the ionicStrengthUnits
         """
         if not isinstance(value, (str, type(None))):
             raise ValueError("ionicStrengthUnits must be a string/None.")
-        if value not in (None,) + AMOUNT_UNITS:
-            raise ValueError("ionicStrengthUnits must be of type None/{}".format(AMOUNT_UNITS))
+        if value not in (None,) + IONICSTRENGTH_UNITS:
+            raise ValueError("ionicStrengthUnits must be of type None/{}".format(IONICSTRENGTH_UNITS))
 
         self.setParameter(SAMPLE, SAMPLEIONICSTRENGTHUNITS, value)
 

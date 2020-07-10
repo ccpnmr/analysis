@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 19:32:22 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-10 09:40:39 +0100 (Fri, July 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ from ccpn.ui.gui.popups.AttributeEditorPopupABC import ComplexAttributeEditorPop
 from ccpn.core.Sample import Sample
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
     SpinBoxCompoundWidget, PulldownListCompoundWidget
-from ccpn.util.Constants import AMOUNT_UNITS, amountUnits
+from ccpn.util.Constants import AMOUNT_UNITS, amountUnits, IONICSTRENGTH_UNITS
 
 
 class SamplePropertiesPopup(ComplexAttributeEditorPopupABC):
@@ -83,7 +83,7 @@ class SamplePropertiesPopup(ComplexAttributeEditorPopupABC):
                               ),
                         HList([('ionicStrength', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
                                ('ionicStrengthUnits', PulldownListCompoundWidget,
-                                getattr, _setUnits, partial(_getUnits, unitType='ionicStrengthUnits', unitList=('',) + AMOUNT_UNITS), None,
+                                getattr, _setUnits, partial(_getUnits, unitType='ionicStrengthUnits', unitList=('',) + IONICSTRENGTH_UNITS), None,
                                 {'editable': False}), ],
                               hWidth=SHORTWIDTH,
                               ),

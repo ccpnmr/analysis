@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 19:32:21 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-10 09:40:39 +0100 (Fri, July 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1890,6 +1890,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
             if minimumWidth:
                 firstStripWidth = max(firstStripWidth, minimumWidth)
+            firstStripWidth = max(firstStripWidth, STRIP_MINIMUMWIDTH)
 
             if True:  # not self.lastAxisOnly:
                 maxCol = 0
@@ -1908,8 +1909,13 @@ class GuiSpectrumDisplay(CcpnModule):
                     self.stripFrame.setMinimumWidth((firstStripWidth + STRIP_SPACING) * len(self.orderedStrips) - STRIP_SPACING)
                 else:
                     self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
-                self.stripFrame.setMinimumHeight(50)
-
+                self.stripFrame.setMinimumHeight(STRIP_MINIMUMHEIGHT)
+                try:
+                    self._rightGLAxis.setMinimumHeight(STRIP_MINIMUMHEIGHT - self.strips[0]._stripToolBarWidget.height())
+                    self._rightGLAxis._updateAxes = True
+                    self._rightGLAxis.update()
+                except:
+                    pass
             else:
 
                 # set the correct widths for the strips
@@ -1982,6 +1988,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
             if minimumHeight:
                 firstStripHeight = max(firstStripHeight, minimumHeight)
+            firstStripHeight = max(firstStripHeight, STRIP_MINIMUMHEIGHT)
 
             if True:  #not self.lastAxisOnly:
                 maxRow = 0
@@ -2000,7 +2007,11 @@ class GuiSpectrumDisplay(CcpnModule):
                     self.stripFrame.setMinimumHeight((firstStripHeight + STRIP_SPACING) * len(self.orderedStrips) - STRIP_SPACING)
                 else:
                     self.stripFrame.setMinimumHeight(self.stripFrame.minimumSizeHint().height())
-                self.stripFrame.setMinimumWidth(50)
+                self.stripFrame.setMinimumWidth(STRIP_MINIMUMWIDTH)
+                if hasattr(self, '_bottomGLAxis'):
+                    self._bottomGLAxis.setMinimumWidth(STRIP_MINIMUMWIDTH)
+                    self._bottomGLAxis._updateAxes = True
+                    self._bottomGLAxis.update()
 
             else:
 

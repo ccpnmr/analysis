@@ -31,6 +31,18 @@ from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox, CustomLabel
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Base import Base
 
+AboveX = 'aboveX'
+AboveY = 'aboveY'
+BelowX = 'belowX'
+BelowY = 'belowY'
+DisappearedX = 'disappearedX'
+DisappearedY = 'disappearedY'
+AboveObjects = 'aboveObjects'
+BelowObjects = 'belowObjects'
+DisappearedObjects = 'disappearedObjects'
+AboveBrush = 'aboveBrush'
+BelowBrush = 'belowBrush'
+DisappearedBrush = 'disappearedBrush'
 
 class BarGraphWidget(Widget):
 
@@ -59,6 +71,20 @@ class BarGraphWidget(Widget):
         self.xLine = self.customViewBox.xLine
         self.customViewBox.addItem(self.xLine)
         self.setThresholdLine()
+        self._dataDict = {
+                            AboveX:[],
+                            AboveY:[],
+                            AboveBrush:'g',
+                            AboveObjects:[],
+                            BelowX:[],
+                            BelowY:[],
+                            BelowBrush:'r',
+                            BelowObjects:[],
+                            DisappearedX:[],
+                            DisappearedY:[],
+                            DisappearedBrush:'b',
+                            DisappearedObjects:[]
+                         }
 
     def _setViewBox(self):
         self.customViewBox = CustomViewBox(application=self.application)
@@ -141,18 +167,18 @@ class BarGraphWidget(Widget):
     def _lineMoved(self, **args):
         self.clear()
         if len(args) > 0:
-            aboveX = args['aboveX']
-            aboveY = args['aboveY']
-            disappearedX = args['disappearedX']
-            disappearedY = args['disappearedY']
-            aboveObjects = args['aboveObjects']
-            belowX = args['belowX']
-            belowY = args['belowY']
-            belowObjects = args['belowObjects']
-            disappearedObjects = args['disappearedObjects']
-            self.aboveBrush = args['aboveBrush']
-            self.belowBrush = args['belowBrush']
-            self.disappearedBrush = args['disappearedBrush']
+            aboveX = args[AboveX]
+            aboveY = args[AboveY]
+            disappearedX = args[DisappearedX]
+            disappearedY = args[DisappearedY]
+            aboveObjects = args[AboveObjects]
+            belowX = args[BelowX]
+            belowY = args[BelowY]
+            belowObjects = args[BelowObjects]
+            disappearedObjects = args[DisappearedObjects]
+            self.aboveBrush = args[AboveBrush]
+            self.belowBrush = args[BelowBrush]
+            self.disappearedBrush = args[DisappearedBrush]
 
         else:
             aboveX = []

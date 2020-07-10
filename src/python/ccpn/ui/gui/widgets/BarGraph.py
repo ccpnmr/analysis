@@ -102,31 +102,48 @@ class BarGraph(pg.BarGraphItem):
                 )
         self.opts.update(opts)
 
-    def setObjects(self, objects):
+    def setObjects(self, objects, objAttr='pid'):
 
-        for label in self.labels:
-            for object in objects:
-                if isinstance(object, NmrResidue):
-                    nmrResidue = object
+        if len(self.labels) == len(objects):
+            for label, obj in zip(self.labels, objects):
+                if isinstance(obj, NmrResidue):
+                    nmrResidue = obj
                     if hasattr(nmrResidue, 'sequenceCode'):
-
                         if nmrResidue.residue:
                             if nmrResidue.sequenceCode is not None:
                                 if str(nmrResidue.sequenceCode) == label.text():
-                                    label.setData(int(nmrResidue.sequenceCode), object)
-                if isinstance(object, Spectrum):
-                    label.setData(str(object.name), object)
+                                    label.setData(int(nmrResidue.sequenceCode), obj)
+                else:
+                    label.setData(0, obj)
+                    if objAttr == 'pid':
+                        label.setText(obj.pid)
+                    else:
+                        label.setText(getattr(obj, objAttr, ''))
 
 
-                        # if nmrResidue.sequenceCode is not None:
-                        #   ind = nmrResidue.nmrChain.nmrResidues.index(nmrResidue)
-                        #   lbl = label.text()
-                        #   if str(ind) == lbl:
-                        #     label.setData(ind, object)
-
-                # else:
-                # pass
-                # print('Impossible to set this object to its label. Function implemented only for NmrResidue')
+        # for label in self.labels:
+        #     for object in objects:
+        #         if isinstance(object, NmrResidue):
+        #             nmrResidue = object
+        #             if hasattr(nmrResidue, 'sequenceCode'):
+        #
+        #                 if nmrResidue.residue:
+        #                     if nmrResidue.sequenceCode is not None:
+        #                         if str(nmrResidue.sequenceCode) == label.text():
+        #                             label.setData(int(nmrResidue.sequenceCode), object)
+        #         if isinstance(object, Spectrum):
+        #             label.setData(str(object.name), object)
+        #
+        #
+        #                 # if nmrResidue.sequenceCode is not None:
+        #                 #   ind = nmrResidue.nmrChain.nmrResidues.index(nmrResidue)
+        #                 #   lbl = label.text()
+        #                 #   if str(ind) == lbl:
+        #                 #     label.setData(ind, object)
+        #
+        #         # else:
+        #         # pass
+        #         # print('Impossible to set this object to its label. Function implemented only for NmrResidue')
 
     def getValueDict(self):
         for x, y in zip(self.xValues, self.yValues):
@@ -172,6 +189,7 @@ class BarGraph(pg.BarGraphItem):
             label.setBrush(QtGui.QColor(self.brush))
 
 
+
 class CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
     """ A text annotation of a bar.
         """
@@ -203,17 +221,16 @@ class CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
         return self.customObject
 
     def paint(self, painter, option, widget):
-        self._selectCurrentNmrResidue()
+        self._selectCurrent()
         QtWidgets.QGraphicsSimpleTextItem.paint(self, painter, option, widget)
 
-    def _selectCurrentNmrResidue(self):
-
-        if self.data(int(self.text())) is not None:
-
-            if self.application is not None:
-
-                if self.data(int(self.text())) in self.application.current.nmrResidues:
-                    self.setSelected(True)
+    def _selectCurrent(self):
+        if self.text().isdigit():
+            if self.data(int(self.text())) is not None:
+                if self.application is not None:
+                    if self.data(int(self.text())) in self.application.current.nmrResidues:
+                        self.setSelected(True)
+        #  add other option to use pids/
 
 
 class CustomViewBox(pg.ViewBox):

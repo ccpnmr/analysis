@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-10 09:40:39 +0100 (Fri, July 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-10 18:32:43 +0100 (Fri, July 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,6 @@ from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Sample import Sample
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from typing import Tuple, Optional
-from ccpn.ui.gui.widgets.Widget import WidgetCorner
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
@@ -339,7 +338,8 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                    setLayout=True, acceptDrops=False,
                                                                    scrollBarPolicies=('asNeeded', 'never'),
                                                                    minimumSizes=(STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT),
-                                                                   spectrumDisplay=self)
+                                                                   spectrumDisplay=self,
+                                                                   cornerWidget=not self.is1D)
             self._stripFrameScrollArea.setWidget(self.stripFrame)
             self._stripFrameScrollArea.setWidgetResizable(True)
             self.qtParent.getLayout().addWidget(self._stripFrameScrollArea, stripRow, 0, 1, 7)
@@ -386,9 +386,6 @@ class GuiSpectrumDisplay(CcpnModule):
                 # self._bottomGLAxis.aspectRatioMode = self.application.preferences.general.aspectRatioMode
                 # self._bottomGLAxis.aspectRatios = self.application.preferences.general.aspectRatios.copy()
                 self._bottomGLAxis.hide()
-
-                # add a small widget to fill the corner between the widgets
-                self._cornerAxis = WidgetCorner(self._stripFrameScrollArea, spectrumDisplay=self, mainWindow=self.mainWindow, background='orange')
 
         self.qtParent.getLayout().setContentsMargins(1, 0, 1, 0)
         self.qtParent.getLayout().setSpacing(0)
@@ -654,10 +651,6 @@ class GuiSpectrumDisplay(CcpnModule):
                 self._rightGLAxis.hide()
                 self._bottomGLAxis.show()
                 self._bottomGLAxis._updateAxes = True
-
-        # update the background colour
-        self.colours = getColours()
-        self._cornerAxis.setBackground(self.colours[CCPNGLWIDGET_BACKGROUND])
 
         self.stripFrame.update()
         self._stripFrameScrollArea._updateAxisWidgets()
@@ -1916,37 +1909,38 @@ class GuiSpectrumDisplay(CcpnModule):
                     self._rightGLAxis.update()
                 except:
                     pass
-            else:
 
-                # set the correct widths for the strips
-                maxCol = thisLayout.count() - 1
-                firstWidth = scaleFactor * (thisLayoutWidth - AXIS_WIDTH - (maxCol * AXIS_PADDING)) / (maxCol + 1)
-
-                if minimumWidth:
-                    firstWidth = max(firstWidth, minimumWidth)
-
-                endWidth = firstWidth + AXIS_WIDTH
-
-                # set the minimum widths and stretch values for the strips
-                for column in range(thisLayout.count()):
-                    thisLayout.setColumnStretch(column, firstWidth if stretchValue else 1)
-                    if widths:
-                        wid = thisLayout.itemAt(column).widget()
-                        wid.setMinimumWidth(firstWidth)
-
-                thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 1)
-                if widths:
-                    wid = thisLayout.itemAt(maxCol).widget()
-                    wid.setMinimumWidth(endWidth)
-
-                # fix the width of the stripFrame
-                if minimumWidth:
-
-                    # this depends on the spacing in stripFrame
-                    self.stripFrame.setMinimumWidth((firstWidth + STRIP_SPACING) * len(self.orderedStrips) + AXIS_WIDTH)
-                else:
-                    self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
-                self.stripFrame.setMinimumHeight(50)
+            # else:
+            #
+            #     # set the correct widths for the strips
+            #     maxCol = thisLayout.count() - 1
+            #     firstWidth = scaleFactor * (thisLayoutWidth - AXIS_WIDTH - (maxCol * AXIS_PADDING)) / (maxCol + 1)
+            #
+            #     if minimumWidth:
+            #         firstWidth = max(firstWidth, minimumWidth)
+            #
+            #     endWidth = firstWidth + AXIS_WIDTH
+            #
+            #     # set the minimum widths and stretch values for the strips
+            #     for column in range(thisLayout.count()):
+            #         thisLayout.setColumnStretch(column, firstWidth if stretchValue else 1)
+            #         if widths:
+            #             wid = thisLayout.itemAt(column).widget()
+            #             wid.setMinimumWidth(firstWidth)
+            #
+            #     thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 1)
+            #     if widths:
+            #         wid = thisLayout.itemAt(maxCol).widget()
+            #         wid.setMinimumWidth(endWidth)
+            #
+            #     # fix the width of the stripFrame
+            #     if minimumWidth:
+            #
+            #         # this depends on the spacing in stripFrame
+            #         self.stripFrame.setMinimumWidth((firstWidth + STRIP_SPACING) * len(self.orderedStrips) + AXIS_WIDTH)
+            #     else:
+            #         self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
+            #     self.stripFrame.setMinimumHeight(50)
 
             self.stripFrame.show()
 
@@ -2013,36 +2007,36 @@ class GuiSpectrumDisplay(CcpnModule):
                     self._bottomGLAxis._updateAxes = True
                     self._bottomGLAxis.update()
 
-            else:
-
-                # set the correct heights for the strips
-                maxRow = thisLayout.count() - 1
-                firstHeight = scaleFactor * (thisLayoutHeight - AXIS_HEIGHT - (maxRow * AXIS_PADDING)) / (maxRow + 1)
-
-                if minimumHeight:
-                    firstHeight = max(firstHeight, minimumHeight)
-
-                endHeight = firstHeight + AXIS_HEIGHT
-
-                # set the minimum heights and stretch values for the strips
-                for rr in range(thisLayout.count()):
-                    thisLayout.setRowStretch(rr, firstHeight if stretchValue else 1)
-                    if heights:
-                        wid = thisLayout.itemAt(rr).widget()
-                        wid.setMinimumHeight(firstHeight)
-
-                thisLayout.setRowStretch(maxRow, endHeight if stretchValue else 1)
-                if heights:
-                    wid = thisLayout.itemAt(maxRow).widget()
-                    wid.setMinimumHeight(endHeight)
-
-                # fix the height of the stripFrame
-                if minimumHeight:
-                    # this depends on the spacing in stripFrame
-                    self.stripFrame.setMinimumHeight((firstHeight + STRIP_SPACING) * len(self.orderedStrips) + AXIS_HEIGHT)
-                else:
-                    self.stripFrame.setMinimumHeight(self.stripFrame.minimumSizeHint().height())
-                self.stripFrame.setMinimumWidth(50)
+            # else:
+            #
+            #     # set the correct heights for the strips
+            #     maxRow = thisLayout.count() - 1
+            #     firstHeight = scaleFactor * (thisLayoutHeight - AXIS_HEIGHT - (maxRow * AXIS_PADDING)) / (maxRow + 1)
+            #
+            #     if minimumHeight:
+            #         firstHeight = max(firstHeight, minimumHeight)
+            #
+            #     endHeight = firstHeight + AXIS_HEIGHT
+            #
+            #     # set the minimum heights and stretch values for the strips
+            #     for rr in range(thisLayout.count()):
+            #         thisLayout.setRowStretch(rr, firstHeight if stretchValue else 1)
+            #         if heights:
+            #             wid = thisLayout.itemAt(rr).widget()
+            #             wid.setMinimumHeight(firstHeight)
+            #
+            #     thisLayout.setRowStretch(maxRow, endHeight if stretchValue else 1)
+            #     if heights:
+            #         wid = thisLayout.itemAt(maxRow).widget()
+            #         wid.setMinimumHeight(endHeight)
+            #
+            #     # fix the height of the stripFrame
+            #     if minimumHeight:
+            #         # this depends on the spacing in stripFrame
+            #         self.stripFrame.setMinimumHeight((firstHeight + STRIP_SPACING) * len(self.orderedStrips) + AXIS_HEIGHT)
+            #     else:
+            #         self.stripFrame.setMinimumHeight(self.stripFrame.minimumSizeHint().height())
+            #     self.stripFrame.setMinimumWidth(50)
 
             self.stripFrame.show()
 

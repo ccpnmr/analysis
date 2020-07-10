@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-10 15:00:52 +0100 (Fri, July 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-10 18:32:43 +0100 (Fri, July 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -5359,8 +5359,9 @@ class CcpnGLWidget(QOpenGLWidget):
                                                yNumPoints, intPositionPixel, ph0, ph1, pivot)
 
     def newTrace(self, position=None):
-        cursorCoordinate = self.getCurrentCursorCoordinate()
-        position = position if position else [cursorCoordinate[0], cursorCoordinate[1]]  #list(cursorPosition)
+        # cursorCoordinate = self.getCurrentCursorCoordinate(self.cursorCoordinate)
+        cursorCoordinate = self.current.cursorPosition
+        position = position if position else [cursorCoordinate[0], cursorCoordinate[1]]
 
         # add to the list of traces
         self._currentTraces.append(position)
@@ -6456,7 +6457,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         self.cursorCoordinate[n] = None
                         self.doubleCursorCoordinate[1 - n] = None
 
-                self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+                # self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
                 # only need to redraw if we can see the cursor
                 # if self._updateVTrace or self._updateHTrace:

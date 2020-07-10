@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-10 18:32:44 +0100 (Fri, July 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -63,7 +63,7 @@ class WidgetCorner(Widget):
     def __init__(self, parent, spectrumDisplay=None, mainWindow=None, setLayout=False, acceptDrops=False, background=None, **kwds):
         """Initialise the widget
         """
-        super(WidgetCorner, self).__init__(parent=parent, setLayout=setLayout, acceptDrops=acceptDrops, **kwds)
+        super().__init__(parent=parent, setLayout=setLayout, acceptDrops=acceptDrops, **kwds)
         self._parent = parent
         self.spectrumDisplay = spectrumDisplay
         self.mainWindow = mainWindow

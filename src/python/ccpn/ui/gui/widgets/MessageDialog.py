@@ -294,6 +294,7 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
         assert len(objects) == len(texts)
 
     dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
+    dialog.setFocus()
 
     _checkbox = None
 

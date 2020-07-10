@@ -38,7 +38,7 @@ from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import percentage
-
+from ccpn.core.Spectrum import Spectrum
 
 current = []
 
@@ -60,8 +60,8 @@ class BarGraph(pg.BarGraphItem):
         self.viewBox = viewBox
         self.callback = None
         self.trigger = QtCore.pyqtSignal()
-        self.xValues = xValues or []
-        self.yValues = yValues or []
+        self.xValues = xValues if xValues is not None else []
+        self.yValues = yValues if yValues is not None else []
         self.brush = brush
         self.clicked = None
         self.objects = objects or []
@@ -114,6 +114,9 @@ class BarGraph(pg.BarGraphItem):
                             if nmrResidue.sequenceCode is not None:
                                 if str(nmrResidue.sequenceCode) == label.text():
                                     label.setData(int(nmrResidue.sequenceCode), object)
+                if isinstance(object, Spectrum):
+                    label.setData(str(object.name), object)
+
 
                         # if nmrResidue.sequenceCode is not None:
                         #   ind = nmrResidue.nmrChain.nmrResidues.index(nmrResidue)

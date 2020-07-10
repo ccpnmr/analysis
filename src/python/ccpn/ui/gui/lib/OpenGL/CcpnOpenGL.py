@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-22 18:18:17 +0100 (Mon, June 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-10 15:00:52 +0100 (Fri, July 10, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3907,7 +3907,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if self._drawBottomAxis:
                 # create the X axis labelling
-                for axLabel in self.axisLabelling['0']:
+                for axLabel in self.axisLabelling['0'].values():
                     axisX = axLabel[2]
                     axisXLabel = axLabel[3]
 
@@ -3943,7 +3943,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if self._drawRightAxis:
                 # create the Y axis labelling
-                for xx, ayLabel in enumerate(self.axisLabelling['1']):
+                for xx, ayLabel in enumerate(self.axisLabelling['1'].values()):
                     axisY = ayLabel[2]
                     axisYLabel = ayLabel[3]
 
@@ -5758,6 +5758,15 @@ class CcpnGLWidget(QOpenGLWidget):
         """Build the grid
         """
 
+        def getDigit(ll, order):
+            ss = '{0:.1f}'.format(ll[3] / order)
+            valLen = len(ss)
+            return ss[valLen-3]
+
+        def getDigitLen(ll, order):
+            ss = '{0:.1f}'.format(ll[3] / order)
+            return len(ss)
+
         def check(ll):
             # check if a number ends in an even digit
             val = '%.0f' % (ll[3] / ll[4])
@@ -5768,8 +5777,12 @@ class CcpnGLWidget(QOpenGLWidget):
         def valueToRatio(val, x0, x1):
             return (val - x0) / (x1 - x0)
 
-        labelling = {'0': [], '1': []}
+        labelling = {'0': {}, '1': {}}
         axesChanged = False
+        _minPow = None
+        _minOrder = None
+        _minSet = False
+        _labelRestrictList = ('0123456789', '0258', '05', '0')
 
         # check if the width is too small to draw too many grid levels
         boundX = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
@@ -5896,13 +5909,16 @@ class CcpnGLWidget(QOpenGLWidget):
                 for scaleOrder, i in enumerate(scaleGrid):  #  [2,1,0]:   ## Draw three different scales of grid
                     dist = br - ul
                     nlTarget = 10. ** i
-                    d = 10. ** np.floor(np.log10(abs(dist / nlTarget)) + 0.5)
+                    _pow = np.log10(abs(dist / nlTarget)) + 0.5
+                    d = 10. ** np.floor(_pow)
 
                     ul1 = np.floor(ul / d) * d
                     br1 = np.ceil(br / d) * d
                     dist = br1 - ul1
                     nl = (dist / d) + 0.5
 
+                    _minPow = np.floor(_pow) if _minPow is None else np.minimum(_minPow, np.floor(_pow))
+                    _minOrder = d if _minOrder is None else np.minimum(_minOrder, d)
                     for ax in axisList:  #   range(0,2):  ## Draw grid for both axes
 
                         # # skip grid lines for point grids - not sure this is working
@@ -5942,14 +5958,17 @@ class CcpnGLWidget(QOpenGLWidget):
 
                                 if includeGrid:
                                     if '%.5f' % p1[0] == '%.5f' % p2[0]:  # check whether a vertical line - x axis
+                                        pp = self._round_sig(p1[0], sig=10)
 
                                         # xLabel = str(int(p1[0])) if d[0] >=1 else self.XMode % p1[0]
-                                        labelling[str(ax)].append((i, ax, valueToRatio(p1[0], axisLimitL, axisLimitR),
-                                                                   p1[0], d[0]))
+                                        labelling[str(ax)][pp] = ((i, ax, valueToRatio(p1[0], axisLimitL, axisLimitR),
+                                                                   pp, d[0]))
                                     else:
+                                        pp = self._round_sig(p1[1], sig=10)
+
                                         # num = int(p1[1]) if d[1] >=1 else self.XMode % p1[1]
-                                        labelling[str(ax)].append((i, ax, valueToRatio(p1[1], axisLimitB, axisLimitT),
-                                                                   p1[1], d[1]))
+                                        labelling[str(ax)][pp] = ((i, ax, valueToRatio(p1[1], axisLimitB, axisLimitT),
+                                                                   pp, d[1]))
 
                                     # append the new points to the end of nparray, ignoring narrow grids
                                     if scaleBounds[ax] * (scaleOrder + 1) > 225:
@@ -5994,35 +6013,30 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 # restrict the labelling to the maximum without overlap based on width
                 # should be dependent on font size though
-                while len(labelling['0']) > (self.w / 60.0):
-                    #restrict X axis labelling
-                    lStrings = labelling['0']
-                    if check(lStrings[0]):
-                        labelling['0'] = lStrings[0::2]  # [ls for ls in lStrings if check(ls)]
-                    else:
-                        labelling['0'] = lStrings[1::2]  # [ls for ls in lStrings if check(ls)]
+                _maxChars = 1
+                for k, val in list(labelling['0'].items()):
+                    _maxChars = max(_maxChars, getDigitLen(val, _minOrder[0]))
+                _width = self.w / (7.0*_maxChars)         # num of columns
+                restrictList = 0
+                ll = len(labelling['0'])
+                while ll > _width and restrictList < 3:
+                    ll /= 2
+                    restrictList += 1
+                for k, val in list(labelling['0'].items()):
+                    if getDigit(val, _minOrder[0]) not in _labelRestrictList[restrictList]:
+                        # remove the item
+                        del labelling['0'][k]
 
-                # # clean up strings if in _intFormat
-                # if self.XMode == self._intFormat:
-                #     for ll in labelling['0'][::-1]:
-                #         if round(ll[3], 5) != int(ll[3]):
-                #             # remove the item
-                #             labelling['0'].remove(ll)
-
-                while len(labelling['1']) > (self.h / 20.0):
-                    #restrict Y axis labelling
-                    lStrings = labelling['1']
-                    if check(lStrings[0]):
-                        labelling['1'] = lStrings[0::2]  # [ls for ls in lStrings if check(ls)]
-                    else:
-                        labelling['1'] = lStrings[1::2]  # [ls for ls in lStrings if check(ls)]
-
-                # # clean up strings if in _intFormat
-                # if self.YMode == self._intFormat:
-                #     for ll in labelling['1'][::-1]:
-                #         if round(ll[3], 5) != int(ll[3]):
-                #             # remove the item
-                #             labelling['1'].remove(ll)
+                _height = self.h / 15.0         # num of rows
+                restrictList = 0
+                ll = len(labelling['1'])
+                while ll > _height and restrictList < 3:
+                    ll /= 2
+                    restrictList += 1
+                for k, val in list(labelling['1'].items()):
+                    if getDigit(val, _minOrder[1]) not in _labelRestrictList[restrictList]:
+                        # remove the item
+                        del labelling['1'][k]
 
         return labelling, axesChanged
 

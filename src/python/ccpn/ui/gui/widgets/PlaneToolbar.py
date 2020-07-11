@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 12:55:47 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-11 01:33:18 +0100 (Sat, July 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1099,6 +1099,9 @@ class StripHeaderWidget(_OpenGLFrameABC):
     def _setPositionParameter(self, stripPos, subParameterName, value):
         """Set the item in the position dict
         """
+        if self.strip.isDeleted or self.strip._flaggedForDelete:
+            return
+
         params = self.strip.getParameter(STRIPDICT, stripPos)
         if not params:
             params = {}

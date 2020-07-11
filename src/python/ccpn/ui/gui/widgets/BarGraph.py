@@ -234,6 +234,9 @@ class CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
 
 
 class CustomViewBox(pg.ViewBox):
+
+    itemsSelected = QtCore.Signal(object)
+
     def __init__(self, application=None, *args, **kwds):
         pg.ViewBox.__init__(self, *args, **kwds)
         self.exportDialog = None
@@ -245,6 +248,7 @@ class CustomViewBox(pg.ViewBox):
 
         self.__xLine = pg.InfiniteLine(angle=0, movable=True, pen='b')
         self.addItem(self.xLine)
+        self.contextMenu = None
 
     @property
     def xLine(self):
@@ -332,6 +336,9 @@ class CustomViewBox(pg.ViewBox):
                         if self.inYRange(label.pos().y(), minY, maxY, ):
                             if self.application is not None:
                                 obj = label.data(int(label.pos().x()))
+                                if obj is None:
+                                    # new mode of setting object.
+                                    obj = label.data(0)
                                 selected.append(obj)
 
                 self._resetBoxes()
@@ -342,12 +349,14 @@ class CustomViewBox(pg.ViewBox):
 
         if len(selected) > 0:
             try:
-                currentSelected = getattr(self.application.current, selected[0]._pluralLinkName)
-                selected.extend(currentSelected)
-                currentObjs = setattr(self.application.current, selected[0]._pluralLinkName, selected)
-                self.updateSelectionFromCurrent()
+                self.itemsSelected.emit(selected)
+                if self.application.current: # replace this bit
+                    currentSelected = getattr(self.application.current, selected[0]._pluralLinkName)
+                    selected.extend(currentSelected)
+                    currentObjs = setattr(self.application.current, selected[0]._pluralLinkName, selected)
+                    self.updateSelectionFromCurrent()
             except Exception as e:
-                getLogger().warning('Error in setting current objects. ' + str(e))
+                getLogger().debug('Error in setting current objects. TODO: Replace with itemsSelected Notifier ' + str(e))
 
     def inYRange(self, yValue, y1, y2):
         if round(y1, 3) <= round(yValue, 3) <= round(y2, 3):
@@ -356,6 +365,17 @@ class CustomViewBox(pg.ViewBox):
 
     def getLabels(self):
         return [label for label in self.childGroup.childItems() if isinstance(label, CustomLabel)]
+
+    def _selectLabelsByTexts(self, texts):
+        if self.getLabels():
+            for label in self.getLabels():
+                for text in texts:
+                    if text == label.text():
+                       label.setSelected(True)
+
+    def clearSelection(self):
+        for label in self.getLabels():
+            label.setSelected(False)
 
     def updateSelectionFromCurrent(self):
         if self.getLabels():
@@ -377,13 +397,13 @@ class CustomViewBox(pg.ViewBox):
         self.selectionBox.hide()
         self.rbScaleBox.hide()
 
-    def _raiseContextMenu(self, ev):
-
+    def _getContextMenu(self):
         self.contextMenu = Menu('', None, isFloatWidget=True)
         self.contextMenu.addAction('Reset View', self.autoRange)
 
         ## ThresholdLine
-        self.thresholdLineAction = QtGui.QAction("Threshold Line", self, triggered=self._toggleThresholdLine, checkable=True, )
+        self.thresholdLineAction = QtGui.QAction("Threshold Line", self, triggered=self._toggleThresholdLine,
+                                                 checkable=True, )
         self._checkThresholdAction()
         self.contextMenu.addAction(self.thresholdLineAction)
 
@@ -393,7 +413,8 @@ class CustomViewBox(pg.ViewBox):
         self.contextMenu.addAction(self.labelsAction)
 
         ## Labels: Show Above Threshold
-        self.showAboveThresholdAction = QtGui.QAction("Show Labels Above Threshold", self, triggered=self.showAboveThreshold)
+        self.showAboveThresholdAction = QtGui.QAction("Show Labels Above Threshold", self,
+                                                      triggered=self.showAboveThreshold)
         self.contextMenu.addAction(self.showAboveThresholdAction)
 
         ## Selection: Select Above Threshold
@@ -403,6 +424,11 @@ class CustomViewBox(pg.ViewBox):
 
         self.contextMenu.addSeparator()
         self.contextMenu.addAction('Export', self.showExportDialog)
+        return self.contextMenu
+
+    def _raiseContextMenu(self, ev):
+
+        self.contextMenu = self._getContextMenu()
         self.contextMenu.exec_(ev.screenPos().toPoint())
 
     def _checkThresholdAction(self):

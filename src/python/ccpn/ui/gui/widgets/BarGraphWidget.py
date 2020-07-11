@@ -38,6 +38,8 @@ BelowY = 'belowY'
 DisappearedX = 'disappearedX'
 DisappearedY = 'disappearedY'
 AboveObjects = 'aboveObjects'
+AllAboveObjects = 'allAboveObjects'
+AllBelowObjects = 'allBelowObjects'
 BelowObjects = 'belowObjects'
 DisappearedObjects = 'disappearedObjects'
 AboveBrush = 'aboveBrush'
@@ -76,6 +78,7 @@ class BarGraphWidget(Widget):
                             AboveY:[],
                             AboveBrush:'g',
                             AboveObjects:[],
+                            AllAboveObjects:[],
                             BelowX:[],
                             BelowY:[],
                             BelowBrush:'r',

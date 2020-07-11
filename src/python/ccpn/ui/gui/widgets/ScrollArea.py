@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-10 18:32:44 +0100 (Fri, July 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-11 01:25:49 +0100 (Sat, July 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -139,11 +139,13 @@ class SpectrumDisplayScrollArea(ScrollArea):
                     if child._axisType == 0:
                         # resize the X axis widgets
                         child.setGeometry(0, rect.height(), _width, margins[3])
+                        # child._resizeGL(_width, margins[3])
                     else:
                         # resize the Y axis widgets
                         child.setGeometry(rect.width(), 0, margins[2], _height)
-                    child._updateAxes = True
-                    child.update()
+                        # child._resizeGL(margins[2], _height)
+                    # child._updateAxes = True
+                    # child.update()
 
             if self._cornerWidget:
                 self._cornerWidget.setGeometry(_width, _height, margins[2], offset)

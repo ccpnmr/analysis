@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-10 18:32:43 +0100 (Fri, July 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-11 01:25:48 +0100 (Sat, July 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -943,9 +943,9 @@ class CcpnGLWidget(QOpenGLWidget):
         # must be set here to catch the change of screen
         self.refreshDevicePixelRatio()
         self._resizeGL(w, h)
-        if self._aspectRatioMode == 0:
-            self.GLSignals._emitXAxisChanged(source=self, strip=self.strip,
-                                             aspectRatios=self._lockedAspectRatios)
+        # if self._aspectRatioMode == 0:
+        #     self.GLSignals._emitXAxisChanged(source=self, strip=self.strip,
+        #                                      aspectRatios=self._lockedAspectRatios)
 
     def _resizeGL(self, w, h):
         self.w = w
@@ -1204,8 +1204,11 @@ class CcpnGLWidget(QOpenGLWidget):
                 ax0 = self._getValidAspectRatio(self._axisCodes[0])
                 ax1 = self._getValidAspectRatio(self._axisCodes[1])
             else:
-                ax0 = self.pixelX
-                ax1 = self.pixelY
+                try:
+                    ax0, ax1 = self.spectrumDisplay._stripAddMode
+                except:
+                    ax0 = self.pixelX
+                    ax1 = self.pixelY
 
             if self.viewports:
                 vp = self.viewports.getViewportFromWH(self._currentView, self.w, self.h)
@@ -1230,9 +1233,13 @@ class CcpnGLWidget(QOpenGLWidget):
             if (self._aspectRatioMode == 2) or _useFirstDefault:
                 ax0 = self._getValidAspectRatio(self._axisCodes[0])
                 ax1 = self._getValidAspectRatio(self._axisCodes[1])
-            else:
-                ax0 = self.pixelX
-                ax1 = self.pixelY
+            else:  # must be 1
+                try:
+                    ax0, ax1 = self.spectrumDisplay._stripAddMode
+                except:
+                    ax0 = self.pixelX
+                    ax1 = self.pixelY
+            # print('>>> Yaxis {}     {}'.format(self._aspectRatioMode, ax0 / ax1))
 
             if self.viewports:
                 vp = self.viewports.getViewportFromWH(self._currentView, self.w, self.h)
@@ -2207,7 +2214,9 @@ class CcpnGLWidget(QOpenGLWidget):
         """Toggle the use fixed aspect button
         """
         self._aspectRatioMode = 0 if self._aspectRatioMode == 2 else 2
+        self._emitAxisFixed()
 
+    def _emitAxisFixed(self):
         # create a dict and event to update this strip first
         aDict = {GLNotifier.GLSOURCE         : None,
                  GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
@@ -2215,6 +2224,14 @@ class CcpnGLWidget(QOpenGLWidget):
                  }
         self._glAxisLockChanged(aDict)
         self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lockValues=(self._aspectRatioMode,))
+
+    def _getAxisDict(self):
+        # create a dict and event to update this strip first
+        aDict = {GLNotifier.GLSOURCE         : None,
+                 GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
+                 GLNotifier.GLVALUES         : (self._aspectRatioMode,)
+                 }
+        return aDict
 
     def mousePressInCornerButtons(self, mx, my):
         """Check if the mouse has been pressed in the lock button

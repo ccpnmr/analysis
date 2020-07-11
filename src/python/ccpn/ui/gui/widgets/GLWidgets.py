@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-10 18:32:44 +0100 (Fri, July 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-11 01:25:49 +0100 (Sat, July 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -675,7 +675,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # self.GLSignals.glAllAxesChanged.connect(self._glAllAxesChanged)
         # self.GLSignals.glMouseMoved.connect(self._glMouseMoved)
         # self.GLSignals.glEvent.connect(self._glEvent)
-        # self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
+        self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
         # self.GLSignals.glAxisUnitsChanged.connect(self._glAxisUnitsChanged)
 
         self.lastPixelRatio = None
@@ -1720,6 +1720,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if self.spectrumDisplay.isDeleted:
             return
 
+        try:
+            self._parentStrip = self.spectrumDisplay.strips[0]
+        except:
+            return
+
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
             self._aspectRatioMode = aDict[GLNotifier.GLVALUES][0]
 
@@ -2054,7 +2059,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.GLSignals.glAllAxesChanged.connect(self._glAllAxesChanged)
         self.GLSignals.glMouseMoved.connect(self._glMouseMoved)
         self.GLSignals.glEvent.connect(self._glEvent)
-        self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
+        # self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
         self.GLSignals.glAxisUnitsChanged.connect(self._glAxisUnitsChanged)
 
         self.glReady = True
@@ -2710,8 +2715,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 ax0 = self._getValidAspectRatio(self.spectrumDisplay.axisCodes[0])
                 ax1 = self._getValidAspectRatio(self.spectrumDisplay.axisCodes[1])
             else:
-                ax0 = self.pixelX
-                ax1 = self.pixelY
+                try:
+                    ax0, ax1 = self.spectrumDisplay._stripAddMode
+                except:
+                    ax0 = self.pixelX
+                    ax1 = self.pixelY
 
             # width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
             # height = (self.h - self.AXIS_MOUSEYOFFSET) if self._drawBottomAxis else self.h
@@ -2735,8 +2743,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 ax0 = self._getValidAspectRatio(self.spectrumDisplay.axisCodes[0])
                 ax1 = self._getValidAspectRatio(self.spectrumDisplay.axisCodes[1])
             else:
-                ax0 = self.pixelX
-                ax1 = self.pixelY
+                try:
+                    ax0, ax1 = self.spectrumDisplay._stripAddMode
+                except:
+                    ax0 = self.pixelX
+                    ax1 = self.pixelY
 
             # width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
             # height = (self.h - self.AXIS_MOUSEYOFFSET) if self._drawBottomAxis else self.h
@@ -2782,6 +2793,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         """Change to axes of the view, axis visibility, scale and rebuild matrices when necessary
         to improve display speed
         """
+        try:
+            self._parentStrip = self.spectrumDisplay.orderedStrips[0]
+        except:
+            return
+
         if self._parentStrip.isDeleted or not self.globalGL:
             return
 
@@ -3038,11 +3054,15 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self.axisR = mbx - zoomOut * (mbx - self.axisR)
 
             if not self._aspectRatioMode:
-                ratios = None
-                if self.spectrumDisplay and self.spectrumDisplay.strips and len(self.spectrumDisplay.strips) > 0:
-                    strip = self.spectrumDisplay.strips[0]
-                    if not (strip.isDeleted or strip._flaggedForDelete):
-                        ratios = strip._CcpnGLWidget._lockedAspectRatios
+                # ratios = None
+                # if self.spectrumDisplay and self.spectrumDisplay.strips and len(self.spectrumDisplay.strips) > 0:
+                #     strip = self.spectrumDisplay.strips[0]
+                #     if not (strip.isDeleted or strip._flaggedForDelete):
+                #         ratios = strip._CcpnGLWidget._lockedAspectRatios
+                try:
+                    ratios = self.spectrumDisplay.strips[0]._CcpnGLWidget._lockedAspectRatios
+                except:
+                    ratios = None
 
                 self.GLSignals._emitXAxisChanged(source=self, strip=None, spectrumDisplay=self.spectrumDisplay,
                                                  axisB=self.axisB, axisT=self.axisT,
@@ -3087,11 +3107,15 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self.axisT = mby - zoomOut * (mby - self.axisT)
 
             if not self._aspectRatioMode:
-                ratios = None
-                if self.spectrumDisplay and self.spectrumDisplay.strips and len(self.spectrumDisplay.strips) > 0:
-                    strip = self.spectrumDisplay.strips[0]
-                    if not (strip.isDeleted or strip._flaggedForDelete):
-                        ratios = strip._CcpnGLWidget._lockedAspectRatios
+                # ratios = None
+                # if self.spectrumDisplay and self.spectrumDisplay.strips and len(self.spectrumDisplay.strips) > 0:
+                #     strip = self.spectrumDisplay.strips[0]
+                #     if not (strip.isDeleted or strip._flaggedForDelete):
+                #         ratios = strip._CcpnGLWidget._lockedAspectRatios
+                try:
+                    ratios = self.spectrumDisplay.strips[0]._CcpnGLWidget._lockedAspectRatios
+                except:
+                    ratios = None
 
                 self.GLSignals._emitYAxisChanged(source=self, strip=None, spectrumDisplay=self.spectrumDisplay,
                                                  axisB=self.axisB, axisT=self.axisT,

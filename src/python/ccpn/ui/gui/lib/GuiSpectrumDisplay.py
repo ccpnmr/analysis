@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-10 18:32:43 +0100 (Fri, July 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-11 01:25:48 +0100 (Sat, July 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -642,14 +642,22 @@ class GuiSpectrumDisplay(CcpnModule):
             if self.stripArrangement == 'Y':
                 self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), 0)
                 # self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), self._bottomGLAxis.height())
+                aDict = self.strips[0]._CcpnGLWidget._getAxisDict()
+                self._stripAddMode = (self.strips[0]._CcpnGLWidget.pixelX, self.strips[0]._CcpnGLWidget.pixelY)
                 self._rightGLAxis.show()
                 self._bottomGLAxis.hide()
+                self._rightGLAxis._glAxisLockChanged(aDict)
+                self._stripAddMode = None
                 self._rightGLAxis._updateAxes = True
             else:
                 self._stripFrameScrollArea.setViewportMargins(0, 0, 0, self._bottomGLAxis.height())
                 # self._stripFrameScrollArea.setViewportMargins(0, 0, self._rightGLAxis.width(), self._bottomGLAxis.height())
+                aDict = self.strips[0]._CcpnGLWidget._getAxisDict()
+                self._stripAddMode = (self.strips[0]._CcpnGLWidget.pixelX, self.strips[0]._CcpnGLWidget.pixelY)
                 self._rightGLAxis.hide()
                 self._bottomGLAxis.show()
+                self._bottomGLAxis._glAxisLockChanged(aDict)
+                self._stripAddMode = None
                 self._bottomGLAxis._updateAxes = True
 
         self.stripFrame.update()
@@ -1526,6 +1534,10 @@ class GuiSpectrumDisplay(CcpnModule):
             # do axis redrawing
             self._redrawAxes(deletingStrip=True)
 
+    def _redrawAxesAddMode(self):
+        self._stripAddMode = (self.strips[0]._CcpnGLWidget.pixelX, self.strips[0]._CcpnGLWidget.pixelY)
+        self.strips[0]._CcpnGLWidget._emitAxisFixed()
+
     def _redrawAxes(self, index=-1, deletingStrip=False):
         """Redraw the axes for the stripFrame, and set the new current strip,
         will default to the last strip if not selected.
@@ -1533,6 +1545,7 @@ class GuiSpectrumDisplay(CcpnModule):
         self.showAxes(stretchValue=True, deletingStrip=deletingStrip)
         if self.strips:
             self.current.strip = self.strips[index]
+        self._stripAddMode = None
 
     def removeCurrentStrip(self):
         """Remove current.strip if it belongs to self.
@@ -1769,7 +1782,8 @@ class GuiSpectrumDisplay(CcpnModule):
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
                 with self._hideWidget(self.stripFrame):
-                    addUndoItem(undo=self._redrawAxes)
+                    addUndoItem(undo=self._redrawAxes,
+                                redo=self._redrawAxesAddMode)
 
                     #EJB 20181213: old style delete notifiers
                     # result = self.strips[index]._clone()
@@ -1787,7 +1801,9 @@ class GuiSpectrumDisplay(CcpnModule):
                         copyVisible = self.strips[index].header.headerVisible
 
                         # inserts the strip into the stripFrame here
+                        self._stripAddMode = (self.strips[0]._CcpnGLWidget.pixelX, self.strips[0]._CcpnGLWidget.pixelY)
                         result = self.strips[index]._clone()
+
                         if not isinstance(result, GuiStrip):
                             raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))
                     result._finaliseAction('create')
@@ -1817,7 +1833,8 @@ class GuiSpectrumDisplay(CcpnModule):
                     # add layout handling to the undo stack
                     addUndoItem(undo=partial(self._removeStripFromLayout, self, result),
                                 redo=partial(self._restoreStripToLayout, self, result, index))
-                    addUndoItem(redo=partial(self._redrawAxes, index))
+                    addUndoItem(redo=partial(self._redrawAxes, index),
+                                undo=self._redrawAxesAddMode)
 
             # do axis redrawing
             self._redrawAxes(index)  # this might be getting confused with the ordering

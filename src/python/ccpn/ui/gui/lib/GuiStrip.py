@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 19:32:21 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-11 01:25:48 +0100 (Sat, July 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -165,20 +165,21 @@ class GuiStrip(Frame):
         settings = spectrumDisplay.getSettings()
         if len(spectrumDisplay.strips) > 1:
 
+            _firstStrip = spectrumDisplay.strips[0]
             # copy the values form the first strip
-            self.symbolLabelling = min(spectrumDisplay.strips[0].symbolLabelling, self.MAXPEAKLABELTYPES - 1)
-            self.symbolType = min(spectrumDisplay.strips[0].symbolType, self.MAXPEAKSYMBOLTYPES - 1)
-            self.symbolSize = spectrumDisplay.strips[0].symbolSize
-            self.symbolThickness = spectrumDisplay.strips[0].symbolThickness
+            self.symbolLabelling = min(_firstStrip.symbolLabelling, self.MAXPEAKLABELTYPES - 1)
+            self.symbolType = min(_firstStrip.symbolType, self.MAXPEAKSYMBOLTYPES - 1)
+            self.symbolSize = _firstStrip.symbolSize
+            self.symbolThickness = _firstStrip.symbolThickness
 
-            self.gridVisible = spectrumDisplay.strips[0].gridVisible
-            self.crosshairVisible = spectrumDisplay.strips[0].crosshairVisible
-            self.doubleCrosshairVisible = spectrumDisplay.strips[0].doubleCrosshairVisible
-            self.sideBandsVisible = spectrumDisplay.strips[0].sideBandsVisible
+            self.gridVisible = _firstStrip.gridVisible
+            self.crosshairVisible = _firstStrip.crosshairVisible
+            self.doubleCrosshairVisible = _firstStrip.doubleCrosshairVisible
+            self.sideBandsVisible = _firstStrip.sideBandsVisible
 
-            self.showSpectraOnPhasing = spectrumDisplay.strips[0].showSpectraOnPhasing
-            self._contourThickness = spectrumDisplay.strips[0]._contourThickness
-            self._spectrumBordersVisible = spectrumDisplay.strips[0]._spectrumBordersVisible
+            self.showSpectraOnPhasing = _firstStrip.showSpectraOnPhasing
+            self._contourThickness = _firstStrip._contourThickness
+            self._spectrumBordersVisible = _firstStrip._spectrumBordersVisible
 
             # self._CcpnGLWidget._useLockedAspect = spectrumDisplay.strips[0]._CcpnGLWidget._useLockedAspect
 
@@ -204,11 +205,6 @@ class GuiStrip(Frame):
                                                   aspectRatioMode=settings[AXISASPECTRATIOMODE],
                                                   aspectRatios=settings[AXISASPECTRATIOS])
 
-        self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-        self.showActivePhaseTrace = True
-        self.pivotLine = None
-        self._lastClickedObjects = None
-
         # set the axis units from the current settings
         self._CcpnGLWidget._xUnits = settings[AXISXUNITS]
         self._CcpnGLWidget._yUnits = settings[AXISYUNITS]
@@ -216,6 +212,11 @@ class GuiStrip(Frame):
         self._CcpnGLWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
         self._CcpnGLWidget._applyXLimit = self._preferences.zoomXLimitApply
         self._CcpnGLWidget._applyYLimit = self._preferences.zoomYLimitApply
+
+        self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+        self.showActivePhaseTrace = True
+        self.pivotLine = None
+        self._lastClickedObjects = None
 
         # self._CcpnGLWidget._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
 

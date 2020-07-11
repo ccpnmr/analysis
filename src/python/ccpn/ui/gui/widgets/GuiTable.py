@@ -705,7 +705,11 @@ GuiTable::item::selected {
             # item.setValue(val)  # Required--the text-change callback is invoked
             # when we call setItem.
             if isinstance(val, bool):  # this will create a check box if the value is a bool
-                item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+                # item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+                # Very important: Set Flag so that user cannot check/uncheck directly the checkbox otherwise there are two parallel callbacks.
+                # The checkbox state is set automatically from the data.
+                item.setFlags(QtCore.Qt.NoItemFlags)
+                item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
                 state = 2 if val else 0
                 item.setCheckState(state)
                 self.setItem(row, col, item)

@@ -22,6 +22,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import time as systime
+
+if not hasattr(systime, 'clock'):
+    # NOTE:ED - quick patch to fix bug in pyqt 5.9
+    systime.clock = systime.process_time
+
 import datetime
 import os
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -98,11 +104,18 @@ class MacroEditor(CcpnModule):
         if not self.filePath:
             if self.userMacroDirPath is None:
                 self._tempFile = tempfile.NamedTemporaryFile(suffix='.py')
+                self._tempFile.close()
+#                os.unlink(self._tempFile.name)
                 self.filePath = self._tempFile.name
             else:
                 # within AnalysisV3
                 self._tempFile = tempfile.NamedTemporaryFile(prefix='macro_', dir=aPath(self.userMacroDirPath), suffix='.py')
+                self._tempFile.close()
+#                os.unlink(self._tempFile.name)
                 self.filePath = self._tempFile.name
+
+            with open(aPath(self.filePath), 'w'):
+                pass
 
            ### Gui settings ###
         self.mainWidget.layout().setSpacing(5)
@@ -181,7 +194,7 @@ class MacroEditor(CcpnModule):
                 filePath += '.py'
             if self.filePath != filePath:
                 self._removeMacroFromCurrent()
-                self._closeTempFile()
+                self._deleteTempFile()
             self.filePath = filePath
             self._saveTextToFile()
             self.openPath(filePath)
@@ -199,7 +212,7 @@ class MacroEditor(CcpnModule):
                     MessageDialog.showMessage('Already Opened.', 'This file is already opened in the project')
                     return
                 else:
-                    with open(filePath, 'r') as f:
+                    with open(aPath(filePath), 'r') as f:
                         self.textEditor.textChanged.disconnect()
                         self.textEditor.clear()
                         for line in f.readlines():
@@ -371,7 +384,7 @@ class MacroEditor(CcpnModule):
                 if ok:
                     if self.filePath != filePath:
                         self._removeMacroFromCurrent()
-                        self._closeTempFile()
+                        self._deleteTempFile()
                     self.openPath(filePath)
                     self._setFileName()
                 else:
@@ -379,7 +392,7 @@ class MacroEditor(CcpnModule):
             else:
                 if self.filePath != filePath:
                     self._removeMacroFromCurrent()
-                    self._closeTempFile()
+                    self._deleteTempFile()
                 self.openPath(filePath)
                 self._setFileName()
         else:
@@ -434,7 +447,7 @@ class MacroEditor(CcpnModule):
         if filePath:
             if not filePath.endswith('.py'):
                 filePath += '.py'
-            with open(filePath, 'w') as f:
+            with open(aPath(filePath), 'w') as f:
                 f.write(self.textEditor.toPlainText())
                 f.close()
         if self.filePath:
@@ -490,10 +503,11 @@ class MacroEditor(CcpnModule):
             return True
         return False
 
-    def _closeTempFile(self):
-        if self._tempFile:
+    def _deleteTempFile(self):
+        if self._tempFile and self._tempFile.name == self.filePath:
             if self.textEditor.get() == '': # delete empty temp
-                self._tempFile.close()
+                if os.path.exists(self.filePath):
+                    os.remove(self.filePath)
 
     def restoreWidgetsState(self, **widgetsState):
         """
@@ -514,7 +528,7 @@ class MacroEditor(CcpnModule):
                         if value is not None:
                             if self.filePath != value:
                                 self._removeMacroFromCurrent()
-                                self._closeTempFile()
+                                self._deleteTempFile()
                                 print(self.filePath, value, '@@')
 
                             self.openPath(value)
@@ -533,7 +547,7 @@ class MacroEditor(CcpnModule):
             ok = MessageDialog.showYesNoWarning('Close Macro', 'Do you want save?')
             if ok:
                 self.saveMacro()
-        self._closeTempFile()
+        self._deleteTempFile()
         self._removeMacroFromCurrent()
         super()._closeModule()
 

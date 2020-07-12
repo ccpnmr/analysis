@@ -176,9 +176,10 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
     def findMaximisedDock(self, event):
         result = None
-        maximisedWidget = [widget for widget in self.findChildren(QtGui.QWidget) if hasattr(widget, 'maximised') and widget.maximised==True]
-        if len(maximisedWidget) > 0:
-            result = maximisedWidget[0]
+        targetWidgets = [widget for widget in self.findChildren(QtGui.QWidget) if hasattr(widget, 'maximised')]
+        maximisedWidgets = [widget for widget in targetWidgets if widget.maximised == True]
+        if len(maximisedWidgets) > 0:
+            result = maximisedWidgets[0]
         return result
 
     def dragEnterEvent(self, *args):

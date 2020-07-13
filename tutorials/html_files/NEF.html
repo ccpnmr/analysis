@@ -11,19 +11,23 @@
 <div class="headerBar">NMR Exchange Format (NEF)</div>
 <div class="tutorial">
 <h2>NMR Exchange Format (NEF)</h2>
-<p>The NMR field has traditionally used a large variety of program specific file formats. This has made it difficult for software packages to inter-operate and has complicated data-archiving and retrieval. To address these challenges, the developers of a large number of NMR software packages have united to develop a single, universal file format, the NMR Exchange Format "NEF", and have committed to make their software NEF compatible (<a href="https://www.nature.com/articles/nsmb.3041">Gutmanas et al. 2015</a> ).</p>
+<p>The NMR field has traditionally used a large variety of program specific file formats. This has made it difficult for software packages to inter-operate and has complicated data-archiving and retrieval. To address these challenges, the developers of a large number of NMR software packages have united to develop a single, universal file format, the NMR Exchange Format "NEF", and have committed to make their software NEF compatible (<a href="https://www.nature.com/articles/nsmb.3041">Gutmanas et al. 2015</a>).</p>
 <p>The main advantage of NEF is that allows the most common types of NMR data, such as chemical shifts, peak lists and restraint lists to be stored in a single file. In addition, NEF files can be extended to contain additional programme-specific information. It also ensures proper handling of stereospecific and non-stereospecific assignments so that no information is lost.</p>
 <p>NEF uses the STAR file format. STAR files have a defined structure and only certain terms are allowed. This makes it easy to be use as an archival format for many types of biological data. It is also more humanly readable than some other format types (e.g. XML). Examples include NMR-STAR, used by the <a href="http://www.bmrb.wisc.edu/">Biological Nuclear Magnetic Resonance Data Bank (BMRB)</a> and mmCIF which is now the only accepted format for molecular coordinate deposition in <a href="https://www.rcsb.org/">Protein Data Bank</a>.</p>
+<p>This document aims to give a brief overview of the NEF format. For more details please see Commented_Example.nef and Overview.md in: <br />
+<a href="https://github.com/NMRExchangeFormat/NEF/tree/master/specification">https://github.com/NMRExchangeFormat/NEF/tree/master/specification</a> </p>
+
+
 <h3>Key characteristics</h3>
     <p>There are few characteristic features of the NEF format, the two most noticeable ones are:
         <br>1. Data names start with an underscore, we will refer to these as <span class="action">tags</span>.
         <br>2. There are a few reserved keywords (common to all STAR-type files): <span class="action">data_</span>, <span class="action">loop_</span>, <span class="action">save_</span> and <span class="action">stop_</span>.</p>
     <p>NEF files always start with the keyword <span class="action">data_</span> followed by a project description (e.g. <span class="action">data_peptide_project</span> in the example below). This indicates the start of the data block. NEF files should only have one data block per file.
     <h3>Saveframes</h3>
-    <p>Data are organised in sections called <span class="action">saveframes</span>. Saveframes start with the keyword <span class="action">save_</span> followed by the <span class="action">framecode</span>, which is unique for this saveframe. Chemical shift lists, peak lists or restraint list are examples of data that have a specific saveframe in which they are placed and identified by specific tags (names). For example, chemical shifts are listed in the saveframe <span class="action">save_nef_chemical_shift_list</span>.</p>
+    <p>Data are organised in sections called <span class="action">saveframes</span>. Saveframes start with the keyword <span class="action">save_</span> followed by the <span class="action">framecode</span>, which is unique for this saveframe. Chemical shift lists, peak lists or restraint list are examples of data that have a specific saveframe in which they are placed and identified by specific tags (names). For example, chemical shifts are listed in the saveframe <span class="action">save_nef_chemical_shift_list</span>. Each NEF file must contain following saveframes: <span class="action">_nef_nmr_meta_data</span>, <span class="action">_nef_molecular_system</span>, <span class="action">_nef_chemical_shift_list</span></p>
     <p>The data within a saveframe are composed of tags and loops.</p>
     <h3>Tags</h3>
-    <p>Tags in a NEF file list the information that is needed or helpful for the particular section. Each tag in a saveframe must be unique.</p>
+    <p>Tags in a NEF file list the information that is needed or helpful for a particular section. Each tag in a saveframe must be unique.</p>
     <p>The NEF format has a number of mandatory and optional tags for each saveframe, these are detailed in Commented_Example.nef and mmcif_nef.dic.</p>
     <p>For example, in the <span class="action">nef_nmr_spectrum_hsqc</span> saveframe there are four tags that must be specified:</p>
     <pre>
@@ -95,28 +99,32 @@
    <p>This is particularly useful when a program is capable of harvesting information produced by another programme, for instance as a result of a structure calculation.</p>
 
    <h2>Annotated Example file</h2>
+
+<p>Tags in <span class="action">bold purple</span> indicate content that must be included in a NEF file. <br/>
+Tags in <b>bold black</b> are mandatory only if a specific saveframe or loop is present in a NEF file.</p>
+   
    <h4>Section 1: NMR meta data (mandatory)</h4>
    <p>Only one of these saveframes is allowed per project</p>
 <pre>
-    data_peptide_project
+    <span class="action">data_</span>peptide_project
 
-      save_nef_nmr_meta_data
+      <span class="action">save_nef_nmr_meta_data</span>
 
-          _nef_nmr_meta_data.sf_category      nef_nmr_meta_data
-          _nef_nmr_meta_data.sf_framecode     nef_nmr_meta_data
-          _nef_nmr_meta_data.format_name      nmr_exchange_format
-          _nef_nmr_meta_data.format_version   1.1
-          _nef_nmr_meta_data.program_name     AnalysisAssign
-          _nef_nmr_meta_data.program_version  3.0.1.1
-          _nef_nmr_meta_data.creation_date    2020-06-14T20:53:22.311917
-         _nef_nmr_meta_data.uuid              AnalysisAssign-2020-06-14T20:53:22.311917-1956756036
+          <span class="action">_nef_nmr_meta_data.sf_category</span>      nef_nmr_meta_data
+          <span class="action">_nef_nmr_meta_data.sf_framecode</span>     nef_nmr_meta_data
+          <span class="action">_nef_nmr_meta_data.format_name</span>      nmr_exchange_format
+          <span class="action">_nef_nmr_meta_data.format_version</span>   1.1
+          <span class="action">_nef_nmr_meta_data.program_name</span>     AnalysisAssign
+          <span class="action">_nef_nmr_meta_data.program_version</span>  3.0.1.1
+          <span class="action">_nef_nmr_meta_data.creation_date</span>    2020-06-14T20:53:22.311917
+         <span class="action">_nef_nmr_meta_data.uuid</span>              AnalysisAssign-2020-06-14T20:53:22.311917-1956756036
       save_</pre>
 
    <p>We hope that in the near future this section will also include run history:</p>
    <pre>
       loop_
-         _nef_run_history.run_number
-         _nef_run_history.program_name
+         <b>_nef_run_history.run_number</b>
+         <b>_nef_run_history.program_name</b>
          _nef_run_history.program_version
          _nef_run_history.script_name
 
@@ -130,16 +138,16 @@
 <h4>Section 2: Molecular system (mandatory)</h4>
    <p>Only one of these saveframes is allowed per data block as all molecules can be included in a single loop.</p>
 <pre>
-   save_nef_molecular_system
+   <span class="action">save_nef_molecular_system</span>
 
-      _nef_molecular_system.sf_category   nef_molecular_system
-      _nef_molecular_system.sf_framecode  nef_molecular_system
+      <span class="action">_nef_molecular_system.sf_category</span>   nef_molecular_system
+      <span class="action">_nef_molecular_system.sf_framecode</span>  nef_molecular_system
 
-      loop_
-         _nef_sequence.index
-         _nef_sequence.chain_code
-         _nef_sequence.sequence_code
-         _nef_sequence.residue_name
+      <span class="action">loop_</span>
+         <span class="action">_nef_sequence.index</span>
+         <span class="action">_nef_sequence.chain_code</span>
+         <span class="action">_nef_sequence.sequence_code</span>
+         <span class="action">_nef_sequence.residue_name</span>
          _nef_sequence.linking
          _nef_sequence.residue_variant
          _nef_sequence.ccpn_comment
@@ -157,21 +165,21 @@
 
 
 <h4>Section 3: Chemical shift table (mandatory)</h4>
-   <p>There can be more than one of these saveframes in a single NEF file. Note how the <span class="action">_nef_chemical_shift_list.sf_category</span> tag specifies the saveframe type (<span class="action">_nef_chemical_shift_list</span>) and the <span class="action">_nef_chemical_shift_list.sf_framecode</span> tag specifies the name of that particular saveframe (<span class="action">_nef_chemical_shift_list.sf_category</span>).</p>
+   <p>There can be more than one of these saveframes in a single NEF file. Note how the <span class="action">_nef_chemical_shift_list.sf_category</span> tag specifies the saveframe type (<span class="action">_nef_chemical_shift_list</span>) and the <span class="action">_nef_chemical_shift_list.sf_framecode</span> tag specifies the name of that particular saveframe (<span class="action">_nef_chemical_shift_list_bmr5844</span>).</p>
 <pre>
-   save_nef_chemical_shift_list_bmr5844
+   <span class="action">save_nef_chemical_shift_list</span>_bmr5844
 
-      _nef_chemical_shift_list.sf_category   nef_chemical_shift_list
-      _nef_chemical_shift_list.sf_framecode  nef_chemical_shift_list_bmr5844
+      <span class="action">_nef_chemical_shift_list.sf_category</span>   nef_chemical_shift_list
+      <span class="action">_nef_chemical_shift_list.sf_framecode</span>  nef_chemical_shift_list_bmr5844
       _nef_chemical_shift_list.ccpn_serial   1
       _nef_chemical_shift_list.ccpn_comment  ''
 
-      loop_
-         _nef_chemical_shift.chain_code
-         _nef_chemical_shift.sequence_code
-         _nef_chemical_shift.residue_name
-         _nef_chemical_shift.atom_name
-         _nef_chemical_shift.value
+      <span class="action">loop_</span>
+         <span class="action">_nef_chemical_shift.chain_code</span>
+         <span class="action">_nef_chemical_shift.sequence_code</span>
+         <span class="action">_nef_chemical_shift.residue_name</span>
+         <span class="action">_nef_chemical_shsift.atom_name</span>
+         <span class="action">_nef_chemical_shift.value</span>
          _nef_chemical_shift.value_uncertainty
          _nef_chemical_shift.element
          _nef_chemical_shift.isotope_number
@@ -244,9 +252,9 @@
 <pre>
    save_nef_distance_restraint_list_1pqx_mr
 
-      _nef_distance_restraint_list.sf_category     nef_distance_restraint_list
-      _nef_distance_restraint_list.sf_framecode    nef_distance_restraint_list_1pqx_mr
-      _nef_distance_restraint_list.potential_type  undefined
+      <b>_nef_distance_restraint_list.sf_category</b>     nef_distance_restraint_list
+      <b>_nef_distance_restraint_list.sf_framecode</b>    nef_distance_restraint_list_1pqx_mr
+      <b>_nef_distance_restraint_list.potential_type</b>  undefined
       _nef_distance_restraint_list.restraint_origin  .
       _nef_distance_restraint_list.ccpn_tensor_chain_code  .
       _nef_distance_restraint_list.ccpn_tensor_sequence_code  .
@@ -259,11 +267,11 @@
       _nef_distance_restraint_list.ccpn_unit       .
       _nef_distance_restraint_list.ccpn_comment    ''
 
-      loop_
+      <b>loop_
          _nef_distance_restraint.index
-         _nef_distance_restraint.restraint_id
+         _nef_distance_restraint.restraint_id</b>
          _nef_distance_restraint.restraint_combination_id
-         _nef_distance_restraint.chain_code_1
+         <b>_nef_distance_restraint.chain_code_1
          _nef_distance_restraint.sequence_code_1
          _nef_distance_restraint.residue_name_1
          _nef_distance_restraint.atom_name_1
@@ -271,7 +279,7 @@
          _nef_distance_restraint.sequence_code_2
          _nef_distance_restraint.residue_name_2
          _nef_distance_restraint.atom_name_2
-         _nef_distance_restraint.weight
+         _nef_distance_restraint.weight</b>
          _nef_distance_restraint.target_value
          _nef_distance_restraint.target_value_uncertainty
          _nef_distance_restraint.lower_linear_limit
@@ -305,9 +313,9 @@
 <pre>
    save_nef_dihedral_restraint_list_Dih-1pqx_mr
 
-      _nef_dihedral_restraint_list.sf_category     nef_dihedral_restraint_list
-      _nef_dihedral_restraint_list.sf_framecode    nef_dihedral_restraint_list_Dih-1pqx_mr
-      _nef_dihedral_restraint_list.potential_type  undefined
+      <b>_nef_dihedral_restraint_list.sf_category</b>     nef_dihedral_restraint_list
+      <b>_nef_dihedral_restraint_list.sf_framecode</b>    nef_dihedral_restraint_list_Dih-1pqx_mr
+      <b>_nef_dihedral_restraint_list.potential_type</b>  undefined
       _nef_dihedral_restraint_list.restraint_origin  .
       _nef_dihedral_restraint_list.ccpn_tensor_chain_code  .
       _nef_dihedral_restraint_list.ccpn_tensor_sequence_code  .
@@ -320,11 +328,11 @@
       _nef_dihedral_restraint_list.ccpn_unit       .
       _nef_dihedral_restraint_list.ccpn_comment    ''
 
-      loop_
+      <b>loop_
          _nef_dihedral_restraint.index
-         _nef_dihedral_restraint.restraint_id
+         _nef_dihedral_restraint.restraint_id</b>
          _nef_dihedral_restraint.restraint_combination_id
-         _nef_dihedral_restraint.chain_code_1
+         <b>_nef_dihedral_restraint.chain_code_1
          _nef_dihedral_restraint.sequence_code_1
          _nef_dihedral_restraint.residue_name_1
          _nef_dihedral_restraint.atom_name_1
@@ -340,7 +348,7 @@
          _nef_dihedral_restraint.sequence_code_4
          _nef_dihedral_restraint.residue_name_4
          _nef_dihedral_restraint.atom_name_4
-         _nef_dihedral_restraint.weight
+         _nef_dihedral_restraint.weight</b>
          _nef_dihedral_restraint.target_value
          _nef_dihedral_restraint.target_value_uncertainty
          _nef_dihedral_restraint.lower_linear_limit
@@ -362,10 +370,10 @@
 <pre>
    save_nef_nmr_spectrum_hsqc
 
-      _nef_nmr_spectrum.sf_category                   nef_nmr_spectrum
-      _nef_nmr_spectrum.sf_framecode                  nef_nmr_spectrum_hsqc
-      _nef_nmr_spectrum.num_dimensions                2
-      _nef_nmr_spectrum.chemical_shift_list           nef_chemical_shift_list_bmr5844
+      <b>_nef_nmr_spectrum.sf_category</b>                   nef_nmr_spectrum
+      <b>_nef_nmr_spectrum.sf_framecode</b>                  nef_nmr_spectrum_hsqc
+      <b>_nef_nmr_spectrum.num_dimensions</b>                2
+      <b>_nef_nmr_spectrum.chemical_shift_list</b>           nef_chemical_shift_list_bmr5844
       _nef_nmr_spectrum.experiment_classification     .
       _nef_nmr_spectrum.experiment_type               hsqc
       _nef_nmr_spectrum.ccpn_positive_contour_count   10
@@ -399,10 +407,10 @@
       _nef_nmr_spectrum.ccpn_peaklist_symbol_style    cross
       _nef_nmr_spectrum.ccpn_peaklist_text_colour     '#7a7a7a'
 
-      loop_
+      <b>loop_
          _nef_spectrum_dimension.dimension_id
          _nef_spectrum_dimension.axis_unit
-         _nef_spectrum_dimension.axis_code
+         _nef_spectrum_dimension.axis_code</b>
          _nef_spectrum_dimension.spectrometer_frequency
          _nef_spectrum_dimension.spectral_width
          _nef_spectrum_dimension.value_first_point
@@ -413,6 +421,15 @@
 
          1  ppm  1H   600.13     16.66305634  13.06118752  circular  true  .  H
          2  ppm  15N  60.810663  32.88896883  134.8013663  circular  true  .  N
+      stop_
+
+      <b>loop_
+         _nef_spectrum_dimension_transfer.dimension_1
+         _nef_spectrum_dimension_transfer.dimension_2
+         _nef_spectrum_dimension_transfer.transfer_type</b>
+         _nef_spectrum_dimension_transfer.is_indirect
+
+         1  2  onebond  false
       stop_
 
       loop_
@@ -487,8 +504,8 @@
 <pre>
    save_ccpn_assignment
 
-      _ccpn_assignment.sf_category   ccpn_assignment
-      _ccpn_assignment.sf_framecode  ccpn_assignment
+      <b>_ccpn_assignment.sf_category</b>   ccpn_assignment
+      <b>_ccpn_assignment.sf_framecode</b>  ccpn_assignment
 
       loop_
          _nmr_chain.short_name

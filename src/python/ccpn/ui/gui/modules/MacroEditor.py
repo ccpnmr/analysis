@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 01:56:08 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-13 12:50:08 +0100 (Mon, July 13, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -575,3 +575,6 @@ if __name__ == '__main__':
 
     app.start()
     win.close()
+
+    if sys.platform[:3].lower() == 'win':
+        os._exit(0)

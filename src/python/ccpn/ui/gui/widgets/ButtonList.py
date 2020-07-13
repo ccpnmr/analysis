@@ -200,7 +200,7 @@ class ButtonBoxList(QtWidgets.QDialogButtonBox, Base, ButtonListMixin):
 # this should be treated as deprecated?
 # see ButtonBoxList above
 class ButtonList(Widget, ButtonListMixin):
-    def __init__(self, parent=None, texts=None, callbacks=None, icons=None,
+    def __init__(self, parent=None, texts=None, callbacks=None, icons=None, setMinimumWidth=True,
                  tipTexts=None, direction='h', commands=None, images=None, setLastButtonFocus=True, **kwds):
 
         super().__init__(parent, setLayout=True, **kwds)  # ejb - added setLayout
@@ -239,14 +239,14 @@ class ButtonList(Widget, ButtonListMixin):
             icons.append(None)
 
         self.buttons = []
-        self.addButtons(texts, callbacks, icons, tipTexts)
+        self.addButtons(texts, callbacks, icons, tipTexts, setMinimumWidth)
 
         # set focus always on the last button (which is usually the ok, or run button) unless setLastButtonFocus flag == False
         if len(self.buttons) > 0 and setLastButtonFocus:
             lastButton = self.buttons[-1]
             lastButton.setFocus()
 
-    def addButtons(self, texts, callbacks, icons=None, tipTexts=None):
+    def addButtons(self, texts, callbacks, icons=None, tipTexts=None, setMinimumWidth=True):
 
         if tipTexts is None:
             tipTexts = []
@@ -272,7 +272,8 @@ class ButtonList(Widget, ButtonListMixin):
                             tipText=tipTexts[i], grid=grid)
 
             width = button.fontMetrics().boundingRect(text).width() + 7
-            button.setMinimumWidth(width * 1.5)
+            if setMinimumWidth:
+                button.setMinimumWidth(width * 1.5)
 
             self.buttons.append(button)
             self.buttonNames[text] = i + j

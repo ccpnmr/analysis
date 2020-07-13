@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+CCPNMR_TOP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit; pwd)"
+export CCPNMR_TOP_DIR
+PYEDITOR="${CCPNMR_TOP_DIR}"/src/python/ccpn/ui/gui/modules/MacroEditor.py
+source "${CCPNMR_TOP_DIR}"/bin/paths.sh
+
+"${ANACONDA3}"/bin/python -W ignore "${PYEDITOR}" $*

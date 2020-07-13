@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-11 01:25:48 +0100 (Sat, July 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-13 12:16:14 +0100 (Mon, July 13, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1255,6 +1255,31 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if rescale:
             self._rescaleAllAxes()
+
+    def _getSelectionBoxRatio(self, delta=(0.0, 0.0)):
+        """Get the current deltas for the selection box and restrict to the aspectRatio if locked/fixed
+        """
+        if (self._aspectRatioMode == 2):
+            ax0 = self._getValidAspectRatio(self._axisCodes[0])
+            ax1 = self._getValidAspectRatio(self._axisCodes[1])
+        else:  # must be 1
+            ax0 = self.pixelX
+            ax1 = self.pixelY
+
+        if self.viewports:
+            vp = self.viewports.getViewportFromWH(self._currentView, self.w, self.h)
+            width = vp.width
+            height = vp.height
+        else:
+            width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
+            height = (self.h - self.AXIS_MOUSEYOFFSET) if self._drawBottomAxis else self.h
+
+        if width > height:
+            dy = abs(height * delta[0] * ax1 / (ax0 * width)) * np.sign(delta[1])
+            return (delta[0], dy)
+        else:
+            dx = abs(width * delta[1] * ax0 / (ax1 * height)) * np.sign(delta[0])
+            return (dx, delta[1])
 
     def _rescaleXAxis(self, update=True):
         self._testAxisLimits()
@@ -2784,7 +2809,19 @@ class CcpnGLWidget(QOpenGLWidget):
 
             elif (self._key == Qt.Key_Shift) and int(event.buttons() & Qt.LeftButton):
 
-                self._endCoordinate = cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
+                # fix the box to the screen ratio
+                if self.aspectRatioMode:
+                    self._endCoordinate = cursorCoordinate
+                    dx = self._startCoordinate[0] - self._endCoordinate[0]             # deltaX
+                    dy = self._startCoordinate[1] - self._endCoordinate[1]             # deltaY
+                    _delta = self._getSelectionBoxRatio((dx, dy))
+                    dx = _delta[0] #* np.sign(dx)
+                    dy = _delta[1] #* np.sign(dy)
+                    # dx = abs(dy * self.pixelX / self.pixelY) * np.sign(dx)
+                    self._endCoordinate[0] = self._startCoordinate[0] - dx
+                    self._endCoordinate[1] = self._startCoordinate[1] - dy
+                else:
+                    self._endCoordinate = cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
                 self._selectionMode = 1
                 self._drawSelectionBox = True
                 self._drawDeltaOffset = True

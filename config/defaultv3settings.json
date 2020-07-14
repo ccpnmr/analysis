@@ -5,7 +5,7 @@
         "auxiliaryFilesPath"                   : "~/.ccpn",
         "userMacroPath"                        : "~/.ccpn/macros/",
         "userPluginPath"                       : "~/.ccpn/plugins/",
-        "userPipesPath"                       : "~/.ccpn/pipes/",
+        "userPipesPath"                        : "~/.ccpn/pipes/",
         "userLayoutsPath"                      : "",
         "userWorkingPath"                      : "~",
         "useProjectPath"                       : false,
@@ -57,9 +57,9 @@
         "searchBoxMode"                        : false,
         "searchBoxDoFit"                       : false,
         "searchBoxWidthsNd"                    : {
-            "H"         : 0.3,
-            "N"         : 0.2,
-            "C"         : 0.5
+            "H" : 0.3,
+            "N" : 0.2,
+            "C" : 0.5
         },
         "searchBoxWidths1d"                    : {
             "H"         : 0.02,
@@ -105,7 +105,8 @@
         "proxyPassword"    : ""
     },
     "externalPrograms" : {
-        "pymol" : ""
+        "pymol"          : "",
+        "PDFViewer" : ""
     },
     "recentMacros"     : [
     ],

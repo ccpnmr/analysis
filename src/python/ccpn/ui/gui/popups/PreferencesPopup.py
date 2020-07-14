@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 12:55:47 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-14 16:30:21 +0100 (Tue, July 14, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -715,6 +715,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """
         with self._changes.blockChanges():
             self.pymolPath.setText(self.preferences.externalPrograms.pymol)
+            self.PDFViewerPath.setText(self.preferences.externalPrograms.PDFViewer)
 
     def _setSpectrumTabWidgets(self, parent):
         """Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live
@@ -1185,6 +1186,18 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.testPymolPathButton = Button(parent, grid=(row, 3), callback=self._testPymol,
                                           text='test', hPolicy='fixed')
 
+        row += 1
+        self.PDFViewerPathLabel = Label(parent, "Linux PDFViewer", grid=(row, 0), )
+        self.PDFViewerPath = PathEdit(parent, grid=(row, 1), hAlign='t')
+        self.PDFViewerPath.setMinimumWidth(LineEditsMinimumWidth)
+        self.PDFViewerPath.textChanged.connect(self._queueSetPDFViewerPath)
+        # self.PDFViewerPath.setText(self.preferences.externalPrograms.pDFViewer)
+        self.PDFViewerPathButton = Button(parent, grid=(row, 2), callback=self._getPDFViewerPath, icon='icons/directory',
+                                      hPolicy='fixed')
+
+        self.testPDFViewerPathButton = Button(parent, grid=(row, 3), callback=self._testPDFViewer,
+                                          text='test', hPolicy='fixed')
+
         # add spacer to stop columns changing width
         row += 1
         Spacer(parent, 15, 2,
@@ -1193,6 +1206,13 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _testPymol(self):
         program = self.pymolPath.get()
+        if not self._testExternalProgram(program):
+            self.sender().setText('Failed')
+        else:
+            self.sender().setText('Success')
+
+    def _testPDFViewer(self):
+        program = self.PDFViewerPath.get()
         if not self._testExternalProgram(program):
             self.sender().setText('Failed')
         else:
@@ -1513,6 +1533,37 @@ class PreferencesPopup(CcpnDialogMainWidget):
         if file:
             self.pymolPath.setText(file)
             # self._setPymolPath()
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetPDFViewerPath(self):
+        value = self.PDFViewerPath.get()
+        if 'externalPrograms' in self.preferences:
+            if 'PDFViewer' in self.preferences.externalPrograms:
+                if value != self.preferences.externalPrograms.PDFViewer:
+                    self.testPDFViewerPathButton.setText('test')
+                    return partial(self._setPDFViewerPath, value)
+
+    def _setPDFViewerPath(self, value):
+        # PDFViewerPath = self.PDFViewerPath.get()
+        if 'externalPrograms' in self.preferences:
+            if 'PDFViewer' in self.preferences.externalPrograms:
+                self.preferences.externalPrograms.PDFViewer = value
+        # self.testPDFViewerPathButton.setText('test')
+
+    def _getPDFViewerPath(self):
+        # NB native dialog on OSX does not show contentens of an .app dir.
+        # Therefore cannot navigate and set the exec file that is needed for the correct usage of PDFViewer!
+        dialog = FileDialog(self, text='Select File',
+                            useNative=False,
+                            directory=str(self.PDFViewerPath.get()),
+                            # preferences=self.preferences, # Do not use native
+                            pathID=USEROTHERPATH)
+        dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
+        dialog._show()
+        file = dialog.selectedFile()
+        if file:
+            self.PDFViewerPath.setText(file)
+            # self._setPDFViewerPath()
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetAutoBackupFrequency(self):

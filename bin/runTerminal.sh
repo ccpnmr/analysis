@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
-conda activate
+export FONTCONFIG_FILE=${_PARENT_FONTCONFIG_FILE}
+export FONTCONFIG_PATH=${_PARENT_FONTCONFIG_PATH}
+export QT_PLUGIN_PATH=${_PARENT_QT_PLUGIN_PATH}
+export QT_LOGGING_RULES=${_PARENT_QT_LOGGING_RULES}
 echo "$*"
+$* &

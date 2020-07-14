@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+export _PARENT_FONTCONFIG_FILE=${FONTCONFIG_FILE}
+export _PARENT_FONTCONFIG_PATH=${FONTCONFIG_PATH}
+export _PARENT_QT_PLUGIN_PATH=${QT_PLUGIN_PATH}
+export _PARENT_QT_LOGGING_RULES=${QT_LOGGING_RULES}
+
 export ANACONDA3="${CCPNMR_TOP_DIR}"/miniconda
 export PYTHONPATH="${CCPNMR_TOP_DIR}"/src/python:"${CCPNMR_TOP_DIR}"/src/c
 export FONTCONFIG_FILE="${ANACONDA3}"/etc/fonts/fonts.conf

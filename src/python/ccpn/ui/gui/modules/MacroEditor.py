@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-13 12:50:08 +0100 (Mon, July 13, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-14 15:16:40 +0100 (Tue, July 14, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -105,13 +105,24 @@ class MacroEditor(CcpnModule):
             if self.userMacroDirPath is None:
                 self._tempFile = tempfile.NamedTemporaryFile(suffix='.py')
                 self._tempFile.close()
-#                os.unlink(self._tempFile.name)
                 self.filePath = self._tempFile.name
             else:
+                if not os.path.exists(aPath(self.userMacroDirPath)):
+                    from ccpn.ui.gui.widgets.MessageDialog import showYesNo
+
+                    title, msg = "User macro path doesn't exist", "Do you want to create the folder?\n(no will revert to a temporary folder)"
+                    openNew = showYesNo(title, msg)
+                    if openNew:
+                        # recursively create folder
+                        os.makedirs(aPath(self.userMacroDirPath))
+
+                if os.path.exists(aPath(self.userMacroDirPath)):
+                    self._tempFile = tempfile.NamedTemporaryFile(prefix='macro_', dir=aPath(self.userMacroDirPath), suffix='.py')
+                else:
+                    self._tempFile = tempfile.NamedTemporaryFile(suffix='.py')
+
                 # within AnalysisV3
-                self._tempFile = tempfile.NamedTemporaryFile(prefix='macro_', dir=aPath(self.userMacroDirPath), suffix='.py')
                 self._tempFile.close()
-#                os.unlink(self._tempFile.name)
                 self.filePath = self._tempFile.name
 
             with open(aPath(self.filePath), 'w'):

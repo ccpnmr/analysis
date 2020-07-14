@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-25 10:46:02 +0100 (Thu, June 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-14 15:16:40 +0100 (Tue, July 14, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -22,13 +22,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
+import os
 from PyQt5.QtCore import QUrl
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.util.Common import isWindowsOS
-import os
-import posixpath
+from ccpn.util.Path import aPath
 
 
 class CcpnWebView(CcpnModule):
@@ -43,16 +42,18 @@ class CcpnWebView(CcpnModule):
         super().__init__(mainWindow=mainWindow, name=name)
 
         self.webView = QWebEngineView()
-        # self.webView.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True)
-        # self.addWidget(self.webView, 0, 0, 1, 1)  # make it the first item
         self.mainWidget.getLayout().addWidget(self.webView, 0, 0)
 
         urlPath = urlPath or ''
-
-        # NOTE:ED - need to remove windows separators
-        urlPath = urlPath.replace(os.sep, posixpath.sep)
-        if not isWindowsOS():
-            urlPath = 'file://' + urlPath  # webEngine needs to prefix
+        # if not isWindowsOS():
+        if (urlPath.startswith('http://') or urlPath.startswith('https://')):
+            pass
+        elif urlPath.startswith('file:/'):
+            urlPath = urlPath[len('file:/'):]
+            urlPath = 'file://'+str(aPath(urlPath))
+        else:
+            if os.path.exists(aPath(urlPath)):
+                urlPath = 'file://'+str(aPath(urlPath))
 
         self.webView.load(QUrl(urlPath))
         self.webView.show()

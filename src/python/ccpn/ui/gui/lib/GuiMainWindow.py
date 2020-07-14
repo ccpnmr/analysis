@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 12:55:47 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-14 15:16:40 +0100 (Tue, July 14, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -917,9 +917,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     def _showCCPNTutorials(self):
         from ccpn.framework.PathsAndUrls import ccpnVideos
-        import webbrowser
+        # import webbrowser
 
-        webbrowser.open(ccpnVideos)
+        # webbrowser.open(ccpnVideos)
+        self.application._showHtmlFile('Video Tutorials', ccpnVideos)
 
     def _showTutorial(self, filename, modulesMenu):
         """Run a CCPN macro from the populated menu

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 12:55:47 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-14 15:16:40 +0100 (Tue, July 14, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3027,7 +3027,22 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
 
         if self.preferences.general.useNativeWebbrowser:
-            self._systemOpen(path)
+            from ccpn.util.Path import aPath
+            import webbrowser
+
+            path = path or ''
+            # if not isWindowsOS():
+            if (path.startswith('http://') or path.startswith('https://')):
+                pass
+            elif path.startswith('file:/'):
+                path = path[len('file:/'):]
+                path = 'file://' + str(aPath(path))
+            else:
+                if os.path.exists(aPath(path)):
+                    path = 'file://' + str(aPath(path))
+
+            webbrowser.open(path)
+            # self._systemOpen(path)
         else:
             from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
 
@@ -3079,15 +3094,17 @@ class Framework(NotifierBase):
 
     def showAboutCcpn(self):
         from ccpn.framework.PathsAndUrls import ccpnUrl
-        import webbrowser
+        # import webbrowser
 
-        webbrowser.open(ccpnUrl)
+        # webbrowser.open(ccpnUrl)
+        self._showHtmlFile("About CCPN", ccpnUrl)
 
     def showCcpnLicense(self):
         from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
-        import webbrowser
+        # import webbrowser
 
-        webbrowser.open(ccpnLicenceUrl)
+        # webbrowser.open(ccpnLicenceUrl)
+        self._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
 
     def showCodeInspectionPopup(self):
         # TODO: open a file browser to top of source directory
@@ -3095,15 +3112,17 @@ class Framework(NotifierBase):
 
     def showIssuesList(self):
         from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
-        import webbrowser
+        # import webbrowser
 
-        webbrowser.open(ccpnIssuesUrl)
+        # webbrowser.open(ccpnIssuesUrl)
+        self._showHtmlFile("CCPN Issues", ccpnIssuesUrl)
 
     def showTutorials(self):
         from ccpn.framework.PathsAndUrls import ccpnTutorials
-        import webbrowser
+        # import webbrowser
 
-        webbrowser.open(ccpnTutorials)
+        # webbrowser.open(ccpnTutorials)
+        self._showHtmlFile("CCPN Tutorials", ccpnTutorials)
 
     def showUpdatePopup(self):
         """Open the update popup
@@ -3167,7 +3186,8 @@ class Framework(NotifierBase):
     def showLicense(self):
         from ccpn.framework.PathsAndUrls import licensePath
 
-        self._systemOpen(licensePath)
+        # self._systemOpen(licensePath)
+        self._showHtmlFile("CCPN Licence", licensePath)
 
     #########################################    End Menu callbacks   ##################################################
 

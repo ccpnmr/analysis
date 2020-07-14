@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-14 18:03:01 +0100 (Tue, July 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-14 18:09:10 +0100 (Tue, July 14, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,7 @@ ccpnIssuesUrl                   = 'https://bitbucket.org/ccpnmr/issue-tracker/is
 # CCPN code
 ccpnCodePath                    = Path.getTopDirectory()
 ccpnConfigPath                  = os.path.join(ccpnCodePath, 'config')
+ccpnRunTerminal                 = os.path.join(ccpnCodePath, 'bin', 'runTerminal.sh')
 defaultPreferencesPath          = os.path.join(ccpnConfigPath, 'defaultv3settings.json')
 ccpnmodelPythonPath             = os.path.join(Path.getPythonDirectory(), 'ccpnmodel')
 ccpnPythonPath                  = os.path.join(Path.getPythonDirectory(), 'ccpn')
@@ -54,7 +55,6 @@ pipePath                        = os.path.join(ccpnPythonPath, 'pipes')
 pipeTemplates                   = os.path.join(ccpnPythonPath, 'framework', 'lib', 'pipeline', 'templates')
 fontsPath                       = os.path.join(ccpnPythonPath, 'ui', 'gui', 'widgets', 'fonts')
 nefValidationPath               = os.path.join(ccpnPythonPath, 'util', 'nef', 'NEF', 'specification', 'mmcif_nef_v1_1.dic')
-ccpnRunTerminal                 = os.path.join(ccpnPythonPath, 'bin', 'runTerminal.sh')
 
 # Program tutorials and documentation
 shortcutsPath                   = os.path.join(ccpnCodePath, 'doc', 'static', 'AnalysisShortcuts.pdf')

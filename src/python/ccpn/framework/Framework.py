@@ -3021,31 +3021,36 @@ class Framework(NotifierBase):
         else:
             subprocess.run(['open', path], check=True)
 
-    def _showHtmlFile(self, title, path):
+    def _showHtmlFile(self, title, urlPath):
         "Displays html files in program QT viewer or using native webbrowser depending on useNativeWebbrowser option"
 
         mainWindow = self.ui.mainWindow
 
         if self.preferences.general.useNativeWebbrowser:
-            from ccpn.util.Path import aPath
             import webbrowser
+            import posixpath
 
-            path = path or ''
-            # if not isWindowsOS():
-            if (path.startswith('http://') or path.startswith('https://')):
+            urlPath = urlPath or ''
+            if (urlPath.startswith('http://') or urlPath.startswith('https://')):
                 pass
-            elif path.startswith('file://'):
-                pass
+            elif urlPath.startswith('file://'):
+                urlPath = urlPath[len('file://'):]
+                if isWindowsOS():
+                    urlPath = urlPath.replace(os.sep, posixpath.sep)
+                else:
+                    urlPath = 'file://' + urlPath
             else:
-                if os.path.exists(aPath(path)):
-                    path = 'file://' + path
+                if isWindowsOS():
+                    urlPath = urlPath.replace(os.sep, posixpath.sep)
+                else:
+                    urlPath = 'file://' + urlPath
 
-            webbrowser.open(path)
+            webbrowser.open(urlPath)
             # self._systemOpen(path)
         else:
             from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
 
-            self.newModule = CcpnWebView(mainWindow=mainWindow, name=title, urlPath=path)
+            self.newModule = CcpnWebView(mainWindow=mainWindow, name=title, urlPath=urlPath)
 
             # self.newModule = CcpnModule(mainWindow=mainWindow, name=title)
             # view = CcpnWebView(path)

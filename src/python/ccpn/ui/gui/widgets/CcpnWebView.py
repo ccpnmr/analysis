@@ -46,18 +46,18 @@ class CcpnWebView(CcpnModule):
         self.mainWidget.getLayout().addWidget(self.webView, 0, 0)
 
         urlPath = urlPath or ''
-        # if not isWindowsOS():
         if (urlPath.startswith('http://') or urlPath.startswith('https://')):
             pass
         elif urlPath.startswith('file://'):
             urlPath = urlPath[len('file://'):]
-            urlPath = urlPath if isWindowsOS() else 'file://'+urlPath
-            # pass
+            if isWindowsOS():
+                urlPath = urlPath.replace(os.sep, posixpath.sep)
+            else:
+                urlPath = 'file://'+urlPath
         else:
-            if os.path.exists(aPath(urlPath)):
-                if isWindowsOS():
-                    urlPath = urlPath.replace(os.sep, posixpath.sep)
-                # urlPath = urlPath if isWindowsOS() else 'file://'+urlPath
+            if isWindowsOS():
+                urlPath = urlPath.replace(os.sep, posixpath.sep)
+            else:
                 urlPath = 'file://'+urlPath
 
         self.webView.load(QUrl(urlPath))

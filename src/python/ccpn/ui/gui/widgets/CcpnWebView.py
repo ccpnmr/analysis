@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-14 15:30:51 +0100 (Tue, July 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-14 15:39:06 +0100 (Tue, July 14, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -49,11 +49,13 @@ class CcpnWebView(CcpnModule):
         if (urlPath.startswith('http://') or urlPath.startswith('https://')):
             pass
         elif urlPath.startswith('file://'):
-            urlPath = urlPath[len('file://'):]
-            urlPath = str(aPath(urlPath)) if isWindowsOS() else 'file://'+str(aPath(urlPath))
+            # urlPath = urlPath[len('file://'):]
+            # urlPath = urlPath if isWindowsOS() else 'file://'+urlPath
+            pass
         else:
             if os.path.exists(aPath(urlPath)):
-                urlPath = str(aPath(urlPath)) if isWindowsOS() else 'file://'+str(aPath(urlPath))
+                # urlPath = urlPath if isWindowsOS() else 'file://'+urlPath
+                urlPath = 'file://'+urlPath
 
         self.webView.load(QUrl(urlPath))
         self.webView.show()

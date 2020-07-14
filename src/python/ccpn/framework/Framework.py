@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-14 15:30:51 +0100 (Tue, July 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-14 15:39:06 +0100 (Tue, July 14, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3035,11 +3035,10 @@ class Framework(NotifierBase):
             if (path.startswith('http://') or path.startswith('https://')):
                 pass
             elif path.startswith('file://'):
-                path = path[len('file://'):]
-                path = 'file://' + str(aPath(path))
+                pass
             else:
                 if os.path.exists(aPath(path)):
-                    path = 'file://' + str(aPath(path))
+                    path = 'file://' + path
 
             webbrowser.open(path)
             # self._systemOpen(path)

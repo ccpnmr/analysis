@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-14 15:42:54 +0100 (Tue, July 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-14 15:51:41 +0100 (Tue, July 14, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -23,6 +23,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import os
+import posixpath
 from PyQt5.QtCore import QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -54,8 +55,10 @@ class CcpnWebView(CcpnModule):
             # pass
         else:
             if os.path.exists(aPath(urlPath)):
-                urlPath = urlPath if isWindowsOS() else 'file://'+urlPath
-                # urlPath = 'file://'+urlPath
+                if isWindowsOS():
+                    urlPath = urlPath.replace(os.sep, posixpath.sep)
+                # urlPath = urlPath if isWindowsOS() else 'file://'+urlPath
+                urlPath = 'file://'+urlPath
 
         self.webView.load(QUrl(urlPath))
         self.webView.show()

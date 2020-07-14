@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-14 16:30:21 +0100 (Tue, July 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-14 16:34:35 +0100 (Tue, July 14, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3021,7 +3021,7 @@ class Framework(NotifierBase):
         elif isMacOS():
             subprocess.run(['open', path], check=True)
         else:
-            linuxCommand = self.preferences.externalPrograms.linuxPDFViewer
+            linuxCommand = self.preferences.externalPrograms.PDFViewer
             # assume a linux and use the choice given in the preferences
             if linuxCommand:
                 subprocess.run([linuxCommand, path], check=True)

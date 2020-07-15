@@ -55,8 +55,18 @@ class CompoundView(QGraphicsView, Base):
         self._parent = parent
         self.preferences = preferences
 
-        self.backgroundColor = QtGui.QColor(10, 1, 0, 0)
-        self.bondColor = Qt.black
+        if self.preferences is not None:
+            self.colourScheme = self.preferences.general.colourScheme
+            if self.colourScheme == 'light':
+                self.backgroundColor = self.setStyleSheet('background-color: #bd8413')
+            else:
+                self.backgroundColor = self.setStyleSheet('background-color: #ffffff')
+                self.setAtomColorWhite = True
+            self.bondColor = Qt.white
+            #
+        else:
+            self.backgroundColor = QtGui.QColor(10, 1, 0, 0)
+            self.bondColor = Qt.black
 
         # self.setCompound = self.setCompound
         self.rotatePos = None

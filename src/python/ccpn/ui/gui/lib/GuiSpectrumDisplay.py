@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-11 01:25:48 +0100 (Sat, July 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-17 10:36:48 +0100 (Fri, July 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2387,6 +2387,15 @@ class GuiSpectrumDisplay(CcpnModule):
                     self.zPlaneFrame._strip = None
 
         self.update()
+
+    def _highlightAxes(self, strip):
+        """Highlight the last row axis if strip
+        """
+        _row = self.stripRow(0)
+        if _row:
+            highlight = (_row[-1] == strip)
+            self._rightGLAxis.highlightCurrentStrip(highlight)
+            self._bottomGLAxis.highlightCurrentStrip(highlight)
 
     #===========================================================================================
     # new'Object' and other methods

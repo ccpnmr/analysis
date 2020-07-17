@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-11 01:25:49 +0100 (Sat, July 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-17 10:36:49 +0100 (Fri, July 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Colour import rgbRatioToHex
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import BOTTOMAXIS
 
 
 SCROLLBAR_POLICY_DICT = dict(
@@ -136,7 +137,7 @@ class SpectrumDisplayScrollArea(ScrollArea):
             children = self.findChildren((Gui1dWidgetAxis, GuiNdWidgetAxis))
             if children:
                 for child in children:
-                    if child._axisType == 0:
+                    if child._axisType == BOTTOMAXIS:
                         # resize the X axis widgets
                         child.setGeometry(0, rect.height(), _width, margins[3])
                         # child._resizeGL(_width, margins[3])

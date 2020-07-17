@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-14 15:16:40 +0100 (Tue, July 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-17 10:36:48 +0100 (Fri, July 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1183,6 +1183,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if currentStrip and not currentStrip.isDeleted:
             currentStrip._highlightStrip(True)
             currentStrip._attachZPlaneWidgets()
+            currentStrip.spectrumDisplay._highlightAxes(currentStrip)
 
     def printToFile(self):
         self.application.showPrintSpectrumDisplayPopup()

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-11 01:25:49 +0100 (Sat, July 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-17 10:36:49 +0100 (Fri, July 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -66,7 +66,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLExternalRegion
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CURSOR_SOURCE_NONE, CURSOR_SOURCE_SELF, CURSOR_SOURCE_OTHER
-from ccpn.ui.gui.lib.GuiStrip import STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT
+from ccpn.ui.gui.lib.GuiStrip import STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT, AxisMenu
+from ccpn.ui.gui.lib.mouseEvents import rightMouse
 
 
 class GuiNdWidget(CcpnGLWidget):
@@ -711,12 +712,14 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         0 = X Axis type, 1 = Y Axis type
         Only the required axis is drawn and the widget dimensions are fixed in the other axis
         """
+        _axisList = (GLDefs.BOTTOMAXIS, GLDefs.RIGHTAXIS)
+
         if type(dimension) != int:
             raise TypeError('dimension must be an int')
         if not (0 <= dimension < 2):
             raise TypeError('dimension is out of range')
 
-        self._axisType = dimension
+        self._axisType = _axisList[dimension]
         if dimension == 1:
             self.setFixedWidth(self.AXIS_MARGINRIGHT + (0 if self.AXIS_INSIDE else self.AXIS_LINE))
             self.setMinimumHeight(STRIP_MINIMUMHEIGHT)
@@ -1129,23 +1132,23 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         """
         # build the axes
         if self.highlighted:
-            if self._axisType == 1:
+            if self._axisType == GLDefs.RIGHTAXIS:
                 self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0],
                                                                        r=self.highlightColour[0],
                                                                        g=self.highlightColour[1],
                                                                        b=self.highlightColour[2], transparency=32.0)
-            else:  # self._axisType == 0:
+            else:  # self._axisType == GLDefs.BOTTOMAXIS:
                 self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1, 0],
                                                                        r=self.highlightColour[0],
                                                                        g=self.highlightColour[1],
                                                                        b=self.highlightColour[2], transparency=32.0)
         else:
-            if self._axisType == 1:
+            if self._axisType == GLDefs.RIGHTAXIS:
                 self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1, 0],
                                                                        r=self.foreground[0],
                                                                        g=self.foreground[1],
                                                                        b=self.foreground[2], transparency=32.0)
-            else:  # self._axisType == 0:
+            else:  # self._axisType == GLDefs.BOTTOMAXIS:
                 self.axisLabelling, self.axesChanged = self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1, 0],
                                                                        r=self.foreground[0],
                                                                        g=self.foreground[1],
@@ -1164,12 +1167,12 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # draw the axes tick marks (effectively the same grid in smaller viewport)
         if self._axesVisible:
-            if self._drawRightAxis and self._axisType == 1:
+            if self._drawRightAxis and self._axisType == GLDefs.RIGHTAXIS:
                 # draw the grid marks for the right axis
                 self.viewports.setViewport(self._currentRightAxisView)
                 self.gridList[1].drawIndexVBO(enableVBO=True)
 
-            if self._drawBottomAxis and self._axisType == 0:
+            if self._drawBottomAxis and self._axisType == GLDefs.BOTTOMAXIS:
                 # draw the grid marks for the bottom axis
                 self.viewports.setViewport(self._currentBottomAxisView)
                 self.gridList[2].drawIndexVBO(enableVBO=True)
@@ -1575,7 +1578,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._axisXLabelling = []
         self._axisYLabelling = []
         self._axisScaleLabelling = []
-        self._axisType = 0
+        self._axisType = GLDefs.BOTTOMAXIS
 
         self._stackingValue = (0.0, 0.0)
         self._stackingMode = False
@@ -2069,7 +2072,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
     def _parentResize(self, size):
         return
-        if self._axisType == 0:
+        if self._axisType == GLDefs.BOTTOMAXIS:
             # axis widget is an X widget so grab connected width
             self.setMaximumWidth(size[0])
 
@@ -2293,7 +2296,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             smallFont = self.getSmallFont()
             fScale = smallFont.scale
 
-            if self._drawBottomAxis and self._axisType == 0:
+            if self._drawBottomAxis and self._axisType == GLDefs.BOTTOMAXIS:
                 # create the X axis labelling
                 for axLabel in self.axisLabelling['0'].values():
                     axisX = axLabel[2]
@@ -2329,7 +2332,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
             self._axisYLabelling = []
 
-            if self._drawRightAxis and self._axisType == 1:
+            if self._drawRightAxis and self._axisType == GLDefs.RIGHTAXIS:
                 # create the Y axis labelling
                 for xx, ayLabel in enumerate(self.axisLabelling['1'].values()):
                     axisY = ayLabel[2]
@@ -2374,7 +2377,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 # NOTE:ED - this case should never occur
                 return
 
-            if self._drawBottomAxis and self._axisType == 0:
+            if self._drawBottomAxis and self._axisType == GLDefs.BOTTOMAXIS:
                 # put the axis labels into the bottom bar
                 self.viewports.setViewport(self._currentBottomAxisBarView)
 
@@ -2389,7 +2392,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 for lb in self._axisXLabelling:
                     lb.drawTextArrayVBO(enableVBO=True)
 
-            if self._drawRightAxis and self._axisType == 1:
+            if self._drawRightAxis and self._axisType == GLDefs.RIGHTAXIS:
                 # put the axis labels into the right bar
                 self.viewports.setViewport(self._currentRightAxisBarView)
 
@@ -2596,6 +2599,120 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         """
         if self.glReady:
             self._rescaleAllZoom(False)
+
+    def mousePressEvent(self, ev):
+
+        try:
+            _row = self.spectrumDisplay.stripRow(0)
+            self.current.strip = _row[-1]
+        except:
+            return
+
+        mx = ev.pos().x()
+        if self._drawBottomAxis:
+            my = self.height() - ev.pos().y() - self.AXIS_MOUSEYOFFSET
+        else:
+            my = self.height() - ev.pos().y()
+        self._mouseStart = (mx, my)
+
+    def mouseReleaseEvent(self, ev):
+
+        # if no self.current then strip is not defined correctly
+        if not getattr(self.current, 'mouseMovedDict', None):
+            return
+
+        mx = ev.pos().x()
+        if self._drawBottomAxis:
+            my = self.height() - ev.pos().y() - self.AXIS_MOUSEYOFFSET
+        else:
+            my = self.height() - ev.pos().y()
+        self._mouseEnd = (mx, my)
+
+        # add a 2-pixel tolerance to the click event - in case of a small wiggle on coordinates
+        if not self._widthsChangedEnough(self._mouseStart, self._mouseEnd, tol=2):
+
+            # perform click action
+            self._mouseClickEvent(ev)
+
+    def _mouseClickEvent(self, event: QtGui.QMouseEvent, axis=None):
+        """handle the mouse click event
+        """
+        if rightMouse(event) and axis is None:
+            # right click on canvas, not the axes
+
+            try:
+                _row = self.spectrumDisplay.stripRow(0)
+                strip = _row[-1]
+            except:
+                return
+
+            event.accept()
+            mouseInAxis = self._axisType
+
+            strip.contextMenuMode = AxisMenu
+            menu = strip._contextMenus.get(strip.contextMenuMode)
+
+            # create a dynamic menu based on the available axisCodes
+            menu.clear()
+            strip._addItemsToMarkAxesMenuAxesView(mouseInAxis, menu)
+            strip._addItemsToCopyAxisFromMenuesAxes(mouseInAxis, menu, self.is1D)
+
+            if menu is not None:
+                strip.viewStripMenu = menu
+            else:
+                strip.viewStripMenu = self._getCanvasContextMenu()
+
+            strip._raiseContextMenu(event)
+
+        self.update()
+
+    def _mouseInAxis(self, mousePos):
+        h = self.h
+        w = self.w
+
+        # find the correct viewport
+        if (self._drawRightAxis and self._drawBottomAxis):
+            mw = [0, self.AXIS_MARGINBOTTOM, w - self.AXIS_MARGINRIGHT, h - 1]
+            ba = [0, 0, w - self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM - 1]
+            ra = [w - self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM, w, h]
+
+        elif (self._drawBottomAxis):
+            mw = [0, self.AXIS_MARGINBOTTOM, w, h - 1]
+            ba = [0, 0, w, self.AXIS_MARGINBOTTOM - 1]
+            ra = [w, self.AXIS_MARGINBOTTOM, w, h]
+
+        elif (self._drawRightAxis):
+            mw = [0, 0, w - self.AXIS_MARGINRIGHT, h - 1]
+            ba = [0, 0, w - self.AXIS_MARGINRIGHT, 0]
+            ra = [w - self.AXIS_MARGINRIGHT, 0, w, h]
+
+        else:  # no axes visible
+            mw = [0, 0, w, h]
+            ba = [0, 0, w, 0]
+            ra = [w, 0, w, h]
+
+        mx = mousePos.x()
+        my = self.height() - mousePos.y()
+
+        if self.between(mx, mw[0], mw[2]) and self.between(my, mw[1], mw[3]):
+
+            # if in the mainView
+            return GLDefs.MAINVIEW
+
+        elif self.between(mx, ba[0], ba[2]) and self.between(my, ba[1], ba[3]):
+
+            # in the bottomAxisBar, so zoom in the X axis
+            return GLDefs.BOTTOMAXIS
+
+        elif self.between(mx, ra[0], ra[2]) and self.between(my, ra[1], ra[3]):
+
+            # in the rightAxisBar, so zoom in the Y axis
+            return GLDefs.RIGHTAXIS
+
+        else:
+
+            # must be in the corner
+            return GLDefs.AXISCORNER
 
     def mouseMoveEvent(self, event):
 
@@ -3137,6 +3254,23 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 # self._storeZoomHistory()
 
         event.accept()
+
+    def highlightCurrentStrip(self, current):
+        if current:
+            self.highlighted = True
+
+            self._updateAxes = True
+            for gr in self.gridList:
+                gr.renderMode = GLRENDERMODE_REBUILD
+
+        else:
+            self.highlighted = False
+
+            self._updateAxes = True
+            for gr in self.gridList:
+                gr.renderMode = GLRENDERMODE_REBUILD
+
+        self.update()
 
 
 class GuiNdWidgetAxis(Gui1dWidgetAxis):

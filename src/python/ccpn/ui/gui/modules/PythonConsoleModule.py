@@ -84,6 +84,18 @@ class PythonConsoleModule(CcpnModule):
         """
         self.application._enableLoggingToConsole = value
 
+    def enterEvent(self, event):
+        # do nothing. Just keep the event.
+        event.accept()
+        # don't call super or you lose the cursor while typing, even when casually the mouse cursor
+        # is on top of the inline documentation. Which is annoying and unproductive.
+
+    def leaveEvent(self, event):
+        # do nothing. Just keep the event.
+        event.accept()
+        # don't call super or you lose the cursor while typing, even when casually the mouse cursor
+        # is on top of the inline documentation. Which is annoying and unproductive.
+
     def _closeModule(self):
         # self.pythonConsoleWidget._stopChannels()
         self.mainWindow.pythonConsoleModule = None

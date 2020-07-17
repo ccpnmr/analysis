@@ -41,6 +41,8 @@ from ccpn.util.Common import isWindowsOS
 
 
 class IpythonConsole(Widget):
+    focusedIn = QtCore.Signal(QtGui.QFocusEvent)
+    mouseMoved = QtCore.Signal(QtGui.QMouseEvent)
 
     def __init__(self, mainWindow, namespace=None, **kwds):
 
@@ -58,23 +60,13 @@ class IpythonConsole(Widget):
         km = QtInProcessKernelManager()
         km.start_kernel()
         km.kernel.gui = 'qt4'
-
         self.mainWindow = mainWindow
         self.mainWindow.pythonConsole = self
-
         self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
-        #TODO:GEERTEN: Sort Stylesheet issues
         self.setStyleSheet(self.mainWindow.styleSheet())
-
         self.ipythonWidget._set_font(self.mainWindow.application._fontSettings.fixedWidthFont)
-
         self.ipythonWidget.kernel_manager = km
-        # self.ipythonWidget.kernel_client = km.client()
-        #TODO:LUCA:The Widget class already has a layout: can just do grid=(row,col)
-        #use getLayout() of the widget class to get hold of the widget layout in case you need to do something special
-
         self.setMinimumHeight(100)
-
         self.textEditor = TextEditor(self)
         self.textEditor.setReadOnly(True)
         # if this is called here then keyboard input gets
@@ -93,30 +85,10 @@ class IpythonConsole(Widget):
         # self.consoleFrame.addLayout(buttonLayout, 2, 0)
 
         self.consoleFrame.layout().addWidget(self.ipythonWidget, 0, 0)
-
-        # runMacroButton = QtWidgets.QPushButton()
-        # runMacroButton.clicked.connect(self._runMacro)
-        # runMacroButton.setText('Run Macro')
-        # buttonLayout.addWidget(runMacroButton)
-        #
-        # historyButton = QtWidgets.QPushButton()
-        # historyButton.clicked.connect(self._showHistory)
-        # historyButton.setText('Show History')
-        # buttonLayout.addWidget(historyButton, 0, 1)
-
-        # THIS Buttons are broken. There is actually no reason to have a run macro here.
-        # We have the full menu menu item for macros!
-        # self.buttons = ButtonList(self.consoleFrame,
-        #                         texts=['Open Macro', 'Show History'],
-        #                         callbacks=[self._runMacro, self._showHistory],
-        #                         direction='H', hAlign='c',
-        #                         grid=(1,0))
-
         self.splitter.setStretchFactor(1, 8)
         self.splitter.setChildrenCollapsible(False)
         self.splitter.setStyleSheet("QSplitter::handle { background-color: gray }")
         self.getLayout().addWidget(self.splitter)
-
         namespace['runMacro'] = self._runMacro
         km.kernel.shell.push(namespace)
 

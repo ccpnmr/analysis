@@ -540,10 +540,7 @@ class MacroEditor(CcpnModule):
                             if self.filePath != value:
                                 self._removeMacroFromCurrent()
                                 self._deleteTempFile()
-                                print(self.filePath, value, '@@')
-
                             self.openPath(value)
-                            print(self.filePath, value, '##')
                         continue
 
 

@@ -234,6 +234,18 @@ SpectrumHit.sampleComponent = property(getter, None, None,
                                        "ccpn.SampleComponent in which ccpn.SpectrumHit is found")
 del getter
 
+def _newComponent(self: Sample, name: str = None, labelling=DEFAULT_LABELLING, **kwargs) -> SampleComponent:
+    """internal. Used to avoid the overhead of decorators.
+    """
+    apiSubstance = self._project._apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name, labeling=labelling)
+
+    if apiSubstance:
+        substance = self._project._data2Obj[apiSubstance]
+    else:
+        from ccpn.core.Substance import _newSubstance
+        substance = _newSubstance(self._project, name=name, labelling=labelling)
+    obj = self._wrappedData.newSampleComponent(name=name, labeling=substance._wrappedData.labeling, **kwargs)
+    return self._project._data2Obj.get(obj)
 
 @newObjectList(('SampleComponent', 'Substance'))
 def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, role: str = None,  # ejb

@@ -542,8 +542,8 @@ class Substance(AbstractWrapperObject):
     @referenceSpectra.setter
     def referenceSpectra(self, value):
         name = self.name
-        for spectrum in self.referenceSpectra:
-            spectrum._apiDataSource.experiment.refComponentName = None
+        # for spectrum in self.referenceSpectra:
+        #     spectrum._apiDataSource.experiment.refComponentName = None
         for spectrum in value:
             spectrum._apiDataSource.experiment.refComponentName = name
 

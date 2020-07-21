@@ -34,7 +34,7 @@ from typing import Sequence, Tuple, Union, Optional
 from collections import OrderedDict
 from time import time
 from datetime import datetime
-
+import traceback
 from ccpn.util.Common import _traverse, _getChildren
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
@@ -1354,11 +1354,13 @@ class Project(AbstractWrapperObject):
             raise ValueError("Project file type %s is not recognised" % subType)
 
     @logCommand('project')
-    def loadSpectrum(self, path: str, subType: str, name=None) -> list:
+    def loadSpectrum(self, path: str, subType: str, name=None):
         """Load spectrum defined by path into application
         """
-        from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
+        self._loadSpectrum(path, subType, name)
 
+    def _loadSpectrum(self, path, subType, name=None) -> list:
+        from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
         # #TODO:RASMUS FIXME check for rename
 
         try:
@@ -1367,7 +1369,9 @@ class Project(AbstractWrapperObject):
                     )
         except Exception as es:
             getLogger().warning(es)
-            raise es
+            traceback.print_exc()
+            # raise es # why do we need this? This can be called in a loop, keep the program rolling!
+            return []
 
         if apiDataSource is None:
             return []

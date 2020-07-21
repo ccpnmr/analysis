@@ -22,13 +22,15 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 # Start of code
 #=========================================================================================
 
-
+from multiprocessing.pool import ThreadPool as Pool
 import os
 from os.path import isfile, join
 import pathlib
 import pandas as pd
+import time
 from ccpn.util.Logging import getLogger, _debug3
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+from tqdm import tqdm, tqdm_gui
 
 
 ################################       Excel Headers Warning      ######################################################
@@ -95,6 +97,7 @@ SUBSTANCES_SHEET_COLUMNS =  [SUBSTANCE_NAME,SPECTRUM_PATH,SPECTRUM_GROUP_NAME,EX
 SAMPLE_SHEET_COLUMNS = [SAMPLE_NAME, SPECTRUM_GROUP_NAME, SPECTRUM_PATH, SPECTRUM_NAME]
 
 
+
 def makeTemplate(path,fileName='lookupTemplate.xlsx',):
     """
     :param path: path where to save the template
@@ -155,8 +158,8 @@ def _filterBrukerExperiments(brukerFilePaths, fileType = '1r', multipleExp=False
 
 class ExcelReader(object):
 
-    # from ccpn.util.decorators import profile
-    # @profile
+    from ccpn.util.decorators import profile
+    @profile
     def __init__(self, project, excelPath):
         """
         :param project: the ccpnmr Project object
@@ -193,20 +196,31 @@ class ExcelReader(object):
         self.dataframes = self._getDataFrameFromSheets(self.sheets)
 
         # self._project.blankNotification()
-        getLogger().info('Loading Excel File...')
+        # getLogger().info('Loading Excel File...')
 
         # with undoBlockWithoutSideBar():
         #     getLogger().info('Loading Excel File...')
         #     with notificationEchoBlocking():
+        self._tempSpectrumGroupsSpectra = {} # needed to improve the loading speed
         self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
         self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
         self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
 
+        getLogger().info('Loading Substances metadata...')
         self._dispatchAttrsToObjs(self.substancesDicts)
+        getLogger().info('Loading Substances Spectra...')
         self._loadSpectraForSheet(self.substancesDicts)
+        getLogger().info('Loading Samples metadata...')
         self._dispatchAttrsToObjs(self.samplesDicts)
+        getLogger().info('Loading Samples Spectra...')
         self._loadSpectraForSheet(self.samplesDicts)
-        # self._project.unblankNotification()
+        getLogger().info('Loading SpectrumGroups...')
+        self._fillSpectrumGroups()
+        getLogger().info('Loading from Excel completed...')
+
+
+
+                # self._project.unblankNotification()
 
     ######################################################################################################################
     ######################                  PARSE EXCEL                     ##############################################
@@ -240,6 +254,7 @@ class ExcelReader(object):
     def _createSubstancesDataFrames(self, dataframesList):
         '''Creates substances in the project if not already present, For each substance link a dictionary of all its values
          from the dataframe row. '''
+        from ccpn.core.Substance import _newSubstance
 
         substancesDataFrames = []
         for dataFrame in dataframesList:
@@ -249,7 +264,7 @@ class ExcelReader(object):
                         if key == SUBSTANCE_NAME:
                             if self._project is not None:
                                 if not self._project.getByPid('SU:' + str(value) + '.'):
-                                    substance = self._project.newSubstance(name=str(value))
+                                    substance = _newSubstance(self._project, name=str(value))
                                     substancesDataFrames.append({substance: dataFrameAsDict})
                                 else:
                                     getLogger().warning('Impossible to create substance %s. A substance with the same name already '
@@ -282,12 +297,13 @@ class ExcelReader(object):
         return samplesDataFrames
 
     def _createSamples(self, dataframesList):
+        from ccpn.core.Sample import _newSample
         samples = []
         for dataFrame in dataframesList:
             if SAMPLE_NAME in dataFrame.columns:
                 for name in list(set((dataFrame[SAMPLE_NAME]))):
                     if not self._project.getByPid('SA:' + str(name)):
-                        sample = self._project.newSample(name=str(name))
+                        sample = _newSample(self._project, name=str(name))
                         samples.append(sample)
 
                     else:
@@ -308,6 +324,7 @@ class ExcelReader(object):
                 for groupName in list(set((dataFrame[SPECTRUM_GROUP_NAME]))):
                     # name = self._checkDuplicatedSpectrumGroupName(groupName)
                     newSG = self._createNewSpectrumGroup(groupName)
+                    self._tempSpectrumGroupsSpectra[groupName] = []
                     spectrumGroups.append(newSG)
         return spectrumGroups
 
@@ -321,9 +338,10 @@ class ExcelReader(object):
     #     return name
 
     def _createNewSpectrumGroup(self, name):
+        from ccpn.core.SpectrumGroup import _newSpectrumGroup
         if self._project:
             if not self._project.getByPid('SG:' + str(name)):
-                return self._project.newSpectrumGroup(name=str(name))
+                return _newSpectrumGroup(self._project, name=str(name))
             else:
                 getLogger().warning('Impossible to create the spectrumGroup %s. A spectrumGroup with the same name already '
                                     'exsists in the project. ' % name)
@@ -342,6 +360,8 @@ class ExcelReader(object):
         of the excel file.
         If the full path is given, from the root to the spectrum file name, then it uses that.
         '''
+        _args = []
+
         if self._project is not None:
             for objDict in dictLists:
                 for obj, dct in objDict.items():
@@ -350,13 +370,15 @@ class ExcelReader(object):
                             value = str(value) # no point of being int/float
                             if os.path.exists(value):
                                 # if isinstance(value, str):  # means it's a pathlike str### the full path is given:
-                                    self._addSpectrum(filePath=value, dct=dct, obj=obj)
+                                #     self._addSpectrum(filePath=value, dct=dct, obj=obj)
+                                    _args.append((value, dct, obj))
 
                             else:  ### needs to find the path from the excel file:
                                 self.directoryPath = str(pathlib.Path(self.excelPath).parent)
                                 filePath = self.directoryPath + '/' + str(value)
                                 if os.path.exists(filePath):  ### is a folder, e.g Bruker type. The project can handle.
-                                    self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
+                                    # self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
+                                    _args.append((value, dct, obj))
 
 
                                 else:  ### is a spectrum file, The project needs to get the extension: e.g .hdf5
@@ -369,12 +391,15 @@ class ExcelReader(object):
                                                     value = value.split('/')[-1]
                                                 if os.path.splitext(fileWithExtension)[0] == value:
                                                     filePath = newFilePath + '/' + fileWithExtension
-                                                    self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
+                                                    # self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
+                                                    _args.append((value, dct, obj))
                                     except Exception as e:
                                         getLogger().warning(e)
+        pool = Pool(processes=2)
+        pool.starmap(self._addSpectrum, _args)
+        pool.close()
 
     def _addSpectrum(self, filePath, dct, obj):
-        from ccpn.core.Spectrum import SPECTRUMSERIES, SPECTRUMSERIESITEMS
         '''
         :param filePath: spectrum full file path
         :param dct:  dict with information for the spectrum. eg EXP type
@@ -384,17 +409,15 @@ class ExcelReader(object):
         if not name:
             name = obj.name
         if filePath.endswith('1r'): # a try to make a loader faster down the model, skipping the loops
-            data = self._project.loadSpectrum(filePath, 'Bruker',str(name) )
+            data = self._project._loadSpectrum(filePath, 'Bruker',str(name) )
         else:
             data = self._project.loadData(filePath)
         if data is not None:
             if len(data) > 0:
                 self._linkSpectrumToObj(obj, data[0], dct)
-                if EXP_TYPE in dct:
-                    try:
-                        data[0].experimentType = dct[EXP_TYPE]
-                    except Exception as e:
-                        print(e, dct)
+                if EXP_TYPE in dct: # use exp name as it is much faster and safer to save than exp type.
+                    data[0].experimentName = dct[EXP_TYPE]
+
                         # _debug3(getLogger(), msg=(e, data[0], dct[EXP_TYPE]))
 
     ######################################################################################################################
@@ -404,6 +427,7 @@ class ExcelReader(object):
     def _linkSpectrumToObj(self, obj, spectrum, dct):
         from ccpn.core.Sample import Sample
         from ccpn.core.Substance import Substance
+        from ccpn.core.Spectrum import SPECTRUMSERIES, SPECTRUMSERIESITEMS
 
         if isinstance(obj, Substance):
             obj.referenceSpectra += (spectrum,)
@@ -413,11 +437,20 @@ class ExcelReader(object):
 
         for key, value in dct.items():
             if key == SPECTRUM_GROUP_NAME:
-                spectrumGroup = self._project.getByPid('SG:' + str(value))
-                if spectrumGroup is not None:
-                    spectrumGroup.spectra += (spectrum,)
-                if SERIES in dct:
-                    spectrum._setSeriesItem(spectrumGroup,dct[SERIES])
+                # spectrumGroup = self._project.getByPid('SG:' + str(value))
+                tempSGspectra = self._tempSpectrumGroupsSpectra.get(str(value))
+                if tempSGspectra is not None:
+                    tempSGspectra.append(spectrum)
+                # if spectrumGroup is not None: # this strategy is very slow. do not use here.
+                #     spectrumGroup.spectra += (spectrum,)
+                if SERIES in dct: # direct insertion of series values for speed optimisation
+                    spectrum.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, {'SG:'+str(value):dct[SERIES]})
+
+    def _fillSpectrumGroups(self):
+        for sgName, spectra in self._tempSpectrumGroupsSpectra.items():
+            spectrumGroup = self._project.getByPid('SG:' + str(sgName))
+            if spectrumGroup is not None:
+                spectrumGroup.spectra = spectra
 
     ######################################################################################################################
     ######################            DISPATCH ATTRIBUTES TO RELATIVE OBJECTS         ####################################
@@ -467,11 +500,12 @@ class ExcelReader(object):
     ######################################################################################################################
 
     def _createSampleComponents(self, sample, data):
+        from ccpn.core.SampleComponent import _newComponent
         sampleComponentsNames = [[header, sampleComponentName] for header, sampleComponentName in data.items() if
                                  header == SAMPLE_COMPONENTS and sampleComponentName != NOTGIVEN]
         if len(sample.sampleComponents) == 0:
             if len(sampleComponentsNames) > 0:
                 for name in sampleComponentsNames[0][1].split(','):
                     if not self._project.getByPid('SC:' + str(name)):
-                        sampleComponent = sample.newSampleComponent(name=(str(name)))
+                        sampleComponent = _newComponent(sample, name=(str(name)))
                         sampleComponent.role = 'Compound'

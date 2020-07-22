@@ -47,7 +47,7 @@ current = []
 
 class BarGraph(pg.BarGraphItem):
     def __init__(self, application=None, viewBox=None, xValues=None, yValues=None,
-                 objects=None, brush=None, labelDistanceRatio=0.1, **kwds):
+                 objects=None, brush=None, drawLabels=True, labelDistanceRatio=0.1, **kwds):
         super().__init__(**kwds)
         '''
         This class allows top draw bars with or without objects.It Needs only xValues and yValues.
@@ -84,7 +84,8 @@ class BarGraph(pg.BarGraphItem):
         self.allValues = {}
         self.getValueDict()
         self.labels = []
-        self.drawLabels(labelDistanceRatio)
+        if drawLabels:
+            self.drawLabels(labelDistanceRatio)
         if self.objects:
             self.setObjects(self.objects)
 

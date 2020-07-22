@@ -158,8 +158,8 @@ def _filterBrukerExperiments(brukerFilePaths, fileType = '1r', multipleExp=False
 
 class ExcelReader(object):
 
-    from ccpn.util.decorators import profile
-    @profile
+    # from ccpn.util.decorators import profile
+    # @profile
     def __init__(self, project, excelPath):
         """
         :param project: the ccpnmr Project object
@@ -408,8 +408,8 @@ class ExcelReader(object):
         name = dct.get(SPECTRUM_NAME)
         if not name:
             name = obj.name
-        if filePath.endswith('1r'): # a try to make a loader faster down the model, skipping the loops
-            data = self._project._loadSpectrum(filePath, 'Bruker',str(name) )
+        if filePath.endswith('1r'): # Not ideal implementation. But makes the loader much faster down the model by skipping internal loops.
+            data = self._project._loadSpectrum(filePath, 'Bruker', str(name) )
         else:
             data = self._project.loadData(filePath)
         if data is not None:

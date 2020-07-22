@@ -45,6 +45,7 @@ DisappearedObjects = 'disappearedObjects'
 AboveBrush = 'aboveBrush'
 BelowBrush = 'belowBrush'
 DisappearedBrush = 'disappearedBrush'
+DrawLabels = 'drawLabels'
 
 class BarGraphWidget(Widget):
 
@@ -86,7 +87,8 @@ class BarGraphWidget(Widget):
                             DisappearedX:[],
                             DisappearedY:[],
                             DisappearedBrush:'b',
-                            DisappearedObjects:[]
+                            DisappearedObjects:[],
+                            DrawLabels:True
                          }
 
     def _setViewBox(self):
@@ -169,6 +171,7 @@ class BarGraphWidget(Widget):
 
     def _lineMoved(self, **args):
         self.clear()
+        drawLabels = True
         if len(args) > 0:
             aboveX = args[AboveX]
             aboveY = args[AboveY]
@@ -182,6 +185,7 @@ class BarGraphWidget(Widget):
             self.aboveBrush = args[AboveBrush]
             self.belowBrush = args[BelowBrush]
             self.disappearedBrush = args[DisappearedBrush]
+            drawLabels = args[DrawLabels]
 
         else:
             aboveX = []
@@ -207,11 +211,11 @@ class BarGraphWidget(Widget):
                         belowY.append(y)
                         belowObjects.append(obj)
 
-        self.aboveThreshold = BarGraph(viewBox=self.customViewBox, application=self.application,
+        self.aboveThreshold = BarGraph(viewBox=self.customViewBox, application=self.application, drawLabels=drawLabels,
                                        xValues=aboveX, yValues=aboveY, objects=aboveObjects, brush=self.aboveBrush)
-        self.belowThreshold = BarGraph(viewBox=self.customViewBox, application=self.application,
+        self.belowThreshold = BarGraph(viewBox=self.customViewBox, application=self.application, drawLabels=drawLabels,
                                        xValues=belowX, yValues=belowY, objects=belowObjects, brush=self.belowBrush)
-        self.disappearedPeaks = BarGraph(viewBox=self.customViewBox, application=self.application,
+        self.disappearedPeaks = BarGraph(viewBox=self.customViewBox, application=self.application, drawLabels=drawLabels,
                                          xValues=disappearedX, yValues=disappearedY, objects=disappearedObjects,
                                          brush=self.disappearedBrush)
 

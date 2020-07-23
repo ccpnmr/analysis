@@ -1677,20 +1677,21 @@ GuiTable::item::selected {
         model = self.selectionModel()
         # selects all the items in the row
         selection = fromSelection if fromSelection else model.selectedIndexes()
+        from collections import defaultdict
 
         if selection:
             selectedObjects = []
             rows = []
+            valuesDict = defaultdict(list)
             for iSelect in selection:
                 row = iSelect.row()
                 col = iSelect.column()
                 if self._dataFrameObject:
                     if len(self._dataFrameObject._objects) > 0:
                         if isinstance(self._dataFrameObject._objects[0], pd.Series):
-                            df = self._dataFrameObject.dataFrame
-                            if row not in rows:
-                                rows.append(row) #otherwise gets a copy while loops through the columns
-                                selectedObjects.append(df.iloc[row])
+                            h = self.horizontalHeaderItem(col).text()
+                            v = self.item(row, col).text()
+                            valuesDict[h].append(v)
 
                         else:
                             colName = self.horizontalHeaderItem(col).text()
@@ -1706,6 +1707,8 @@ GuiTable::item::selected {
                                     obj = self.project.getByPid(objIndex)
                                     if obj:
                                         selectedObjects.append(obj)
+            if valuesDict:
+                selectedObjects = [row for i,row in pd.DataFrame(valuesDict).iterrows()]
 
             return selectedObjects
         else:

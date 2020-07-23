@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-22 17:06:31 +0100 (Wed, April 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-23 17:10:54 +0100 (Thu, July 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -185,7 +185,7 @@ class ExportStripToFilePopup(ExportDialog):
 
         # populate initial pulldown from background colour
         spectrumColourKeys = list(spectrumColours.keys())
-        fillColourPulldown(self.foregroundColourBox, allowAuto=False)
+        fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
 
         # set foreground to black
         self.foregroundColourBox.setCurrentText(spectrumColours['#000000'])
@@ -195,7 +195,7 @@ class ExportStripToFilePopup(ExportDialog):
             self.foregroundColourBox.setCurrentText(spectrumColours[self.foregroundColour])
         else:
             addNewColourString(self.foregroundColour)
-            fillColourPulldown(self.foregroundColourBox, allowAuto=False)
+            fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
             spectrumColourKeys = list(spectrumColours.keys())
             self.foregroundColourBox.setCurrentText(spectrumColours[self.foregroundColour])
 
@@ -211,7 +211,7 @@ class ExportStripToFilePopup(ExportDialog):
 
         # populate initial pulldown from background colour
         spectrumColourKeys = list(spectrumColours.keys())
-        fillColourPulldown(self.backgroundColourBox, allowAuto=False)
+        fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
 
         # set background to white
         self.backgroundColourBox.setCurrentText(spectrumColours['#FFFFFF'])
@@ -221,7 +221,7 @@ class ExportStripToFilePopup(ExportDialog):
             self.backgroundColourBox.setCurrentText(spectrumColours[self.backgroundColour])
         else:
             addNewColourString(self.backgroundColour)
-            fillColourPulldown(self.backgroundColourBox, allowAuto=False)
+            fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
             spectrumColourKeys = list(spectrumColours.keys())
             self.backgroundColourBox.setCurrentText(spectrumColours[self.backgroundColour])
 
@@ -289,8 +289,8 @@ class ExportStripToFilePopup(ExportDialog):
         newColour = dialog.getColor()
         if newColour:
             addNewColour(newColour)
-            fillColourPulldown(self.foregroundColourBox, allowAuto=False)
-            fillColourPulldown(self.backgroundColourBox, allowAuto=False)
+            fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
+            fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
             self.foregroundColourBox.setCurrentText(spectrumColours[newColour.name()])
             self.foregroundColour = newColour.name()
 
@@ -305,8 +305,8 @@ class ExportStripToFilePopup(ExportDialog):
         newColour = dialog.getColor()
         if newColour:
             addNewColour(newColour)
-            fillColourPulldown(self.backgroundColourBox, allowAuto=False)
-            fillColourPulldown(self.foregroundColourBox, allowAuto=False)
+            fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
+            fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
             self.backgroundColourBox.setCurrentText(spectrumColours[newColour.name()])
             self.backgroundColour = newColour.name()
 

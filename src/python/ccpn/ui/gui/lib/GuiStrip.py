@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-11 01:25:48 +0100 (Sat, July 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-23 17:10:53 +0100 (Thu, July 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -48,6 +48,7 @@ from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
     notificationBlanking, undoBlockWithoutSideBar
 from ccpn.util.decorators import logCommand
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND
+from ccpn.util.Colour import colorSchemeTable
 
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
@@ -1584,12 +1585,19 @@ class GuiStrip(Frame):
 
     def _createMarkAtPosition(self, positions, axisCodes):
         try:
-            defaultColour = self._preferences.defaultMarksColour
-            self._project.newMark(defaultColour, positions, axisCodes)
+            _prefsGeneral = self.application.preferences.general
+            defaultColour = _prefsGeneral.defaultMarksColour
+            if not defaultColour.startswith('#'):
+                colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else ['#FF0000']
+                _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
+                defaultColour = colourList[_prefsGeneral._defaultMarksCount]
+                _prefsGeneral._defaultMarksCount += 1
 
         except Exception as es:
             getLogger().warning('Error setting mark at position')
             raise (es)
+        else:
+            self._project.newMark(defaultColour, positions, axisCodes)
 
     def _copyAxisFromStrip(self, axisId, fromStrip):
         try:
@@ -1630,7 +1638,18 @@ class GuiStrip(Frame):
             if self.isDeleted or self._flaggedForDelete:
                 return
 
-            defaultColour = self._preferences.defaultMarksColour
+            try:
+                _prefsGeneral = self.application.preferences.general
+                defaultColour = _prefsGeneral.defaultMarksColour
+                if not defaultColour.startswith('#'):
+                    colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else ['#FF0000']
+                    _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
+                    defaultColour = colourList[_prefsGeneral._defaultMarksCount]
+                    _prefsGeneral._defaultMarksCount += 1
+            except:
+                defaultColour = '#FF0000'
+
+            # defaultColour = self._preferences.defaultMarksColour
             mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
             positions = [mouseDict[ax] for ax in self.axisCodes if ax in mouseDict]
             axisCodes = [ax for ax in self.axisCodes if ax in mouseDict]

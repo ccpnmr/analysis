@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-07-23 17:10:53 +0100 (Thu, July 23, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -225,12 +225,47 @@ def _spectrumViewHasChanged(data):
     # Update action icol colour
     action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
     if action:
-        pix = QtGui.QPixmap(QtCore.QSize(60/spectrumDisplay.devicePixelRatio(), 10/spectrumDisplay.devicePixelRatio()))
+        _iconX = int(60/spectrumDisplay.devicePixelRatio())
+        _iconY = int(10/spectrumDisplay.devicePixelRatio())
+
+        pix = QtGui.QPixmap(QtCore.QSize(_iconX, _iconY))
         if self._showContours:
             if spectrumDisplay.is1D:
-                pix.fill(QtGui.QColor(self.sliceColour))
+                _col = self.sliceColour
+                # pix.fill(QtGui.QColor(self.sliceColour))
             else:
-                pix.fill(QtGui.QColor(self.positiveContourColour))
+                _col = self.positiveContourColour
+                # pix.fill(QtGui.QColor(self.positiveContourColour))
+
+            if _col.startswith('#'):
+                pix.fill(QtGui.QColor(self.sliceColour))
+
+            elif _col in Colour.colorSchemeTable:
+                colourList = Colour.colorSchemeTable[_col]
+
+                step = _iconX
+                stepX =_iconX
+                stepY = len(colourList) - 1
+                jj = 0
+                painter = QtGui.QPainter(pix)
+
+                for ii in range(_iconX):
+                    _interp = (stepX - step) / stepX
+                    _intCol = Colour.interpolateColourHex(colourList[min(jj, stepY)], colourList[min(jj + 1, stepY)],
+                                                           _interp)
+
+                    # painter.setPen(QtGui.QColor(colourList[min(jj, len(colourList) - 1)]))
+                    painter.setPen(QtGui.QColor(_intCol))
+                    painter.drawLine(ii, 0, ii, _iconY)
+                    step -= stepY
+                    if step < 0:
+                        step += stepX
+                        jj += 1
+
+                painter.end()
+
+            else:
+                pix.fill(QtGui.QColor('gray'))
         else:
             pix.fill(QtGui.QColor('gray'))
         action.setIcon(QtGui.QIcon(pix))

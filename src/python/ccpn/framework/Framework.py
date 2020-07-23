@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-14 18:03:01 +0100 (Tue, July 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-23 17:10:52 +0100 (Thu, July 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -692,13 +692,16 @@ class Framework(NotifierBase):
             # change spectrum colours
             for spectrum in project.spectra:
                 if len(spectrum.axisCodes) > 1:
-                    spectrum.positiveContourColour = autoCorrectHexColour(spectrum.positiveContourColour,
-                                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                    spectrum.negativeContourColour = autoCorrectHexColour(spectrum.negativeContourColour,
-                                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+                    if spectrum.positiveContourColour.startswith('#'):
+                        spectrum.positiveContourColour = autoCorrectHexColour(spectrum.positiveContourColour,
+                                                                              getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+                    if spectrum.negativeContourColour.startswith('#'):
+                        spectrum.negativeContourColour = autoCorrectHexColour(spectrum.negativeContourColour,
+                                                                              getColours()[CCPNGLWIDGET_HEXBACKGROUND])
                 else:
-                    spectrum.sliceColour = autoCorrectHexColour(spectrum.sliceColour,
-                                                                getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+                    if spectrum.sliceColour.startswith('#'):
+                        spectrum.sliceColour = autoCorrectHexColour(spectrum.sliceColour,
+                                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
 
             # change peakList colours
             for objList in project.peakLists:

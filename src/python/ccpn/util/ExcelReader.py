@@ -361,7 +361,7 @@ class ExcelReader(object):
         If the full path is given, from the root to the spectrum file name, then it uses that.
         '''
         _args = []
-
+        # todo change hardcoded / for path
         if self._project is not None:
             for objDict in dictLists:
                 for obj, dct in objDict.items():
@@ -370,15 +370,13 @@ class ExcelReader(object):
                             value = str(value) # no point of being int/float
                             if os.path.exists(value):
                                 # if isinstance(value, str):  # means it's a pathlike str### the full path is given:
-                                #     self._addSpectrum(filePath=value, dct=dct, obj=obj)
-                                    _args.append((value, dct, obj))
+                                    self._addSpectrum(filePath=value, dct=dct, obj=obj)
 
                             else:  ### needs to find the path from the excel file:
                                 self.directoryPath = str(pathlib.Path(self.excelPath).parent)
                                 filePath = self.directoryPath + '/' + str(value)
                                 if os.path.exists(filePath):  ### is a folder, e.g Bruker type. The project can handle.
-                                    # self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
-                                    _args.append((value, dct, obj))
+                                    self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
 
 
                                 else:  ### is a spectrum file, The project needs to get the extension: e.g .hdf5
@@ -391,13 +389,9 @@ class ExcelReader(object):
                                                     value = value.split('/')[-1]
                                                 if os.path.splitext(fileWithExtension)[0] == value:
                                                     filePath = newFilePath + '/' + fileWithExtension
-                                                    # self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
-                                                    _args.append((value, dct, obj))
+                                                    self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
                                     except Exception as e:
                                         getLogger().warning(e)
-        pool = Pool(processes=2)
-        pool.starmap(self._addSpectrum, _args)
-        pool.close()
 
     def _addSpectrum(self, filePath, dct, obj):
         '''

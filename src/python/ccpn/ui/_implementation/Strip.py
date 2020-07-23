@@ -412,6 +412,9 @@ class Strip(AbstractWrapperObject):
 
     @logCommand(get='self')
     def displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = ()):
+        self._displaySpectrum(spectrum, axisOrder)
+
+    def _displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = (), useUndoBlock=True):
         """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
         """
         getLogger().debug('Strip.displaySpectrum>>> %s' % spectrum)
@@ -467,12 +470,19 @@ class Strip(AbstractWrapperObject):
         else:
             stripSerial = 0
 
-        with undoBlock():
-            # Make spectrumView
+        if useUndoBlock:
+            with undoBlock():
+                # Make spectrumView
+                obj = apiStrip.spectrumDisplay.newSpectrumView(spectrumName=dataSource.name,
+                                                               stripSerial=stripSerial, dataSource=dataSource,
+                                                               dimensionOrdering=dimensionOrdering)
+                result = self._project._data2Obj[apiStrip.findFirstStripSpectrumView(spectrumView=obj)]
+
+        else:
             obj = apiStrip.spectrumDisplay.newSpectrumView(spectrumName=dataSource.name,
                                                            stripSerial=stripSerial, dataSource=dataSource,
                                                            dimensionOrdering=dimensionOrdering)
-        result = self._project._data2Obj[apiStrip.findFirstStripSpectrumView(spectrumView=obj)]
+            result = self._project._data2Obj[apiStrip.findFirstStripSpectrumView(spectrumView=obj)]
 
         return result
 

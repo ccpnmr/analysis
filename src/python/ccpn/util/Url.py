@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-13 10:38:51 +0000 (Mon, January 13, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-07-27 12:09:33 +0100 (Mon, July 27, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -51,7 +51,7 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     # create the options list for creating an http connection
     options = {'cert_reqs': 'CERT_REQUIRED',
                'ca_certs' : certifi.where(),
-               'timeout'  : urllib3.Timeout(connect=3.0, read=3.0),
+               # 'timeout'  : urllib3.Timeout(connect=3.0, read=3.0),
                'retries'  : urllib3.Retry(1, redirect=False)
                }
 

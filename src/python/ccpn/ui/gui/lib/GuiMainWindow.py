@@ -1361,7 +1361,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
                 except Exception as es:
                     MessageDialog.showError('Load Project', 'loadProject Error: %s' % str(es))
-                    getLogger().warning('loadProject Error: %s' % str(es))
+                    getLogger().warning('loadProject Error: %s' % str(es), )
+                    getLogger().exception(str(es))
 
             else:
                 # with progressManager(self.mainWindow, 'Loading data... ' + url):

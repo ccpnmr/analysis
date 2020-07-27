@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-04 15:35:10 +0100 (Thu, June 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-27 10:25:31 +0100 (Mon, July 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -667,13 +667,13 @@ class Project(AbstractWrapperObject):
 
     def suspendNotification(self):
         """Suspend notifier execution and accumulate notifiers for later execution"""
-        # return
+        return
         # TODO suspension temporarily disabled
         self._notificationSuspension += 1
 
     def resumeNotification(self):
         """Execute accumulated notifiers and resume immediate notifier execution"""
-        # return
+        return
         # TODO suspension temporarily disabled
         # This was broken at one point, and we never found time to fix it
         # It is a time-saving measure, allowing you to e.g. execute a

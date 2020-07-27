@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-07 09:51:34 +0100 (Tue, July 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-27 10:25:31 +0100 (Mon, July 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ from functools import partial
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core._implementation.AbsorbResonance import absorbResonance
 from ccpn.core.lib import Pid
 from ccpn.core.lib.Util import AtomIdTuple
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
@@ -276,7 +277,8 @@ class NmrAtom(AbstractWrapperObject):
                         changedAssigned = tuple(set(self.assignedPeaks) | set(result.assignedPeaks))
                         setattr(self, ASSIGNEDPEAKSCHANGED, changedAssigned)
 
-                        result._wrappedData.absorbResonance(self._apiResonance)
+                        # result._wrappedData.absorbResonance(self._apiResonance)
+                        absorbResonance(self.project, result._wrappedData, self._apiResonance)
                         self._project._logger.warning("Merging (1) %s into %s. Merging is NOT undoable."
                                                       % (oldPid, result.longPid))
 
@@ -309,15 +311,22 @@ class NmrAtom(AbstractWrapperObject):
                     changedAssigned = tuple(set(self.assignedPeaks) | set(result.assignedPeaks))
                     setattr(self, ASSIGNEDPEAKSCHANGED, changedAssigned)
 
-                    result._wrappedData.absorbResonance(self._apiResonance)
+                    # NOTE:ED - testing new merge
+
+                    # _absorbNmrAtom(result, self)
+
+                    # result._wrappedData.absorbResonance(self._apiResonance)
+                    # absorbResonance(self.project, result._wrappedData, self._apiResonance)
+                    absorbResonance(result, self)
+
                     self._project._logger.warning("Merging (2) %s into %s. Merging is NOT undoable."
                                                   % (oldPid, result.longPid))
                 else:
                     raise ValueError("New assignment clash with existing assignment,"
                                      " and merging is disallowed")
             #
-            if undo is not None and clearUndo:
-                undo.clear()
+            # if undo is not None and clearUndo:
+            #     undo.clear()
 
         return result
 
@@ -326,6 +335,14 @@ class NmrAtom(AbstractWrapperObject):
         "Returns ChemicalShift objects connected to NmrAtom"
         getDataObj = self._project._data2Obj.get
         return tuple(sorted(getDataObj(x) for x in self._wrappedData.shifts))
+
+    def _getAttribute(self, attrName) -> Tuple:
+        """Returns contents of api attribute
+        """
+        if hasattr(self._wrappedData, attrName):
+            return getattr(self._wrappedData, attrName)
+
+        raise TypeError('nmrAtom does not have attribute {}'.format(attrName))
 
     #=========================================================================================
     # Implementation functions

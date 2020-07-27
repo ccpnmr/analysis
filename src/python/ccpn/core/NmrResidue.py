@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-07 09:51:34 +0100 (Tue, July 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-27 10:25:31 +0100 (Mon, July 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core._implementation.AbsorbResonance import absorbResonance
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
@@ -1100,7 +1101,8 @@ class NmrResidue(AbstractWrapperObject):
                                 changedAssigned |= set(_nmrAtom.assignedPeaks)
                             setattr(self, ASSIGNEDPEAKSCHANGED, tuple(changedAssigned))
 
-                            newResonance.absorbResonance(resonance)
+                            # newResonance.absorbResonance(resonance)
+                            absorbResonance(self.project, newResonance, resonance)
 
                     apiResonanceGroup.delete()
 

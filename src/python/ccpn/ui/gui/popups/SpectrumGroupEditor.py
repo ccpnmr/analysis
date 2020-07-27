@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 12:01:35 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-23 17:06:50 +0100 (Thu, July 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -198,13 +198,14 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             self.obj.seriesType = self._spectrumGroupSeriesTypeEdited
 
         if self.obj.id in self._currentEditorState():
-            specList = self._currentEditorState()[self.obj.id]
+            specList = self._currentEditorState()[self.obj.id].get('spectra') or []
             for dim, specPid in enumerate(specList):
                 spec = self.project.getByPid(specPid)
 
                 # read the value from the edits dict - bit of a hack from _changeSpectrumSeriesValues
                 if spec and dim in self._spectrumGroupSeriesEdited:
                     self._spectrumGroupSeriesValues[dim] = self._spectrumGroupSeriesEdited[dim]
+
             if self._spectrumGroupSeriesEdited:
                 try:
 
@@ -385,7 +386,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                 aTab._populateColour()
 
         with self.blockWidgetSignals():
-            self.seriesTab._fillSeriesFrame(self._defaultSpectra)
+            self.seriesTab._fillSeriesFrame(self._defaultSpectra, spectrumGroup=self.obj)
         self.seriesTab._populate()
 
     def _getChangeState(self):
@@ -456,6 +457,15 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
     def _closeColourTabNd(self, index):
         self._colourTabsNd.removeTab(index)
 
+    def _leftPullDownCallback(self, value=None):
+        """Callback when selecting the left spectrumGroup pulldown item
+        """
+        obj = self.project.getByPid(value)
+        if obj:
+            # set the new object
+            self.defaultObject = obj
+        super(SpectrumGroupEditor, self)._leftPullDownCallback(value)
+
     def _spectraChanged(self, *args):
         """Respond to a change in the list of spectra to add the spectrumGroup
         """
@@ -463,6 +473,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         self._spectraChangedNd()
         # call the series frame as this contains code for updating _changes
         self.seriesTab._queueChangeSpectrumList()
+        self.seriesTab._populate()
 
     def _spectraChanged1d(self):
         self._newSpectra = self._getSpectraFromList()
@@ -514,7 +525,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             if not (0 <= index < NUMTABS):
                 self._tabWidget.insertTab(1, self._generalTabWidget1d, GENERALTAB1D_LABEL)
 
-        self.seriesTab._fillSeriesFrame(self._newSpectra)
+        self.seriesTab._fillSeriesFrame(self._newSpectra, spectrumGroup=self.obj)
 
         # update the current list
         self.currentSpectra = self._newSpectra
@@ -569,7 +580,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             if not (0 <= index < NUMTABS):
                 self._tabWidget.insertTab(self._tabWidget.count() - 1, self._generalTabWidgetNd, GENERALTABND_LABEL)
 
-        self.seriesTab._fillSeriesFrame(self._newSpectra)
+        self.seriesTab._fillSeriesFrame(self._newSpectra, spectrumGroup=self.obj)
 
         # update the current list
         self.currentSpectra = self._newSpectra
@@ -647,7 +658,7 @@ class SeriesFrame(Frame):
 
         # self._seriesFrame = Frame(self, setLayout=True, showBorder=False, grid=(self._seriesFrameRow, self._seriesFrameCol), gridSpan=(1, 3))
         self._seriesFrame = None
-        self._fillSeriesFrame(defaultItems=defaultItems)
+        self._fillSeriesFrame(defaultItems=defaultItems, spectrumGroup=self.defaultObject)
 
         row += 1
         # unitsLabel = Label(self, text='Series Units', grid=(row, col), hAlign='l')
@@ -699,7 +710,7 @@ class SeriesFrame(Frame):
         # get colours from the lineEdit and copy to the plainTextEdit
         # yourWidget.palette().highlight().color().name()?
 
-    def _fillSeriesFrame(self, defaultItems):
+    def _fillSeriesFrame(self, defaultItems, spectrumGroup=None):
         """Reset the contents of the series frame for changed spectrum list
         """
         # remove previous editor values
@@ -709,6 +720,7 @@ class SeriesFrame(Frame):
 
         self._changes.clear()
         self._editors = OrderedDict()
+        self.defaultObject = spectrumGroup
 
         with self._changes.blockChanges():
             # empty the frame
@@ -754,7 +766,10 @@ class SeriesFrame(Frame):
             series = self.defaultObject.series
             if series:
                 for spec, textEditor in self._editors.items():
-                    ii = self.defaultObject.spectra.index(spec)
+                    try:
+                        ii = self.defaultObject.spectra.index(spec)
+                    except:
+                        pass
 
                     try:
                         if self.seriesType.getIndex() == SeriesTypes.FLOAT.value:

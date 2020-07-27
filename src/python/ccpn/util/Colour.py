@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-25 14:47:21 +0000 (Wed, March 25, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-23 17:06:50 +0100 (Thu, July 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -601,6 +601,87 @@ allColours = OrderedDict([('#000000', 'black'),
                           ('#FFB6C1', 'lightpink')
                           ])
 
+# default color schemes
+colorSchemeTable = OrderedDict([('redshade', ('#FFC0C0', '#FF9A9A', '#FF7373', '#FF4D4D', '#FF2626', '#FF0000', '#D90000', '#B30000', '#8C0000', '#660000')),
+                                ('orangeshade', ('#FFE0C0', '#FFC890', '#FFB060', '#FF9830', '#FF8000', '#E17100', '#C26100', '#A35200', '#854200', '#663300')),
+                                ('yellowshade', ('#FFFF99', '#FFFF4C', '#FFFF00', '#E7E700', '#CFCF00', '#B6B600', '#9E9E00', '#868600', '#6D6D00', '#555500')),
+                                ('greenshade', ('#99FF99', '#73F073', '#4CE04C', '#26D026', '#00C000', '#00AE00', '#009C00', '#008A00', '#007800', '#006600')),
+                                ('blueshade', ('#C0C0FF', '#9A9AFF', '#7373FF', '#4D4DFF', '#2626FF', '#0000FF', '#0000D9', '#0000B3', '#00008C', '#000066')),
+                                ('cyanshade', ('#00FFFF', '#00ECEC', '#00D8D8', '#00C4C4', '#00B0B0', '#009C9C', '#008888', '#007474', '#006060', '#004C4C')),
+                                ('purpleshade', ('#E6CCFF', '#D399F0', '#C066E0', '#AC33D0', '#9900C0', '#8500AC', '#700097', '#5C0082', '#47006E', '#330059')),
+                                ('greyshade', ('#CCCCCC', '#BBBBBB', '#AAAAAA', '#999999', '#888888', '#777777', '#666666', '#555555', '#444444', '#333333')),
+                                ('redshade2', ('#660000', '#8C0000', '#B30000', '#D90000', '#FF0000', '#FF2626', '#FF4D4D', '#FF7373', '#FF9A9A', '#FFC0C0')),
+                                ('orangeshade2',
+                                 ('#663300', '#854200', '#A35200', '#C26100', '#E17100', '#FF8000', '#FF9830', '#FFB060', '#FFC890', '#FFE0C0')),
+                                ('yellowshade2',
+                                 ('#555500', '#6D6D00', '#868600', '#9E9E00', '#B6B600', '#CFCF00', '#E7E700', '#FFFF00', '#FFFF4C', '#FFFF99')),
+                                ('greenshade2', ('#006600', '#007800', '#008A00', '#009C00', '#00AE00', '#00C000', '#26D026', '#4CE04C', '#73F073', '#99FF99')),
+                                ('blueshade2', ('#000066', '#00008C', '#0000B3', '#0000D9', '#0000FF', '#2626FF', '#4D4DFF', '#7373FF', '#9A9AFF', '#C0C0FF')),
+                                ('cyanshade2', ('#004C4C', '#006060', '#007474', '#008888', '#009C9C', '#00B0B0', '#00C4C4', '#00D8D8', '#00ECEC', '#00FFFF')),
+                                ('purpleshade2',
+                                 ('#330059', '#47006E', '#5C0082', '#700097', '#8500AC', '#9900C0', '#AC33D0', '#C066E0', '#D399F0', '#E6CCFF')),
+                                ('greyshade2', ('#333333', '#444444', '#555555', '#666666', '#777777', '#888888', '#999999', '#AAAAAA', '#BBBBBB', '#CCCCCC')),
+
+                                ('rainbow', (
+                                    '#FF00FF', '#FF0080', '#FF0000', '#FF8000', '#FFFF00', '#80FF00', '#00FF00', '#00FF80', '#00FFFF', '#0080FF', '#0000FF',
+                                    '#8000FF')),
+                                ('rainbow2',
+                                 ('#8000FF', '#0000FF', '#0080FF', '#00FFFF', '#00FF80', '#00FF00', '#80FF00', '#FFFF00', '#FF8000', '#FF0000', '#FF0080',
+                                  '#FF00FF')),
+                                ('wimbledon', ('#008000', '#1C8E00', '#389C00', '#55AB00', '#71B900', '#8EC700', '#AAD500', '#C7E300', '#E3F100', '#FFFF00')),
+                                ('wimbledon2', ('#FFFF00', '#E3F100', '#C7E300', '#AAD500', '#8EC700', '#71B900', '#55AB00', '#389C00', '#1C8E00', '#008000')),
+                                ('toothpaste', ('#C0C0FF', '#9A9AFF', '#7373FF', '#4D4DFF', '#2626FF', '#0000FF', '#0040FF', '#0080FF', '#00C0FF', '#00FFFF')),
+                                ('toothpaste2', ('#00FFFF', '#00C0FF', '#0080FF', '#0040FF', '#0000FF', '#2626FF', '#4D4DFF', '#7373FF', '#9A9AFF', '#C0C0FF')),
+                                ('cmy',
+                                 ('#00FFFF', '#33CCFF', '#6699FF', '#9966FF', '#CC33FF', '#FF00FF', '#FF33CC', '#FF6699', '#FF9966', '#FFCC33', '#FFFF00')),
+                                ('cmy2',
+                                 ('#FFFF00', '#FFCC33', '#FF9966', '#FF6699', '#FF33CC', '#FF00FF', '#CC33FF', '#9966FF', '#6699FF', '#33CCFF', '#00FFFF')),
+                                ('steel', ('#C0C0C0', '#ABABB9', '#9595B2', '#8080AB', '#6B6BA4', '#55559D', '#404095', '#2A2A8E', '#151587', '#000080')),
+                                ('steel2', ('#000080', '#151587', '#2A2A8E', '#404095', '#55559D', '#6B6BA4', '#8080AB', '#9595B2', '#ABABB9', '#C0C0C0')),
+                                ('rgb',
+                                 ('#FF0000', '#CC1900', '#993300', '#664D00', '#336600', '#008000', '#006633', '#004D66', '#003399', '#0019CC', '#0000FF')),
+                                ('rgb2',
+                                 ('#0000FF', '#0019CC', '#003399', '#004D66', '#006633', '#008000', '#336600', '#664D00', '#993300', '#CC1900', '#FF0000')),
+                                ('tropicana', ('#FFFF00', '#FFE30E', '#FFC71C', '#FFAA2A', '#FF8E39', '#FF7147', '#FF5555', '#FF3863', '#FF1C72', '#FF0080')),
+                                ('tropicana2', ('#FF0080', '#FF1C72', '#FF3863', '#FF5555', '#FF7147', '#FF8E39', '#FFAA2A', '#FFC71C', '#FFE30E', '#FFFF00')),
+                                ('sunset', ('#FFC0C0', '#FF9A9A', '#FF7373', '#FF4D4D', '#FF2626', '#FF0000', '#FF4000', '#FF8000', '#FFC000', '#FFFF00')),
+                                ('sunset2', ('#FFFF00', '#FFC000', '#FF8000', '#FF4000', '#FF0000', '#FF2626', '#FF4D4D', '#FF7373', '#FF9A9A', '#FFC0C0')),
+                                ('magma', ('#000000', '#400000', '#800000', '#C00000', '#FF0000', '#FF3300', '#FF6600', '#FF9900', '#FFCC00', '#FFFF00')),
+                                ('magma2', ('#FFFF00', '#FFCC00', '#FF9900', '#FF6600', '#FF3300', '#FF0000', '#C00000', '#800000', '#400000', '#000000')),
+                                ('holly', ('#80FF80', '#66E666', '#4DCD4D', '#33B333', '#199A19', '#008000', '#FF0000', '#D50000', '#AB0000', '#800000')),
+                                ('holly2', ('#800000', '#AB0000', '#D50000', '#FF0000', '#008000', '#199A19', '#33B333', '#4DCD4D', '#66E666', '#80FF80')),
+                                ('glacier', ('#000000', '#000040', '#000080', '#0000C0', '#0000FF', '#2626FF', '#4D4DFF', '#7373FF', '#9A9AFF', '#C0C0FF')),
+                                ('glacier2', ('#C0C0FF', '#9A9AFF', '#7373FF', '#4D4DFF', '#2626FF', '#0000FF', '#0000C0', '#000080', '#000040', '#000000')),
+                                ('monarchy', ('#C0C0FF', '#6060FF', '#0000FF', '#3300CC', '#660099', '#990066', '#CC0033', '#FF0000', '#C00000', '#800000')),
+                                ('monarchy2', ('#800000', '#C00000', '#FF0000', '#CC0033', '#990066', '#660099', '#3300CC', '#0000FF', '#6060FF', '#C0C0FF')),
+                                ('contrast', ('#FF0000', '#008000', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF')),
+                                ('contrast2', ('#00FFFF', '#FF00FF', '#FFFF00', '#0000FF', '#008000', '#FF0000')),
+                                ('lightspectrum', (
+                                    '#6B8E23', '#DA70D6', '#8A2BE2', '#808000', '#1E90FF', '#FFA500', '#FF0000', '#4682B4', '#7FFF00', '#9932CC',
+                                    '#A0522D', '#00CED1', '#00FFFF', '#FFFF00', '#FF1493', '#32CD32')),
+                                ('lightspectrum2', (
+                                    '#32CD32', '#FF1493', '#FFFF00', '#00FFFF', '#00CED1', '#A0522D', '#9932CC', '#7FFF00', '#4682B4', '#FF0000', '#FFA500',
+                                    '#1E90FF', '#808000', '#8A2BE2', '#DA70D6', '#6B8E23')),
+
+                                ('red-orange', ('#ff2010', '#ff3414', '#ff4818', '#ff5c1c', '#ff7020', '#ff8424', '#ff9828', '#ffac2c', '#ffc030')),
+                                ('orange-yellow', ('#ffc030', '#fcc72c', '#facf28', '#f8d724', '#f6df20', '#f4e71c', '#f2ef18', '#f0f714', '#eeff10')),
+                                ('yellow-green', ('#eeff10', '#d2f812', '#b6f214', '#9aeb16', '#7fe518', '#63df1a', '#47d81c', '#2bd21e', '#10cc20')),
+                                ('green-blue', ('#10cc20', '#12b43b', '#149d57', '#168573', '#186e8f', '#1a56ab', '#1c3fc7', '#1e27e3', '#2010ff')),
+                                ('blue-cyan', ('#2010ff', '#202bff', '#2047ff', '#2063ff', '#207fff', '#209aff', '#20b6ff', '#20d2ff', '#20eeff')),
+                                ('blue-purple', ('#2010ff', '#3912ff', '#5314ff', '#6d16ff', '#8718ff', '#a01aff', '#ba1cff', '#d41eff', '#ee20ff')),
+                                ('orange-red', ('#ffc030', '#ffac2c', '#ff9828', '#ff8424', '#ff7020', '#ff5c1c', '#ff4818', '#ff3414', '#ff2010')),
+                                ('yellow-orange', ('#eeff10', '#f0f714', '#f2ef18', '#f4e71c', '#f6df20', '#f8d724', '#facf28', '#fcc72c', '#ffc030')),
+                                ('green-yellow', ('#10cc20', '#2bd21e', '#47d81c', '#63df1a', '#7fe518', '#9aeb16', '#b6f214', '#d2f812', '#eeff10')),
+                                ('blue-green', ('#2010ff', '#1e27e3', '#1c3fc7', '#1a56ab', '#186e8f', '#168573', '#149d57', '#12b43b', '#10cc20')),
+                                ('cyan-blue', ('#20eeff', '#20d2ff', '#20b6ff', '#209aff', '#207fff', '#2063ff', '#2047ff', '#202bff', '#2010ff')),
+                                ('purple-blue', ('#ee20ff', '#d41eff', '#ba1cff', '#a01aff', '#8718ff', '#6d16ff', '#5314ff', '#3912ff', '#2010ff')),
+                                ('black-white', ('#000000', '#1f1f1f', '#3f3f3f', '#5f5f5f', '#7f7f7f', '#9f9f9f', '#bfbfbf', '#dfdfdf', '#ffffff')),
+                                ('white-black', ('#ffffff', '#dfdfdf', '#bfbfbf', '#9f9f9f', '#7f7f7f', '#5f5f5f', '#3f3f3f', '#1f1f1f', '#000000')),
+                                ('black-gray', ('#000000', '#0f0f0f', '#1f1f1f', '#2f2f2f', '#3f3f3f', '#4f4f4f', '#5f5f5f', '#6f6f6f', '#7f7f7f')),
+                                ('gray-black', ('#7f7f7f', '#6f6f6f', '#5f5f5f', '#4f4f4f', '#3f3f3f', '#2f2f2f', '#1f1f1f', '#0f0f0f', '#000000')),
+
+                                ])
+
 allColoursWithSpaces = OrderedDict([(k, colourNameWithSpace(v)) for k, v in allColours.items()])
 
 # set the spectrum colours to all, override minimum set above
@@ -740,6 +821,7 @@ def isSpectrumColour(colourString):
     """
     return colourString in list(spectrumColours.keys())
 
+
 def addNewColourString(colourString):
     """Add a new Hex colour to the colourlist
     New colour has the name 'Colour <n>' where n is the next free number
@@ -791,14 +873,24 @@ def autoCorrectHexColour(colour, referenceHexColour='#ffffff', addNewColour=True
 #     colList.setCurrentIndex(int(newIndex) - 1)
 
 def selectPullDownColour(pulldown, colourString, allowAuto=False):
-    try:
+    # try:
+    #     pulldown.setCurrentText(spectrumColours[colourString])
+    # except:
+    #     if allowAuto and '#' in pulldown.texts:
+    #         pulldown.setCurrentText('#')
+
+    if colourString in spectrumColours:
         pulldown.setCurrentText(spectrumColours[colourString])
-    except:
-        if allowAuto and '#' in pulldown.texts:
-            pulldown.setCurrentText('#')
+    elif colourString in colorSchemeTable:
+        pulldown.setCurrentText(colourString)
+    elif allowAuto and '#' in pulldown.texts:
+        pulldown.setCurrentText('#')
 
 
-def fillColourPulldown(pulldown, allowAuto=False):
+ICON_SIZE = 20
+
+
+def fillColourPulldown(pulldown, allowAuto=False, includeGradients=True):
     currText = pulldown.currentText()
     # currIndex = pulldown.currentIndex()
     # print ('>>>', currText, currIndex)
@@ -812,29 +904,56 @@ def fillColourPulldown(pulldown, allowAuto=False):
             colName = item[1]  # colourNameWithSpace(item[1])
 
             if item[0] != '#':
-                pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+                pix = QtGui.QPixmap(QtCore.QSize(ICON_SIZE, ICON_SIZE))
                 pix.fill(QtGui.QColor(item[0]))
                 pulldown.addItem(icon=QtGui.QIcon(pix), text=colName)
             elif allowAuto:
                 pulldown.addItem(text=colName)
 
+        if includeGradients:
+            for colName, colourList in colorSchemeTable.items():
+                pix = QtGui.QPixmap(QtCore.QSize(ICON_SIZE, ICON_SIZE))
+                step = ICON_SIZE
+                stepX = ICON_SIZE
+                stepY = len(colourList) - 1
+                jj = 0
+                painter = QtGui.QPainter(pix)
+
+                for ii in range(ICON_SIZE):
+                    _interp = (stepX - step) / stepX
+                    _intCol = interpolateColourHex(colourList[min(jj, stepY)], colourList[min(jj + 1, stepY)],
+                                                   _interp)
+
+                    painter.setPen(QtGui.QColor(_intCol))
+                    painter.drawLine(ii, 0, ii, ICON_SIZE)
+                    step -= stepY
+                    if step < 0:
+                        step += stepX
+                        jj += 1
+
+                painter.end()
+                pulldown.addItem(icon=QtGui.QIcon(pix), text=colName)
+
         pulldown.setCurrentText(currText)
 
 
-def _setColourPulldown(pulldown, attrib):
+def _setColourPulldown(pulldown, attrib, allowAuto=False, includeGradients=True):
     """Populate colour pulldown and set to the current colour
     """
     spectrumColourKeys = list(spectrumColours.keys())
-    fillColourPulldown(pulldown, allowAuto=False)
+    fillColourPulldown(pulldown, allowAuto=allowAuto, includeGradients=includeGradients)
     c = attrib.upper() if attrib.startswith('#') else attrib
     if c in spectrumColourKeys:
         col = spectrumColours[c]
         pulldown.setCurrentText(col)
+    elif attrib in colorSchemeTable:
+        pulldown.setCurrentText(attrib)
     else:
         addNewColourString(c)
-        fillColourPulldown(pulldown, allowAuto=False)
-        col = spectrumColours[c]
-        pulldown.setCurrentText(col)
+        fillColourPulldown(pulldown, allowAuto=allowAuto, includeGradients=includeGradients)
+        if c != '#' or allowAuto is True:
+            col = spectrumColours[c]
+            pulldown.setCurrentText(col)
 
 
 def getSpectrumColour(colourName, defaultReturn=None):
@@ -844,8 +963,14 @@ def getSpectrumColour(colourName, defaultReturn=None):
     try:
         colName = colourName  # colourNameNoSpace(colourName)
 
-        col = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
-        return col.upper() if col.startswith('#') else col
+        if colName in spectrumColours.values():
+            col = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+            return col.upper() if col.startswith('#') else col
+        elif colName in colorSchemeTable:
+            return colName
+        else:
+            return defaultReturn
+
     except:
         # colour not found in the list
         return defaultReturn
@@ -855,6 +980,10 @@ def getAutoColourRgbRatio(inColour=None, sourceObject=None, colourAttribute=None
     listColour = inColour
     if listColour == '#':
         listColour = getattr(sourceObject, colourAttribute, defaultColour)
+        if listColour in colorSchemeTable:
+            # get the first item from the colour gradient
+            listColour = colorSchemeTable[listColour][0]
+
     return hexToRgbRatio(listColour)
 
 
@@ -980,3 +1109,95 @@ if __name__ == '__main__':
         opposites.append(thisPalette[oppCol])
 
     colourPlot(opposites, title='Dark Inverted Colours')
+
+
+def interpolateColourRgba(colour1, colour2, value, alpha=1.0):
+    result = [(col1 + (col2 - col1) * value) for col1, col2 in zip(colour1, colour2)]
+    while len(result) < 4:
+        result.append(alpha)
+    return tuple(result[:4])
+
+
+def interpolateColourHex(hexColor1, hexColor2, value, alpha=1.0):
+    r1 = int('0x' + hexColor1[1:3], 16)
+    g1 = int('0x' + hexColor1[3:5], 16)
+    b1 = int('0x' + hexColor1[5:7], 16)
+    r2 = int('0x' + hexColor2[1:3], 16)
+    g2 = int('0x' + hexColor2[3:5], 16)
+    b2 = int('0x' + hexColor2[5:7], 16)
+    colour1 = (r1, g1, b1)
+    colour2 = (r2, g2, b2)
+
+    result = [(col1 + (col2 - col1) * value) for col1, col2 in zip(colour1, colour2)]
+    return '#%02x%02x%02x' % (int(result[0]), int(result[1]), int(result[2]))
+
+# ('darkredshade', ('#7f6060', '#7f4d4d', '#7f3939', '#7f2626', '#7f1313', '#7f0000', '#6c0000', '#590000', '#460000', '#330000')),
+# ('darkorangeshade', ('#7f7060', '#7f6448', '#7f5830', '#7f4c18', '#7f4000', '#703800', '#613000', '#512900', '#422100', '#331900')),
+# ('darkyellowshade', ('#7f7f4c', '#7f7f26', '#7f7f00', '#737300', '#676700', '#5b5b00', '#4f4f00', '#434300', '#363600', '#2a2a00')),
+# ('darkgreenshade', ('#4c7f4c', '#397839', '#267026', '#136813', '#006000', '#005700', '#004e00', '#004500', '#003c00', '#003300')),
+# ('darkblueshade', ('#60607f', '#4d4d7f', '#39397f', '#26267f', '#13137f', '#00007f', '#00006c', '#000059', '#000046', '#000033')),
+# ('darkcyanshade', ('#007f7f', '#007676', '#006c6c', '#006262', '#005858', '#004e4e', '#004444', '#003a3a', '#003030', '#002626')),
+# ('darkpurpleshade', ('#73667f', '#694c78', '#603370', '#561968', '#4c0060', '#420056', '#38004b', '#2e0041', '#230037', '#19002c')),
+# ('darkgreyshade', ('#666666', '#5d5d5d', '#555555', '#4c4c4c', '#444444', '#3b3b3b', '#333333', '#2a2a2a', '#222222', '#191919')),
+# ('darkredshade2', ('#330000', '#460000', '#590000', '#6c0000', '#7f0000', '#7f1313', '#7f2626', '#7f3939', '#7f4d4d', '#7f6060')),
+# ('darkorangeshade2', ('#331900', '#422100', '#512900', '#613000', '#703800', '#7f4000', '#7f4c18', '#7f5830', '#7f6448', '#7f7060')),
+# ('darkyellowshade2', ('#2a2a00', '#363600', '#434300', '#4f4f00', '#5b5b00', '#676700', '#737300', '#7f7f00', '#7f7f26', '#7f7f4c')),
+# ('darkgreenshade2', ('#003300', '#003c00', '#004500', '#004e00', '#005700', '#006000', '#136813', '#267026', '#397839', '#4c7f4c')),
+# ('darkblueshade2', ('#000033', '#000046', '#000059', '#00006c', '#00007f', '#13137f', '#26267f', '#39397f', '#4d4d7f', '#60607f')),
+# ('darkcyanshade2', ('#002626', '#003030', '#003a3a', '#004444', '#004e4e', '#005858', '#006262', '#006c6c', '#007676', '#007f7f')),
+# ('darkpurpleshade2', ('#19002c', '#230037', '#2e0041', '#38004b', '#420056', '#4c0060', '#561968', '#603370', '#694c78', '#73667f')),
+# ('darkgreyshade2', ('#191919', '#222222', '#2a2a2a', '#333333', '#3b3b3b', '#444444', '#4c4c4c', '#555555', '#5d5d5d', '#666666')),
+#
+# ('darkrainbow',
+#  ('#7f007f', '#7f0040', '#7f0000', '#7f4000', '#7f7f00', '#407f00', '#007f00', '#007f40', '#007f7f', '#00407f', '#00007f', '#40007f')),
+# ('darkrainbow2',
+#  ('#40007f', '#00007f', '#00407f', '#007f7f', '#007f40', '#007f00', '#407f00', '#7f7f00', '#7f4000', '#7f0000', '#7f0040', '#7f007f')),
+# ('darkwimbledon', ('#004000', '#0e4700', '#1c4e00', '#2a5500', '#385c00', '#476300', '#556a00', '#637100', '#717800', '#7f7f00')),
+# ('darkwimbledon2', ('#7f7f00', '#717800', '#637100', '#556a00', '#476300', '#385c00', '#2a5500', '#1c4e00', '#0e4700', '#004000')),
+# ('darktoothpaste', ('#60607f', '#4d4d7f', '#39397f', '#26267f', '#13137f', '#00007f', '#00207f', '#00407f', '#00607f', '#007f7f')),
+# ('darktoothpaste2', ('#007f7f', '#00607f', '#00407f', '#00207f', '#00007f', '#13137f', '#26267f', '#39397f', '#4d4d7f', '#60607f')),
+# ('darkcmy', ('#007f7f', '#19667f', '#334c7f', '#4c337f', '#66197f', '#7f007f', '#7f1966', '#7f334c', '#7f4c33', '#7f6619', '#7f7f00')),
+# ('darkcmy2', ('#7f7f00', '#7f6619', '#7f4c33', '#7f334c', '#7f1966', '#7f007f', '#66197f', '#4c337f', '#334c7f', '#19667f', '#007f7f')),
+# ('darksteel', ('#606060', '#55555c', '#4a4a59', '#404055', '#353552', '#2a2a4e', '#20204a', '#151547', '#0a0a43', '#000040')),
+# ('darksteel2', ('#000040', '#0a0a43', '#151547', '#20204a', '#2a2a4e', '#353552', '#404055', '#4a4a59', '#55555c', '#606060')),
+# ('darkrgb', ('#7f0000', '#660c00', '#4c1900', '#332600', '#193300', '#004000', '#003319', '#002633', '#00194c', '#000c66', '#00007f')),
+# ('darkrgb2', ('#00007f', '#000c66', '#00194c', '#002633', '#003319', '#004000', '#193300', '#332600', '#4c1900', '#660c00', '#7f0000')),
+# ('darktropicana', ('#7f7f00', '#7f7107', '#7f630e', '#7f5515', '#7f471c', '#7f3823', '#7f2a2a', '#7f1c31', '#7f0e39', '#7f0040')),
+# ('darktropicana2', ('#7f0040', '#7f0e39', '#7f1c31', '#7f2a2a', '#7f3823', '#7f471c', '#7f5515', '#7f630e', '#7f7107', '#7f7f00')),
+# ('darksunset', ('#7f6060', '#7f4d4d', '#7f3939', '#7f2626', '#7f1313', '#7f0000', '#7f2000', '#7f4000', '#7f6000', '#7f7f00')),
+# ('darksunset2', ('#7f7f00', '#7f6000', '#7f4000', '#7f2000', '#7f0000', '#7f1313', '#7f2626', '#7f3939', '#7f4d4d', '#7f6060')),
+# ('darkmagma', ('#000000', '#200000', '#400000', '#600000', '#7f0000', '#7f1900', '#7f3300', '#7f4c00', '#7f6600', '#7f7f00')),
+# ('darkmagma2', ('#7f7f00', '#7f6600', '#7f4c00', '#7f3300', '#7f1900', '#7f0000', '#600000', '#400000', '#200000', '#000000')),
+# ('darkholly', ('#407f40', '#337333', '#266626', '#195919', '#0c4d0c', '#004000', '#7f0000', '#6a0000', '#550000', '#400000')),
+# ('darkholly2', ('#400000', '#550000', '#6a0000', '#7f0000', '#004000', '#0c4d0c', '#195919', '#266626', '#337333', '#407f40')),
+# ('darkglacier', ('#000000', '#000020', '#000040', '#000060', '#00007f', '#13137f', '#26267f', '#39397f', '#4d4d7f', '#60607f')),
+# ('darkglacier2', ('#60607f', '#4d4d7f', '#39397f', '#26267f', '#13137f', '#00007f', '#000060', '#000040', '#000020', '#000000')),
+# ('darkmonarchy', ('#60607f', '#30307f', '#00007f', '#190066', '#33004c', '#4c0033', '#660019', '#7f0000', '#600000', '#400000')),
+# ('darkmonarchy2', ('#400000', '#600000', '#7f0000', '#660019', '#4c0033', '#33004c', '#190066', '#00007f', '#30307f', '#60607f')),
+# ('darkcontrast', ('#7f0000', '#004000', '#00007f', '#7f7f00', '#7f007f', '#007f7f')),
+# ('darkcontrast2', ('#007f7f', '#7f007f', '#7f7f00', '#00007f', '#004000', '#7f0000')),
+# ('darkspectrum', (
+#     '#004040', '#6d386b', '#400040', '#404000', '#0f487f', '#7f5200', '#7f0000', '#23415a', '#004000', '#451571', '#400000', '#006768', '#000040',
+#     '#7f2200', '#7f0a49', '#196619')),
+# ('darkspectrum2', (
+#     '#196619', '#7f0a49', '#7f2200', '#000040', '#006768', '#400000', '#451571', '#004000', '#23415a', '#7f0000', '#7f5200', '#0f487f', '#404000',
+#     '#400040', '#6d386b', '#004040')),
+# ('darkred-orange', ('#7f1008', '#7f1a0a', '#7f240c', '#7f2e0e', '#7f3810', '#7f4212', '#7f4c14', '#7f5616', '#7f6018')),
+# ('darkorange-yellow', ('#7f6018', '#7e6316', '#7d6714', '#7c6b12', '#7b6f10', '#7a730e', '#79770c', '#787b0a', '#777f08')),
+# ('darkyellow-green', ('#777f08', '#697c09', '#5b790a', '#4d750b', '#3f720c', '#316f0d', '#236c0e', '#15690f', '#086610')),
+# ('darkgreen-blue', ('#086610', '#095a1d', '#0a4e2b', '#0b4239', '#0c3747', '#0d2b55', '#0e1f63', '#0f1371', '#10087f')),
+# ('darkblue-cyan', ('#10087f', '#10157f', '#10237f', '#10317f', '#103f7f', '#104d7f', '#105b7f', '#10697f', '#10777f')),
+# ('darkblue-purple', ('#10087f', '#1c097f', '#290a7f', '#360b7f', '#430c7f', '#500d7f', '#5d0e7f', '#6a0f7f', '#77107f')),
+# ('darkorange-red', ('#7f6018', '#7f5616', '#7f4c14', '#7f4212', '#7f3810', '#7f2e0e', '#7f240c', '#7f1a0a', '#7f1008')),
+# ('darkyellow-orange', ('#777f08', '#787b0a', '#79770c', '#7a730e', '#7b6f10', '#7c6b12', '#7d6714', '#7e6316', '#7f6018')),
+# ('darkgreen-yellow', ('#086610', '#15690f', '#236c0e', '#316f0d', '#3f720c', '#4d750b', '#5b790a', '#697c09', '#777f08')),
+# ('darkblue-green', ('#10087f', '#0f1371', '#0e1f63', '#0d2b55', '#0c3747', '#0b4239', '#0a4e2b', '#095a1d', '#086610')),
+# ('darkcyan-blue', ('#10777f', '#10697f', '#105b7f', '#104d7f', '#103f7f', '#10317f', '#10237f', '#10157f', '#10087f')),
+# ('darkpurple-blue', ('#77107f', '#6a0f7f', '#5d0e7f', '#500d7f', '#430c7f', '#360b7f', '#290a7f', '#1c097f', '#10087f')),
+#
+# ('darkspectrum', (
+#     '#008080', '#DA70D6', '#800080', '#808000', '#1E90FF', '#FFA500', '#FF0000', '#4682B4', '#008000', '#8A2BE2', '#800000',
+#     '#00CED1', '#000080', '#FF4500', '#FF1493', '#32CD32')),
+# ('darkspectrum2', (
+#     '#32CD32', '#FF1493', '#FF4500', '#000080', '#00CED1', '#800000', '#8A2BE2', '#008000', '#4682B4', '#FF0000', '#FFA500',
+#     '#1E90FF', '#808000', '#800080', '#DA70D6', '#008080')),

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 12:55:47 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-23 17:08:30 +0100 (Thu, July 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -141,7 +141,7 @@ class GuiStrip1d(GuiStrip):
         self.offsetWidget = None
         self.offsetValue = (0.0, 0.0)
 
-        self.widgetIndex = 3  #start adding widgets from row 3
+        self.widgetIndex = 4  #start adding widgets from row 4
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # TEST: ED new plane widgets

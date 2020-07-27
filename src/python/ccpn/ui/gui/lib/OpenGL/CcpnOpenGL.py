@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-13 12:16:14 +0100 (Mon, July 13, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-23 17:08:30 +0100 (Thu, July 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2404,7 +2404,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if region._objectView and not region._objectView.isVisible():
                 continue
 
-            if region.visible and region.movable:
+            if region.visible and region.movable and region.values == region.values:        # nan/inf check
                 if region.orientation == 'h':
                     if not self._widthsChangedEnough((0.0, region.values),
                                                      (0.0, cursorCoordinate[1]),
@@ -3602,7 +3602,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
                     fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
 
-                    col = (*spectrumView.posColour[0:3], 0.5)
+                    _posColour = spectrumView.posColours[0]
+                    col = (*_posColour[0:3], 0.5)
 
                     # add lines to drawList
                     drawList.indices = np.append(drawList.indices, np.array((index, index + 1,
@@ -5093,10 +5094,13 @@ class CcpnGLWidget(QOpenGLWidget):
             # y = positionPixel[1] + spectrumView._traceScale * (self.axisT - self.axisB) * \
             #     np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
 
-            colour = spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
-            colR = int(colour.strip('# ')[0:2], 16) / 255.0
-            colG = int(colour.strip('# ')[2:4], 16) / 255.0
-            colB = int(colour.strip('# ')[4:6], 16) / 255.0
+            # colour = spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
+            # colR = int(colour.strip('# ')[0:2], 16) / 255.0
+            # colG = int(colour.strip('# ')[2:4], 16) / 255.0
+            # colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+            _posColour = spectrumView.posColours[0]
+            colR, colG, colB = _posColour[0:3]
 
             hSpectrum = GLVertexArray(numLists=1,
                                       renderMode=GLRENDERMODE_RESCALE,
@@ -5151,10 +5155,13 @@ class CcpnGLWidget(QOpenGLWidget):
             # x = positionPixel[0] + spectrumView._traceScale * (self.axisL - self.axisR) * \
             #     np.array([preData[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
 
-            colour = spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
-            colR = int(colour.strip('# ')[0:2], 16) / 255.0
-            colG = int(colour.strip('# ')[2:4], 16) / 255.0
-            colB = int(colour.strip('# ')[4:6], 16) / 255.0
+            # colour = spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
+            # colR = int(colour.strip('# ')[0:2], 16) / 255.0
+            # colG = int(colour.strip('# ')[2:4], 16) / 255.0
+            # colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+            _posColour = spectrumView.posColours[0]
+            colR, colG, colB = _posColour[0:3]
 
             vSpectrum = GLVertexArray(numLists=1,
                                       renderMode=GLRENDERMODE_RESCALE,
@@ -5211,14 +5218,19 @@ class CcpnGLWidget(QOpenGLWidget):
             # print('>>>', positionPixel)
             col1 = getattr(spectrumView.spectrum,
                            self.SPECTRUMPOSCOLOUR)  #spectrumView._getColour('sliceColour', '#AAAAAA')
-            if self.is1D:
-                col2 = col1
-            else:
-                col2 = getattr(spectrumView.spectrum,
-                               self.SPECTRUMNEGCOLOUR)  #spectrumView._getColour('sliceColour', '#AAAAAA')
-            colR = int(col1.strip('# ')[0:2], 16) / 255.0
-            colG = int(col1.strip('# ')[2:4], 16) / 255.0
-            colB = int(col1.strip('# ')[4:6], 16) / 255.0
+
+            # if self.is1D:
+            #     col2 = col1
+            # else:
+            #     col2 = getattr(spectrumView.spectrum,
+            #                    self.SPECTRUMNEGCOLOUR)  #spectrumView._getColour('sliceColour', '#AAAAAA')
+
+            # colR = int(col1.strip('# ')[0:2], 16) / 255.0
+            # colG = int(col1.strip('# ')[2:4], 16) / 255.0
+            # colB = int(col1.strip('# ')[4:6], 16) / 255.0
+
+            _posColour = spectrumView.posColours[0]
+            colR, colG, colB = _posColour[0:3]
 
             # fade the trace to the negative colour
             # colRn = int(col2.strip('# ')[0:2], 16) / 255.0
@@ -5269,16 +5281,19 @@ class CcpnGLWidget(QOpenGLWidget):
                     [yDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(yMinFrequency, yMaxFrequency + 1)])
             x = positionPixel[0] + spectrumView._traceScale * (self.axisL - self.axisR) * dataX
 
-            col1 = getattr(spectrumView.spectrum,
-                           self.SPECTRUMPOSCOLOUR)  #spectrumView._getColour('sliceColour', '#AAAAAA')
-            if self.is1D:
-                col2 = col1
-            else:
-                col2 = getattr(spectrumView.spectrum,
-                               self.SPECTRUMNEGCOLOUR)  #spectrumView._getColour('sliceColour', '#AAAAAA')
-            colR = int(col1.strip('# ')[0:2], 16) / 255.0
-            colG = int(col1.strip('# ')[2:4], 16) / 255.0
-            colB = int(col1.strip('# ')[4:6], 16) / 255.0
+            # col1 = getattr(spectrumView.spectrum,
+            #                self.SPECTRUMPOSCOLOUR)  #spectrumView._getColour('sliceColour', '#AAAAAA')
+            # if self.is1D:
+            #     col2 = col1
+            # else:
+            #     col2 = getattr(spectrumView.spectrum,
+            #                    self.SPECTRUMNEGCOLOUR)  #spectrumView._getColour('sliceColour', '#AAAAAA')
+            # colR = int(col1.strip('# ')[0:2], 16) / 255.0
+            # colG = int(col1.strip('# ')[2:4], 16) / 255.0
+            # colB = int(col1.strip('# ')[4:6], 16) / 255.0
+
+            _posColour = spectrumView.posColours[0]
+            colR, colG, colB = _posColour[0:3]
 
             # fade the trace to the negative colour
             # colRn = int(col2.strip('# ')[0:2], 16) / 255.0

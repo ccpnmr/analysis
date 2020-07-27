@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-14 16:30:21 +0100 (Tue, July 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-23 17:10:55 +0100 (Thu, July 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1110,7 +1110,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.marksDefaultColourBox = PulldownList(parent, grid=(row, 1), vAlign='t')
 
         # populate colour pulldown and set to the current colour
-        fillColourPulldown(self.marksDefaultColourBox, allowAuto=False)
+        fillColourPulldown(self.marksDefaultColourBox, allowAuto=False, includeGradients=True)
         self.marksDefaultColourBox.currentIndexChanged.connect(self._queueChangeMarksColourIndex)
 
         # add a colour dialog button
@@ -1149,13 +1149,24 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangeMarksColourIndex(self, value):
-        if value >= 0 and list(spectrumColours.keys())[value] != self.preferences.general.defaultMarksColour:
-            return partial(self._changeMarksColourIndex, value)
+        if value >= 0:
+            colName = colourNameNoSpace(self.marksDefaultColourBox.getText())
+            if colName in spectrumColours.values():
+                colName = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+            if colName != self.preferences.general.defaultMarksColour:
+                # and list(spectrumColours.keys())[value] != self.preferences.general.defaultMarksColour:
+                return partial(self._changeMarksColourIndex, value)
 
     def _changeMarksColourIndex(self, value):
         """Change the default maerks colour in the preferences
         """
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.marksDefaultColourBox.currentText()))]
+        colName = colourNameNoSpace(self.marksDefaultColourBox.currentText())
+        if colName in spectrumColours.values():
+            newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+        else:
+            newColour = colName
+
+        # newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.marksDefaultColourBox.currentText()))]
         if newColour:
             self.preferences.general.defaultMarksColour = newColour
 
@@ -1166,7 +1177,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         newColour = dialog.getColor()
         if newColour is not None:
             addNewColour(newColour)
-            fillColourPulldown(self.marksDefaultColourBox, allowAuto=False)
+            fillColourPulldown(self.marksDefaultColourBox, allowAuto=False, includeGradients=True)
             self.marksDefaultColourBox.setCurrentText(spectrumColours[newColour.name()])
 
     def _setExternalProgramsTabWidgets(self, parent):

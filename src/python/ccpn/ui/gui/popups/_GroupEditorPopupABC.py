@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 12:01:35 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-23 17:06:50 +0100 (Thu, July 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1160,11 +1160,11 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
                     # call the post init routine to populate any new values as necessary
                     if self.GROUPEDITOR_INIT_METHOD:
-                        for name, state in updateList.items():
-                            pid = '%s:%s' % (self.GROUP_PID_KEY, name)
-                            obj = self.project.getByPid(pid)
-                            if obj == self.obj:
-                                self.GROUPEDITOR_INIT_METHOD()
+                        # for name, state in updateList.items():
+                        #     pid = '%s:%s' % (self.GROUP_PID_KEY, name)
+                        #     obj = self.project.getByPid(pid)
+                        #     if obj == self.obj:
+                        self.GROUPEDITOR_INIT_METHOD()
 
                 else:
                     # new mode

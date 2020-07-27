@@ -68,6 +68,7 @@
             "intensity" : 200000
         },
         "defaultMarksColour"                   : "#EE82EE",
+        "_defaultMarksCount"                   : 0,
         "autoCorrectColours"                   : true,
         "multipletAveraging"                   : 0,
         "showSpectraOnPhasing"                 : false,

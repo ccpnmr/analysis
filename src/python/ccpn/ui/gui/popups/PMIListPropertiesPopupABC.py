@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-26 12:13:45 +0100 (Fri, June 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-23 17:10:54 +0100 (Thu, July 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -190,7 +190,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         """
         _colourLabel = Label(self.mainWidget, '%s' % attrib, grid=(row, 0))
         _colourPulldownList = PulldownList(self.mainWidget, grid=(row, 1))
-        Colour.fillColourPulldown(_colourPulldownList, allowAuto=True)
+        Colour.fillColourPulldown(_colourPulldownList, allowAuto=True, includeGradients=False)
         pulldowns.append((_colourLabel, _colourPulldownList, attrib))
         _colourButton = Button(self.mainWidget, vAlign='t', hAlign='l', grid=(row, 2), hPolicy='fixed',
                               callback=partial(self._queueSetColourButton, _colourPulldownList), icon='icons/colours')
@@ -230,7 +230,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         # set the colours in the pulldowns
         for item in self._colourPulldowns:
             _, pl, attrib = item
-            Colour.fillColourPulldown(pl, allowAuto=True)
+            Colour.fillColourPulldown(pl, allowAuto=True, includeGradients=False)
 
             c = self.listViewSettings[attrib]
             Colour.selectPullDownColour(pl, c, allowAuto=True)
@@ -322,7 +322,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         for item in self._colourPulldowns:
             _, pl, attrib = item
 
-            fillColourPulldown(pl, allowAuto=False)
+            fillColourPulldown(pl, allowAuto=False, includeGradients=False)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetValue(self, attr, getFunction, setFunction, dim):

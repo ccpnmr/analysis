@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-20 16:05:25 +0100 (Mon, April 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-23 17:10:54 +0100 (Thu, July 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -72,6 +72,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPNG
+from ccpn.util.Colour import colorSchemeTable
 
 
 PLOTLEFT = 'plotLeft'
@@ -93,7 +94,8 @@ FRAMEPADDING = 12
 
 
 def alphaClip(value):
-    return np.clip(float(value), 0.0, 1.0)
+    # return np.clip(float(value), 0.0, 1.0)
+    return float(value)
 
 
 class GLExporter():
@@ -577,6 +579,11 @@ class GLExporter():
             # if spectrumView.isVisible():
             if spectrumView.spectrum.pid in self.params[GLSELECTEDPIDS]:
 
+                _x = self.displayScale * self.mainView.left
+                _y = self.displayScale * self.mainView.bottom
+                _width = self.displayScale * self.mainView.width
+                _height = self.displayScale * self.mainView.height
+
                 if spectrumView.spectrum.dimensionCount > 1:
                     if spectrumView in self._parent._spectrumSettings.keys():
                         # self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
@@ -587,6 +594,9 @@ class GLExporter():
                         # mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
 
                         thisSpec = self._parent._contourList[spectrumView]
+
+                        # # clip all colours first
+                        # _colors = np.clip(thisSpec.colors, 0.0, 0.9999)
 
                         # drawVertexColor
                         # gr = Group()
@@ -603,11 +613,7 @@ class GLExporter():
                             colour = colors.Color(*thisSpec.colors[ii0 * 4:ii0 * 4 + 3], alpha=alphaClip(thisSpec.colors[ii0 * 4 + 3]))
                             colourPath = 'spectrumViewContours%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
-                            newLine = self.lineVisible(self._parent, newLine,
-                                                       x=self.displayScale * self.mainView.left,
-                                                       y=self.displayScale * self.mainView.bottom,
-                                                       width=self.displayScale * self.mainView.width,
-                                                       height=self.displayScale * self.mainView.height)
+                            newLine = self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height)
                             if newLine:
                                 if colourPath not in colourGroups:
                                     colourGroups[colourPath] = {PDFLINES      : [],
@@ -629,14 +635,15 @@ class GLExporter():
                         # drawVertexColor
                         self._appendVertexLineGroup(indArray=thisSpec,
                                                     colourGroups=colourGroups,
-                                                    plotDim={PLOTLEFT  : self.displayScale * self.mainView.left,
-                                                             PLOTBOTTOM: self.displayScale * self.mainView.bottom,
-                                                             PLOTWIDTH : self.displayScale * self.mainView.width,
-                                                             PLOTHEIGHT: self.displayScale * self.mainView.height},
+                                                    plotDim={PLOTLEFT  : _x,
+                                                             PLOTBOTTOM: _y,
+                                                             PLOTWIDTH : _width,
+                                                             PLOTHEIGHT: _height},
                                                     name='spectrumContours%s' % spectrumView.pid,
                                                     mat=mat,
                                                     lineWidth=0.5 * self.baseThickness * self.contourThickness
                                                     )
+
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
 
     def _addSpectrumBoundaries(self):
@@ -656,33 +663,37 @@ class GLExporter():
                 fx0, fx1 = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
                 if spectrumView.spectrum.dimensionCount > 1:
                     fy0, fy1 = self._spectrumValues[1].maxSpectrumFrequency, self._spectrumValues[1].minSpectrumFrequency
-                    colour = colors.Color(*spectrumView.posColour[0:3], alpha=alphaClip(0.5))
+                    _col = spectrumView.posColours[0]
+                    colour = colors.Color(*_col[0:3], alpha=alphaClip(0.5))
                 else:
                     if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:
                         fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
                     else:
                         fy0, fy1 = 0.0, 0.0
 
-                    colour = spectrumView.sliceColour
-                    colR = int(colour.strip('# ')[0:2], 16) / 255.0
-                    colG = int(colour.strip('# ')[2:4], 16) / 255.0
-                    colB = int(colour.strip('# ')[4:6], 16) / 255.0
+                    # colour = spectrumView.sliceColour
+                    # colR = int(colour.strip('# ')[0:2], 16) / 255.0
+                    # colG = int(colour.strip('# ')[2:4], 16) / 255.0
+                    # colB = int(colour.strip('# ')[4:6], 16) / 255.0
+                    # colour = colors.Color(colR, colG, colB, alpha=alphaClip(0.5))
 
-                    colour = colors.Color(colR, colG, colB, alpha=alphaClip(0.5))
+                    _col = spectrumView.posColours[0]
+                    colour = colors.Color(*_col[0:3], alpha=alphaClip(0.5))
 
                 colourPath = 'spectrumViewBoundaries%s%s%s%s%s' % (
                     spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
+                _x = self.displayScale * self.mainView.left
+                _y = self.displayScale * self.mainView.bottom
+                _width = self.displayScale * self.mainView.width
+                _height = self.displayScale * self.mainView.height
+
                 # generate the bounding box
                 newLine = [fx0, fy0, fx0, fy1, fx1, fy1, fx1, fy0, fx0, fy0]
                 for ii in range(0, len(newLine) - 2, 2):
-                    thisLine = newLine[ii:ii + 4]
+                    # thisLine = newLine[ii:ii + 4]
 
-                    thisLine = self.lineVisible(self._parent, newLine,
-                                                x=self.displayScale * self.mainView.left,
-                                                y=self.displayScale * self.mainView.bottom,
-                                                width=self.displayScale * self.mainView.width,
-                                                height=self.displayScale * self.mainView.height)
+                    thisLine = self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height)
                     if thisLine:
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = {PDFLINES        : [],
@@ -775,6 +786,11 @@ class GLExporter():
                                       and pp in self._parent._GLIntegrals._GLSymbols.keys()
                                       and pp.integralList.pid in self.params[GLSELECTEDPIDS]]
 
+            _x = self.displayScale * self.mainView.left
+            _y = self.displayScale * self.mainView.bottom
+            _width = self.displayScale * self.mainView.width
+            _height = self.displayScale * self.mainView.height
+
             for integralListView in validIntegralListViews:  # spectrumView.integralListViews:
                 mat = None
                 if spectrumView.spectrum.dimensionCount > 1:
@@ -816,11 +832,7 @@ class GLExporter():
                             colourPath = 'spectrumViewIntegralFill%s%s%s%s%s' % (
                                 spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
-                            newLine = self.lineVisible(self._parent, newLine,
-                                                       x=self.displayScale * self.mainView.left,
-                                                       y=self.displayScale * self.mainView.bottom,
-                                                       width=self.displayScale * self.mainView.width,
-                                                       height=self.displayScale * self.mainView.height)
+                            newLine = self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height)
                             if newLine:
                                 if colourPath not in colourGroups:
                                     colourGroups[colourPath] = {PDFLINES: [], PDFFILLCOLOR: colour, PDFSTROKE: None, PDFSTROKECOLOR: None}
@@ -1105,6 +1117,11 @@ class GLExporter():
         Add the infinite lines to the main drawing area.
         """
         colourGroups = OrderedDict()
+        _x = self.displayScale * self.mainView.left
+        _y = self.displayScale * self.mainView.bottom
+        _width = self.displayScale * self.mainView.width
+        _height = self.displayScale * self.mainView.height
+
         for infLine in self._parent._infiniteLines:
             if infLine.visible:
                 colour = colors.Color(*infLine.brush[0:3], alpha=alphaClip(infLine.brush[3]))
@@ -1115,11 +1132,7 @@ class GLExporter():
                 else:
                     newLine = [infLine.values, self._parent.axisT, infLine.values, self._parent.axisB]
 
-                newLine = self.lineVisible(self._parent, newLine,
-                                           x=self.displayScale * self.mainView.left,
-                                           y=self.displayScale * self.mainView.bottom,
-                                           width=self.displayScale * self.mainView.width,
-                                           height=self.displayScale * self.mainView.height)
+                newLine = self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height)
                 if newLine:
                     if colourPath not in colourGroups:
                         colourGroups[colourPath] = {PDFLINES          : [],
@@ -1510,6 +1523,11 @@ class GLExporter():
 
     def _appendVertexLineGroup(self, indArray, colourGroups, plotDim, name, mat=None,
                                includeLastVertex=False, lineWidth=0.5):
+        _x = plotDim[PLOTLEFT]
+        _y = plotDim[PLOTBOTTOM]
+        _width = plotDim[PLOTWIDTH]
+        _height = plotDim[PLOTHEIGHT]
+
         for vv in range(0, len(indArray.vertices) - 2, 2):
 
             if mat is not None:
@@ -1538,11 +1556,7 @@ class GLExporter():
                     cc[PDFSTROKE] = None
                     cc[PDFSTROKECOLOR] = None
 
-            newLine = self.lineVisible(self._parent, newLine,
-                                       x=plotDim[PLOTLEFT],
-                                       y=plotDim[PLOTBOTTOM],
-                                       width=plotDim[PLOTWIDTH],
-                                       height=plotDim[PLOTHEIGHT])
+            newLine = self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height)
             if newLine:
                 colourGroups[colourPath][PDFLINES].append(newLine)
 
@@ -1562,6 +1576,11 @@ class GLExporter():
         # override so that each element is a new group
         if splitGroups:
             colourGroups = OrderedDict()
+
+        _x = plotDim[PLOTLEFT]
+        _y = plotDim[PLOTBOTTOM]
+        _width = plotDim[PLOTWIDTH]
+        _height = plotDim[PLOTHEIGHT]
 
         for ii in range(0, len(indArray.indices), indexLen):
             ii0 = [int(ind) for ind in indArray.indices[ii:ii + indexLen]]
@@ -1599,11 +1618,7 @@ class GLExporter():
                     cc[PDFSTROKE] = None
                     cc[PDFSTROKECOLOR] = None
 
-            newLine = self.lineVisible(self._parent, newLine,
-                                       x=plotDim[PLOTLEFT],
-                                       y=plotDim[PLOTBOTTOM],
-                                       width=plotDim[PLOTWIDTH],
-                                       height=plotDim[PLOTHEIGHT])
+            newLine = self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height)
             if newLine:
                 colourGroups[colourPath][PDFLINES].append(newLine)
 

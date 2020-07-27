@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-29 09:03:03 +0000 (Wed, January 29, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-07-23 17:10:53 +0100 (Thu, July 23, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -125,7 +125,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 phaseTraces = self.hPhaseTraces
                 position = self.strip.mousePosition[1]
                 if not self.strip.haveSetHPhasingPivot:
-
                     viewParams = self._getSpectrumViewParams(0)
                     self.strip.hPhasingPivot.setPos(0.5 * (viewParams.minSpectrumFrequency +
                                                            viewParams.maxSpectrumFrequency))
@@ -136,7 +135,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 phaseTraces = self.vPhaseTraces
                 position = self.strip.mousePosition[0]
                 if not self.strip.haveSetVPhasingPivot:
-
                     viewParams = self._getSpectrumViewParams(1)
                     self.strip.vPhasingPivot.setPos(0.5 * (viewParams.minSpectrumFrequency +
                                                            viewParams.maxSpectrumFrequency))
@@ -338,10 +336,27 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         # if not self.posLevels and not self.negLevels:
         #   return
 
-        self.posColour = Colour.scaledRgba(self._getColour('positiveContourColour'))  # TBD: for now assume only one colour
-        self.negColour = Colour.scaledRgba(self._getColour('negativeContourColour'))  # and assumes these attributes are set
-        glList.posColour = self.posColour
-        glList.negColour = self.negColour
+        # self.posColour = Colour.scaledRgba(self._getColour('positiveContourColour'))  # TBD: for now assume only one colour
+        # self.negColour = Colour.scaledRgba(self._getColour('negativeContourColour'))  # and assumes these attributes are set
+        # glList.posColour = self.posColour
+        # glList.negColour = self.negColour
+
+        colName = self._getColour('positiveContourColour')
+        if not colName.startswith('#'):
+            # get the colour from the gradient table or a single red
+            colListPos = tuple(Colour.scaledRgba(col) for col in Colour.colorSchemeTable[colName]) if colName in Colour.colorSchemeTable else ((1, 0, 0, 1),)
+        else:
+            colListPos = (Colour.scaledRgba(colName),)
+
+        colName = self._getColour('negativeContourColour')
+        if not colName.startswith('#'):
+            # get the colour from the gradient table or a single red
+            colListNeg = tuple(Colour.scaledRgba(col) for col in Colour.colorSchemeTable[colName]) if colName in Colour.colorSchemeTable else ((1, 0, 0, 1),)
+        else:
+            colListNeg = (Colour.scaledRgba(colName),)
+
+        glList.posColours = self.posColours = colListPos
+        glList.negColours = self.negColours = colListNeg
 
         try:
             self._constructContours(self.posLevels, self.negLevels, glList=glList, doRefresh=True)
@@ -510,6 +525,40 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             # new code for the recompiled glList
             # test = None
 
+            # get the positive contour colour list
+            _posColours = []
+            stepX = len(posLevels) - 1
+            step = stepX
+            stepY = len(self.posColours) - 1
+            jj = 0
+            for ii in range(stepX + 1):
+                _interp = (stepX - step) / stepX
+                _intCol = Colour.interpolateColourRgba(self.posColours[min(jj, stepY)], self.posColours[min(jj + 1, stepY)],
+                                                       _interp,
+                                                       alpha=1.0)
+                _posColours.extend(_intCol)
+                step -= stepY
+                if step < 0:
+                    step += stepX
+                    jj += 1
+
+            # get the positive contour colour list
+            _negColours = []
+            stepX = len(negLevels) - 1
+            step = stepX
+            stepY = len(self.negColours) - 1
+            jj = 0
+            for ii in range(stepX + 1):
+                _interp = (stepX - step) / stepX
+                _intCol = Colour.interpolateColourRgba(self.negColours[min(jj, stepY)], self.negColours[min(jj + 1, stepY)],
+                                                       _interp,
+                                                       alpha=1.0)
+                _negColours.extend(_intCol)
+                step -= stepY
+                if step < 0:
+                    step += stepX
+                    jj += 1
+
             contourList = None
             if numDims < 3 or self._application.preferences.general.generateSinglePlaneContours:
                 dataArrays = tuple()
@@ -519,16 +568,18 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 contourList = Contourer2d.contourerGLList(dataArrays,
                                                           posLevelsArray,
                                                           negLevelsArray,
-                                                          np.array(self.posColour * len(posLevels), dtype=np.float32),
-                                                          np.array(self.negColour * len(negLevels), dtype=np.float32))
+                                                          np.array(_posColours, dtype=np.float32),
+                                                          np.array(_negColours, dtype=np.float32))
+                # np.array(self.posColour * len(posLevels), dtype=np.float32),
+                # np.array(self.negColour * len(negLevels), dtype=np.float32))
             else:
 
                 specIndices = self._displayOrderSpectrumDimensionIndices
                 stripIndices = tuple(specIndices.index(ii) for ii in range(numDims))
                 regionLimits = tuple(axis.region for axis in self.strip.orderedAxes)
 
-                axisLimits = dict([ (self.spectrum.axisCodes[ii], regionLimits[stripIndices[ii]])
-                                    for ii in range(numDims) if stripIndices[ii] is not None and stripIndices[ii] > 1])
+                axisLimits = dict([(self.spectrum.axisCodes[ii], regionLimits[stripIndices[ii]])
+                                   for ii in range(numDims) if stripIndices[ii] is not None and stripIndices[ii] > 1])
 
                 # this isn't fully tested and still has an offset of -1
                 # cheat to move the spectrum by 1 point by adding buffer to visible XY axes
@@ -547,14 +598,16 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                             tempDataArray = dataArray.transpose(*xyzDims)
 
                             # flatten multidimensional arrays into single array
-                            for maxCount in range(numDims-2):
+                            for maxCount in range(numDims - 2):
                                 tempDataArray = np.max(tempDataArray.clip(0.0, 1e15), axis=0) + np.min(tempDataArray.clip(-1e12, 0.0), axis=0)
 
                             contourList = Contourer2d.contourerGLList((tempDataArray,),
                                                                       posLevelsArray,
                                                                       negLevelsArray,
-                                                                      np.array(self.posColour * len(posLevels), dtype=np.float32),
-                                                                      np.array(self.negColour * len(negLevels), dtype=np.float32))
+                                                                      np.array(_posColours, dtype=np.float32),
+                                                                      np.array(_negColours, dtype=np.float32))
+                            # np.array(self.posColour * len(posLevels), dtype=np.float32),
+                            # np.array(self.negColour * len(negLevels), dtype=np.float32))
 
             if contourList and contourList[1] > 0:
                 # set the contour arrays for the GL object
@@ -863,7 +916,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
                 # check as there could be more dimensions
                 # planeCount = self.strip.planeToolbar.planeCounts[dim - 2].value()
-                planeCount = self.strip.planeAxisBars[dim-2].planeCount     #   .planeToolbar.planeCounts[dim - 2].value()
+                planeCount = self.strip.planeAxisBars[dim - 2].planeCount  #   .planeToolbar.planeCounts[dim - 2].value()
 
                 # valuePerPoint, _, _, _, _ = useFirstVisible._getSpectrumViewParams(2)
                 # zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)
@@ -919,7 +972,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 planeList = planeList + ((tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount),)
 
                 # need to add 0.5 for the indexing in the api
-                planePointValues = planePointValues + ((tuple(pointToValue(zz+0.5) for zz in range(zPoint0, zPoint1+1)), zPointOffset, zPointCount),)
+                planePointValues = planePointValues + ((tuple(pointToValue(zz + 0.5) for zz in range(zPoint0, zPoint1 + 1)), zPointOffset, zPointCount),)
 
             # return (tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount)
             return planeList, planePointValues

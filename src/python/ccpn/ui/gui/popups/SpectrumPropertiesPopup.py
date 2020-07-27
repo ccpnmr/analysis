@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-26 12:13:45 +0100 (Fri, June 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-23 17:06:50 +0100 (Thu, July 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -66,6 +66,8 @@ SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 DEFAULTSPACING = (3, 3)
 TABMARGINS = (1, 10, 1, 5)  # l, t, r, b
 SELECTALL = '<All>'
+SELECT1D = '<All 1d Spectra>'
+SELECTND = '<All Nd Spectra>'
 
 
 def _updateGl(self, spectrumList):
@@ -550,7 +552,7 @@ class GeneralTab(Widget):
 
             # populate initial pulldown
             # spectrumColourKeys = list(spectrumColours.keys())
-            fillColourPulldown(self.colourBox, allowAuto=False)
+            fillColourPulldown(self.colourBox, allowAuto=False, includeGradients=False)
             # c = spectrum.sliceColour
             # if c in spectrumColourKeys:
             #     self.colourBox.setCurrentText(spectrumColours[c])
@@ -749,7 +751,7 @@ class GeneralTab(Widget):
 
     def _fillPullDowns(self):
         if self.spectrum.dimensionCount == 1:
-            fillColourPulldown(self.colourBox, allowAuto=False)
+            fillColourPulldown(self.colourBox, allowAuto=False, includeGradients=False)
 
     def _populateGeneral(self):
         """Populate general tab from self.spectrum
@@ -1014,11 +1016,22 @@ class GeneralTab(Widget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangeSliceComboIndex(self, spectrum, value):
-        if value >= 0 and list(spectrumColours.keys())[value] != spectrum.sliceColour:
-            return partial(self._changedSliceComboIndex, spectrum, value)
+        if value >= 0:
+            colName = colourNameNoSpace(self.colourBox.getText())
+            if colName in spectrumColours.values():
+                colName = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+            if colName != spectrum.sliceColour:
+                # and list(spectrumColours.keys())[value] != spectrum.sliceColour:
+                return partial(self._changedSliceComboIndex, spectrum, value)
 
     def _changedSliceComboIndex(self, spectrum, value):
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.colourBox.currentText()))]
+        colName = colourNameNoSpace(self.colourBox.currentText())
+        if colName in spectrumColours.values():
+            newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+        else:
+            newColour = colName
+
+        # newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.colourBox.currentText()))]
         if newColour:
             spectrum.sliceColour = newColour
             self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour)
@@ -1691,8 +1704,8 @@ class ContoursTab(Widget):
 
         # populate initial pulldown
         spectrumColourKeys = list(spectrumColours.keys())
-        fillColourPulldown(self.positiveColourBox, allowAuto=False)
-        fillColourPulldown(self.negativeColourBox, allowAuto=False)
+        fillColourPulldown(self.positiveColourBox, allowAuto=False, includeGradients=True)
+        fillColourPulldown(self.negativeColourBox, allowAuto=False, includeGradients=True)
 
         # c = self.spectrum.positiveContourColour
         # if c in spectrumColourKeys:
@@ -1867,8 +1880,8 @@ class ContoursTab(Widget):
             self.negativeContourCountData.setValue(negLevels)
 
     def _fillPullDowns(self):
-        fillColourPulldown(self.positiveColourBox, allowAuto=False)
-        fillColourPulldown(self.negativeColourBox, allowAuto=False)
+        fillColourPulldown(self.positiveColourBox, allowAuto=False, includeGradients=True)
+        fillColourPulldown(self.negativeColourBox, allowAuto=False, includeGradients=True)
 
     def _populateColour(self):
         """Populate colour tab from self.spectrum
@@ -1912,7 +1925,7 @@ class ContoursTab(Widget):
                     self._copyCheckBoxes[cc].setChecked(state)
 
             if self._copyToSpectra:
-                texts = ['<All Nd Spectra>'] + [spectrum.pid for spectrum in self._copyToSpectra if spectrum != self.spectrum]
+                texts = [SELECTND] + [spectrum.pid for spectrum in self._copyToSpectra if spectrum != self.spectrum]
                 self._copyToSpectraPullDown.modifyTexts(texts)
 
     def _writeLoggingMessage(self, command):
@@ -2081,12 +2094,22 @@ class ContoursTab(Widget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangePosColourComboIndex(self, spectrum, value):
-        if value >= 0 and list(spectrumColours.keys())[value] != spectrum.positiveContourColour:
-            return partial(self._changePosColourComboIndex, spectrum, value)
+        if value >= 0:
+            colName = colourNameNoSpace(self.positiveColourBox.getText())
+            if colName in spectrumColours.values():
+                colName = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+            if colName != spectrum.positiveContourColour:
+                # and list(spectrumColours.keys())[value] != spectrum.positiveContourColour:
+                return partial(self._changePosColourComboIndex, spectrum, value)
 
     def _changePosColourComboIndex(self, spectrum, value):
-        # newColour = list(spectrumColours.keys())[value]
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.positiveColourBox.currentText()))]
+        colName = colourNameNoSpace(self.positiveColourBox.currentText())
+        if colName in spectrumColours.values():
+            newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+        else:
+            newColour = colName
+
+        # newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.positiveColourBox.currentText()))]
         if newColour:
             spectrum.positiveContourColour = newColour
             self._writeLoggingMessage("spectrum.positiveContourColour = '%s'" % newColour)
@@ -2103,12 +2126,22 @@ class ContoursTab(Widget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangeNegColourComboIndex(self, spectrum, value):
-        if value >= 0 and list(spectrumColours.keys())[value] != spectrum.negativeContourColour:
-            return partial(self._changeNegColourComboIndex, spectrum, value)
+        if value >= 0:
+            colName = colourNameNoSpace(self.negativeColourBox.getText())
+            if colName in spectrumColours.values():
+                colName = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+            if colName != spectrum.negativeContourColour:
+                # and list(spectrumColours.keys())[value] != spectrum.negativeContourColour:
+                return partial(self._changeNegColourComboIndex, spectrum, value)
 
     def _changeNegColourComboIndex(self, spectrum, value):
-        # newColour = list(spectrumColours.keys())[value]
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.negativeColourBox.currentText()))]
+        colName = colourNameNoSpace(self.negativeColourBox.currentText())
+        if colName in spectrumColours.values():
+            newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+        else:
+            newColour = colName
+
+        # newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.negativeColourBox.currentText()))]
         if newColour:
             spectrum.negativeContourColour = newColour
             self._writeLoggingMessage("spectrum.negativeContourColour = '%s'" % newColour)
@@ -2175,7 +2208,7 @@ class ContoursTab(Widget):
         """
         if self._showCopyOptions:
             toSpectraPids = self._copyToSpectraPullDown.getText()
-            if toSpectraPids == SELECTALL:
+            if toSpectraPids == SELECTND:
                 toSpectra = [spectrum for spectrum in self._copyToSpectra if spectrum != self.spectrum]
             else:
                 toSpectra = [self.application.project.getByPid(toSpectraPids)]
@@ -2264,7 +2297,7 @@ class ColourTab(Widget):
         self.positiveColourBox = PulldownList(self, vAlign='t', grid=(7, 1))
 
         # populate initial pulldown
-        fillColourPulldown(self.positiveColourBox, allowAuto=False)
+        fillColourPulldown(self.positiveColourBox, allowAuto=False, includeGradients=True)
         self.positiveColourBox.currentIndexChanged.connect(partial(self._queueChangeSliceComboIndex, spectrum))
 
         # add a colour dialog button
@@ -2329,7 +2362,7 @@ class ColourTab(Widget):
             self._copyToSpectra = None
 
     def _fillPullDowns(self):
-        fillColourPulldown(self.positiveColourBox, allowAuto=False)
+        fillColourPulldown(self.positiveColourBox, allowAuto=False, includeGradients=True)
 
     def _populateColour(self):
         """Populate dimensions tab from self.spectrum
@@ -2366,7 +2399,7 @@ class ColourTab(Widget):
                         pass
 
             if self._copyToSpectra:
-                texts = ['<All 1d Spectra>'] + [spectrum.pid for spectrum in self._copyToSpectra if spectrum != self.spectrum]
+                texts = [SELECT1D] + [spectrum.pid for spectrum in self._copyToSpectra if spectrum != self.spectrum]
                 self._copyToSpectraPullDown.modifyTexts(texts)
 
     def _writeLoggingMessage(self, command):
@@ -2384,12 +2417,22 @@ class ColourTab(Widget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangeSliceComboIndex(self, spectrum, value):
-        if value >= 0 and list(spectrumColours.keys())[value] != spectrum.sliceColour:
-            return partial(self._changedSliceComboIndex, spectrum, value)
+        if value >= 0:
+            colName = colourNameNoSpace(self.positiveColourBox.getText())
+            if colName in spectrumColours.values():
+                colName = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+            if colName != spectrum.sliceColour:
+                # and list(spectrumColours.keys())[value] != spectrum.sliceColour:
+                return partial(self._changedSliceComboIndex, spectrum, value)
 
     def _changedSliceComboIndex(self, spectrum, value):
-        # newColour = list(spectrumColours.keys())[value]
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.positiveColourBox.currentText()))]
+        colName = colourNameNoSpace(self.positiveColourBox.currentText())
+        if colName in spectrumColours.values():
+            newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+        else:
+            newColour = colName
+
+        # newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.positiveColourBox.currentText()))]
         if newColour:
             spectrum.sliceColour = newColour
             self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour)
@@ -2412,7 +2455,7 @@ class ColourTab(Widget):
         """
         if self._showCopyOptions:
             toSpectraPids = self._copyToSpectraPullDown.getText()
-            if toSpectraPids == SELECTALL:
+            if toSpectraPids == SELECT1D:
                 toSpectra = [spectrum for spectrum in self._copyToSpectra if spectrum != self.spectrum]
             else:
                 toSpectra = [self.application.project.getByPid(toSpectraPids)]

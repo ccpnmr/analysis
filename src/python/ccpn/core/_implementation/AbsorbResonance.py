@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-27 10:25:31 +0100 (Mon, July 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-28 12:46:05 +0100 (Tue, July 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -83,14 +83,19 @@ def absorbResonance(self: 'NmrAtom', nmrAtom) -> 'NmrAtom':
                                 'Attempt to merge nmrAtoms with different isotope codes')
             return
 
+    _selfPeaks = set(self.assignedPeaks)
+    _nmrAtomPeaks = set(nmrAtom.assignedPeaks)
     _changedAssigned = tuple(set(self.assignedPeaks) | set(nmrAtom.assignedPeaks))
+    _shifts = tuple(set(selfApi.shifts) | set(resonanceB.shifts))
 
     with undoStackBlocking() as addUndoItem:
         # recalculate shifts in undo stack
+
+        # NOTE:ED - make explicit _finaliseAction on peaks - not in nmrAtom
+
         addUndoItem(undo=partial(nmrAtom._finaliseAction, 'change'))
+        addUndoItem(undo=partial(setattr, nmrAtom, ASSIGNEDPEAKSCHANGED, _changedAssigned))
         addUndoItem(undo=partial(self._finaliseAction, 'change'))
-        addUndoItem(undo=partial(setattr, self, ASSIGNEDPEAKSCHANGED, _changedAssigned))
-        # addUndoItem(undo=partial(setattr, nmrAtom, ASSIGNEDPEAKSCHANGED, _changedAssigned))
         addUndoItem(undo=partial(_recalculateShifts, project, selfApi))
         addUndoItem(undo=partial(_recalculateShifts, project, resonanceB))
 

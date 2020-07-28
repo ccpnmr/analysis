@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-14 15:16:40 +0100 (Tue, July 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-28 12:46:05 +0100 (Tue, July 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -540,10 +540,7 @@ class MacroEditor(CcpnModule):
                             if self.filePath != value:
                                 self._removeMacroFromCurrent()
                                 self._deleteTempFile()
-                                print(self.filePath, value, '@@')
-
                             self.openPath(value)
-                            print(self.filePath, value, '##')
                         continue
 
 

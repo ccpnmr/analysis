@@ -35,7 +35,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-27 10:25:31 +0100 (Mon, July 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-28 12:46:05 +0100 (Tue, July 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -52,6 +52,8 @@ from ccpnmodel.ccpncore.memops.ApiError import ApiError
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 
+_OVERRIDE = 'override'
+
 
 def _setDict(dd, oldKey, newKey, attrObj):
     """Undo/redo method to delete/recover item from dict
@@ -60,14 +62,8 @@ def _setDict(dd, oldKey, newKey, attrObj):
     dd[newKey] = attrObj
 
 
-def _setattrWithOverride(obj, attrName, val):
-    _topObj = obj.topObject
-    _root = _topObj.__dict__.get('memopsRoot')
-    _override = _root.__dict__.get('override')
-
-    _root.__dict__['override'] = True
-    setattr(obj, attrName, val)
-    _root.__dict__['override'] = _override
+def _setOverride(root, value):
+    root.__dict__['override'] = value
 
 
 def _changeDict(targetObj, attrName, sourceObj, parentName, topObj):
@@ -371,6 +367,9 @@ def mergeObjects(project, sourceObj, targetObj, _useV3Delete=False, _mergeFunc=N
                 root = targetObj.root
                 try:
                     root.override = True
+                    # undo/redo
+                    addUndoItem(undo=partial(setattr, root, _OVERRIDE, False),
+                                redo=partial(setattr, root, _OVERRIDE, True))
 
                     for a in nastyLinks:
                         # links that can *NOT* be handled without bypassing API
@@ -388,16 +387,22 @@ def mergeObjects(project, sourceObj, targetObj, _useV3Delete=False, _mergeFunc=N
 
                             if getattr(targetObj, linkName) is None:
 
+                                attrObj = getattr(sourceObj, linkName)
+
+                                # NOTE:ED - skip if no change
+                                if attrObj is None:
+                                    continue
+
                                 #do
                                 childDict = {}
                                 oldKey = None
                                 newKey = None
-                                attrObj = getattr(sourceObj, linkName)
                                 if backName in keyNames:
+                                    # must be before the setattr
                                     oldKey = attrObj.getLocalKey()
+
                                 setattr(sourceObj, linkName, None)
                                 setattr(targetObj, linkName, attrObj)
-
                                 # undo/redo
                                 addUndoItem(undo=partial(setattr, sourceObj, linkName, attrObj),
                                             redo=partial(setattr, sourceObj, linkName, None))
@@ -469,25 +474,28 @@ def mergeObjects(project, sourceObj, targetObj, _useV3Delete=False, _mergeFunc=N
                                 else:
                                     continue
 
+                            # skip if no change
+                            if not moveList:
+                                continue
+
                             # do
                             oldKeys = []
                             newKeys = []
                             if backName in keyNames:
                                 oldKeys = [x.getLocalKey() for x in moveList]
-                            setattr(sourceObj, linkName, ignoreList)
-                            setattr(targetObj, linkName, keepList + moveList)
 
                             _ll = list(ll)
                             _ignoreList = list(ignoreList)
                             _keepList = list(keepList)
                             _moveList = list(keepList + moveList)
 
-                            # NOTE:ED - not sure this is calling the notifiers
+                            setattr(sourceObj, linkName, ignoreList)
+                            setattr(targetObj, linkName, keepList + moveList)
                             # undo/redo
-                            addUndoItem(undo=partial(_setattrWithOverride, sourceObj, linkName, _ll),
-                                        redo=partial(_setattrWithOverride, sourceObj, linkName, _ignoreList))
-                            addUndoItem(undo=partial(_setattrWithOverride, targetObj, linkName, _keepList),
-                                        redo=partial(_setattrWithOverride, targetObj, linkName, _moveList))
+                            addUndoItem(undo=partial(setattr, sourceObj, linkName, _ll),
+                                        redo=partial(setattr, sourceObj, linkName, _ignoreList))
+                            addUndoItem(undo=partial(setattr, targetObj, linkName, _keepList),
+                                        redo=partial(setattr, targetObj, linkName, _moveList))
 
                             if backName in keyNames:
                                 newKeys = []
@@ -539,6 +547,9 @@ def mergeObjects(project, sourceObj, targetObj, _useV3Delete=False, _mergeFunc=N
 
                 finally:
                     root.override = False
+                    # undo/redo
+                    addUndoItem(undo=partial(setattr, root, _OVERRIDE, True),
+                                redo=partial(setattr, root, _OVERRIDE, False))
 
         with undoStackBlocking() as addUndoItem:
 

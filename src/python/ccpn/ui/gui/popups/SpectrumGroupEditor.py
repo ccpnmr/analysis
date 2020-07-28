@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:06:50 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-28 12:55:35 +0100 (Tue, July 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -761,34 +761,35 @@ class SeriesFrame(Frame):
     def _populate(self):
         """Populate the texteditors - seriesValues and seriesUnits for the spectrumGroup
         """
-        with self._changes.blockChanges():
-            self.seriesType.setIndex(int(self.defaultObject.seriesType or 0))
-            series = self.defaultObject.series
-            if series:
-                for spec, textEditor in self._editors.items():
-                    try:
-                        ii = self.defaultObject.spectra.index(spec)
-                    except:
-                        pass
+        if self.defaultObject:
+            with self._changes.blockChanges():
+                self.seriesType.setIndex(int(self.defaultObject.seriesType or 0))
+                series = self.defaultObject.series
+                if series:
+                    for spec, textEditor in self._editors.items():
+                        try:
+                            ii = self.defaultObject.spectra.index(spec)
+                        except:
+                            pass
 
-                    try:
-                        if self.seriesType.getIndex() == SeriesTypes.FLOAT.value:
-                            seriesValue = float(series[ii])
-                        if self.seriesType.getIndex() == SeriesTypes.INTEGER.value:
-                            seriesValue = int(series[ii])
-                        elif self.seriesType.getIndex() == SeriesTypes.STRING.value:
-                            seriesValue = str(series[ii])
+                        try:
+                            if self.seriesType.getIndex() == SeriesTypes.FLOAT.value:
+                                seriesValue = float(series[ii])
+                            if self.seriesType.getIndex() == SeriesTypes.INTEGER.value:
+                                seriesValue = int(series[ii])
+                            elif self.seriesType.getIndex() == SeriesTypes.STRING.value:
+                                seriesValue = str(series[ii])
+                            else:
+                                seriesValue = repr(series[ii])
+                        except Exception as es:
+                            textEditor.set('')
                         else:
-                            seriesValue = repr(series[ii])
-                    except Exception as es:
-                        textEditor.set('')
-                    else:
-                        textEditor.set(str(seriesValue))
+                            textEditor.set(str(seriesValue))
 
-            if self.defaultObject.seriesUnits is not None and self.defaultObject.seriesUnits not in self._pulldownData:
-                self._pulldownData += (self.defaultObject.seriesUnits,)
-            self.unitsEditor.modifyTexts(texts=self._pulldownData)
-            self.unitsEditor.select(self.defaultObject.seriesUnits)
+                if self.defaultObject.seriesUnits is not None and self.defaultObject.seriesUnits not in self._pulldownData:
+                    self._pulldownData += (self.defaultObject.seriesUnits,)
+                self.unitsEditor.modifyTexts(texts=self._pulldownData)
+                self.unitsEditor.select(self.defaultObject.seriesUnits)
 
         self._validateEditors()
 
@@ -823,7 +824,7 @@ class SeriesFrame(Frame):
             pass
 
         else:
-            specValue = spectrum._getSeriesItemsById(spectrumGroup.pid)
+            specValue = spectrum._getSeriesItemsById(spectrumGroup.pid) if spectrumGroup else None
             if seriesValue != specValue:
                 return partial(self._changeSpectrumSeriesValues, spectrumGroup, spectrum, dim, seriesValue)
 

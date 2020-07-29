@@ -185,7 +185,7 @@ class BarGraphWidget(Widget):
             self.aboveBrush = args[AboveBrush]
             self.belowBrush = args[BelowBrush]
             self.disappearedBrush = args[DisappearedBrush]
-            drawLabels = args[DrawLabels]
+            drawLabels = args.get(DrawLabels)
 
         else:
             aboveX = []

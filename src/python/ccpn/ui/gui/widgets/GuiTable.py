@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-29 16:12:16 +0100 (Wed, July 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1016,42 +1016,45 @@ GuiTable::item::selected {
         elif event.button() == QtCore.Qt.LeftButton:
 
             item = self.itemAt(event.pos())
-            if item:
+            if not item:
+                self._currentRow = None
+                self._currentCol = None
+                self._selectionTableCallback(None)  # None selected. Needs callback anyway, so actions can be performed.
+
+                event.accept()
+                super(GuiTable, self).mousePressEvent(event)
+            else:
                 self._currentRow = item.row()
                 self._currentCol = item.column()
                 if item._format == bool and self._checkBoxTableCallback is not None:
                     self._checkBoxTableCallback(item)
-            else:
-                self._currentRow = None
-                self._currentCol = None
-                self._selectionTableCallback(None) # None selected. Needs callback anyway, so actions can be performed.
 
-            # we are selecting from the table
-            self._mousePressedPos = event.pos()
+                # we are selecting from the table
+                self._mousePressedPos = event.pos()
 
-            event.accept()
-            super(GuiTable, self).mousePressEvent(event)
-
-            if self._selectOverride == False:
-                # False required as may be clicking on an already selected item to deselect everything else
-                self._selectionTableCallback(None, mouseDrag=False)
-
-                # disable selecting as there may be a double click
-                self.setSelectionMode(self.NoSelection)
-
-                self._selectOverride = True
-
-                if self.pressingModifiers():
-                    # timer to re-enable table, smaller interval so that single click above doesn't look too delayed
-                    # don't respond to selection if modifiers pressed
-                    QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 0.75,
-                                             self._handleCellClickedExit)
-                else:
-                    QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 0.75,
-                                             partial(self._handleCellClicked, event.pos()))
-            else: # odd behaviours otherwise
-                self._selectionTableCallback(None)
+                event.accept()
                 super(GuiTable, self).mousePressEvent(event)
+
+                if self._selectOverride == False:
+                    # False required as may be clicking on an already selected item to deselect everything else
+                    self._selectionTableCallback(None, mouseDrag=False)
+
+                    # disable selecting as there may be a double click
+                    self.setSelectionMode(self.NoSelection)
+
+                    self._selectOverride = True
+
+                    if self.pressingModifiers():
+                        # timer to re-enable table, smaller interval so that single click above doesn't look too delayed
+                        # don't respond to selection if modifiers pressed
+                        QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 0.75,
+                                                 self._handleCellClickedExit)
+                    else:
+                        QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 0.75,
+                                                 partial(self._handleCellClicked, event.pos()))
+                else: # odd behaviours otherwise
+                    self._selectionTableCallback(None)
+
         else:
             event.ignore()
             super(GuiTable, self).mousePressEvent(event)

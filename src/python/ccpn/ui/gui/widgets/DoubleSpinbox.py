@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-22 18:18:17 +0100 (Mon, June 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-29 21:21:02 +0100 (Wed, July 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -54,6 +54,18 @@ KEYVALIDATELIST = (QtCore.Qt.Key_Return,
                    QtCore.Qt.Key_8,
                    QtCore.Qt.Key_9,
                    )
+KEYVALIDATEDECIMAL = (QtCore.Qt.Key_0,)  # need to discard if after decimal
+KEYVALIDATEDIGIT = (QtCore.Qt.Key_0,
+                    QtCore.Qt.Key_1,
+                    QtCore.Qt.Key_2,
+                    QtCore.Qt.Key_3,
+                    QtCore.Qt.Key_4,
+                    QtCore.Qt.Key_5,
+                    QtCore.Qt.Key_6,
+                    QtCore.Qt.Key_7,
+                    QtCore.Qt.Key_8,
+                    QtCore.Qt.Key_9,
+                    )
 
 
 class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
@@ -87,6 +99,7 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
 
         The spin box has the given parent.
         """
+        self._keyPressed = None
         self.validator = QtGui.QDoubleValidator()
         self.validator.Notation = 1
 
@@ -134,11 +147,10 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
             value = value
             self.setValue(value)
 
-        lineEdit = self.lineEdit()
-        lineEdit.returnPressed.connect(self._keyPressed)
-
         self._internalWheelEvent = True
-        self._keyPressed = False
+
+        lineEdit = self.lineEdit()
+        lineEdit.returnPressed.connect(self._returnPressed)
 
         # change focusPolicy so that spinboxes don't grab focus unless selected
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
@@ -172,7 +184,7 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
             # disable multiple stepping for wheelMouse events in a spectrumDisplay
             super().stepBy(1 if steps > 0 else -1 if steps < 0 else steps)
 
-    def _keyPressed(self, *args):
+    def _returnPressed(self, *args):
         """emit the value when return has been pressed
         """
         self.returnPressed.emit(self.value())
@@ -201,18 +213,28 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
 
     def validate(self, text, position):
         # activate the validator when
-        if self._keyPressed:
+        if self._keyPressed == 0:
             return self.validator.Intermediate, text, position
+        elif self._keyPressed in KEYVALIDATEDECIMAL:
+            ii = position - 1
+            while ii > 0:
+                # allow th euser to enter zeroes after the decimal point
+                if text[ii] in ['.']:
+                    return self.validator.Intermediate, text, position
+                if text[ii] in ['e']:
+                    return self.validator.validate(text, position)
+                ii -= 1
+            return self.validator.validate(text, position)
         else:
             return self.validator.validate(text, position)
 
     def keyPressEvent(self, event):
         # allow the typing of other stuff into the box and validate only when required
-        self._keyPressed = False if event.key() in KEYVALIDATELIST else True
+        self._keyPressed = event.key() if event.key() in KEYVALIDATELIST else 0
         super().keyPressEvent(event)
 
     def keyReleaseEvent(self, event):
-        self._keyPressed = False
+        self._keyPressed = None
         super().keyReleaseEvent(event)
 
 
@@ -226,6 +248,11 @@ def fexp(f):
     return int(floor(log10(abs(f)))) if f != 0 else 0
 
 
+def validFloat(string):
+    match = _float_re.search(string)
+    return match.groups()[0] == string if match else False
+
+
 class ScientificDoubleSpinBox(DoubleSpinbox):
     """Constructs a spinbox in which the values can be set using Sci notation
     """
@@ -233,6 +260,10 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
     def __init__(self, *args, **kwargs):
         super(ScientificDoubleSpinBox, self).__init__(*args, **kwargs)
         self.setDecimals(1000)
+        _decs = kwargs.get('step')
+        # step if defined by 'step' relative to current power
+        self._decimalStep = 0.1 if _decs is None else _decs
+        # self._decimalStep = 10 ** _decs
 
     def fixup(self, text):
         return self.validator.fixup(text)
@@ -243,14 +274,21 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
         """
         if self.minimum() <= 0 and self.maximum() <= 0:
             # check for maximum
+            _lineEdit = self.lineEdit()
             val = min(-abs(float(text)), self.maximum())
-            self.lineEdit().setText(self.textFromValue(val))
+            # keep the cursor position so it doesn't jump to the end; same below
+            _lastPos = _lineEdit.cursorPosition()
+            _lineEdit.setText(self.textFromValue(val))
+            _lineEdit.setCursorPosition(_lastPos)
             return val
 
         elif self.minimum() >= 0 and self.maximum() >= 0:
             # check for minimum
+            _lineEdit = self.lineEdit()
             val = max(abs(float(text)), self.minimum())
-            self.lineEdit().setText(self.textFromValue(val))
+            _lastPos = _lineEdit.cursorPosition()
+            _lineEdit.setText(self.textFromValue(val))
+            _lineEdit.setCursorPosition(_lastPos)
             return val
 
         return float(text)
@@ -261,6 +299,7 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
     def stepBy(self, steps):
         """Increment the current value.
         Step if 1/10th of the current rounded value * step
+        Now defined by 'step' in kwargs, i.e., step=0.1, 0.01
         """
         # clip number of steps to SCIENTIFICSPINBOXSTEP as 10* will go directly to zero from 1 when Ctrl/Cmd pressed
         steps = min(steps, SCIENTIFICSPINBOXSTEP) if steps > 0 else max(steps, -SCIENTIFICSPINBOXSTEP)
@@ -268,7 +307,8 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
         text = self.cleanText()
         groups = _float_re.search(text).groups()
         decimal = float(groups[1])
-        decimal += steps * 10 ** fexp(decimal / 10)  #     (decimal / 10)
+        # decimal += steps * 10 ** fexp(decimal / self._decimalStep)  #     (decimal / 10)
+        decimal += steps * 10 ** fexp(decimal * self._decimalStep)
         new_string = '{:g}'.format(decimal) + (groups[3] if groups[3] else '')
 
         # the double convert ensures number stays to the closest Sci notation

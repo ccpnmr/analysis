@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:10:53 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-29 21:21:02 +0100 (Wed, July 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -531,16 +531,19 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             step = stepX
             stepY = len(self.posColours) - 1
             jj = 0
-            for ii in range(stepX + 1):
-                _interp = (stepX - step) / stepX
-                _intCol = Colour.interpolateColourRgba(self.posColours[min(jj, stepY)], self.posColours[min(jj + 1, stepY)],
-                                                       _interp,
-                                                       alpha=1.0)
-                _posColours.extend(_intCol)
-                step -= stepY
-                if step < 0:
-                    step += stepX
-                    jj += 1
+            if stepX > 0:
+                for ii in range(stepX + 1):
+                    _interp = (stepX - step) / stepX
+                    _intCol = Colour.interpolateColourRgba(self.posColours[min(jj, stepY)], self.posColours[min(jj + 1, stepY)],
+                                                           _interp,
+                                                           alpha=1.0)
+                    _posColours.extend(_intCol)
+                    step -= stepY
+                    if step < 0:
+                        step += stepX
+                        jj += 1
+            else:
+                _posColours = self.posColours[0]
 
             # get the positive contour colour list
             _negColours = []
@@ -548,16 +551,19 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             step = stepX
             stepY = len(self.negColours) - 1
             jj = 0
-            for ii in range(stepX + 1):
-                _interp = (stepX - step) / stepX
-                _intCol = Colour.interpolateColourRgba(self.negColours[min(jj, stepY)], self.negColours[min(jj + 1, stepY)],
-                                                       _interp,
-                                                       alpha=1.0)
-                _negColours.extend(_intCol)
-                step -= stepY
-                if step < 0:
-                    step += stepX
-                    jj += 1
+            if stepX > 0:
+                for ii in range(stepX + 1):
+                    _interp = (stepX - step) / stepX
+                    _intCol = Colour.interpolateColourRgba(self.negColours[min(jj, stepY)], self.negColours[min(jj + 1, stepY)],
+                                                           _interp,
+                                                           alpha=1.0)
+                    _negColours.extend(_intCol)
+                    step -= stepY
+                    if step < 0:
+                        step += stepX
+                        jj += 1
+            else:
+                _negColours = self.negColours[0]
 
             contourList = None
             if numDims < 3 or self._application.preferences.general.generateSinglePlaneContours:

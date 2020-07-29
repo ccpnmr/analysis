@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:06:50 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-29 21:21:02 +0100 (Wed, July 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1179,17 +1179,17 @@ class DimensionsTab(Widget):
             row += 1
             self.spectralWidthsData[i] = ScientificDoubleSpinBox(self, grid=(row, i + 1), vAlign='t', hAlign='l', decimals=3, step=0.1)
             self.spectralWidthsData[i].valueChanged.connect(partial(self._queueSetSpectralWidths, spectrum, i,
-                                                                         self.spectralWidthsData[i].textFromValue))
+                                                                    self.spectralWidthsData[i].textFromValue))
 
             row += 1
             self.spectralWidthsHzData[i] = ScientificDoubleSpinBox(self, grid=(row, i + 1), vAlign='t', hAlign='l', decimals=3, step=0.1)
             self.spectralWidthsHzData[i].valueChanged.connect(partial(self._queueSetSpectralWidthsHz, spectrum, i,
-                                                                         self.spectralWidthsHzData[i].textFromValue))
+                                                                      self.spectralWidthsHzData[i].textFromValue))
 
             row += 1
             self.spectrometerFrequenciesData[i] = ScientificDoubleSpinBox(self, grid=(row, i + 1), vAlign='t', hAlign='l', decimals=3, step=0.1)
             self.spectrometerFrequenciesData[i].valueChanged.connect(partial(self._queueSetSpectrometerFrequencies, spectrum, i,
-                                                                         self.spectrometerFrequenciesData[i].textFromValue))
+                                                                             self.spectrometerFrequenciesData[i].textFromValue))
 
             row += 1
             # value = spectrum.referenceValues[i]
@@ -1687,13 +1687,13 @@ class ContoursTab(Widget):
 
         row += 1
         positiveMultiplierLabel = Label(self, text="Positive Multiplier", grid=(row, col), vAlign='c', hAlign='l')
-        self.positiveMultiplierData = DoubleSpinbox(self, grid=(row, col + 1), vAlign='t', min=0.0, decimals=3, step=0.1)
+        self.positiveMultiplierData = ScientificDoubleSpinBox(self, grid=(row, col + 1), vAlign='t', min=0.0, decimals=3, step=0.01)
         # self.positiveMultiplierData.setValue(float(self.spectrum.positiveContourFactor))
         self.positiveMultiplierData.valueChanged.connect(partial(self._queueChangePositiveContourFactor, spectrum, self.positiveMultiplierData.textFromValue))
 
         row += 1
         positiveContourCountLabel = Label(self, text="Number of positive contours", grid=(row, col), vAlign='c', hAlign='l')
-        self.positiveContourCountData = Spinbox(self, grid=(row, col + 1), vAlign='t')
+        self.positiveContourCountData = Spinbox(self, grid=(row, col + 1), vAlign='t', min=1)
         # self.positiveContourCountData.setValue(int(self.spectrum._apiDataSource.positiveContourCount))
         self.positiveContourCountData.valueChanged.connect(partial(self._queueChangePositiveContourCount, spectrum))
 
@@ -1741,13 +1741,13 @@ class ContoursTab(Widget):
 
         row += 1
         negativeMultiplierLabel = Label(self, text="Negative Multiplier", grid=(row, col), vAlign='c', hAlign='l')
-        self.negativeMultiplierData = DoubleSpinbox(self, grid=(row, col + 1), vAlign='t', min=0.0, decimals=3, step=0.1)
+        self.negativeMultiplierData = ScientificDoubleSpinBox(self, grid=(row, col + 1), vAlign='t', min=0.0, decimals=3, step=0.01)
         # self.negativeMultiplierData.setValue(self.spectrum.negativeContourFactor)
         self.negativeMultiplierData.valueChanged.connect(partial(self._queueChangeNegativeContourFactor, spectrum, self.negativeMultiplierData.textFromValue))
 
         row += 1
         negativeContourCountLabel = Label(self, text="Number of negative contours", grid=(row, col), vAlign='c', hAlign='l')
-        self.negativeContourCountData = Spinbox(self, grid=(row, col + 1), vAlign='t')
+        self.negativeContourCountData = Spinbox(self, grid=(row, col + 1), vAlign='t', min=1)
         # self.negativeContourCountData.setValue(self.spectrum.negativeContourCount)
         self.negativeContourCountData.valueChanged.connect(partial(self._queueChangeNegativeContourCount, spectrum))
 
@@ -2013,7 +2013,7 @@ class ContoursTab(Widget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangePositiveContourCount(self, spectrum, value):
-        if value >= 0 and value != spectrum.positiveContourCount:
+        if value > 0 and value != spectrum.positiveContourCount:
             returnVal = partial(self._changePositiveContourCount, spectrum, value)
         else:
             returnVal = None
@@ -2068,7 +2068,7 @@ class ContoursTab(Widget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangeNegativeContourCount(self, spectrum, value):
-        if value >= 0 and value != spectrum.negativeContourCount:
+        if value > 0 and value != spectrum.negativeContourCount:
             returnVal = partial(self._changeNegativeContourCount, spectrum, value)
         else:
             returnVal = None

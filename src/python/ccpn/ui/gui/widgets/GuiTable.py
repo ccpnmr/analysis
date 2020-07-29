@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-29 16:12:16 +0100 (Wed, July 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-29 21:21:03 +0100 (Wed, July 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1019,10 +1019,8 @@ GuiTable::item::selected {
             if not item:
                 self._currentRow = None
                 self._currentCol = None
-                self._selectionTableCallback(None)  # None selected. Needs callback anyway, so actions can be performed.
-
                 event.accept()
-                super(GuiTable, self).mousePressEvent(event)
+
             else:
                 self._currentRow = item.row()
                 self._currentCol = item.column()
@@ -1052,7 +1050,7 @@ GuiTable::item::selected {
                     else:
                         QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() * 0.75,
                                                  partial(self._handleCellClicked, event.pos()))
-                else: # odd behaviours otherwise
+                else:  # odd behaviours otherwise
                     self._selectionTableCallback(None)
 
         else:

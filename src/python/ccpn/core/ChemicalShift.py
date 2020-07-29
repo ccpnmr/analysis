@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-23 15:18:27 +0100 (Tue, June 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-28 12:46:05 +0100 (Tue, July 28, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -148,8 +148,6 @@ class ChemicalShift(AbstractWrapperObject):
         """CCPN Internal: update the pid if its nmrAtom has been merged
         """
         if self.nmrAtom:
-            # NOTE:ED - change the reference in _pid2Obj to reflect the name change
-            self._id = Pid.IDSEP.join((self.chemicalShiftList.id, self.nmrAtom._id))
             self._resetIds()
         else:
             raise RuntimeError('ChemicalShift {} has no associated nmrAtom'.format(self))

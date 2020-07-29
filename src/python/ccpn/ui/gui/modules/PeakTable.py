@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-26 12:02:35 +0000 (Thu, March 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -208,8 +208,6 @@ class PeakListTableWidget(GuiTable):
                             grid=(3, 0), gridSpan=(1, 6))
         self.moduleParent = moduleParent
 
-        self.tableMenu.addAction('Copy Peaks...', self._copyPeaks)
-
         ## populate the table if there are peaklists in the project
         if peakList is not None:
             self._selectPeakList(peakList)
@@ -229,6 +227,18 @@ class PeakListTableWidget(GuiTable):
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
+
+    def _setContextMenu(self, enableExport=True, enableDelete=True):
+        """Subclass guiTable to add new items to context menu
+        """
+        super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
+        _actions = self.tableMenu.actions()
+        if _actions:
+            _topMenuItem = _actions[0]
+            _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
+            self._copyPeakMenuAction = self.tableMenu.addAction('Copy Peaks...', self._copyPeaks)
+            # move new actions to the top of the list
+            self.tableMenu.insertAction(_topSeparator, self._copyPeakMenuAction)
 
     def _processDroppedItems(self, data):
         """CallBack for Drop events

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-07 09:51:34 +0100 (Tue, July 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -24,16 +24,17 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import Union, Tuple
+from typing import Union, Tuple, Sequence
 from functools import partial
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core._implementation.AbsorbResonance import absorbResonance
 from ccpn.core.lib import Pid
 from ccpn.core.lib.Util import AtomIdTuple
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Constants
-from ccpn.util.Common import name2IsotopeCode
+from ccpn.util.Common import name2IsotopeCode, makeIterableList
 from ccpn.util.Constants import PSEUDO_ATOM_NAMES
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoBlock, renameObjectContextManager
@@ -221,8 +222,6 @@ class NmrAtom(AbstractWrapperObject):
         """
 
         oldPid = self.longPid
-        clearUndo = False
-        undo = self._apiResonance.root._undo
         apiResonance = self._apiResonance
         apiResonanceGroup = apiResonance.resonanceGroup
 
@@ -266,19 +265,11 @@ class NmrAtom(AbstractWrapperObject):
                     # NB self.name can never be returned as None
 
                     if result is self:
-                        self._wrappedData.name = name or None
+                        # self._wrappedData.name = name or None
+                        self.rename(name or None)
 
                     elif mergeToExisting:
-                        clearUndo = True
-
-                        # insert the new attached nmrAtoms - deleted and new will be included so tables can update with deleted peaks/nmrAtoms
-                        # hopefully traitlets will solve notifier problems
-                        changedAssigned = tuple(set(self.assignedPeaks) | set(result.assignedPeaks))
-                        setattr(self, ASSIGNEDPEAKSCHANGED, changedAssigned)
-
-                        result._wrappedData.absorbResonance(self._apiResonance)
-                        self._project._logger.warning("Merging (1) %s into %s. Merging is NOT undoable."
-                                                      % (oldPid, result.longPid))
+                        self.mergeNmrAtoms(result)
 
                     else:
                         raise ValueError("New assignment clash with existing assignment,"
@@ -290,42 +281,57 @@ class NmrAtom(AbstractWrapperObject):
                     if nmrResidue.getNmrAtom(self.name) is None:
                         self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
                         if name != self.name:
-                            self._wrappedData.name = name or None
+                            # self._wrappedData.name = name or None
+                            self.rename(name or None)
+
                     elif name is None or oldNmrResidue.getNmrAtom(name) is None:
                         if name != self.name:
-                            self._wrappedData.name = name or None
+                            # self._wrappedData.name = name or None
+                            self.rename(name or None)
+
                         self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
                     else:
-                        self._wrappedData.name = None  # Necessary to avoid name clashes
+                        # self._wrappedData.name = None  # Necessary to avoid name clashes
+                        self.rename(None)
                         self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
-                        self._wrappedData.name = name
+                        # self._wrappedData.name = name
+                        self.rename(name or None)
 
                 elif mergeToExisting:
-                    # WARNING if we get here undo is no longer possible
-                    clearUndo = True
+                    self.mergeNmrAtoms(result)
 
-                    # insert the new attached nmrAtoms - deleted and new will be included so tables can update with deleted peaks/nmrAtoms
-                    # hopefully traitlets will solve notifier problems
-                    changedAssigned = tuple(set(self.assignedPeaks) | set(result.assignedPeaks))
-                    setattr(self, ASSIGNEDPEAKSCHANGED, changedAssigned)
-
-                    result._wrappedData.absorbResonance(self._apiResonance)
-                    self._project._logger.warning("Merging (2) %s into %s. Merging is NOT undoable."
-                                                  % (oldPid, result.longPid))
                 else:
                     raise ValueError("New assignment clash with existing assignment,"
                                      " and merging is disallowed")
-            #
-            if undo is not None and clearUndo:
-                undo.clear()
 
         return result
+
+    @logCommand(get='self')
+    def mergeNmrAtoms(self, nmrAtoms: Sequence['NmrAtom']):
+        nmrAtoms = makeIterableList(nmrAtoms)
+        nmrAtoms = [self.project.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom for nmrAtom in nmrAtoms]
+        if not all(isinstance(nmrAtom, NmrAtom) for nmrAtom in nmrAtoms):
+            raise TypeError('nmrAtoms can only contain items of type NmrAtom')
+        if self in nmrAtoms:
+            raise TypeError('nmrAtom cannot be merged with itself')
+
+        with undoBlock():
+            for nmrAtom in nmrAtoms:
+                absorbResonance(self, nmrAtom)
 
     @property
     def chemicalShifts(self) -> Tuple:
         "Returns ChemicalShift objects connected to NmrAtom"
         getDataObj = self._project._data2Obj.get
         return tuple(sorted(getDataObj(x) for x in self._wrappedData.shifts))
+
+    def _getAttribute(self, attrName) -> Tuple:
+        """Returns contents of api attribute
+        """
+        if hasattr(self._wrappedData, attrName):
+            return getattr(self._wrappedData, attrName)
+
+        raise TypeError('nmrAtom does not have attribute {}'.format(attrName))
 
     #=========================================================================================
     # Implementation functions

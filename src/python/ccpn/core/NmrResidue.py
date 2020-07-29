@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-07 09:51:34 +0100 (Tue, July 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,17 +26,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
-from functools import partial
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core._implementation.AbsorbResonance import absorbResonance
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 from ccpn.core import _importOrder
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameObject, renameObjectNoBlanking, undoBlock
+from ccpn.util.Common import makeIterableList
 from ccpn.util.Logging import getLogger
 
 
@@ -1078,29 +1079,13 @@ class NmrResidue(AbstractWrapperObject):
 
                 if not residueType or result.residueType == residueType:
 
-                    # keep a log of changed peaks
-                    changedAssigned = {}
-
                     # Move or merge the NmrAtoms across and delete the current NmrResidue
                     for resonance in apiResonanceGroup.resonances:
                         newResonance = newApiResonanceGroup.findFirstResonance(implName=resonance.name)
                         if newResonance is None:
                             resonance.resonanceGroup = newApiResonanceGroup
                         else:
-                            # WARNING. This step is NOT undoable, and clears the undo stack
-                            clearUndo = True
-
-                            # insert the new attached nmrAtoms - deleted and new will be included so tables can update with deleted peaks/nmrAtoms
-                            # hopefully traitlets will solve notifier problems
-                            _nmrAtom = self.project._data2Obj.get(newResonance)
-                            if _nmrAtom:
-                                changedAssigned |= set(_nmrAtom.assignedPeaks)
-                            _nmrAtom = self.project._data2Obj.get(resonance)
-                            if _nmrAtom:
-                                changedAssigned |= set(_nmrAtom.assignedPeaks)
-                            setattr(self, ASSIGNEDPEAKSCHANGED, tuple(changedAssigned))
-
-                            newResonance.absorbResonance(resonance)
+                            absorbResonance(newResonance, resonance)
 
                     apiResonanceGroup.delete()
 
@@ -1110,13 +1095,31 @@ class NmrResidue(AbstractWrapperObject):
                                      % (chainCode, sequenceCode, residueType,
                                         chainCode, sequenceCode, result.residueType))
 
-            if clearUndo:
-                self._project._logger.warning("Merging NmrAtoms from %s into %s. Merging is NOT undoable."
-                                              % (oldPid, result.longPid))
-                if undo is not None:
-                    undo.clear()
-
         return result
+
+    @logCommand(get='self')
+    def mergeNmrResidues(self, nmrResidues: typing.Sequence['NmrResidue']):
+        nmrResidues = makeIterableList(nmrResidues)
+        nmrResidues = [self.project.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue for nmrResidue in nmrResidues]
+        if not all(isinstance(nmrResidue, NmrResidue) for nmrResidue in nmrResidues):
+            raise TypeError('nmrResidues can only contain items of type NmrResidue')
+        if self in nmrResidues:
+            raise TypeError('nmrResidue cannot be merged with itself')
+
+        with undoBlock():
+            apiResonanceGroup = self._wrappedData
+
+            for nmrResidue in nmrResidues:
+                for nmrAtom in nmrResidue.nmrAtoms:
+                    existingNmrAtom = self.getNmrAtom(nmrAtom.name)
+                    if existingNmrAtom is None:
+                        # move resonance
+                        resonance = nmrAtom._wrappedData
+                        resonance.resonanceGroup = apiResonanceGroup
+                    else:
+                        absorbResonance(existingNmrAtom, nmrAtom)
+
+                nmrResidue.delete()
 
     # def _rebuildAssignedChains(self):
     #   self._startCommandEchoBlock('_rebuildAssignedChains')

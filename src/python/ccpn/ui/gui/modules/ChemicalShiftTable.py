@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-12 16:00:40 +0100 (Fri, June 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -47,6 +47,8 @@ from PyQt5 import QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
+from ccpn.ui.gui.widgets.MessageDialog import showYesNo, showWarning
 
 
 logger = getLogger()
@@ -236,7 +238,7 @@ class ChemicalShiftTable(GuiTable):
                   'Standard deviation of chemical shift, in selected ChemicalShiftList', None, '%6.3f'),
                  ('Shift list peaks',
                   lambda cs: ChemicalShiftTable._getShiftPeakCount(cs), 'Number of peaks assigned to this NmrAtom in PeakLists associated with this'
-                                                                                 'ChemicalShiftList', None, '%3d'),
+                                                                        'ChemicalShiftList', None, '%3d'),
                  ('All peaks',
                   lambda cs: len(set(x for x in cs.nmrAtom.assignedPeaks)), 'Number of peaks assigned to this NmrAtom across all PeakLists', None, '%3d'),
                  ('Comment', lambda cs: ChemicalShiftTable._getCommentText(cs), 'Notes',
@@ -423,6 +425,87 @@ class ChemicalShiftTable(GuiTable):
         else:
             self.clearTable()
 
+    def _setContextMenu(self, enableExport=True, enableDelete=True):
+        """Subclass guiTable to insert new merge items to top of context menu
+        """
+        super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
+        _actions = self.tableMenu.actions()
+        if _actions:
+            _topMenuItem = _actions[0]
+            _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
+            self._mergeMenuAction = self.tableMenu.addAction('Merge NmrAtoms', self._mergeNmrAtoms)
+            self._editMenuAction = self.tableMenu.addAction('Edit NmrAtom', self._editNmrAtom)
+            # move new actions to the top of the list
+            self.tableMenu.insertAction(_topSeparator, self._mergeMenuAction)
+            self.tableMenu.insertAction(self._mergeMenuAction, self._editMenuAction)
+
+    def _raiseTableContextMenu(self, pos):
+        """Create a new menu and popup at cursor position
+        Add merge item
+        """
+        selection = self.getSelectedObjects()
+        data = self.getRightMouseItem()
+        if data:
+            chemShift = data.get(DATAFRAME_OBJECT)
+            currentNmrAtom = chemShift.nmrAtom if chemShift else None
+
+            selection = [ch.nmrAtom for ch in selection or []]
+            _check = (currentNmrAtom and (1 < len(selection) < 5) and currentNmrAtom in selection)
+            _option = ' into {}'.format(currentNmrAtom.id if currentNmrAtom else '') if _check else ''
+            self._mergeMenuAction.setText('Merge NmrAtoms {}'.format(_option))
+            self._mergeMenuAction.setEnabled(_check)
+
+            self._editMenuAction.setText('Edit NmrAtom {}'.format(currentNmrAtom.id if currentNmrAtom else ''))
+            self._editMenuAction.setEnabled(True if currentNmrAtom else False)
+
+        else:
+            # disabled but visible lets user know that menu items exist
+            self._mergeMenuAction.setText('Merge NmrAtoms')
+            self._mergeMenuAction.setEnabled(False)
+            self._editMenuAction.setText('Edit NmrAtom')
+            self._editMenuAction.setEnabled(False)
+
+        super()._raiseTableContextMenu(pos)
+
+    def _mergeNmrAtoms(self):
+        """Merge the nmrAtoms in the selection into the nmrAtom that has ben right-clicked
+        """
+        selection = self.getSelectedObjects()
+        data = self.getRightMouseItem()
+        if data and selection:
+            chemShift = data.get(DATAFRAME_OBJECT)
+            currentNmrAtom = chemShift.nmrAtom if chemShift else None
+            matching = [ch.nmrAtom for ch in selection if ch and ch.nmrAtom != currentNmrAtom and
+                        ch.nmrAtom.isotopeCode == currentNmrAtom.isotopeCode]
+            nonMatching = [ch.nmrAtom for ch in selection if ch and ch.nmrAtom != currentNmrAtom and
+                           ch.nmrAtom.isotopeCode != currentNmrAtom.isotopeCode]
+
+            if len(matching) < 1:
+                showWarning('Merge NmrAtoms', 'No matching isotope codes')
+            else:
+                ss = 's' if (len(nonMatching) > 1) else ''
+                nonMatchingList = '\n\n\n({} nmrAtom{} with non-matching isotopeCode{})'.format(len(nonMatching), ss, ss) if nonMatching else ''
+                yesNo = showYesNo('Merge NmrAtoms', "Do you want to merge\n\n"
+                                                    "{}   into   {}{}".format('\n'.join([ss.id for ss in matching]),
+                                                                              currentNmrAtom.id,
+                                                                              nonMatchingList))
+                if yesNo:
+                    currentNmrAtom.mergeNmrAtoms(matching)
+
+    def _editNmrAtom(self):
+        """Show the edit nmrAtom popup for the clicked nmrAtom
+        """
+        data = self.getRightMouseItem()
+        if data:
+            chemShift = data.get(DATAFRAME_OBJECT)
+            currentNmrAtom = chemShift.nmrAtom if chemShift else None
+
+            if currentNmrAtom:
+                from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomPopup
+
+                popup = NmrAtomPopup(parent=self.mainWindow, mainWindow=self.mainWindow, obj=currentNmrAtom)
+                popup.exec_()
+
     @staticmethod
     def _getShiftPeakCount(chemicalShift):
         """
@@ -501,4 +584,3 @@ class ChemicalShiftTable(GuiTable):
         # self.clearTableNotifiers()
         self._chemicalShiftListPulldown.unRegister()
         super()._close()
-

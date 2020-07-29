@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-02 18:18:49 +0100 (Thu, July 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -282,8 +282,11 @@ GuiTable::item::selected {
         # enable the right click menu
         self.searchWidget = None
         self._setHeaderContextMenu()
+        self._enableExport = enableExport
+        self._enableDelete = enableDelete
         self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
         self._enableSearch = enableSearch
+        self._currentRightMenuItem = None
 
         # populate if a dataFrame has been passed in
         if dataFrameObject:
@@ -1007,6 +1010,7 @@ GuiTable::item::selected {
 
         if event.button() == QtCore.Qt.RightButton:
             # stops the selection from the table when the right button is clicked
+            self._currentRightMenuItem = self.itemAt(event.pos())
             event.accept()
 
         elif event.button() == QtCore.Qt.LeftButton:
@@ -1142,7 +1146,8 @@ GuiTable::item::selected {
         self.customContextMenuRequested.connect(self._raiseTableContextMenu)
 
     def _raiseTableContextMenu(self, pos):
-
+        """Create a new menu and popup at cursor position
+        """
         pos = QtCore.QPoint(pos.x() + 10, pos.y() + 10)
         action = self.tableMenu.exec_(self.mapToGlobal(pos))
 
@@ -1665,6 +1670,16 @@ GuiTable::item::selected {
         #rows.sort()
 
         return rows
+
+    def getRightMouseItem(self):
+        if self._currentRightMenuItem:
+            row = self._currentRightMenuItem.row()
+            data = {}
+            for cc in range(self.columnCount()):
+                colName = self.horizontalHeaderItem(cc).text()
+                data[colName] = self.item(row, cc).value
+
+            return data
 
     def getSelectedObjects(self, fromSelection=None):
         '''

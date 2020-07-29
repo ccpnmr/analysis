@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-23 18:26:47 +0100 (Tue, June 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -57,7 +57,7 @@ class NmrAtomPopup(AttributeEditorPopupABC):
 
     klass = NmrAtom
     attributes = [('pid', EntryCompoundWidget, getattr, None, None, None, {}),
-                  ('nmrAtom name', PulldownListCompoundWidget, getattr, None, _getNmrAtomTypes, None, {'editable' : True}),
+                  ('nmrAtom name', PulldownListCompoundWidget, getattr, None, _getNmrAtomTypes, None, {'editable': True}),
                   ('nmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNmrResidueTypes, None, {}),
                   ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {}),
                   ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
@@ -71,21 +71,30 @@ class NmrAtomPopup(AttributeEditorPopupABC):
         atomName = self.nmrAtomname.getText()
         nmrResidue = self.nmrResidue.getText()
 
-        if self.obj.name != atomName:
-            self.obj.rename(atomName)
+        destNmrResidue = self.project.getByPid('NR:{}'.format(nmrResidue))
+        if not destNmrResidue:
+            raise TypeError('nmrResidue does not exist')
 
-        if self.obj.nmrResidue.id != nmrResidue:
-            nmrResidue = self.project.getByPid('NR:%s' % nmrResidue)
-            merge = self.MergetoExisting.isChecked()
+        destNmrAtom = destNmrResidue.getNmrAtom(atomName)
+        merge = self.MergetoExisting.isChecked()
 
-            if not merge and self.project.getByPid('NA:%s.%s' % (nmrResidue.id, atomName)):
+        if destNmrAtom and destNmrAtom == self.obj:
+            # same nmrAtom so skip
+            pass
+        elif destNmrAtom:
+            # different name and/or different nmrResidue
+            if not merge:
                 # raise error to notify popup
                 raise ValueError('Cannot re-assign NmrAtom to an existing NmrAtom of another NmrResidue without merging')
-            else:
-                self.obj.assignTo(chainCode=nmrResidue.nmrChain.shortName,
-                                  sequenceCode=nmrResidue.sequenceCode,
-                                  residueType=nmrResidue.residueType,
-                                  mergeToExisting=merge)
+            destNmrAtom.mergeNmrAtoms(self.obj)
+
+        else:
+            # assign to a new nmrAtom
+            self.obj.assignTo(chainCode=destNmrResidue.nmrChain.shortName,
+                              sequenceCode=destNmrResidue.sequenceCode,
+                              residueType=destNmrResidue.residueType,
+                              name=atomName,
+                              mergeToExisting=merge)
 
             self.pid.setText(self.obj.pid)
 

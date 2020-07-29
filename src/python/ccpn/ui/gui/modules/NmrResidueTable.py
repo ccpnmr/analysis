@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-12 16:00:40 +0100 (Fri, June 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, showYesNo
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -47,12 +47,13 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
+from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 from ccpnc.clibrary import Clibrary
+
 
 logger = getLogger()
 ALL = '<all>'
 _getNmrIndex = Clibrary.getNmrResidueIndex
-
 
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 
@@ -335,7 +336,7 @@ class NmrResidueTable(GuiTable):
             # ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None, None),
             ('Pid', lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None, None),
             ('_object', lambda nmrResidue: nmrResidue, 'Object', None, None),
-            ('NmrChain', lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain containing the nmrResidue', None, None),        # just add the nmrChain for clarity
+            ('NmrChain', lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain containing the nmrResidue', None, None),  # just add the nmrChain for clarity
             ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
             ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
             ('NmrAtoms', lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None, None),
@@ -431,7 +432,7 @@ class NmrResidueTable(GuiTable):
             raise RuntimeError('Col has to be >= 2')
         self._widget.getLayout().addWidget(widget, row, col, rowSpan, colSpan)
         if alignment is not None:
-            self._widget.getLayout().setAlignment(widget,alignment)
+            self._widget.getLayout().setAlignment(widget, alignment)
         widget.setFixedSize(widget.sizeHint())
         self._widget.setFixedSize(self._widget.sizeHint())
 
@@ -772,85 +773,155 @@ class NmrResidueTable(GuiTable):
     def _selectPullDown(self, value):
         self.ncWidget.select(value)
 
+    def _setContextMenu(self, enableExport=True, enableDelete=True):
+        """Subclass guiTable to insert new merge items to top of context menu
+        """
+        super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
+        _actions = self.tableMenu.actions()
+        if _actions:
+            _topMenuItem = _actions[0]
+            _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
+            self._mergeMenuAction = self.tableMenu.addAction('Merge NmrResidues', self._mergeNmrResidues)
+            self._editMenuAction = self.tableMenu.addAction('Edit NmrResidue', self._editNmrResidue)
+            # move new actions to the top of the list
+            self.tableMenu.insertAction(_topSeparator, self._mergeMenuAction)
+            self.tableMenu.insertAction(self._mergeMenuAction, self._editMenuAction)
+
+    def _raiseTableContextMenu(self, pos):
+        """Create a new menu and popup at cursor position
+        Add merge item
+        """
+        selection = self.getSelectedObjects()
+        data = self.getRightMouseItem()
+        if data:
+            currentNmrResidue = data.get(DATAFRAME_OBJECT)
+
+            selection = selection or []
+            _check = (currentNmrResidue and (1 < len(selection) < 5) and currentNmrResidue in selection)
+            _option = ' into {}'.format(currentNmrResidue.id if currentNmrResidue else '') if _check else ''
+            self._mergeMenuAction.setText('Merge NmrResidues {}'.format(_option))
+            self._mergeMenuAction.setEnabled(_check)
+
+            self._editMenuAction.setText('Edit NmrResidue {}'.format(currentNmrResidue.id if currentNmrResidue else ''))
+            self._editMenuAction.setEnabled(True if currentNmrResidue else False)
+
+        else:
+            # disabled but visible lets user know that menu items exist
+            self._mergeMenuAction.setText('Merge NmrResidues')
+            self._mergeMenuAction.setEnabled(False)
+            self._editMenuAction.setText('Edit NmrResidue')
+            self._editMenuAction.setEnabled(False)
+
+        super()._raiseTableContextMenu(pos)
+
+    def _mergeNmrResidues(self):
+        """Merge the nmrResidues in the selection into the nmrResidue that has been right-clicked
+        """
+        selection = self.getSelectedObjects()
+        data = self.getRightMouseItem()
+        if data and selection:
+            currentNmrResidue = data.get(DATAFRAME_OBJECT)
+            matching = [ch for ch in selection if ch and ch != currentNmrResidue]
+
+            if len(matching):
+                yesNo = showYesNo('Merge NmrResidues', "Do you want to merge\n\n"
+                                                       "{}   into   {}".format('\n'.join([ss.id for ss in matching]),
+                                                                               currentNmrResidue.id))
+                if yesNo:
+                    currentNmrResidue.mergeNmrResidues(matching)
+
+    def _editNmrResidue(self):
+        """Show the edit nmrResidue popup for the clicked nmrResidue
+        """
+        data = self.getRightMouseItem()
+        if data:
+            currentNmrResidue = data.get(DATAFRAME_OBJECT)
+
+            if currentNmrResidue:
+                from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
+
+                popup = NmrResiduePopup(parent=self.mainWindow, mainWindow=self.mainWindow, obj=currentNmrResidue)
+                popup.exec_()
+
+
 KD = 'Kd'
 Deltas = 'Ddelta'
 
+
 class _CSMNmrResidueTable(NmrResidueTable):
-  """
-  Custom nmrResidue Table with extra columns used in the ChemicalShiftsMapping Module
-  """
-  def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
-               checkBoxCallback=None, nmrChain=None, **kwds):
-
-    NmrResidueTable.__init__(self, parent=parent, mainWindow=mainWindow,
-                             moduleParent=moduleParent,
-                             actionCallback=actionCallback,
-                             selectionCallback=selectionCallback,
-                             checkBoxCallback = checkBoxCallback,
-                             nmrChain=nmrChain,
-                             multiSelect=True,
-                             **kwds)
-
-    self.NMRcolumns = ColumnClass([
-        ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None, None),
-        ('Pid', lambda nmrResidue:nmrResidue.pid, 'Pid of NmrResidue', None, None),
-        ('_object', lambda nmrResidue:nmrResidue, 'Object', None, None),
-        ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
-        ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
-        ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
-        ('Selected', lambda nmrResidue: _CSMNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None, None),
-        ('Spectra', lambda nmrResidue: _CSMNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
-         , 'Number of spectra selected for calculating the deltas', None, None),
-        (Deltas, lambda nmrResidue: nmrResidue._delta, '', None, None),
-        (KD, lambda nmrResidue: nmrResidue._estimatedKd, '', None, None),
-        ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: _CSMNmrResidueTable._setChecked(nmr, value), None),
-        # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None, None),
-        ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value), None)
-      ])        #[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
-                # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
-
-    self._widget.setFixedHeight(45)
-    self.chemicalShiftsMappingModule = None
-
-
-  @staticmethod
-  def _setChecked(obj, value):
     """
-    CCPN-INTERNAL: Insert a comment into GuiTable
+    Custom nmrResidue Table with extra columns used in the ChemicalShiftsMapping Module
     """
 
-    obj._includeInDeltaShift = value
-    obj._finaliseAction('change')
+    def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
+                 checkBoxCallback=None, nmrChain=None, **kwds):
 
-  @staticmethod
-  def _getNmrResidueSpectraCount(nmrResidue):
+        NmrResidueTable.__init__(self, parent=parent, mainWindow=mainWindow,
+                                 moduleParent=moduleParent,
+                                 actionCallback=actionCallback,
+                                 selectionCallback=selectionCallback,
+                                 checkBoxCallback=checkBoxCallback,
+                                 nmrChain=nmrChain,
+                                 multiSelect=True,
+                                 **kwds)
 
-    """
-    CCPN-INTERNAL: Insert an index into ObjectTable
-    """
-    try:
-      return nmrResidue.spectraCount
-    except:
-      return None
+        self.NMRcolumns = ColumnClass([
+            ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None, None),
+            ('Pid', lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None, None),
+            ('_object', lambda nmrResidue: nmrResidue, 'Object', None, None),
+            ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
+            ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
+            ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
+            ('Selected', lambda nmrResidue: _CSMNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None, None),
+            ('Spectra', lambda nmrResidue: _CSMNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
+             , 'Number of spectra selected for calculating the deltas', None, None),
+            (Deltas, lambda nmrResidue: nmrResidue._delta, '', None, None),
+            (KD, lambda nmrResidue: nmrResidue._estimatedKd, '', None, None),
+            ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: _CSMNmrResidueTable._setChecked(nmr, value), None),
+            # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None, None),
+            ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value), None)
+            ])  #[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
+        # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
 
-  @staticmethod
-  def _getSelectedNmrAtomNames(nmrResidue):
+        self._widget.setFixedHeight(45)
+        self.chemicalShiftsMappingModule = None
 
-    """
-    CCPN-INTERNAL: Insert an index into ObjectTable
-    """
-    try:
-      return ', '.join(nmrResidue.selectedNmrAtomNames)
-    except:
-      return None
+    @staticmethod
+    def _setChecked(obj, value):
+        """
+        CCPN-INTERNAL: Insert a comment into GuiTable
+        """
 
-  def _selectPullDown(self, value):
-    ''' Used for automatic restoring of widgets '''
-    self.ncWidget.select(value)
-    try:
-      if self.chemicalShiftsMappingModule is not None:
-        self.chemicalShiftsMappingModule._updateModule()
-    except Exception as e:
-      getLogger().warning('Impossible update chemicalShiftsMappingModule from restoring %s' %e)
+        obj._includeInDeltaShift = value
+        obj._finaliseAction('change')
 
+    @staticmethod
+    def _getNmrResidueSpectraCount(nmrResidue):
 
+        """
+        CCPN-INTERNAL: Insert an index into ObjectTable
+        """
+        try:
+            return nmrResidue.spectraCount
+        except:
+            return None
+
+    @staticmethod
+    def _getSelectedNmrAtomNames(nmrResidue):
+
+        """
+        CCPN-INTERNAL: Insert an index into ObjectTable
+        """
+        try:
+            return ', '.join(nmrResidue.selectedNmrAtomNames)
+        except:
+            return None
+
+    def _selectPullDown(self, value):
+        ''' Used for automatic restoring of widgets '''
+        self.ncWidget.select(value)
+        try:
+            if self.chemicalShiftsMappingModule is not None:
+                self.chemicalShiftsMappingModule._updateModule()
+        except Exception as e:
+            getLogger().warning('Impossible update chemicalShiftsMappingModule from restoring %s' % e)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-28 12:46:05 +0100 (Tue, July 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -67,8 +67,6 @@ def absorbResonance(self: 'NmrAtom', nmrAtom) -> 'NmrAtom':
     if self.isDeleted or self._flaggedForDelete:
         raise RuntimeError("function absorbResonance call on deleted nmrAtom: @{}".format(self.serial))
 
-    from ccpn.core.NmrAtom import ASSIGNEDPEAKSCHANGED
-
     project = self.project
 
     selfApi = self._wrappedData
@@ -83,10 +81,9 @@ def absorbResonance(self: 'NmrAtom', nmrAtom) -> 'NmrAtom':
                                 'Attempt to merge nmrAtoms with different isotope codes')
             return
 
-    _selfPeaks = set(self.assignedPeaks)
-    _nmrAtomPeaks = set(nmrAtom.assignedPeaks)
+    from ccpn.core.NmrAtom import ASSIGNEDPEAKSCHANGED
+
     _changedAssigned = tuple(set(self.assignedPeaks) | set(nmrAtom.assignedPeaks))
-    _shifts = tuple(set(selfApi.shifts) | set(resonanceB.shifts))
 
     with undoStackBlocking() as addUndoItem:
         # recalculate shifts in undo stack
@@ -152,6 +149,7 @@ def absorbResonance(self: 'NmrAtom', nmrAtom) -> 'NmrAtom':
             resonanceB.removeApplicationData(matchAppData)
             # NOTE:ED - need undo/redo here?
 
+    setattr(self, ASSIGNEDPEAKSCHANGED, _changedAssigned)
     mergeObjects(project, resonanceB, selfApi, _useV3Delete=True, )  #_mergeFunc=_mergeResonances)
 
     # Must be after resonance merge, so that links to peaks are properly set

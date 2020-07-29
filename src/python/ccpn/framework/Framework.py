@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:10:52 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -205,6 +205,7 @@ class Arguments:
     debug3 = False
     skipUserPreferences = True
     projectPath = None
+    _skipUpdates = False
 
     def __init__(self, projectPath=None, **kwds):
 
@@ -377,7 +378,7 @@ class Framework(NotifierBase):
             project = self.newProject()
         self._updateCheckableMenuItems()
 
-        if self.preferences.general.checkUpdatesAtStartup:
+        if self.preferences.general.checkUpdatesAtStartup and not getattr(self.args, '_skipUpdates', False):
             if not self.ui._checkUpdates():
                 return
 

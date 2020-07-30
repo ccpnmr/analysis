@@ -335,6 +335,11 @@ def _estimateVolumesItem(strip):
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volume(s)', shortcut='EV',
                     callback=strip.mainWindow.estimateVolumes)
 
+def _recalculatePeakHeightsItem(strip):
+    return _SCMitem(name='Recalculate Height(s)',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Recalculate peak height(s) for the same position',
+                    shortcut='RH',
+                    callback=strip.mainWindow.recalculateCurrentPeakHeights)
 
 def _reorderPeakListAxesItem(strip):
     return _SCMitem(name='Reorder PeakList Axes...',
@@ -845,6 +850,7 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _separator(),
         _refitPeakItem(guiStripNd),
         _refitPeakGroupItem(guiStripNd),
+        _recalculatePeakHeightsItem(guiStripNd),
         _snapToExtremaItem(guiStripNd),
         _estimateVolumesItem(guiStripNd),
         _reorderPeakListAxesItem(guiStripNd),

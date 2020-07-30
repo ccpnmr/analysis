@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-28 12:55:35 +0100 (Tue, July 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-30 12:06:59 +0100 (Thu, July 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -310,7 +310,11 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
     def _initGeneralTab1d(self):
         thisTab = self.generalTab1d
-        self._colourTabs1d = Tabs(thisTab, grid=(0, 0))
+
+        self._group1dColours = Frame(thisTab, grid=(0, 0), setLayout=True, showBorder=True)
+        Label(self._group1dColours, text='Group Colours here...', grid=(0, 0))
+
+        self._colourTabs1d = Tabs(thisTab, grid=(1, 0))
 
         # remember the state when switching tabs
         self.copyCheckBoxState = []
@@ -337,7 +341,11 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
     def _initGeneralTabNd(self):
         thisTab = self.generalTabNd
-        self._colourTabsNd = Tabs(thisTab, grid=(0, 0))
+
+        self._groupNdColours = Frame(thisTab, grid=(0, 0), setLayout=True, showBorder=True)
+        Label(self._groupNdColours, text='Group Colours here...', grid=(0, 0))
+
+        self._colourTabsNd = Tabs(thisTab, grid=(1, 0))
 
         # remember the state when switching tabs
         self.copyCheckBoxState = []

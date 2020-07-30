@@ -35,7 +35,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-28 12:46:05 +0100 (Tue, July 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-30 14:28:19 +0100 (Thu, July 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -641,7 +641,8 @@ def _deleteFromV3(obj):
             v3obj.delete()
             return
 
-    raise RuntimeError('trying to delete object {}'.format(obj))
+    obj.delete()
+    # raise RuntimeError('trying to delete object {}'.format(obj))
 
 
 def _notifyChangeV3(obj):
@@ -658,7 +659,7 @@ def _notifyChangeV3(obj):
             v3obj._finaliseAction('change')
             return
 
-    raise RuntimeError('trying to notify object {}'.format(obj))
+    # raise RuntimeError('trying to notify object {}'.format(obj))
 
 # def _notifyChangeV3List(objList):
 #     """Method to notify change to a list of objects

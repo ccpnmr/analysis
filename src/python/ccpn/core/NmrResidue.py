@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-30 11:33:24 +0100 (Thu, July 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1464,6 +1464,20 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
             apiResonanceGroup.molType, apiResonanceGroup.ccpCode = tt
 
     return result
+
+
+def _getNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None,
+                   residueType: str = None) -> typing.Optional[NmrResidue]:
+    """Get NmrResidue with sequenceCode=sequenceCode and residueType=residueType,
+    """
+    self = self._project.getByPid(self) if isinstance(self, str) else self
+
+    partialId = '%s.%s.' % (self.id, str(sequenceCode).translate(Pid.remapSeparators))
+    ll = self._project.getObjectsByPartialId(className='NmrResidue', idStartsWith=partialId)
+    if ll:
+        return ll[0]
+    else:
+        return self.getNmrResidue(sequenceCode)
 
 
 def _fetchNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None,

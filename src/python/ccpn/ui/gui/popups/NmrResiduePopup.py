@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:53 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-30 11:33:24 +0100 (Thu, July 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -24,10 +24,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import re
 from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED, getNmrResiduePrediction
-from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget, CheckBoxCompoundWidget
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.NmrResidue import NmrResidue, _getNmrResidue
 
 
 REMOVEPERCENT = '( ?\d+.?\d* ?%)+'
@@ -72,6 +72,7 @@ class NmrResiduePopup(AttributeEditorPopupABC):
                   ('nmrChain', PulldownListCompoundWidget, getattr, setattr, _getNmrChainList, None, {}),
                   ('sequenceCode', EntryCompoundWidget, getattr, setattr, None, None, {}),
                   ('residueType', PulldownListCompoundWidget, getattr, setattr, _getResidueTypeProb, _checkNmrResidue, {}),
+                  ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {}),
                   ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ]
 
@@ -80,10 +81,26 @@ class NmrResiduePopup(AttributeEditorPopupABC):
     def _applyAllChanges(self, changes):
         """Apply all changes - move nmrResidue to new chain
         """
-        self.obj.moveToNmrChain(self.nmrChain.getText(),
-                                self.sequenceCode.getText(),
-                                re.sub(REMOVEPERCENT, '', self.residueType.getText())
-                                )
+        merge = self.MergetoExisting.isChecked()
+
+        _nmrChain = self.project.getByPid(self.nmrChain.getText())
+        destNmrResidue = _getNmrResidue(_nmrChain,
+                                        self.sequenceCode.getText(),
+                                        re.sub(REMOVEPERCENT, '', self.residueType.getText())) if _nmrChain else None
+
+        if destNmrResidue:
+            # move to an existing nmrResidue requires a merge
+            if not merge:
+                # raise error to notify popup
+                raise ValueError('Cannot move NmrResidue to an existing NmrResidue without merging')
+            destNmrResidue.mergeNmrResidues(self.obj)
+
+        else:
+            # assign to a new nmrResidue
+            self.obj.moveToNmrChain(self.nmrChain.getText(),
+                                    self.sequenceCode.getText(),
+                                    re.sub(REMOVEPERCENT, '', self.residueType.getText())
+                                    )
 
     def _setValue(self, attr, setFunction, value):
         """Not needed here - subclass so does no operation

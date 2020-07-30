@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtCore
 from ccpn.core.lib import AssignmentLib
-from ccpn.core.lib.peakUtils import estimateVolumes
+from ccpn.core.lib.peakUtils import estimateVolumes, updateHeight
 from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.lib.SpectrumDisplay import navigateToCurrentPeakPosition, navigateToCurrentNmrResiduePosition
@@ -39,7 +39,7 @@ from ccpn.ui.gui.popups.ShortcutsPopup import UserShortcuts
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
 from ccpn.ui.gui.lib.mouseEvents import MouseModes, setCurrentMouseMode, getCurrentMouseMode
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 
 
 #TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
@@ -100,7 +100,7 @@ class GuiWindow():
         addShortCut("g, p", self, self.getCurrentPositionAndStrip, context=context)
         addShortCut("r, p", self, partial(self.refitCurrentPeaks, singularMode=True), context=context)
         addShortCut("r, g", self, partial(self.refitCurrentPeaks, singularMode=False), context=context)
-
+        addShortCut("r, h", self, self.recalculateCurrentPeakHeights, context=context)
         addShortCut("Tab,Tab", self, self.moveToNextSpectrum, context=context)
         addShortCut("Tab, q", self, self.moveToPreviousSpectrum, context=context)
         addShortCut("Tab, a", self, self.showAllSpectra, context=context)
@@ -344,6 +344,21 @@ class GuiWindow():
         fitMethod = self.application.preferences.general.peakFittingMethod
         with undoBlockWithoutSideBar():
             AssignmentLib.refitPeaks(peaks, fitMethod=fitMethod, singularMode=singularMode)
+
+    def recalculateCurrentPeakHeights(self):
+        '''
+        Recalculates the peak height without changing the ppm position
+        '''
+        getLogger().info('Recalculating peak height(s).')
+
+        current = self.application.current
+        peaks = current.peaks
+
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                list(map(lambda x: updateHeight(x), peaks))
+
+        getLogger().info('Recalculating peak height(s) completed.')
 
     def estimateVolumes(self):
         """Estimate volumes of peaks selected by right-mouse menu

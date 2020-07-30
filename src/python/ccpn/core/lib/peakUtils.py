@@ -31,6 +31,7 @@ from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib.ContextManagers import undoBlock
 import pandas as pd
+from ccpn.util.Common import makeIterableList
 
 
 POSITIONS = 'positions'
@@ -970,6 +971,9 @@ def movePeak(peak, ppmPositions, updateHeight=True):
             # get the interpolated height at this position
             peak.height = peak.peakList.spectrum.getHeight(ppmPositions)
 
+def updateHeight(peak):
+    with undoBlock():
+        peak.height = peak.peakList.spectrum.getHeight(peak.position)
 
 # added for pipelines
 
@@ -1083,3 +1087,68 @@ def _snap1DPeakToClosestExtremum(peak, maximumLimit=1):
         if peak.comment: peak.comment = peak.comment + '.' + ' Orphan'
         else: peak.comment = 'Orphan'
         getLogger().info('No maxima found within tollerances for %s. Kept original positions %s' %(peak.pid, str(round(peak.position[0],3))))
+
+
+def getSpectraHeights(spectra, peakListIndexes:list=None, ) -> pd.DataFrame:
+    return _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, peakListIndexes=peakListIndexes)
+
+def getSpectraVolumes(spectra, peakListIndexes:list=None, ) -> pd.DataFrame:
+    return _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=VOLUME, peakListIndexes=peakListIndexes)
+
+def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID='NR_ID', peakListIndexes:list=None):
+    '''
+    :param spectra: list of spectra
+    :param peakProperty: 'height'or'volume'
+    :param NR_ID: columnName for the NmrResidue ID
+    :param peakListIndex: list of peakList indexes for getting the right peakList from the given spectra,
+                         default: the last peakList available
+    :return: Pandas DataFrame with the following structure:
+            Index: multiIndex => axisCodes as levels;
+            Columns => NR_ID: the nmrResidue(s) assigned for the peak if available
+                       Spectrum series values sorted by ascending values, if series values are not set, then the
+                       spectrum name is used instead.
+
+                    |  NR_ID  |   SP1     |    SP2    |   SP3
+        H     N     |         |           |           |
+       -------------+-------- +-----------+-----------+---------
+        7.5  104.3  | A.1.ARG |    10    |  100       | 1000
+
+    to sort the dataframe by an axisCode, eg 'H' use:
+    df = df.sort_index(level='H')
+    '''
+    spectra = list(spectra)
+    dfs = []
+    columnSorting = []
+    if peakListIndexes is None:
+        peakListIndexes = [-1]*len(spectra)
+    for spectrum, ix in zip(spectra, peakListIndexes):
+        positions = []
+        values = []
+        nmrResidues = []
+        serieValue = spectrum._getSeriesItem(spectrum.spectrumGroups[-1])
+        if serieValue is None:
+            serieValue = spectrum.name
+        peakList = spectrum.peakLists[ix]
+        peaks = peakList.peaks
+        peaks.sort(key=lambda x: x.position, reverse=True)
+        for peak in peaks:
+            positions.append(peak.position)
+            values.append(getattr(peak, peakProperty, None))
+            aa = makeIterableList(peak.assignments)
+            assignedResidues = list(set(filter(None, map(lambda x: x.nmrResidue.id, aa))))
+            nmrResidues.append(", ".join(assignedResidues))
+            columnSorting.append(serieValue)
+        index = pd.MultiIndex.from_tuples(positions, names=spectrum.axisCodes)
+        _df = pd.DataFrame(values, columns=[serieValue], index=index)
+        _df[NR_ID] = nmrResidues
+        _df = _df[~_df.index.duplicated()]
+        dfs.append(_df)
+    df = pd.concat(dfs, axis=1, levels=0)
+    df[NR_ID] = df.T[df.columns.values == NR_ID].apply(lambda x:' '.join(set([item for item in x[x.notnull()]])))
+    df = df.loc[:, ~df.columns.duplicated()]
+    cols = list(df.columns)
+    resColumn = cols.pop(cols.index(NR_ID))
+    sortedCols = sorted(cols, reverse=False)
+    sortedCols.insert(0, resColumn)
+    df = df[sortedCols]
+    return df

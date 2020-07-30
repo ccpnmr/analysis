@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 01:02:52 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-07-30 12:09:36 +0100 (Thu, July 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -76,7 +76,7 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
     def _copyPeakListToSpectrum(self):
         if self.sourcePeakList is not None:
             try:
-                self.project.blankNotification()
+                # self.project.blankNotification()
                 if self.targetSpectrum is not None:
                     self.sourcePeakList.copyTo(self.targetSpectrum)
 
@@ -85,8 +85,8 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
                 showWarning(str(self.windowTitle()), str(es))
                 if self.application._isInDebugMode:
                     raise es
-            finally:
-                self.project.unblankNotification()
+            # finally:
+            #     self.project.unblankNotification()
 
     def _populateSourcePeakListPullDown(self):
         """Populate the pulldown with the list of spectra in the project

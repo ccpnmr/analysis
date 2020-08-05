@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:45 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-08-05 18:43:27 +0100 (Wed, August 05, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,7 +34,7 @@ from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayPropertiesPopupNd
-
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.util.Logging import getLogger
 
 
@@ -123,197 +123,201 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         Increases contour base level for all spectra visible in the display.
         """
         modifiedSpectra = set()
-        for spectrumView in self.spectrumViews:
-            if spectrumView.isVisible():
-                spectrum = spectrumView.spectrum
+        with undoBlockWithoutSideBar():
+            for spectrumView in self.spectrumViews:
+                if spectrumView.isVisible():
+                    spectrum = spectrumView.spectrum
 
-                # only increase once - duh
-                if spectrum in modifiedSpectra:
-                    continue
+                    # only increase once - duh
+                    if spectrum in modifiedSpectra:
+                        continue
 
-                modifiedSpectra.add(spectrum)
+                    modifiedSpectra.add(spectrum)
 
-                if spectrum.positiveContourBase == spectrumView.positiveContourBase:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    # setting to None forces the spectrumVIew to access the spectrum attributes
-                    spectrumView.positiveContourBase = None
-                    spectrumView.positiveContourFactor = None
-                    spectrum.positiveContourBase *= spectrum.positiveContourFactor
-                else:
-                    # Display has custom contour base - change that one only
-                    spectrumView.positiveContourBase *= spectrumView.positiveContourFactor
+                    if spectrum.positiveContourBase == spectrumView.positiveContourBase:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        # setting to None forces the spectrumVIew to access the spectrum attributes
+                        spectrumView.positiveContourBase = None
+                        spectrumView.positiveContourFactor = None
+                        spectrum.positiveContourBase *= spectrum.positiveContourFactor
+                    else:
+                        # Display has custom contour base - change that one only
+                        spectrumView.positiveContourBase *= spectrumView.positiveContourFactor
 
-                if spectrum.negativeContourBase == spectrumView.negativeContourBase:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    spectrumView.negativeContourBase = None
-                    spectrumView.negativeContourFactor = None
-                    spectrum.negativeContourBase *= spectrum.negativeContourFactor
-                else:
-                    # Display has custom contour base - change that one only
-                    spectrumView.negativeContourBase *= spectrumView.negativeContourFactor
+                    if spectrum.negativeContourBase == spectrumView.negativeContourBase:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        spectrumView.negativeContourBase = None
+                        spectrumView.negativeContourFactor = None
+                        spectrum.negativeContourBase *= spectrum.negativeContourFactor
+                    else:
+                        # Display has custom contour base - change that one only
+                        spectrumView.negativeContourBase *= spectrumView.negativeContourFactor
 
-                # spectrumView.rebuildContours()
-                # spectrumView.update()
+                    # spectrumView.rebuildContours()
+                    # spectrumView.update()
 
-                mainWindow = self.mainWindow
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.positiveContourBase = %s" % spectrum.positiveContourBase, spectrum=spectrum)
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.negativeContourBase = %s" % spectrum.negativeContourBase, spectrum=spectrum)
-                getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
-                getLogger().info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
-                getLogger().info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
+                    mainWindow = self.mainWindow
+                    mainWindow.pythonConsole.writeConsoleCommand(
+                            "spectrum.positiveContourBase = %s" % spectrum.positiveContourBase, spectrum=spectrum)
+                    mainWindow.pythonConsole.writeConsoleCommand(
+                            "spectrum.negativeContourBase = %s" % spectrum.negativeContourBase, spectrum=spectrum)
+                    getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
+                    getLogger().info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
+                    getLogger().info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
 
-        # self._rebuildContours()
+            # self._rebuildContours()
 
     def lowerContourBase(self):
         """
         Decreases contour base level for all spectra visible in the display.
         """
         modifiedSpectra = set()
-        for spectrumView in self.spectrumViews:
-            if spectrumView.isVisible():
-                spectrum = spectrumView.spectrum
+        with undoBlockWithoutSideBar():
+            for spectrumView in self.spectrumViews:
+                if spectrumView.isVisible():
+                    spectrum = spectrumView.spectrum
 
-                # only increase once - duh
-                if spectrum in modifiedSpectra:
-                    continue
+                    # only increase once - duh
+                    if spectrum in modifiedSpectra:
+                        continue
 
-                modifiedSpectra.add(spectrum)
+                    modifiedSpectra.add(spectrum)
 
-                if spectrum.positiveContourBase == spectrumView.positiveContourBase:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    spectrumView.positiveContourBase = None
-                    spectrumView.positiveContourFactor = None
-                    spectrum.positiveContourBase /= spectrum.positiveContourFactor
-                else:
-                    # Display has custom contour base - change that one only
-                    spectrumView.positiveContourBase /= spectrumView.positiveContourFactor
+                    if spectrum.positiveContourBase == spectrumView.positiveContourBase:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        spectrumView.positiveContourBase = None
+                        spectrumView.positiveContourFactor = None
+                        spectrum.positiveContourBase /= spectrum.positiveContourFactor
+                    else:
+                        # Display has custom contour base - change that one only
+                        spectrumView.positiveContourBase /= spectrumView.positiveContourFactor
 
-                if spectrum.negativeContourBase == spectrumView.negativeContourBase:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    spectrumView.negativeContourBase = None
-                    spectrumView.negativeContourFactor = None
-                    spectrum.negativeContourBase /= spectrum.negativeContourFactor
-                else:
-                    # Display has custom contour base - change that one only
-                    spectrumView.negativeContourBase /= spectrumView.negativeContourFactor
+                    if spectrum.negativeContourBase == spectrumView.negativeContourBase:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        spectrumView.negativeContourBase = None
+                        spectrumView.negativeContourFactor = None
+                        spectrum.negativeContourBase /= spectrum.negativeContourFactor
+                    else:
+                        # Display has custom contour base - change that one only
+                        spectrumView.negativeContourBase /= spectrumView.negativeContourFactor
 
-                # spectrumView.rebuildContours()
-                # spectrumView.update()
+                    # spectrumView.rebuildContours()
+                    # spectrumView.update()
 
-                mainWindow = self.mainWindow
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.positiveContourBase = %s" % spectrum.positiveContourBase, spectrum=spectrum)
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.negativeContourBase = %s" % spectrum.negativeContourBase, spectrum=spectrum)
-                getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
-                getLogger().info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
-                getLogger().info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
+                    mainWindow = self.mainWindow
+                    mainWindow.pythonConsole.writeConsoleCommand(
+                            "spectrum.positiveContourBase = %s" % spectrum.positiveContourBase, spectrum=spectrum)
+                    mainWindow.pythonConsole.writeConsoleCommand(
+                            "spectrum.negativeContourBase = %s" % spectrum.negativeContourBase, spectrum=spectrum)
+                    getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
+                    getLogger().info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
+                    getLogger().info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
 
-        # self._rebuildContours()
+            # self._rebuildContours()
 
     def addContourLevel(self):
         """
         Increases number of contours by 1 for all spectra visible in the display.
         """
         modifiedSpectra = set()
-        for spectrumView in self.spectrumViews:
-            if spectrumView.isVisible():
-                spectrum = spectrumView.spectrum
+        with undoBlockWithoutSideBar():
+            for spectrumView in self.spectrumViews:
+                if spectrumView.isVisible():
+                    spectrum = spectrumView.spectrum
 
-                # only increase once - duh
-                if spectrum in modifiedSpectra:
-                    continue
+                    # only increase once - duh
+                    if spectrum in modifiedSpectra:
+                        continue
 
-                modifiedSpectra.add(spectrum)
+                    modifiedSpectra.add(spectrum)
 
-                if spectrum.positiveContourCount == spectrumView.positiveContourCount:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    spectrumView.positiveContourCount = None
-                    spectrum.positiveContourCount += 1
-                else:
-                    # Display has custom contour count - change that one only
-                    spectrumView.positiveContourCount += 1
+                    if spectrum.positiveContourCount == spectrumView.positiveContourCount:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        spectrumView.positiveContourCount = None
+                        spectrum.positiveContourCount += 1
+                    else:
+                        # Display has custom contour count - change that one only
+                        spectrumView.positiveContourCount += 1
 
-                if spectrum.negativeContourCount == spectrumView.negativeContourCount:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    spectrumView.negativeContourCount = None
-                    spectrum.negativeContourCount += 1
-                else:
-                    # Display has custom contour count - change that one only
-                    spectrumView.negativeContourCount += 1
+                    if spectrum.negativeContourCount == spectrumView.negativeContourCount:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        spectrumView.negativeContourCount = None
+                        spectrum.negativeContourCount += 1
+                    else:
+                        # Display has custom contour count - change that one only
+                        spectrumView.negativeContourCount += 1
 
-                # spectrumView.rebuildContours()
-                # spectrumView.update()
+                    # spectrumView.rebuildContours()
+                    # spectrumView.update()
 
-                mainWindow = self.mainWindow
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.negativeContourCount = %s" % spectrum.negativeContourCount, spectrum=spectrum)
-                getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
-                getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
-                getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
+                    mainWindow = self.mainWindow
+                    mainWindow.pythonConsole.writeConsoleCommand(
+                            "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
+                    mainWindow.pythonConsole.writeConsoleCommand(
+                            "spectrum.negativeContourCount = %s" % spectrum.negativeContourCount, spectrum=spectrum)
+                    getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
+                    getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
+                    getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
 
-        # self._rebuildContours()
+            # self._rebuildContours()
 
     def removeContourLevel(self):
         """
         Decreases number of contours by 1 for all spectra visible in the display.
         """
         modifiedSpectra = set()
-        for spectrumView in self.spectrumViews:
-            if spectrumView.isVisible():
-                spectrum = spectrumView.spectrum
+        with undoBlockWithoutSideBar():
+            for spectrumView in self.spectrumViews:
+                if spectrumView.isVisible():
+                    spectrum = spectrumView.spectrum
 
-                # only increase once - duh
-                if spectrum in modifiedSpectra:
-                    continue
+                    # only increase once - duh
+                    if spectrum in modifiedSpectra:
+                        continue
 
-                modifiedSpectra.add(spectrum)
+                    modifiedSpectra.add(spectrum)
 
-                if spectrum.positiveContourCount == spectrumView.positiveContourCount:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    spectrumView.positiveContourCount = None
-                    if spectrum.positiveContourCount:
-                        spectrum.positiveContourCount -= 1
-                else:
-                    # Display has custom contour count - change that one only
-                    if spectrumView.positiveContourCount:
-                        spectrumView.positiveContourCount -= 1
+                    if spectrum.positiveContourCount == spectrumView.positiveContourCount:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        spectrumView.positiveContourCount = None
+                        if spectrum.positiveContourCount:
+                            spectrum.positiveContourCount -= 1
+                    else:
+                        # Display has custom contour count - change that one only
+                        if spectrumView.positiveContourCount:
+                            spectrumView.positiveContourCount -= 1
 
-                if spectrum.negativeContourCount == spectrumView.negativeContourCount:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    spectrumView.negativeContourCount = None
-                    if spectrum.negativeContourCount:
-                        spectrum.negativeContourCount -= 1
-                else:
-                    # Display has custom contour count - change that one only
-                    if spectrumView.negativeContourCount:
-                        spectrumView.negativeContourCount -= 1
+                    if spectrum.negativeContourCount == spectrumView.negativeContourCount:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        spectrumView.negativeContourCount = None
+                        if spectrum.negativeContourCount:
+                            spectrum.negativeContourCount -= 1
+                    else:
+                        # Display has custom contour count - change that one only
+                        if spectrumView.negativeContourCount:
+                            spectrumView.negativeContourCount -= 1
 
-                # spectrumView.rebuildContours()
-                # spectrumView.update()
+                    # spectrumView.rebuildContours()
+                    # spectrumView.update()
 
-                mainWindow = self.mainWindow
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
-                mainWindow.pythonConsole.writeConsoleCommand(
-                        "spectrum.negativeContourCount = %s" % spectrum.negativeContourCount, spectrum=spectrum)
-                getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
-                getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
-                getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
+                    mainWindow = self.mainWindow
+                    mainWindow.pythonConsole.writeConsoleCommand(
+                            "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
+                    mainWindow.pythonConsole.writeConsoleCommand(
+                            "spectrum.negativeContourCount = %s" % spectrum.negativeContourCount, spectrum=spectrum)
+                    getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
+                    getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
+                    getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
 
-        # self._rebuildContours()
+            # self._rebuildContours()
 
     def updateTraces(self):
         for strip in self.strips:

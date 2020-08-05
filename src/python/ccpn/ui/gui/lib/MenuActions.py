@@ -4,21 +4,23 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = ""
-__credits__ = ""
-__licence__ = ("")
-__reference__ = ("")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified$"
-__version__ = "$Revision$"
+__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
-# Created:
+# Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date$"
+__date__ = "$Date: 2020-06-15 10:06:31 +0000 (Mon, June 15, 2020) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -609,14 +611,18 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
             from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
             checkSpectraToOpen(mainWindow, [spectrumGroup])
 
-            spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0], position=position, relativeTo=relativeTo)
+            spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0], position=position, relativeTo=relativeTo, isGrouped=True)
+            # set the spectrumView colours
+            spectrumDisplay._colourChanged(spectrumGroup)
 
             with undoBlockWithoutSideBar():
                 with notificationEchoBlocking():
                     for spectrum in spectrumGroup.spectra[1:]:  # Add the other spectra
                         spectrumDisplay.displaySpectrum(spectrum)
+                        # update the spectrumView colours
+                        spectrumDisplay._colourChanged(spectrumGroup)
 
-                    spectrumDisplay.isGrouped = True
+                    # spectrumDisplay.isGrouped = True
                     spectrumDisplay.spectrumToolBar.hide()
                     spectrumDisplay.spectrumGroupToolBar.show()
                     spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)

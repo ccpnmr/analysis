@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-29 21:21:02 +0100 (Wed, July 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -539,7 +539,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                                            alpha=1.0)
                     _posColours.extend(_intCol)
                     step -= stepY
-                    if step < 0:
+                    while step < 0:
                         step += stepX
                         jj += 1
             else:
@@ -559,7 +559,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                                            alpha=1.0)
                     _negColours.extend(_intCol)
                     step -= stepY
-                    if step < 0:
+                    while step < 0:
                         step += stepX
                         jj += 1
             else:

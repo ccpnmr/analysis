@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-29 21:21:02 +0100 (Wed, July 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-05 18:43:27 +0100 (Wed, August 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -60,6 +60,10 @@ from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise
 from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForSpectrumPopup
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
+from ccpn.core.SpectrumGroup import SpectrumGroup
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import _blankContainer
+from ccpn.util.AttrDict import AttrDict
 
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
@@ -2083,7 +2087,7 @@ class ContoursTab(Widget):
         self._writeLoggingMessage("spectrum.negativeContourCount = %d" % int(value))
         self.pythonConsole.writeConsoleCommand("spectrum.negativeContourCount = %d" % int(value), spectrum=spectrum)
 
-    # spectrum negativeContourColour button and pulldown
+    # spectrum positiveContourColour button and pulldown
     def _queueChangePosSpectrumColour(self, spectrum):
         dialog = ColourDialog(self)
         newColour = dialog.getColor()
@@ -2496,3 +2500,225 @@ class ColourTab(Widget):
         """Clean the items from the stateChange queue
         """
         self._changes.clear()
+
+
+class ColourFrameABC(Frame):
+    POSITIVECOLOUR = False
+    NEGATIVECOLOUR = False
+    SLICECOLOUR = False
+    EDITMODE = True
+
+    def __init__(self, parent=None, mainWindow=None, container=None, editMode=False, spectrumGroup=None, item=None, **kwds):
+
+        super().__init__(parent, **kwds)
+
+        self._parent = parent
+        self._container = container         # master widget, that this is attached to
+        self.mainWindow = mainWindow
+        self.application = self.mainWindow.application
+        self.project = self.mainWindow.project
+        self.preferences = self.application.preferences
+
+        # check that the spectrum and the copyToSpectra list are correctly defined
+        getByPid = self.application.project.getByPid
+        if editMode:
+            self.spectrumGroup = getByPid(spectrumGroup) if isinstance(spectrumGroup, str) else spectrumGroup
+            if not isinstance(self.spectrumGroup, SpectrumGroup):
+                raise TypeError('spectrumGroup must be of type SpectrumGroup or None')
+        else:
+            # create a dummy container to hold the colours
+            self.spectrumGroup = AttrDict()
+            self.spectrumGroup.positiveContourColour = None
+            self.spectrumGroup.negativeContourColour = None
+            self.spectrumGroup.sliceColour = None
+
+        self.EDITMODE = editMode
+
+        self.item = item
+        self._changes = ChangeDict()
+
+        self.pythonConsole = mainWindow.pythonConsole
+        self.logger = getLogger()
+
+        row = 0
+        if self.POSITIVECOLOUR:
+            Label(self, text="Group Positive Contour Colour", vAlign='t', hAlign='l', grid=(row, 0))
+            self.positiveColourBox = PulldownList(self, vAlign='t', grid=(row, 1))
+            self.positiveColourButton = Button(self, grid=(row, 2), vAlign='t', hAlign='l',
+                                               icon='icons/colours', hPolicy='fixed')
+            self.positiveColourButton.clicked.connect(partial(self._queueChangePosSpectrumColour, self.spectrumGroup))
+            row += 1
+
+        if self.NEGATIVECOLOUR:
+            Label(self, text="Group Negative Contour Colour", vAlign='t', hAlign='l', grid=(row, 0))
+            self.negativeColourBox = PulldownList(self, vAlign='t', grid=(row, 1))
+            self.negativeColourButton = Button(self, grid=(row, 2), vAlign='t', hAlign='l',
+                                               icon='icons/colours', hPolicy='fixed')
+            self.negativeColourButton.clicked.connect(partial(self._queueChangeNegSpectrumColour, self.spectrumGroup))
+            row += 1
+
+        if self.SLICECOLOUR:
+            Label(self, text="Group Slice Colour", vAlign='t', hAlign='l', grid=(row, 0))
+            self.sliceColourBox = PulldownList(self, vAlign='t', grid=(row, 1))
+            self.sliceColourButton = Button(self, grid=(row, 2), vAlign='t', hAlign='l',
+                                            icon='icons/colours', hPolicy='fixed')
+            self.sliceColourButton.clicked.connect(partial(self._queueChangeSliceColour, self.spectrumGroup))
+            row += 1
+
+        self._fillPullDowns()
+
+        if self.POSITIVECOLOUR:
+            self.positiveColourBox.currentIndexChanged.connect(partial(self._queueChangePosColourComboIndex, self.spectrumGroup))
+        if self.NEGATIVECOLOUR:
+            self.negativeColourBox.currentIndexChanged.connect(partial(self._queueChangeNegColourComboIndex, self.spectrumGroup))
+        if self.SLICECOLOUR:
+            self.sliceColourBox.currentIndexChanged.connect(partial(self._queueChangeSliceComboIndex, self.spectrumGroup))
+
+    def _updateSpectrumGroup(self, spectrumGroup):
+        # check that the spectrum and the copyToSpectra list are correctly defined
+        getByPid = self.application.project.getByPid
+        self.spectrumGroup = getByPid(spectrumGroup) if isinstance(spectrumGroup, str) else spectrumGroup
+        if not isinstance(self.spectrumGroup, (SpectrumGroup, type(None))):
+            raise TypeError('spectrumGroup must be of type SpectrumGroup or None')
+
+    def _fillPullDowns(self):
+        if self.POSITIVECOLOUR:
+            fillColourPulldown(self.positiveColourBox, allowAuto=False, includeGradients=True, allowNone=True)
+        if self.NEGATIVECOLOUR:
+            fillColourPulldown(self.negativeColourBox, allowAuto=False, includeGradients=True, allowNone=True)
+        if self.SLICECOLOUR:
+            fillColourPulldown(self.sliceColourBox, allowAuto=False, includeGradients=True, allowNone=True)
+
+    def _populateColour(self):
+        """Populate dimensions tab from self.spectrum
+        Blocking to be performed by tab container
+        """
+        # clear all changes
+        self._changes.clear()
+
+        with self._changes.blockChanges():
+            if self.POSITIVECOLOUR:
+                _setColourPulldown(self.positiveColourBox, self.spectrumGroup.positiveContourColour, allowAuto=False, includeGradients=True, allowNone=True)
+            if self.NEGATIVECOLOUR:
+                _setColourPulldown(self.negativeColourBox, self.spectrumGroup.negativeContourColour, allowAuto=False, includeGradients=True, allowNone=True)
+            if self.SLICECOLOUR:
+                _setColourPulldown(self.sliceColourBox, self.spectrumGroup.sliceColour, allowAuto=False, includeGradients=True, allowNone=True)
+
+    def _getChangeState(self):
+        """Get the change state from the parent widget
+        """
+        return self._container._getChangeState()
+
+    def _writeLoggingMessage(self, command):
+        self.logger.info("spectrumGroup = project.getByPid('%s')" % self.spectrumGroup.pid)
+        self.logger.info(command)
+
+    # spectrum positiveContourColour button and pulldown
+    def _queueChangePosSpectrumColour(self, spectrum):
+        dialog = ColourDialog(self)
+        newColour = dialog.getColor()
+        if newColour is not None:
+            addNewColour(newColour)
+            self._container._fillPullDowns()
+            self.positiveColourBox.setCurrentText(spectrumColours[newColour.name()])
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueChangePosColourComboIndex(self, spectrumGroup, value):
+        if value >= 0:
+            colName = colourNameNoSpace(self.positiveColourBox.getText())
+            if colName in spectrumColours.values():
+                colName = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+            if colName != spectrumGroup.positiveContourColour:
+                # and list(spectrumColours.keys())[value] != spectrumGroup.positiveContourColour:
+                return partial(self._changePosColourComboIndex, spectrumGroup, value)
+
+    def _changePosColourComboIndex(self, spectrumGroup, value):
+        colName = colourNameNoSpace(self.positiveColourBox.currentText())
+        if colName in spectrumColours.values():
+            newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+        else:
+            newColour = colName
+
+        _value = newColour or None
+        spectrumGroup.positiveContourColour = _value
+        # self._writeLoggingMessage("spectrumGroup.positiveContourColour = {}".format(repr(_value)))
+        # self.pythonConsole.writeConsoleCommand("spectrumGroup.positiveContourColour = {}".format(repr(_value)), spectrumGroup=spectrumGroup)
+
+    # spectrum negativeContourColour button and pulldown
+    def _queueChangeNegSpectrumColour(self, spectrum):
+        dialog = ColourDialog(self)
+        newColour = dialog.getColor()
+        if newColour is not None:
+            addNewColour(newColour)
+            self._container._fillPullDowns()
+            self.negativeColourBox.setCurrentText(spectrumColours[newColour.name()])
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueChangeNegColourComboIndex(self, spectrumGroup, value):
+        if value >= 0:
+            colName = colourNameNoSpace(self.negativeColourBox.getText())
+            if colName in spectrumColours.values():
+                colName = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+            if colName != spectrumGroup.negativeContourColour:
+                # and list(spectrumColours.keys())[value] != spectrumGroup.negativeContourColour:
+                return partial(self._changeNegColourComboIndex, spectrumGroup, value)
+
+    def _changeNegColourComboIndex(self, spectrumGroup, value):
+        colName = colourNameNoSpace(self.negativeColourBox.currentText())
+        if colName in spectrumColours.values():
+            newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+        else:
+            newColour = colName
+
+        _value = newColour or None
+        spectrumGroup.negativeContourColour = _value
+        # self._writeLoggingMessage("spectrumGroup.negativeContourColour = {}".format(repr(_value)))
+        # self.pythonConsole.writeConsoleCommand("spectrumGroup.negativeContourColour = {}".format(repr(_value)), spectrumGroup=spectrumGroup)
+
+    # spectrum sliceColour button and pulldown
+    def _queueChangeSliceColour(self, spectrumGroup):
+        dialog = ColourDialog(self)
+        newColour = dialog.getColor()
+        if newColour is not None:
+            addNewColour(newColour)
+            self._container._fillPullDowns()
+            self.sliceColourBox.setCurrentText(spectrumColours[newColour.name()])
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueChangeSliceComboIndex(self, spectrumGroup, value):
+        if value >= 0:
+            colName = colourNameNoSpace(self.sliceColourBox.getText())
+            if colName in spectrumColours.values():
+                colName = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+            if colName != spectrumGroup.sliceColour:
+                # and list(spectrumColours.keys())[value] != spectrumGroup.sliceColour:
+                return partial(self._changedSliceComboIndex, spectrumGroup, value)
+
+    def _changedSliceComboIndex(self, spectrumGroup, value):
+        colName = colourNameNoSpace(self.sliceColourBox.currentText())
+        if colName in spectrumColours.values():
+            newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+        else:
+            newColour = colName
+
+        _value = newColour or None
+        spectrumGroup.sliceColour = _value
+        # self._writeLoggingMessage("spectrumGroup.sliceColour = {}".format(repr(_value)))
+        # self.pythonConsole.writeConsoleCommand("spectrumGroup.sliceColour = {}".format(repr(_value)), spectrumGroup=spectrumGroup)
+
+    def _cleanWidgetQueue(self):
+        """Clean the items from the stateChange queue
+        """
+        self._changes.clear()
+
+
+class Colour1dFrame(ColourFrameABC):
+    POSITIVECOLOUR = False
+    NEGATIVECOLOUR = False
+    SLICECOLOUR = True
+
+
+class ColourNdFrame(ColourFrameABC):
+    POSITIVECOLOUR = True
+    NEGATIVECOLOUR = True
+    SLICECOLOUR = False

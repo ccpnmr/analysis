@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:10:53 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,7 @@ SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoin
                                                                    'minSpectrumFrequency',
                                                                    'maxSpectrumFrequency',
                                                                    ))
+
 
 class GuiSpectrumView(QtWidgets.QGraphicsObject):
 
@@ -147,7 +148,6 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         # axis = self.strip.orderedAxes[axisDim]
         dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[axisDim]
 
-
         # map self.spectrum.axisCodes onto self.axisCodes
 
         if not dataDim:
@@ -173,7 +173,6 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
             minSpectrumFrequency = maxSpectrumFrequency = None
             totalPointCount = pointCount = None
             valuePerPoint = None
-
 
         # if hasattr(dataDim, 'primaryDataDimRef'):
         #     # FreqDataDim - get ppm valuePerPoint
@@ -225,53 +224,72 @@ def _spectrumViewHasChanged(data):
     # Update action icol colour
     action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
     if action:
-        _iconX = int(60/spectrumDisplay.devicePixelRatio())
-        _iconY = int(10/spectrumDisplay.devicePixelRatio())
+        # add spectrum action for non-grouped action
+        _addActionIcon(action, self, spectrumDisplay)
 
-        pix = QtGui.QPixmap(QtCore.QSize(_iconX, _iconY))
-        if self._showContours:
-            if spectrumDisplay.is1D:
-                _col = self.sliceColour
-                # pix.fill(QtGui.QColor(self.sliceColour))
-            else:
-                _col = self.positiveContourColour
-                # pix.fill(QtGui.QColor(self.positiveContourColour))
+    if spectrumDisplay.isGrouped and self in spectrumDisplay.spectrumViews:
+        if hasattr(self, '_guiChanged'):
+            del self._guiChanged
 
-            if _col.startswith('#'):
-                pix.fill(QtGui.QColor(self.sliceColour))
+            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
-            elif _col in Colour.colorSchemeTable:
-                colourList = Colour.colorSchemeTable[_col]
+            GLSignals = GLNotifier(parent=self)
 
-                step = _iconX
-                stepX =_iconX
-                stepY = len(colourList) - 1
-                jj = 0
-                painter = QtGui.QPainter(pix)
+            self.buildContoursOnly = True
 
-                for ii in range(_iconX):
-                    _interp = (stepX - step) / stepX
-                    _intCol = Colour.interpolateColourHex(colourList[min(jj, stepY)], colourList[min(jj + 1, stepY)],
-                                                           _interp)
-
-                    # painter.setPen(QtGui.QColor(colourList[min(jj, len(colourList) - 1)]))
-                    painter.setPen(QtGui.QColor(_intCol))
-                    painter.drawLine(ii, 0, ii, _iconY)
-                    step -= stepY
-                    if step < 0:
-                        step += stepX
-                        jj += 1
-
-                painter.end()
-
-            else:
-                pix.fill(QtGui.QColor('gray'))
-        else:
-            pix.fill(QtGui.QColor('gray'))
-        action.setIcon(QtGui.QIcon(pix))
+            # repaint
+            GLSignals.emitPaintEvent()
 
     # Update strip
     self.strip.update()
+
+
+def _addActionIcon(action, self, spectrumDisplay):
+    _iconX = int(60 / spectrumDisplay.devicePixelRatio())
+    _iconY = int(10 / spectrumDisplay.devicePixelRatio())
+    pix = QtGui.QPixmap(QtCore.QSize(_iconX, _iconY))
+
+    # if getattr(self, '_showContours', True):
+    if spectrumDisplay.isGrouped or self._showContours:
+        if spectrumDisplay.is1D:
+            _col = self.sliceColour
+            # pix.fill(QtGui.QColor(self.sliceColour))
+        else:
+            _col = self.positiveContourColour
+            # pix.fill(QtGui.QColor(self.positiveContourColour))
+
+        if _col and _col.startswith('#'):
+            pix.fill(QtGui.QColor(_col))
+
+        elif _col in Colour.colorSchemeTable:
+            colourList = Colour.colorSchemeTable[_col]
+
+            step = _iconX
+            stepX = _iconX
+            stepY = len(colourList) - 1
+            jj = 0
+            painter = QtGui.QPainter(pix)
+
+            for ii in range(_iconX):
+                _interp = (stepX - step) / stepX
+                _intCol = Colour.interpolateColourHex(colourList[min(jj, stepY)], colourList[min(jj + 1, stepY)],
+                                                      _interp)
+
+                # painter.setPen(QtGui.QColor(colourList[min(jj, len(colourList) - 1)]))
+                painter.setPen(QtGui.QColor(_intCol))
+                painter.drawLine(ii, 0, ii, _iconY)
+                step -= stepY
+                while step < 0:
+                    step += stepX
+                    jj += 1
+
+            painter.end()
+
+        else:
+            pix.fill(QtGui.QColor('gray'))
+    else:
+        pix.fill(QtGui.QColor('gray'))
+    action.setIcon(QtGui.QIcon(pix))
 
 
 def _createdSpectrumView(data):

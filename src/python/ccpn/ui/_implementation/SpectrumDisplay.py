@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 15:15:02 +0100 (Mon, March 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -499,7 +499,7 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                            axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
                            widths: Sequence[float] = (), units: Sequence[str] = (),
                            stripDirection: str = 'Y', is1D: bool = False,
-                           independentStrips: bool = False):
+                           independentStrips: bool = False, isGrouped=False):
     """
     :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
     :param \*str axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
@@ -560,7 +560,7 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
 
     # Add intensity dimension for 1D if necessary
     if dataSource.numDim == 1 and len(displayAxisCodes) == 1:
-        displayAxisCodes+=('intensity',)
+        displayAxisCodes += ('intensity',)
         dimensionOrdering.append(0)
 
     if dataSource.findFirstDataDim(className='SampledDataDim') is not None:
@@ -617,14 +617,16 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                 apiAxis.position = position
                 apiAxis.width = width
 
-        if dataSource.numDim != 1: # it gets crazy on 1D displays
+        if dataSource.numDim != 1:  # it gets crazy on 1D displays
             display._useFirstDefault = True
+
+        display.isGrouped = isGrouped
 
     # Make spectrumView. NB We need notifiers on for these
     stripSerial = 1 if independentStrips else 0
-    display._wrappedData.newSpectrumView(spectrumName=dataSource.name,
-                            stripSerial=stripSerial, dataSource=dataSource,
-                            dimensionOrdering=dimensionOrdering)
+    _newSpectrumView = display._wrappedData.newSpectrumView(spectrumName=dataSource.name,
+                                                            stripSerial=stripSerial, dataSource=dataSource,
+                                                            dimensionOrdering=dimensionOrdering)
 
     try:
         display.strips[0]._CcpnGLWidget.initialiseAxes(strip=display.strips[0])

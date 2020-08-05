@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-16 13:13:49 +0100 (Thu, July 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -207,7 +207,6 @@ class Window(AbstractWrapperObject):
         # NOTE:ED currently recovers all modules, not just spectrumDisplays
         # needs to handle different moduleAreas
         for mods, (pos, rel) in moduleList.items():
-
             # may need to have a dock.float() in here somewhere if from a deleted moduleArea
             self.moduleArea.moveDock(mods, pos, rel)
             # recover sizes?
@@ -246,7 +245,7 @@ class Window(AbstractWrapperObject):
                               axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
                               widths: Sequence[float] = (), units: Sequence[str] = (),
                               stripDirection: str = 'Y', is1D: bool = False,
-                              position='right', relativeTo=None,
+                              position = 'right', relativeTo = None, isGrouped = False,
                               **kwds):
         """
         :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
@@ -276,7 +275,7 @@ class Window(AbstractWrapperObject):
             # create the new spectrumDisplay
             display = _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
                                              title=title, positions=positions, widths=widths, units=units,
-                                             stripDirection=stripDirection, is1D=is1D, **kwds)
+                                             stripDirection=stripDirection, is1D=is1D, isGrouped=isGrouped, **kwds)
 
             # add the new module to mainWindow at the required position
             self.moduleArea.addModule(display, position=position, relativeTo=relativeTo)
@@ -303,7 +302,6 @@ class Window(AbstractWrapperObject):
         Object is recovered through the deleteObject decorator
         """
         with undoBlockWithoutSideBar():
-
             # get the current state of the layout
             _list = self._getModuleInsertList(moduleArea=display.area)
 
@@ -322,7 +320,7 @@ class Window(AbstractWrapperObject):
 
                 # add/remove spectrumDisplay from module Area - using moveDock method
                 addUndoItem(undo=partial(self._restoreModules, _list),
-                            redo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None),)
+                            redo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None), )
 
             # disable the spectrumDisplay notifiers
             self._setBlankingSpectrumDisplayNotifiers(display, True)

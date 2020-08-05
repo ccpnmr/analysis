@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-30 14:29:19 +0100 (Thu, July 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-05 18:43:27 +0100 (Wed, August 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -46,7 +46,7 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
-from ccpn.ui.gui.popups.SpectrumPropertiesPopup import ColourTab, ContoursTab
+from ccpn.ui.gui.popups.SpectrumPropertiesPopup import ColourTab, ContoursTab, Colour1dFrame, ColourNdFrame
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Constants import ALL_UNITS, ERRORSTRING
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
@@ -182,6 +182,29 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             if _changes:
                 self._applyAllChanges(_changes)
 
+        try:
+            _changes = self._group1dColours._changes
+            if _changes:
+                # self._group1dColours.spectrumGroup = self.obj
+                self._applyAllChanges(_changes)
+                if self.obj != self._group1dColours.spectrumGroup:
+                    # if a dummy spectrumGroup then copy to actual group
+                    for k, val in self._group1dColours.spectrumGroup.items():
+                        setattr(self.obj, k, val)
+        except:
+            pass
+        try:
+            _changes = self._groupNdColours._changes
+            if _changes:
+                # self._groupNdColours.spectrumGroup = self.obj
+                self._applyAllChanges(_changes)
+                if self.obj != self._groupNdColours.spectrumGroup:
+                    # if a dummy spectrumGroup then copy to actual group
+                    for k, val in self._groupNdColours.spectrumGroup.items():
+                        setattr(self.obj, k, val)
+        except Exception as es:
+            pass
+
         self._spectrumGroupSeriesEdited = OrderedDict()
         self._spectrumGroupSeriesValues = list(self.obj.series)
         self._spectrumGroupSeriesUnitsEdited = None
@@ -299,9 +322,12 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         """Return the list of active tabs
         """
         # test the colour tabs for the moment
-        tabs = tuple(self._colourTabs1d.widget(ii) for ii in range(self._colourTabs1d.count())) + \
-               tuple(self._colourTabsNd.widget(ii) for ii in range(self._colourTabsNd.count())) + \
-               (self.spectraTab, self.seriesTab)
+        _1dTabs = tuple(self._colourTabs1d.widget(ii) for ii in range(self._colourTabs1d.count()))
+        _NdTabs = tuple(self._colourTabsNd.widget(ii) for ii in range(self._colourTabsNd.count()))
+        _1dGroup = (self._group1dColours,) if _1dTabs else ()
+        _NdGroup = (self._groupNdColours,) if _NdTabs else ()
+
+        tabs = _1dTabs + _NdTabs + _1dGroup + _NdGroup + (self.spectraTab, self.seriesTab)
         return tabs
 
     def _initSpectraTab(self):
@@ -311,8 +337,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
     def _initGeneralTab1d(self):
         thisTab = self.generalTab1d
 
-        # self._group1dColours = Frame(thisTab, grid=(0, 0), setLayout=True, showBorder=True)
-        # Label(self._group1dColours, text='Group Colours here...', grid=(0, 0))
+        self._group1dColours = Colour1dFrame(parent=thisTab, mainWindow=self.mainWindow, container=self, editMode=self.editMode, spectrumGroup=self.obj,
+                                             grid=(0, 0), setLayout=True)
 
         self._colourTabs1d = Tabs(thisTab, grid=(1, 0))
 
@@ -342,8 +368,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
     def _initGeneralTabNd(self):
         thisTab = self.generalTabNd
 
-        # self._groupNdColours = Frame(thisTab, grid=(0, 0), setLayout=True, showBorder=True)
-        # Label(self._groupNdColours, text='Group Colours here...', grid=(0, 0))
+        self._groupNdColours = ColourNdFrame(parent=thisTab, mainWindow=self.mainWindow, container=self, editMode=self.editMode, spectrumGroup=self.obj,
+                                             grid=(0, 0), setLayout=True)
 
         self._colourTabsNd = Tabs(thisTab, grid=(1, 0))
 
@@ -380,6 +406,15 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             for aTab in tuple(colourTab.widget(ii) for ii in range(colourTab.count())):
                 aTab._fillPullDowns()
 
+        try:
+            self._group1dColours._fillPullDowns()
+        except:
+            pass
+        try:
+            self._groupNdColours._fillPullDowns()
+        except:
+            pass
+
     def _populate(self):
         """Populate the widgets in the tabs
         """
@@ -392,6 +427,15 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         for colourTab in (self._colourTabs1d, self._colourTabsNd):
             for aTab in tuple(colourTab.widget(ii) for ii in range(colourTab.count())):
                 aTab._populateColour()
+
+        try:
+            self._group1dColours._populateColour()
+        except:
+            pass
+        try:
+            self._groupNdColours._populateColour()
+        except:
+            pass
 
         with self.blockWidgetSignals():
             self.seriesTab._fillSeriesFrame(self._defaultSpectra, spectrumGroup=self.obj)

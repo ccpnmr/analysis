@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:06:50 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-05 18:43:27 +0100 (Wed, August 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -890,7 +890,7 @@ def selectPullDownColour(pulldown, colourString, allowAuto=False):
 ICON_SIZE = 20
 
 
-def fillColourPulldown(pulldown, allowAuto=False, includeGradients=True):
+def fillColourPulldown(pulldown, allowAuto=False, allowNone=False, includeGradients=True):
     currText = pulldown.currentText()
     # currIndex = pulldown.currentIndex()
     # print ('>>>', currText, currIndex)
@@ -898,6 +898,9 @@ def fillColourPulldown(pulldown, allowAuto=False, includeGradients=True):
         pulldown.clear()
         if allowAuto:
             pulldown.addItem(text='<auto>')
+        if allowNone:
+            pulldown.addItem(text='')
+
         for item in spectrumColours.items():
             # if item[1] not in pulldown.texts:
 
@@ -927,7 +930,7 @@ def fillColourPulldown(pulldown, allowAuto=False, includeGradients=True):
                     painter.setPen(QtGui.QColor(_intCol))
                     painter.drawLine(ii, 0, ii, ICON_SIZE)
                     step -= stepY
-                    if step < 0:
+                    while step < 0:
                         step += stepX
                         jj += 1
 
@@ -937,20 +940,23 @@ def fillColourPulldown(pulldown, allowAuto=False, includeGradients=True):
         pulldown.setCurrentText(currText)
 
 
-def _setColourPulldown(pulldown, attrib, allowAuto=False, includeGradients=True):
+def _setColourPulldown(pulldown, attrib, allowAuto=False, includeGradients=True, allowNone=False):
     """Populate colour pulldown and set to the current colour
     """
     spectrumColourKeys = list(spectrumColours.keys())
-    fillColourPulldown(pulldown, allowAuto=allowAuto, includeGradients=includeGradients)
-    c = attrib.upper() if attrib.startswith('#') else attrib
+    fillColourPulldown(pulldown, allowAuto=allowAuto, includeGradients=includeGradients, allowNone=allowNone)
+    c = attrib.upper() if attrib and attrib.startswith('#') else attrib
     if c in spectrumColourKeys:
         col = spectrumColours[c]
         pulldown.setCurrentText(col)
     elif attrib in colorSchemeTable:
         pulldown.setCurrentText(attrib)
+    elif c is None:
+        if allowNone:
+            pulldown.setCurrentText('')
     else:
         addNewColourString(c)
-        fillColourPulldown(pulldown, allowAuto=allowAuto, includeGradients=includeGradients)
+        fillColourPulldown(pulldown, allowAuto=allowAuto, includeGradients=includeGradients, allowNone=allowNone)
         if c != '#' or allowAuto is True:
             col = spectrumColours[c]
             pulldown.setCurrentText(col)
@@ -1119,6 +1125,10 @@ def interpolateColourRgba(colour1, colour2, value, alpha=1.0):
 
 
 def interpolateColourHex(hexColor1, hexColor2, value, alpha=1.0):
+    if hexColor1 is None or hexColor2 is None:
+        return None
+    value = np.clip(value, 0.0, 1.0)
+
     r1 = int('0x' + hexColor1[1:3], 16)
     g1 = int('0x' + hexColor1[3:5], 16)
     b1 = int('0x' + hexColor1[5:7], 16)

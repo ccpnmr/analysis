@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 12:44:37 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -141,13 +141,14 @@ class Gui(Ui):
         self.setNotifier(project, [Notifier.CHANGE], 'Spectrum', _spectrumHasChanged)
 
         from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView, _spectrumViewHasChanged
-
+        from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
         # project.registerNotifier('SpectrumView', 'delete', GuiSpectrumView._deletedSpectrumView)
 
         # project.registerNotifier('SpectrumView', 'create', GuiSpectrumView._createdSpectrumView)
         # project.registerNotifier('SpectrumView', 'change', GuiSpectrumView._spectrumViewHasChanged)
         self.setNotifier(project, [Notifier.CREATE], 'SpectrumView', _createdSpectrumView)
         self.setNotifier(project, [Notifier.CHANGE], 'SpectrumView', _spectrumViewHasChanged)
+        self.setNotifier(project, [Notifier.CHANGE], 'SpectrumGroup', _spectrumGroupViewHasChanged)
 
         from ccpn.ui.gui.lib import GuiPeakListView
 

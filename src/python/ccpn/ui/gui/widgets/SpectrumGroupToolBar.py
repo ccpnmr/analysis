@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:56 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-08-05 18:43:27 +0100 (Wed, August 05, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,11 +25,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from ccpn.ui.gui.widgets.ToolBar import ToolBar
+from PyQt5 import QtCore, QtGui
 from functools import partial
+from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib import Pid
 
 
 class SpectrumGroupToolBar(ToolBar):
@@ -37,6 +38,7 @@ class SpectrumGroupToolBar(ToolBar):
         super().__init__(parent=parent, **kwds)
         self.spectrumDisplay = spectrumDisplay
         self._project = self.spectrumDisplay.project
+        self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
 
         # self._spectrumGroups = []
 
@@ -69,6 +71,7 @@ class SpectrumGroupToolBar(ToolBar):
             action = self.addAction(spectrumGroup.pid, partial(self._toggleSpectrumGroup, spectrumGroup))
             action.setCheckable(True)
             action.setChecked(True)
+            action.setText(spectrumGroup.pid)
             action.setToolTip(spectrumGroup.name)
             action.setObjectName(spectrumGroup.pid)
             self._setupButton(action, spectrumGroup)
@@ -80,6 +83,7 @@ class SpectrumGroupToolBar(ToolBar):
         action = self.addAction(spectrumGroup.pid, partial(self._toggleSpectrumGroup, spectrumGroup))
         action.setCheckable(True)
         action.setChecked(True)
+        action.setText(spectrumGroup.pid)
         action.setToolTip(spectrumGroup.name)
         action.setObjectName(spectrumGroup.pid)
         self._setupButton(action, spectrumGroup)
@@ -88,6 +92,9 @@ class SpectrumGroupToolBar(ToolBar):
         widget = self.widgetForAction(action)
         widget.setIconSize(QtCore.QSize(120, 10))
         widget.setFixedSize(75, 30)
+
+        from ccpn.ui.gui.lib.GuiSpectrumView import _addActionIcon
+        _addActionIcon(action, spectrumGroup, self.spectrumDisplay)
 
     def mousePressEvent(self, event: QtGui.QMouseEvent):
         """
@@ -153,6 +160,21 @@ class SpectrumGroupToolBar(ToolBar):
         if len(strip.spectra) == 0:
             self.spectrumDisplay._closeModule()
 
+    def _spectrumGroupRename(self, data):
+        """Rename the spectrumGroup in the toolbar from a notifier callback
+        """
+        spectrumGroup = data[Notifier.OBJECT]
+        trigger = data[Notifier.TRIGGER]
+
+        if spectrumGroup and trigger in [Notifier.RENAME]:
+            oldPid = Pid.Pid(data[Notifier.OLDPID])
+
+            validActions = [action for action in self.actions() if action.text() == oldPid]
+            for action in validActions:
+                action.setText(spectrumGroup.pid)
+                action.setToolTip(spectrumGroup.name)
+                action.setObjectName(spectrumGroup.pid)
+
     # LM: Fixme the code for peakList views below needs refactoring
 
     def _showHidePeakListView(self, spectrumGroup):
@@ -180,3 +202,22 @@ class SpectrumGroupToolBar(ToolBar):
     def _getPeakListViews(self, spectrumGroup):
         spectrumGroupPeakLists = [peakList for spectrum in spectrumGroup.spectra for peakList in spectrum.peakLists]
         return [plv for peakList in spectrumGroupPeakLists for plv in peakList.peakListViews]
+
+
+def _spectrumGroupViewHasChanged(data):
+    self = data[Notifier.OBJECT]
+
+    if self.isDeleted:
+        return
+
+    from ccpn.ui.gui.lib.GuiSpectrumView import _addActionIcon
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+    specDisplays = [sd for sd in self.project.spectrumDisplays if sd and sd.isGrouped and not (sd.isDeleted or sd._flaggedForDelete)]
+
+    for specDisplay in specDisplays:
+        _actions = [action for action in specDisplay.spectrumGroupToolBar.actions() if action.text() == self.pid]
+
+        for action in _actions:
+            # add spectrum action for grouped action
+            _addActionIcon(action, self, specDisplay)

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,9 @@ SPECTRUMGROUPCOMMENT = 'spectrumGroupComment'
 SPECTRUMGROUPSERIES = 'spectrumGroupSeries'
 SPECTRUMGROUPSERIESUNITS = 'spectrumGroupSeriesUnits'
 SPECTRUMGROUPSERIESTYPE = 'spectrumGroupSeriesType'
+SPECTRUMGROUPPOSITIVECONTOURCOLOUR = 'spectrumGroupPositiveContourColour'
+SPECTRUMGROUPNEGATIVECONTOURCOLOUR = 'spectrumGroupNegativeContourColour'
+SPECTRUMGROUPSLICECOLOUR = 'spectrumGroupSliceColour'
 
 
 class SeriesTypes(LabelledEnum):
@@ -130,6 +133,48 @@ class SpectrumGroup(AbstractWrapperObject):
             raise ValueError("comment must be a string/None.")
 
         self.setParameter(SPECTRUMGROUP, SPECTRUMGROUPCOMMENT, value)
+
+    @property
+    def sliceColour(self) -> str:
+        """1d sliceColour for group"""
+        colour = self.getParameter(SPECTRUMGROUP, SPECTRUMGROUPSLICECOLOUR)
+        return colour
+
+    @sliceColour.setter
+    def sliceColour(self, value: str):
+        """1d sliceColour for group"""
+        if not isinstance(value, (str, type(None))):
+            raise ValueError("sliceColour must be a string/None.")
+
+        self.setParameter(SPECTRUMGROUP, SPECTRUMGROUPSLICECOLOUR, value)
+
+    @property
+    def positiveContourColour(self) -> str:
+        """1d positivecontourColour for group"""
+        colour = self.getParameter(SPECTRUMGROUP, SPECTRUMGROUPPOSITIVECONTOURCOLOUR)
+        return colour
+
+    @positiveContourColour.setter
+    def positiveContourColour(self, value: str):
+        """1d positiveContourColour for group"""
+        if not isinstance(value, (str, type(None))):
+            raise ValueError("positiveContourColour must be a string/None.")
+
+        self.setParameter(SPECTRUMGROUP, SPECTRUMGROUPPOSITIVECONTOURCOLOUR, value)
+
+    @property
+    def negativeContourColour(self) -> str:
+        """Nd negativecontourColour for group"""
+        colour = self.getParameter(SPECTRUMGROUP, SPECTRUMGROUPNEGATIVECONTOURCOLOUR)
+        return colour
+
+    @negativeContourColour.setter
+    def negativeContourColour(self, value: str):
+        """Nd negativeContourColour for group"""
+        if not isinstance(value, (str, type(None))):
+            raise ValueError("negativeContourColour must be a string/None.")
+
+        self.setParameter(SPECTRUMGROUP, SPECTRUMGROUPNEGATIVECONTOURCOLOUR, value)
 
     #-------------------------------------------------------------------------------------------------------
     # GWV hack to alleviate (temporarily) the loss of order on spectra

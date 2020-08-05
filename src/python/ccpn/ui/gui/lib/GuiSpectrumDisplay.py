@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-17 10:36:48 +0100 (Fri, July 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -58,6 +58,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget
 from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidgetAxis, GuiNdWidgetAxis
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import ZPlaneNavigationModes
+from ccpn.util import Colour
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
@@ -462,6 +463,12 @@ class GuiSpectrumDisplay(CcpnModule):
                                                            self._listViewChanged,
                                                            onceOnly=True)
 
+        self._spectrumGroupNotifier = self.setNotifier(self.project,
+                                                       [Notifier.CHANGE, Notifier.RENAME],
+                                                       SpectrumGroup.className,
+                                                       self._spectrumGroupChanged,
+                                                       onceOnly=True)
+
     # GWV 20181124:
     # def _unRegisterNotifiers(self):
     #     """Unregister notifiers
@@ -517,6 +524,107 @@ class GuiSpectrumDisplay(CcpnModule):
 
         GLSignals = GLNotifier(parent=None)
         GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict={})
+
+    def _spectrumGroupChanged(self, data):
+        """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
+        """
+        if self.isGrouped and data:
+            trigger = data[Notifier.TRIGGER]
+            if trigger == Notifier.RENAME:
+                self.spectrumGroupToolBar._spectrumGroupRename(data)
+            elif trigger == Notifier.CHANGE:
+
+                spectrumGroup = data[Notifier.OBJECT]
+                spectrumGroups = [action.text() for action in self.spectrumGroupToolBar.actions()]
+                if spectrumGroup.pid not in spectrumGroups:
+                    return
+                self._colourChanged(spectrumGroup)
+
+    def _colourChanged(self, spectrumGroup):
+        if self.is1D:
+            self._1dColourChanged(spectrumGroup)
+        else:
+            self._NdColourChanged(spectrumGroup)
+
+    def _NdColourChanged(self, spectrumGroup):
+        _posCol = spectrumGroup.positiveContourColour
+        _negCol = spectrumGroup.negativeContourColour
+        _specViews = [specView for spec in spectrumGroup.spectra for specView in self.spectrumViews if specView.spectrum == spec]
+
+        _posColours = (None,)
+        if _posCol and _posCol.startswith('#'):
+            _posColours = (_posCol,)
+        elif _posCol in Colour.colorSchemeTable:
+            _posColours = Colour.colorSchemeTable[_posCol]
+        # get the positive contour colour list
+        stepX = len(_specViews) - 1
+        step = stepX
+        stepY = len(_posColours) - 1
+        jj = 0
+        if stepX > 0:
+            for ii in range(stepX + 1):
+                _interp = (stepX - step) / stepX
+                _intCol = Colour.interpolateColourHex(_posColours[min(jj, stepY)], _posColours[min(jj + 1, stepY)],
+                                                      _interp,
+                                                      alpha=1.0)
+                _specViews[ii].positiveContourColour = _intCol
+                step -= stepY
+                while step < 0:
+                    step += stepX
+                    jj += 1
+        elif stepX == 0:
+            _specViews[0].positiveContourColour = _posColours[0]
+        _negColours = (None,)
+        if _negCol and _negCol.startswith('#'):
+            _negColours = (_negCol,)
+        elif _negCol in Colour.colorSchemeTable:
+            _negColours = Colour.colorSchemeTable[_negCol]
+        # get the negative contour colour list
+        stepX = len(_specViews) - 1
+        step = stepX
+        stepY = len(_negColours) - 1
+        jj = 0
+        if stepX > 0:
+            for ii in range(stepX + 1):
+                _interp = (stepX - step) / stepX
+                _intCol = Colour.interpolateColourHex(_negColours[min(jj, stepY)], _negColours[min(jj + 1, stepY)],
+                                                      _interp,
+                                                      alpha=1.0)
+                _specViews[ii].negativeContourColour = _intCol
+                step -= stepY
+                while step < 0:
+                    step += stepX
+                    jj += 1
+        elif stepX == 0:
+            _specViews[0].negativeContourColour = _negColours[0]
+
+    def _1dColourChanged(self, spectrumGroup):
+        _sliceCol = spectrumGroup.sliceColour
+        _specViews = [specView for spec in spectrumGroup.spectra for specView in self.spectrumViews if specView.spectrum == spec]
+
+        _sliceColours = (None,)
+        if _sliceCol.startswith('#'):
+            _sliceColours = (_sliceCol,)
+        elif _sliceCol in Colour.colorSchemeTable:
+            _sliceColours = Colour.colorSchemeTable[_sliceCol]
+        # get the sliceitive contour colour list
+        stepX = len(_specViews) - 1
+        step = stepX
+        stepY = len(_sliceColours) - 1
+        jj = 0
+        if stepX > 0:
+            for ii in range(stepX + 1):
+                _interp = (stepX - step) / stepX
+                _intCol = Colour.interpolateColourHex(_sliceColours[min(jj, stepY)], _sliceColours[min(jj + 1, stepY)],
+                                                      _interp,
+                                                      alpha=1.0)
+                _specViews[ii].sliceColour = _intCol
+                step -= stepY
+                while step < 0:
+                    step += stepX
+                    jj += 1
+        elif stepX == 0:
+            _specViews[0].sliceColour = _sliceColours[0]
 
     def _spectrumViewVisibleChanged(self):
         """Respond to a visibleChanged in one of the spectrumViews.

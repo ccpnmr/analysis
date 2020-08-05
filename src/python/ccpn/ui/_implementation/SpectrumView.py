@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import operator
 from typing import Tuple
-
+from functools import partial
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -35,7 +35,7 @@ from ccpn.core.lib import Pid
 from ccpn.ui._implementation.Strip import Strip
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, newObject
+from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, newObject, undoStackBlocking
 
 
 class SpectrumView(AbstractWrapperObject):
@@ -134,8 +134,18 @@ class SpectrumView(AbstractWrapperObject):
 
     @positiveContourColour.setter
     def positiveContourColour(self, value: str):
-        if self.positiveContourColour != value:
-            self._wrappedData.spectrumView.positiveContourColour = value
+        if not isinstance(value, (str, type(None))):
+            raise ValueError("positiveContourColour must be a string/None.")
+
+        with undoStackBlocking() as addUndoItem:
+            # add undo/redo items to flag change of colour for the spectrumViews
+            addUndoItem(redo=partial(setattr, self, '_guiChanged', True))
+
+        self._guiChanged = True
+        self._wrappedData.spectrumView.positiveContourColour = value
+
+        with undoStackBlocking() as addUndoItem:
+            addUndoItem(undo=partial(setattr, self, '_guiChanged', True))
 
     @property
     def positiveContourCount(self) -> int:
@@ -219,8 +229,18 @@ class SpectrumView(AbstractWrapperObject):
 
     @negativeContourColour.setter
     def negativeContourColour(self, value: str):
-        if self.negativeContourColour != value:
-            self._wrappedData.spectrumView.negativeContourColour = value
+        if not isinstance(value, (str, type(None))):
+            raise ValueError("negativeContourColour must be a string/None.")
+
+        with undoStackBlocking() as addUndoItem:
+            # add undo/redo items to flag change of colour for the spectrumViews
+            addUndoItem(redo=partial(setattr, self, '_guiChanged', True))
+
+        self._guiChanged = True
+        self._wrappedData.spectrumView.negativeContourColour = value
+
+        with undoStackBlocking() as addUndoItem:
+            addUndoItem(undo=partial(setattr, self, '_guiChanged', True))
 
     @property
     def negativeContourCount(self) -> int:
@@ -332,8 +352,18 @@ class SpectrumView(AbstractWrapperObject):
 
     @sliceColour.setter
     def sliceColour(self, value: str):
-        if self.sliceColour != value:
-            self._wrappedData.spectrumView.sliceColour = value
+        if not isinstance(value, (str, type(None))):
+            raise ValueError("sliceColour must be a string/None.")
+
+        with undoStackBlocking() as addUndoItem:
+            # add undo/redo items to flag change of colour for the spectrumViews
+            addUndoItem(redo=partial(setattr, self, '_guiChanged', True))
+
+        self._guiChanged = True
+        self._wrappedData.spectrumView.sliceColour = value
+
+        with undoStackBlocking() as addUndoItem:
+            addUndoItem(undo=partial(setattr, self, '_guiChanged', True))
 
     @property
     def spectrum(self) -> Spectrum:

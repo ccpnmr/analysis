@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-05 19:42:03 +0100 (Wed, August 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -551,7 +551,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
 
         record = isotopeRecords.get(checkIsotopeCode)
         if record:
-            isValid = name.startswith(record.symbol)
+            isValid = name.startswith(record.symbol) or (name.startswith('Q') and record.symbol == 'H')
             if not isValid:
                 getLogger().warning("Invalid isotopeCode %s for nmrAtom name %s, setting isotopeCode to '?'" % (isotopeCode, name))
                 dd['isotopeCode'] = '?'
@@ -568,10 +568,11 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
             getLogger().warning("Could not reset serial of %s to %s - keeping original value"
                                 % (result, serial))
 
-    if name and name[0] in PSEUDO_ATOM_NAMES:
-        # NOTE:ED - this is a hack to allow setting Q pseudoAtom types to isotopeCode 1H
-        #           could actually be used to bypass all name checking in the api
-        obj.__dict__['isotopeCode'] = PSEUDO_ATOM_NAMES[name[0]]
+    # if name and name[0] in PSEUDO_ATOM_NAMES:
+    #     # NOTE:ED - this is a hack to allow setting Q pseudoAtom types to isotopeCode 1H
+    #     #           could actually be used to bypass all name checking in the api
+    #     #           shouldn't be needed with the 'or' added to the isValid check above
+    #     obj.__dict__['isotopeCode'] = PSEUDO_ATOM_NAMES[name[0]]
 
     return result
 

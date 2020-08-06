@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-05 18:43:27 +0100 (Wed, August 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-06 20:30:36 +0100 (Thu, August 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib import Pid
+from ccpn.util.OrderedSet import OrderedSet
 
 
 class SpectrumGroupToolBar(ToolBar):
@@ -60,7 +61,7 @@ class SpectrumGroupToolBar(ToolBar):
     #     AbstractWrapperObject.setParameter(self.spectrumDisplay,
     #                                        SPECTRUMGROUPS, SPECTRUMGROUPLIST, groups)
 
-    def _addAction(self, spectrumGroup):
+    def _addAction(self, spectrumGroup, oldAction=None):
 
         _spectrumGroups = self.spectrumDisplay._getSpectrumGroups()
 
@@ -68,15 +69,29 @@ class SpectrumGroupToolBar(ToolBar):
             # _spectrumGroups.append(spectrumGroup)
             _spectrumGroups += (spectrumGroup.pid,)
 
-            action = self.addAction(spectrumGroup.pid, partial(self._toggleSpectrumGroup, spectrumGroup))
-            action.setCheckable(True)
-            action.setChecked(True)
-            action.setText(spectrumGroup.pid)
-            action.setToolTip(spectrumGroup.name)
-            action.setObjectName(spectrumGroup.pid)
-            self._setupButton(action, spectrumGroup)
+            if oldAction:
+                self.addAction(oldAction)
+                oldAction.setEnabled(True)
+            else:
+                action = self.addAction(spectrumGroup.pid, partial(self._toggleSpectrumGroup, spectrumGroup))
+                action.setCheckable(True)
+                action.setChecked(True)
+                action.setText(spectrumGroup.pid)
+                action.setToolTip(spectrumGroup.name)
+                action.setObjectName(spectrumGroup.pid)
+                self._setupButton(action, spectrumGroup)
 
             self.spectrumDisplay._setSpectrumGroups(_spectrumGroups)
+
+    def _removeAction(self, action, spectrumGroup):
+        _spectrumGroups = OrderedSet(self.spectrumDisplay._getSpectrumGroups())
+        if spectrumGroup.pid in _spectrumGroups:
+            _spectrumGroups = _spectrumGroups - {spectrumGroup.pid,}
+
+            self.removeAction(action)
+            action.setEnabled(False)
+
+            self.spectrumDisplay._setSpectrumGroups(list(_spectrumGroups))
 
     def _forceAddAction(self, spectrumGroup):
 
@@ -151,14 +166,36 @@ class SpectrumGroupToolBar(ToolBar):
     def _deleteSpectrumGroup(self, action, spectrumGroup):
         strip = self._getStrip()
         if strip is not None:
-            self.removeAction(action)
-            for spectrumView in strip.spectrumViews:
-                if spectrumView.spectrum in spectrumGroup.spectra:
-                    spectrumView.delete()
-        if spectrumGroup in self._spectrumGroups:
-            self._spectrumGroups.remove(spectrumGroup)
-        if len(strip.spectra) == 0:
-            self.spectrumDisplay._closeModule()
+            from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, undoStackBlocking
+
+            with undoBlockWithoutSideBar():
+
+                _spectra = [sp for group in [strip.project.getByPid(gr) for gr in strip.spectrumDisplay._getSpectrumGroups() if strip.project.getByPid(gr)]
+                            for sp in group.spectra
+                            if not (sp.isDeleted or sp._flaggedForDelete)]
+
+                self._removeAction(action, spectrumGroup)
+
+                with undoStackBlocking() as addUndoItem:
+                    # need to undo the removal of action
+                    addUndoItem(undo=strip._CcpnGLWidget.updateVisibleSpectrumViews,
+                                redo=partial(self._removeAction, action, spectrumGroup))
+
+                for spectrumView in strip.spectrumViews:
+                    # NOTE:ED - can only delete those that are not duplicated
+                    #           need count in all spectrumDisplay._getSpectrumGroups
+                    if spectrumView.spectrum in spectrumGroup.spectra and _spectra.count(spectrumView.spectrum) == 1:
+                        spectrumView.delete()
+
+                with undoStackBlocking() as addUndoItem:
+                    # keep a handle to the action for reinserting
+                    addUndoItem(undo=partial(self._addAction, spectrumGroup, oldAction=action),
+                                redo=strip._CcpnGLWidget.updateVisibleSpectrumViews)
+
+                # if spectrumGroup in self._spectrumGroups:
+                #     self._spectrumGroups.remove(spectrumGroup)
+                # if len(strip.spectra) == 0:
+                #     self.spectrumDisplay._closeModule()
 
     def _spectrumGroupRename(self, data):
         """Rename the spectrumGroup in the toolbar from a notifier callback

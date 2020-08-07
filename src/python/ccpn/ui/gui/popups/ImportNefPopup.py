@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-07 14:11:10 +0100 (Tue, July 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-07 01:36:21 +0100 (Fri, August 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1070,6 +1070,11 @@ class NefDictFrame(Frame):
     applyCheckBoxes['ccpn_substance'] = partial(apply_checkBox_item,
                                                 prefix='ccpn_substance_synonym_',
                                                 mappingCode='ccpn_substance',
+                                                )
+
+    applyCheckBoxes['nef_peak_restraint_link'] = partial(apply_checkBox_item,
+                                                prefix='nef_peak_restraint_',
+                                                mappingCode='nef_peak_restraint_link',
                                                 )
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

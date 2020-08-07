@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 11:47:17 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-07 01:36:21 +0100 (Fri, August 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -399,6 +399,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         SpectrumGroup._pluralLinkName,
         Note._pluralLinkName,
         PeakCluster._pluralLinkName,
+        # 'restraintLinks',
         ]
 
     lockedItems = {
@@ -426,6 +427,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         'ccpn_notes'                 : (Note._pluralLinkName, Note.className),
         'ccpn_peak_cluster'          : (PeakCluster._pluralLinkName, PeakCluster.className),
         # 'ccpn_peak_cluster_serial'          : (PeakCluster._pluralLinkName, PeakCluster.className),
+        'nef_peak_restraint_link'    : ('restraintLinks','RestraintLink')
         }
 
     nefProjectToSaveFramesMapping = {
@@ -448,6 +450,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         SpectrumGroup._pluralLinkName    : ['ccpn_spectrum_group', 'ccpn_group_spectrum'],
         Note._pluralLinkName             : ['ccpn_note'],
         PeakCluster._pluralLinkName      : ['ccpn_peak_cluster_list', 'ccpn_peak_cluster', 'ccpn_peak_cluster_peaks'],
+        'restraintLinks'                 : ['nef_peak_restraint_link'],
         }
 
     nefProjectToHandlerMapping = {
@@ -467,6 +470,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         SpectrumGroup._pluralLinkName    : None,
         Note._pluralLinkName             : 'ccpn_note',
         PeakCluster._pluralLinkName      : None,
+        'restraintLinks'                 : None,
         }
 
     contents = {}
@@ -494,7 +498,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
             self.headerItem = self.projectItem
 
         for name in self.checkList:
-            if hasattr(self.project, name):  # just to be safe
+            if hasattr(self.project, name) or True:  # just to be safe
                 item = QtWidgets.QTreeWidgetItem(self.headerItem)
                 item.setText(0, name)
                 if self._enableCheckBoxes:
@@ -690,6 +694,8 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     contents['nmr_chain'] = content_list
 
     contents['ccpn_notes'] = content_list  # content_ccpn_notes
+
+    contents['nef_peak_restraint_links'] = content_list  # content_ccpn_notes
 
     def _fillFunc(self, project, saveFrame, *args, **kwds):
         saveFrameName = saveFrame['sf_category']

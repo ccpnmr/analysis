@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-11 12:24:50 +0000 (Fri, February 11, 2022) $"
+__modifiedBy__ = "$modifiedBy: varioustoxins $"
+__dateModified__ = "$dateModified: 2022-02-13 16:32:52 +0000 (Sun, February 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -436,20 +436,23 @@ class Framework(NotifierBase, GuiBase):
             self._autoBackupThread.start()
 
     def _backupProject(self):
-        from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+        try:
+            from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 
-        apiIo.backupProject(self.project._wrappedData.parent)
-        backupPath = self.project.backupPath
+            apiIo.backupProject(self.project._wrappedData.parent)
+            backupPath = self.project.backupPath
 
-        backupStatePath = fetchDir(backupPath, Layout.StateDirName)
+            backupStatePath = fetchDir(backupPath, Layout.StateDirName)
 
-        copy_tree(self.statePath, backupStatePath)
-        layoutFile = os.path.join(backupStatePath, Layout.DefaultLayoutFileName)
-        Layout.saveLayoutToJson(self.ui.mainWindow, layoutFile)
-        self.current._dumpStateToFile(backupStatePath)
+            copy_tree(self.statePath, backupStatePath)
+            layoutFile = os.path.join(backupStatePath, Layout.DefaultLayoutFileName)
+            Layout.saveLayoutToJson(self.ui.mainWindow, layoutFile)
+            self.current._dumpStateToFile(backupStatePath)
 
-        #Spectra should not be copied over. Dangerous for disk space
-        # backupDataPath = fetchDir(backupPath, DataDirName)
+            #Spectra should not be copied over. Dangerous for disk space
+            # backupDataPath = fetchDir(backupPath, DataDirName)
+        except Exception as es:
+            getLogger().warning('Project backup failed with error %s' % es)
 
     #-----------------------------------------------------------------------------------------
 

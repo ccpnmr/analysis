@@ -9,13 +9,33 @@
 <div><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 20px"></a></div>
 <br>
 <div class="headerBar">FAQs</div>
-<div class="tutorial">
+<p class="tutorial">
 <h2>FAQs</h2>
 <p><a href="#V2Feat">What has happened to my favourite V2 features?</a>
+<br><a href="#ShouldISwitch">Should I switch from V2.4 to V3?</a>
+<br><a href="#Catalina">How can I can I install CcpNmr Analysis V3 on MacOS Catalina?</a>
 <br><a href="#ChemBuildMol">How can I get a molecule from ChemBuild into CcpNmr Analysis V3?</a>
 <br><a href="#ChemBuildXml">How can I save a molecule created in ChemBuild as a ChemComp .xml file?</a>
+
 <h3><a name="V2Feat"></a>What has happened to my favourite V2 features?</h3></p>
 <p>Have a look at our <a href="PopularV2FeaturesInV3.html">Popular V2 Features in V3</a> page for a list of V2 features and how they have been implemented in V3. You may also be interested in our <a href="V2ToV3Translation.html">V2 to V3 translation</a> page which gives a direct translation of V2 mouse and keyboard commands to the new V3 commands.</p>
+
+<h3><a name="ShouldISwitch"></a>Should I switch from V2.4 to V3?</h3>
+<p>Overall, V3 is a nicer, more flexible and more user-friendly programme than V2.4, as illustrated in our <a href="https://www.youtube.com/watch?v=k08ZwgZY8yA&t=914s">Switching to CcpNmr Analysis V3</a> talk from our 2019 conference. However, as yet, not all features have been ported from V2.4. Our <a href="PopularV2FeaturesInV3.html">Popular V2 Features in V3</a> page will give you a bit of an idea of whether there are elements of V2.4 that are not yet present in V3 and that you don't want to do without. In general, smaller projects involving assignments and chemical shift mapping will work well in V3. Anything involving structures, relaxation data analysis and regular use of synthetic peaks lists is currently better served in V2.4.</p>
+
+<h3><a name="Catalina"></a>How can I can I install CcpNmr Analysis V3 on MacOS Catalina?</h3>
+<p>Try following these instructions quite closely:</p>
+<ol>
+    <li>Download the <a href="http://www.ccpn.ac.uk/download/3.0.2/CcpNmrLauncher.dmg">MacOS Launcher App</a> and install in the usual way.</li>
+    <li>The first time you open the app, do so with <span class="action">right-click / Open</span> and verify that you want to open an App from an unregistered Developer.</li>
+    <li>If you encounter any errors that the App <b>'can't be opened'</b> or <b>'is damaged'</b>, please open your <span class="action">System Preferences</span> and go to <span class="action">Security & Privacy / General</span>.</li>
+    <li>Select <span class="action">Allow apps downloaded from Anywhere</span>. </li>
+    <li>If <span class="action">Anywhere</span>  is not an option, open a terminal window and enter <span class="action">sudo spctl --master-disable</span>.</li>
+    <li>Now try opening the app again via <span class="action">right-click / Open</span>.</li>
+</ol>
+<p>Once you have opened the Launcher once this way, you should be okay and can set you security settings back to <span class="action">Allow apps downloaded from App Store</span> or <span class="action">App Store and identified developers</span>.</p>
+<p>We hope that we will manage to get Apple Develop status in the near future so that this whole procedure will no longer be necessary.</p>
+
 <h3><a name="ChemBuildMol"></a>How can I get a molecule from ChemBuild into CcpNmr Analysis V3?</h3>
 <p>As yet, ChemBuild and Analysis V3 are not properly integrated and it may still take us a little while to get this done properly. There are one or two workarounds. Which one you should use (and indeed whether you should bother importing a molecule at all!)  depends on what your ultimate aim is (why are you trying to import what).</p>
 <p>Analysis V3 is currently able to read pdb files and SMILES, but not the CCPN ChemComp .xml files and not mol2 files.
@@ -31,6 +51,7 @@
     <li>If you have a non-standard amino acid in your peptide/protein, the easiest thing is probably to enter the chain using the natural amino acid most closely related to your non-natural one. Create an NmrChain from your Chain (double-click on <span class="action">New NmrChain</span> and select <span class="action">Clone from Chain</span>). Then delete/add NmrAtoms to the natural amino acid to create your non-natural amino acid. You can then use the NmrAtoms to do your assignment. The only drawback with this is that the program will not be able to recognise your non-natural amino acid as being assigned, because there is no equivalent in a Chain. At the moment it isn't possible to modify Chains (except to delete residues), but we will be adding such features in future.</li></ol></p>
 <p>What is worth noting is that you can make quite a few changes to your NmrChains and NmrResidues (by double-clicking on them in the sidebar). So you can import a SMILES as a substance, create an NmrChain from this (the whole molecule will go into a single NmrResidue) and then double-click on the <span class="action">NmrResidue</span> and change the NmrChain, Sequence Code (i.e. Residue Number) and Amino Acid name to those of your choice, and this will be slotted into another NmrChain. (So, in this way, you could have another NmrChain in which you had removed an NmrResidue and then you could replace it with something from a SMILES.)
 </p>
+
 <h3><a name="ChemBuildXml"></a>How can I save a molecule created in ChemBuild as a ChemComp .xml file?</h3>
 <p>Unfortunately, this needs a slightly odd work-around at the moment. Go to the <span class="action">Compound Info</span> tab on the right hand side. Make sure you enter a <span class="action">Name</span> and a <span class="action">CCPN Code</span>. Now create a folder in your computer's file browser where you want to save the ChemComp file - this has to have the same name as your compound's <span class="action">Name</span>. Then go to the <span class="action">Export</span> menu and select <span class="action">CCPN ChemComp XML File</span>. Navigate not to the folder you have just created, but the folder one higher, enter the compound's name under <span class="action">Save As</span> and click <span class="action">Save</span>. If asked, select to replace the folder and then your ChemComp .xml file should be saved.</p>
 </div>

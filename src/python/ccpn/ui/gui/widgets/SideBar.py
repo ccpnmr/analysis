@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 19:56:35 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-21 15:18:31 +0100 (Fri, August 21, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -78,7 +78,9 @@ from ccpn.ui.gui.widgets.Spacer import Spacer as CCPNSpacer
 from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.ui.gui.lib.mouseEvents import makeDragEvent
 
+from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
 # from PyQt5.QtCore import QStringListModel
 # from PyQt5.QtGui import QListView, QAbstractItemView
 
@@ -1197,31 +1199,74 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         else:
             super().mouseReleaseEvent(event)
 
-    def dragEnterEvent(self, event):
-        """Handle drag enter event to create a new drag/drag item.
+        self._dragStartPosition = None
+        self._pids = None
+        self._mouseButton = None
+
+    def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
+        """Keep a list of the selected items when the left mouse button is pressed
         """
-        if event.mimeData().hasUrls():
-            event.accept()
+        def _treeOrder(val):
+            try:
+                return int(val.id[5:])
+            except:
+                return 1e10
+
+        # call superclass to update selected items
+        super(SideBar, self).mousePressEvent(event)
+
+        if event.button() == QtCore.Qt.LeftButton:
+            # keep the list if left button pressed
+            self._dragStartPosition = event.pos()
+            pids = OrderedSet()
+
+            # get the list of items with ids and sort by order in tree
+            _items = [item.data(1, QtCore.Qt.UserRole) for item in self.selectedItems()
+                      if item and item.data(1, QtCore.Qt.UserRole) and isinstance(item.data(1, QtCore.Qt.UserRole).id, str)]
+            _items = sorted(_items, key=lambda item: _treeOrder(item))
+            for item in _items:
+                if item and item.obj:
+                    pids.add(str(item.obj.pid))
+
+            self._pids = list(pids)
         else:
-            pids = []
-            for item in self.selectedItems():
-                if item is not None:
+            self._dragStartPosition = None
+            self._pids = None
 
-                    dataPid = item.data(0, QtCore.Qt.DisplayRole)
-                    sideBarObject = item.data(1, QtCore.Qt.UserRole)
+        self._mouseButton = event.button()
 
-                    if sideBarObject.obj:
-                        pids.append(str(sideBarObject.obj.pid))
+    def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
+        """Create a mouse drag event with the selected items when dragging with the left button
+        """
+        if self._mouseButton == QtCore.Qt.LeftButton:
+            if (event.pos() - self._dragStartPosition).manhattanLength() >= QtWidgets.QApplication.startDragDistance():
+                makeDragEvent(self, {'pids': self._pids}, '\n'.join(self._pids))
 
-            itemData = json.dumps({'pids': pids})
-
-            tempData = QtCore.QByteArray()
-            stream = QtCore.QDataStream(tempData, QtCore.QIODevice.WriteOnly)
-            stream.writeQString(itemData)
-            event.mimeData().setData(ccpnmrJsonData, tempData)
-            event.mimeData().setText(itemData)
-
-            event.accept()
+    # def dragEnterEvent(self, event):
+    #     """Handle drag enter event to create a new drag/drag item.
+    #     """
+    #     if event.mimeData().hasUrls():
+    #         event.accept()
+    #     else:
+    #         pids = []
+    #         for item in self.selectedItems():
+    #             if item is not None:
+    #
+    #                 dataPid = item.data(0, QtCore.Qt.DisplayRole)
+    #                 sideBarObject = item.data(1, QtCore.Qt.UserRole)
+    #
+    #                 if sideBarObject.obj:
+    #                     pids.append(str(sideBarObject.obj.pid))
+    #
+    #         itemData = json.dumps({'pids': pids})
+    #
+    #         tempData = QtCore.QByteArray()
+    #         stream = QtCore.QDataStream(tempData, QtCore.QIODevice.WriteOnly)
+    #         stream.writeQString(itemData)
+    #         event.mimeData().setData(ccpnmrJsonData, tempData)
+    #         event.mimeData().setText(itemData)
+    #
+    #         event.accept()
 
     def dragMoveEvent(self, event):
         """Required function to enable dragging and dropping within the sidebar.

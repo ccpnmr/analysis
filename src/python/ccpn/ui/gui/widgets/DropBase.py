@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 10:04:26 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-08-21 15:18:31 +0100 (Fri, August 21, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -254,12 +254,15 @@ class DropBase:
 
             if mimeData.hasFormat(DropBase.JSONDATA):
                 data['isCcpnJson'] = True
-                jsonData = json.loads(mimeData.text())
-                if jsonData is not None and len(jsonData) > 0:
-                    data.update(jsonData)
-                if self.PIDS in data:
-                    newPids = [Pid(pid) for pid in data[self.PIDS]]
-                    data[self.PIDS] = newPids
+                try:
+                    jsonData = json.loads(mimeData.text())
+                    if jsonData is not None and len(jsonData) > 0:
+                        data.update(jsonData)
+                    if self.PIDS in data:
+                        newPids = [Pid(pid) for pid in data[self.PIDS]]
+                        data[self.PIDS] = newPids
+                except:
+                    pass
 
             elif event.mimeData().hasUrls():
                 # NOTE:ED - not sure which is correct

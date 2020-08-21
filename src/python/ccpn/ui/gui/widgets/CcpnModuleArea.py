@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-08-21 15:18:31 +0100 (Fri, August 21, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -304,11 +304,14 @@ class CcpnModuleArea(ModuleArea, DropBase):
         """
         wasMaximised = False
 
+        # seems to add too many containers if relativeTo is None
+        if not relativeTo:
+            relativeTo = self
+
         for oldModule in self.modules.values():
             if oldModule.maximised:
                 oldModule.toggleMaximised()
                 wasMaximised=True
-
 
         self._updateModuleNames()
 

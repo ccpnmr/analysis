@@ -332,6 +332,19 @@ class Sample(AbstractWrapperObject):
     # CCPN functions
     #=========================================================================================
 
+    def getSampleComponentsSpectra(self):
+        '''
+        Gets spectra linked to sampleComponents through substances.
+        These spectra are normally the reference spectra used in screening/metabolomics, and used to match signal
+        to the sample.spectra when a sample its a mixtures.
+        '''
+        spectra = []
+        for sampleComponent in self.sampleComponents:
+            substance = sampleComponent.substance
+            if substance is not None:
+                spectra += substance.referenceSpectra
+        return sorted(set(spectra), key=spectra.index)
+
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations

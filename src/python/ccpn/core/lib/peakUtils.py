@@ -28,9 +28,10 @@ from ccpn.util.Logging import getLogger
 from collections import OrderedDict
 from scipy.optimize import curve_fit
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
-from ccpn.util.Common import makeIterableList
+from ccpn.util.Common import makeIterableList as mi
 from ccpn.core.lib.ContextManagers import undoBlock
 import pandas as pd
+from pandas import MultiIndex as m_ix
 from ccpn.util.Common import makeIterableList
 
 
@@ -1126,30 +1127,23 @@ def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID='NR_
     to sort the dataframe by an axisCode, eg 'H' use:
     df = df.sort_index(level='H')
     '''
-    spectra = list(spectra)
     dfs = []
-    columnSorting = []
-    if peakListIndexes is None:
-        peakListIndexes = [-1]*len(spectra)
+    if peakListIndexes is None: peakListIndexes = [-1]*len(spectra)
     for spectrum, ix in zip(spectra, peakListIndexes):
         positions = []
         values = []
         nmrResidues = []
-        serieValue = spectrum._getSeriesItem(spectrum.spectrumGroups[-1])
-        if serieValue is None:
-            serieValue = spectrum.name
-        peakList = spectrum.peakLists[ix]
-        peaks = peakList.peaks
+        serieValue = spectrum.name # use spectrumName as default. if series defined use that instead.
+        if len(spectrum.spectrumGroups)>0:
+            serieValue = spectrum._getSeriesItem(spectrum.spectrumGroups[-1])
+        peaks = spectrum.peakLists[ix].peaks
         peaks.sort(key=lambda x: x.position, reverse=True)
         for peak in peaks:
             positions.append(peak.position)
             values.append(getattr(peak, peakProperty, None))
-            aa = makeIterableList(peak.assignments)
-            assignedResidues = list(set(filter(None, map(lambda x: x.nmrResidue.id, aa))))
+            assignedResidues = list(set(filter(None, map(lambda x: x.nmrResidue.id, mi(peak.assignments)))))
             nmrResidues.append(", ".join(assignedResidues))
-            columnSorting.append(serieValue)
-        index = pd.MultiIndex.from_tuples(positions, names=spectrum.axisCodes)
-        _df = pd.DataFrame(values, columns=[serieValue], index=index)
+        _df = pd.DataFrame(values, columns=[serieValue], index=m_ix.from_tuples(positions, names=spectrum.axisCodes))
         _df[NR_ID] = nmrResidues
         _df = _df[~_df.index.duplicated()]
         dfs.append(_df)
@@ -1160,5 +1154,4 @@ def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID='NR_
     resColumn = cols.pop(cols.index(NR_ID))
     sortedCols = sorted(cols, reverse=False)
     sortedCols.insert(0, resColumn)
-    df = df[sortedCols]
-    return df
+    return df[sortedCols]

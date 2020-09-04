@@ -267,6 +267,41 @@ class SpectrumGroup(AbstractWrapperObject):
 
         self.setParameter(SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESTYPE, value)
 
+    @property
+    def seriesPeakHeightForPosition(self):
+        '''
+        return: Pandas DataFrame with the following structure:
+                Index: multiIndex => axisCodes as levels;
+                Columns => NR_ID: ID for the nmrResidue(s) assigned to the peak if available
+                           Spectrum series values sorted by ascending values, if series values are not set, then the
+                           spectrum name is used instead.
+
+                        |  NR_ID  |   SP1     |    SP2    |   SP3
+            H     N     |         |           |           |
+           -------------+-------- +-----------+-----------+---------
+            7.5  104.3  | A.1.ARG |    10     |  100      | 1000
+
+            '''
+        from ccpn.core.lib.peakUtils import getSpectralPeakHeights
+        return getSpectralPeakHeights(self.spectra)
+
+    @property
+    def seriesPeakHeightForNmrResidue(self):
+        '''
+        return: Pandas DataFrame with the following structure:
+                Index:  ID for the nmrResidue(s) assigned to the peak ;
+                Columns => Spectrum series values sorted by ascending values, if series values are not set, then the
+                           spectrum name is used instead.
+
+                       |   SP1     |    SP2    |   SP3
+            NR_ID      |           |           |           |
+           ------------+-----------+-----------+-----------+---------
+            A.1.ARG    |    10     |  100      | 1000
+
+            '''
+        from ccpn.core.lib.peakUtils import getSpectralPeakHeightForNmrResidue
+        return getSpectralPeakHeightForNmrResidue(self.spectra)
+
     def sortSpectraBySeries(self, reverse=True):
         import numpy as np
         if not None in self.series:

@@ -50,7 +50,7 @@ H = 'H'
 N = 'N'
 C = 'C'
 DefaultAtomWeights = OrderedDict(((H, 7.00), (N, 1.00), (C, 4.00), (OTHER, 1.00)))
-
+NR_ID='NR_ID'
 
 class Dictlist(dict):
     def __setitem__(self, key, value):
@@ -1100,13 +1100,31 @@ def _snap1DPeakToClosestExtremum(peak, maximumLimit=1):
         getLogger().info('No maxima found within tollerances for %s. Kept original positions %s' %(peak.pid, str(round(peak.position[0],3))))
 
 
-def getSpectraHeights(spectra, peakListIndexes:list=None, ) -> pd.DataFrame:
+def getSpectralPeakHeights(spectra, peakListIndexes:list=None) -> pd.DataFrame:
     return _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, peakListIndexes=peakListIndexes)
 
-def getSpectraVolumes(spectra, peakListIndexes:list=None, ) -> pd.DataFrame:
+def getSpectralPeakVolumes(spectra, peakListIndexes:list=None) -> pd.DataFrame:
     return _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=VOLUME, peakListIndexes=peakListIndexes)
 
-def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID='NR_ID', peakListIndexes:list=None):
+def getSpectralPeakHeightForNmrResidue(spectra, peakListIndexes:list=None) -> pd.DataFrame:
+    '''
+    return: Pandas DataFrame with the following structure:
+            Index:  ID for the nmrResidue(s) assigned to the peak ;
+            Columns => Spectrum series values sorted by ascending values, if series values are not set, then the
+                       spectrum name is used instead.
+
+                   |   SP1     |    SP2    |   SP3
+        NR_ID      |           |           |
+       ------------+-----------+-----------+----------
+        A.1.ARG    |    10     |  100      | 1000
+
+        '''
+    df = getSpectralPeakHeights(spectra, peakListIndexes)
+    newDf = df[df[NR_ID] != ''] # remove rows if NR_ID is not defined
+    newDf = newDf.reset_index(drop=True).groupby(NR_ID).max()
+    return newDf
+
+def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID=NR_ID, peakListIndexes:list=None):
     '''
     :param spectra: list of spectra
     :param peakProperty: 'height'or'volume'
@@ -1135,7 +1153,9 @@ def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID='NR_
         nmrResidues = []
         serieValue = spectrum.name # use spectrumName as default. if series defined use that instead.
         if len(spectrum.spectrumGroups)>0:
-            serieValue = spectrum._getSeriesItem(spectrum.spectrumGroups[-1])
+            sGserieValue = spectrum._getSeriesItem(spectrum.spectrumGroups[-1])
+            if sGserieValue is not None:
+                serieValue = sGserieValue
         peaks = spectrum.peakLists[ix].peaks
         peaks.sort(key=lambda x: x.position, reverse=True)
         for peak in peaks:

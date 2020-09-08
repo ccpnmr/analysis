@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-21 15:18:31 +0100 (Fri, August 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-08 12:32:29 +0100 (Tue, September 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -22,7 +22,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtCore import pyqtSlot
 from ccpn.core.Spectrum import Spectrum
 from pyqtgraph.dockarea.Dock import Dock
@@ -176,7 +176,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
     def findMaximisedDock(self, event):
         result = None
-        targetWidgets = [widget for widget in self.findChildren(QtGui.QWidget) if hasattr(widget, 'maximised')]
+        targetWidgets = [widget for widget in self.findChildren(QtWidgets.QWidget) if hasattr(widget, 'maximised')]
         maximisedWidgets = [widget for widget in targetWidgets if widget.maximised == True]
         if len(maximisedWidgets) > 0:
             result = maximisedWidgets[0]

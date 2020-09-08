@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-09-08 12:32:29 +0100 (Tue, September 08, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -22,14 +22,11 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-
-from functools import partial
-import weakref
 import pyqtgraph as pg
-from PyQt5 import QtCore, QtGui
-from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox, CustomLabel
+from PyQt5 import QtWidgets
+from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Base import Base
+
 
 AboveX = 'aboveX'
 AboveY = 'aboveY'
@@ -46,6 +43,7 @@ AboveBrush = 'aboveBrush'
 BelowBrush = 'belowBrush'
 DisappearedBrush = 'disappearedBrush'
 DrawLabels = 'drawLabels'
+
 
 class BarGraphWidget(Widget):
 
@@ -75,21 +73,21 @@ class BarGraphWidget(Widget):
         self.customViewBox.addItem(self.xLine)
         self.setThresholdLine()
         self._dataDict = {
-                            AboveX:[],
-                            AboveY:[],
-                            AboveBrush:'g',
-                            AboveObjects:[],
-                            AllAboveObjects:[],
-                            BelowX:[],
-                            BelowY:[],
-                            BelowBrush:'r',
-                            BelowObjects:[],
-                            DisappearedX:[],
-                            DisappearedY:[],
-                            DisappearedBrush:'b',
-                            DisappearedObjects:[],
-                            DrawLabels:True
-                         }
+            AboveX            : [],
+            AboveY            : [],
+            AboveBrush        : 'g',
+            AboveObjects      : [],
+            AllAboveObjects   : [],
+            BelowX            : [],
+            BelowY            : [],
+            BelowBrush        : 'r',
+            BelowObjects      : [],
+            DisappearedX      : [],
+            DisappearedY      : [],
+            DisappearedBrush  : 'b',
+            DisappearedObjects: [],
+            DrawLabels        : True
+            }
 
     def _setViewBox(self):
         self.customViewBox = CustomViewBox(application=self.application)
@@ -98,7 +96,7 @@ class BarGraphWidget(Widget):
         self.customViewBox.setParent(self.plotWidget)
 
     def _setLayout(self):
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         self.setLayout(hbox)
         hbox.addWidget(self.plotWidget)
         hbox.setContentsMargins(1, 1, 1, 1)
@@ -125,7 +123,8 @@ class BarGraphWidget(Widget):
         self.customViewBox.setLimits(xMin=xMin, xMax=xMax, yMin=yMin, yMax=yMax)
 
     def updateViewBoxLimits(self):
-        '''Updates with default paarameters. Minimum values to show the data only'''
+        """Updates with default paarameters. Minimum values to show the data only
+        """
         if self.xValues and self.yValues:
             self.customViewBox.setLimits(xMin=min(self.xValues) / 2, xMax=max(self.xValues) + (max(self.xValues) * 0.5),
                                          yMin=min(self.yValues) / 2, yMax=max(self.yValues) + (max(self.yValues) * 0.5),

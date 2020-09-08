@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-08 12:32:29 +0100 (Tue, September 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -97,7 +97,7 @@ INCLUDE_AXIS_WIDGET = True
 #     that we can't control in PyQt. Specifically even if you overide setContentsMargins on ScrollArea it is never
 #     called but at the same time ScrollArea gets a lower contents margin of 1 pixel that we didn't ask for... ;-(
 def styleSheetPredicate(target):
-    children = [child for child in target.children() if isinstance(child, QtGui.QWidget)]
+    children = [child for child in target.children() if isinstance(child, QtWidgets.QWidget)]
 
     return len(children) < 2
 

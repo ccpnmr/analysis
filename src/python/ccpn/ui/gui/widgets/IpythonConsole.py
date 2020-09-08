@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 00:13:57 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-08 12:32:29 +0100 (Tue, September 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -41,8 +41,8 @@ from ccpn.util.Common import isWindowsOS
 
 
 class IpythonConsole(Widget):
-    focusedIn = QtCore.Signal(QtGui.QFocusEvent)
-    mouseMoved = QtCore.Signal(QtGui.QMouseEvent)
+    focusedIn = QtCore.pyqtSignal(QtGui.QFocusEvent)
+    mouseMoved = QtCore.pyqtSignal(QtGui.QMouseEvent)
 
     def __init__(self, mainWindow, namespace=None, **kwds):
 

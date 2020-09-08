@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-21 15:18:31 +0100 (Fri, August 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-08 12:32:29 +0100 (Tue, September 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -33,13 +33,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import json
 from ccpn.core.lib.Pid import Pid
 from ccpn.util.Logging import getLogger
-from PyQt5 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 
-# GST maybe this too high level but because of the way drag events are handled cooperativley
+# GST maybe this too high level but because of the way drag events are handled cooperatively
 # at the moment it needs to be here...
 #
 # so what should happen (from my reading of the omens / Qt 'Documentation') is all widgets should reject events they
-# can't handle, this will then cause the event to pecolate out through the visual hierachy till it finds a module and
+# can't handle, this will then cause the event to percolate out through the visual hierarchy till it finds a module and
 # then gets handled, Currently any widget that inherits drop base will pass all events upto drop base which is
 # then handling module events which ought i guess be handled by the module after visual hierarchy percolation
 #
@@ -49,7 +49,6 @@ from PyQt5 import QtGui, QtCore
 #
 # if this analysis is wrong do tell me why, i am curious to understand whats going on
 
-from traceback import print_stack
 
 class DropBase:
     """
@@ -117,7 +116,6 @@ class DropBase:
 
     # super().dragMoveEvent(event)
 
-
     def isDragToMaximisedModule(self, event):
         from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModule
 
@@ -155,16 +153,15 @@ class DropBase:
                 self._target = target
                 self._statusBar = statusBar
 
-            def eventFilter(self,obj,event):
+            def eventFilter(self, obj, event):
                 try:
                     if event.type() == QtCore.QEvent.DragLeave:
                         self._target.inDragToMaximisedModule = False
                         if self._statusBar is not None:
                             self._statusBar.clearMessage()
 
-
                         self._target.removeEventFilter(self)
-                        self._target.cleanupFilter =  None
+                        self._target.cleanupFilter = None
                         self.deleteLater()
 
 
@@ -172,15 +169,15 @@ class DropBase:
                     print('exception during event filter cleanup, deleting myself', e)
                     self.deleteLater()
 
-                result = super().eventFilter(obj,event)
+                result = super().eventFilter(obj, event)
                 return result
 
 
-        parentModule =  self._findModule()
+        parentModule = self._findModule()
 
         if not self.inDragToMaximisedModule and isinstance(ev, (QtGui.QDragEnterEvent, QtGui.QDragMoveEvent)):
 
-            message  = "Can't drag to a maximised window"
+            message = "Can't drag to a maximised window"
 
             statusBar = parentModule.findWindow().statusBar()
 
@@ -191,12 +188,11 @@ class DropBase:
             # GST this cleanup filter is because its is not guarunteed that the DragLeaveEvent will come via
             # the same widget so this is safer
             self.cleanupFilter = MyEventFilter(self, statusBar)
-            QtGui.QApplication.instance().installEventFilter(self.cleanupFilter)
+            QtWidgets.QApplication.instance().installEventFilter(self.cleanupFilter)
 
             ev.setDropAction(QtCore.Qt.IgnoreAction)
             ev.ignore()
             self.inDragToMaximisedModule = True
-
 
     def dropEvent(self, event):
         """
@@ -240,16 +236,14 @@ class DropBase:
           - (type, data) key,value pairs,
         """
         data = dict(
-            event=event,
-            source=None
-        )
+                event=event,
+                source=None
+                )
 
-        if hasattr(event,'source'):
+        if hasattr(event, 'source'):
             data['source'] = event.source()
 
-
-
-        if hasattr(event,'mimeData'):
+        if hasattr(event, 'mimeData'):
             mimeData = event.mimeData()
 
             if mimeData.hasFormat(DropBase.JSONDATA):
@@ -275,22 +269,22 @@ class DropBase:
 
         return data
 
-    def checkForBadDragEvent(self,ev):
+    def checkForBadDragEvent(self, ev):
 
         from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModule
 
         parentModule = self._findModule()
-        if isinstance(ev.source(),CcpnModule) and self is not parentModule:
-            if not hasattr(self,'badDragEnter'):
+        if isinstance(ev.source(), CcpnModule) and self is not parentModule:
+            if not hasattr(self, 'badDragEnter'):
                 className = self.__class__.__name__
 
                 eventType = ''
-                if isinstance(ev,QtGui.QDragMoveEvent):
-                    eventType =  'move'
-                elif isinstance(ev,QtGui.QDragEnterEvent):
-                    eventType ='enter'
+                if isinstance(ev, QtGui.QDragMoveEvent):
+                    eventType = 'move'
+                elif isinstance(ev, QtGui.QDragEnterEvent):
+                    eventType = 'enter'
 
-                getLogger().debug('recieved drag %s from %s which is not a module %i' % (eventType,className, id(self)))
+                getLogger().debug('recieved drag %s from %s which is not a module %i' % (eventType, className, id(self)))
 
                 self.badDragEnter = True
 
@@ -386,4 +380,3 @@ class DropBase:
             if isinstance(par, CcpnModule):
                 return par
             par = par.parent()  # getParent() may be used for CCPN widgets, not for other QWidgets
-

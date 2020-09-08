@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:06:50 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-08 12:32:29 +0100 (Tue, September 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -997,7 +997,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                 self.errorFrame.layout().setAlignment(iconLabel, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
 
     def _emptyErrorFrame(self):
-        for child in self.errorFrame.findChildren(QtGui.QWidget):
+        for child in self.errorFrame.findChildren(QtWidgets.QWidget):
             self.errorFrame.getLayout().removeWidget(child)
             child.setParent(None)
             child.hide()

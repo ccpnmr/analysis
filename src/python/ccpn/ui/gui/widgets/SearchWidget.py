@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2018-12-20 15:53:25 +0000 (Thu, December 20, 2018) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-09-08 12:32:29 +0100 (Tue, September 08, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -73,8 +73,6 @@ class GuiTableFilter(ScrollArea):
         self.table = table
         self._parent = parent
 
-
-
         # self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
         self.setWidgetResizable(True)
         self._widget = Frame(self, setLayout=True, showBorder=False)
@@ -83,9 +81,7 @@ class GuiTableFilter(ScrollArea):
         self.setWidget(self._widget)
         self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 
-
-
-        labelColumn = Label(self._widget,'Search in', grid=(1,0), gridSpan=(1, 2))
+        labelColumn = Label(self._widget, 'Search in', grid=(1, 0), gridSpan=(1, 2))
         self.columnOptions = PulldownList(self._widget, grid=(1, 2))
 
         self.columnOptions.setMinimumWidth(40)
@@ -93,7 +89,7 @@ class GuiTableFilter(ScrollArea):
         # self.searchLabel = Label(self,'Search for')
         # self.searchLabel.setIcon(Icon('icons/disconnectPrevious'))
 
-        self.edit = LineEdit(self._widget, grid=(0,0), gridSpan=(1,5), backgroundText='Search Item')
+        self.edit = LineEdit(self._widget, grid=(0, 0), gridSpan=(1, 5), backgroundText='Search Item')
 
         # self.searchLabel = Label(self._widget, grid=(0,0))
         # thisIcon = Icon('icons/edit-find')
@@ -105,7 +101,7 @@ class GuiTableFilter(ScrollArea):
         self.searchButtons = ButtonList(self._widget, texts=['Reset', 'Close'], tipTexts=['Restore Table', 'Close Search'],
                                         callbacks=[partial(self.restoreTable, self.table),
                                                    self.hideSearch],
-                                        grid=(1, 3), gridSpan=(1,2))
+                                        grid=(1, 3), gridSpan=(1, 2))
         # self.searchButtons = ButtonList(self._widget, texts=['Search', 'Reset', 'Close'], tipTexts=['Search', 'Restore Table', 'Close Search'],
         #                                 callbacks=[partial(self.findOnTable, self.table),
         #                                            partial(self.restoreTable, self.table),
@@ -120,13 +116,13 @@ class GuiTableFilter(ScrollArea):
         self.searchButtons.getButton('Reset').setEnabled(False)
 
         # fix the sizes of the widgets
-        self.setFixedHeight(self.sizeHint().height()+10)
+        self.setFixedHeight(self.sizeHint().height() + 10)
 
         labelColumn.setFixedWidth(labelColumn.sizeHint().width())
         self.searchLabel.setFixedWidth(self.searchLabel.sizeHint().width())
         self.searchButtons.setFixedWidth(self.searchButtons.sizeHint().width())
 
-        # self.widgetLayout = QtGui.QHBoxLayout()
+        # self.widgetLayout = QtWidgets.QHBoxLayout()
         # self.setLayout(self.widgetLayout)
         # ws = [labelColumn, self.columnOptions, self.searchLabel, self.edit, self.searchButtons]
         # for w in ws:
@@ -292,7 +288,7 @@ def attachSearchWidget(parent, table):
 
         parentLayout = table.parent().getLayout()
 
-        if isinstance(parentLayout, QtGui.QGridLayout):
+        if isinstance(parentLayout, QtWidgets.QGridLayout):
             idx = parentLayout.indexOf(table)
             location = parentLayout.getItemPosition(idx)
             if location is not None:

@@ -120,7 +120,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:06:39 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-08 12:32:29 +0100 (Tue, September 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1117,7 +1117,7 @@ class ObjectTableItemDelegate(QtWidgets.QStyledItemDelegate):
                 self.customWidget = None
                 editor = QtWidgets.QStyledItemDelegate.createEditor(self, parentWidget, itemStyle, index)
 
-                if isinstance(editor, QtGui.QDoubleSpinBox):
+                if isinstance(editor, QtWidgets.QDoubleSpinBox):
                     numDecimals = objCol.editDecimals
 
                     if numDecimals is not None:
@@ -1128,7 +1128,7 @@ class ObjectTableItemDelegate(QtWidgets.QStyledItemDelegate):
                         else:
                             editor.setSingleStep(10 ** -numDecimals)
 
-                if isinstance(editor, QtGui.QSpinBox):
+                if isinstance(editor, QtWidgets.QSpinBox):
                     if objCol.editStep:
                         editor.setSingleStep(objCol.editStep)
 

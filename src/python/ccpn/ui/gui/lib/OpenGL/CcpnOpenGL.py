@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:08:30 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-08 12:26:30 +0100 (Tue, September 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -467,7 +467,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._axisScale = np.zeros((4,), dtype=np.float32)
         self._background = np.zeros((4,), dtype=np.float32)
         self._parameterList = np.zeros((4,), dtype=np.int32)
-        self._view = np.zeros((4,), dtype=np.float32)
+        # self._view = np.zeros((4,), dtype=np.float32)
         self._updateBackgroundColour = True
 
         # get information from the parent class (strip)
@@ -587,11 +587,11 @@ class CcpnGLWidget(QOpenGLWidget):
         self.symbolX = abs(self._symbolSize * self.pixelX)
         self.symbolY = abs(self._symbolSize * self.pixelY)
 
-        self._dataMatrix[0:16] = [self.axisL, self.axisR, self.axisT, self.axisB,
-                                  self.pixelX, self.pixelY, w, h,
-                                  0.2, 1.0, 0.4, 1.0,
-                                  0.3, 0.1, 1.0, 1.0]
-        currentShader.setGLUniformMatrix4fv('dataMatrix', 1, GL.GL_FALSE, self._dataMatrix)
+        # self._dataMatrix[0:16] = [self.axisL, self.axisR, self.axisT, self.axisB,
+        #                           self.pixelX, self.pixelY, w, h,
+        #                           0.2, 1.0, 0.4, 1.0,
+        #                           0.3, 0.1, 1.0, 1.0]
+        # currentShader.setGLUniformMatrix4fv('dataMatrix', 1, GL.GL_FALSE, self._dataMatrix)
         currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
         # map mouse coordinates to world coordinates - only needs to change on resize, move soon
@@ -614,11 +614,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
         # self._view[0:4] = [w - self.AXIS_MARGINRIGHT, h - self.AXIS_MOUSEYOFFSET, 1.0, 1.0]
-        self._view[0:4] = [vpwidth, vpheight, 1.0, 1.0]
+        # self._view[0:4] = [vpwidth, vpheight, 1.0, 1.0]
 
         # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
         currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
-        currentShader.setGLUniform4fv('viewport', 1, self._view)
+        # currentShader.setGLUniform4fv('viewport', 1, self._view)
 
         if rescaleOverlayText:
             self._rescaleOverlayText()
@@ -2200,8 +2200,8 @@ class CcpnGLWidget(QOpenGLWidget):
         GL.glClearColor(*col)
         self.background = np.array(col, dtype=np.float32)
 
-        self.globalGL._shaderProgram1.makeCurrent()
-        self.globalGL._shaderProgram1.setBackground(self.background)
+        # self.globalGL._shaderProgram1.makeCurrent()
+        # self.globalGL._shaderProgram1.setBackground(self.background)
         self.globalGL._shaderProgramTex.makeCurrent()
         self.globalGL._shaderProgramTex.setBackground(self.background)
         if not silent:
@@ -7509,8 +7509,8 @@ GLOptions = {
 
 class CcpnTransform3D(QtGui.QMatrix4x4):
     """
-  Extension of QMatrix4x4 with some helpful methods added.
-  """
+    Extension of QMatrix4x4 with some helpful methods added.
+    """
 
     def __init__(self, *args):
         QtGui.QMatrix4x4.__init__(self, *args)
@@ -7527,9 +7527,8 @@ class CcpnTransform3D(QtGui.QMatrix4x4):
             raise Exception("Argument 'nd' must be 2 or 3")
 
     def map(self, obj):
+        """Extends QMatrix4x4.map() to allow mapping (3, ...) arrays of coordinates
         """
-    Extends QMatrix4x4.map() to allow mapping (3, ...) arrays of coordinates
-    """
         if isinstance(obj, np.ndarray) and obj.ndim >= 2 and obj.shape[0] in (2, 3):
             return fn.transformCoordinates(self, obj)
         else:
@@ -7548,7 +7547,7 @@ class CcpnGLItem():
         CcpnGLItem._nextId += 1
 
         self.strip = None
-        self._view = None
+        # self._view = None
         self._children = set()
         self._transform = CcpnTransform3D()
         self._visible = True

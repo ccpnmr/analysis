@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-20 16:05:25 +0100 (Mon, April 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-08 12:26:31 +0100 (Tue, September 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -331,7 +331,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self._axisScale = np.zeros((4,), dtype=np.float32)
         self._background = np.zeros((4,), dtype=np.float32)
         self._parameterList = np.zeros((4,), dtype=np.int32)
-        self._view = np.zeros((4,), dtype=np.float32)
+        # self._view = np.zeros((4,), dtype=np.float32)
         self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
 
         self.resetRangeLimits()
@@ -616,8 +616,8 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         GL.glClearColor(*col)
         self.background = col
 
-        self.globalGL._shaderProgram1.makeCurrent()
-        self.globalGL._shaderProgram1.setBackground(self.background)
+        # self.globalGL._shaderProgram1.makeCurrent()
+        # self.globalGL._shaderProgram1.setBackground(self.background)
         self.globalGL._shaderProgramTex.makeCurrent()
         self.globalGL._shaderProgramTex.setBackground(self.background)
         if not silent:

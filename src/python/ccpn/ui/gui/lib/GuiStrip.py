@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:10:53 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-08 12:34:08 +0100 (Tue, September 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1592,12 +1592,10 @@ class GuiStrip(Frame):
                 _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
                 defaultColour = colourList[_prefsGeneral._defaultMarksCount]
                 _prefsGeneral._defaultMarksCount += 1
+        except:
+            defaultColour = '#FF0000'
 
-        except Exception as es:
-            getLogger().warning('Error setting mark at position')
-            raise (es)
-        else:
-            self._project.newMark(defaultColour, positions, axisCodes)
+        self._project.newMark(defaultColour, positions, axisCodes)
 
     def _copyAxisFromStrip(self, axisId, fromStrip):
         try:

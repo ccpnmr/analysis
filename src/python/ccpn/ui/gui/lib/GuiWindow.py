@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-08 14:19:36 +0100 (Wed, April 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-08 12:34:08 +0100 (Tue, September 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,7 @@ from ccpn.ui.gui.widgets.MessageDialog import progressManager
 from ccpn.ui.gui.lib.mouseEvents import MouseModes, setCurrentMouseMode, getCurrentMouseMode
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.util.Colour import colorSchemeTable
 
 
 #TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
@@ -643,9 +644,25 @@ class GuiWindow():
                     if colour:
                         project.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomId])
                     else:
-                        # just use gray rather than checking colourScheme
+                        # just use default mark colour rather than checking colourScheme
                         defaultColour = self.application.preferences.general.defaultMarksColour
-                        project.newMark(defaultColour, [chemicalShift.value], [atomId])
+
+                        try:
+                            _prefsGeneral = self.application.preferences.general
+                            defaultColour = _prefsGeneral.defaultMarksColour
+                            if not defaultColour.startswith('#'):
+                                colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else ['#FF0000']
+                                _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
+                                defaultColour = colourList[_prefsGeneral._defaultMarksCount]
+                                _prefsGeneral._defaultMarksCount += 1
+                        except:
+                            defaultColour = '#FF0000'
+
+                        try:
+                            project.newMark(defaultColour, [chemicalShift.value], [atomId])
+                        except Exception as es:
+                            getLogger().warning('Error setting mark at position')
+                            raise (es)
 
     def toggleGridAll(self):
         """

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-30 11:41:07 +0100 (Thu, July 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-08 12:34:07 +0100 (Tue, September 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1361,6 +1361,7 @@ class Project(AbstractWrapperObject):
 
     def _loadSpectrum(self, path, subType, name=None) -> list:
         from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
+
         # #TODO:RASMUS FIXME check for rename
 
         try:
@@ -1530,30 +1531,14 @@ class Project(AbstractWrapperObject):
         To be depreciated in next version in lieu of mainWindow.newMark (with different call signature)
 
         """
-        from ccpn.ui._implementation.Mark import _newMark
+        from ccpn.ui._implementation.Mark import _newMark, _removeMarkAxes
 
-        if not self.findMark(colour=colour, positions=positions, axisCodes=axisCodes, labels=labels):
-            return _newMark(self, colour=colour, positions=positions, axisCodes=axisCodes,
-                            style=style, units=units, labels=labels
+        marks = _removeMarkAxes(self, positions=positions, axisCodes=axisCodes, labels=labels)
+        if marks:
+            pos, axes, lbls = marks
+            return _newMark(self, colour=colour, positions=pos, axisCodes=axes,
+                            style=style, units=units, labels=lbls
                             )
-
-    @logCommand('project.')
-    def findMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str], labels: Sequence[str] = ()):
-        """Find existing Mark
-
-        :param str colour: Mark colour
-        :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
-        :param tuple/list axisCodes: Axis codes for all lines in the mark
-        :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
-        :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
-        :param tuple/list labels: Ruler labels for all lines in the mark. Default: None
-
-        :return Mark instance
-
-        """
-        from ccpn.ui._implementation.Mark import _findMark
-
-        return _findMark(self, colour=colour, positions=positions, axisCodes=axisCodes, labels=labels)
 
     # GWV 20181127: not used
     # def _newSimpleMark(self, colour: str, position: float, axisCode: str, style: str = 'simple',

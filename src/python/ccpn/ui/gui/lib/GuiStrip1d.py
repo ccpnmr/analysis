@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:08:30 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-08 12:34:08 +0100 (Tue, September 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,7 @@ from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPhasingMenu, _get1dDefaul
     _get1dPeakMenu, _get1dIntegralMenu, _get1dMultipletMenu, _get1dAxisMenu
 from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.util.Colour import colorSchemeTable
 
 
 class GuiStrip1d(GuiStrip):
@@ -407,7 +408,18 @@ class GuiStrip1d(GuiStrip):
         Could be Peak/Multiplet
         """
         try:
-            defaultColour = self._preferences.defaultMarksColour
+            _prefsGeneral = self.application.preferences.general
+            defaultColour = _prefsGeneral.defaultMarksColour
+            if not defaultColour.startswith('#'):
+                colourList = colorSchemeTable[defaultColour] if defaultColour in colorSchemeTable else ['#FF0000']
+                _prefsGeneral._defaultMarksCount = _prefsGeneral._defaultMarksCount % len(colourList)
+                defaultColour = colourList[_prefsGeneral._defaultMarksCount]
+                _prefsGeneral._defaultMarksCount += 1
+        except:
+            defaultColour = '#FF0000'
+
+        try:
+            # defaultColour = self._preferences.defaultMarksColour
             position = (obj.ppmPositions[0], obj.height)
             axisCodes = self.axisCodes
 

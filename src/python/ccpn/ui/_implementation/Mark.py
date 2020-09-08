@@ -6,7 +6,7 @@ After creation, there are no attributes that can be modified; i.e. the Mark obje
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:40 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-09-08 12:34:08 +0100 (Tue, September 08, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import collections
 from typing import Sequence, Tuple
-
+from itertools import zip_longest
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
@@ -40,7 +40,7 @@ from ccpn.util.Logging import getLogger
 
 
 RulerData = collections.namedtuple('RulerData', ['position', 'axisCode', 'unit', 'label'])
-MARKTOLERANCE = 1e-7
+MARKTOLERANCE = 1e-5
 
 
 class Mark(AbstractWrapperObject):
@@ -184,7 +184,6 @@ class Mark(AbstractWrapperObject):
             pstring = str(tuple([(self.axisCodes[i], roundedValue(self.positions[i])) for i in range(ll)]))
             return '<%s:%s %s>' % (self.shortClassName, self.serial, pstring[1:-1])
 
-
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
@@ -199,35 +198,38 @@ class Mark(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-def _findMark(self: Project, colour: str, positions: Sequence[float], axisCodes: Sequence, labels: Sequence[str] = ()) -> Mark:
-    """Find existing Mark based on colour, position, axisCode and label.
+def _removeMarkAxes(self: Project, positions: Sequence[float], axisCodes: Sequence[str], labels: Sequence[str] = ()) -> Tuple[Tuple, ...]:
+    """Remove existing Mark rulers based on position, axisCode and label.
 
-    See the Mark class for details.
-
-    :param str colour: Mark colour
     :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
     :param tuple/list axisCodes: Axis codes for all lines in the mark
     :param tuple/list labels: Ruler labels for all lines in the mark. Default: None
-    :return: existing Mark instance.
+    :return: tuple of tuples: remaining (positions, axisCodes, labels) that do not currently exist in any mark.
     """
-    for pos, axis, label in zip(positions, axisCodes, labels):
+    markList = list(zip_longest(positions, axisCodes, labels))
+    if not markList:
+        raise TypeError('_removeMarkAxes: badly defined parameters {}; {}; {}'.format(positions, axisCodes, labels))
+
+    indices = list(axisCodes)
+    for pos, axis, label in markList:
         for mark in self.marks:
-            try:
-                for mPos, mAxis, mLabel in zip(mark.positions, mark.axisCodes, mark.labels):
-                    posClose = abs(mPos - pos) < MARKTOLERANCE
-                    if mark.colour == colour and mAxis == axis and mLabel == label and posClose:
-                        return mark
-            except:
-                # mark may not be defined correctly.
-                continue
+            for mPos, mAxis, mLabel in zip_longest(mark.positions, mark.axisCodes, mark.labels):
+                try:
+                    posClose = (-MARKTOLERANCE < (mPos - pos) < MARKTOLERANCE)
+                    if mAxis == axis and mLabel == label and posClose and axis in indices:
+                        # remove this axis from the list
+                        indices.remove(axis)
+                except:
+                    # mark may not be defined correctly.
+                    continue
+
+    return tuple(tuple(mark[ind] for ii, mark in enumerate(markList) if mark[1] in indices) for ind in range(3))
 
 
 @newObject(Mark)
 def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: Sequence,
              style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = (), serial: int = None) -> Mark:
     """Create new Mark
-
-    See the Mark class for details.
 
     :param str colour: Mark colour
     :param tuple/list positions: Position in unit (default ppm) of all lines in the mark

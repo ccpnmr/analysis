@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 19:56:35 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-08 12:31:56 +0100 (Tue, September 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,14 +25,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 # from ccpn.ui.gui.guiSettings import helveticaItalic12
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 
 # Width?
-# Allow setting of max lengh based on data model?
+# Allow setting of max length based on data model?
 
 import re
 
@@ -127,6 +127,9 @@ class Entry(QtWidgets.QLineEdit, Base):
         if doCallback:
             self._callback()
 
+    def _split(self, text: str):
+        return [x.strip() for x in text.split(',')]
+
 
 class IntEntry(Entry):
 
@@ -187,15 +190,15 @@ class FloatEntry(Entry):
         elif value == 0:
             text = '0.0'
         elif abs(value) > 999999 or abs(value) < 0.00001:
-            format = '%%.%de' % (self.decimals)
-            text = format % value
+            textFormat = '%%.%de' % (self.decimals)
+            text = textFormat % value
         else:
-            format = '%%.%df' % (self.decimals)
-            text = format % value
+            textFormat = '%%.%df' % (self.decimals)
+            text = textFormat % value
 
         return text
 
-    def setRange(self, minValue=-INFINITY, maxValue=INFINITY):
+    def setRange(self, minValue=-MAXINT, maxValue=MAXINT):
 
         valid = QtGui.QIntValidator(minValue, maxValue, self)
         self.setValidator(valid)
@@ -215,7 +218,8 @@ class ArrayEntry(Entry):
         Entry.__init__(self, parent, text, callback, **kwds)
 
     def convertText(self, text):
-        return re.split(SPLIT_REG_EXP, text) or []
+        # return re.split(SPLIT_REG_EXP, text) or []
+        return self._split(text) or []
 
     def convertInput(self, array):
         return SEPARATOR.join(array)
@@ -227,7 +231,8 @@ class IntArrayEntry(IntEntry):
         IntEntry.__init__(self, parent, text, callback, **kwds)
 
     def convertText(self, text):
-        array = re.split(SPLIT_REG_EXP, text) or []
+        # array = re.split(SPLIT_REG_EXP, text) or []
+        array = self._split(text) or []
         return [IntEntry.convertText(self, x) for x in array]
 
     def convertInput(self, values):
@@ -241,7 +246,8 @@ class FloatArrayEntry(FloatEntry):
         FloatEntry.__init__(self, parent, text, callback, **kwds)
 
     def convertText(self, text):
-        array = re.split(SPLIT_REG_EXP, text) or []
+        # array = re.split(SPLIT_REG_EXP, text) or []
+        array = self._split(text) or []
         return [FloatEntry.convertText(self, x) for x in array]
 
     def convertInput(self, values):
@@ -301,30 +307,30 @@ if __name__ == '__main__':
     app = Application('test', 'test1')
 
     window = QtWidgets.QWidget()
-
+    frame = Frame(window, setLayout=True)
 
     def callback(value):
         print("Callback", value)
 
 
-    Entry(window, 'Start Text', callback)
+    Entry(frame, 'Start Text', callback, grid=(0, 0))
 
-    ArrayEntry(window, ['A', 'C', 'D', 'C'], callback)
+    ArrayEntry(frame, ['A', 'C', 'D', 'C'], callback, grid=(1, 0))
 
-    IntEntry(window, 123, callback)
+    IntEntry(frame, 123, callback, grid=(2, 0))
 
-    IntArrayEntry(window, [4, 5, 6, 7], callback)
+    IntArrayEntry(frame, [4, 5, 6, 7], callback, grid=(3, 0))
 
-    FloatEntry(window, 2.818, callback)
+    FloatEntry(frame, 2.818, callback, grid=(4, 0))
 
-    e = FloatArrayEntry(window, [1, 2, 4], callback, decimals=2)
+    e = FloatArrayEntry(frame, [1, 2, 4], callback, decimals=2, grid=(5, 0))
     e.set([1e12, -0.7e-5, 9.75])
 
-    LabelledEntry(window, 'Text:', 'Initial val', callback)
+    LabelledEntry(frame, 'Text:', 'Initial val', callback, setLayout=True, grid=(6, 0))
 
-    LabelledIntEntry(window, 'Int:', 0, callback)
+    LabelledIntEntry(frame, 'Int:', 0, callback, setLayout=True, grid=(7, 0))
 
-    LabelledFloatEntry(window, 'Float:', 0.7295, callback, decimals=8)
+    LabelledFloatEntry(frame, 'Float:', 0.7295, callback, decimals=8, setLayout=True, grid=(8, 0))
 
     window.show()
 

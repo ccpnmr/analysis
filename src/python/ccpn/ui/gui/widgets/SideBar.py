@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-21 15:18:31 +0100 (Fri, August 21, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-09 18:38:59 +0100 (Wed, September 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ import json
 import fnmatch
 from contextlib import contextmanager
 from PyQt5 import QtGui, QtWidgets, QtCore
-from typing import Callable
+from typing import Callable, Optional
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -713,7 +713,7 @@ class SidebarClassSpectrumTreeItems(SidebarClassABC):
                          callback=callback, menuAction=menuAction, children=children, isDraggable=isDraggable, **kwds)
         self._children = self.children  # Save them for reset/create, as we will dynamically change the tree on building
 
-    def setNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., str], **kwds) -> Notifier:
+    def setNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., Optional[str]], **kwds) -> Notifier:
         """subclass setNotifier to override classType for spectrumGroups.
         """
         if type(theObject) is SpectrumGroup:

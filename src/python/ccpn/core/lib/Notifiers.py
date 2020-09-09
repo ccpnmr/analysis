@@ -19,7 +19,7 @@ April 2017: First design by Geerten Vuister
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -28,9 +28,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-09-09 18:38:59 +0100 (Wed, September 09, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,7 +44,7 @@ import sys
 
 from functools import partial
 from collections import OrderedDict
-from typing import Callable, Any
+from typing import Callable, Any, Optional
 from itertools import permutations
 from ccpn.util.Logging import getLogger
 
@@ -208,7 +208,7 @@ class Notifier(NotifierABC):
     def __init__(self, theObject: Any,
                  triggers: list,
                  targetName: str,
-                 callback: Callable[..., str],
+                 callback: Callable[..., Optional[str]],
                  onceOnly=False,
                  debug=False,
                  **kwargs):
@@ -470,7 +470,7 @@ class NotifierBase(object):
                                )
         return objNotifiers
 
-    def setNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., str], **kwargs) -> Notifier:
+    def setNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., Optional[str]], **kwargs) -> Notifier:
         """
         Set Notifier for Ccpn V3 object theObject
 
@@ -492,7 +492,7 @@ class NotifierBase(object):
         objNotifiers[id] = notifier
         return notifier
 
-    def setGuiNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., str], **kwargs) -> Notifier:
+    def setGuiNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., Optional[str]], **kwargs) -> Notifier:
         """
         Set Notifier for Ccpn V3 object theObject
 

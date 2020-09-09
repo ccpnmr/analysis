@@ -17,7 +17,7 @@ April 2017: First design by Geerten Vuister
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -26,9 +26,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:42 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-09-09 18:38:59 +0100 (Wed, September 09, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,7 +42,7 @@ import sys
 
 from functools import partial
 from collections import OrderedDict
-from typing import Callable, Any
+from typing import Callable, Any, Optional
 
 from PyQt5 import QtGui, QtWidgets
 
@@ -103,7 +103,7 @@ class GuiNotifier(NotifierABC):
     _triggerKeywords = (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)
 
     def __init__(self, theObject: Any, triggers: list, targetName: list,
-                 callback: Callable[..., str], debug=False, **kwargs):
+                 callback: Callable[..., Optional[str]], debug=False, **kwargs):
         """
         Create GuiNotifier object;
 

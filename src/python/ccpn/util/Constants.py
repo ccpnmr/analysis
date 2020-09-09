@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-10 09:40:39 +0100 (Fri, July 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,7 @@ DOUBLEAXIS_ACTIVEAXES = 'doubleActiveAxes'
 
 POSINFINITY = float('Infinity')
 NEGINFINITY = float('-Infinity')
+SCALETOLERANCE = 1e-9
 
 # Timestamp formats
 stdTimeFormat = "%Y-%m-%d %%H:M:%S.%f"

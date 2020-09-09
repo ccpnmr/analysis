@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:10:53 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -152,7 +152,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
         self.data = self.spectrum.positions, self.spectrum.intensities
 
         # spawn a rebuild in the openGL strip
-        self.buildContoursOnly = True
+        self.buildContours = True
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
         GLSignals = GLNotifier(parent=self)

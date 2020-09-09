@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-14 16:30:21 +0100 (Tue, July 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1129,6 +1129,12 @@ def getIsotopeListFromCode(isotopeCode):
     return atomNames
 
 
+class ZPlaneNavigationModes(LabelledEnum):
+    PERSPECTRUMDISPLAY = 0, 'Per Spectrum Display'
+    PERSTRIP = 1, 'Per Strip'
+    INSTRIP = 2, 'In Strip'
+
+
 if __name__ == '__main__':
     """Test the output from the printFormatter and recover as the python object
     """
@@ -1168,9 +1174,3 @@ if __name__ == '__main__':
     print('dataDict string: \n{}'.format(dd))
     recover = pretty.literal_eval(dd)
     print('Recovered python object: {} '.format(recover))
-
-
-class ZPlaneNavigationModes(LabelledEnum):
-    PERSPECTRUMDISPLAY = 0, 'Per Spectrum Display'
-    PERSTRIP = 1, 'Per Strip'
-    INSTRIP = 2, 'In Strip'

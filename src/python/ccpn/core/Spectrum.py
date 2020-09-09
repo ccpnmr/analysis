@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -80,11 +80,12 @@ from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
 from ccpn.core.lib.Cache import cached
 from ccpn.util.decorators import logCommand
 from ccpn.framework.constants import CCPNMR_PREFIX
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSimple, \
     undoStackBlocking, renameObject, undoBlock, notificationBlanking, ccpNmrV3CoreSetter
 from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.util.Path import Path, aPath
 from ccpn.util.Common import isIterable, incrementName
+from ccpn.util.Constants import SCALETOLERANCE
 
 # 2019010:ED test new matching
 # from ccpn.util.Common import axisCodeMapping
@@ -240,6 +241,7 @@ class Spectrum(AbstractWrapperObject):
 
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
+        self._scaleChanged = False
 
     def _infoString(self, includeDimensions=False):
         """Return info string about self, optionally including dimensional
@@ -504,14 +506,22 @@ assignmentTolerances
         return self._wrappedData.scale
 
     @scale.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSimple()
     def scale(self, value: float):
+        if not isinstance(value, (float, type(None))):
+            raise TypeError('Spectrum.scale {} must be a float/None'.format(self))
+
+        if value is not None and -SCALETOLERANCE < value < SCALETOLERANCE:
+            # Display a warning, but allow to be set
+            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        self._scaleChanged = True
         self._wrappedData.scale = value
 
-        # # update the intensities as the scale has changed
-        # self._intensities = self.getSliceData()
-
-        # for spectrumView in self.spectrumViews:
-        #     spectrumView.refreshData()
+        if self.dimensionCount == 1:
+            # update the intensities as the scale has changed
+            self._intensities = self.getSliceData()
 
     @property
     @_includeInCopy
@@ -1486,9 +1496,10 @@ assignmentTolerances
     @intensities.setter
     def intensities(self, value: np.ndarray):
         self._intensities = value
-        # temporary hack for showing straight the result of intensities change
-        for spectrumView in self.spectrumViews:
-            spectrumView.refreshData()
+
+        # # temporary hack for showing straight the result of intensities change
+        # for spectrumView in self.spectrumViews:
+        #     spectrumView.refreshData()
 
     @property
     def positions(self) -> np.array:
@@ -1509,10 +1520,12 @@ assignmentTolerances
 
     @positions.setter
     def positions(self, value):
+        # self._scaleChanged = True
         self._positions = value
-        # temporary hack for showing straight the result of intensities change
-        for spectrumView in self.spectrumViews:
-            spectrumView.refreshData()
+
+        # # temporary hack for showing straight the result of intensities change
+        # for spectrumView in self.spectrumViews:
+        #     spectrumView.refreshData()
 
     @property
     @_includeInCopy
@@ -2436,8 +2449,8 @@ assignmentTolerances
             raise ValueError("position values must be floats.")
 
         scale = self.scale if self.scale is not None else 1.0
-        if self.scale == 0.0:
-            getLogger().warning('Scaling "%s" by 0.0!' % self)
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
 
         pointPosition = self._apiDataSource.getPositionValue(pointPosition)
         return pointPosition * scale if pointPosition else None
@@ -2487,8 +2500,8 @@ assignmentTolerances
 
         result = None
         scale = self.scale if self.scale is not None else 1.0
-        if self.scale == 0.0:
-            getLogger().warning('Scaling "%s" by 0.0!' % self)
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
 
         if self.dimensionCount == 1:
             # 1D data
@@ -2623,10 +2636,9 @@ assignmentTolerances
         position[xDim - 1] = 1  # position is 1-based
         position[yDim - 1] = 1
 
-        result = None
         scale = self.scale if self.scale is not None else 1.0
-        if self.scale == 0.0:
-            getLogger().warning('Scaling "%s" by 0.0!' % self)
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
 
         result = self._getPlaneData(position=position, xDim=xDim, yDim=yDim)
         # Make a copy in order to preserve the original data and apply scaling
@@ -2795,21 +2807,42 @@ assignmentTolerances
         """Subclassed to handle associated spectrumViews instances
         """
         super()._finaliseAction(action=action)
-        # propagate the rename to associated spectrumViews
-        if action in ['change']:
-            for specView in self.spectrumViews:
-                specView._finaliseAction(action=action)
 
         # notify peak/integral/multiplet list
         if action in ['create', 'delete']:
             for peakList in self.peakLists:
                 peakList._finaliseAction(action=action)
-        if action in ['create', 'delete']:
             for multipletList in self.multipletLists:
                 multipletList._finaliseAction(action=action)
-        if action in ['create', 'delete']:
             for integralList in self.integralLists:
                 integralList._finaliseAction(action=action)
+
+        # propagate the rename to associated spectrumViews
+        if action in ['change']:
+            for specView in self.spectrumViews:
+                if self._scaleChanged:
+                    # force a rebuild of the contours/etc.
+                    specView.buildContoursOnly = True
+                specView._finaliseAction(action=action)
+
+            if self._scaleChanged:
+                self._scaleChanged = False
+
+                # notify peaks/multiplets/integrals that the scale has changed
+                for peakList in self.peakLists:
+                    for peak in peakList.peaks:
+                        peak._finaliseAction(action=action)
+                for multipletList in self.multipletLists:
+                    for multiplet in multipletList.multiplets:
+                        multiplet._finaliseAction(action=action)
+                for integralList in self.integralLists:
+                    for integral in integralList.integrals:
+                        integral._finaliseAction(action=action)
+
+            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+            GLSignals = GLNotifier(parent=self)
+            GLSignals.emitPaintEvent()
 
     @logCommand(get='self')
     def delete(self):

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-03 15:13:56 +0100 (Wed, June 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1152,6 +1152,36 @@ def ccpNmrV3CoreUndoBlock():
                 result = func(*args, **kwds)
 
         self._finaliseAction('change')
+        return result
+
+    return theDecorator
+
+
+def ccpNmrV3CoreSimple():
+    """A decorator wrap the property setters method in an undo block and triggering the
+    'change' notification
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]
+
+        application = getApplication()  # pass it in to reduce overhead
+
+        oldValue = getattr(self, func.__name__)
+
+        with undoBlockWithoutSideBar(application=application):
+            with undoStackBlocking(application=application) as addUndoItem:
+                # call the wrapped function
+                result = func(*args, **kwds)
+
+                addUndoItem(undo=partial(func, self, oldValue),
+                            redo=partial(func, self, args[1])
+                            )
+
+        # self._finaliseAction('change')
         return result
 
     return theDecorator

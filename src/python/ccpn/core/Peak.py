@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 12:16:13 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,7 @@ from ccpn.core.lib.ContextManagers import newObject, \
     ccpNmrV3CoreSetter, ccpNmrV3CoreUndoBlock, undoBlock
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
+from ccpn.util.Constants import SCALETOLERANCE
 
 
 ALIASINGCHANGED = '_aliasingChanged'
@@ -104,38 +105,126 @@ class Peak(AbstractWrapperObject):
     @property
     def height(self) -> Optional[float]:
         """height of Peak."""
-        return self._wrappedData.height
+        if self._wrappedData.height is None:
+            return None
+
+        scale = self.peakList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.height by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        return self._wrappedData.height * scale
 
     @height.setter
-    def height(self, value: float):
-        self._wrappedData.height = value
+    def height(self, value: Optional[float]):
+        if not isinstance(value, (float, type(None))):
+            raise TypeError('height must be a float/None')
+        elif value is not None and (value - value) != 0.0:
+            raise TypeError('height cannot be NaN or Infinity')
+
+        if value is None:
+            self._wrappedData.height = None
+        else:
+            scale = self.peakList.spectrum.scale
+            scale = scale if scale is not None else 1.0
+            if -SCALETOLERANCE < scale < SCALETOLERANCE:
+                getLogger().warning('Scaling {}.height by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+                self._wrappedData.height = None
+            else:
+                self._wrappedData.height = value / scale
 
     @property
     def heightError(self) -> Optional[float]:
         """height error of Peak."""
-        return self._wrappedData.heightError
+        if self._wrappedData.heightError is None:
+            return None
+
+        scale = self.peakList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.heightError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        return self._wrappedData.heightError * scale
 
     @heightError.setter
-    def heightError(self, value: float):
-        self._wrappedData.heightError = value
+    def heightError(self, value: Optional[float]):
+        if not isinstance(value, (float, type(None))):
+            raise TypeError('heightError must be a float/None')
+        elif value is not None and (value - value) != 0.0:
+            raise TypeError('heightError cannot be NaN or Infinity')
+
+        if value is None:
+            self._wrappedData.heightError = None
+        else:
+            scale = self.peakList.spectrum.scale
+            scale = scale if scale is not None else 1.0
+            if -SCALETOLERANCE < scale < SCALETOLERANCE:
+                getLogger().warning('Scaling {}.heightError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+                self._wrappedData.heightError = None
+            else:
+                self._wrappedData.heightError = value / scale
 
     @property
     def volume(self) -> Optional[float]:
         """volume of Peak."""
-        return self._wrappedData.volume
+        if self._wrappedData.volume is None:
+            return None
+
+        scale = self.peakList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.volume by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        return self._wrappedData.volume * scale
 
     @volume.setter
-    def volume(self, value: float):
-        self._wrappedData.volume = value
+    def volume(self, value: Optional[float]):
+        if not isinstance(value, (float, type(None))):
+            raise TypeError('volume must be a float/None')
+        elif value is not None and (value - value) != 0.0:
+            raise TypeError('volume cannot be NaN or Infinity')
+
+        if value is None:
+            self._wrappedData.volume = None
+        else:
+            scale = self.peakList.spectrum.scale
+            scale = scale if scale is not None else 1.0
+            if -SCALETOLERANCE < scale < SCALETOLERANCE:
+                getLogger().warning('Scaling {}.volume by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+                self._wrappedData.volume = None
+            else:
+                self._wrappedData.volume = value / scale
 
     @property
     def volumeError(self) -> Optional[float]:
         """volume error of Peak."""
-        return self._wrappedData.volumeError
+        if self._wrappedData.volumeError is None:
+            return None
+
+        scale = self.peakList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.volumeError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        return self._wrappedData.volumeError * scale
 
     @volumeError.setter
-    def volumeError(self, value: float):
-        self._wrappedData.volumeError = value
+    def volumeError(self, value: Optional[float]):
+        if not isinstance(value, (float, type(None))):
+            raise TypeError('volumeError must be a float/None')
+        elif value is not None and (value - value) != 0.0:
+            raise TypeError('volumeError cannot be NaN or Infinity')
+
+        if value is None:
+            self._wrappedData.volumeError = None
+        else:
+            scale = self.peakList.spectrum.scale
+            scale = scale if scale is not None else 1.0
+            if -SCALETOLERANCE < scale < SCALETOLERANCE:
+                getLogger().warning('Scaling {}.volumeError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+                self._wrappedData.volumeError = None
+            else:
+                self._wrappedData.volumeError = value / scale
 
     @property
     def figureOfMerit(self) -> Optional[float]:

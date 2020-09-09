@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-08 12:32:29 +0100 (Tue, September 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -430,7 +430,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self._spectrumRenameNotifier = self.setNotifier(self.project,
                                                         [Notifier.RENAME],
-                                                        'Spectrum',
+                                                        Spectrum.className,
                                                         self._spectrumRenameChanged)
 
         # FIXME _toolbarNotifier is a nasty notifier.

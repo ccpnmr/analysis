@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-01 18:30:06 +0100 (Fri, May 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -24,6 +24,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
@@ -35,6 +36,7 @@ from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, undoBlock
 from ccpn.util.Logging import getLogger
+from ccpn.util.Constants import SCALETOLERANCE
 
 
 MULTIPLET_TYPES = ['singlet', 'doublet', 'triplet', 'quartet', 'quintet', 'sextet', 'septet', 'octet', 'nonet',
@@ -42,8 +44,7 @@ MULTIPLET_TYPES = ['singlet', 'doublet', 'triplet', 'quartet', 'quintet', 'sexte
 
 
 def _calculateCenterOfMass(multiplet):
-    """
-
+    """Calculate the centre of mass of the multiplet peaks
     :param multiplet: multiplet obj containing peaks.
     :return: the center of mass of the multiplet that can be used as peak position
              if you consider the multiplet as a single peak
@@ -70,9 +71,18 @@ def _calculateCenterOfMass(multiplet):
 
 
 def _getMultipletHeight(multiplet):
-    'return the highest peak intensity across the multiplet peaks'
+    """Derive the highest peak intensity from the multiplet peaks"""
+    # NOTE:ED - a more accurate method may be needed here
     if len(multiplet.peaks) > 0:
-        return max([peak.height or 1 for peak in multiplet.peaks])
+        heights = [(peak.height or 0.0) for peak in multiplet.peaks]
+        return heights[int(np.argmax(np.abs(heights)))]
+
+
+def _getMultipletHeightError(multiplet):
+    """Derive the height error from the multiplet peaks"""
+    if len(multiplet.peaks) > 0:
+        heightErrors = [(peak.heightError or 0.0) for peak in multiplet.peaks]
+        return heightErrors[int(np.argmax(np.abs(heightErrors)))]
 
 
 class Multiplet(AbstractWrapperObject):
@@ -132,27 +142,52 @@ class Multiplet(AbstractWrapperObject):
         height = _getMultipletHeight(self)
         return height
 
-    @height.setter
-    def height(self, value: float):
-        self._wrappedData.height = value
+    # # cannot set the height - derived from peaks
+    # @height.setter
+    # def height(self, value: float):
+    #     self._wrappedData.height = value
 
     @property
     def heightError(self) -> Optional[float]:
         """height error of Multiplet."""
-        return self._wrappedData.heightError
+        heightError = _getMultipletHeightError(self)
+        return heightError
 
-    @heightError.setter
-    def heightError(self, value: float):
-        self._wrappedData.heightError = value
+    # # cannot set the heightError - derived from peaks
+    # @heightError.setter
+    # def heightError(self, value: float):
+    #     self._wrappedData.heightError = value
 
     @property
     def volume(self) -> Optional[float]:
         """volume of Multiplet."""
-        return self._wrappedData.volume
+        if self._wrappedData.volume is None:
+            return None
+
+        scale = self.multipletList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.volume by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        return self._wrappedData.volume * scale
 
     @volume.setter
-    def volume(self, value: float):
-        self._wrappedData.volume = value
+    def volume(self, value: Optional[float]):
+        if not isinstance(value, (float, type(None))):
+            raise TypeError('volume must be a float/None')
+        elif value is not None and (value - value) != 0.0:
+            raise TypeError('volume cannot be NaN or Infinity')
+
+        if value is None:
+            self._wrappedData.volume = None
+        else:
+            scale = self.multipletList.spectrum.scale
+            scale = scale if scale is not None else 1.0
+            if -SCALETOLERANCE < scale < SCALETOLERANCE:
+                getLogger().warning('Scaling {}.volume by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+                self._wrappedData.volume = None
+            else:
+                self._wrappedData.volume = value / scale
 
     @property
     def offset(self) -> Optional[float]:
@@ -175,11 +210,33 @@ class Multiplet(AbstractWrapperObject):
     @property
     def volumeError(self) -> Optional[float]:
         """volume error of Multiplet."""
-        return self._wrappedData.volumeError
+        if self._wrappedData.volumeError is None:
+            return None
+
+        scale = self.multipletList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.volumeError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        return self._wrappedData.volumeError * scale
 
     @volumeError.setter
-    def volumeError(self, value: float):
-        self._wrappedData.volumeError = value
+    def volumeError(self, value: Optional[float]):
+        if not isinstance(value, (float, type(None))):
+            raise TypeError('volumeError must be a float/None')
+        elif value is not None and (value - value) != 0.0:
+            raise TypeError('volumeError cannot be NaN or Infinity')
+
+        if value is None:
+            self._wrappedData.volumeError = None
+        else:
+            scale = self.multipletList.spectrum.scale
+            scale = scale if scale is not None else 1.0
+            if -SCALETOLERANCE < scale < SCALETOLERANCE:
+                getLogger().warning('Scaling {}.volumeError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+                self._wrappedData.volumeError = None
+            else:
+                self._wrappedData.volumeError = value / scale
 
     @property
     def figureOfMerit(self) -> Optional[float]:
@@ -210,7 +267,7 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def slopes(self) -> List[float]:
-        """slope (in dimension order) used in calculating integral value."""
+        """slope (in dimension order) used in calculating multiplet value."""
         return self._wrappedData.slopes
 
     @slopes.setter
@@ -247,11 +304,11 @@ class Multiplet(AbstractWrapperObject):
         return self.multipletList.spectrum.axisCodes
 
     @property
-    def peaks(self) -> Optional[Tuple[Any]]:
+    def peaks(self) -> Optional[Tuple[Any, ...]]:
         """List of peaks attached to the multiplet."""
         if self._wrappedData:
             return tuple([self._project._data2Obj[pk] for pk in self._wrappedData.sortedPeaks()
-                      if pk in self._project._data2Obj])
+                          if pk in self._project._data2Obj])
         else:
             return ()
 
@@ -485,11 +542,11 @@ def _newMultiplet(self: MultipletList,
         if pp not in spectrum.peaks:
             raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
 
-    dd = {'height': height, 'heightError': heightError,
-          'volume': volume, 'volumeError': volumeError, 'offset': offset, 'slopes': slopes,
+    dd = {'height'    : height, 'heightError': heightError,
+          'volume'    : volume, 'volumeError': volumeError, 'offset': offset, 'slopes': slopes,
           'figOfMerit': figureOfMerit, 'constraintWeight': constraintWeight,
           'annotation': annotation, 'details': comment,
-          'limits': limits, 'pointLimits': pointLimits}
+          'limits'    : limits, 'pointLimits': pointLimits}
     if pks:
         dd['peaks'] = [pk._wrappedData for pk in pks]
 
@@ -513,6 +570,7 @@ def _newMultiplet(self: MultipletList,
                                 % (result, serial))
 
     return result
+
 
 # EJB 20181127: removed
 # Multiplet._parentClass.newMultiplet = _newMultiplet

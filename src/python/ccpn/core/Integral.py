@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-16 17:29:23 +0000 (Mon, March 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,7 @@ from scipy.integrate import trapz
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
+from ccpn.util.Constants import SCALETOLERANCE
 
 
 LinkedPeaks = 'linkedPeaks'
@@ -97,29 +98,90 @@ class Integral(AbstractWrapperObject):
     @property
     def value(self) -> Optional[float]:
         """value of Integral"""
-        return self._wrappedData.volume
+
+        if self._wrappedData.volume is None:
+            return None
+
+        scale = self.integralList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.value by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        return self._wrappedData.volume * scale
 
     @value.setter
-    def value(self, value: float):
-        self._wrappedData.volume = value
+    def value(self, value: Optional[float]):
+        if not isinstance(value, (float, type(None))):
+            raise TypeError('value must be a float/None')
+        elif value is not None and (value - value) != 0.0:
+            raise TypeError('value cannot be NaN or Infinity')
+
+        if value is None:
+            self._wrappedData.volume = None
+        else:
+            scale = self.integralList.spectrum.scale
+            scale = scale if scale is not None else 1.0
+            if -SCALETOLERANCE < scale < SCALETOLERANCE:
+                getLogger().warning('Scaling {}.value by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+                self._wrappedData.volume = None
+            else:
+                self._wrappedData.volume = value / scale
 
     @property
     def valueError(self) -> Optional[float]:
         """value error of Integral"""
-        return self._wrappedData.volumeError
+        if self._wrappedData.volumeError is None:
+            return None
+
+        scale = self.integralList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.valueError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        return self._wrappedData.volumeError * scale
 
     @valueError.setter
-    def valueError(self, value: float):
-        self._wrappedData.volumeError = value
+    def valueError(self, value: Optional[float]):
+        if not isinstance(value, (float, type(None))):
+            raise TypeError('valueError must be a float/None')
+        elif value is not None and (value - value) != 0.0:
+            raise TypeError('valueError cannot be NaN or Infinity')
+
+        if value is None:
+            self._wrappedData.volumeError = None
+        else:
+            scale = self.integralList.spectrum.scale
+            scale = scale if scale is not None else 1.0
+            if -SCALETOLERANCE < scale < SCALETOLERANCE:
+                getLogger().warning('Scaling {}.valueError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+                self._wrappedData.volumeError = None
+            else:
+                self._wrappedData.volumeError = value / scale
 
     @property
     def bias(self) -> float:
         """Baseplane offset used in calculating integral value"""
-        return self._wrappedData.offset
+        scale = self.integralList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.bias by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        return self._wrappedData.offset * scale
 
     @bias.setter
     def bias(self, value: float):
-        self._wrappedData.offset = value
+        if not isinstance(value, float):
+            raise TypeError('bias must be a float')
+        elif (value - value) != 0.0:
+            raise TypeError('bias cannot be NaN or Infinity')
+
+        scale = self.integralList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.bias by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+            self._wrappedData.offset = 0.0
+        else:
+            self._wrappedData.offset = value / scale
 
     @property
     def figureOfMerit(self) -> Optional[float]:
@@ -131,23 +193,55 @@ class Integral(AbstractWrapperObject):
         self._wrappedData.figOfMerit = value
 
     @property
-    def offset(self) -> Optional[float]:
+    def offset(self) -> float:
         """offset of Integral"""
-        return self._wrappedData.offset
+        scale = self.integralList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.offset by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        return self._wrappedData.offset * scale
 
     @offset.setter
     def offset(self, value: float):
-        self._wrappedData.offset = value
+        if not isinstance(value, float):
+            raise TypeError('offset must be a float')
+        elif (value - value) != 0.0:
+            raise TypeError('offset cannot be NaN or Infinity')
+
+        scale = self.integralList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.offset by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+            self._wrappedData.offset = 0.0
+        else:
+            self._wrappedData.offset = value / scale
 
     # NOTE:ED - check, baseline is currently using offset in the model
     @property
-    def baseline(self) -> Optional[float]:
+    def baseline(self) -> float:
         """baseline of Integral"""
-        return self._wrappedData.offset
+        scale = self.integralList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.baseline by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        return self._wrappedData.offset * scale
 
     @baseline.setter
     def baseline(self, value: float):
-        self._wrappedData.offset = value
+        if not isinstance(value, float):
+            raise TypeError('baseline must be a float')
+        elif (value - value) != 0.0:
+            raise TypeError('baseline cannot be NaN or Infinity')
+
+        scale = self.integralList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.baseline by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+            self._wrappedData.offset = 0.0
+        else:
+            self._wrappedData.offset = value / scale
 
     @property
     def constraintWeight(self) -> Optional[float]:
@@ -159,18 +253,41 @@ class Integral(AbstractWrapperObject):
         self._wrappedData.constraintWeight = value
 
     @property
-    def slopes(self) -> List[float]:
+    def slopes(self) -> Optional[List[float]]:
         """slope (in dimension order) used in calculating integral value
 
         The slope is defined as the intensity in point i+1 minus the intensity in point i"""
         # return [x.slope for x in self._wrappedData.sortedPeakDims()]
-        return self._wrappedData.slopes
+        if self._wrappedData.slopes is None:
+            return None
+
+        scale = self.integralList.spectrum.scale
+        scale = scale if scale is not None else 1.0
+        if -SCALETOLERANCE < scale < SCALETOLERANCE:
+            getLogger().warning('Scaling {}.slopes by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        return [slope * scale for slope in self._wrappedData.slopes]
 
     @slopes.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
-    def slopes(self, value):
-        self._wrappedData.slopes = value
+    def slopes(self, value: Optional[List[float]] = None):
+        if not isinstance(value, (list, type(None))):
+            raise TypeError('slopes must be a None or list of floats - {}'.format(value))
+        if value and not all(isinstance(sl, float) for sl in value):
+            raise TypeError('slopes must be a None or list of floats - {}'.format(value))
+
+        if value is None:
+            self._wrappedData.slopes = None
+        else:
+            scale = self.integralList.spectrum.scale
+            scale = scale if scale is not None else 1.0
+            if -SCALETOLERANCE < scale < SCALETOLERANCE:
+                getLogger().warning('Scaling {}.slopes by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+                self._wrappedData.slopes = None
+            else:
+                self._wrappedData.slopes = [sl / scale for sl in value]
+
         # peakDims = self._wrappedData.sortedPeakDims()
         # if len(value) == len(peakDims):
         #   for tt in zip(peakDims, value):

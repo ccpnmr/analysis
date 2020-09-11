@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-08 12:26:31 +0100 (Tue, September 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-11 19:09:41 +0100 (Fri, September 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -124,13 +124,14 @@ class GLGlobalData(QtWidgets.QWidget):
         
             uniform mat4    pTexMatrix;
             uniform vec4    axisScale;
+            uniform vec2    stackOffset;
             varying vec4    _FC;
             varying vec2    _texCoord;
             attribute vec2  _offset;
         
             void main()
             {
-                gl_Position = pTexMatrix * ((gl_Vertex * axisScale) + vec4(_offset, 0.0, 0.0));
+                gl_Position = pTexMatrix * ((gl_Vertex * axisScale) + vec4(_offset + stackOffset, 0.0, 0.0));
               
                 _texCoord = gl_MultiTexCoord0.st;
                 _FC = gl_Color;
@@ -173,6 +174,7 @@ class GLGlobalData(QtWidgets.QWidget):
                                                fragment=self._fragmentShaderTex,
                                                attributes={'pTexMatrix'  : (16, np.float32),
                                                            'axisScale'   : (4, np.float32),
+                                                           'stackOffset' : (2, np.float32),
                                                            'texture'     : (1, np.uint32),
                                                            'background'  : (4, np.float32),
                                                            'blendEnabled': (1, np.uint32),

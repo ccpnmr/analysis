@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-11 19:09:41 +0100 (Fri, September 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -822,13 +822,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                                              0.0, 1.0, 0.0, 0.0,
                                                                                              0.0, 0.0, 1.0, 0.0,
                                                                                              stX, stY, 0.0, 1.0]
-                self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET] = (stX, stY)
-
-                # else:
-                #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
-                #                                                                                  0.0, 1.0, 0.0, 0.0,
-                #                                                                                  0.0, 0.0, 1.0, 0.0,
-                #                                                                                  0.0, 0.0, 0.0, 1.0]
+                self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET] = np.array((stX, stY), dtype=np.float32)
 
         self._rangeXDefined = True
         self._rangeYDefined = True
@@ -3091,9 +3085,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self._GLMultiplets._spectrumSettings = self._spectrumSettings
         self._GLIntegrals._spectrumSettings = self._spectrumSettings
 
+        self._GLPeaks.buildSymbols()
+        self._GLMultiplets.buildSymbols()
         if not self._stackingMode:
-            self._GLPeaks.buildSymbols()
-            self._GLMultiplets.buildSymbols()
             self._GLIntegrals.buildSymbols()
             self.buildRegions()
 
@@ -3103,9 +3097,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.buildMarksRulers()
 
+        self._GLPeaks.buildLabels()
+        self._GLMultiplets.buildLabels()
         if not self._stackingMode:
-            self._GLPeaks.buildLabels()
-            self._GLMultiplets.buildLabels()
             self._GLIntegrals.buildLabels()
 
         phasingFrame = self.spectrumDisplay.phasingFrame
@@ -3256,10 +3250,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self.drawSpectra()
         self.drawBoundingBoxes()
 
+        self._GLPeaks.drawSymbols(self._spectrumSettings, shader=currentShader, stackingMode=self._stackingMode)
+        self._GLMultiplets.drawSymbols(self._spectrumSettings, shader=currentShader, stackingMode=self._stackingMode)
         if not self._stackingMode:
-            self._GLPeaks.drawSymbols(self._spectrumSettings)
-            self._GLMultiplets.drawSymbols(self._spectrumSettings)
-
             if not (self.is1D and self.strip._isPhasingOn):  # other mouse buttons checeks needed here
                 self._GLIntegrals.drawSymbols(self._spectrumSettings)
                 with self._disableGLAliasing():
@@ -3277,15 +3270,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
         currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
+        currentShader.setGLUniform2fv('stackOffset', 1, np.array((0.0, 0.0), dtype=np.float32))
 
         # draw the text to the screen
         self.enableTexture()
         self.enableTextClientState()
+        self._GLPeaks.drawLabels(self._spectrumSettings, shader=currentShader, stackingMode=self._stackingMode)
+        self._GLMultiplets.drawLabels(self._spectrumSettings, shader=currentShader, stackingMode=self._stackingMode)
+        currentShader.setGLUniform2fv('stackOffset', 1, np.array((0.0, 0.0), dtype=np.float32))
+
         if not self._stackingMode:
-
-            self._GLPeaks.drawLabels(self._spectrumSettings)
-            self._GLMultiplets.drawLabels(self._spectrumSettings)
-
             if not (self.is1D and self.strip._isPhasingOn):
                 self._GLIntegrals.drawLabels(self._spectrumSettings)
 
@@ -3548,15 +3542,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         if self._stackingMode:
                             # use the stacking matrix to offset the 1D spectra
-                            try:
-                                currentShader.setGLUniformMatrix4fv('mvMatrix',
-                                                                    1, GL.GL_FALSE,
-                                                                    self._spectrumSettings[spectrumView][
-                                                                        GLDefs.SPECTRUM_STACKEDMATRIX])
-                            except Exception as es:
-                                pass
-
-                        # self._contourList[spectrumView].drawVertexColor()
+                            currentShader.setGLUniformMatrix4fv('mvMatrix',
+                                                                1, GL.GL_FALSE,
+                                                                self._spectrumSettings[spectrumView][
+                                                                    GLDefs.SPECTRUM_STACKEDMATRIX])
+                        # draw contours
                         self._contourList[spectrumView].drawVertexColorVBO(enableVBO=True)
                     else:
                         pass

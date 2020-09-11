@@ -4,7 +4,7 @@ Module containing functions for defining GLSL shaders.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2018-12-20 14:08:00 +0000 (Thu, December 20, 2018) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-09-11 19:09:41 +0100 (Fri, September 11, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -117,31 +117,38 @@ class ShaderProgram(object):
                             0.0, 0.0, 0.0, 1.0]
 
     def setGLUniformMatrix4fv(self, uniformLocation=None, count=1, transpose=GL.GL_FALSE, value=None):
-        if uniformLocation in self.uniformLocations:
+        try:
             GL.glUniformMatrix4fv(self.uniformLocations[uniformLocation],
                                   count, transpose, value)
-        else:
-            raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
+        except:
+            raise RuntimeError('Error setting setGLUniformMatrix4fv: {}'.format(uniformLocation))
 
     def setGLUniform4fv(self, uniformLocation=None, count=1, value=None):
-        if uniformLocation in self.uniformLocations:
+        try:
             GL.glUniform4fv(self.uniformLocations[uniformLocation],
                             count, value)
-        else:
-            raise RuntimeError('Error setting setGLUniform4fv: %s' % uniformLocation)
+        except:
+            raise RuntimeError('Error setting setGLUniform4fv: {}'.format(uniformLocation))
 
     def setGLUniform4iv(self, uniformLocation=None, count=1, value=None):
-        if uniformLocation in self.uniformLocations:
+        try:
             GL.glUniform4iv(self.uniformLocations[uniformLocation],
                             count, value)
-        else:
-            raise RuntimeError('Error setting setGLUniform4iv: %s' % uniformLocation)
+        except:
+            raise RuntimeError('Error setting setGLUniform4iv: {}'.format(uniformLocation))
+
+    def setGLUniform2fv(self, uniformLocation=None, count=1, value=None):
+        try:
+            GL.glUniform2fv(self.uniformLocations[uniformLocation],
+                            count, value)
+        except:
+            raise RuntimeError('Error setting setGLUniform2fv: {}'.format(uniformLocation))
 
     def setGLUniform1i(self, uniformLocation=None, value=None):
-        if uniformLocation in self.uniformLocations:
+        try:
             GL.glUniform1i(self.uniformLocations[uniformLocation], value)
-        else:
-            raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
+        except:
+            raise RuntimeError('Error setting setGLUniformMatrix4fv: {}'.format(uniformLocation))
 
     def addGLShader(self, source, shader_type):
         """Function for compiling a GLSL shader

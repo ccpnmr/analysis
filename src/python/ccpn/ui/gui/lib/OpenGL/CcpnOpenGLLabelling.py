@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-29 09:03:04 +0000 (Wed, January 29, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-09-11 19:09:41 +0100 (Fri, September 11, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -43,6 +43,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_DRAW, GLRENDERM
     GLREFRESHMODE_NEVER, GLREFRESHMODE_REBUILD, GLSymbolArray, GLLabelArray
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
+
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -1815,7 +1816,7 @@ class GLLabelling():
     # Drawing
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def drawSymbols(self, spectrumSettings):
+    def drawSymbols(self, spectrumSettings, shader=None, stackingMode=True):
         """Draw the symbols to the screen
         """
         if self.strip.isDeleted:
@@ -1837,12 +1838,18 @@ class GLLabelling():
 
         for objListView, specView in self._visibleListViews:
             if not objListView.isDeleted and objListView in self._GLSymbols.keys():
-                # self._GLSymbols[objListView].drawIndexArray()
+
+                if stackingMode:
+                    # use the stacking matrix to offset the 1D spectra
+                    shader.setGLUniformMatrix4fv('mvMatrix',
+                                                 1, GL.GL_FALSE,
+                                                 spectrumSettings[specView][GLDefs.SPECTRUM_STACKEDMATRIX])
+                # draw the symbols
                 self._GLSymbols[objListView].drawIndexVBO(enableVBO=False)
 
         GL.glLineWidth(1.0 * self._GLParent.viewports._devicePixelRatio)
 
-    def drawLabels(self, spectrumSettings):
+    def drawLabels(self, spectrumSettings, shader=None, stackingMode=True):
         """Draw the labelling to the screen
         """
         if self.strip.isDeleted:
@@ -1862,8 +1869,13 @@ class GLLabelling():
         for objListView, specView in self._visibleListViews:
             if not objListView.isDeleted and objListView in self._GLLabels.keys():
                 for drawString in self._GLLabels[objListView].stringList:
+
+                    if stackingMode:
+                        # use the stacking matrix to offset the 1D spectra
+                        shader.setGLUniform2fv('stackOffset', 1,
+                                               spectrumSettings[specView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET])
+                    # draw text
                     drawString.drawTextArrayVBO(enableVBO=True)
-                    # drawString.defineTextArray()
 
 
 class GLpeakListMethods():

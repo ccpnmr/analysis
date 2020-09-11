@@ -158,8 +158,9 @@ class RadioButtons(QtWidgets.QWidget, Base):
             raise ValueError('radioButton %s not found in the list' % text)
 
     def get(self):
+        if self.getIndex():
+            return self.texts[self.getIndex()]
 
-        return self.texts[self.getIndex()]
 
     def getIndex(self):
         if self.buttonGroup.checkedButton() is not None:
@@ -171,11 +172,13 @@ class RadioButtons(QtWidgets.QWidget, Base):
         return self.buttonGroup.checkedButton() is not None
 
     def set(self, text, silent=False):
-
-        i = self.texts.index(text)
-        self.setIndex(i)
-        if self.callback and not silent:
-            self.callback()
+        if text in self.texts:
+            i = self.texts.index(text)
+            self.setIndex(i)
+            if self.callback and not silent:
+                self.callback()
+        else:
+            self.deselectAll()
 
     def getSelectedText(self):
         for radioButton in self.radioButtons:

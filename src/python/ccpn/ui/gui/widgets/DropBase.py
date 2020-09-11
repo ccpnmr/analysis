@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-08 12:32:29 +0100 (Tue, September 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -64,6 +64,7 @@ class DropBase:
     _dropTargets = (URLS, TEXT, PIDS, IDS)
 
     from ccpn.util.Constants import ccpnmrJsonData as JSONDATA
+    from ccpn.util.Constants import ccpnmrModelDataList as MODELDATALIST
 
     def _init(self, acceptDrops=False, **kwds):
 

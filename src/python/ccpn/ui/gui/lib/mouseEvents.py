@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 19:56:35 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -245,47 +245,90 @@ def getMouseEventDict(event: QtGui.QMouseEvent):
 import json
 from ccpn.ui.gui.widgets.DropBase import DropBase
 # from ccpn.ui.gui.guiSettings import textFontLarge
-from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
+from ccpn.ui.gui.guiSettings import getColours, DRAG_BACKGROUND, DRAG_FOREGROUND
 
 
-def makeDragEvent(self, dataDict, text, action=QtCore.Qt.CopyAction):
+# small border to make the drag items look cleaner
+DRAGBORDER = 2
+
+
+def _setMimeQString(value):
+    """Convert a string to a stream
+    """
+    result = QtCore.QByteArray()
+    stream = QtCore.QDataStream(result, QtCore.QIODevice.WriteOnly)
+    stream.writeQString(value)
+    return result
+
+
+def _setMimeQVariant(value):
+    """Convert a python object into a stream
+    """
+    result = QtCore.QByteArray()
+    stream = QtCore.QDataStream(result, QtCore.QIODevice.WriteOnly)
+    stream.writeQVariant(value)
+    return result
+
+
+def _getMimeQVariant(value):
+    """Convert a stream QVariant back into a python object
+    """
+    stream = QtCore.QDataStream(value, QtCore.QIODevice.ReadOnly)
+    result = stream.readQVariant()
+    return result
+
+
+def makeDragEvent(self, dataDict, texts, label=None, action=QtCore.Qt.CopyAction):
+    """Create a new drag event with 'self' as the source
+
+    :param self: source of the new drag event
+    :param dataDict: data to add as mimeData
+    :param texts: list of strings to copy/move to list widget types (if required)
+    :param label: string required to create the drag icon
+    :param action: QtCore.Qt.CopyAction or Move action - may be used by dropEvent
+    :return:
+    """
     itemData = json.dumps(dataDict)
 
     mimeData = QtCore.QMimeData()
-
-    # ejb - added so that itemData works with PyQt5
-    tempData = QtCore.QByteArray()
-    stream = QtCore.QDataStream(tempData, QtCore.QIODevice.WriteOnly)
-    stream.writeQString(text)
-    mimeData.setData(DropBase.JSONDATA, tempData)
-
-    # mimeData.setData(DropBase.JSONDATA, self.text())
+    mimeData.setData(DropBase.JSONDATA, _setMimeQString(itemData))
+    mimeData.setData(DropBase.MODELDATALIST, _setMimeQVariant(texts))
     mimeData.setText(itemData)
+
+    # create the new event with the mimeData - this does not contain internal application/x-qabstractitemmodeldatalist (INTERNALQTDATA)
     drag = QtGui.QDrag(self)
     drag.setMimeData(mimeData)
 
     # create a new temporary label the the dragged pixmap
     # fixes labels that are very big with small text
     dragLabel = QtWidgets.QLabel()
-    dragLabel.setText(text)
+    dragLabel.setText(str(label))
 
-    from ccpn.framework.Application import getApplication
-    getApp = getApplication()
-    if getApp and hasattr(getApp, '_fontSettings'):
-        dragLabel.setFont(getApp._fontSettings.textFontLarge)
+    if label is not None:
+        from ccpn.framework.Application import getApplication
 
-    dragLabel.setStyleSheet('color: %s' % (getColours()[LABEL_FOREGROUND]))
+        getApp = getApplication()
+        if getApp and hasattr(getApp, '_fontSettings'):
+            dragLabel.setFont(getApp._fontSettings.textFontLarge)
 
-    # set the pixmap
-    pixmap = dragLabel.grab()
+        # set the colours and margin for the drag icon
+        dragLabel.setStyleSheet('color: {}; background: {}'.format(getColours()[DRAG_FOREGROUND], getColours()[DRAG_BACKGROUND]))
+        dragLabel.setContentsMargins(DRAGBORDER, DRAGBORDER, DRAGBORDER - 1, DRAGBORDER - 1)
 
-    # make the label slightly transparent
-    painter = QtGui.QPainter(pixmap)
-    painter.setCompositionMode(painter.CompositionMode_DestinationIn)
-    painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 240))
-    painter.end()
-    drag.setPixmap(pixmap)
+        # set the pixmap
+        pixmap = dragLabel.grab()
 
+        # make the label slightly transparent - not strictly necessary
+        painter = QtGui.QPainter(pixmap)
+        painter.setCompositionMode(painter.CompositionMode_DestinationIn)
+        painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 240))
+        painter.end()
+
+        # set pixmap if label is defined other defaults to mimeData.text
+        drag.setPixmap(pixmap)
+
+    # set the hotspot as the centre
     drag.setHotSpot(QtCore.QPoint(dragLabel.width() // 2, dragLabel.height() // 2))
 
+    # invoke the drag event
     drag.exec_(action)

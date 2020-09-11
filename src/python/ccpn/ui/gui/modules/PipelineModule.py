@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:06:38 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -60,6 +60,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.pipes import loadedPipes as LP
 import threading
 
+
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 DropHereLabel = 'Drop SP or SG here'
@@ -101,7 +102,6 @@ class GuiPipeline(CcpnModule, Pipeline):
             self.templatePath = self.generalPreferences.auxiliaryFilesPath
             self.savingDataPath = self.application.pipelinePath
         if pipes is None:
-
             pipes = LP
 
         self.rebuildTemplates = True
@@ -128,22 +128,21 @@ class GuiPipeline(CcpnModule, Pipeline):
             self._inputDataDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Spectrum', self._updateInputDataFromNotifier)
             # add for SpectrumGroup
 
-
     @property
     def widgetsState(self):
         return self._widgetsState
 
     @widgetsState.getter
     def widgetsState(self):
-        '''Special case of saving widgets for this module. the only thing to be saved is the filePath of the pipeline.
-        The guiPipeline has its own mechanism for restoring '''
+        """Special case of saving widgets for this module. the only thing to be saved is the filePath of the pipeline.
+        The guiPipeline has its own mechanism for restoring """
         return {PipelinePath: self._savePipeline()}
 
     def restoreWidgetsState(self, **widgetsState):
-        ''' Overriden method from ccpnModule
+        """ Overriden method from ccpnModule
             Special case of restoring widgets for this module.
           the only thing to be saved is the filePath of the pipeline. The guiPipeline has its own mechanism for restoring
-        '''
+        """
         if PipelinePath in widgetsState:
             if widgetsState[PipelinePath]:
                 if os.path.exists(widgetsState[PipelinePath]):
@@ -176,10 +175,10 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     @guiPipes.setter
     def guiPipes(self, guiPipes):
-        '''
+        """
         Set the guiPipes to the guiPipeline
         :param guiPipes:  GuiPipe class
-        '''
+        """
 
         if guiPipes is not None:
             allGuiPipes = []
@@ -201,18 +200,16 @@ class GuiPipeline(CcpnModule, Pipeline):
                 _fetchDemoPipe()
             modules = loadPipeSysModules([userPipesPath])
 
-
-
     @property
     def pipelineTemplates(self):
         return self._pipelineTemplates
 
     @pipelineTemplates.setter
     def pipelineTemplates(self, pipelineTemplates):
-        '''
+        """
         Set the pipelineTemplates to the guiPipeline
         :param pipelineTemplates:  [{templateName: templateClass}]
-        '''
+        """
 
         if pipelineTemplates is not None:
             self._pipelineTemplates = pipelineTemplates
@@ -257,26 +254,26 @@ class GuiPipeline(CcpnModule, Pipeline):
     def _createInputWidgets(self):
         #
         row = 0
-        self.pipelineReNameLabel = Label(self.inputFrame, 'Name', grid=(row,0))
-        self.pipelineReNameTextEdit = LineEdit(self.inputFrame, PipelineName, grid=(row,1))
+        self.pipelineReNameLabel = Label(self.inputFrame, 'Name', grid=(row, 0))
+        self.pipelineReNameTextEdit = LineEdit(self.inputFrame, PipelineName, grid=(row, 1))
         # self.pipelineReNameTextEdit.editingFinished.connect(self._renamePipelineCallback)
-        row +=1
-        self.inputDataLabel = Label(self.inputFrame, 'Input Data', grid=(row,0))
-        self.inputDataList = ListWidget(self.inputFrame, acceptDrops=True, grid=(row,1))
+        row += 1
+        self.inputDataLabel = Label(self.inputFrame, 'Input Data', grid=(row, 0))
+        self.inputDataList = ListWidget(self.inputFrame, acceptDrops=True, grid=(row, 1), emptyText=DropHereLabel)
         contextMenu = self._inputDataContextMenu
         self.inputDataList.setContextMenu(contextMenu)
         self.inputDataList.setMaximumHeight(100)
         self.inputDataList.setAcceptDrops(True)
-        self.inputDataList.addItem(self._getInputDataHeaderLabel())
+        # self.inputDataList.addItem(self._getInputDataHeaderLabel())
         self.inputDataList.dropped.connect(self._itemsDropped)
         row += 1
         # PIPES SELECTION:
-        self.pipesLabel = Label(self.inputFrame, 'Pipes', grid=(row,0))
-        self.pipeTreeWidget = PipesTree(self.inputFrame, guiPipeline=self, grid=(row,1))
+        self.pipesLabel = Label(self.inputFrame, 'Pipes', grid=(row, 0))
+        self.pipeTreeWidget = PipesTree(self.inputFrame, guiPipeline=self, grid=(row, 1))
         self.pipeTreeWidget._addPipesToTree()
         # search widget
         row += 1
-        self._resultWidget = ListWidget(self.inputFrame, contextMenu=False, callback=self.callbackResultWidget, grid=(row,1))
+        self._resultWidget = ListWidget(self.inputFrame, contextMenu=False, callback=self.callbackResultWidget, grid=(row, 1))
         self._resultWidget.itemDoubleClicked.connect(self._resultItemDoubleClickCallback)
         self._resultWidget.keyPressEvent = self._pipesResultskeyPressEvent
         self._resultWidget.hide()
@@ -284,7 +281,6 @@ class GuiPipeline(CcpnModule, Pipeline):
         # self._resultWidget.setStyleSheet('QListWidget {border: 1px;}')
         row += 1
         self._addPipesSearchWidget(row)
-
 
     def _createSaveOpenButtonGroup(self):
         # self.pipelineNameLabel = Label(self, PipelineName)
@@ -316,18 +312,19 @@ class GuiPipeline(CcpnModule, Pipeline):
     def _addPipesSearchWidget(self, row):
         bText = 'Search Pipe. Return to add selected'
 
-        self._searchWidget = LineEdit(self.inputFrame, backgroundText=bText, grid=(row, 1),)
+        self._searchWidget = LineEdit(self.inputFrame, backgroundText=bText, grid=(row, 1), )
         self._searchWidget.textChanged.connect(self._searchWidgetCallback)
         self._searchWidget.keyPressEvent = self._pipeSearchkeyPressEvent
         self._searchWidget.setMinimumWidth(300)
 
     def _searchNameInList(self, ll, searchText):
         import fnmatch
+
         found = set()
         if not searchText.endswith('*'):
-            searchText = searchText+'*'
+            searchText = searchText + '*'
         if not searchText.startswith('*'):
-            searchText = '*'+searchText
+            searchText = '*' + searchText
         for ln, nn in zip([x.lower() for x in ll], ll):
             if fnmatch.fnmatch(ln, searchText):
                 found.add(nn)
@@ -348,7 +345,7 @@ class GuiPipeline(CcpnModule, Pipeline):
                 self._resultWidget.addItems(pipeNames)
                 # b = self._resultWidget.sizeHintForRow(0) * self._resultWidget.count() + 2 * self._resultWidget.frameWidth() #this make the search of dynamic sizes
                 # self._resultWidget.setMaximumHeight(b)
-                self._resultWidget.setMaximumHeight(abs(self._resultWidget.sizeHintForRow(0)) * 4) # fix height by num of rows
+                self._resultWidget.setMaximumHeight(abs(self._resultWidget.sizeHintForRow(0)) * 4)  # fix height by num of rows
                 self._searchWidget.setClearButtonEnabled(True)
 
             else:
@@ -357,16 +354,15 @@ class GuiPipeline(CcpnModule, Pipeline):
             self._resultWidget.hide()
 
     def _resultItemDoubleClickCallback(self):
-        if len(self._resultWidget.getSelectedTexts())==1:
+        if len(self._resultWidget.getSelectedTexts()) == 1:
             self.addPipe(self._resultWidget.getSelectedTexts()[-1])
-
 
     def callbackResultWidget(self):
         selectedTreeItems = self.pipeTreeWidget.selectedItems()
         self.pipeTreeWidget.selectItems(self._resultWidget.getSelectedTexts())
 
     def _addPipelineDropArea(self):
-        self.pipelineArea = PipelineDropArea(self, guiPipeline=self,  mainWindow=self.mainWindow)
+        self.pipelineArea = PipelineDropArea(self, guiPipeline=self, mainWindow=self.mainWindow)
         # self.pipelineArea.dropEvent = self._pipelineDropEvent
         scroll = ScrollArea(self)
         scroll.setWidget(self.pipelineArea)
@@ -382,12 +378,12 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.currentGuiPipesNames.clear()
 
     def _pipeSearchkeyPressEvent(self, keyEvent):
-        ''' Run the pipeline by pressing the enter key '''
+        """ Run the pipeline by pressing the enter key """
         if keyEvent.key() == Qt.Key_Enter or keyEvent.key() == Qt.Key_Return:
             if self._searchWidget.get():
                 selectedList = self.pipeTreeWidget.selectedItems()
                 names = [i.pipeName for i in selectedList]
-                if len(names)>0:
+                if len(names) > 0:
                     for name in names:
                         self.addPipe(name)
                     self._searchWidget.clear()
@@ -397,7 +393,7 @@ class GuiPipeline(CcpnModule, Pipeline):
             self.pipeTreeWidget.clearSelection()
 
         elif keyEvent.key() == Qt.Key_Up:
-            if len(self._resultWidget.getTexts())>0:
+            if len(self._resultWidget.getTexts()) > 0:
                 self._resultWidget.selectItems(self._resultWidget.getTexts()[:1])
                 self._resultWidget.setFocus()
 
@@ -405,11 +401,11 @@ class GuiPipeline(CcpnModule, Pipeline):
             LineEdit.keyPressEvent(self._searchWidget, keyEvent)
 
     def _pipesResultskeyPressEvent(self, keyEvent):
-        ''' Run the pipeline by pressing the enter key '''
+        """ Run the pipeline by pressing the enter key """
         if keyEvent.key() == Qt.Key_Enter or keyEvent.key() == Qt.Key_Return:
             if self._searchWidget.get():
                 names = self._resultWidget.getSelectedTexts()
-                if len(names)>0:
+                if len(names) > 0:
                     for name in names:
                         self.addPipe(name)
         elif keyEvent.key() == Qt.Key_Escape or keyEvent.key() == Qt.Key_Delete:
@@ -423,7 +419,6 @@ class GuiPipeline(CcpnModule, Pipeline):
         counter = collections.Counter(self.currentGuiPipesNames)
         return str(guiPipeName) + '-' + str(counter[str(guiPipeName)])
         # return str(guiPipeName)
-
 
     ####################################_________ GUI CallBacks ____________###########################################
 
@@ -449,7 +444,7 @@ class GuiPipeline(CcpnModule, Pipeline):
                     return
                 else:
                     if not position:
-                        position =  self.addBoxPosition.get()
+                        position = self.addBoxPosition.get()
                     newGuiPipe = guiPipe(parent=self, application=self.application, name=serialName, project=self.project)
                     newGuiPipe.setMaximumHeight(newGuiPipe.sizeHint().height())
                     self.pipelineArea.addDock(newGuiPipe, position=position, relativeTo=relativeTo)
@@ -458,7 +453,7 @@ class GuiPipeline(CcpnModule, Pipeline):
                     return
 
     def runPipeline(self):
-        '''Run all pipes in the specified order '''
+        """Run all pipes in the specified order """
         from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
 
         with undoBlockWithoutSideBar():
@@ -516,8 +511,6 @@ class GuiPipeline(CcpnModule, Pipeline):
         # showInfo('Pipeline','Finished')
         self.goButton.setEnabled(True)
 
-
-
     def _closeModule(self):
         """Re-implementation of closeModule function from CcpnModule to unregister notification """
         self._unregisterNotifier()
@@ -546,8 +539,8 @@ class GuiPipeline(CcpnModule, Pipeline):
             if guiPipe.pipeName == name:
                 return guiPipe
 
-
     ####################################_________ Saving Restoring  SETUP ____________####################################
+
     def _openJsonFile(self, path):
         if path is not None:
             with open(str(path), 'r') as jf:
@@ -572,7 +565,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         return pipelineBoxes
 
     def _getPipelineStatePath(self):
-        ''' used to auto-restore when opening/saving modules in projects'''
+        """ used to auto-restore when opening/saving modules in projects"""
         return self._savePipeline()
 
     @property
@@ -582,39 +575,39 @@ class GuiPipeline(CcpnModule, Pipeline):
             ['name', [self.pipelineReNameTextEdit, self.pipelineReNameTextEdit.get, self.pipelineReNameTextEdit.set]],
             ['inputData', [self.inputDataList, self.inputDataList.getTexts, self.inputDataList.setTexts]],
             ['savePath', [self.savePipelineLineEdit, self.savePipelineLineEdit.get, self.savePipelineLineEdit.setText]],
-            ['autoActive', [self.autoActiveCheckBox,self.autoActiveCheckBox.get, self.autoActiveCheckBox.set]],
-            ['addPosit',[self.addBoxPosition, self.addBoxPosition.get, self.addBoxPosition.set]]
-        ])
+            ['autoActive', [self.autoActiveCheckBox, self.autoActiveCheckBox.get, self.autoActiveCheckBox.set]],
+            ['addPosit', [self.addBoxPosition, self.addBoxPosition.get, self.addBoxPosition.set]]
+            ])
         return dd
 
-    def _setSavedWidgetParameters(self,  values:dict={}):
-        '''
+    def _setSavedWidgetParameters(self, values: dict = {}):
+        """
         sets the extra widget which are saved in a pipeline file:
         name
         inputData
         savePath
         autoActive
         addPosit
-        '''
+        """
         for key, value in values.items():
             widgetList = self._settingsDict.get(key)
             if widgetList is not None:
-                widget, getValue, setValue =  widgetList
+                widget, getValue, setValue = widgetList
                 setValue(value)
 
     def _getSavingWidgetParameters(self):
-        '''
+        """
         get the extra widget values to save in a pipeline file:
         name
         inputData
         savePath
         autoActive
         addPosit
-        '''
-        dd = od([[x,None] for x in self._settingsDict])
+        """
+        dd = od([[x, None] for x in self._settingsDict])
         for key, widgetList in self._settingsDict.items():
-                widget, getValue, setValue =  widgetList
-                dd[key] = getValue()
+            widget, getValue, setValue = widgetList
+            dd[key] = getValue()
         return dd
 
     def _openSavedPipeline(self, path=None):
@@ -637,7 +630,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.pipelineArea._restoreState(state)
 
     def _savePipeline(self):
-        '''jsonData = [{pipelineArea.state}, [guiPipesState]]   '''
+        """jsonData = [{pipelineArea.state}, [guiPipesState]]   """
         guiPipesState = self.pipelineArea.guiPipesState
         # if len(guiPipesState)>0:
         self.jsonData = []
@@ -650,7 +643,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         #   getLogger().warning('No Gui Pipes to save.')
 
     def _saveToJson(self):
-        '''Tries to catch various error in giving the saving path '''
+        """Tries to catch various error in giving the saving path """
         pipelineFilePath = None
 
         savingPath = str(self.savePipelineLineEdit.lineEdit.text())
@@ -679,7 +672,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         with open(pipelineFilePath, 'w') as fp:
             json.dump(self.jsonData, fp, indent=2)
             fp.close()
-            getLogger().info('Pipeline File saved in: '+pipelineFilePath)
+            getLogger().info('Pipeline File saved in: ' + pipelineFilePath)
             # self.project._logger.info('File saved in: ' + pipelineFilePath)
         # except:
         #   getLogger().warning('File not saved. Insert a valid directory path. E.g /Users/user1/Desktop/')
@@ -698,45 +691,42 @@ class GuiPipeline(CcpnModule, Pipeline):
             self.savePipelineParams.append(newDict)
         return self.savePipelineParams
 
-    def _getInputDataHeaderLabel(self):
-        # color = QtGui.QColor('green')
-        header = QtWidgets.QListWidgetItem(DropHereLabel)
-        header.setFlags(QtCore.Qt.NoItemFlags)
-        # header.setBackground(color)
-        return header
+    # def _getInputDataHeaderLabel(self):
+    #     # color = QtGui.QColor('green')
+    #     header = QtWidgets.QListWidgetItem(DropHereLabel)
+    #     header.setFlags(QtCore.Qt.NoItemFlags)
+    #     # header.setBackground(color)
+    #     return header
 
     def _inputDataContextMenu(self):
         contextMenu = Menu('', self, isFloatWidget=True)
-        contextMenu.addItem("Add data", callback=self._addSpectraPopup)
-        contextMenu.addItem("Remove selected", callback=self._removeSelectedInputData)
+        contextMenu.addItem('Add Spectra/SpectrumGroups', callback=self._addSpectraPopup)
+        contextMenu.addItem('Remove Selected', callback=self._removeSelectedInputData)
         contextMenu.addSeparator()
-        contextMenu.addItem("Clear all", callback=self._clearInputData)
+        contextMenu.addItem('Clear All', callback=self._clearInputData)
         return contextMenu
-
 
     def _createSettingsWidgets(self):
 
         row = 0
-        self.autoLabel = Label(self.settingsWidget, 'Auto Run', grid=(row,0))
-        self.autoCheckBox = CheckBox(self.settingsWidget, callback=self._displayStopButton,  grid=(row,1))
+        self.autoLabel = Label(self.settingsWidget, 'Auto Run', grid=(row, 0))
+        self.autoCheckBox = CheckBox(self.settingsWidget, callback=self._displayStopButton, grid=(row, 1))
         self.autoCheckBox.setEnabled(False)
         row += 1
         self.savePipelineLabel = Label(self.settingsWidget, 'Save in: directory path',
-                                       tipText='Select path where to save your Pipeline file',  grid=(row,0))
+                                       tipText='Select path where to save your Pipeline file', grid=(row, 0))
         self.savePipelineLineEdit = LineEditButtonDialog(self.settingsWidget,
-                                                         fileMode=QtWidgets.QFileDialog.Directory,  grid=(row,1))
+                                                         fileMode=QtWidgets.QFileDialog.Directory, grid=(row, 1))
         row += 1
-        self.addBoxLabel = Label(self.settingsWidget, 'Add Pipes',  grid=(row,0))
+        self.addBoxLabel = Label(self.settingsWidget, 'Add Pipes', grid=(row, 0))
         self.addBoxPosition = RadioButtons(self.settingsWidget, texts=['top', 'bottom'],
                                            callback=self._addPipeDirectionCallback, selectedInd=1, direction='h',
-                                           grid=(row,1))
+                                           grid=(row, 1))
         self.addBoxPosition.setMaximumHeight(20)
         row += 1
-        self.autoActiveLabel = Label(self.settingsWidget, 'Auto active',  grid=(row,0))
-        self.autoActiveCheckBox = CheckBox(self.settingsWidget, callback=self._autoActiveCallback,  grid=(row,1))
+        self.autoActiveLabel = Label(self.settingsWidget, 'Auto active', grid=(row, 0))
+        self.autoActiveCheckBox = CheckBox(self.settingsWidget, callback=self._autoActiveCallback, grid=(row, 1))
         self.autoActiveCheckBox.setChecked(True)
-
-
 
     def _itemsDropped(self):
         self.setDataSelection()
@@ -754,7 +744,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     def _clearInputData(self):
         self.inputDataList.clear()
-        self.inputDataList.addItem(self._getInputDataHeaderLabel())
+        # self.inputDataList.addItem(self._getInputDataHeaderLabel())
         self.setDataSelection()
 
     def _addSpectraPopup(self):
@@ -783,7 +773,6 @@ class GuiPipeline(CcpnModule, Pipeline):
     def _autoActiveCallback(self):
         value = self.autoActiveCheckBox.get()
 
-
     def _displayStopButton(self):
         if self.autoCheckBox.isChecked():
             self.threadButtons.buttons[0].show()
@@ -793,7 +782,6 @@ class GuiPipeline(CcpnModule, Pipeline):
             self.threadButtons.buttons[0].hide()
             self.threadButtons.buttons[1].hide()
             self.threadButtons.buttons[2].show()
-
 
     def _addWidgetsToLayout(self, widgets, layout):
         count = int(len(widgets) / 2)
@@ -811,7 +799,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         if self.project is not None:
             if len(dataTexts) == 0:
                 # self.threadButtons.setEnabled(False)
-                self.inputDataList.addItem(self._getInputDataHeaderLabel())
+                # self.inputDataList.addItem(self._getInputDataHeaderLabel())
                 return
             for text in dataTexts:
                 obj = self.project.getByPid(text)
@@ -859,7 +847,6 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.setDataSelection()
 
 
-
 #################################### _________ RUN GUI TESTING ____________ ####################################
 
 
@@ -869,6 +856,7 @@ if __name__ == '__main__':
 
     # analysis specific
     from ccpn.pipes import loadedPipes
+
 
     app = TestApplication()
     win = QtWidgets.QMainWindow()

@@ -5,7 +5,7 @@ List widget
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:54 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,12 +26,13 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
-
+from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5.QtCore import pyqtSignal
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.util.Constants import ccpnmrJsonData
+from ccpn.ui.gui.lib.mouseEvents import _getMimeQVariant
+from ccpn.util.Constants import ccpnmrModelDataList, INTERNALQTDATA
+
 
 # GST is this really a WrapperObject ListWidget because there appear to be some
 # methods and features that are possibly quite coupled to them or some defined
@@ -60,8 +61,9 @@ class ListWidget(QtWidgets.QListWidget, Base):
                  sortOnDrop=False,
                  allowDuplicates=False,
                  copyDrop=True,
-                 infinitleyTallVertically= False,
-                 minRowsVisible = 4,
+                 infinitleyTallVertically=False,
+                 minRowsVisible=4,
+                 emptyText=None,
                  **kwds):
 
         super().__init__(parent)
@@ -102,14 +104,15 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self.infinitleyTallVerically = infinitleyTallVertically
         self.minRowsVisible = minRowsVisible
 
+        self._emptyText = str(emptyText)
         # self.setStyleSheet(self._styleSheet)
 
     def minimumSizeHint(self) -> QtCore.QSize:
-        result =  super().minimumSizeHint()
-        if self.count()  > 0:
-            result.setHeight(self.sizeHintForRow(0)* self.minRowsVisible)
+        result = super().minimumSizeHint()
+        if self.count() > 0:
+            result.setHeight(self.sizeHintForRow(0) * self.minRowsVisible)
         else:
-            result.setHeight(self.fontMetrics().height()* self.minRowsVisible)
+            result.setHeight(self.fontMetrics().height() * self.minRowsVisible)
         return result
 
     def sizeHint(self):
@@ -350,27 +353,35 @@ class ListWidget(QtWidgets.QListWidget, Base):
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.accept()
-        else:
+        elif event.mimeData().hasFormat(INTERNALQTDATA):
             super(ListWidget, self).dragEnterEvent(event)
+        else:
+            event.accept()
 
     def dragMoveEvent(self, event):
         if event.mimeData().hasUrls():
             event.setDropAction(QtCore.Qt.CopyAction)
             event.accept()
-        else:
+        elif event.mimeData().hasFormat(INTERNALQTDATA):
             super(ListWidget, self).dragMoveEvent(event)
+        else:
+            event.accept()
 
     def dropEvent(self, event):
-        if event.mimeData().hasUrls():
+        mimeData = event.mimeData()
+
+        if mimeData.hasUrls():
             event.setDropAction(QtCore.Qt.CopyAction)
             event.accept()
             links = []
-            for url in event.mimeData().urls():
+            for url in mimeData.urls():
                 links.append(str(url.toLocalFile()))
-            # self.emit(QtCore.SIGNAL("dropped"), links)
+
             self.dropped.emit(links)
             if self.sortOnDrop is True:
                 self.sortItems()
+            event.accept()
+
         else:
             data = [self.parseEvent(event)]
             if event.source() != self:  # otherwise duplicates
@@ -380,44 +391,49 @@ class ListWidget(QtWidgets.QListWidget, Base):
                     else:
                         event.setDropAction(QtCore.Qt.MoveAction)
 
-                    super(ListWidget, self).dropEvent(event)
+                    if mimeData.hasFormat(INTERNALQTDATA):
+                        # process listType to listType drag/drop - before the emit
+                        super(ListWidget, self).dropEvent(event)
+
+                    elif mimeData.hasFormat(ccpnmrModelDataList):
+                        # respond to manual drag item (possibly created by mouseEvents.makeDragEvent)
+                        texts = _getMimeQVariant(mimeData.data(ccpnmrModelDataList)) or []
+                        if texts is not None:
+                            if isinstance(texts, list):
+                                for text in texts:
+                                    self.addItem(str(text))
+                            else:
+                                raise TypeError('mimeData.{} must be a list/None: {}'.format(ccpnmrModelDataList, repr(texts)))
+
                     self.dropped.emit(data)
                     if not self.allowDuplicates:
                         self._removeDuplicate()
                     if self.sortOnDrop is True:
                         self.sortItems()
-                else:
+                    event.accept()
 
-                    if event.source() is self.dropSource:  # check that the drop comes
-                        event.setDropAction(QtCore.Qt.MoveAction)  # from only the permitted widget
-                        # self.emit(QtCore.SIGNAL("dropped"), items)
+                elif event.source() is self.dropSource:
+                    # check that the drop comes from only the permitted widget
+                    event.setDropAction(QtCore.Qt.MoveAction)
+
+                    if mimeData.hasFormat(INTERNALQTDATA):
+                        # process listType to listType drag/drop - before the emit
                         super(ListWidget, self).dropEvent(event)
-                        self.dropped.emit(data)
-                        if self.sortOnDrop is True:
-                            self.sortItems()
-                    else:
-                        event.accept()
 
-            # ejb - tried to fix transfer of CopyAction, but intermittent
-            # encodedData = event.mimeData().data(ccpnmrJsonData)
-            # stream = QtCore.QDataStream(encodedData, QtCore.QIODevice.ReadOnly)
-            # eventData = stream.readQVariantHash()
-            #
-            # items = []
-            # if event.source() != self: #otherwise duplicates
-            #   actionType = QtCore.Qt.CopyAction
-            #   if 'dragAction' in eventData.keys():        # put these strings somewhere else
-            #     if eventData['dragAction'] == 'copy':
-            #       actionType = QtCore.Qt.CopyAction             # ejb - changed from Move
-            #     elif eventData['dragAction'] == 'move':
-            #       actionType = QtCore.Qt.MoveAction             # ejb - changed from Move
-            #
-            #   event.setDropAction(actionType)
-            #   # self.emit(QtCore.SIGNAL("dropped"), items)
-            #   self.dropped.emit(items)
-            #   super(ListWidget, self).dropEvent(event)
-            # else:
-            #   event.ignore()
+                    elif mimeData.hasFormat(ccpnmrModelDataList):
+                        # respond to manual drag item (possibly created by mouseEvents.makeDragEvent)
+                        texts = _getMimeQVariant(mimeData.data(ccpnmrModelDataList)) or []
+                        if texts is not None:
+                            if isinstance(texts, list):
+                                for text in texts:
+                                    self.addItem(str(text))
+                            else:
+                                raise TypeError('mimeData.{} must be a list/None: {}'.format(ccpnmrModelDataList, repr(texts)))
+
+                    self.dropped.emit(data)
+                    if self.sortOnDrop is True:
+                        self.sortItems()
+                    event.accept()
 
     def _removeDuplicate(self):
         """ Removes duplicates from listwidget on dropping. Could be implemented to don't add in first place but difficult
@@ -430,25 +446,40 @@ class ListWidget(QtWidgets.QListWidget, Base):
         uniq = [i for i in self.getItems() if i.text() not in seen and not seen.add(i.text())]
         removeDuplicates = [self.model().removeRow(self.row(i)) for i in self.getItems() if i not in uniq]
 
-
     def _disableLabels(self, labels):
         items = self.getItems()
         for item in items:
             if item.text() in labels:
                 item.setFlags(QtCore.Qt.NoItemFlags)
 
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        if self.count() == 0 and self._emptyText:
+            # paint the emptyText string in the empty widget
+            self._paintEmpty(event)
+
+    def _paintEmpty(self, event):
+        """If the widget is empty then write the emptyText string
+        """
+        p = QtGui.QPainter(self.viewport())
+        pen = QtGui.QPen(QtGui.QColor("grey"))
+        oldPen = p.pen()
+        p.setPen(pen)
+        p.drawText(self.rect(), QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop, " " + self._emptyText)
+        p.setPen(oldPen)
+        p.end()
+
 
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Spacer import Spacer
 
 
 class ListWidgetPair(Frame):
     """
-    Define a pair of listWidgets such that information can be cpoied from one side
+    Define a pair of listWidgets such that information can be copied from one side
     to the other and vise-versa
     """
 

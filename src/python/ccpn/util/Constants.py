@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -50,6 +50,8 @@ isoTimeFormat = "%Y-%m-%dT%%H:M:%S.%f"
 
 # CCPNMR data-transfer json mimetype
 ccpnmrJsonData = 'ccpnmr-json'
+ccpnmrModelDataList = 'ccpnmr-model-datalist'
+INTERNALQTDATA = 'application/x-qabstractitemmodeldatalist'
 
 # sequenceCode parsing expression
 # A sequenceCOde is combined (without whitespace) of:

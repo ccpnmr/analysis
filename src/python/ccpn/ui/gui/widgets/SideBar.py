@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-09 18:38:59 +0100 (Wed, September 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1036,6 +1036,8 @@ class SideBarStructure(object):
 
 
 from ccpn.ui.gui.widgets.ListView import ListView
+
+
 SIDEBARROW = 0
 RESULTSWIDGETROW = 1
 SEARCHWIDGETROW = 2
@@ -1067,6 +1069,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self._searchResultsContainer = searchResultsContainer
 
         from ccpn.framework.Application import getApplication
+
         getApp = getApplication()
         if getApp and hasattr(getApp, '_fontSettings'):
             self.setFont(getApp._fontSettings.sidebarFont)
@@ -1098,7 +1101,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self._resultsLabel.setStyleSheet("font-size:14px;")
         self._resultsLabel.setFixedHeight(self._resultsLabel.sizeHint().height())
 
-        self._resultsList = ListView(self._resultsFrame, mainWindow=self.mainWindow, grid = (0, 0), fitToContents=True,
+        self._resultsList = ListView(self._resultsFrame, mainWindow=self.mainWindow, grid=(0, 0), fitToContents=True,
                                      listViewContainer=self._resultsFrame)
 
         # frame can collapse to nothing
@@ -1206,11 +1209,15 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
     def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
         """Keep a list of the selected items when the left mouse button is pressed
         """
-        def _treeOrder(val):
+
+        def _treeOrder(item):
             try:
-                return int(val.id[5:])
+                _, data = item
+                # should give a string of the form 'Tree-<n>'
+                return int(data.id[5:])
             except:
-                return 1e10
+                # default to go to the bottom of the list
+                return 1e8
 
         # call superclass to update selected items
         super(SideBar, self).mousePressEvent(event)
@@ -1220,15 +1227,17 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
             self._dragStartPosition = event.pos()
             pids = OrderedSet()
 
+            _projectItem = self.invisibleRootItem().child(0)
             # get the list of items with ids and sort by order in tree
-            _items = [item.data(1, QtCore.Qt.UserRole) for item in self.selectedItems()
+            _items = [(item, item.data(1, QtCore.Qt.UserRole)) for item in self.selectedItems()
                       if item and item.data(1, QtCore.Qt.UserRole) and isinstance(item.data(1, QtCore.Qt.UserRole).id, str)]
             _items = sorted(_items, key=lambda item: _treeOrder(item))
-            for item in _items:
-                if item and item.obj:
-                    pids.add(str(item.obj.pid))
+            for item, data in _items:
+                if data and data.obj:
+                    if not (item != _projectItem and isinstance(data.obj, Project)):
+                        pids.add(str(data.obj.pid))
 
-            self._pids = list(pids)
+            self._pids = list(pids) or None
         else:
             self._dragStartPosition = None
             self._pids = None
@@ -1238,9 +1247,9 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
     def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
         """Create a mouse drag event with the selected items when dragging with the left button
         """
-        if self._mouseButton == QtCore.Qt.LeftButton:
+        if self._mouseButton == QtCore.Qt.LeftButton and self._pids:
             if (event.pos() - self._dragStartPosition).manhattanLength() >= QtWidgets.QApplication.startDragDistance():
-                makeDragEvent(self, {'pids': self._pids}, '\n'.join(self._pids))
+                makeDragEvent(self, {'pids': self._pids}, self._pids, '\n'.join(self._pids))
 
     # def dragEnterEvent(self, event):
     #     """Handle drag enter event to create a new drag/drag item.

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 00:13:56 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -65,6 +65,9 @@ class fontSettings():
         self.helvetica14 = Font(HELVETICAFONT, 14)
         self.helveticaBold14 = Font(HELVETICAFONT, 14, bold=True)
 
+        self.helvetica16 = Font(HELVETICAFONT, 16)
+        self.helveticaBold16 = Font(HELVETICAFONT, 16, bold=True)
+
         self.helvetica20 = Font(HELVETICAFONT, 20)
         self.helveticaBold20 = Font(HELVETICAFONT, 20, bold=True)
 
@@ -82,6 +85,8 @@ class fontSettings():
         self.textFontBold = self.helveticaBold12  # general text font bold
         self.textFontLarge = self.helvetica14  # general text font large
         self.textFontLargeBold = self.helveticaBold14  # general text font large bold
+        self.textFontVeryLarge = self.helvetica16  # general text font large
+        self.textFontVeryLargeBold = self.helveticaBold16  # general text font large bold
         self.textFontHuge = self.helvetica20  # general text font huge
         self.textFontHugeBold = self.helveticaBold20  # general text font huge bold
 
@@ -186,6 +191,8 @@ GUINMRRESIDUE = 'GUINMRRESIDUE'
 
 GUISTRIP_PIVOT = 'GUISTRIP_PIVOT'
 
+DRAG_FOREGROUND = 'DRAG_FOREGROUND'
+DRAG_BACKGROUND = 'DRAG_BACKGROUND'
 LABEL_FOREGROUND = 'LABEL_FOREGROUND'
 LABEL_BACKGROUND = 'LABEL_BACKGROUND'
 LABEL_SELECTEDBACKGROUND = 'LABEL_SELECTEDBACKGROUND'
@@ -229,6 +236,7 @@ LIGHTCORAL = hexToRgbRatio([k for k, v in allColours.items() if v == 'lightcoral
 
 BORDERNOFOCUS_COLOUR = '#A9A9A9'
 BORDERFOCUS_COLOUR = '#4E86F6'
+HIGHLIGHT_COLOUR = '#0063E1'
 
 # Shades
 CCPNGLWIDGET_REGIONSHADE = 0.30
@@ -282,6 +290,8 @@ colourSchemes = {
 
         GUISTRIP_PIVOT                   : MARISHINO,
 
+        DRAG_FOREGROUND                  : 'white',
+        DRAG_BACKGROUND                  : HIGHLIGHT_COLOUR,
         LABEL_FOREGROUND                 : TEXT_COLOUR,
         DIVIDER                          : '#a9a9a9',  # could be could CCPN_WIDGET_BORDER_COLOUR, was TEXT_COLOUR
         SOFTDIVIDER                      : SOFT_DIVIDER_COLOUR,

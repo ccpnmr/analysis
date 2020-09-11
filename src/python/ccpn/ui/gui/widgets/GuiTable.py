@@ -1880,6 +1880,30 @@ GuiTable::item::selected {
                     if scrollToSelection and not self._scrollOverride:
                         self.scrollToSelectedIndex()
 
+    def selectLastRow(self):
+        selectionModel = self.selectionModel()
+        model = self.model()
+        rowCount = model.rowCount()
+        selectionModel.clearSelection()
+        rowIndex = model.index(rowCount-1, 0)
+        selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
+        self.setCurrentIndex(rowIndex)
+        self.scrollToSelectedIndex()
+
+    def getSelectedRowAsDataFrame(self):
+        values = []
+        headers = []
+        rowDf = None
+        if self.currentRow() is not None:
+            for i in range(self.model().columnCount()):
+                headers.append(self.horizontalHeaderItem(i).text())
+                if self.item(self.currentRow(), i) is not None:
+                    values.append(self.item(self.currentRow(), i).text())
+                else:
+                    return rowDf
+            rowDf = pd.DataFrame([values,], columns=headers)
+        return rowDf
+
     def clearTable(self):
         "remove all objects from the table"
         # self.hide()

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-05 18:43:27 +0100 (Wed, August 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-14 13:54:21 +0100 (Mon, September 14, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -208,14 +208,14 @@ def invertRGBLuma(r, g, b):
     ycbcr[0] = 255 - ycbcr[0]
     ycbcr = np.add(ycbcr, COLORMATRIXJPEGINVOFFSET)
 
-    rgbprimeOut = np.dot(COLORMATRIXJPEGINV, ycbcr)
-    # rgbprimeOut = np.add(rgbprimeOut, COLORMATRIXJPEGINVCONST) / 256
+    rgbPrimeOut = np.dot(COLORMATRIXJPEGINV, ycbcr)
+    # rgbPrimeOut = np.add(rgbPrimeOut, COLORMATRIXJPEGINVCONST) / 256
 
-    # return tuple([255*inv_gam_sRGB(col) for col in rgbprimeOut])
+    # return tuple([255*inv_gam_sRGB(col) for col in rgbPrimeOut])
 
     # clip the colours
-    rgbprimeOut = np.clip(rgbprimeOut, [0, 0, 0], [255, 255, 255])
-    return tuple([float(col) for col in rgbprimeOut])
+    rgbPrimeOut = np.clip(rgbPrimeOut, [0, 0, 0], [255, 255, 255])
+    return tuple([float(col) for col in rgbPrimeOut])
 
 
 def invertRGBHue(r, g, b):
@@ -235,14 +235,14 @@ def invertRGBHue(r, g, b):
     ycbcr[2] = 255 - ycbcr[2]
     ycbcr = np.add(ycbcr, COLORMATRIXJPEGINVOFFSET)
 
-    rgbprimeOut = np.dot(COLORMATRIXJPEGINV, ycbcr)
-    # rgbprimeOut = np.add(rgbprimeOut, COLORMATRIXJPEGINVCONST) / 256
+    rgbPrimeOut = np.dot(COLORMATRIXJPEGINV, ycbcr)
+    # rgbPrimeOut = np.add(rgbPrimeOut, COLORMATRIXJPEGINVCONST) / 256
 
-    # return tuple([255*inv_gam_sRGB(col) for col in rgbprimeOut])
+    # return tuple([255*inv_gam_sRGB(col) for col in rgbPrimeOut])
 
     # clip the colours
-    rgbprimeOut = np.clip(rgbprimeOut, [0, 0, 0], [255, 255, 255])
-    return tuple([float(col) for col in rgbprimeOut])
+    rgbPrimeOut = np.clip(rgbPrimeOut, [0, 0, 0], [255, 255, 255])
+    return tuple([float(col) for col in rgbPrimeOut])
 
 
 def _getRandomColours(numberOfColors):
@@ -250,6 +250,8 @@ def _getRandomColours(numberOfColors):
 
     return ["#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)]) for i in range(numberOfColors)]
 
+
+ERRORCOLOUR = '#FF0000'
 
 colourNameToHexDict = {
     'red'    : '#ff0000',

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-26 17:43:46 +0000 (Wed, February 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-14 13:54:20 +0100 (Mon, September 14, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,7 @@ __date__ = "$Date: 2020-01-23 15:34:14 +0000 (Thu, January 23, 2020) $"
 
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from ccpn.util.Colour import hexToRgbRatio
+from ccpn.util.Colour import hexToRgbRatio, colorSchemeTable, ERRORCOLOUR
 from ccpn.util.Logging import getLogger
 
 try:
@@ -73,8 +73,15 @@ class GLSimpleStrings():
                 continue
 
             if spectrumView not in self.strings:
-                self.addString(spectrumView, (0, 0),
-                               colour=spectrumView.spectrum.sliceColour, alpha=1.0,
+
+                _posColours = (ERRORCOLOUR, )
+                _posCol = spectrumView.spectrum.sliceColour
+                if _posCol and _posCol.startswith('#'):
+                    _posColours = (_posCol,)
+                elif _posCol in colorSchemeTable:
+                    _posColours = colorSchemeTable[_posCol]
+
+                self.addString(spectrumView, (0, 0), colour=_posColours[0], alpha=1.0,
                                lock=GLDefs.LOCKAXIS | GLDefs.LOCKLEFT | GLDefs.LOCKBOTTOM, axisCodes=('intensity',))
 
     def drawStrings(self):
@@ -267,8 +274,15 @@ class GLSimpleStrings():
             obj.updateTextArrayVBOAttribs(enableVBO=True)
 
             try:
+                _posColours = (ERRORCOLOUR, )
+                _posCol = obj.spectrumView.spectrum.sliceColour
+                if _posCol and _posCol.startswith('#'):
+                    _posColours = (_posCol,)
+                elif _posCol in colorSchemeTable:
+                    _posColours = colorSchemeTable[_posCol]
+
                 # reset the colour, may have changed due to spectrum colour change, but not caught anywhere else yet
-                obj.setStringHexColour(obj.spectrumView.spectrum.sliceColour, alpha=1.0)
+                obj.setStringHexColour(_posColours[0], alpha=1.0)
 
                 # redefine the string's colour VBOs
                 obj.updateTextArrayVBOColour(enableVBO=True)
@@ -294,8 +308,15 @@ class GLSimpleLegend(GLSimpleStrings):
                 continue
 
             if spectrumView not in self.strings:
-                self.addString(spectrumView, (0, 0),
-                               colour=spectrumView.spectrum.sliceColour, alpha=1.0)
+
+                _posColours = (ERRORCOLOUR, )
+                _posCol = spectrumView.spectrum.sliceColour
+                if _posCol and _posCol.startswith('#'):
+                    _posColours = (_posCol,)
+                elif _posCol in colorSchemeTable:
+                    _posColours = colorSchemeTable[_posCol]
+
+                self.addString(spectrumView, (0, 0), colour=_posColours[0], alpha=1.0)
 
     def drawStrings(self):
         if self.strip.isDeleted:
@@ -381,8 +402,15 @@ class GLSimpleLegend(GLSimpleStrings):
             stringObj.updateTextArrayVBOAttribs(enableVBO=True)
 
             try:
+                _posColours = (ERRORCOLOUR, )
+                _posCol = stringObj.object.sliceColour
+                if _posCol and _posCol.startswith('#'):
+                    _posColours = (_posCol,)
+                elif _posCol in colorSchemeTable:
+                    _posColours = colorSchemeTable[_posCol]
+
                 # reset the colour, may have changed due to spectrum colour change, but not caught anywhere else yet
-                stringObj.setStringHexColour(stringObj.object.sliceColour, alpha=1.0)
+                stringObj.setStringHexColour(_posColours[0], alpha=1.0)
 
                 # redefine the string's colour VBOs
                 stringObj.updateTextArrayVBOColour(enableVBO=True)

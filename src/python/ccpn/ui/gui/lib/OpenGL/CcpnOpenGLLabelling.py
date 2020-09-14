@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-11 19:09:41 +0100 (Fri, September 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-14 13:54:20 +0100 (Mon, September 14, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1870,7 +1870,7 @@ class GLLabelling():
             if not objListView.isDeleted and objListView in self._GLLabels.keys():
                 for drawString in self._GLLabels[objListView].stringList:
 
-                    if stackingMode:
+                    if shader and stackingMode:
                         # use the stacking matrix to offset the 1D spectra
                         shader.setGLUniform2fv('stackOffset', 1,
                                                spectrumSettings[specView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET])

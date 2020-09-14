@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:50 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-09-14 14:02:20 +0100 (Mon, September 14, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,12 +25,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 
 
 class SetupNmrResiduesPopup(CcpnDialogMainWidget):
@@ -62,15 +61,27 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
         self._applyButton = self.getButton(self.OKBUTTON)
         self._applyButton.setEnabled(True)
         self._cancelButton = self.getButton(self.CANCELBUTTON)
-        # self.assignmentCheckBox.setEnabled(False) #This option is broken.
-        # self.buttonBox = ButtonList(self, grid=(1, 3), texts=['Cancel', 'Ok'],
-        #                             callbacks=[self.reject, ])
+
+        # use below if the popup does not need to close
+        # self.assignmentCheckBox = CheckBox(self.mainWidget, text="Keep existing assignments", checked=True, grid=(1, 0), gridSpan=(1, 3))
+        #
+        # self._acceptButtonText = 'Apply'
+        # self.BUTTON_CANCEL = 'Close'
+        #
+        # self.setApplyButton(callback=self._setupNmrResidues, text=self._acceptButtonText, tipText='Setup Nmr Residues')
+        # self.setCloseButton(callback=self.reject, text=self.BUTTON_CANCEL, tipText='Close Dialog')
+        # self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
+        #
+        # self.__postInit__()
+        # self._applyButton = self.getButton(self.APPLYBUTTON)
+        # self._applyButton.setEnabled(True)
+        # self._cancelButton = self.getButton(self.CLOSEBUTTON)
 
     def _setupNmrResidues(self):
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             peakList = self.project.getByPid(self.peakListPulldown.currentText())
             nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
-            keepAssignments = self.assignmentCheckBox.isChecked()  #This option is broken.
+            keepAssignments = self.assignmentCheckBox.isChecked()
 
             # go through all the peaks in the peakList
             for peak in peakList.peaks:
@@ -83,4 +94,5 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
                         nmrAtom = nmrResidue.fetchNmrAtom(name=str(axisCode))
                         peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
 
+        # remove if popup does not need to close
         self.accept()

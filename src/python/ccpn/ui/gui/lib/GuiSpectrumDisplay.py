@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-15 18:35:35 +0100 (Tue, September 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1057,11 +1057,12 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         Add spectrumGroup on the display and its button on the toolBar
         """
-        self.spectrumGroupToolBar._addAction(spectrumGroup)
-        for spectrum in spectrumGroup.spectra:
-            self.displaySpectrum(spectrum)
-        if self.current.strip not in self.strips:
-            self.current.strip = self.strips[0]
+        if self.isGrouped:
+            self.spectrumGroupToolBar._addAction(spectrumGroup)
+            for spectrum in spectrumGroup.spectra:
+                self.displaySpectrum(spectrum)
+            if self.current.strip not in self.strips:
+                self.current.strip = self.strips[0]
 
     def _handleSample(self, sample):
         """

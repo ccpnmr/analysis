@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 15:15:02 +0100 (Mon, March 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-15 18:35:35 +0100 (Tue, September 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1134,7 +1134,7 @@ class PeakList(PMIListABC):
             regionArray = np.array((firstArray - firstArray, lastArray - firstArray))
 
             # Get the data; note that arguments has to be castable to int?
-            dataArray, intRegion = dataSource.getRegionData(firstArray, lastArray)
+            dataArray, intRegion = dataSource.getRegionData(firstArray, lastArray)      # unit-scaled
 
             # update positions relative to the corner of the data array
             firstArray = firstArray.astype(np.float32)
@@ -1188,11 +1188,10 @@ class PeakList(PMIListABC):
                 height, center, linewidth = result[pkNum]
 
                 # work on the _wrappedData
-                peak = peak._wrappedData
-                peakDims = peak.sortedPeakDims()
+                apiPeak = peak._wrappedData
+                peakDims = apiPeak.sortedPeakDims()
 
-                dataSource = peak.peakList.dataSource
-                numDim = dataSource.numDim
+                dataSource = apiPeak.peakList.dataSource
                 dataDims = dataSource.sortedDataDims()
 
                 for i, peakDim in enumerate(peakDims):
@@ -1206,7 +1205,8 @@ class PeakList(PMIListABC):
                         peakDim.position = center[i] + firstArray[i] + 1.0  # API position starts at 1
                     peakDim.lineWidth = dataDims[i].valuePerPoint * linewidth[i]
 
-                peak.height = dataSource.scale * height
+                # apiPeak.height = dataSource.scale * height
+                apiPeak.height = height
 
     def _getAliasingRange(self):
         """Return the min/max aliasing range for the peaks in the list, if there are no peaks, return None

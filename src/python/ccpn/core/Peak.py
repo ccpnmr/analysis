@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-15 18:35:35 +0100 (Tue, September 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -940,6 +940,11 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.lineWidth = lineWidths[ii]
 
+    result.height = height          # use the method to store the unit-scaled value
+    result.volume = volume
+    result.heightError = heightError
+    result.volumeError = volumeError
+
     return result
 
 
@@ -993,7 +998,9 @@ def _newPickedPeak(self: PeakList, pointPositions: Sequence[float] = None, heigh
         if fitMethod and lineWidths and lineWidths[i] is not None:
             peakDim.lineWidth = dataDim.valuePerPoint * lineWidths[i]  # conversion from points to Hz
 
-    apiPeak.height = apiDataSource.scale * height
+    # apiPeak.height = apiDataSource.scale * height
+    # store the unit scaled value
+    apiPeak.height = height
 
     return result
 

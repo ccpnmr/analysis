@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 12:16:13 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-15 18:35:35 +0100 (Tue, September 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -645,7 +645,7 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
         _snap1DPeakToClosestExtremum(peak, maximumLimit=1)
         return
 
-    if searchBoxMode and dataSource.numDim > 1:
+    if searchBoxMode and numDim > 1:
         # NOTE:ED get the peakDim axisCode here and define the new half boxwidths based on the ValuePerPoint
         searchBoxWidths = getApp.preferences.general.searchBoxWidthsNd
 
@@ -830,7 +830,8 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
                 peakDim.lineWidth = dataDims[i].valuePerPoint * linewidth[i]
 
         if searchBoxDoFit:
-            apiPeak.height = dataSource.scale * height
+            # apiPeak.height = dataSource.scale * height
+            apiPeak.height = height
         else:
             # get the interpolated height
             peak.height = peak.peakList.spectrum.getHeight(peak.ppmPositions)
@@ -969,11 +970,17 @@ def movePeak(peak, ppmPositions, updateHeight=True):
 
         if updateHeight:
             # get the interpolated height at this position
-            peak.height = peak.peakList.spectrum.getHeight(ppmPositions)
+            if peak.peakList.spectrum.dimensionCount == 1:
+                peak.height = peak.peakList.spectrum.getIntensity(ppmPositions[:1])
+            else:
+                peak.height = peak.peakList.spectrum.getHeight(ppmPositions)
 
 def updateHeight(peak):
     with undoBlock():
-        peak.height = peak.peakList.spectrum.getHeight(peak.position)
+        if peak.peakList.spectrum.dimensionCount == 1:
+            peak.height = peak.peakList.spectrum.getIntensity(peak.position[:1])
+        else:
+            peak.height = peak.peakList.spectrum.getHeight(peak.position)
 
 # added for pipelines
 
@@ -1074,14 +1081,17 @@ def _snap1DPeakToClosestExtremum(peak, maximumLimit=1):
 
     x_filtered, y_filtered = _1DregionsFromLimits(x,y, [a,b])
     maxValues, minValues = simple1DPeakPicker(y_filtered, x_filtered, noiseLevel, negDelta=0, negative=False)
+
+    # NOTE:ED - to Luca, should this also find the nearest negative peaks?
     if len(maxValues)>0:
-        maxValues =np.array(maxValues)
+        maxValues = np.array(maxValues)
         positions = maxValues[:,0]
         heights = maxValues[:,1]
         nearestPosition = find_nearest(positions, peak.position[0])
         nearestHeight = heights[positions == nearestPosition]
         peak.position = [nearestPosition,]
         peak.height = nearestHeight[0]
+
     else:
         peak.height = float(0.0)
         if peak.comment: peak.comment = peak.comment + '.' + ' Orphan'

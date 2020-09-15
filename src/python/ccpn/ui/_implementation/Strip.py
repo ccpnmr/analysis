@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-06 18:27:17 +0000 (Thu, February 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-15 18:35:35 +0100 (Tue, September 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -597,22 +597,15 @@ class Strip(AbstractWrapperObject):
                         # map position to the spectrum
                         position = [inPosition[ind] for ii, ind in enumerate(indices)]
 
-                        peak = peakList.newPeak(ppmPositions=position, height=height)
-                        peak.height = spectrumView.spectrum.getHeight(ppmPositions=position)
+                        _height = spectrumView.spectrum.getHeight(ppmPositions=position)
+                        peak = peakList.newPeak(ppmPositions=position, height=_height)
+                        # peak.height = spectrumView.spectrum.getHeight(ppmPositions=position)
                     else:
                         # 1d position with height
 
-                        # note, the height below is not derived from any fitting
-                        # but is a weighted average of the values at the neighbouring grid points
-                        spectrum = spectrumView.spectrum
-                        pp = spectrum.mainSpectrumReferences[0].valueToPoint(position[0])
-                        frac = pp % 1
-                        if spectrum.intensities is not None and spectrum.intensities.size != 0:
-                            # need to interpolate between pp-1, and pp
-                            height = spectrum.intensities[int(pp) - 1] + \
-                                     frac * (spectrum.intensities[int(pp)] - spectrum.intensities[int(pp) - 1])
-
-                        peak = peakList.newPeak(ppmPositions=position, height=height)
+                        _height = spectrumView.spectrum.getIntensity(ppmPositions=position[:1])
+                        peak = peakList.newPeak(ppmPositions=position, height=_height)
+                        # peak.height = spectrumView.spectrum.getIntensity(ppmPositions=position)
 
                     result.append(peak)
                     peakLists.append(peakList)

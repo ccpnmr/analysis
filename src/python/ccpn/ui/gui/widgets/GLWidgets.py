@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-11 19:09:41 +0100 (Fri, September 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-15 18:35:35 +0100 (Tue, September 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -573,15 +573,16 @@ class Gui1dWidget(CcpnGLWidget):
             if ind is not None:
                 p0[ind] += deltaPosition[ii]
 
-        # update height - taken from peakPickPosition
-        spectrum = peak.peakList.spectrum
-        pp = spectrum.mainSpectrumReferences[0].valueToPoint(p0[0])
-        frac = pp % 1
-        if spectrum.intensities is not None and spectrum.intensities.size != 0:
-            # need to interpolate between pp-1, and pp
-            peak.height = spectrum.intensities[int(pp) - 1] + \
-                          frac * (spectrum.intensities[int(pp)] - spectrum.intensities[int(pp) - 1])
+        # # update height - taken from peakPickPosition
+        # spectrum = peak.peakList.spectrum
+        # pp = spectrum.mainSpectrumReferences[0].valueToPoint(p0[0])
+        # frac = pp % 1
+        # if spectrum.intensities is not None and spectrum.intensities.size != 0:
+        #     # need to interpolate between pp-1, and pp
+        #     peak.height = spectrum.intensities[int(pp) - 1] + \
+        #                   frac * (spectrum.intensities[int(pp)] - spectrum.intensities[int(pp) - 1])
 
+        peak.height = peak.peakList.spectrum.getIntensity(p0[:1])
         peak.position = p0
 
 

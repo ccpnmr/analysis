@@ -10,3 +10,5 @@ set PATHTO=%HOME%\%RELEASE%\%CCPNMRPATH%\miniconda
 
 "%ANACONDA3%"\python -i -O -W ignore "%ENTRYMODULE%" "%ROOT%" "%PATHFROM%" "%PATHTO%"
 endlocal
+
+PAUSE

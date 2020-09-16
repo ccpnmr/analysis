@@ -5,3 +5,5 @@ call "%~dp0\paths"
 
 "%ANACONDA3%"\python %*
 endlocal
+
+PAUSE

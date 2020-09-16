@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-17 10:36:48 +0100 (Fri, July 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-16 12:14:32 +0100 (Wed, September 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -61,6 +61,7 @@ from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 from ccpn.util.Common import uniquify
 from ccpn.util import Logging
 from ccpn.util import Path
@@ -123,6 +124,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         # GuiWindow.__init__(self, application)
         self.application = application
+
+        setWidgetFont(self, 'textFontHuge')
 
         # Module area
         self.moduleArea = CcpnModuleArea(mainWindow=self)

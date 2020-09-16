@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-18 18:56:31 +0100 (Mon, May 18, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,9 +25,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtGui, QtWidgets
 import textwrap
-
+from PyQt5 import QtCore, QtGui, QtWidgets
+from ccpn.ui.gui.widgets.Font import setWidgetFont
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 # from ccpn.ui.gui.guiSettings import messageFont, messageFontBold
 
@@ -78,16 +79,16 @@ def _wrapString(text, lineLength=LINELENGTH):
     newWrapped2 = []
     if len(newWrapped) > 1:
         lineNum = 0
-        while lineNum < len(newWrapped)-1:
+        while lineNum < len(newWrapped) - 1:
             l1 = newWrapped[lineNum]
-            l2 = newWrapped[lineNum+1]
+            l2 = newWrapped[lineNum + 1]
 
             if (len(l1) + len(l2) < LINELENGTH) and '\n' not in l1:
                 newWrapped2.append(l1 + ' ' + l2)
                 lineNum += 1
             else:
                 newWrapped2.append(l1)
-                if lineNum == len(newWrapped)-2:
+                if lineNum == len(newWrapped) - 2:
                     newWrapped2.append(l2)
 
             lineNum += 1
@@ -125,28 +126,25 @@ class MessageDialog(QtWidgets.QMessageBox):
         # Adapted from best solution so far from: http://apocalyptech.com/linux/qt/qmessagebox/
         layout = self.layout()
 
-        from ccpn.framework.Application import getApplication
-
-        getApp = getApplication()
-        widgetBasic = widgetMessage = None
+        # set the fonts for the labels (pushButtons are set later)
+        for widgetLabel in self.findChildren((QtWidgets.QLabel, QtWidgets.QTextEdit)):
+            setWidgetFont(widgetLabel, )
 
         maxTextWidth = 50
+        widgetBasic = None
         item = layout.itemAtPosition(0, 2)  # grid position of basic text item
         if item:
             widgetBasic = item.widget()
-            if getApp and hasattr(getApp, '_fontSettings'):
-                widgetBasic.setFont(getApp._fontSettings.messageFontBold)
 
             # get the bounding rectangle for each line of basicText
             for wrapLine in basicTextWrap:
                 tWidth = int((QtGui.QFontMetrics(widgetBasic.font()).boundingRect(wrapLine).width() + WRAPBORDER) * WRAPSCALE)
                 maxTextWidth = max(maxTextWidth, tWidth)
 
+        widgetMessage = None
         item = layout.itemAtPosition(1, 2)  # grid position of informative text item
         if item:
             widgetMessage = item.widget()
-            if getApp and hasattr(getApp, '_fontSettings'):
-                widgetMessage.setFont(getApp._fontSettings.messageFont)
 
             # get the bounding rectangle for each line of informativeText
             for wrapLine in messageWrap:
@@ -158,9 +156,6 @@ class MessageDialog(QtWidgets.QMessageBox):
         if widgetMessage:
             widgetMessage.setFixedWidth(maxTextWidth)
 
-        # textEdit = self.findChild(QtGui.QTextEdit)
-        # textEdit.setFont(messageFont)
-
         palette = QtGui.QPalette()
         self.setPalette(palette)
 
@@ -169,10 +164,16 @@ class MessageDialog(QtWidgets.QMessageBox):
             scaledImage = image.scaled(48, 48, QtCore.Qt.KeepAspectRatio)
             self.setIconPixmap(scaledImage)
 
+        # self.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+
     def resizeEvent(self, ev):
         """
         required to set the initial position of the message box on the centre of the screen
         """
+        # set the font of the push buttons, must be here after __init__ has completed
+        for child in self.findChildren(QtWidgets.QPushButton):
+            setWidgetFont(child, )
+
         # must be the first event outside of the __init__ otherwise frameGeometries are not valid
         super(MessageDialog, self).resizeEvent(ev)
 
@@ -325,7 +326,7 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
                 dialog.setDefaultButton(button)
 
         if checkbox != None:
-            _checkbox = QtWidgets.QCheckBox(checkbox, parent=dialog)
+            _checkbox = CheckBox(parent=dialog, text=checkbox)
             _checkbox.setChecked(checked)
             dialog.setCheckBox(_checkbox)
 
@@ -425,6 +426,7 @@ class progressPopup(CcpnDialog):
         getApp = getApplication()
         if getApp and hasattr(getApp, '_fontSettings'):
             self.label.setFont(getApp._fontSettings.messageFont)
+            self.setFont(getApp._fontSettings.messageFont)
 
         # self.layout().addWidget(self.progressbar)
 
@@ -606,6 +608,7 @@ if __name__ == '__main__':
         print(showWarning('Another Warning and Test qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789\n for a basic popup with a long line of text as the basic text',
                           'Test for a basic popup with a long line of text as the basic text and a path\n/Users/ejb66/PycharmProjects/Git/AnalysisV3/internal/scripts/something/filename.txt '
                           'and text with no spaces qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789_qwertyuiopasdfghjklzxcvbnm0123456789 something\n else'))
+
 
     # app = TestApplication()
     # # popup = BasePopup(title='Test MessageReporter')

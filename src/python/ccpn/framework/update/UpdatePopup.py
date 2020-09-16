@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-16 12:14:32 +0100 (Wed, September 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -33,10 +33,11 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.util.Update import UpdateAgent
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 
 
 REFRESHBUTTONTEXT = 'Refresh Updates Information'
-DOWNLOADBUTTONTEXT = 'Download and Install Updates'
+DOWNLOADBUTTONTEXT = 'Download/Install Updates'
 UPDATELICENCEKEYTEXT = 'Update LicenceKey'
 # CLOSEBUTTONTEXT = 'Close'
 CLOSEEXITBUTTONTEXT = 'Close and Exit'
@@ -101,7 +102,15 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
                     'Install the updates from the server',
                     'Close update dialog')
         icons = ('icons/redo.png', 'icons/dialog-apply.png', 'icons/window-close.png')
-        self.buttonList = ButtonList(self.mainWidget, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row, 0), gridSpan=(1, 3))
+        self.buttonList = ButtonList(self.mainWidget, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row, 0), gridSpan=(1, 3),
+                                     setMinimumWidth=False)
+
+        # set some padding for the buttons
+        _height = getFontHeight()
+        for button in self.buttonList.buttons:
+            button.setStyleSheet("padding-left: {}px; padding-right: {}px; padding-top: 0px; padding-bottom: 0px;".format(_height, _height))
+        self._updateButton.setStyleSheet("padding-left: {}px; padding-right: {}px; padding-top: 0px; padding-bottom: 0px;".format(_height, _height))
+
         row += 1
 
         if self.preferences:
@@ -115,11 +124,11 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
             row += 1
 
         self.infoBox = TextEditor(self.mainWidget, grid=(row, 0), gridSpan=(1, 3))  # NOTE:ED - do not set valign here
-        # self.infoBox.setVisible(False)
+        self.infoBox.setVisible(False)
 
-        # self.setFixedSize(750, 450)
-        self.setFixedWidth(750)
+        self.setFixedWidth(self.sizeHint().width())
         self._hideInfoBox()
+        # self._showInfoBox()
 
         # initialise the popup
         self.resetFromServer()
@@ -187,14 +196,20 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
         self.reject()
 
     def _showInfoBox(self):
-        self.setMinimumHeight(300)
-        self.setMaximumHeight(600)
         self.infoBox.show()
+        _height = self.sizeHint().height()
+        # self.setMinimumHeight(8 * getFontHeight())
+        # self.setMaximumHeight(16 * getFontHeight())
+        self.setMinimumHeight(_height)
+        self.setMaximumHeight(_height * 2)
+        self.resize(QtCore.QSize( self.width(), _height * 2))
         self._refreshQT()
 
     def _hideInfoBox(self):
-        self.setFixedHeight(180)
         self.infoBox.hide()
+        _height = self.sizeHint().height()
+        # self.setFixedHeight(8 * getFontHeight())
+        self.setFixedHeight(_height)
         self._refreshQT()
 
     def _showInfo(self, *args):

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-03 15:50:42 +0100 (Wed, June 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-16 12:14:32 +0100 (Wed, September 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.ui.gui.lib.ChangeStateHandler import ChangeDict
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.Font import setWidgetFont
 
 
 def _updateGl(self, spectrumList):

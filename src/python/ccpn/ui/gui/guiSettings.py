@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-16 12:14:32 +0100 (Wed, September 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,12 +27,24 @@ __date__ = "$Date: 2016-11-15 21:37:50 +0000 (Tue, 15 Nov 2016) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtWidgets, QtCore
-from ccpn.ui.gui.widgets.Font import Font, HELVETICAFONTREQUEST, MONACOFONTREQUEST, LUCIDAGRANDEFONTREQUEST, _readFontFromPreferences
+from ccpn.ui.gui.widgets.Font import Font, HELVETICAFONTREQUEST, MONACOFONTREQUEST, \
+    LUCIDAGRANDEFONTREQUEST, _readFontFromPreferences, DEFAULTFONT
 from ccpn.util.decorators import singleton
 from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import allColours, hexToRgbRatio, autoCorrectHexColour, \
     spectrumHexDarkColours, spectrumHexLightColours, spectrumHexMediumColours, \
     spectrumHexDefaultLightColours, spectrumHexDefaultDarkColours, rgbRatioToHex
+from ccpn.util.LabelledEnum import LabelledEnum
+from itertools import product
+
+
+class FontSizes(LabelledEnum):
+    TINY = 0.5, 'smallest font, half size'
+    SMALL = 0.75, 'smaller font'
+    MEDIUM = 1.0, 'default sized font, unit scale of the chosen font'
+    LARGE = 1.25, 'larger font'
+    VLARGE = 1.5, 'very large font'
+    HUGE = 2.0, 'huge font'
 
 
 class fontSettings():
@@ -42,6 +54,36 @@ class fontSettings():
         MONACOFONT = _readFontFromPreferences(MONACOFONTREQUEST, preferences)
         HELVETICAFONT = _readFontFromPreferences(HELVETICAFONTREQUEST, preferences)
         LUCIDAGRANDEFONT = _readFontFromPreferences(LUCIDAGRANDEFONTREQUEST, preferences)
+
+        self.defaultFonts = {}
+        try:
+            fontList = MONACOFONT.split(',')
+            name, size, _, _, _, _, _, _, _, _, _ = fontList
+
+            for ii, fontSize in enumerate(FontSizes):
+                thisSize = int(size) * fontSize.value
+
+                fontList[1] = str(thisSize)
+                # define a default font but override with string values
+                for bold, italic in product((False, True), repeat=2):
+                    newFont = Font(name, int(size))
+                    newFont.fromString(','.join(fontList))
+                    fontBold = newFont.bold()
+                    fontItalic = newFont.italic()
+                    self.defaultFonts[(DEFAULTFONT, fontSize.name, bold or fontBold, italic or fontItalic)] = newFont
+
+        except Exception as es:
+            print(str(es))
+            name, size = 'Helvetica', 12
+
+            for ii, fontSize in enumerate(FontSizes):
+                thisSize = 12 * fontSize.value
+
+                for bold, italic in product((False, True), repeat=2):
+                    newFont = Font(name, int(thisSize))
+                    fontBold = newFont.bold()
+                    fontItalic = newFont.italic()
+                    self.defaultFonts[(DEFAULTFONT, fontSize.name, bold or fontBold, italic or fontItalic)] = newFont
 
         # fonts
         self.monaco12 = Font(MONACOFONT, 12)
@@ -104,6 +146,21 @@ class fontSettings():
         self.menuFont = self.lucidaGrande14  # Menus
         self.messageFont = self.helvetica14  # used in popup messages;
         self.messageFontBold = self.helveticaBold14  # used in popup messages;
+
+    def getFont(self, name=DEFAULTFONT, size='MEDIUM', bold=False, italic=False):
+        try:
+            name = DEFAULTFONT
+            if bold and italic and (name, size, bold, italic) in self.defaultFonts:
+                return self.defaultFonts[(name, size, bold, italic)]
+            elif bold and (name, size, bold, italic) in self.defaultFonts:
+                return self.defaultFonts[(name, size, bold, italic)]
+            elif italic and (name, size, bold, italic) in self.defaultFonts:
+                return self.defaultFonts[(name, size, bold, italic)]
+
+            return self.defaultFonts[(name, size, False, False)]
+        except Exception as es:
+            getLogger().warning('Font ({}, {}, {}, {}) not found'.format(name, size, bold, italic))
+            return Font('Helvetica', 12)
 
 
 # Colours

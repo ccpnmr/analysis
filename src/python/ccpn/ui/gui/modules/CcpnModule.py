@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 19:56:35 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-16 12:14:32 +0100 (Wed, September 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -71,6 +71,7 @@ from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget, SpinBoxCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.Entry import Entry
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 
 
 CommonWidgets = {
@@ -253,6 +254,13 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self._serial = None
         self._titleName = None  # name without serial
         CcpnModule.moduleName = name
+
+        setWidgetFont(self, 'textFontHuge')
+        # from ccpn.framework.Application import getApplication
+        #
+        # getApp = getApplication()
+        # if getApp and hasattr(getApp, '_fontSettings'):
+        #     self.setFont(getApp._fontSettings.moduleLabelFont)
 
         self.widgetArea.setContentsMargins(0, 0, 0, 0)
 
@@ -1110,14 +1118,17 @@ class CcpnModuleLabel(DockLabel):
         self.module = module
         self.fixedWidth = True
 
-        from ccpn.framework.Application import getApplication
+        setWidgetFont(self, 'moduleLabelFont')
+        self.labelSize = (getWidgetFontHeight('moduleLabelFont') or 12) + 4
+        # from ccpn.framework.Application import getApplication
+        #
+        # getApp = getApplication()
+        # if getApp and hasattr(getApp, '_fontSettings'):
+        #     self.setFont(getApp._fontSettings.moduleLabelFont)
+        #     self.labelSize = QtGui.QFontMetrics(getApp._fontSettings.moduleLabelFont).height() + 4
+        # else:
+        #     self.labelSize = 16
 
-        getApp = getApplication()
-        if getApp and hasattr(getApp, '_fontSettings'):
-            self.setFont(getApp._fontSettings.moduleLabelFont)
-            self.labelSize = QtGui.QFontMetrics(getApp._fontSettings.moduleLabelFont).height() + 4
-        else:
-            self.labelSize = 16
         self.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
         self.closeButton.setStyleSheet('''border: 0px solid #a9a9a9;
                                           border-radius: 1px;

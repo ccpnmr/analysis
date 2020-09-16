@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-16 12:14:32 +0100 (Wed, September 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPo
 from ccpn.ui.gui.widgets.Application import Application
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.MessageDialog import showError, showWarning
+from ccpn.ui.gui.widgets.Font import getFontHeight
 # This import initializes relative paths for QT style-sheets.  Do not remove!
 from ccpn.framework.PathsAndUrls import userPreferencesPath
 
@@ -62,6 +63,12 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
     def pixelMetric(self, QStyle_PixelMetric, option=None, widget=None):
         if QStyle_PixelMetric == QtWidgets.QStyle.PM_SmallIconSize:
             return 18
+        elif QStyle_PixelMetric in (QtWidgets.QStyle.PM_IndicatorHeight,
+                                    QtWidgets.QStyle.PM_IndicatorWidth,
+                                    QtWidgets.QStyle.PM_ExclusiveIndicatorWidth,
+                                    QtWidgets.QStyle.PM_ExclusiveIndicatorHeight):
+            fontHeight = (getFontHeight(size='SMALL') or 16)
+            return fontHeight
         else:
             return QtWidgets.QProxyStyle.pixelMetric(self, QStyle_PixelMetric, option, widget)
 

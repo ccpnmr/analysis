@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:54 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,12 +30,13 @@ from contextlib import contextmanager
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.Font import setWidgetFont
 
 
 NULL = object()
 
 
-#TODO: clean various methods, removing 'depreciated' ones
+#TODO: clean various methods, removing 'deprecated' ones
 
 class PulldownList(QtWidgets.QComboBox, Base):
     popupAboutToBeShown = QtCore.pyqtSignal()
@@ -44,7 +45,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
 
     def __init__(self, parent, texts=None, objects=None,
                  icons=None, callback=None,
-                 clickToShowCallback= None, index=0,
+                 clickToShowCallback=None, index=0,
                  backgroundText=None, headerText=None,
                  headerEnabled=False, headerIcon=None,
                  editable=False, maxVisibleItems=16,
@@ -81,14 +82,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self.headerIcon = headerIcon
         self.backgroundText = backgroundText
 
-        if editable:
-            self.setEditable(editable)
-            if self.backgroundText:
-                self.lineEdit().setPlaceholderText(str(self.backgroundText))
-            self.lineEdit().textEdited.connect(self._emitPulldownTextEdited)
-            #GST this cures a bug where the text background overwrites the popup button...
-            self.lineEdit().setStyleSheet('background: transparent')
-
+        self.setEditable(editable)
         # self.setIconSize(QtCore.QSize(22,22))
 
         PulldownList.setData(self, texts, objects, index, icons,
@@ -125,6 +119,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
             self.lineEdit().textEdited.connect(self._emitPulldownTextEdited)
             #GST this cures a bug where the text background overwrites the popup button...
             self.lineEdit().setStyleSheet('background: transparent')
+            # set the font for the placeHolderText (not set by Base)
+            setWidgetFont(self.lineEdit(), )
 
     def focusOutEvent(self, ev) -> None:
         super(PulldownList, self).focusOutEvent(ev)
@@ -394,6 +390,7 @@ if __name__ == '__main__':
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
     from functools import partial
 
+
     app = TestApplication()
 
     texts = ['Int', 'Float', 'String', '']
@@ -409,12 +406,14 @@ if __name__ == '__main__':
         print('HEY')
         print('callback2', object)
 
+
     def callback21():
         print('clciked')
         print('callback2')
 
+
     def abts(s):
-        print('s',s.texts)
+        print('s', s.texts)
 
 
     popup = CcpnDialog(windowTitle='Test PulldownList', setLayout=True)
@@ -435,7 +434,7 @@ if __name__ == '__main__':
     pulldownList = PulldownList(parent=popup, texts=texts, icons=icons,
                                 objects=objects, callback=callback, clickToShowCallback=callback21, grid=(0, 0), **policyDict
                                 )
-    pulldownList.popupAboutToBeShown.connect(partial(abts,pulldownList ))
+    pulldownList.popupAboutToBeShown.connect(partial(abts, pulldownList))
     pulldownList.insertSeparator(2)
     pulldownList.clearEditText()
 

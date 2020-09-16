@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 19:56:35 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 # from ccpn.ui.gui.guiSettings import helveticaItalic12
 # from ccpn.framework.Translation import translator
 
@@ -73,15 +74,19 @@ class LineEdit(QtWidgets.QLineEdit, Base):
 
         self.setAlignment(TextAlignment[textAlignment])
         self.setMinimumWidth(minimumWidth)
-        self.setFixedHeight(25)
+
+        fontHeight = (getFontHeight() or 16) + 13
+        self.setFixedHeight(fontHeight)
+
         if not editable:
             self.setReadOnly(True)
             self.setEnabled(False)
 
-            from ccpn.framework.Application import getApplication
-            getApp = getApplication()
-            if getApp and hasattr(getApp, '_fontSettings'):
-                self.setFont(getApp._fontSettings.helveticaItalic12)
+            setWidgetFont(self, )
+            # from ccpn.framework.Application import getApplication
+            # getApp = getApplication()
+            # if getApp and hasattr(getApp, '_fontSettings'):
+            #     self.setFont(getApp._fontSettings.helveticaItalic12)
 
         # self.orientation = QtCore.Qt.Vertical
 

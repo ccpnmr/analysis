@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-10 11:21:55 +0000 (Fri, January 10, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,7 +35,6 @@ import ccpn.ui.gui.guiSettings as guiSettings
 class Label(QtWidgets.QLabel, Base):
     _styleSheet = """
     QLabel {
-            font-size: %spt;
             font-weight: %s;
             color: %s;
             margin-left: %dpx;
@@ -84,7 +83,7 @@ class Label(QtWidgets.QLabel, Base):
         self.setText(text)
 
     def _setStyleSheet(self):
-        self.setStyleSheet(self._styleSheet % (self._textSize,
+        self.setStyleSheet(self._styleSheet % (#self._textSize,
                                                self._bold,
                                                self._colour,
                                                self._margins[0],

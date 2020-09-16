@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-29 21:21:03 +0100 (Wed, July 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,7 @@ from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.core.lib.Util import getParentObjectFromPid
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, showMessage
+from ccpn.ui.gui.widgets.Font import setWidgetFont
 
 
 # BG_COLOR = QtGui.QColor('#E0E0E0')
@@ -378,6 +379,9 @@ GuiTable::item::selected {
 
         # update method for ccpn sorting
         TableWidgetItem.__lt__ = __ltForTableWidgetItem__
+
+        setWidgetFont(self.horizontalHeader(), )
+        setWidgetFont(self.verticalHeader(), )
 
     def _initTableCommonWidgets(self, parent, height=35, setGuiNotifier=None, **kwds):
         """Initialise the common table elements

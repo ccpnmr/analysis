@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:54 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-16 12:14:32 +0100 (Wed, September 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ from PyQt5 import QtWidgets, QtCore
 from pyqtgraph.dockarea import Dock
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.Font import setWidgetFont
 
 
 HALIGN_DICT = {
@@ -287,6 +288,8 @@ class Base(DropBase, SignalBlocking):
         # set the object name of the widget to give unique name for restoring widgets
         if objectName:
             self.setObjectName(objectName)
+
+        setWidgetFont(self, 'textFontHuge')
 
         # connect destruction of widget to onDestroyed method,
         # which subsequently can be subclassed

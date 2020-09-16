@@ -90,9 +90,9 @@
         "_copySpectraSettings1d"               : null,
         "_copySpectraSettingsNd"               : null,
         "exportDpi"                            : 300,
-        "editorFont"                           : "Monaco",
-        "moduleFont"                           : "Helvetica",
-        "messageFont"                          : "Lucida Grande",
+        "editorFont"                           : "Helvetica,12,-1,5,50,0,0,0,0,0,Regular",
+        "moduleFont"                           : "Helvetica,12,-1,5,50,0,0,0,0,0,Regular",
+        "messageFont"                          : "Helvetica,12,-1,5,50,0,0,0,0,0,Regular",
         "checkUpdatesAtStartup"                : true,
         "zPlaneNavigationMode"                 : 0
     },

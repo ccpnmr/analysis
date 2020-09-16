@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:10:54 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-16 12:14:32 +0100 (Wed, September 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -192,7 +192,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         _colourPulldownList = PulldownList(self.mainWidget, grid=(row, 1))
         Colour.fillColourPulldown(_colourPulldownList, allowAuto=True, includeGradients=False)
         pulldowns.append((_colourLabel, _colourPulldownList, attrib))
-        _colourButton = Button(self.mainWidget, vAlign='t', hAlign='l', grid=(row, 2), hPolicy='fixed',
+        _colourButton = Button(self.mainWidget, hAlign='l', grid=(row, 2), hPolicy='fixed', #vAlign='t',
                               callback=partial(self._queueSetColourButton, _colourPulldownList), icon='icons/colours')
 
         _colourPulldownList.currentIndexChanged.connect(partial(self._queueSetColour, _colourPulldownList, attrib, row))

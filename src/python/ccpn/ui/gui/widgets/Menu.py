@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 19:56:35 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,8 @@ from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.Base import Base
 # from ccpn.ui.gui.guiSettings import menuFont
 from ccpn.framework.Translation import translator
+from ccpn.ui.gui.widgets.Font import setWidgetFont
+
 
 SHOWMODULESMENU = 'Show/hide Modules'
 MACROSMENU = 'User Macros'
@@ -49,10 +51,6 @@ class Menu(QtWidgets.QMenu, Base):
         self.setTitle(title)
         self.isFloatWidget = isFloatWidget
 
-        from ccpn.framework.Application import getApplication
-        getApp = getApplication()
-        if getApp and hasattr(getApp, '_fontSettings'):
-            self.setFont(getApp._fontSettings.menuFont)
         self.setToolTipsVisible(True)
 
     def addItem(self, text, shortcut=None, callback=None, checked=True, checkable=False, icon=None, toolTip=None, **kwargs):
@@ -80,8 +78,3 @@ class Menu(QtWidgets.QMenu, Base):
 class MenuBar(QtWidgets.QMenuBar):
     def __init__(self, parent):
         QtWidgets.QMenuBar.__init__(self, parent)
-
-        from ccpn.framework.Application import getApplication
-        getApp = getApplication()
-        if getApp and hasattr(getApp, '_fontSettings'):
-            self.setFont(getApp._fontSettings.menuFont)

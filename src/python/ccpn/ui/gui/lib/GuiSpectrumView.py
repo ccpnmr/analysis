@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-15 18:35:35 +0100 (Tue, September 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-17 12:26:48 +0100 (Thu, September 17, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -249,8 +249,8 @@ def _addActionIcon(action, self, spectrumDisplay):
     _iconY = int(10 / spectrumDisplay.devicePixelRatio())
     pix = QtGui.QPixmap(QtCore.QSize(_iconX, _iconY))
 
-    # if getattr(self, '_showContours', True):
-    if spectrumDisplay.isGrouped:# or self._showContours:
+    if getattr(self, '_showContours', True) or spectrumDisplay.isGrouped:
+    # if spectrumDisplay.isGrouped:# or self._showContours:
         if spectrumDisplay.is1D:
             _col = self.sliceColour
             # pix.fill(QtGui.QColor(self.sliceColour))

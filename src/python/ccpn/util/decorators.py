@@ -41,6 +41,7 @@ from functools import partial
 from ccpn.util.SafeFilename import getSafeFilename
 # from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.Logging import getLogger
+import time
 
 
 def trace(f):
@@ -96,6 +97,19 @@ def singleton(cls):
     cls.__init__ = object.__init__
     return cls
 
+
+def timeit(method):
+    ''' times the execution time of a function/method'''
+
+    def timed(*args, **kwds):
+        ts = time.time()
+        result = method(*args, **kwds)
+        te = time.time()
+        final = te - ts
+        m = 'Execution time for %r: %.3f ms'
+        print( m % (method.__name__, final))
+        return result
+    return timed
 
 def profile(func):
     @functools.wraps(func)

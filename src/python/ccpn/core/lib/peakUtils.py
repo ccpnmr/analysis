@@ -1026,7 +1026,7 @@ def find_nearest(array, value):
     return array[idx]
 
 
-def snap1DPeaksToExtrema(peaks, maximumLimit=1):
+def snap1DPeaksToExtrema(peaks, maximumLimit=0.1):
     from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
     with undoBlockWithoutSideBar():
         with notificationEchoBlocking():
@@ -1056,7 +1056,7 @@ def _getAdjacentPeakPositions1D(peak):
     return previousPeakPosition, nextPeakPosition
 
 
-def _snap1DPeakToClosestExtremum(peak, maximumLimit=1):
+def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True):
     '''
     It snaps a peak to its closest extremum, that can be considered as a peak.
     it uses adjacent peak positions as boundaries. However if no adjacent peaks then uses the maximumlimits.
@@ -1077,27 +1077,32 @@ def _snap1DPeakToClosestExtremum(peak, maximumLimit=1):
 
     # refind maxima
     noiseLevel = peak.peakList.spectrum.noiseLevel
+    minNoiseLevel = peak.peakList.spectrum.negativeNoiseLevel
     if not noiseLevel: #estimate as you can from the spectrum
         noiseLevel, minNoiseLevel = estimateNoiseLevel1D(y)
 
     x_filtered, y_filtered = _1DregionsFromLimits(x,y, [a,b])
-    maxValues, minValues = simple1DPeakPicker(y_filtered, x_filtered, noiseLevel, negDelta=0, negative=False)
+    maxValues, minValues = simple1DPeakPicker(y_filtered, x_filtered, noiseLevel, negDelta=minNoiseLevel, negative=doNeg)
+    allValues = maxValues + minValues
 
-    # NOTE:ED - to Luca, should this also find the nearest negative peaks?
-    if len(maxValues)>0:
-        maxValues = np.array(maxValues)
-        positions = maxValues[:,0]
-        heights = maxValues[:,1]
+    if len(allValues)>0:
+        allValues = np.array(allValues)
+        positions = allValues[:,0]
+        heights = allValues[:,1]
         nearestPosition = find_nearest(positions, peak.position[0])
         nearestHeight = heights[positions == nearestPosition]
-        peak.position = [nearestPosition,]
-        peak.height = nearestHeight[0]
+        if a == nearestPosition or b == nearestPosition: # avoid to snap to an existing peak, as it might be a wrong snap.
+            peak.height = peak.peakList.spectrum.getIntensity(peak.position)
+        # TODO elif... need to find a way to avoid snapping on the noise if not maxima found
+        else:
+            peak.position = [nearestPosition,]
+            peak.height = nearestHeight[0]
 
     else:
-        peak.height = float(0.0)
+        peak.height = peak.peakList.spectrum.getIntensity(peak.position)
         if peak.comment: peak.comment = peak.comment + '.' + ' Orphan'
         else: peak.comment = 'Orphan'
-        getLogger().info('No maxima found within tollerances for %s. Kept original positions %s' %(peak.pid, str(round(peak.position[0],3))))
+        getLogger().info('No maxima found within tolerances for %s. Kept original positions %s' %(peak.pid, str(round(peak.position[0],3))))
 
 
 def getSpectralPeakHeights(spectra, peakListIndexes:list=None) -> pd.DataFrame:

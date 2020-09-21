@@ -40,6 +40,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
 from ccpn.util.Constants import AMOUNT_UNITS, IONICSTRENGTH_UNITS
+from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject, undoBlock
 
 
 SAMPLE = 'sample'
@@ -483,6 +484,16 @@ PseudoDimension.orderedSamples = property(getter, setter, None,
                                           )
 del getter
 del setter
+
+
+def _fetchSample(project, name: str = None):
+    """Fetch Sample with name=name, creating it if necessary"""
+
+    with undoBlock():
+        ff = project._project._data2Obj.get
+        result = (ff(project._wrappedData.sampleStore.findFirstSample(name=name)) or
+                  project.newSample(name=name))
+    return result
 
 #EJB 20181205: moved to Project
 # Project.newSample = _newSample

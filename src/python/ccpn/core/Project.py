@@ -1733,6 +1733,17 @@ class Project(AbstractWrapperObject):
                           rowNumber=rowNumber, columnNumber=columnNumber, comment=comment, **kwds)
 
     @logCommand('project.')
+    def fetchSample(self, name:str):
+        """Get or create Sample with given name.
+        See the Sample class for details.
+        :param self: project
+        :param name: sample name
+        :return: new or existing Sample instance.
+        """
+        from ccpn.core.Sample import _fetchSample
+        return _fetchSample(self, name)
+
+    @logCommand('project.')
     def newDataSet(self, title: str = None, programName: str = None, programVersion: str = None,
                    dataPath: str = None, creationDate: datetime = None, uuid: str = None,
                    comment: str = None, **kwds):

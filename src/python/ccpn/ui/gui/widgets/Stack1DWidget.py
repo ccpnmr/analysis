@@ -61,7 +61,7 @@ class Offset1DWidget(Frame):
         ii += 1
         self.labelOffset = Label(self, OffsetY, grid=(0, ii))
         ii += 1
-        self.boxYOffset = ScientificDoubleSpinBox(self, step=0.1, grid=(0, ii), min=0, max=1e8)
+        self.boxYOffset = ScientificDoubleSpinBox(self, step=0.1, grid=(0, ii), min=-1e100, max=1e100)
 
         ii += 1
         Spacer(self, 2, 2,

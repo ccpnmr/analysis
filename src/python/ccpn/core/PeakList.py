@@ -535,9 +535,35 @@ class PeakList(PMIListABC):
                 else:
                     getLogger().warning('Peak %s contains undefined height/lineWidths' % str(pp))
 
+    def _pick1DsingleMaximum(self, maxNoiseLevel=None,
+                             minNoiseLevel=None,
+                             ignoredRegions=[[20, 19]],
+                             eNoiseThresholdFactor=1.5,
+                             useXRange=10):
+        '''
+        :param maxNoiseLevel:
+        :param minNoiseLevel:
+        :param ignoredRegions:
+        :param eNoiseThresholdFactor:
+        :param useXRange:
+        :return: Used for spectra where only one observable is expected. E.g. 19F reference spectra for screening.
+        '''
+        peaks = []
+        spectrum = self.spectrum
+        x, y = spectrum.positions, spectrum.intensities
+        masked = _filtered1DArray(np.array([x, y]), ignoredRegions)
+        filteredX, filteredY = masked[0].compressed(), masked[1].compressed()
+        if maxNoiseLevel is None and minNoiseLevel is None:
+            maxNoiseLevel, minNoiseLevel = estimateNoiseLevel1D(y, f=useXRange, stdFactor=eNoiseThresholdFactor)
+        maxValue = np.argmax(filteredY)
+        spectrum.noiseLevel = float(maxNoiseLevel)
+        spectrum.negativeNoiseLevel = float(minNoiseLevel)
+        if maxValue:
+            peak = self.newPeak(ppmPositions=[float(x[maxValue]),], height=float(y[maxValue]))
+            snr = peak._getSNRatio()
+            peaks.append(peak)
+        return peaks
 
-    # from ccpn.util.decorators import profile
-    # @profile
     def peakFinder1D(self, maxNoiseLevel=None, minNoiseLevel=None,
                      ignoredRegions=[[20, 19]], negativePeaks=False,
                      eNoiseThresholdFactor=1.5,

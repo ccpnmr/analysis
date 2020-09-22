@@ -4,21 +4,23 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = ""
-__credits__ = ""
-__licence__ = ("")
-__reference__ = ("")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified$"
-__version__ = "$Revision$"
+__dateModified__ = "$dateModified: 2020-09-22 15:04:49 +0100 (Tue, September 22, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
-# Created:
+# Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date$"
+__date__ = "$Date: 2020-05-26 14:50:42 +0000 (Tue, May 26, 2020) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -252,11 +254,12 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @meritThreshold.setter
-    def meritThreshold(self, value: float):
-        if not isinstance(value, float):
-            raise TypeError("meritThreshold must be a float")
+    def meritThreshold(self, value: typing.Union[float, int]):
+        if not isinstance(value, (float, int)):
+            raise TypeError("meritThreshold must be a float or integer")
         if not (0.0 <= value <= 1.0):
             raise ValueError("meritThreshold must be in the range [0.0, 1.0]")
+        value = float(value)
 
         self.setParameter(MERITSETTINGS, MERITTHRESHOLD, value)
 

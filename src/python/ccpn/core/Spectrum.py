@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-15 18:35:35 +0100 (Tue, September 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 15:04:49 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -508,13 +508,13 @@ assignmentTolerances
     @scale.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSimple()
-    def scale(self, value: float):
-        if not isinstance(value, (float, type(None))):
-            raise TypeError('Spectrum.scale {} must be a float/None'.format(self))
-
+    def scale(self, value: Union[float, int, None]):
+        if not isinstance(value, (float, int, type(None))):
+            raise TypeError('Spectrum.scale {} must be a float, integer or None'.format(self))
         if value is not None and -SCALETOLERANCE < value < SCALETOLERANCE:
             # Display a warning, but allow to be set
             getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+        value = float(value)
 
         self._scaleChanged = True
         self._wrappedData.scale = value

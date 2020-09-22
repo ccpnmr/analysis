@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-15 18:35:35 +0100 (Tue, September 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 15:04:49 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -116,11 +116,12 @@ class Peak(AbstractWrapperObject):
         return self._wrappedData.height * scale
 
     @height.setter
-    def height(self, value: Optional[float]):
-        if not isinstance(value, (float, type(None))):
-            raise TypeError('height must be a float/None')
+    def height(self, value: Union[float, int, None]):
+        if not isinstance(value, (float, int, type(None))):
+            raise TypeError('height must be a float, integer or None')
         elif value is not None and (value - value) != 0.0:
             raise TypeError('height cannot be NaN or Infinity')
+        value = float(value)
 
         if value is None:
             self._wrappedData.height = None
@@ -147,11 +148,12 @@ class Peak(AbstractWrapperObject):
         return self._wrappedData.heightError * scale
 
     @heightError.setter
-    def heightError(self, value: Optional[float]):
-        if not isinstance(value, (float, type(None))):
-            raise TypeError('heightError must be a float/None')
+    def heightError(self, value: Union[float, int, None]):
+        if not isinstance(value, (float, int, type(None))):
+            raise TypeError('heightError must be a float, integer or None')
         elif value is not None and (value - value) != 0.0:
             raise TypeError('heightError cannot be NaN or Infinity')
+        value = float(value)
 
         if value is None:
             self._wrappedData.heightError = None
@@ -178,11 +180,12 @@ class Peak(AbstractWrapperObject):
         return self._wrappedData.volume * scale
 
     @volume.setter
-    def volume(self, value: Optional[float]):
-        if not isinstance(value, (float, type(None))):
-            raise TypeError('volume must be a float/None')
+    def volume(self, value: Union[float, int, None]):
+        if not isinstance(value, (float, int, type(None))):
+            raise TypeError('volume must be a float, integer or None')
         elif value is not None and (value - value) != 0.0:
             raise TypeError('volume cannot be NaN or Infinity')
+        value = float(value)
 
         if value is None:
             self._wrappedData.volume = None
@@ -209,11 +212,12 @@ class Peak(AbstractWrapperObject):
         return self._wrappedData.volumeError * scale
 
     @volumeError.setter
-    def volumeError(self, value: Optional[float]):
-        if not isinstance(value, (float, type(None))):
-            raise TypeError('volumeError must be a float/None')
+    def volumeError(self, value: Union[float, int, None]):
+        if not isinstance(value, (float, int, type(None))):
+            raise TypeError('volumeError must be a float, integer or None')
         elif value is not None and (value - value) != 0.0:
             raise TypeError('volumeError cannot be NaN or Infinity')
+        value = float(value)
 
         if value is None:
             self._wrappedData.volumeError = None

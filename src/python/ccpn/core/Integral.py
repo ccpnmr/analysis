@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 12:46:43 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Peak import Peak
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Integral as ApiIntegral
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakDim as ApiPeakDim
-from typing import Optional, Tuple, Sequence, List
+from typing import Optional, Tuple, Sequence, List, Union
 import numpy as np
 from scipy.integrate import trapz
 from ccpn.util.decorators import logCommand
@@ -110,11 +110,12 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.volume * scale
 
     @value.setter
-    def value(self, value: Optional[float]):
-        if not isinstance(value, (float, type(None))):
-            raise TypeError('value must be a float/None')
+    def value(self, value: Union[float, int, None]):
+        if not isinstance(value, (float, int, type(None))):
+            raise TypeError('value must be a float, integer or None')
         elif value is not None and (value - value) != 0.0:
             raise TypeError('value cannot be NaN or Infinity')
+        value = float(value)
 
         if value is None:
             self._wrappedData.volume = None
@@ -141,11 +142,12 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.volumeError * scale
 
     @valueError.setter
-    def valueError(self, value: Optional[float]):
-        if not isinstance(value, (float, type(None))):
-            raise TypeError('valueError must be a float/None')
+    def valueError(self, value: Union[float, int, None]):
+        if not isinstance(value, (float, int, type(None))):
+            raise TypeError('valueError must be a float, integer or None')
         elif value is not None and (value - value) != 0.0:
             raise TypeError('valueError cannot be NaN or Infinity')
+        value = float(value)
 
         if value is None:
             self._wrappedData.volumeError = None
@@ -169,11 +171,12 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.offset * scale
 
     @bias.setter
-    def bias(self, value: float):
-        if not isinstance(value, float):
-            raise TypeError('bias must be a float')
+    def bias(self, value: Union[float, int]):
+        if not isinstance(value, (float, int)):
+            raise TypeError('bias must be a float or integer')
         elif (value - value) != 0.0:
             raise TypeError('bias cannot be NaN or Infinity')
+        value = float(value)
 
         scale = self.integralList.spectrum.scale
         scale = scale if scale is not None else 1.0
@@ -203,11 +206,12 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.offset * scale
 
     @offset.setter
-    def offset(self, value: float):
-        if not isinstance(value, float):
-            raise TypeError('offset must be a float')
+    def offset(self, value: Union[float, int]):
+        if not isinstance(value, (float, int)):
+            raise TypeError('offset must be a float or integer')
         elif (value - value) != 0.0:
             raise TypeError('offset cannot be NaN or Infinity')
+        value = float(value)
 
         scale = self.integralList.spectrum.scale
         scale = scale if scale is not None else 1.0
@@ -229,11 +233,12 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.offset * scale
 
     @baseline.setter
-    def baseline(self, value: float):
-        if not isinstance(value, float):
-            raise TypeError('baseline must be a float')
+    def baseline(self, value: Union[float, int]):
+        if not isinstance(value, (float, int)):
+            raise TypeError('baseline must be a float or integer')
         elif (value - value) != 0.0:
             raise TypeError('baseline cannot be NaN or Infinity')
+        value = float(value)
 
         scale = self.integralList.spectrum.scale
         scale = scale if scale is not None else 1.0

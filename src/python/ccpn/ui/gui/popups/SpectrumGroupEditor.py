@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-05 18:43:27 +0100 (Wed, August 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -342,6 +342,9 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
         self._colourTabs1d = Tabs(thisTab, grid=(1, 0))
 
+        self._group1dColours.setContentsMargins(5, 5, 5, 5)
+        thisTab.setContentsMargins(0, 0, 0, 0)
+
         # remember the state when switching tabs
         self.copyCheckBoxState = []
 
@@ -372,6 +375,9 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                                              grid=(0, 0), setLayout=True)
 
         self._colourTabsNd = Tabs(thisTab, grid=(1, 0))
+
+        self._groupNdColours.setContentsMargins(5, 5, 5, 5)
+        thisTab.setContentsMargins(0, 0, 0, 0)
 
         # remember the state when switching tabs
         self.copyCheckBoxState = []

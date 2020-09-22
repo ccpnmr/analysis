@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-15 18:35:35 +0100 (Tue, September 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:22 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -50,6 +50,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
@@ -294,10 +295,10 @@ class GuiSpectrumDisplay(CcpnModule):
                                   hPolicy='minimal', hAlign='left')
         self.toolBarFrame.setContentsMargins(4, 4, 4, 4)
 
-        TOOLBAR_HEIGHT = 30
+        TOOLBAR_HEIGHT = max(getFontHeight(size='VLARGE') or 30, 30)
 
         # Utilities Toolbar; filled in Nd/1d classes
-        self.spectrumUtilToolBar = ToolBar(parent=self.toolBarFrame, iconSizes=(24, 24),
+        self.spectrumUtilToolBar = ToolBar(parent=self.toolBarFrame, iconSizes=(TOOLBAR_HEIGHT, TOOLBAR_HEIGHT),
                                            grid=(0, 0), hPolicy='minimal', hAlign='left')
         self.spectrumUtilToolBar.setFixedHeight(TOOLBAR_HEIGHT)
 
@@ -2552,6 +2553,7 @@ def _spectrumHasChanged(data):
         if action:  # spectrum might not be in all displays
             # update toolbar button name
             action.setText(spectrum.name)
+            setWidgetFont(action, size='SMALL')
 
         # check the visibleAliasing here and update planeToolbar
         for strip in spectrumDisplay.strips:

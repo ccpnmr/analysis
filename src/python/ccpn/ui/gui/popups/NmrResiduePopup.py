@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-30 11:33:24 +0100 (Thu, July 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -76,7 +76,7 @@ class NmrResiduePopup(AttributeEditorPopupABC):
                   ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ]
 
-    hWidth = 120
+    # hWidth = 120
 
     def _applyAllChanges(self, changes):
         """Apply all changes - move nmrResidue to new chain

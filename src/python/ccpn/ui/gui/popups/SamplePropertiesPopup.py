@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-10 09:40:39 +0100 (Fri, July 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -68,24 +68,36 @@ class SamplePropertiesPopup(ComplexAttributeEditorPopupABC):
         setattr(self, attr, value)
 
     klass = Sample  # The class whose properties are edited/displayed
-    HWIDTH = 140
+    HWIDTH = 50
     SHORTWIDTH = 140
     attributes = VList([('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
                         ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                         # ('amountUnit', RadioButtonsCompoundWidget, _get, _set, None, None, {'texts'      : AMOUNT_UNITS,
                         #                                                                     'selectedInd': 1,
                         #                                                                     'direction'  : 'h'}),
-                        HList([('amount', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
-                               ('amountUnits', PulldownListCompoundWidget,
-                                getattr, _setUnits, partial(_getUnits, unitType='amountUnits', unitList=('',) + AMOUNT_UNITS), None,
-                                {'editable': False}), ],
-                              hWidth=SHORTWIDTH,
+                        HList([VList([('amount', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}), ],
+                                     hWidth=None,
+                                     group=1,
+                                     ),
+                               VList([('amountUnits', PulldownListCompoundWidget,
+                                       getattr, _setUnits, partial(_getUnits, unitType='amountUnits', unitList=('',) + AMOUNT_UNITS), None,
+                                       {'editable': False}), ],
+                                     hWidth=None,
+                                     group=2,
+                                     ), ],
+                              hWidth=None,
                               ),
-                        HList([('ionicStrength', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
-                               ('ionicStrengthUnits', PulldownListCompoundWidget,
-                                getattr, _setUnits, partial(_getUnits, unitType='ionicStrengthUnits', unitList=('',) + IONICSTRENGTH_UNITS), None,
-                                {'editable': False}), ],
-                              hWidth=SHORTWIDTH,
+                        HList([VList([('ionicStrength', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}), ],
+                                     hWidth=None,
+                                     group=1,
+                                     ),
+                               VList([('ionicStrengthUnits', PulldownListCompoundWidget,
+                                       getattr, _setUnits, partial(_getUnits, unitType='ionicStrengthUnits', unitList=('',) + IONICSTRENGTH_UNITS), None,
+                                       {'editable': False}), ],
+                                     hWidth=None,
+                                     group=2,
+                                     ), ],
+                              hWidth=None,
                               ),
                         ('pH', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0, 'max': 14, 'decimals': 2}),
                         ('batchIdentifier', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
@@ -93,10 +105,10 @@ class SamplePropertiesPopup(ComplexAttributeEditorPopupABC):
                         ('rowNumber', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0, 'step': 1}),
                         ('columnNumber', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0, 'step': 1}),
                         ],
-                       hWidth=HWIDTH,
+                       hWidth=None,
                        )
 
-    hWidth = 120
+    # hWidth = 120
     FIXEDWIDTH = True
     FIXEDHEIGHT = True
     ENABLEREVERT = True

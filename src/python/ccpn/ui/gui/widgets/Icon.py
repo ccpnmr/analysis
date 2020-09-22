@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 10:04:27 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -38,7 +38,7 @@ ICON_DIR = os.path.dirname(__file__)
 
 class Icon(QtGui.QIcon):
 
-    def __init__(self, image=None, color=None):
+    def __init__(self, image=None, color=None, size=21):
 
         assert image or color
 
@@ -52,14 +52,14 @@ class Icon(QtGui.QIcon):
 
             elif isinstance(color, (tuple, list)):
                 image.fill(color[0][:7])
-                dx = 22.0 / float(len(color))
+                dx = (size+1) / float(len(color))
 
                 x = dx
                 for i, c in enumerate(color[1:]):
                     col = QtGui.QColor(c[:7])
                     painter.setPen(col)
                     painter.setBrush(col)
-                    painter.drawRect(x, 0, x + dx, 21)
+                    painter.drawRect(int(x), 0, int(x + dx), size)
                     x += dx
 
             else:
@@ -67,7 +67,7 @@ class Icon(QtGui.QIcon):
 
             painter.setPen(QtGui.QColor('#000000'))
             painter.setBrush(QtGui.QBrush())
-            painter.drawRect(0, 0, 21, 21)
+            painter.drawRect(0, 0, size, size)
             painter.end()
 
         elif not isinstance(image, QtGui.QIcon):
@@ -82,6 +82,7 @@ class Icon(QtGui.QIcon):
         png_file_a2x = '%s@2x.png' % image
         if os.path.exists(png_file) or os.path.exists(png_file_a2x):
             image = '%s.png' % image
+        self._filePath = png_file
         return image
 
     def addFile(self, fileName: str, **kwargs):

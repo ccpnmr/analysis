@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:06:39 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,27 +25,18 @@ __date__ = "$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-
-
-Qt = QtCore.Qt
-
 import os
 import urllib
-
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
-
 from ccpn.framework.PathsAndUrls import ccpn2Url
-
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERMACROSPATH
-from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
-from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
-
+from ccpn.ui.gui.widgets.Font import getFontHeight
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.util import Register
 from ccpn.util import Url
 
@@ -55,34 +46,42 @@ SCRIPT_URL = ccpn2Url + '/cgi-bin/macros/submitMacro.py'
 
 # code below has to be synchronised with code in SCRIPT_URL
 
-class SubmitMacroPopup(CcpnDialog):
+class SubmitMacroPopup(CcpnDialogMainWidget):
+
+    FIXEDHEIGHT = False
+    FIXEDWIDTH = False
+
     def __init__(self, parent=None, title='Submit Macro Form', **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
         self.setContentsMargins(5, 5, 5, 5)
         self._registrationDict = Register.loadDict()
 
+        _height = getFontHeight()
+
         row = 0
         for key in ('name', 'organisation', 'email'):
-            label = Label(self, text='%s: ' % metaUtil.upperFirst(key), grid=(row, 0))
-            label = Label(self, text=self._registrationDict.get(key), grid=(row, 1))
+            label = Label(self.mainWidget, text='%s: ' % metaUtil.upperFirst(key), grid=(row, 0))
+            label = Label(self.mainWidget, text=self._registrationDict.get(key), grid=(row, 1))
             row += 1
 
-        button = Button(self, 'Macro path:', callback=self._selectMacro, grid=(row, 0))
-        self.pathEntry = Entry(self, maxLength=200, grid=(row, 1))
+        button = Button(self.mainWidget, 'Macro path:', callback=self._selectMacro, grid=(row, 0))
+        self.pathEntry = Entry(self.mainWidget, maxLength=200, grid=(row, 1))
         row += 1
 
-        label = Label(self, text='Keywords: ', grid=(row, 0))
-        self.keywordsEntry = Entry(self, grid=(row, 1))
+        label = Label(self.mainWidget, text='Keywords: ', grid=(row, 0), vAlign='t')
+        self.keywordsEntry = Entry(self.mainWidget, grid=(row, 1))
         row += 1
 
-        label = Label(self, text='Description: ', grid=(row, 0))
-        self.textEditor = TextEditor(self, grid=(row, 1))
-        row += 1
+        label = Label(self.mainWidget, text='Description: ', grid=(row, 0), vAlign='t')
+        self.textEditor = TextEditor(self.mainWidget, grid=(row, 1))
+        self.textEditor.setMinimumHeight(_height * 4)
 
-        button = Button(self, 'Submit', callback=self._submitMacro, grid=(row, 1))
-
-        self.setMinimumSize(400, 400)
+        # enable the buttons
+        self.setOkButton(callback=self._submitMacro, text='Submit', tipText='Submit Macro')
+        self.setCloseButton(callback=self.reject, tipText='Close Popup')
+        self.setDefaultButton(self.CLOSEBUTTON)
+        self.__postInit__()
 
     def _selectMacro(self):
 

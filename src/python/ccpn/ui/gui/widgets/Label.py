@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,6 @@ import ccpn.ui.gui.guiSettings as guiSettings
 class Label(QtWidgets.QLabel, Base):
     _styleSheet = """
     QLabel {
-            font-weight: %s;
             color: %s;
             margin-left: %dpx;
             margin-top: %dpx;
@@ -45,7 +44,7 @@ class Label(QtWidgets.QLabel, Base):
             }
     """
 
-    def __init__(self, parent=None, text='', textColour=None, textSize=12, bold=False,
+    def __init__(self, parent=None, text='', textColour=None, textSize=None, bold=False,
                  margins=[2, 1, 2, 1], **kwds):
         super().__init__(parent)
         Base._init(self, **kwds)
@@ -67,6 +66,12 @@ class Label(QtWidgets.QLabel, Base):
         # this appears not to pick up the colour as set by the stylesheet!
         # self._colour = textColor if textColor else self.palette().color(QtGui.QPalette.WindowText).name()
 
+        if bold:
+            # enable boldFace - font already set by Base
+            _font = self.font()
+            _font.setBold(True)
+            self.setFont(_font)
+
         colours = guiSettings.getColours()
         self._colour = textColour if textColour else colours[guiSettings.LABEL_FOREGROUND]
         self._setStyleSheet()
@@ -84,7 +89,7 @@ class Label(QtWidgets.QLabel, Base):
 
     def _setStyleSheet(self):
         self.setStyleSheet(self._styleSheet % (#self._textSize,
-                                               self._bold,
+                                               # self._bold,
                                                self._colour,
                                                self._margins[0],
                                                self._margins[1],

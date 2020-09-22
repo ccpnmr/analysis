@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -54,7 +54,7 @@ class Button(QtWidgets.QPushButton, Base):
             fontHeight = (getFontHeight() or 16) + 7
             self.setIconSize(QtCore.QSize(fontHeight, fontHeight))
         else:
-            self.setStyleSheet('QPushButton { padding: 3px 3px 3px 3px; }')
+            self.setStyleSheet('Button { padding: 3px 2px 3px 2px; }')
 
         if toggle is not None:
             self.setCheckable(True)

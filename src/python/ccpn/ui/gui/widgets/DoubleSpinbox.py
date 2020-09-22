@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-29 21:21:02 +0100 (Wed, July 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -75,7 +75,7 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
     #   background-color: #f7ffff;
     #   color: #122043;
     #   margin: 0px 0px 0px 0px;
-    #   padding: 2px 2px 2px 2px;
+    #   padding: 3px 3px 3px 3px;
     #   border: 1px solid #182548;
     # }
     #
@@ -154,6 +154,7 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
 
         # change focusPolicy so that spinboxes don't grab focus unless selected
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.setStyleSheet('DoubleSpinbox { padding: 3px 3px 3px 3px; }')
 
     def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
         """Process the wheelEvent for the doubleSpinBox

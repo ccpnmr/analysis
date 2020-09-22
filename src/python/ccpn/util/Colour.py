@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-14 13:54:21 +0100 (Mon, September 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,9 +27,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 """Color specification"""
 
+import numpy as np
 from collections import OrderedDict
 from PyQt5 import QtGui, QtCore
-import numpy as np
+from ccpn.ui.gui.widgets.Font import getFontHeight
+from ccpn.ui.gui.widgets.Icon import Icon
 
 
 def _ccpnHex(val):
@@ -889,13 +891,16 @@ def selectPullDownColour(pulldown, colourString, allowAuto=False):
         pulldown.setCurrentText('#')
 
 
-ICON_SIZE = 20
+# ICON_SIZE = 20
 
 
 def fillColourPulldown(pulldown, allowAuto=False, allowNone=False, includeGradients=True):
     currText = pulldown.currentText()
     # currIndex = pulldown.currentIndex()
     # print ('>>>', currText, currIndex)
+
+    ICON_SIZE = max(getFontHeight(size='MEDIUM') or 16, 16)
+
     with pulldown.blockWidgetSignals():
         pulldown.clear()
         if allowAuto:

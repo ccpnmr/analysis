@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-08 13:33:52 +0100 (Mon, June 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -99,7 +99,8 @@ class SampleComponentPopup(ComplexAttributeEditorPopupABC):
                                ('Current substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
                                ],
                               queueStates=False,
-                              hWidth=HWIDTH,
+                              hWidth=None,
+                              group=1,
                               ),
                         ('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
                         ('labelling', PulldownListCompoundWidget, getattr, setattr, _getLabelling, None, {'editable': True}),
@@ -108,7 +109,8 @@ class SampleComponentPopup(ComplexAttributeEditorPopupABC):
                         ('concentrationUnit', PulldownListCompoundWidget, getattr, setattr, _getConcentrationUnits, None, {'editable': False}),
                         ('concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
                         ],
-                       hWidth=HWIDTH,
+                       hWidth=None,
+                       group=1,
                        )
 
     FIXEDWIDTH = True

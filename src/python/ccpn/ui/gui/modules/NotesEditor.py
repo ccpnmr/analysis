@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:22 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -22,14 +22,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets
-
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
-from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NotePulldown
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.lib.Notifiers import Notifier
@@ -37,13 +35,15 @@ from ccpn.core.Note import Note
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-from ccpn.ui.gui.widgets.ToolBar import ToolBar
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.guiSettings import BORDERNOFOCUS_COLOUR
 
 
 logger = getLogger()
+
+DEFAULTSPACING = (0, 0)
+DEFAULTMARGINS = (0, 0, 0, 0)  # l, t, r, b
 
 
 class NotesEditorModule(CcpnModule):
@@ -79,9 +79,10 @@ class NotesEditorModule(CcpnModule):
             self.current = None
         self.note = None
 
-        self._widgetScrollArea = ScrollArea(parent=self.mainWidget, grid=(0, 0), scrollBarPolicies=('never', 'never'))
-        self._widgetScrollArea.setWidgetResizable(True)
-        self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
+        self._widget = ScrollableFrame(self.mainWidget, setLayout=True, showBorder=False,
+                                       scrollBarPolicies=('never', 'never'), spacing=DEFAULTSPACING, margins=DEFAULTMARGINS,
+                                       grid=(2, 1))
+        self._widgetScrollArea = self._widget._scrollArea
 
         row = 0
         self.spacer = Spacer(self._widget, 5, 5,
@@ -101,20 +102,18 @@ class NotesEditorModule(CcpnModule):
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(row, 0), gridSpan=(1, 1))
 
-        #~~~~~~~~~~ define noteWidget box to contain man editing
+        #~~~~~~~~~~ define noteWidget box to contain main editing
         row += 1
-        self.noteWidget = Widget(self._widget, grid=(row, 0), gridSpan=(4, 5), setLayout=True)
+        self.noteWidget = Frame(self._widget, grid=(row, 0), gridSpan=(4, 5), setLayout=True)
         self.noteWidget.hide()
 
         nRow = 1
         self.label1 = Label(self.noteWidget, text='name', grid=(nRow, 0), vAlign='c', hAlign='r')
-        self.label1.setMaximumHeight(30)
         self.lineEdit1 = LineEdit(self.noteWidget, grid=(nRow, 1), gridSpan=(1, 2), vAlign='top', textAlignment='l', backgroundText='> Enter name <')
         self.lineEdit1.editingFinished.connect(self._applyNote)  # *1
         nRow += 1
 
         self.labelComment = Label(self.noteWidget, text='comment', grid=(nRow, 0), vAlign='c', hAlign='r')
-        self.labelComment.setMaximumHeight(30)
         self.lineEditComment = LineEdit(self.noteWidget, grid=(nRow, 1), gridSpan=(1, 2), vAlign='top', textAlignment='l', backgroundText='> Optional <')
         self.lineEditComment.editingFinished.connect(self._applyNote)  # *1
         nRow += 1
@@ -123,11 +122,12 @@ class NotesEditorModule(CcpnModule):
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
                              grid=(nRow, 3), gridSpan=(1, 1))
         nRow += 1
+
         self.textBox = TextEditor(self.noteWidget, grid=(nRow, 0), gridSpan=(1, 6))
         self.textBox.editingFinished.connect(self._applyNote)  # *1
 
-        # *1 Automatically save the note when it loses the focus.
-        # Otherwise is very dangerous of loosing all the carefully written notes if you forget to press the button apply!
+        # NOTE: *1 Automatically save the note when it loses the focus.
+        #       Otherwise is very dangerous of losing all the carefully written notes if you forget to press the button apply!
 
         #~~~~~~~~~~ end of noteWidget box
 
@@ -136,11 +136,6 @@ class NotesEditorModule(CcpnModule):
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                              grid=(row, 4), gridSpan=(1, 1))
-
-        self._widget.setContentsMargins(5, 5, 5, 5)
-
-        self._widgetScrollArea.setWidget(self._widget)
-        self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 
         self._noteNotifier = None
         self.droppedNotifier = None

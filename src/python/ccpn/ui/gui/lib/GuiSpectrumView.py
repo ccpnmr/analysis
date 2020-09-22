@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-17 12:26:48 +0100 (Thu, September 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:22 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -250,13 +250,10 @@ def _addActionIcon(action, self, spectrumDisplay):
     pix = QtGui.QPixmap(QtCore.QSize(_iconX, _iconY))
 
     if getattr(self, '_showContours', True) or spectrumDisplay.isGrouped:
-    # if spectrumDisplay.isGrouped:# or self._showContours:
         if spectrumDisplay.is1D:
             _col = self.sliceColour
-            # pix.fill(QtGui.QColor(self.sliceColour))
         else:
             _col = self.positiveContourColour
-            # pix.fill(QtGui.QColor(self.positiveContourColour))
 
         if _col and _col.startswith('#'):
             pix.fill(QtGui.QColor(_col))
@@ -275,7 +272,6 @@ def _addActionIcon(action, self, spectrumDisplay):
                 _intCol = Colour.interpolateColourHex(colourList[min(jj, stepY)], colourList[min(jj + 1, stepY)],
                                                       _interp)
 
-                # painter.setPen(QtGui.QColor(colourList[min(jj, len(colourList) - 1)]))
                 painter.setPen(QtGui.QColor(_intCol))
                 painter.drawLine(ii, 0, ii, _iconY)
                 step -= stepY
@@ -289,6 +285,7 @@ def _addActionIcon(action, self, spectrumDisplay):
             pix.fill(QtGui.QColor('gray'))
     else:
         pix.fill(QtGui.QColor('gray'))
+
     action.setIcon(QtGui.QIcon(pix))
 
 

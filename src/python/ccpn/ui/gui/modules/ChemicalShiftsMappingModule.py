@@ -72,7 +72,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 15:15:03 +0100 (Mon, March 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:22 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -374,7 +374,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.vBarTableSplitter.addWidget(self.barGraphWidget)
     self.vBarTableSplitter.setStretchFactor(0, 1)
     self.mainWidget.getLayout().addWidget(self.vBarTableSplitter)
-    self.mainWidget.setContentsMargins(5, 5, 5, 5)  # l,t,r,b
+    # self.mainWidget.setContentsMargins(5, 5, 5, 5)  # l,t,r,b
 
   #####################################################
   ##########   Settings widgets creation  #############
@@ -382,8 +382,10 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _initSettingsWidgets(self):
 
-    self.scrollAreaWidgetContents = ScrollableFrame(self.settingsWidget, setLayout=True, spacing=DEFAULTSPACING,
-                     scrollBarPolicies=('asNeeded', 'asNeeded'), margins=TABMARGINS, grid=(0,0))
+    # self.scrollAreaWidgetContents = ScrollableFrame(self.settingsWidget, setLayout=True, spacing=DEFAULTSPACING,
+    #                  scrollBarPolicies=('asNeeded', 'asNeeded'), margins=TABMARGINS, grid=(0,0))
+    # NOTE:ED - Luca, this is already a scrollWidget
+    self.scrollAreaWidgetContents = self.settingsWidget
 
     i = 0
     self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select input data', grid=(i, 0), vAlign='t')

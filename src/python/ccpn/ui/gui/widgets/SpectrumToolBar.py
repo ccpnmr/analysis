@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-24 09:36:25 +0100 (Fri, April 24, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ from functools import partial
 from ccpn.core.lib.Notifiers import Notifier
 from collections import OrderedDict
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui._implementation.PeakListView import PeakListView
 from ccpn.ui._implementation.IntegralListView import IntegralListView
 from ccpn.ui._implementation.MultipletListView import MultipletListView
@@ -341,6 +342,7 @@ class SpectrumToolBar(ToolBar):
             for action in validActions:
                 action.setText(spectrum.id)
                 action.setObjectName(spectrum.pid)
+                # setWidgetFont(action, size='SMALL')
 
     def _removeSpectrum(self, button: QtWidgets.QToolButton):
         """
@@ -506,7 +508,10 @@ class SpectrumToolBar(ToolBar):
                 action.setChecked(True)
                 action.setToolTip(spectrum.name)
                 widget = self.widgetForAction(action)
-                widget.setIconSize(QtCore.QSize(120, 10))
+
+                _height1 = max(getFontHeight(size='SMALL') or 12, 12)
+                widget.setIconSize(QtCore.QSize(_height1 * 10, _height1))
+                # widget.setIconSize(QtCore.QSize(120, 10))
                 self._setSizes(action)
                 # WHY _wrappedData and not spectrumView?
                 widget.spectrumView = spectrumView._wrappedData
@@ -519,13 +524,18 @@ class SpectrumToolBar(ToolBar):
         # if spectrumDisplay.is1D:
         #     action.toggled.connect(spectrumView.plot.setVisible)
         action.toggled.connect(spectrumView.setVisible)
+        setWidgetFont(action, size='SMALL')
         return action
 
     def _setSizes(self, action):
 
         widget = self.widgetForAction(action)
-        widget.setIconSize(QtCore.QSize(120, 10))
-        widget.setFixedSize(75, 30)
+        _height1 = max(getFontHeight(size='SMALL') or 12, 12)
+        _height2 = max(getFontHeight(size='VLARGE') or 30, 30)
+        widget.setIconSize(QtCore.QSize(_height1 * 10, _height1))
+        widget.setFixedSize(_height2 * 2.5, _height2)
+        # widget.setIconSize(QtCore.QSize(120, 10))
+        # widget.setFixedSize(75, 30)
 
     def _toolbarChange(self, spectrumViews):
 
@@ -545,7 +555,9 @@ class SpectrumToolBar(ToolBar):
                         self.addAction(act)
 
                         widget = self.widgetForAction(act)
-                        widget.setIconSize(QtCore.QSize(120, 10))
+                        _height1 = max(getFontHeight(size='SMALL') or 12, 12)
+                        widget.setIconSize(QtCore.QSize(_height1 * 10, _height1))
+                        # widget.setIconSize(QtCore.QSize(120, 10))
                         self._setSizes(act)
         self.update()
 

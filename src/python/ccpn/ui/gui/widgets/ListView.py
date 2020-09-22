@@ -4,21 +4,23 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = ""
-__credits__ = ""
-__licence__ = ("")
-__reference__ = ("")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified$"
-__version__ = "$Revision$"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
-# Created:
+# Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date$"
+__date__ = "$Date: 2020-05-26 14:50:42 +0000 (Tue, May 26, 2020) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -29,6 +31,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, QSize
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Constants import ccpnmrJsonData
+from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 
 
 HEADERHEIGHT = 24
@@ -72,8 +75,23 @@ class ListView(QtWidgets.QListView, Base):
 
         self._headerHeight = HEADERHEIGHT if headerHeight is None else headerHeight
         self._minRowCount = MIN_ROWS if minRowCount is None else minRowCount
+        self._setFocusColour()
 
-
+    def _setFocusColour(self, focusColour=None, noFocusColour=None):
+        """Set the focus/noFocus colours for the widget
+        """
+        focusColour = getColours()[BORDERFOCUS]
+        noFocusColour = getColours()[BORDERNOFOCUS]
+        styleSheet = "ListView { " \
+                     "border: 1px solid;" \
+                     "border-radius: 1px;" \
+                     "border-color: %s;" \
+                     "} " \
+                     "ListWidget:focus { " \
+                     "border: 1px solid %s; " \
+                     "border-radius: 1px; " \
+                     "}" % (noFocusColour, focusColour)
+        self.setStyleSheet(styleSheet)
 
     def _minRows(self, rc):
         """Return the number of rows to show

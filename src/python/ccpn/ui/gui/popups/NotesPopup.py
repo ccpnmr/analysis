@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:53 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,14 +26,14 @@ __date__ = "$Date: 9/05/2017 $"
 #=========================================================================================
 
 from ccpn.core.Note import Note
-from ccpn.ui.gui.popups.SimpleAttributeEditorPopupABC import SimpleAttributeEditorPopupABC
-from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget
 
 
-class NotesPopup(SimpleAttributeEditorPopupABC):
+class NotesPopup(AttributeEditorPopupABC):
     """Notes attributes editor popup"""
 
     klass = Note
-    attributes = [('name', getattr, setattr, {'backgroundText': '> Enter name <'}),
-                  ('comment', getattr, setattr, {'backgroundText': '> Optional <'}),
+    attributes = [('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ]

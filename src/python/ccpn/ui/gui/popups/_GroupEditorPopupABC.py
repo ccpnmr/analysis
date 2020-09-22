@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonBoxList
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -46,6 +46,7 @@ from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.Constants import INTERNALQTDATA
+from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 
 
 DEFAULTSPACING = (3, 3)
@@ -211,7 +212,8 @@ class _ListWidget(ListWidget):
         self.itemDoubleClicked.connect(self._itemDoubleClickedCallback)
 
         # GST seems to be missing a border, why?
-        self.setStyleSheet('ListWidget { border: 1px solid rgb(207,207,207)}')
+        # self.setStyleSheet('ListWidget { border: 1px solid rgb(207,207,207)}')
+        self._setFocusColour()
 
         self.setSortingEnabled(sorted)
 
@@ -221,7 +223,23 @@ class _ListWidget(ListWidget):
 
         self._feedbackWidget.highlight(False)
 
-        self.setMinimumSize(256, 64)
+        # self.setMinimumSize(256, 64)
+
+    def _setFocusColour(self, focusColour=None, noFocusColour=None):
+        """Set the focus/noFocus colours for the widget
+        """
+        focusColour = getColours()[BORDERFOCUS]
+        noFocusColour = getColours()[BORDERNOFOCUS]
+        styleSheet = "ListWidget { " \
+                     "border: 1px solid;" \
+                     "border-radius: 1px;" \
+                     "border-color: %s;" \
+                     "} " \
+                     "ListWidget:focus { " \
+                     "border: 1px solid %s; " \
+                     "border-radius: 1px; " \
+                     "}" % (noFocusColour, focusColour)
+        self.setStyleSheet(styleSheet)
 
     def startDrag(self, *args, **kwargs):
         super().startDrag(*args, **kwargs)
@@ -570,27 +588,34 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         else:
             labelName = 'name'
 
+        optionTexts = [labelName, 'comment', self.GROUP_NAME, 'Selection']
+        _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
+        self._FIXEDWIDTH = maxDim.width()
+
         row = 1
         self.nameLabel = Label(self._dialogWidget, labelName, grid=(row, 0))
-        self.nameEdit = LineEdit(self._dialogWidget, backgroundText='%s Name' % self.GROUP_NAME, textAlignment='left', grid=(row, 1))
+        self._nameEditFrame = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 2))
+        self.nameEdit = LineEdit(self._nameEditFrame, backgroundText='%s Name' % self.GROUP_NAME, hAlign='l', textAlignment='left', grid=(row, 1))
 
         row += 1
         self.commentLabel = Label(self._dialogWidget, 'comment', grid=(row, 0))
-        self.commentEdit = LineEdit(self._dialogWidget, backgroundText='> Optional <', textAlignment='left', grid=(row, 1))
+        self.commentEdit = LineEdit(self._dialogWidget, backgroundText='> Optional <', textAlignment='left', grid=(row, 1), gridSpan=(1, 2))
 
         # GST need something better than this..!
-        self.nameEdit.setFixedWidth(self._FIXEDWIDTH * 1.5)
+        # self.nameEdit.setFixedWidth(self._FIXEDWIDTH * 1.5)
+        self.nameEdit.setFixedWidth(self._FIXEDWIDTH * 2)
         # self.nameEdit.setVisible(True)
 
         row += 1
         if self.editMode:
+            self._leftPullDownLabel = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 2))
             self.leftPullDownLabel = Label(self._dialogWidget, self.GROUP_NAME, grid=(row, 0))
-            self.leftPullDown = self.KLASS_PULLDOWN(parent=self._dialogWidget,
+            self.leftPullDown = self.KLASS_PULLDOWN(parent=self._leftPullDownLabel,
                                                     mainWindow=self.mainWindow,
                                                     showSelectName=False,
                                                     default=self.obj,
                                                     callback=self._leftPullDownCallback,
-                                                    fixedWidths=[0, self._FIXEDWIDTH],
+                                                    fixedWidths=[0, None],
                                                     hAlign='l', grid=(row, 1),
                                                     )
         row += 2
@@ -603,8 +628,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                                           grid=(0, 0), dragRole='right', acceptDrops=True, sortOnDrop=False, copyDrop=False,
                                           emptyText=self.LEFT_EMPTY_TEXT, rearrangeable=True, itemFactory=OrderedListWidgetItemFactory())
 
-        self.leftListFeedbackWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.leftListWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        self.leftListFeedbackWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        # self.leftListWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
 
     def connectModels(self):
         self.nameEdit.textChanged.connect(self._updateNameOnEdit)
@@ -636,8 +661,8 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                                            grid=(0, 0), dragRole='left', acceptDrops=True, sortOnDrop=False, copyDrop=False,
                                            emptyText=self.RIGHT_EMPTY_TEXT, sorted=True, itemFactory=OrderedListWidgetItemFactory())
 
-        self.rightListFeedbackWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.rightListWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        self.rightListFeedbackWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        # self.rightListWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
 
         # small frame for holding the pulldown list
         row += 1
@@ -648,7 +673,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
                                                  showSelectName=True,
                                                  selectNoneText='none',
                                                  callback=self._rightPullDownCallback,
-                                                 fixedWidths=[0, self._FIXEDWIDTH],
+                                                 fixedWidths=[0, None],
                                                  filterFunction=self._rightPullDownFilter,
                                                  hAlign='l', grid=(0, 1)
                                                  )

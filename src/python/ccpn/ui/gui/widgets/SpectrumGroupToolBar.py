@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-06 20:30:36 +0100 (Thu, August 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ from PyQt5 import QtCore, QtGui
 from functools import partial
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib import Pid
 from ccpn.util.OrderedSet import OrderedSet
@@ -77,6 +78,8 @@ class SpectrumGroupToolBar(ToolBar):
                 action.setCheckable(True)
                 action.setChecked(True)
                 action.setText(spectrumGroup.pid)
+                setWidgetFont(action, size='SMALL')
+
                 action.setToolTip(spectrumGroup.name)
                 action.setObjectName(spectrumGroup.pid)
                 self._setupButton(action, spectrumGroup)
@@ -99,14 +102,20 @@ class SpectrumGroupToolBar(ToolBar):
         action.setCheckable(True)
         action.setChecked(True)
         action.setText(spectrumGroup.pid)
+        setWidgetFont(action, size='SMALL')
+
         action.setToolTip(spectrumGroup.name)
         action.setObjectName(spectrumGroup.pid)
         self._setupButton(action, spectrumGroup)
 
     def _setupButton(self, action, spectrumGroup):
         widget = self.widgetForAction(action)
-        widget.setIconSize(QtCore.QSize(120, 10))
-        widget.setFixedSize(75, 30)
+        _height1 = max(getFontHeight(size='SMALL') or 12, 12)
+        _height2 = max(getFontHeight(size='VLARGE') or 30, 30)
+        widget.setIconSize(QtCore.QSize(_height1 * 10, _height1))
+        widget.setFixedSize(_height2 * 2.5, _height2)
+        # widget.setIconSize(QtCore.QSize(120, 10))
+        # widget.setFixedSize(75, 30)
 
         from ccpn.ui.gui.lib.GuiSpectrumView import _addActionIcon
         _addActionIcon(action, spectrumGroup, self.spectrumDisplay)
@@ -211,6 +220,7 @@ class SpectrumGroupToolBar(ToolBar):
                 action.setText(spectrumGroup.pid)
                 action.setToolTip(spectrumGroup.name)
                 action.setObjectName(spectrumGroup.pid)
+                # setWidgetFont(action, size='SMALL')
 
     # LM: Fixme the code for peakList views below needs refactoring
 

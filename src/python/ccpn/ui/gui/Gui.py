@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-16 12:14:32 +0100 (Wed, September 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:22 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -62,15 +62,38 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
 
     def pixelMetric(self, QStyle_PixelMetric, option=None, widget=None):
         if QStyle_PixelMetric == QtWidgets.QStyle.PM_SmallIconSize:
-            return 18
+            # change the size of the icons in menus - overrides checkBoxes in menus
+            return (getFontHeight() or 15) + 3
         elif QStyle_PixelMetric in (QtWidgets.QStyle.PM_IndicatorHeight,
                                     QtWidgets.QStyle.PM_IndicatorWidth,
                                     QtWidgets.QStyle.PM_ExclusiveIndicatorWidth,
-                                    QtWidgets.QStyle.PM_ExclusiveIndicatorHeight):
-            fontHeight = (getFontHeight(size='SMALL') or 16)
-            return fontHeight
+                                    QtWidgets.QStyle.PM_ExclusiveIndicatorHeight,
+                                    ):
+            # change the sizeof checkBoxes and radioButtons
+            return (getFontHeight() or 17) - 2
+        elif QStyle_PixelMetric == QtWidgets.QStyle.PM_MessageBoxIconSize:
+            # change the iconsize in messageDialog
+            return getFontHeight(size='MAXIMUM') or 18
         else:
-            return QtWidgets.QProxyStyle.pixelMetric(self, QStyle_PixelMetric, option, widget)
+            return super().pixelMetric(QStyle_PixelMetric, option, widget)
+
+    # def drawPrimitive(self, element: QtWidgets.QStyle.PrimitiveElement, option: 'QStyleOption', painter: QtGui.QPainter, widget: typing.Optional[QtWidgets.QWidget] = ...) -> None:
+    #     if element == QtWidgets.QStyle.PE_IndicatorBranch:
+    #         # draw a scaled image here
+    #
+    #         # QPixmap
+    #         # pixmap;
+    #         # pixmap.load(":/res/background.jpg");
+    #         # QPainter
+    #         # paint(this);
+    #         # int
+    #         # widWidth = this->ui->centralWidget->width();
+    #         # int
+    #         # widHeight = this->ui->centralWidget->height();
+    #         # pixmap = pixmap.scaled(widWidth, widHeight, Qt::KeepAspectRatioByExpanding);
+    #         # paint.drawPixmap(0, 0, pixmap);
+    #     else:
+    #         return super(_MyAppProxyStyle, self).drawPrimitive(element, option, painter, widget)
 
 
 class Gui(Ui):

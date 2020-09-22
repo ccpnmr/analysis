@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 16:49:59 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -117,10 +117,12 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
                                ('labelling', PulldownListCompoundWidget, getattr, setattr, _getLabelling, None, {'editable': True}),
                                ],
                               queueStates=False,
-                              hWidth=HWIDTH,
+                              hWidth=None,
+                              group=1,
                               ),
                         VList([('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}), ],
-                              hWidth=HWIDTH,
+                              hWidth=None,
+                              group=1,
                               ),
                         MoreLess([('synonyms', EntryCompoundWidget, _getSynonym, _setSynonym, None, None, {'backgroundText': ''}),
                                   ('referenceSpectra', PulldownListCompoundWidget, _getSpectrum, _setSpectrum, _getCurrentSpectra, None, {'editable': False}),
@@ -136,21 +138,23 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
                                   ('polarSurfaceArea', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
                                   ('logPartitionCoefficient', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
                                   ],
-                                 hWidth=HWIDTH,
+                                 hWidth=None,
                                  name='Advanced',
                                  ),
                         MoreLess([VList([('smiles', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''})],
-                                        hWidth=HWIDTH,
+                                        hWidth=None,
+                                        group=2,
                                         ),
                                   VList([('Compound view', CompoundViewCompoundWidget, None, None, None, None, {})],
                                         queueStates=False,
-                                        hWidth=HWIDTH,
+                                        hWidth=None,
+                                        group=2,
                                         ),
                                   ],
                                  name='Compound',
                                  ),
                         ],
-                       hWidth=HWIDTH,
+                       hWidth=None,
                        )
 
     USESCROLLWIDGET = True

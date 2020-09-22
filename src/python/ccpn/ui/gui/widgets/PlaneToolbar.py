@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,7 @@ from ccpn.ui.gui.guiSettings import getColours, STRIPHEADER_BACKGROUND, \
     STRIPHEADER_FOREGROUND, GUINMRRESIDUE, CCPNGLWIDGET_BACKGROUND, \
     CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND
 # from ccpn.ui.gui.guiSettings import textFont, textFontLarge
+from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from PyQt5 import QtGui, QtWidgets, QtCore
@@ -257,32 +258,32 @@ class PlaneSelectorWidget(Frame):
         self._linkedSpinBox = None
         self._linkedPlaneCount = None
 
-        width = 20
-        height = 20
+        _size = getFontHeight(size='MEDIUM')
+        # height = _size
 
         self._mainWidget = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
 
         self.previousPlaneButton = Button(parent=self._mainWidget, text='<', grid=(0, 0),
                                           callback=self._previousPlane)
-        self.previousPlaneButton.setFixedWidth(width)
-        self.previousPlaneButton.setFixedHeight(height)
+        # self.previousPlaneButton.setFixedWidth(_size)
+        # self.previousPlaneButton.setFixedHeight(height)
 
         self.spinBox = DoubleSpinbox(parent=self._mainWidget, showButtons=False, grid=(0, 1),
                                      callback=self._spinBoxChanged, objectName='PlaneSelectorWidget_planeDepth')
-        self.spinBox.setFixedWidth(60)
-        self.spinBox.setFixedHeight(height)
+        self.spinBox.setFixedWidth(_size * 4)
+        # self.spinBox.setFixedHeight(height)
         self.spinBox.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         self.nextPlaneButton = Button(parent=self._mainWidget, text='>', grid=(0, 2),
                                       callback=self._nextPlane)
-        self.nextPlaneButton.setFixedWidth(width)
-        self.nextPlaneButton.setFixedHeight(height)
+        # self.nextPlaneButton.setFixedWidth(_size)
+        # self.nextPlaneButton.setFixedHeight(height)
 
         self.planeCountSpinBox = Spinbox(parent=self._mainWidget, showButtons=False, grid=(0, 3), min=1, max=1000,
                                          objectName='PlaneSelectorWidget_planeCount'
                                          )
-        self.planeCountSpinBox.setFixedWidth(32)
-        self.planeCountSpinBox.setFixedHeight(height)
+        self.planeCountSpinBox.setFixedWidth(_size * 2)
+        # self.planeCountSpinBox.setFixedHeight(height)
         self.planeCountSpinBox.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         self.planeCountSpinBox.returnPressed.connect(self._planeCountChanged)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-05 18:43:27 +0100 (Wed, August 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -323,7 +323,7 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
         self.orderedSpectrumViews = orderedSpectrumViews
         self.orderedSpectra = OrderedSet([spec.spectrum for spec in self.orderedSpectrumViews])
 
-        self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
+        # self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
 
         for specNum, thisSpec in enumerate(self.orderedSpectra):
             contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec,
@@ -408,7 +408,7 @@ class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
             self.tabWidget.addTab(colourTab, thisSpec.name)
             colourTab.setContentsMargins(*TABMARGINS)
 
-        self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
+        # self.tabWidget.setFixedWidth(self.MINIMUM_WIDTH)
         self.tabWidget.setTabClickCallback(self._tabClicked)
 
         # don't forget to call postInit to finish initialise

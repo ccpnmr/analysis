@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:06:39 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -69,7 +69,7 @@ class SpectrumProjectionPopup(CcpnDialog):
         # threshold
         thresholdLabel = Label(self, 'Threshold', grid=(5, 0))
         self.thresholdData = ScientificDoubleSpinBox(self, grid=(5, 1), gridSpan=(1, 2), vAlign='t', min=0.1, max=1e12)
-        self.thresholdData.setMinimumHeight(25)
+        # self.thresholdData.setMinimumHeight(25)
         # Contour coulours checkbox
         contourLabel = Label(self, 'Preserve contour colours', grid=(6, 0))
         self.contourCheckBox = CheckBox(self, checked=True, grid=(6, 1))

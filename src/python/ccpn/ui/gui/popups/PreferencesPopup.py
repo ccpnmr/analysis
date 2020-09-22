@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-16 12:14:32 +0100 (Wed, September 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -61,6 +61,7 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, USERAUXI
     USEROTHERPATH, getInitialPath, setInitialPath
 from ccpn.framework.lib.pipeline.PipesLoader import _fetchUserPipesPath
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
+from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
@@ -402,19 +403,25 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         # NOTE:ED - testing new font loader
         row += 1
-        self._fontsLabel = Label(parent, text="Fonts (require restart)", grid=(row, 0))
+        self._fontsLabel = Label(parent, text="Fonts (requires restart)", grid=(row, 0))
 
         row += 1
         self.editorFontLabel = Label(parent, text="    Editor Font: ", grid=(row, 0))
         self.editorFontData = Button(parent, grid=(row, 1), callback=self._getEditorFont)
 
         row += 1
-        self.moduleFontLabel = Label(parent, text="    Module Font: ", grid=(row, 0))
+        self.moduleFontLabel = Label(parent, text="    IPython Console Font: ", grid=(row, 0))
         self.moduleFontData = Button(parent, grid=(row, 1), callback=self._getModuleFont)
 
         row += 1
-        self.messageFontLabel = Label(parent, text="    Message Font: ", grid=(row, 0))
+        self.messageFontLabel = Label(parent, text="    Sidebar Font: ", grid=(row, 0))
         self.messageFontData = Button(parent, grid=(row, 1), callback=self._getMessageFont)
+
+        # NOTE:ED hide these for now
+        # self.moduleFontLabel.setVisible(False)
+        # self.moduleFontData.setVisible(False)
+        # self.messageFontLabel.setVisible(False)
+        # self.messageFontData.setVisible(False)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -572,7 +579,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         try:
             name, size, _, _, _, _, _, _, _, _, type = fontString.split(',')
         except:
-            name, size, type = "Helvetica", 12, "Regular"
+            name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, "Regular"
 
         fontName = '{}, {}pt, {}'.format(name, size, type)
         widget._fontString = fontString

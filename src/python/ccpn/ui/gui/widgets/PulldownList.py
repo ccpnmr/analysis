@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ from contextlib import contextmanager
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.Font import setWidgetFont
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 
 
 NULL = object()
@@ -49,6 +49,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
                  backgroundText=None, headerText=None,
                  headerEnabled=False, headerIcon=None,
                  editable=False, maxVisibleItems=16,
+                 iconSize=None,
                  **kwds):
         """
 
@@ -83,7 +84,11 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self.backgroundText = backgroundText
 
         self.setEditable(editable)
-        # self.setIconSize(QtCore.QSize(22,22))
+        if iconSize:
+            self._iconSize = iconSize
+        else:
+            self._iconSize = getFontHeight() or 16
+        self.setIconSize(QtCore.QSize(self._iconSize, self._iconSize))
 
         PulldownList.setData(self, texts, objects, index, icons,
                              headerText=headerText, headerEnabled=headerEnabled, headerIcon=headerIcon)
@@ -92,14 +97,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         if self.clickToShowCallback:
             self.popupAboutToBeShown.connect(self.clickToShowCallback)
 
-        self.setStyleSheet("""
-    PulldownList {
-      padding-top: 3px;
-      padding-bottom: 3px;
-      padding-left: 2px;
-      combobox-popup: 0;
-    }
-    """)
+        self.setStyleSheet('PulldownList { padding: 3px 3px 3px 3px; combobox-popup: 0; }')
 
         self.setMaxVisibleItems(maxVisibleItems)
         self._editedText = None
@@ -262,8 +260,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
 
     def addItem(self, text, object=NULL, icon=None, ):
 
-        if icon:
-            QtWidgets.QComboBox.addItem(self, Icon(icon), str(text))
+        if icon and isinstance(icon, QtGui.QIcon):
+            QtWidgets.QComboBox.addItem(self, icon, str(text))
         else:
             QtWidgets.QComboBox.addItem(self, str(text))
 

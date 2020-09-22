@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:22 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -360,7 +360,7 @@ class NmrResidueTable(GuiTable):
                                          )
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-                             grid=(2, 1), gridSpan=(1, 1))
+                             grid=(2, 20), gridSpan=(1, 1))
 
         # initialise the currently attached dataFrame
         self._hiddenColumns = ['Pid', 'NmrChain']
@@ -421,8 +421,8 @@ class NmrResidueTable(GuiTable):
         if col < 2:
             raise RuntimeError('Col has to be >= 2')
         self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
-        widget.setFixedSize(widget.sizeHint())
-        self._widget.setFixedSize(self._widget.sizeHint())
+        # widget.setFixedSize(widget.sizeHint())
+        # self._widget.setFixedSize(self._widget.sizeHint())
 
     def addWidgetToPos(self, widget, row=0, col=2, rowSpan=1, colSpan=1, overrideMinimum=False, alignment=None):
         """
@@ -431,10 +431,10 @@ class NmrResidueTable(GuiTable):
         if col < 2 and not overrideMinimum:
             raise RuntimeError('Col has to be >= 2')
         self._widget.getLayout().addWidget(widget, row, col, rowSpan, colSpan)
-        if alignment is not None:
-            self._widget.getLayout().setAlignment(widget, alignment)
-        widget.setFixedSize(widget.sizeHint())
-        self._widget.setFixedSize(self._widget.sizeHint())
+        # if alignment is not None:
+        #     self._widget.getLayout().setAlignment(widget, alignment)
+        # widget.setFixedSize(widget.sizeHint())
+        # self._widget.setFixedSize(self._widget.sizeHint())
 
     def _setWidgetHeight(self, height):
         self._widgetScrollArea.setFixedHeight(height)

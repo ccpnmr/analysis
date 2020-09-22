@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 01:02:52 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -89,14 +89,14 @@ class PeakFindPopup(CcpnDialog):
 
             self.estimateLineWidths = CheckBoxCompoundWidget(self.estimateFrame,
                                                              grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                                                             fixedWidths=(COLWIDTH, 30),
+                                                             # fixedWidths=(COLWIDTH, 30),
                                                              orientation='right',
                                                              labelText='Estimate Line Widths',
                                                              checked=True
                                                              )
             self.estimateVolumes = CheckBoxCompoundWidget(self.estimateFrame,
                                                           grid=(0, 1), vAlign='top', stretch=(0, 0), hAlign='left',
-                                                          fixedWidths=(COLWIDTH, 30),
+                                                          # fixedWidths=(COLWIDTH, 30),
                                                           orientation='right',
                                                           labelText='Estimate Peak Volumes',
                                                           checked=True
@@ -115,7 +115,7 @@ class PeakFindPopup(CcpnDialog):
             # populate the estimateFrame
             self._updateContents()
 
-            self.setFixedSize(QtCore.QSize(450, 220))
+            self.setFixedSize(self.sizeHint())
         else:
             self.close()
 

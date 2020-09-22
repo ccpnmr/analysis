@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-14 15:51:41 +0100 (Tue, July 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.util.Common import isWindowsOS
 from ccpn.util.Path import aPath
+from ccpn.ui.gui.guiSettings import BORDERNOFOCUS_COLOUR
 
 
 class CcpnWebView(CcpnModule):
@@ -44,6 +45,11 @@ class CcpnWebView(CcpnModule):
 
         self.webView = QWebEngineView()
         self.mainWidget.getLayout().addWidget(self.webView, 0, 0)
+
+        self.mainWidget.setStyleSheet('border-right: 1px solid %s;'
+                                             'border-left: 1px solid %s;'
+                                             'border-bottom: 1px solid %s;'
+                                             'background: transparent;' % (BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR))
 
         urlPath = urlPath or ''
         if (urlPath.startswith('http://') or urlPath.startswith('https://')):

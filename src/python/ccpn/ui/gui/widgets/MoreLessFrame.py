@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-03 18:50:46 +0100 (Fri, July 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,8 +30,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import ActiveLabel, Label
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
-
-PIXMAPWIDTH = 18
+from ccpn.ui.gui.widgets.Font import getFontHeight
 
 
 class MoreLessFrame(Frame):
@@ -56,10 +55,12 @@ class MoreLessFrame(Frame):
         self._minusIcon = Icon('icons/minus')
         self._plusIcon = Icon('icons/plus')
 
+        self.PIXMAPWIDTH = getFontHeight()
+
         row = 0
         self._openButton = ActiveLabel(self, mainWindow=self.mainWindow, grid=(row, 0))
-        self._openButton.setFixedSize(PIXMAPWIDTH, PIXMAPWIDTH)
-        self._openButton.setPixmap(self._minusIcon.pixmap(PIXMAPWIDTH, PIXMAPWIDTH))
+        self._openButton.setFixedSize(self.PIXMAPWIDTH, self.PIXMAPWIDTH)
+        self._openButton.setPixmap(self._minusIcon.pixmap(self.PIXMAPWIDTH, self.PIXMAPWIDTH))
         self._label = Label(self, text=name or '', grid=(row, 1))
         self._labelHeight = self._label.sizeHint().height()
         self._label.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Fixed)
@@ -78,11 +79,11 @@ class MoreLessFrame(Frame):
         """
         self._contentsFrame.setVisible(visible)
         if visible:
-            self._openButton.setPixmap(self._minusIcon.pixmap(18, 18))
+            self._openButton.setPixmap(self._minusIcon.pixmap(self.PIXMAPWIDTH, self.PIXMAPWIDTH))
             # arbitrary large height
             self.setMaximumHeight(2000)
         else:
-            self._openButton.setPixmap(self._plusIcon.pixmap(18, 18))
+            self._openButton.setPixmap(self._plusIcon.pixmap(self.PIXMAPWIDTH, self.PIXMAPWIDTH))
             self.setMaximumHeight(self.sizeHint().height())
 
         if self._callback:

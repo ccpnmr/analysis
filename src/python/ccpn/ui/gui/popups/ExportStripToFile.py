@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:10:54 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -233,7 +233,7 @@ class ExportStripToFilePopup(ExportDialog):
                 labelText='Line Thickness',
                 value=1.0,
                 decimals=2, step=0.05, range=(0.01, 20))
-        self.baseThicknessBox.setFixedHeight(25)
+        # self.baseThicknessBox.setFixedHeight(25)
 
         row += 1
         self.stripPaddingBox = DoubleSpinBoxCompoundWidget(
@@ -241,7 +241,7 @@ class ExportStripToFilePopup(ExportDialog):
                 labelText='Strip Padding',
                 value=5,
                 decimals=0, step=1, range=(0, 50))
-        self.stripPaddingBox.setFixedHeight(25)
+        # self.stripPaddingBox.setFixedHeight(25)
 
         row += 1
         self.exportDpiBox = DoubleSpinBoxCompoundWidget(
@@ -249,7 +249,7 @@ class ExportStripToFilePopup(ExportDialog):
                 labelText='Image dpi',
                 value=300,
                 decimals=0, step=5, range=(36, 2400))
-        self.exportDpiBox.setFixedHeight(25)
+        # self.exportDpiBox.setFixedHeight(25)
 
         row += 1
         userFrame.addSpacer(0, 10, grid=(row, 0))

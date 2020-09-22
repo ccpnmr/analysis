@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -74,21 +74,11 @@ class LineEdit(QtWidgets.QLineEdit, Base):
 
         self.setAlignment(TextAlignment[textAlignment])
         self.setMinimumWidth(minimumWidth)
-
-        fontHeight = (getFontHeight() or 16) + 13
-        self.setFixedHeight(fontHeight)
+        self.setStyleSheet('LineEdit { padding: 3px 3px 3px 3px; }')
 
         if not editable:
             self.setReadOnly(True)
             self.setEnabled(False)
-
-            setWidgetFont(self, )
-            # from ccpn.framework.Application import getApplication
-            # getApp = getApplication()
-            # if getApp and hasattr(getApp, '_fontSettings'):
-            #     self.setFont(getApp._fontSettings.helveticaItalic12)
-
-        # self.orientation = QtCore.Qt.Vertical
 
     def get(self):
         return self.text()

@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 01:02:52 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -54,6 +54,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.MessageDialog import progressManager, showWarning
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 
 
 class SequenceModule():
@@ -480,7 +481,9 @@ class SequenceModule():
         self._highlight = QtWidgets.QGraphicsTextItem()
         self._highlight.setDefaultTextColor(QtGui.QColor(self.colours[SEQUENCEMODULE_TEXT]))
 
-        self._highlight.setFont(self.mainWindow.application._fontSettings.fixedWidthLargeFont)
+        # self._highlight.setFont(self.mainWindow.application._fontSettings.fixedWidthLargeFont)
+        setWidgetFont(self._highlight, size='LARGE')
+
         self._highlight.setPlainText('')
         # self._highlight.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
         self.scrollArea.scene.addItem(self._highlight)
@@ -513,7 +516,9 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
 
         self.colours = getColours()
         self.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINLABEL_TEXT]))
-        self.setFont(self.mainWindow.application._fontSettings.fixedWidthLargeFont)
+
+        # self.setFont(self.mainWindow.application._fontSettings.fixedWidthLargeFont)
+        setWidgetFont(self, size='LARGE')
 
         self.setPos(QtCore.QPointF(position[0], position[1]))
 
@@ -554,8 +559,14 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
         if idx % 10 == 9:  # print out every 10
             numberItem = QtWidgets.QGraphicsTextItem(residue.sequenceCode)
             numberItem.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINLABEL_TEXT]))
-            numberItem.setFont(self.mainWindow.application._fontSettings.helvetica8)
-            xPosition = self.labelPosition + (self.mainWindow.application._fontSettings.textFontHugeSpacing * self.currentIndex)
+
+            # numberItem.setFont(self.mainWindow.application._fontSettings.helvetica8)
+            setWidgetFont(numberItem, size='SMALL')
+            _spacing = getFontHeight(size='LARGE')
+
+            # xPosition = self.labelPosition + (self.mainWindow.application._fontSettings.textFontHugeSpacing * self.currentIndex)
+            xPosition = self.labelPosition + (_spacing * self.currentIndex)
+
             numberItem.setPos(QtCore.QPointF(xPosition, self.yPosition))
             self.scene.addItem(numberItem)
             self.items.append(numberItem)
@@ -615,12 +626,17 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
         self.residue = residue
         self.scene = scene
 
-        self.setFont(self.mainWindow.application._fontSettings.fixedWidthLargeFont)
+        # self.setFont(self.mainWindow.application._fontSettings.fixedWidthLargeFont)
+        setWidgetFont(self, size='LARGE')
+        _spacing = getFontHeight(size='LARGE')
+
         self.colours = getColours()
         self.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINRESIDUE_UNASSIGNED]))
 
         self.setPlainText(residue.shortName)
-        position = labelPosition + (self.mainWindow.application._fontSettings.textFontHugeSpacing * index)
+        # position = labelPosition + (self.mainWindow.application._fontSettings.textFontHugeSpacing * index)
+        position = labelPosition + (_spacing * index)
+
         self.setPos(QtCore.QPointF(position, yPosition))
         self.residueNumber = residue.sequenceCode
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,19 +25,26 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui
+import numpy as np
+from PyQt5 import QtGui, QtCore, QtWidgets
 
 
-SYSTEMFONTREQUEST = 'moduleFont'
-MONACOFONTREQUEST = 'editorFont'
-HELVETICAFONTREQUEST = 'moduleFont'
-LUCIDAGRANDEFONTREQUEST = 'messageFont'
+DEFAULTFONTREQUEST = 'editorFont'
+FIXEDFONTREQUEST = 'moduleFont'
+SIDEBARFONTREQUEST = 'messageFont'
+# MONACOFONTREQUEST = 'editorFont'
+# HELVETICAFONTREQUEST = 'editorFont'
+# LUCIDAGRANDEFONTREQUEST = 'editorFont'
 
 DEFAULTFONT = 'defaultFont'
-SYSTEMFONT = 'System'
-MONACOFONT = 'Monaco'
-HELVETICAFONT = 'Helvetica'
-LUCIDAGRANDEFONT = 'Lucida Grande'
+CONSOLEFONT = 'fixedFont'
+SIDEBARFONT = 'sidebarFont'
+# SYSTEMFONT = 'System'
+# MONACOFONT = 'Monaco'
+# HELVETICAFONT = 'Helvetica'
+# LUCIDAGRANDEFONT = 'Lucida Grande'
+DEFAULTFONTNAME = 'Helvetica'
+DEFAULTFONTSIZE = 16
 
 
 # This only works when we have a QtApp instance working; hence it need to go somewhere else.
@@ -47,7 +54,7 @@ LUCIDAGRANDEFONT = 'Lucida Grande'
 
 def _readFontFromPreferences(fontRequest, preferences):
     # read font name from the preferences file
-    fontName = preferences.general.get(fontRequest) or SYSTEMFONTREQUEST
+    fontName = preferences.general.get(fontRequest) or DEFAULTFONTREQUEST
     return fontName
 
 
@@ -98,7 +105,8 @@ def getWidgetFontHeight(name=DEFAULTFONT, size='MEDIUM', bold=False, italic=Fals
         font = getApp._fontSettings.getFont(name, size, bold, italic)
         return QtGui.QFontMetrics(font).height()
     except:
-        getLogger().debug('Cannot get font')
+        getLogger().debug('Cannot get font, returning default {}pt'.format(DEFAULTFONTSIZE))
+        return DEFAULTFONTSIZE
 
 
 def getFontHeight(name=DEFAULTFONT, size='MEDIUM'):
@@ -110,4 +118,49 @@ def getFontHeight(name=DEFAULTFONT, size='MEDIUM'):
         font = getApp._fontSettings.getFont(name, size, False, False)
         return QtGui.QFontMetrics(font).height()
     except:
-        getLogger().debug('Cannot get font')
+        getLogger().debug('Cannot get font, returning default {}pt'.format(DEFAULTFONTSIZE))
+        return DEFAULTFONTSIZE
+
+
+def getFont(name=DEFAULTFONT, size='MEDIUM'):
+    from ccpn.framework.Application import getApplication
+    from ccpn.util.Logging import getLogger
+
+    try:
+        getApp = getApplication()
+        font = getApp._fontSettings.getFont(name, size, False, False)
+        return font
+    except:
+        getLogger().debug('Cannot get font, returning default font'.format(DEFAULTFONTSIZE))
+        return Font(DEFAULTFONTNAME, DEFAULTFONTSIZE)
+
+
+def getTextDimensionsFromFont(name=DEFAULTFONT, size='MEDIUM', bold=False, italic=False, textList=None):
+    from ccpn.framework.Application import getApplication
+    from ccpn.util.Logging import getLogger
+
+    try:
+        getApp = getApplication()
+        font = getApp._fontSettings.getFont(name, size, bold, italic)
+
+    except:
+        getLogger().debug('Cannot get font, returning default {}pt'.format(DEFAULTFONTSIZE))
+        font = Font(DEFAULTFONTNAME, DEFAULTFONTSIZE)
+
+    fontMetrics = QtGui.QFontMetrics(font, )
+    wPoints = []
+    hPoints = []
+
+    for text in textList:
+        # best estimate for the width of the text, plus a lit extra
+        bRect = fontMetrics.boundingRect(text + '__')
+        wPoints.append(bRect.width())
+        hPoints.append(bRect.height())
+
+    if textList:
+        minDimensions = QtCore.QSize(np.min(wPoints), np.min(hPoints))
+        maxDimensions = QtCore.QSize(np.max(wPoints), np.max(hPoints))
+        return minDimensions, maxDimensions
+
+    else:
+        return QtCore.QSize(0, 0), QtCore.QSize(0, 0)

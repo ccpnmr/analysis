@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-26 12:02:35 +0000 (Thu, March 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -44,6 +44,7 @@ from ccpn.ui.gui.modules.PeakTable import PeakListTableWidget
 from ccpn.ui.gui.modules.MultipletPeakTable import MultipletPeakListTableWidget
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth, getMultipletPosition
 from ccpn.ui.gui.widgets.Splitter import Splitter
@@ -79,7 +80,7 @@ class MultipletTableModule(CcpnModule):
         # mainWidget
         self.peaksFrame = Frame(self.mainWidget, setLayout=True, grid=(0, 1))
         self.peakListTableLabel = Label(self.peaksFrame, 'Peaks:', grid=(0, 0), )
-        self.peakListTableLabel.setFixedHeight(20)
+        self.peakListTableLabel.setFixedHeight(getFontHeight())
 
         self.peakListTable = MultipletPeakListTableWidget(parent=self.peaksFrame,
                                                           mainWindow=self.mainWindow,

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-08 12:32:29 +0100 (Tue, September 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,14 +26,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtWidgets, QtCore
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
-from ccpn.ui.gui.widgets.Splitter import Splitter
-# from ccpn.ui.gui.guiSettings import fixedWidthFont
-
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFont, CONSOLEFONT
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
 from ccpn.util.Logging import getLogger
@@ -64,11 +60,12 @@ class IpythonConsole(Widget):
         self.mainWindow.pythonConsole = self
         self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
         self.setStyleSheet(self.mainWindow.styleSheet())
-        self.ipythonWidget._set_font(self.mainWindow.application._fontSettings.fixedWidthFont)
+
         self.ipythonWidget.kernel_manager = km
         self.setMinimumHeight(100)
         self.textEditor = TextEditor(self)
         self.textEditor.setReadOnly(True)
+        setWidgetFont(self.textEditor, CONSOLEFONT)
         # if this is called here then keyboard input gets
         # sucked into Python console even if it is not opened
         # so instead call _startChannels() when opened
@@ -92,7 +89,10 @@ class IpythonConsole(Widget):
         namespace['runMacro'] = self._runMacro
         km.kernel.shell.push(namespace)
 
-        self._startChannels()  # this is important, otherwise the console does't run anything
+        _font = getFont(name=CONSOLEFONT)
+        self.ipythonWidget.setStyleSheet(f'font-family: {_font.fontName}; font-size: {_font.pointSize()}pt;')
+
+        self._startChannels()  # this is important, otherwise the console doesn't run anything
 
         # hide this widget, it may be visible before the pythonConsoleModule has been instantiated
         self.hide()

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:49 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.widgets.Menu import Menu
 
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.Font import setWidgetFont
 
 
 # mouse modes for single click:
@@ -305,11 +306,7 @@ def makeDragEvent(self, dataDict, texts, label=None, action=QtCore.Qt.CopyAction
     dragLabel.setText(str(label))
 
     if label is not None:
-        from ccpn.framework.Application import getApplication
-
-        getApp = getApplication()
-        if getApp and hasattr(getApp, '_fontSettings'):
-            dragLabel.setFont(getApp._fontSettings.textFontLarge)
+        setWidgetFont(dragLabel, size='MEDIUM')
 
         # set the colours and margin for the drag icon
         dragLabel.setStyleSheet('color: {}; background: {}'.format(getColours()[DRAG_FOREGROUND], getColours()[DRAG_BACKGROUND]))

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:54 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -130,7 +130,7 @@ class ListCompoundWidget(CompoundBaseWidget):
         self._addWidget(self.pulldownList)
 
         # listWidget
-        self.listWidget = ListWidget(parent=self, callback=callback, infinitleyTallVertically=True)
+        self.listWidget = ListWidget(parent=self, callback=callback, infiniteHeight=True)
         self.listWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self._uniqueList = uniqueList
         if defaults is not None:

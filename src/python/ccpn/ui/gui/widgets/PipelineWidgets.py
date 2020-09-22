@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:54 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -57,7 +57,7 @@ from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.pipeline.PipeBase import PIPE_CATEGORIES, PIPE_CATEGORY
 from functools import partial
-from ccpn.ui.gui.widgets.Font import Font
+from ccpn.ui.gui.widgets.Font import getFont
 from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
 from ccpn.util.Colour import hexToRgb
 
@@ -200,10 +200,7 @@ class PipelineDropArea(DockArea):
 
         colours = getColours()
 
-        if self.mainWindow:
-            self.fontLabel = self.mainWindow.application._fontSettings.helveticaBold20
-        else:
-            self.fontLabel = Font('Helvetica', 20, bold=False)
+        self.fontLabel = getFont(size='LARGE')
         self.colourLabel = hexToRgb(colours[LABEL_FOREGROUND])
         self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.layout.setAlignment(QtCore.Qt.AlignTop)

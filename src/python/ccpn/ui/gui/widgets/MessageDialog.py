@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import textwrap
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Font import setWidgetFont
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
@@ -421,12 +421,12 @@ class progressPopup(CcpnDialog):
 
         self.label = Label(self, title, grid=(0, 0))
 
-        from ccpn.framework.Application import getApplication
-
-        getApp = getApplication()
-        if getApp and hasattr(getApp, '_fontSettings'):
-            self.label.setFont(getApp._fontSettings.messageFont)
-            self.setFont(getApp._fontSettings.messageFont)
+        # from ccpn.framework.Application import getApplication
+        # getApp = getApplication()
+        # if getApp and hasattr(getApp, '_fontSettings'):
+        #     self.label.setFont(getApp._fontSettings.messageFont)
+        #     self.setFont(getApp._fontSettings.messageFont)
+        setWidgetFont(self, )
 
         # self.layout().addWidget(self.progressbar)
 

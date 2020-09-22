@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-16 12:14:32 +0100 (Wed, September 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:49 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,9 +26,9 @@ __date__ = "$Date: 2016-11-15 21:37:50 +0000 (Tue, 15 Nov 2016) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
-from ccpn.ui.gui.widgets.Font import Font, HELVETICAFONTREQUEST, MONACOFONTREQUEST, \
-    LUCIDAGRANDEFONTREQUEST, _readFontFromPreferences, DEFAULTFONT
+from PyQt5 import QtCore
+from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONTREQUEST, _readFontFromPreferences, DEFAULTFONT, \
+    DEFAULTFONTSIZE, DEFAULTFONTNAME, FIXEDFONTREQUEST, CONSOLEFONT, SIDEBARFONTREQUEST, SIDEBARFONT
 from ccpn.util.decorators import singleton
 from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import allColours, hexToRgbRatio, autoCorrectHexColour, \
@@ -39,26 +39,30 @@ from itertools import product
 
 
 class FontSizes(LabelledEnum):
+    MINIMUM = 0.25, 'minimum, quarter size'
     TINY = 0.5, 'smallest font, half size'
     SMALL = 0.75, 'smaller font'
     MEDIUM = 1.0, 'default sized font, unit scale of the chosen font'
     LARGE = 1.25, 'larger font'
     VLARGE = 1.5, 'very large font'
     HUGE = 2.0, 'huge font'
+    MAXIMUM = 3.0, 'maximum, triple default size'
 
 
 class fontSettings():
 
     def __init__(self, preferences):
 
-        MONACOFONT = _readFontFromPreferences(MONACOFONTREQUEST, preferences)
-        HELVETICAFONT = _readFontFromPreferences(HELVETICAFONTREQUEST, preferences)
-        LUCIDAGRANDEFONT = _readFontFromPreferences(LUCIDAGRANDEFONTREQUEST, preferences)
-
         self.defaultFonts = {}
+        for defaultRequest, fontName in zip((DEFAULTFONTREQUEST, FIXEDFONTREQUEST, SIDEBARFONTREQUEST),
+                                            (DEFAULTFONT, CONSOLEFONT, SIDEBARFONT)):
+            fontString = _readFontFromPreferences(defaultRequest, preferences)
+            self.generateFonts(fontName, fontString)
+
+    def generateFonts(self, fontName, fontString):
         try:
-            fontList = MONACOFONT.split(',')
-            name, size, _, _, _, _, _, _, _, _, _ = fontList
+            fontList = fontString.split(',')
+            name, size, _, _, weight, _, _, _, _, _, type = fontList
 
             for ii, fontSize in enumerate(FontSizes):
                 thisSize = int(size) * fontSize.value
@@ -68,88 +72,88 @@ class fontSettings():
                 for bold, italic in product((False, True), repeat=2):
                     newFont = Font(name, int(size))
                     newFont.fromString(','.join(fontList))
-                    fontBold = newFont.bold()
-                    fontItalic = newFont.italic()
-                    self.defaultFonts[(DEFAULTFONT, fontSize.name, bold or fontBold, italic or fontItalic)] = newFont
+                    newFont.setBold(bold)
+                    newFont.setItalic(italic)
+                    self.defaultFonts[(fontName, fontSize.name, bold, italic)] = newFont
 
         except Exception as es:
-            print(str(es))
-            name, size = 'Helvetica', 12
+            getLogger().warning('Reverting to default font {}'.format(es))
+
+            name, size = DEFAULTFONTNAME, DEFAULTFONTSIZE
 
             for ii, fontSize in enumerate(FontSizes):
-                thisSize = 12 * fontSize.value
+                thisSize = DEFAULTFONTSIZE * fontSize.value
 
                 for bold, italic in product((False, True), repeat=2):
                     newFont = Font(name, int(thisSize))
-                    fontBold = newFont.bold()
-                    fontItalic = newFont.italic()
-                    self.defaultFonts[(DEFAULTFONT, fontSize.name, bold or fontBold, italic or fontItalic)] = newFont
+                    newFont.setBold(bold)
+                    newFont.setItalic(italic)
+                    self.defaultFonts[(fontName, fontSize.name, bold, italic)] = newFont
 
-        # fonts
-        self.monaco12 = Font(MONACOFONT, 12)
-        self.monaco16 = Font(MONACOFONT, 16)
-        self.monaco20 = Font(MONACOFONT, 20)
-
-        self.helvetica8 = Font(HELVETICAFONT, 8)
-        self.helveticaItalic8 = Font(HELVETICAFONT, 8, italic=True)
-        self.helveticaBold8 = Font(HELVETICAFONT, 8, bold=True)
-
-        self.helvetica10 = Font(HELVETICAFONT, 10)
-        self.helveticaItalic10 = Font(HELVETICAFONT, 10, italic=True)
-        self.helveticaBold10 = Font(HELVETICAFONT, 10, bold=True)
-
-        self.helvetica12 = Font(HELVETICAFONT, 12)
-        self.helveticaItalic12 = Font(HELVETICAFONT, 12, italic=True)
-        self.helveticaBold12 = Font(HELVETICAFONT, 12, bold=True)
-        self.helveticaUnderline12 = Font(HELVETICAFONT, 12, underline=True)
-        self.helveticaStrikeout12 = Font(HELVETICAFONT, 12, strikeout=True)
-
-        self.helvetica14 = Font(HELVETICAFONT, 14)
-        self.helveticaBold14 = Font(HELVETICAFONT, 14, bold=True)
-
-        self.helvetica16 = Font(HELVETICAFONT, 16)
-        self.helveticaBold16 = Font(HELVETICAFONT, 16, bold=True)
-
-        self.helvetica20 = Font(HELVETICAFONT, 20)
-        self.helveticaBold20 = Font(HELVETICAFONT, 20, bold=True)
-
-        self.helveticaBold36 = Font(HELVETICAFONT, 36, bold=True)
-
-        self.lucidaGrande12 = Font(LUCIDAGRANDEFONT, 12)
-        self.lucidaGrande14 = Font(LUCIDAGRANDEFONT, 14)
-
-        # widgets and modules
-        self.textFontTiny = self.helvetica8  # general text font
-        self.textFontTinyBold = self.helveticaBold8  # general text font
-        self.textFontSmall = self.helvetica10  # general text font
-        self.textFontSmallBold = self.helveticaBold10  # general text font
-        self.textFont = self.helvetica12  # general text font
-        self.textFontBold = self.helveticaBold12  # general text font bold
-        self.textFontLarge = self.helvetica14  # general text font large
-        self.textFontLargeBold = self.helveticaBold14  # general text font large bold
-        self.textFontVeryLarge = self.helvetica16  # general text font large
-        self.textFontVeryLargeBold = self.helveticaBold16  # general text font large bold
-        self.textFontHuge = self.helvetica20  # general text font huge
-        self.textFontHugeBold = self.helveticaBold20  # general text font huge bold
-
-        self.textFontTinySpacing = 7
-        self.textFontSmallSpacing = 9
-        self.textFontSpacing = 11
-        self.textFontLargeSpacing = 13
-        self.textFontHugeSpacing = 18
-
-        self.fixedWidthFont = self.monaco12  # for TextEditor, ipythonconsole
-        self.fixedWidthLargeFont = self.monaco16
-        self.fixedWidthHugeFont = self.monaco20
-        self.moduleLabelFont = self.helvetica12  # for text of left-label of modules
-        self.sidebarFont = self.lucidaGrande12  # sidebar
-        self.menuFont = self.lucidaGrande14  # Menus
-        self.messageFont = self.helvetica14  # used in popup messages;
-        self.messageFontBold = self.helveticaBold14  # used in popup messages;
+        # # fonts
+        # self.monaco12 = Font(MONACOFONT, 12)
+        # self.monaco16 = Font(MONACOFONT, 16)
+        # self.monaco20 = Font(MONACOFONT, 20)
+        #
+        # self.helvetica8 = Font(HELVETICAFONT, 8)
+        # self.helveticaItalic8 = Font(HELVETICAFONT, 8, italic=True)
+        # self.helveticaBold8 = Font(HELVETICAFONT, 8, bold=True)
+        #
+        # self.helvetica10 = Font(HELVETICAFONT, 10)
+        # self.helveticaItalic10 = Font(HELVETICAFONT, 10, italic=True)
+        # self.helveticaBold10 = Font(HELVETICAFONT, 10, bold=True)
+        #
+        # self.helvetica12 = Font(HELVETICAFONT, 12)
+        # self.helveticaItalic12 = Font(HELVETICAFONT, 12, italic=True)
+        # self.helveticaBold12 = Font(HELVETICAFONT, 12, bold=True)
+        # self.helveticaUnderline12 = Font(HELVETICAFONT, 12, underline=True)
+        # self.helveticaStrikeout12 = Font(HELVETICAFONT, 12, strikeout=True)
+        #
+        # self.helvetica14 = Font(HELVETICAFONT, 14)
+        # self.helveticaBold14 = Font(HELVETICAFONT, 14, bold=True)
+        #
+        # self.helvetica16 = Font(HELVETICAFONT, 16)
+        # self.helveticaBold16 = Font(HELVETICAFONT, 16, bold=True)
+        #
+        # self.helvetica20 = Font(HELVETICAFONT, 20)
+        # self.helveticaBold20 = Font(HELVETICAFONT, 20, bold=True)
+        #
+        # self.helveticaBold36 = Font(HELVETICAFONT, 36, bold=True)
+        #
+        # self.lucidaGrande12 = Font(LUCIDAGRANDEFONT, 12)
+        # self.lucidaGrande14 = Font(LUCIDAGRANDEFONT, 14)
+        #
+        # # widgets and modules
+        # self.textFontTiny = self.helvetica8  # general text font
+        # self.textFontTinyBold = self.helveticaBold8  # general text font
+        # self.textFontSmall = self.helvetica10  # general text font
+        # self.textFontSmallBold = self.helveticaBold10  # general text font
+        # self.textFont = self.helvetica12  # general text font
+        # self.textFontBold = self.helveticaBold12  # general text font bold
+        # self.textFontLarge = self.helvetica14  # general text font large
+        # self.textFontLargeBold = self.helveticaBold14  # general text font large bold
+        # self.textFontVeryLarge = self.helvetica16  # general text font large
+        # self.textFontVeryLargeBold = self.helveticaBold16  # general text font large bold
+        # self.textFontHuge = self.helvetica20  # general text font huge
+        # self.textFontHugeBold = self.helveticaBold20  # general text font huge bold
+        #
+        # self.textFontTinySpacing = 7
+        # self.textFontSmallSpacing = 9
+        # self.textFontSpacing = 11
+        # self.textFontLargeSpacing = 13
+        # self.textFontHugeSpacing = 18
+        #
+        # self.fixedWidthFont = self.monaco12  # for TextEditor, ipythonconsole
+        # self.fixedWidthLargeFont = self.monaco16
+        # self.fixedWidthHugeFont = self.monaco20
+        # self.moduleLabelFont = self.helvetica12  # for text of left-label of modules
+        # self.sidebarFont = self.lucidaGrande12  # sidebar
+        # self.menuFont = self.lucidaGrande14  # Menus
+        # self.messageFont = self.helvetica14  # used in popup messages;
+        # self.messageFontBold = self.helveticaBold14  # used in popup messages;
 
     def getFont(self, name=DEFAULTFONT, size='MEDIUM', bold=False, italic=False):
         try:
-            name = DEFAULTFONT
             if bold and italic and (name, size, bold, italic) in self.defaultFonts:
                 return self.defaultFonts[(name, size, bold, italic)]
             elif bold and (name, size, bold, italic) in self.defaultFonts:
@@ -160,7 +164,7 @@ class fontSettings():
             return self.defaultFonts[(name, size, False, False)]
         except Exception as es:
             getLogger().warning('Font ({}, {}, {}, {}) not found'.format(name, size, bold, italic))
-            return Font('Helvetica', 12)
+            return Font(DEFAULTFONTNAME, DEFAULTFONTSIZE)
 
 
 # Colours

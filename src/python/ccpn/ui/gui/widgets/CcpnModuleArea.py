@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-08 12:32:29 +0100 (Tue, September 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -44,6 +44,7 @@ from ccpn.util.Colour import hexToRgb
 from ccpn.ui.gui.lib.mouseEvents import SELECT
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
+from ccpn.ui.gui.widgets.Font import getFont
 from functools import partial
 
 
@@ -120,10 +121,11 @@ class CcpnModuleArea(ModuleArea, DropBase):
         # self.setAcceptDrops(True) GWV not needed; handled by DropBase init
 
         self.textLabel = DropAreaLabel
-        if self.mainWindow:
-            self.fontLabel = self.mainWindow.application._fontSettings.helveticaBold36
-        else: #can be None. for example for testing when developing new GUI modules. Cannot crash just for a font label!
-            self.fontLabel = Font('Helvetica', 36, bold=False)
+        self.fontLabel = getFont(size='MAXIMUM')
+        # if self.mainWindow:
+        #     self.fontLabel = self.mainWindow.application._fontSettings.helveticaBold36
+        # else: #can be None. for example for testing when developing new GUI modules. Cannot crash just for a font label!
+        #     self.fontLabel = Font('Helvetica', 36, bold=False)
 
         colours = getColours()
         self.colourLabel = hexToRgb(colours[LABEL_FOREGROUND])
@@ -174,9 +176,16 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
         event.accept()
 
+    def _maximisedAttrib(self, widget):
+        try:
+            getattr(widget, 'maximised')
+            return True
+        except:
+            return False
+
     def findMaximisedDock(self, event):
         result = None
-        targetWidgets = [widget for widget in self.findChildren(QtWidgets.QWidget) if hasattr(widget, 'maximised')]
+        targetWidgets = [widget for widget in self.findChildren(QtWidgets.QWidget) if self._maximisedAttrib(widget)]
         maximisedWidgets = [widget for widget in targetWidgets if widget.maximised == True]
         if len(maximisedWidgets) > 0:
             result = maximisedWidgets[0]

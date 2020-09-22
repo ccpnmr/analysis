@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-22 18:18:17 +0100 (Mon, June 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont, getFontHeight
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER, SOFTDIVIDER
@@ -259,14 +260,14 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         for axis, data in self.aspectData.items():
             aspectRatios[axis] = data.get()
 
-        return {AXISXUNITS               : self.xAxisUnitsButtons.getIndex(),
-                AXISYUNITS               : self.yAxisUnitsButtons.getIndex(),
-                AXISASPECTRATIOMODE      : self.useAspectRatioModeButtons.getIndex(),
-                AXISASPECTRATIOS         : aspectRatios,
-                SYMBOLTYPES              : self.symbol.getIndex() if not self._spectrumDisplay.is1D else 0,
-                ANNOTATIONTYPES          : self.annotationsData.getIndex() if not self._spectrumDisplay.is1D else 0,
-                SYMBOLSIZE               : int(self.symbolSizePixelData.text()),
-                SYMBOLTHICKNESS          : int(self.symbolThicknessData.text())
+        return {AXISXUNITS         : self.xAxisUnitsButtons.getIndex(),
+                AXISYUNITS         : self.yAxisUnitsButtons.getIndex(),
+                AXISASPECTRATIOMODE: self.useAspectRatioModeButtons.getIndex(),
+                AXISASPECTRATIOS   : aspectRatios,
+                SYMBOLTYPES        : self.symbol.getIndex() if not self._spectrumDisplay.is1D else 0,
+                ANNOTATIONTYPES    : self.annotationsData.getIndex() if not self._spectrumDisplay.is1D else 0,
+                SYMBOLSIZE         : int(self.symbolSizePixelData.text()),
+                SYMBOLTHICKNESS    : int(self.symbolThicknessData.text())
                 }
 
     def _aspectRatioModeChanged(self):
@@ -385,7 +386,7 @@ class _commonSettings():
         for dp in displays:
 
             # ignore undefined displays
-            if not dp:
+            if not dp or dp.is1D:
                 continue
 
             if dp.strips:
@@ -629,7 +630,7 @@ class StripPlot(Widget, _commonSettings):
                  includeSpectrumTable=True,
                  defaultSpectrum=None,
                  activePulldownClass=None,
-                 labelText='Display(s):',
+                 labelText='Display(s): ',
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -671,15 +672,23 @@ class StripPlot(Widget, _commonSettings):
         else:
             self.displaysWidget = None
 
+        optionTexts = ['Show sequential strips:',
+                       'Mark positions:',
+                       'Auto clear marks:']
+        if self.activePulldownClass is not None:
+            optionTexts += ['Link to current {}:'.format(self.activePulldownClass.className)]
+        _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
+        colwidth = maxDim.width()
+
         if includeSequentialStrips:
             row += 1
             self.sequentialStripsWidget = CheckBoxCompoundWidget(
                     self,
                     grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                     #minimumWidths=(colwidth, 0),
-                    fixedWidths=(colwidth, 30),
+                    fixedWidths=(colwidth, None),
                     orientation='left',
-                    labelText='Show sequential strips:',
+                    labelText=optionTexts[0],
                     checked=False
                     )
         else:
@@ -690,9 +699,9 @@ class StripPlot(Widget, _commonSettings):
                 self,
                 grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                 #minimumWidths=(colwidth, 0),
-                fixedWidths=(colwidth, 30),
+                fixedWidths=(colwidth, None),
                 orientation='left',
-                labelText='Mark positions:',
+                labelText=optionTexts[1],
                 checked=True
                 )
 
@@ -701,9 +710,9 @@ class StripPlot(Widget, _commonSettings):
                 self,
                 grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                 #minimumWidths=(colwidth, 0),
-                fixedWidths=(colwidth, 30),
+                fixedWidths=(colwidth, None),
                 orientation='left',
-                labelText='Auto clear marks:',
+                labelText=optionTexts[2],
                 checked=True
                 )
 
@@ -713,9 +722,9 @@ class StripPlot(Widget, _commonSettings):
                     self,
                     grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                     #minimumWidths=(colwidth, 0),
-                    fixedWidths=(colwidth, 30),
+                    fixedWidths=(colwidth, None),
                     orientation='left',
-                    labelText='Link to current %s:' % self.activePulldownClass.className,
+                    labelText=optionTexts[3],
                     tipText='Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
                     checked=LINKTOACTIVESTATE
                     ))
@@ -983,21 +992,25 @@ class SequenceGraphSettings(Widget):  #, _commonSettings):
         # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
         # underpinning the addNotifier call does not allow for it either
         row = 0
-        colwidth = 180
-
         texts = [ALL] + defaultListItem.pid if defaultListItem else ([ALL] + displayText)
 
         self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[])
 
         self.checkBoxes = {}
         if settingsDict:
+            optionTexts = []
+            for item, data in settingsDict.items():
+                optionTexts += [data['label']]
+            _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
+            colwidth = maxDim.width()
+
             for item, data in settingsDict.items():
                 row += 1
                 newItem = CheckBoxCompoundWidget(
                         self,
                         grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                         #minimumWidths=(colwidth, 0),
-                        fixedWidths=(colwidth, 30),
+                        fixedWidths=(colwidth, None),
                         orientation='left',
                         labelText=data['label'] if 'label' in data else '',
                         tipText=data['tipText'] if 'tipText' in data else '',
@@ -1088,7 +1101,7 @@ class SequenceGraphSettings(Widget):  #, _commonSettings):
 class SpectrumDisplaySelectionWidget(ListCompoundWidget):
 
     def __init__(self, parent=None, mainWindow=None, vAlign='top', stretch=(0, 0), hAlign='left',
-                 vPolicy='minimal', fixedWidths=(140, 140, 140), orientation='left', labelText='Display(s):',
+                 vPolicy='minimal', fixedWidths=(None, None, None), orientation='left', labelText='Display(s):',
                  tipText='SpectrumDisplay modules to respond to double-click',
                  texts=None, callback=None, displayWidgetChangedCallback=None,
                  defaultListItem=None, displayText=[],
@@ -1108,7 +1121,8 @@ class SpectrumDisplaySelectionWidget(ListCompoundWidget):
                          labelText=labelText, tipText=tipText, texts=texts,
                          callback=self._selectDisplayInList, **kwds)
 
-        self.setFixedHeights((None, None, 40))
+        # default to 5 rows
+        self.setFixedHeights((None, None, 5 * getFontHeight()))
         self.setPreSelect(self._fillDisplayWidget)
 
         # handle signals when the items in the displaysWidget have changed

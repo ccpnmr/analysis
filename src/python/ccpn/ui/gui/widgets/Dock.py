@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 19:56:35 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
 # from ccpn.ui.gui.guiSettings import moduleLabelFont
+from ccpn.ui.gui.widgets.Font import setWidgetFont
 
 
 class CcpnDock(Dock):
@@ -54,10 +55,11 @@ class CcpnDockLabel(DockLabel):
     def __init__(self, *args):
         super().__init__(showCloseButton=True, *args)
 
-        from ccpn.framework.Application import getApplication
-        getApp = getApplication()
-        if getApp and hasattr(getApp, '_fontSettings'):
-            self.setFont(getApp._fontSettings.moduleLabelFont)
+        # from ccpn.framework.Application import getApplication
+        # getApp = getApplication()
+        # if getApp and hasattr(getApp, '_fontSettings'):
+        #     self.setFont(getApp._fontSettings.moduleLabelFont)
+        setWidgetFont(self, )
 
     def mousePressEvent(self, ev):
         if ev.button() == QtCore.Qt.LeftButton:

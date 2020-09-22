@@ -57,7 +57,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-26 12:02:35 +0000 (Thu, March 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -73,8 +73,9 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.ScrollBarVisibilityWatcher import ScrollBarVisibilityWatcher
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFont
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_HEXHIGHLIGHT, \
-    getColours
+    getColours, BORDERNOFOCUS_COLOUR
 
 
 class Frame(QtWidgets.QFrame, Base):
@@ -117,7 +118,7 @@ class Frame(QtWidgets.QFrame, Base):
             styleSheet += "foreground-color: rgb(%d, %d, %d); " % kwds["fgColor"]
             del (kwds['fgColor'])
         if showBorder:
-            styleSheet += "border: 1px solid black; "
+            styleSheet += "border: 1px solid %s; " % BORDERNOFOCUS_COLOUR
         else:
             styleSheet += "border: 0px; "
         if len(styleSheet) > 0:
@@ -262,9 +263,9 @@ class OpenGLOverlayFrame(Frame):
 
     def _setStyle(self, sl, foregroundColour=CCPNGLWIDGET_HEXFOREGROUND, backgroundColour=CCPNGLWIDGET_HEXBACKGROUND):
 
-        from ccpn.framework.Application import getApplication
-
-        textFontLarge = getApplication()._fontSettings.textFontLarge
+        # from ccpn.framework.Application import getApplication
+        # textFontLarge = getApplication()._fontSettings.textFontLarge
+        textFontLarge = getFont(size='MEDIUM')
 
         if self._backgroundColour is not None or self.AUTOFILLBACKGROUND:
             sl.setStyleSheet('QLabel {'
@@ -300,9 +301,9 @@ class OpenGLOverlayFrame(Frame):
                                 highlightColour=CCPNGLWIDGET_HEXHIGHLIGHT):
         """Update the background colour when changing colour themes, keeping the same foreground highlighting
         """
-        from ccpn.framework.Application import getApplication
-
-        textFontLarge = getApplication()._fontSettings.textFontLarge
+        # from ccpn.framework.Application import getApplication
+        # textFontLarge = getApplication()._fontSettings.textFontLarge
+        textFontLarge = getFont(size='MEDIUM')
 
         sl.setStyleSheet('QLabel {'
                          'padding: 0; '

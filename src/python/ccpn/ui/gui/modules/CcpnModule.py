@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-16 12:14:32 +0100 (Wed, September 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:49 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -255,12 +255,12 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self._titleName = None  # name without serial
         CcpnModule.moduleName = name
 
-        setWidgetFont(self, 'textFontHuge')
         # from ccpn.framework.Application import getApplication
         #
         # getApp = getApplication()
         # if getApp and hasattr(getApp, '_fontSettings'):
         #     self.setFont(getApp._fontSettings.moduleLabelFont)
+        setWidgetFont(self, )
 
         self.widgetArea.setContentsMargins(0, 0, 0, 0)
 
@@ -286,6 +286,10 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         # main widget area
         self.mainWidget = Frame(parent=None, setLayout=True, acceptDrops=True)
+        # self.mainWidget = ScrollableFrame(parent=None,
+        #                                       showBorder=False, setLayout=True,
+        #                                       )
+        # self._mainWidgetScrollArea = self.mainWidget._scrollArea
 
         # optional settings widget area
         self.settingsWidget = None
@@ -340,7 +344,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 self._splitter.addWidget(self.mainWidget)
                 self._splitter.addWidget(self._settingsScrollArea)
 
-            self.addWidget(self._splitter)
+            self.addWidget(self._splitter, 0, 0)
             # self._splitter.setStretchFactor(1, 5)
 
         else:
@@ -1118,8 +1122,8 @@ class CcpnModuleLabel(DockLabel):
         self.module = module
         self.fixedWidth = True
 
-        setWidgetFont(self, 'moduleLabelFont')
-        self.labelSize = (getWidgetFontHeight('moduleLabelFont') or 12) + 4
+        setWidgetFont(self, size='LARGE')
+        self.labelSize = (getWidgetFontHeight(size='LARGE') or 12)
         # from ccpn.framework.Application import getApplication
         #
         # getApp = getApplication()

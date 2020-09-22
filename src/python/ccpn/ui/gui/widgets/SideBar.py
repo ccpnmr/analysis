@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -79,7 +79,8 @@ from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.mouseEvents import makeDragEvent
-
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight, getFont, SIDEBARFONT
+from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
 # from PyQt5.QtCore import QStringListModel
 # from PyQt5.QtGui import QListView, QAbstractItemView
@@ -1068,11 +1069,8 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self._searchWidgetContainer = searchWidgetContainer
         self._searchResultsContainer = searchResultsContainer
 
-        from ccpn.framework.Application import getApplication
-
-        getApp = getApplication()
-        if getApp and hasattr(getApp, '_fontSettings'):
-            self.setFont(getApp._fontSettings.sidebarFont)
+        _height = getFontHeight()
+        setWidgetFont(self, name=SIDEBARFONT)
 
         self.header().hide()
         self.setDragEnabled(True)
@@ -1098,9 +1096,6 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self._resultsLabel = Label(self._resultsFrame, text='Search Results', grid=(0, 0))
         self._resultsLabel.setAlignment(QtCore.Qt.AlignCenter)
         self._resultsLabel.setContentsMargins(0, 0, 0, 0)
-        self._resultsLabel.setStyleSheet("font-size:14px;")
-        self._resultsLabel.setFixedHeight(self._resultsLabel.sizeHint().height())
-
         self._resultsList = ListView(self._resultsFrame, mainWindow=self.mainWindow, grid=(0, 0), fitToContents=True,
                                      listViewContainer=self._resultsFrame)
 
@@ -1123,9 +1118,10 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self._resultsList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self._resultsList.customContextMenuRequested.connect(self._resultsListMenuRequested)
 
-        # GST seems to be missing a border, why?
-        # print(self._resultsList.__class__)
-        self._resultsList.setStyleSheet('ListView {border: 1px solid rgb(207,207,207)}')
+        # set the new sidebar font
+        setWidgetFont(self._searchWidget, name=SIDEBARFONT)
+        setWidgetFont(self._resultsLabel, name=SIDEBARFONT)
+        setWidgetFont(self._resultsList, name=SIDEBARFONT)
 
         self._searchSelection = []
         self._searchNotifiers = []

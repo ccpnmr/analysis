@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:49 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -92,7 +92,7 @@ class ChemicalShiftTableModule(CcpnModule):
                                                      grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                                                      vPolicy='minimal',
                                                      #minimumWidths=(colwidth, 0, 0),
-                                                     fixedWidths=(colwidth, 2 * colwidth, None),
+                                                     # fixedWidths=(colwidth, 2 * colwidth, None),
                                                      orientation='left',
                                                      labelText='Display(s):',
                                                      tipText='SpectrumDisplay modules to respond to double-click',

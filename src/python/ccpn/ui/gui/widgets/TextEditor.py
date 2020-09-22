@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-09 19:56:35 +0100 (Tue, June 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
+from ccpn.ui.gui.widgets.Font import setWidgetFont
 
 
 ATTRIBUTE_CHECK_LIST = ('_mouseStart', '_minimumWidth', '_widthStart', '_minimumHeight', '_heightStart')
@@ -53,11 +54,11 @@ class TextEditor(QtWidgets.QTextEdit, Base):
 
         self.filename = filename
 
-        from ccpn.framework.Application import getApplication
-
-        getApp = getApplication()
-        if getApp and hasattr(getApp, '_fontSettings'):
-            self.setFont(getApp._fontSettings.fixedWidthFont)
+        # from ccpn.framework.Application import getApplication
+        # getApp = getApplication()
+        # if getApp and hasattr(getApp, '_fontSettings'):
+        #     self.setFont(getApp._fontSettings.fixedWidthFont)
+        setWidgetFont(self, )
 
         self._changed = False
         self.setTabChangesFocus(True)
@@ -205,11 +206,11 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
         self.filename = filename
         self._fitToContents = fitToContents
 
-        from ccpn.framework.Application import getApplication
-
-        getApp = getApplication()
-        if getApp and hasattr(getApp, '_fontSettings'):
-            self.setFont(getApp._fontSettings.fixedWidthFont)
+        # from ccpn.framework.Application import getApplication
+        # getApp = getApplication()
+        # if getApp and hasattr(getApp, '_fontSettings'):
+        #     self.setFont(getApp._fontSettings.fixedWidthFont)
+        setWidgetFont(self, )
 
         self._changed = False
         self.setTabChangesFocus(True)
@@ -231,14 +232,14 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
         """
         focusColour = getColours()[BORDERFOCUS]
         noFocusColour = getColours()[BORDERNOFOCUS]
-        styleSheet = "QPlainTextEdit { " \
+        styleSheet = "QPlainTextEdit {" \
                      "border: 1px solid;" \
                      "border-radius: 1px;" \
                      "border-color: %s;" \
                      "} " \
-                     "QPlainTextEdit:focus { " \
+                     "QPlainTextEdit:focus {" \
                      "border: 1px solid %s; " \
-                     "border-radius: 1px; " \
+                     "border-radius: 1px;" \
                      "}" % (noFocusColour, focusColour)
         self.setStyleSheet(styleSheet)
 

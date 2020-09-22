@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -395,7 +395,7 @@ GuiTable::item::selected {
                     margin-left : 2px;
                     margin-right : 2px;''')
 
-        self._widgetScrollArea.setFixedHeight(height)  # needed for the correct sizing of the table
+        # self._widgetScrollArea.setFixedHeight(height)  # needed for the correct sizing of the table
 
     def _postInitTableCommonWidgets(self):
         from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -417,6 +417,8 @@ GuiTable::item::selected {
         #             border-bottom-right-radius: 2px;
         #             border-bottom-left-radius: 2px;}
         #             ''')
+
+        self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
 
     def _blockTableEvents(self, blanking=True, _disableScroll=False):
         """Block all updates/signals/notifiers in the table.
@@ -1136,6 +1138,7 @@ GuiTable::item::selected {
 
     def _setContextMenu(self, enableExport=True, enableDelete=True):
         self.tableMenu = QtWidgets.QMenu()
+        setWidgetFont(self.tableMenu, )
         if enableExport:
             self.tableMenu.addAction("Export Visible Table", partial(self.exportTableDialog, exportAll=False))
         if enableExport:
@@ -1168,6 +1171,7 @@ GuiTable::item::selected {
         pos = QtCore.QPoint(pos.x(), pos.y() + 10)  #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
 
         self.headerContextMenumenu = QtWidgets.QMenu()
+        setWidgetFont(self.headerContextMenumenu, )
         columnsSettings = self.headerContextMenumenu.addAction("Column Settings...")
         searchSettings = None
         if self._enableSearch and self.searchWidget is not None:

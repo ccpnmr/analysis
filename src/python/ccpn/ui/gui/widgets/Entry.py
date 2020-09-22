@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-08 12:31:56 +0100 (Tue, September 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,9 +27,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
-# from ccpn.ui.gui.guiSettings import helveticaItalic12
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 
 # Width?
 # Allow setting of max length based on data model?
@@ -75,7 +75,7 @@ class Entry(QtWidgets.QLineEdit, Base):
             else:
                 listener.connect(self.set)
 
-        self.setFixedHeight(25)
+        self.setStyleSheet('padding: 3px 3px 3px 3px;')
 
         self.backgroundText = backgroundText
         if self.backgroundText:
@@ -84,11 +84,6 @@ class Entry(QtWidgets.QLineEdit, Base):
         if not editable:
             self.setReadOnly(True)
             self.setEnabled(False)
-
-            from ccpn.framework.Application import getApplication
-            getApp = getApplication()
-            if getApp and hasattr(getApp, '_fontSettings'):
-                self.setFont(getApp._fontSettings.helveticaItalic12)
 
     def _callback(self):
 

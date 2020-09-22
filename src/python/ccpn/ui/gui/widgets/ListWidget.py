@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -45,7 +45,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
     #              color: #122043;
     #              font-weight: normal;
     #              margin: 0px 0px 0px 0px;
-    #              padding: 2px 2px 2px 2px;
+    #              padding: 3px 3px 3px 3px;
     #              border: 1px solid #182548;
     #              }
     # """
@@ -61,7 +61,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
                  sortOnDrop=False,
                  allowDuplicates=False,
                  copyDrop=True,
-                 infinitleyTallVertically=False,
+                 infiniteHeight=False,
                  minRowsVisible=4,
                  emptyText=None,
                  **kwds):
@@ -101,7 +101,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self.contextMenuItem = 'Remove'
         self.currentContextMenu = self.getContextMenu
 
-        self.infinitleyTallVerically = infinitleyTallVertically
+        self.infinitleyTallVerically = infiniteHeight
         self.minRowsVisible = minRowsVisible
 
         self._emptyText = str(emptyText)

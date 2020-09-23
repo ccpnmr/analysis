@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:32:49 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-23 09:36:16 +0100 (Wed, September 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1123,7 +1123,7 @@ class CcpnModuleLabel(DockLabel):
         self.fixedWidth = True
 
         setWidgetFont(self, size='LARGE')
-        self.labelSize = (getWidgetFontHeight(size='LARGE') or 12)
+        self.labelSize = (getWidgetFontHeight(size='VLARGE') or 16)
         # from ccpn.framework.Application import getApplication
         #
         # getApp = getApplication()

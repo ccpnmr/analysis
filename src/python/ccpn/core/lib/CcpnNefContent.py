@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-06 19:58:15 +0100 (Mon, July 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-23 09:36:16 +0100 (Wed, September 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -491,6 +491,19 @@ class CcpnNefContent:
 
     contents['nef_molecular_system'] = content_nef_molecular_system
 
+    def _stripSpectrumName(self, value):
+        ll = value.rsplit('`', 2)
+        return ll[0]
+
+    def _stripSpectrumSerial(self, value):
+        ll = value.rsplit('`', 2)
+        if len(ll) == 3:
+            # name is of form abc`xyz`
+            try:
+                return int(ll[1])
+            except ValueError:
+                pass
+
     def content_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
@@ -508,8 +521,8 @@ class CcpnNefContent:
                 ss = '`%s`' % peakListSerial
                 # Remove peakList serial suffix (which was added for disambiguation)
                 # So that multiple peakLists all go to one Spectrum
-                if spectrumName.endswith(ss):
-                    spectrumName = spectrumName[:-len(ss)]
+                # if spectrumName.endswith(ss):
+                #     spectrumName = spectrumName[:-len(ss)]
             else:
                 ll = spectrumName.rsplit('`', 2)
                 if len(ll) == 3:
@@ -518,8 +531,9 @@ class CcpnNefContent:
                         peakListParameters['serial'] = int(ll[1])
                     except ValueError:
                         pass
-                    else:
-                        spectrumName = ll[0]
+                    # else:
+                    #     spectrumName = ll[0]
+            spectrumName = self._stripSpectrumName(spectrumName)
 
         result = {category: OrderedSet([spectrumName]), }
         # 'nef_peak_list': OrderedSet([peakListParameters['serial']])}
@@ -547,12 +561,17 @@ class CcpnNefContent:
         # NOTE:ED - not correct yet, need 2 lists
         # peakListSerial = parentFrame['ccpn_peaklist_serial']
         # peakListSerial = parentFrame.get('ccpn_peaklist_serial') or 1
+        _parentName = parentFrame['sf_framecode']
+        _parentSerial = self._stripSpectrumSerial(_parentName)
+
         # get the list of peaks
         mapping = nef2CcpnMap[loop.name]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
-            peakListSerial = parentFrame.get('ccpn_peaklist_serial') or row.get('ccpn_peak_list_serial') or 1  # may not be defined in the list
+            peakListSerial = parentFrame.get('ccpn_peaklist_serial') or \
+                             row.get('ccpn_peak_list_serial') or \
+                             _parentSerial or 1  # may not be defined in the list
             # serial = parameters['serial']
             # result.add((name, peakListSerial, serial))
 
@@ -584,6 +603,9 @@ class CcpnNefContent:
 
         # NOTE:ED - not correct yet, need 2 lists
         # peakListSerial = parentFrame['ccpn_peaklist_serial']
+        _parentName = parentFrame['sf_framecode']
+        _parentSerial = self._stripSpectrumSerial(_parentName)
+
         # get the list of peaks
         mapping = nef2CcpnMap[loop.name]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
@@ -591,7 +613,9 @@ class CcpnNefContent:
             parameters = _parametersFromLoopRow(row, map2)
 
             serial = parameters['serial']
-            peakListSerial = parentFrame['ccpn_peaklist_serial'] or row.get('ccpn_peak_list_serial') or 1  # may not be defined in the list
+            peakListSerial = parentFrame['ccpn_peaklist_serial'] or \
+                             row.get('ccpn_peak_list_serial') or \
+                             _parentSerial or 1  # may not be defined in the list
             # result.add((name, peakListSerial, serial))
 
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [name, peakListSerial, serial])

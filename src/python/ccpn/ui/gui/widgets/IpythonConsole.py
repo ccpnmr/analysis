@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-23 09:36:16 +0100 (Wed, September 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFont, CONSOLEFONT
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Splitter import Splitter
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
 from ccpn.util.Logging import getLogger
@@ -73,7 +74,8 @@ class IpythonConsole(Widget):
 
         self.getLayout().setSpacing(1)
 
-        self.splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
+        # self.splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
+        self.splitter = Splitter(horizontal=False)
         self.splitter.addWidget(self.textEditor)
 
         self.consoleFrame = Frame(self, setLayout=True)
@@ -84,7 +86,8 @@ class IpythonConsole(Widget):
         self.consoleFrame.layout().addWidget(self.ipythonWidget, 0, 0)
         self.splitter.setStretchFactor(1, 8)
         self.splitter.setChildrenCollapsible(False)
-        self.splitter.setStyleSheet("QSplitter::handle { background-color: gray }")
+        # self.splitter.setStyleSheet("QSplitter::handle { background-color: gray }")
+
         self.getLayout().addWidget(self.splitter)
         namespace['runMacro'] = self._runMacro
         km.kernel.shell.push(namespace)

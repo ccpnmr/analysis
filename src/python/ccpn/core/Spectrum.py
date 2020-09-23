@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 12:46:44 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-23 09:40:36 +0100 (Wed, September 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -514,10 +514,12 @@ assignmentTolerances
         if value is not None and -SCALETOLERANCE < value < SCALETOLERANCE:
             # Display a warning, but allow to be set
             getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
-        value = float(value)
 
         self._scaleChanged = True
-        self._wrappedData.scale = value
+        if value is None:
+            self._wrappedData.scale = None
+        else:
+            self._wrappedData.scale = float(value)
 
         if self.dimensionCount == 1:
             # update the intensities as the scale has changed
@@ -1491,6 +1493,7 @@ assignmentTolerances
             if self._intensities is None:
                 getLogger().warning('Unable to get 1D slice data for %s' % self)
                 return np.array([])
+
         return self._intensities
 
     @intensities.setter
@@ -2426,15 +2429,41 @@ assignmentTolerances
     #=========================================================================================
 
     @logCommand(get='self')
+    def getIntensity(self, ppmPositions):
+        """Returns the interpolated height at the ppm position
+        """
+        # The height below is not derived from any fitting
+        # but is a weighted average of the values at the neighbouring grid points
+
+        if self.dimensionCount != 1:
+            raise ValueError('getIntensity only valid for 1d spectra')
+        if len(ppmPositions) != 1:
+            raise ValueError('Length of {} must be 1.'.format(ppmPositions))
+        if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPositions):
+            raise ValueError('ppmPositions values must be floats.')
+
+        ref = self.mainSpectrumReferences[0]
+        pp = ref.valueToPoint(ppmPositions[0])
+        frac = pp % 1
+
+        if self._intensities is not None and self._intensities.size != 0:
+            # need to interpolate between pp-1, and pp
+            height = self._intensities[int(pp) - 1] + \
+                     frac * (self._intensities[int(pp)] - self._intensities[int(pp) - 1])
+
+            # don't need to scale as _intensities is already scaled
+            return height
+
+    @logCommand(get='self')
     def getHeight(self, ppmPositions):
         """Returns the interpolated height at the ppm position
         """
         ref = self.mainSpectrumReferences
 
         if len(ppmPositions) != self.dimensionCount:
-            raise ValueError("Length of %s does not match number of dimensions." % str(ppmPositions))
+            raise ValueError('Length of %s does not match number of dimensions.' % str(ppmPositions))
         if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPositions):
-            raise ValueError("ppmPositions values must be floats.")
+            raise ValueError('ppmPositions values must be floats.')
 
         pointPosition = tuple(ref[dim].valueToPoint(ppm) for dim, ppm in enumerate(ppmPositions))
         return self.getPositionValue(pointPosition)
@@ -2444,9 +2473,9 @@ assignmentTolerances
         """Return the value nearest to the position given in points.
         """
         if len(pointPosition) != self.dimensionCount:
-            raise ValueError("Length of %s does not match number of dimensions." % str(pointPosition))
+            raise ValueError('Length of %s does not match number of dimensions.' % str(pointPosition))
         if not all(isinstance(dimVal, (int, float)) for dimVal in pointPosition):
-            raise ValueError("position values must be floats.")
+            raise ValueError('position values must be floats.')
 
         scale = self.scale if self.scale is not None else 1.0
         if -SCALETOLERANCE < scale < SCALETOLERANCE:

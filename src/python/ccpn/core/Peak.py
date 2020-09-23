@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 12:46:44 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-23 09:40:36 +0100 (Wed, September 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -121,7 +121,6 @@ class Peak(AbstractWrapperObject):
             raise TypeError('height must be a float, integer or None')
         elif value is not None and (value - value) != 0.0:
             raise TypeError('height cannot be NaN or Infinity')
-        value = float(value)
 
         if value is None:
             self._wrappedData.height = None
@@ -132,7 +131,7 @@ class Peak(AbstractWrapperObject):
                 getLogger().warning('Scaling {}.height by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
                 self._wrappedData.height = None
             else:
-                self._wrappedData.height = value / scale
+                self._wrappedData.height = float(value) / scale
 
     @property
     def heightError(self) -> Optional[float]:
@@ -153,7 +152,6 @@ class Peak(AbstractWrapperObject):
             raise TypeError('heightError must be a float, integer or None')
         elif value is not None and (value - value) != 0.0:
             raise TypeError('heightError cannot be NaN or Infinity')
-        value = float(value)
 
         if value is None:
             self._wrappedData.heightError = None
@@ -164,7 +162,7 @@ class Peak(AbstractWrapperObject):
                 getLogger().warning('Scaling {}.heightError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
                 self._wrappedData.heightError = None
             else:
-                self._wrappedData.heightError = value / scale
+                self._wrappedData.heightError = float(value) / scale
 
     @property
     def volume(self) -> Optional[float]:
@@ -185,7 +183,6 @@ class Peak(AbstractWrapperObject):
             raise TypeError('volume must be a float, integer or None')
         elif value is not None and (value - value) != 0.0:
             raise TypeError('volume cannot be NaN or Infinity')
-        value = float(value)
 
         if value is None:
             self._wrappedData.volume = None
@@ -196,7 +193,7 @@ class Peak(AbstractWrapperObject):
                 getLogger().warning('Scaling {}.volume by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
                 self._wrappedData.volume = None
             else:
-                self._wrappedData.volume = value / scale
+                self._wrappedData.volume = float(value) / scale
 
     @property
     def volumeError(self) -> Optional[float]:
@@ -217,7 +214,6 @@ class Peak(AbstractWrapperObject):
             raise TypeError('volumeError must be a float, integer or None')
         elif value is not None and (value - value) != 0.0:
             raise TypeError('volumeError cannot be NaN or Infinity')
-        value = float(value)
 
         if value is None:
             self._wrappedData.volumeError = None
@@ -228,7 +224,7 @@ class Peak(AbstractWrapperObject):
                 getLogger().warning('Scaling {}.volumeError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
                 self._wrappedData.volumeError = None
             else:
-                self._wrappedData.volumeError = value / scale
+                self._wrappedData.volumeError = float(value) / scale
 
     @property
     def figureOfMerit(self) -> Optional[float]:
@@ -944,6 +940,11 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.lineWidth = lineWidths[ii]
 
+    result.height = height          # use the method to store the unit-scaled value
+    result.volume = volume
+    result.heightError = heightError
+    result.volumeError = volumeError
+
     return result
 
 
@@ -997,7 +998,9 @@ def _newPickedPeak(self: PeakList, pointPositions: Sequence[float] = None, heigh
         if fitMethod and lineWidths and lineWidths[i] is not None:
             peakDim.lineWidth = dataDim.valuePerPoint * lineWidths[i]  # conversion from points to Hz
 
-    apiPeak.height = apiDataSource.scale * height
+    # apiPeak.height = apiDataSource.scale * height
+    # store the unit scaled value
+    apiPeak.height = height
 
     return result
 

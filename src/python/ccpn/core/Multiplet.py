@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 12:46:43 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-23 09:40:36 +0100 (Wed, September 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -177,7 +177,6 @@ class Multiplet(AbstractWrapperObject):
             raise TypeError('volume must be a float, integer or None')
         elif value is not None and (value - value) != 0.0:
             raise TypeError('volume cannot be NaN or Infinity')
-        value = float(value)
 
         if value is None:
             self._wrappedData.volume = None
@@ -188,7 +187,7 @@ class Multiplet(AbstractWrapperObject):
                 getLogger().warning('Scaling {}.volume by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
                 self._wrappedData.volume = None
             else:
-                self._wrappedData.volume = value / scale
+                self._wrappedData.volume = float(value) / scale
 
     @property
     def offset(self) -> Optional[float]:
@@ -227,7 +226,6 @@ class Multiplet(AbstractWrapperObject):
             raise TypeError('volumeError must be a float, integer or None')
         elif value is not None and (value - value) != 0.0:
             raise TypeError('volumeError cannot be NaN or Infinity')
-        value = float(value)
 
         if value is None:
             self._wrappedData.volumeError = None
@@ -238,7 +236,7 @@ class Multiplet(AbstractWrapperObject):
                 getLogger().warning('Scaling {}.volumeError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
                 self._wrappedData.volumeError = None
             else:
-                self._wrappedData.volumeError = value / scale
+                self._wrappedData.volumeError = float(value) / scale
 
     @property
     def figureOfMerit(self) -> Optional[float]:

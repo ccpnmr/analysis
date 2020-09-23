@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 15:04:49 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-23 09:34:54 +0100 (Wed, September 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -514,10 +514,12 @@ assignmentTolerances
         if value is not None and -SCALETOLERANCE < value < SCALETOLERANCE:
             # Display a warning, but allow to be set
             getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
-        value = float(value)
 
         self._scaleChanged = True
-        self._wrappedData.scale = value
+        if value is None:
+            self._wrappedData.scale = None
+        else:
+            self._wrappedData.scale = float(value)
 
         if self.dimensionCount == 1:
             # update the intensities as the scale has changed

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 15:04:49 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-23 09:34:54 +0100 (Wed, September 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -115,7 +115,6 @@ class Integral(AbstractWrapperObject):
             raise TypeError('value must be a float, integer or None')
         elif value is not None and (value - value) != 0.0:
             raise TypeError('value cannot be NaN or Infinity')
-        value = float(value)
 
         if value is None:
             self._wrappedData.volume = None
@@ -126,7 +125,7 @@ class Integral(AbstractWrapperObject):
                 getLogger().warning('Scaling {}.value by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
                 self._wrappedData.volume = None
             else:
-                self._wrappedData.volume = value / scale
+                self._wrappedData.volume = float(value) / scale
 
     @property
     def valueError(self) -> Optional[float]:
@@ -147,7 +146,6 @@ class Integral(AbstractWrapperObject):
             raise TypeError('valueError must be a float, integer or None')
         elif value is not None and (value - value) != 0.0:
             raise TypeError('valueError cannot be NaN or Infinity')
-        value = float(value)
 
         if value is None:
             self._wrappedData.volumeError = None
@@ -158,7 +156,7 @@ class Integral(AbstractWrapperObject):
                 getLogger().warning('Scaling {}.valueError by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
                 self._wrappedData.volumeError = None
             else:
-                self._wrappedData.volumeError = value / scale
+                self._wrappedData.volumeError = float(value) / scale
 
     @property
     def bias(self) -> float:

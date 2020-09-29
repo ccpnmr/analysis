@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-29 09:47:40 +0100 (Tue, September 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,25 +26,16 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 #=========================================================================================
 
 import numpy as np
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtGui, QtCore
 
-
-DEFAULTFONTREQUEST = 'editorFont'
-FIXEDFONTREQUEST = 'moduleFont'
-SIDEBARFONTREQUEST = 'messageFont'
-# MONACOFONTREQUEST = 'editorFont'
-# HELVETICAFONTREQUEST = 'editorFont'
-# LUCIDAGRANDEFONTREQUEST = 'editorFont'
 
 DEFAULTFONT = 'defaultFont'
 CONSOLEFONT = 'fixedFont'
 SIDEBARFONT = 'sidebarFont'
-# SYSTEMFONT = 'System'
-# MONACOFONT = 'Monaco'
-# HELVETICAFONT = 'Helvetica'
-# LUCIDAGRANDEFONT = 'Lucida Grande'
+TABLEFONT = 'tableFont'
 DEFAULTFONTNAME = 'Helvetica'
-DEFAULTFONTSIZE = 16
+DEFAULTFONTSIZE = 12
+DEFAULTFONTREGULAR = 'Regular'
 
 
 # This only works when we have a QtApp instance working; hence it need to go somewhere else.
@@ -52,9 +43,9 @@ DEFAULTFONTSIZE = 16
 #QtGui.QFontDatabase.addApplicationFont(os.path.join(fontsPath, 'open-sans/OpenSans-Regular.ttf'))
 
 
-def _readFontFromPreferences(fontRequest, preferences):
+def _readFontFromAppearances(fontRequest, preferences):
     # read font name from the preferences file
-    fontName = preferences.general.get(fontRequest) or DEFAULTFONTREQUEST
+    fontName = preferences.appearance.get(fontRequest)
     return fontName
 
 

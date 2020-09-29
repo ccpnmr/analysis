@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-29 09:47:40 +0100 (Tue, September 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,7 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme
+from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST
 from ccpn.framework.Translation import languages
 from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
 from ccpn.ui.gui.widgets import MessageDialog
@@ -61,7 +61,7 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, USERAUXI
     USEROTHERPATH, getInitialPath, setInitialPath
 from ccpn.framework.lib.pipeline.PipesLoader import _fetchUserPipesPath
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
-from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE
+from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
@@ -76,6 +76,11 @@ NotImplementedTipText = 'This option has not been implemented yet'
 DEFAULTSPACING = (3, 3)
 TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
 ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
+
+FONTLABELFORMAT = '_fontLabel{}'
+FONTDATAFORMAT = '_fontData{}'
+FONTSTRING = '_fontString'
+FONTPREFS = 'font{}'
 
 
 def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, userWorkingPath=None):
@@ -325,7 +330,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         for (tabFunc, tabName) in ((self._setGeneralTabWidgets, 'General'),
                                    (self._setSpectrumTabWidgets, 'Spectrum'),
-                                   (self._setExternalProgramsTabWidgets, 'External Programs')):
+                                   (self._setExternalProgramsTabWidgets, 'External Programs'),
+                                   (self._setAppearanceTabWidgets, 'Appearance'),
+                                   ):
             fr = ScrollableFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
                                  scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
 
@@ -347,35 +354,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.languageBox.setMinimumWidth(PulldownListsMinimumWidth)
         # self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
         self.languageBox.currentIndexChanged.connect(self._queueChangeLanguage)
-
-        row += 1
-        self.colourSchemeLabel = Label(parent, text="Colour Scheme ", grid=(row, 0))
-        self.colourSchemeBox = PulldownList(parent, grid=(row, 1), hAlign='l')
-        self.colourSchemeBox.setToolTip('SpectrumDisplay Background only')
-        self.colourSchemeBox.setMinimumWidth(PulldownListsMinimumWidth)
-        self.colourSchemeBox.addItems(COLOUR_SCHEMES)
-        # self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(self.preferences.general.colourScheme))
-        self._oldColourScheme = None
-        self.colourSchemeBox.currentIndexChanged.connect(self._queueChangeColourScheme)
-
-        row += 1
-        self.useNativeFileLabel = Label(parent, text="Use Native File Dialogs: ", grid=(row, 0))
-        self.useNativeFileBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNative)
-        self.useNativeFileBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNative'))
-
-        row += 1
-        self.useNativeLabel = Label(parent, text="Use Native Menus (requires restart): ", grid=(row, 0))
-        self.useNativeMenus = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNativeMenus)
-        self.useNativeMenus.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeMenus'))
-
-        row += 1
-        self.useNativeWebLabel = Label(parent, text="Use Native Web Browser: ", grid=(row, 0))
-        self.useNativeWebBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNativeWebbrowser)
-        self.useNativeWebBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeWebbrowser'))
-
-        # self._toggleGeneralOptions('useNativeWebbrowser', True)
-        # self.useNativeWebLabel.setEnabled(False)
-        # self.useNativeWebBox.setEnabled(False)
 
         row += 1
         self.autoSaveLayoutOnQuitLabel = Label(parent, text="Auto Save Layout On Quit: ", grid=(row, 0))
@@ -400,28 +378,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.autoBackupFrequencyData.setMinimumWidth(LineEditsMinimumWidth)
         # self.autoBackupFrequencyData.setValue(self.preferences.general.autoBackupFrequency)
         self.autoBackupFrequencyData.valueChanged.connect(self._queueSetAutoBackupFrequency)
-
-        # NOTE:ED - testing new font loader
-        row += 1
-        self._fontsLabel = Label(parent, text="Fonts (requires restart)", grid=(row, 0))
-
-        row += 1
-        self.editorFontLabel = Label(parent, text="    Editor Font: ", grid=(row, 0))
-        self.editorFontData = Button(parent, grid=(row, 1), callback=self._getEditorFont)
-
-        row += 1
-        self.moduleFontLabel = Label(parent, text="    IPython Console Font: ", grid=(row, 0))
-        self.moduleFontData = Button(parent, grid=(row, 1), callback=self._getModuleFont)
-
-        row += 1
-        self.messageFontLabel = Label(parent, text="    Sidebar Font: ", grid=(row, 0))
-        self.messageFontData = Button(parent, grid=(row, 1), callback=self._getMessageFont)
-
-        # NOTE:ED hide these for now
-        # self.moduleFontLabel.setVisible(False)
-        # self.moduleFontData.setVisible(False)
-        # self.messageFontLabel.setVisible(False)
-        # self.messageFontData.setVisible(False)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
@@ -482,8 +438,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.pipesPathDataButton = Button(parent, grid=(row, 2), callback=self._getUserPipesPath,
                                           icon='icons/directory', hPolicy='fixed')
         self.userPipesPath.textChanged.connect(self._queueSetPipesFilesPath)
-        # self.userPipesPath.setEnabled(False)
-        # self.pipesPathDataButton.setEnabled(False)
 
         row += 1
         self.useProjectPathLabel = Label(parent, text="Set Working Path to Project Path: ", grid=(row, 0))
@@ -492,21 +446,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useProjectPathLabel.setToolTip('Set the current user working path to the project folder on loading')
         self.useProjectPathBox.setToolTip('Set the current user working path to the project folder on loading')
 
-        # row += 1
-        # self.annotationsLabel = Label(parent, text="Annotations", grid=(row, 0))
-        # try:
-        #   annType = self.preferences.general.annotationType
-        # except:
-        #   annType = 0
-        #   self.preferences.general.annotationType = annType
-        # self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid'],
-        #                                                    selectedInd=annType,
-        #                                                    callback=self._setAnnotations,
-        #                                                    direction='horizontal',
-        #                                                    grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-        #                                                    tipTexts=None,
-        #                                                    )
-
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
@@ -514,11 +453,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useProxyLabel = Label(parent, text="Use Proxy Settings: ", grid=(row, 0))
         self.useProxyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.proxySettings.useProxy)
         self.useProxyBox.toggled.connect(self._queueSetUseProxy)
-
-        # row += 1
-        # self.useSystemProxyLabel = Label(parent, text="   Use System Proxy for Network: ", grid=(row, 0))
-        # self.useSystemProxyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.proxySettings.useSystemProxy)
-        # self.useSystemProxyBox.toggled.connect(self._queueSetUseSystemProxy)
 
         row += 1
         self.proxyAddressLabel = Label(parent, text="   Web Proxy Server: ", grid=(row, 0), hAlign='l')
@@ -561,6 +495,68 @@ class PreferencesPopup(CcpnDialogMainWidget):
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(row, 1), gridSpan=(1, 1))
 
+    def _setAppearanceTabWidgets(self, parent):
+        """Insert a widget in here to appear in the Appearance Tab
+        """
+
+        row = 0
+        self.colourSchemeLabel = Label(parent, text="Colour Scheme ", grid=(row, 0))
+        self.colourSchemeBox = PulldownList(parent, grid=(row, 1), hAlign='l')
+        self.colourSchemeBox.setToolTip('SpectrumDisplay Background only')
+        self.colourSchemeBox.setMinimumWidth(PulldownListsMinimumWidth)
+        self.colourSchemeBox.addItems(COLOUR_SCHEMES)
+        # self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(self.preferences.general.colourScheme))
+        self._oldColourScheme = None
+        self.colourSchemeBox.currentIndexChanged.connect(self._queueChangeColourScheme)
+
+        row += 1
+        self.useNativeFileLabel = Label(parent, text="Use Native File Dialogs: ", grid=(row, 0))
+        self.useNativeFileBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNative)
+        self.useNativeFileBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNative'))
+
+        row += 1
+        self.useNativeLabel = Label(parent, text="Use Native Menus (requires restart): ", grid=(row, 0))
+        self.useNativeMenus = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNativeMenus)
+        self.useNativeMenus.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeMenus'))
+
+        row += 1
+        self.useNativeWebLabel = Label(parent, text="Use Native Web Browser: ", grid=(row, 0))
+        self.useNativeWebBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNativeWebbrowser)
+        self.useNativeWebBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeWebbrowser'))
+
+        # NOTE:ED - testing new font loader
+        row += 1
+        self._fontsLabel = Label(parent, text="Fonts (requires restart)", grid=(row, 0))
+
+        for num, fontName in enumerate(FONTLIST):
+            row += 1
+            _label = Label(parent, text="    {}: ".format(fontName), grid=(row, 0))
+            _data = Button(parent, grid=(row, 1), callback=partial(self._getFont, num, fontName))
+
+            setattr(self, FONTLABELFORMAT.format(num), _label)
+            setattr(self, FONTDATAFORMAT.format(num), _data)
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        Spacer(parent, 15, 2,
+               QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+               grid=(row, 1), gridSpan=(1, 1))
+
+    def _populateAppearanceTab(self):
+        """Populate the widgets in the appearanceTab
+        """
+        self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(self.preferences.general.colourScheme))
+        self.useNativeFileBox.setChecked(self.preferences.general.useNative)
+        self.useNativeMenus.setChecked(self.preferences.general.useNativeMenus)
+        self.useNativeWebBox.setChecked(self.preferences.general.useNativeWebbrowser)
+
+        for fontNum, fontName in enumerate(FONTLIST):
+            value = self.preferences.appearance[FONTPREFS.format(fontNum)]
+            _fontAttr = getattr(self, FONTDATAFORMAT.format(fontNum))
+            self.setFontText(_fontAttr, value)
+
     def _populate(self):
         """Populate the widgets in the tabs
         """
@@ -572,6 +568,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self._populateGeneralTab()
             self._populateSpectrumTab()
             self._populateExternalProgramsTab()
+            self._populateAppearanceTab()
 
     def setFontText(self, widget, fontString):
         """Set the contents of the widget the details of the font
@@ -579,7 +576,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         try:
             name, size, _, _, _, _, _, _, _, _, type = fontString.split(',')
         except:
-            name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, "Regular"
+            name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
 
         fontName = '{}, {}pt, {}'.format(name, size, type)
         widget._fontString = fontString
@@ -589,20 +586,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Populate the widgets in the generalTab
         """
         self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
-        self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(self.preferences.general.colourScheme))
-        self.useNativeFileBox.setChecked(self.preferences.general.useNative)
-        self.useNativeMenus.setChecked(self.preferences.general.useNativeMenus)
-        self.useNativeWebBox.setChecked(self.preferences.general.useNativeWebbrowser)
-
-        self.setFontText(self.editorFontData, self.preferences.general.editorFont)
-        self.setFontText(self.moduleFontData, self.preferences.general.moduleFont)
-        self.setFontText(self.messageFontData, self.preferences.general.messageFont)
-
-        # TODO:ED disabled for testing
-        # self._toggleGeneralOptions('useNativeWebbrowser', True)
-        # self.useNativeWebLabel.setEnabled(False)
-        # self.useNativeWebBox.setEnabled(False)
-
         self.autoSaveLayoutOnQuitBox.setChecked(self.preferences.general.autoSaveLayoutOnQuit)
         self.restoreLayoutOnOpeningBox.setChecked(self.preferences.general.restoreLayoutOnOpening)
         self.autoBackupEnabledBox.setChecked(self.preferences.general.autoBackupEnabled)
@@ -616,7 +599,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # # TODO enable plugin PathData
         # self.pluginPathData.setDisabled(True)
         # self.pluginPathDataButton.setDisabled(True)
-        userPipesPath = _fetchUserPipesPath(self.application) # gets from preferences or creates the default dir
+        userPipesPath = _fetchUserPipesPath(self.application)  # gets from preferences or creates the default dir
         self.userPipesPath.setText(str(userPipesPath))
 
         self.useProjectPathBox.setChecked(self.preferences.general.useProjectPath)
@@ -991,14 +974,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         self.zPlaneNavigationModeLabel = Label(parent, text="zPlane Navigation Mode", grid=(row, 0))
         self.zPlaneNavigationModeData = RadioButtons(parent, texts=[val.description for val in ZPlaneNavigationModes],
-                                                # selectedInd=annType,
-                                                callback=self._queueSetZPlaneNavigationMode,
-                                                direction='h',
-                                                grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                                tipTexts=('Tools are located at the bottom of the spectrumDisplay,\nand will operate on the last strip selected in that spectrumDisplay',
-                                                          'Tools are located at the bottom of each strip',
-                                                          'Tools are displayed in the upper-left corner of each strip display'),
-                                                )
+                                                     # selectedInd=annType,
+                                                     callback=self._queueSetZPlaneNavigationMode,
+                                                     direction='h',
+                                                     grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                                     tipTexts=('Tools are located at the bottom of the spectrumDisplay,\nand will operate on the last strip selected in that spectrumDisplay',
+                                                               'Tools are located at the bottom of each strip',
+                                                               'Tools are displayed in the upper-left corner of each strip display'),
+                                                     )
         self.zPlaneNavigationModeLabel.setToolTip('Select where the zPlane navigation tools are located')
 
         row += 1
@@ -1126,14 +1109,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.marksDefaultColourLabel = Label(parent, text="Default Marks Colour:", grid=(row, 0))
-        self.marksDefaultColourBox = PulldownList(parent, grid=(row, 1), )#hAlign='l', )
+        self.marksDefaultColourBox = PulldownList(parent, grid=(row, 1), )  #hAlign='l', )
 
         # populate colour pulldown and set to the current colour
         fillColourPulldown(self.marksDefaultColourBox, allowAuto=False, includeGradients=True)
         self.marksDefaultColourBox.currentIndexChanged.connect(self._queueChangeMarksColourIndex)
 
         # add a colour dialog button
-        self.marksDefaultColourButton = Button(parent, grid=(row, 2), hAlign='l', #vAlign='t',
+        self.marksDefaultColourButton = Button(parent, grid=(row, 2), hAlign='l',  #vAlign='t',
                                                icon='icons/colours', hPolicy='fixed')
         self.marksDefaultColourButton.clicked.connect(self._queueChangeMarksColourButton)
 
@@ -1223,10 +1206,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.PDFViewerPath.textChanged.connect(self._queueSetPDFViewerPath)
         # self.PDFViewerPath.setText(self.preferences.externalPrograms.pDFViewer)
         self.PDFViewerPathButton = Button(parent, grid=(row, 2), callback=self._getPDFViewerPath, icon='icons/directory',
-                                      hPolicy='fixed')
+                                          hPolicy='fixed')
 
         self.testPDFViewerPathButton = Button(parent, grid=(row, 3), callback=self._testPDFViewer,
-                                          text='test', hPolicy='fixed')
+                                              text='test', hPolicy='fixed')
 
         # add spacer to stop columns changing width
         row += 1
@@ -2146,55 +2129,21 @@ class PreferencesPopup(CcpnDialogMainWidget):
             return partial(self._toggleGeneralOptions, option, checked)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetEditorFont(self):
-        value = self.editorFontData._fontString
-        if value != self.preferences.general.editorFont:
-            return partial(self._setEditorFont, value)
+    def _queueSetFont(self, dim):
+        _fontAttr = getattr(self, FONTDATAFORMAT.format(dim))
+        value = _fontAttr._fontString
+        if value != self.preferences.appearance[FONTPREFS.format(dim)]:
+            return partial(self._setFont, dim, value)
 
-    def _setEditorFont(self, value):
-        self.preferences.general.editorFont = value
+    def _setFont(self, dim, value):
+        self.preferences.appearance[FONTPREFS.format(dim)] = value
 
-    def _getEditorFont(self):
+    def _getFont(self, dim, fontName):
         # Simple font grabber from the system
-        value = self.editorFontData._fontString
-        newFont, ok = QtWidgets.QFontDialog.getFont(QtGui.QFont(value), caption='Select Editor Font')
+        _fontAttr = getattr(self, FONTDATAFORMAT.format(dim))
+        value = _fontAttr._fontString
+        newFont, ok = QtWidgets.QFontDialog.getFont(QtGui.QFont(value), caption='Select {} Font'.format(fontName))
         if ok:
-            self.setFontText(self.editorFontData, newFont.toString())
+            self.setFontText(_fontAttr, newFont.toString())
             # add the font change to the apply queue
-            self._queueSetEditorFont()
-
-    @queueStateChange(_verifyPopupApply)
-    def _queueSetModuleFont(self):
-        value = self.moduleFontData._fontString
-        if value != self.preferences.general.moduleFont:
-            return partial(self._setModuleFont, value)
-
-    def _setModuleFont(self, value):
-        self.preferences.general.moduleFont = value
-
-    def _getModuleFont(self):
-        # Simple font grabber from the system
-        value = self.moduleFontData._fontString
-        newFont, ok = QtWidgets.QFontDialog.getFont(QtGui.QFont(value), caption='Select Module Font')
-        if ok:
-            self.setFontText(self.moduleFontData, newFont.toString())
-            # add the font change to the apply queue
-            self._queueSetModuleFont()
-
-    @queueStateChange(_verifyPopupApply)
-    def _queueSetMessageFont(self):
-        value = self.messageFontData._fontString
-        if value != self.preferences.general.messageFont:
-            return partial(self._setMessageFont, value)
-
-    def _setMessageFont(self, value):
-        self.preferences.general.messageFont = value
-
-    def _getMessageFont(self):
-        # Simple font grabber from the system
-        value = self.messageFontData._fontString
-        newFont, ok = QtWidgets.QFontDialog.getFont(QtGui.QFont(value), caption='Select Message Font')
-        if ok:
-            self.setFontText(self.messageFontData, newFont.toString())
-            # add the font change to the apply queue
-            self._queueSetMessageFont()
+            self._queueSetFont(dim)

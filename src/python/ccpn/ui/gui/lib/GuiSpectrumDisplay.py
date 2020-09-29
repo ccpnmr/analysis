@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:22 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-29 09:47:39 +0100 (Tue, September 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -259,59 +259,33 @@ class GuiSpectrumDisplay(CcpnModule):
         axisRow = 3
         phasingRow = 4
 
-        # self._widgetScrollArea = ScrollArea(parent=self.qtParent, scrollBarPolicies=('asNeeded', 'never'),
-        #                                     grid=(spectrumRow, 0), gridSpan=(1,7))
-        # self._widgetScrollArea.setWidgetResizable(True)
-        #
-        # self._spectrumFrame = Frame(parent=self.qtParent, setLayout=True,
-        #                             grid=(spectrumRow, 0), gridSpan=(1, 7))
-        # self.spectrumToolBar = SpectrumToolBar(parent=self._spectrumFrame, widget=self, grid=(0,0))
-        #
-        # self._widgetScrollArea.setWidget(self._spectrumFrame)
-        # self._widgetScrollArea.setFixedHeight(30)
-        # self._spectrumFrame.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Ignored)
-        # # self.spectrumToolBar.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        # self.spectrumToolBar.setFixedSize(self.spectrumToolBar.sizeHint())
-
-        # self._spectrumFrame = Frame(parent=self.qtParent, setLayout=True,
-        #                             grid=(spectrumRow, 0), gridSpan=(1, 7))
-        #
-        # self._leftButton = Button(parent=self._spectrumFrame, vAlign='c', hAlign='l', grid=(0, 0),
-        #                          icon='icons/yellow-arrow-left')
-        #
-        # self.spectrumToolBar = SpectrumToolBar(parent=self._spectrumFrame, widget=self,
-        #                                        grid=(0, 1))
-        # self.spectrumToolBar.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        #
-        # self._spacer = Spacer(self._spectrumFrame, 2, 2,
-        #                       QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed, grid=(0, 2))
-        #
-        # self._rightButton = Button(parent=self._spectrumFrame, grid=(0, 3),
-        #                          icon='icons/yellow-arrow-right')
-        #
-        #
+        _spacing = 4
+        _styleSheet = 'QToolBar { spacing: 0px; padding: 0px; }' \
+                      'QToolButton { padding: 0px; }'
+        _iconSize = max(getFontHeight(size='VLARGE') or 30, 30)
+        # TOOLBAR_HEIGHT = _iconSize + _spacing
 
         self.toolBarFrame = Frame(parent=self.qtParent, grid=(spectrumRow, 0), gridSpan=(1, 7), setLayout=True,
-                                  hPolicy='minimal', hAlign='left')
-        self.toolBarFrame.setContentsMargins(4, 4, 4, 4)
-
-        TOOLBAR_HEIGHT = max(getFontHeight(size='VLARGE') or 30, 30)
+                                  hPolicy='minimal', hAlign='left', showBorder=False,
+                                  spacing=(_spacing, _spacing), margins=(_spacing, _spacing, _spacing, _spacing))
 
         # Utilities Toolbar; filled in Nd/1d classes
-        self.spectrumUtilToolBar = ToolBar(parent=self.toolBarFrame, iconSizes=(TOOLBAR_HEIGHT, TOOLBAR_HEIGHT),
+        self.spectrumUtilToolBar = ToolBar(parent=self.toolBarFrame, iconSizes=(_iconSize, _iconSize),
                                            grid=(0, 0), hPolicy='minimal', hAlign='left')
-        self.spectrumUtilToolBar.setFixedHeight(TOOLBAR_HEIGHT)
 
+        # spectrum toolbar - holds spectrum icons for spectrumDisplay
         self.spectrumToolBar = SpectrumToolBar(parent=self.toolBarFrame, widget=self,
                                                grid=(1, 0), hPolicy='minimal', hAlign='left')
-        self.spectrumToolBar.setFixedHeight(TOOLBAR_HEIGHT)
 
-        # spectrumGroupsToolBar
+        # spectrumGroupsToolBar - holds spectrumGroup icons, slightly different behaviour
         self.spectrumGroupToolBar = SpectrumGroupToolBar(parent=self.toolBarFrame, spectrumDisplay=self,
                                                          grid=(2, 0), hPolicy='minimal', hAlign='left')
 
-        self.spectrumGroupToolBar.setFixedHeight(TOOLBAR_HEIGHT)
         self.spectrumGroupToolBar.hide()
+
+        self.spectrumUtilToolBar.setStyleSheet(_styleSheet)
+        self.spectrumToolBar.setStyleSheet(_styleSheet)
+        self.spectrumGroupToolBar.setStyleSheet(_styleSheet)
 
         if self.application.preferences.general.showToolbar:
             self.spectrumUtilToolBar.show()
@@ -320,15 +294,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self.stripFrame = Frame(setLayout=True, showBorder=False, spacing=(5, 0), stretch=(1, 1), margins=(0, 0, 0, 0),
                                 acceptDrops=True)
-        # self.stripFrame.layout().setContentsMargins(0, 0, 0, 0)
-
-        # frameStyleSheetTemplate = ''' .%s { border-left: 1px solid #a9a9a9;
-        #                               border-right: 1px solid #a9a9a9;
-        #                               border-bottom: 1px solid #a9a9a9;
-        #                               border-bottom-right-radius: 2px;
-        #                               border-bottom-left-radius: 2px;
-        #                               %s
-        #                               }'''
 
         if useScrollArea:
             # scroll area for strips

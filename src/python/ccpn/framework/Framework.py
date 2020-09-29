@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-29 09:47:39 +0100 (Tue, September 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3257,6 +3257,24 @@ def isValidPath(projectName, stripFullPath=True, stripExtension=True):
         if name.isalnum():
             return True
 
+def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
+    """Check whether the project name is valid after stripping fullpath and extension
+    Can only contain alphanumeric characters and underscores
+
+    :param projectName: name of project to check
+    :param stripFullPath: set to true to remove leading directory
+    :param stripExtension: set to true to remove extension
+    :return: True if length <= 32 else False
+    """
+    if not projectName:
+        return
+
+    if isinstance(projectName, str):
+        name = os.path.basename(projectName) if stripFullPath else projectName
+        name = os.path.splitext(name)[0] if stripExtension else name
+
+        return len(name) <= 32
+
 
 def getSaveDirectory(parent, preferences=None):
     """Opens save Project as dialog box and gets directory specified in the file dialog."""
@@ -3282,6 +3300,11 @@ def getSaveDirectory(parent, preferences=None):
     if not isValidPath(newPath, stripFullPath=True, stripExtension=True):
         getLogger().warning('Filename can only contain alphanumeric characters and underscores')
         MessageDialog.showWarning('Save Project', 'Filename can only contain alphanumeric characters and underscores')
+        return
+
+    if not isValidFileNameLength(newPath, stripFullPath=True, stripExtension=True):
+        getLogger().warning('Filename must be 32 characters or fewer')
+        MessageDialog.showWarning('Save Project', 'Filename must be 32 characters or fewer')
         return
 
     if newPath:

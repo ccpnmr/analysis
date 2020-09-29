@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-29 09:47:40 +0100 (Tue, September 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -270,7 +270,7 @@ class PlaneSelectorWidget(Frame):
 
         self.spinBox = DoubleSpinbox(parent=self._mainWidget, showButtons=False, grid=(0, 1),
                                      callback=self._spinBoxChanged, objectName='PlaneSelectorWidget_planeDepth')
-        self.spinBox.setFixedWidth(_size * 4)
+        self.spinBox.setFixedWidth(_size * 5)
         # self.spinBox.setFixedHeight(height)
         self.spinBox.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-29 09:47:40 +0100 (Tue, September 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -57,7 +57,7 @@ from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.core.lib.Util import getParentObjectFromPid
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, showMessage
-from ccpn.ui.gui.widgets.Font import setWidgetFont
+from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT
 
 
 # BG_COLOR = QtGui.QColor('#E0E0E0')
@@ -174,7 +174,7 @@ class GuiTable(TableWidget, Base):
 GuiTable {
     background-color: %(GUITABLE_BACKGROUND)s;
     alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-    border: 1px solid #a9a9a9;
+    border: 1px solid %(BORDER_NOFOCUS)s;
     border-radius: 2px;
 }
 
@@ -192,7 +192,7 @@ GuiTable::item::selected {
                  mainWindow=None,
                  dataFrameObject=None,  # collate into a single object that can be changed quickly
                  actionCallback=None, selectionCallback=None, checkBoxCallback=None,
-                 _pulldownKwds=None, enableMouseMoveEvent = True,
+                 _pulldownKwds=None, enableMouseMoveEvent=True,
                  multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                  enableExport=True, enableDelete=True, enableSearch=True,
                  hideIndex=True, stretchLastSection=True, _applyPostSort=True,
@@ -274,10 +274,11 @@ GuiTable::item::selected {
         self.setDragDropMode(self.InternalMove)
         self.setDropIndicatorShown(True)
 
+        _header = self.horizontalHeader()
         # set Interactive and last column to expanding
-        self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
-        self.horizontalHeader().setStretchLastSection(stretchLastSection)
-        self.horizontalHeader().setResizeContentsPrecision(0)
+        _header.setResizeMode(QtWidgets.QHeaderView.Interactive)
+        _header.setStretchLastSection(stretchLastSection)
+        _header.setResizeContentsPrecision(0)
         self.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
 
         # enable the right click menu
@@ -294,7 +295,7 @@ GuiTable::item::selected {
             self.setTableFromDataFrame(dataFrameObject.dataFrame)
 
         # enable callbacks
-        self.enableMouseMoveEvent = enableMouseMoveEvent #this will fire callbacks
+        self.enableMouseMoveEvent = enableMouseMoveEvent  #this will fire callbacks
         self._actionCallback = actionCallback
         self._selectionCallback = selectionCallback
         self._lastSelection = None
@@ -337,15 +338,15 @@ GuiTable::item::selected {
         # model.currentChanged.connect(self._selectionTableCallback)
         # self.clicked.connect(self._selectionTableCallback)
 
-        # self.horizontalHeader().sortIndicatorChanged.connect(self._sortChanged)
-        # self.horizontalHeader().sectionPressed.connect(self._preSort)
+        # _header.sortIndicatorChanged.connect(self._sortChanged)
+        # _header.sectionPressed.connect(self._preSort)
 
         # self.setFormat('%0.3f')
 
         if _applyPostSort:
-            self.horizontalHeader().sectionClicked.connect(self._postSort)
+            _header.sectionClicked.connect(self._postSort)
         else:
-            self.horizontalHeader().sectionClicked.connect(self._postDefaultSort)
+            _header.sectionClicked.connect(self._postDefaultSort)
 
         # set internal flags
         self._mousePressedPos = None
@@ -380,8 +381,10 @@ GuiTable::item::selected {
         # update method for ccpn sorting
         TableWidgetItem.__lt__ = __ltForTableWidgetItem__
 
-        setWidgetFont(self.horizontalHeader(), )
-        setWidgetFont(self.verticalHeader(), )
+        _header.setHighlightSections(self.font().bold())
+        setWidgetFont(self, name=TABLEFONT)
+        setWidgetFont(_header, name=TABLEFONT)
+        setWidgetFont(self.verticalHeader(), name=TABLEFONT)
 
     def _initTableCommonWidgets(self, parent, height=35, setGuiNotifier=None, **kwds):
         """Initialise the common table elements
@@ -722,7 +725,7 @@ GuiTable::item::selected {
                 state = 2 if val else 0
                 item.setCheckState(state)
                 self.setItem(row, col, item)
-                item.setValue('') # errors in getting this in sync with bools or any value
+                item.setValue('')  # errors in getting this in sync with bools or any value
                 item._format = bool
 
             elif isinstance(val, list or tuple):
@@ -781,7 +784,6 @@ GuiTable::item::selected {
                         if mouseDrag:
                             return
 
-
         # update selection
         self._lastSelection = {'clicked'       : self.currentItem(),
                                'selection'     : objList,
@@ -794,9 +796,9 @@ GuiTable::item::selected {
             item = self.currentItem()
             targetName = ''
             if objList is not None:
-                if len(objList)>0:
+                if len(objList) > 0:
                     if hasattr(objList[0], 'className'):
-                        targetName=objList[0].className
+                        targetName = objList[0].className
 
                     if item and objList and self._selectionCallback:
                         data = CallBack(theObject=self._dataFrameObject,
@@ -978,9 +980,6 @@ GuiTable::item::selected {
             if key == QtCore.Qt.Key_A:
                 # self.selectAll()
                 self._selectionTableCallback(None)
-
-
-
 
     def enterEvent(self, event):
         try:
@@ -1732,7 +1731,7 @@ GuiTable::item::selected {
                                     if obj:
                                         selectedObjects.append(obj)
             if valuesDict:
-                selectedObjects = [row for i,row in pd.DataFrame(valuesDict).iterrows()]
+                selectedObjects = [row for i, row in pd.DataFrame(valuesDict).iterrows()]
 
             return selectedObjects
         else:
@@ -1793,7 +1792,6 @@ GuiTable::item::selected {
         if doCallback:
             self._selectionTableCallback(None)
 
-
     def _highLightObjs(self, selection, scrollToSelection=True):
 
         # skip if the table is empty
@@ -1806,7 +1804,7 @@ GuiTable::item::selected {
             model = self.model()
 
             if selection:
-                if len(selection)>0:
+                if len(selection) > 0:
                     if isinstance(selection[0], pd.Series):
                         # not sure how to handle this
                         return
@@ -2192,7 +2190,7 @@ GuiTable::item::selected {
                 for rowObj in rowObjs:
                     newData = data.copy()
                     newData[Notifier.OBJECT] = rowObj
-                    newData[Notifier.TRIGGER] = _triggerType or data[Notifier.TRIGGER]            # Notifier.CHANGE
+                    newData[Notifier.TRIGGER] = _triggerType or data[Notifier.TRIGGER]  # Notifier.CHANGE
                     newData['_calledFromCell'] = cell
 
                     # check whether we are the row object or still a cell object
@@ -2601,16 +2599,19 @@ class GuiTableFrame(Frame):
         self.guiTable = GuiTable(self, *args, **kwargs)
         self.searchWidget = None
 
+
 def _getValueByHeader(row, header):
     try:
         return row[header]
     except Exception as e:
-        getLogger().warn('GuiTable error in getting a value for header %s. Check dataframe Header %s' %(header, e))
+        getLogger().warn('GuiTable error in getting a value for header %s. Check dataframe Header %s' % (header, e))
+
 
 def _setValueByHeader(row, header, value):
     row = row.copy()
     row[header] = value
     return row
+
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Icon import Icon

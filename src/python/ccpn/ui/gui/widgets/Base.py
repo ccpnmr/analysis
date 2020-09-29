@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-29 09:47:40 +0100 (Tue, September 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -80,6 +80,7 @@ class SignalBlocking():
     """
     Class to add widget blocking methods to a subclass
     """
+
     def _blockEvents(self, _widgetBlockers, blanking=False, project=None):
         """Block all updates/signals/notifiers in the widget.
         """
@@ -202,6 +203,7 @@ class Base(DropBase, SignalBlocking):
     def _init(self, isFloatWidget=False,
               tipText=None,
               bgColor=None, fgColor=None,
+              enabled=None,
 
               # keywords related to optional layout
               setLayout=False,
@@ -213,7 +215,7 @@ class Base(DropBase, SignalBlocking):
               hAlign=None, vAlign=None,
               hidden=False,
 
-              # keywords related to dropable properties
+              # keywords related to droppable properties
               acceptDrops=False,
 
               # other keywords
@@ -270,6 +272,9 @@ class Base(DropBase, SignalBlocking):
         if setLayout:
             self.setGridLayout(margins=margins, spacing=spacing)
             self.setStyleSheet('padding: 0px;')
+
+        if enabled is not None:
+            self.setEnabled(enabled)
 
         # add the widget to parent if it is not a float widget and either grid[0] (horizontal)
         # or grid[1] (vertical) are defined

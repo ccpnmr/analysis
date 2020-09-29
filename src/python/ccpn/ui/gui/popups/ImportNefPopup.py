@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-07 01:36:21 +0100 (Fri, August 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-29 09:47:39 +0100 (Tue, September 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -56,6 +56,8 @@ from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.widgets.TextEditor import PlainTextEditor
+from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.Base import SignalBlocking
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
@@ -279,25 +281,40 @@ class NefDictFrame(Frame):
                                                 multiSelect=True)
 
         # info frame (right frame)
-        self.tablesFrame = Frame(self._infoFrame, setLayout=True, showBorder=False, grid=(0, 0))
-        self._frameOptionsNested = Frame(self._infoFrame, setLayout=True, showBorder=False, grid=(1, 0))
-        self.frameOptionsFrame = Frame(self._frameOptionsNested, setLayout=True, showBorder=False, grid=(1, 0))
-        self.fileFrame = Frame(self._infoFrame, setLayout=True, showBorder=False, grid=(2, 0))
-        self._filterLogFrame = MoreLessFrame(self._infoFrame, name='Filter Log', showMore=False, grid=(3, 0), gridSpan=(1, 1))
+        self._optionsSplitter = Splitter(self._infoFrame, setLayout=True, horizontal=False)
+        self._infoFrame.getLayout().addWidget(self._optionsSplitter, 0, 0)
+
+        self.tablesFrame = Frame(self._optionsSplitter, setLayout=True, showBorder=False, grid=(0, 0))
+        self._optionsFrame = Frame(self._optionsSplitter, setLayout=True, showBorder=False, grid=(1, 0))
+        self._optionsSplitter.addWidget(self.tablesFrame)
+        self._optionsSplitter.addWidget(self._optionsFrame)
+
+        self._frameOptionsNested = Frame(self._optionsFrame, setLayout=True, showBorder=False, grid=(1, 0))
+        self.frameOptionsFrame = Frame(self._frameOptionsNested, setLayout=True, showBorder=False, grid=(1, 0))#, vAlign='t')
+        self.fileFrame = Frame(self._optionsFrame, setLayout=True, showBorder=False, grid=(2, 0))
+        self._filterLogFrame = MoreLessFrame(self._optionsFrame, name='Filter Log', showMore=False, grid=(3, 0), gridSpan=(1, 1))
         self._treeSplitter.addWidget(self._filterLogFrame)
+
+        # self.tablesFrame = Frame(self._infoFrame, setLayout=True, showBorder=False, grid=(0, 0))
+        # self._frameOptionsNested = Frame(self._infoFrame, setLayout=True, showBorder=False, grid=(1, 0))
+        # self.frameOptionsFrame = Frame(self._frameOptionsNested, setLayout=True, showBorder=False, grid=(1, 0))
+        # self.fileFrame = Frame(self._infoFrame, setLayout=True, showBorder=False, grid=(2, 0))
+        # self._filterLogFrame = MoreLessFrame(self._infoFrame, name='Filter Log', showMore=False, grid=(3, 0), gridSpan=(1, 1))
+        # self._treeSplitter.addWidget(self._filterLogFrame)
 
         _row = 0
         self.wordWrapData = CheckBoxCompoundWidget(
                 self._filterLogFrame.contentsFrame,
                 grid=(_row, 0), hAlign='left',
                 #minimumWidths=(colwidth, 0),
-                fixedWidths=(None, 30),
+                fixedWidths=(None, None),
                 orientation='left',
                 labelText='Wordwrap:',
                 checked=False,
                 callback=lambda val: self.logData.setLineWrapMode(QtWidgets.QTextEdit.WidgetWidth if val else QtWidgets.QTextEdit.NoWrap)
                 #self._toggleWordWrap,
                 )
+
         _row += 1
         self.logData = TextEditor(self._filterLogFrame.contentsFrame, grid=(_row, 0), gridSpan=(1, 3))
         self.logData.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
@@ -638,14 +655,9 @@ class NefDictFrame(Frame):
 
             row = 0
             # editFrame = Frame(self.frameOptionsFrame, setLayout=True, grid=(row, 0), showBorder=False)
-            saveFrameLabel = Label(self.frameOptionsFrame, text=singular, grid=(row, 0))
+            Label(self.frameOptionsFrame, text=singular, grid=(row, 0))
             saveFrameData = LineEdit(self.frameOptionsFrame, text=str(itemName), grid=(row, 1))
             # editFrame.setFixedHeight(24)
-
-            if errorCode in _errors and itemName in _errors[errorCode]:
-                palette = saveFrameData.palette()
-                palette.setColor(QtGui.QPalette.Base, _fillColour)
-                saveFrameData.setPalette(palette)
 
             texts = ('Rename', 'Auto Rename')
             callbacks = (partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame),
@@ -665,6 +677,32 @@ class NefDictFrame(Frame):
                                              grid=(row, 1), gridSpan=(1, 2), direction='v',
                                              setLastButtonFocus=False)
                 row += 1
+
+            self.wordWrapDataOptions = CheckBoxCompoundWidget(
+                    self.frameOptionsFrame,
+                    grid=(row, 0), gridSpan=(1, 3), hAlign='left',
+                    #minimumWidths=(colwidth, 0),
+                    fixedWidths=(None, None),
+                    orientation='left',
+                    labelText='Wordwrap:',
+                    checked=False,
+                    callback=lambda val: self._commentData.setLineWrapMode(QtWidgets.QTextEdit.WidgetWidth if val else QtWidgets.QTextEdit.NoWrap),
+                    enabled=False
+                    )
+            row += 1
+
+            Label(self.frameOptionsFrame, text='Comment', grid=(row, 0), enabled=False)
+            self._commentData = TextEditor(self.frameOptionsFrame, grid=(row, 1), gridSpan=(1, 2), enabled=False)
+            self._commentData.set('to do ...')
+            self._commentData.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+            self._commentData.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
+            _height = getFontHeight()
+            self._commentData.setMinimumHeight(_height * 3)
+
+            if errorCode in _errors and itemName in _errors[errorCode]:
+                palette = saveFrameData.palette()
+                palette.setColor(QtGui.QPalette.Base, _fillColour)
+                saveFrameData.setPalette(palette)
 
             if tableColourFunc is not None:
                 tableColourFunc(self, saveFrame, item)
@@ -1283,9 +1321,9 @@ class ImportNefPopup(CcpnDialogMainWidget):
         self._activeImportWindow = None
 
         # enable the buttons
-        self.setOkButton(callback=self._okClicked, tipText='Okay')
-        self.setCloseButton(callback=self.reject, tipText='Close')
-        self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
+        self.setOkButton(callback=self._okClicked, text='Import', tipText='Import Nef File')
+        self.setCancelButton(callback=self.reject, tipText='Cancel Import')
+        self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
         self.__postInit__()
 
     def setWidgets(self):

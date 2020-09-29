@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-23 09:36:16 +0100 (Wed, September 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-29 09:47:39 +0100 (Tue, September 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1122,23 +1122,13 @@ class CcpnModuleLabel(DockLabel):
         self.module = module
         self.fixedWidth = True
 
-        setWidgetFont(self, size='LARGE')
-        self.labelSize = (getWidgetFontHeight(size='VLARGE') or 16)
-        # from ccpn.framework.Application import getApplication
-        #
-        # getApp = getApplication()
-        # if getApp and hasattr(getApp, '_fontSettings'):
-        #     self.setFont(getApp._fontSettings.moduleLabelFont)
-        #     self.labelSize = QtGui.QFontMetrics(getApp._fontSettings.moduleLabelFont).height() + 4
-        # else:
-        #     self.labelSize = 16
+        setWidgetFont(self, size='MEDIUM')
+        self.labelSize = (getWidgetFontHeight(size='LARGE') or 16)
 
         self.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
-        self.closeButton.setStyleSheet('''border: 0px solid #a9a9a9;
-                                          border-radius: 1px;
-                                          background-color: transparent; ''')
-
-        # self.setStyleSheet('margin : 2')
+        self.closeButton.setStyleSheet('border: 0px solid %s;'
+                                       'border-radius: 1px;'
+                                       'background-color: transparent;' % BORDERNOFOCUS_COLOUR)
 
         layout = QtWidgets.QGridLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)

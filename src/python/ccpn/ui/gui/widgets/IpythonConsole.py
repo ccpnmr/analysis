@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-23 09:36:16 +0100 (Wed, September 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-29 09:47:40 +0100 (Tue, September 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -52,6 +52,7 @@ class IpythonConsole(Widget):
         # NOTE:ED - check that this is working for Linux/MacOS
         if isWindowsOS():
             import asyncio
+
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
         km = QtInProcessKernelManager()
@@ -78,13 +79,13 @@ class IpythonConsole(Widget):
         self.splitter = Splitter(horizontal=False)
         self.splitter.addWidget(self.textEditor)
 
-        self.consoleFrame = Frame(self, setLayout=True)
+        self.consoleFrame = Frame(self, setLayout=True, margins=(1, 1, 1, 1), spacing=(0, 0))
         self.splitter.addWidget(self.consoleFrame)
         # self.consoleFrame.addLayout(consoleLayout, 1, 0)
         # self.consoleFrame.addLayout(buttonLayout, 2, 0)
 
         self.consoleFrame.layout().addWidget(self.ipythonWidget, 0, 0)
-        self.splitter.setStretchFactor(1, 8)
+        self.splitter.setStretchFactor(1, 1)
         self.splitter.setChildrenCollapsible(False)
         # self.splitter.setStyleSheet("QSplitter::handle { background-color: gray }")
 

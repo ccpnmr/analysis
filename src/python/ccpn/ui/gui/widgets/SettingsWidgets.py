@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-29 09:47:40 +0100 (Tue, September 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -136,6 +136,9 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.yAxisUnitsButtons.setVisible(showYAxis)
 
         row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=12)
+
+        row += 1
         self.useAspectRatioModeLabel = Label(parent, text="Aspect Ratio Mode", grid=(row, 0))
         self.useAspectRatioModeButtons = RadioButtons(parent, texts=['Free', 'Locked', 'Fixed'],
                                                       objectNames=['armSDS_Free', 'armSDS_Locked', 'armSDS_Fixed'],
@@ -179,7 +182,12 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.aspectScreen[aspect].setText(self.aspectData[aspect].textFromValue(aspectValue))
 
         row += 1
-        self.setFromScreenButton = Button(parent, text='Set from Screen', grid=(row, 2), callback=self._setAspectFromScreen)
+        _buttonFrame = Frame(parent, setLayout=True, grid=(row, 1), gridSpan=(1, 3), hAlign='l')
+        self.setFromDefaultsButton = Button(_buttonFrame, text='Set from Defaults', grid=(0, 0), callback=self._setAspectFromDefaults)
+        self.setFromScreenButton = Button(_buttonFrame, text='Set from Screen', grid=(0, 1), callback=self._setAspectFromScreen)
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=12)
 
         if not self._spectrumDisplay.is1D:
             row += 1
@@ -221,6 +229,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.symbolThicknessData.valueChanged.connect(self._symbolsChanged)
 
         row += 1
+        _height = getFontHeight(size='VLARGE') or 24
         self.stripArrangementLabel = Label(parent, text="Strip Arrangement", grid=(row, 0))
         self.stripArrangementButtons = RadioButtons(parent, texts=['    ', '    ', '    '],
                                                     objectNames=['stripSDS_Row', 'stripSDS_Column', 'stripSDS_Tile'],
@@ -229,9 +238,9 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                                     direction='horizontal',
                                                     grid=(row, 1), gridSpan=(1, 3), hAlign='l',
                                                     tipTexts=None,
-                                                    icons=[('icons/strip-row', (24, 24)),
-                                                           ('icons/strip-column', (24, 24)),
-                                                           ('icons/strip-tile', (24, 24))
+                                                    icons=[('icons/strip-row', (_height, _height)),
+                                                           ('icons/strip-column', (_height, _height)),
+                                                           ('icons/strip-tile', (_height, _height))
                                                            ],
                                                     )
 
@@ -294,6 +303,15 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             for aspect, label in self.aspectScreen.items():
                 if aspect in self.aspectData:
                     self.aspectData[aspect].setValue(self.aspectData[aspect].valueFromText(label.text()))
+
+        self._settingsChanged()
+
+    def _setAspectFromDefaults(self, *args):
+        with self.aspectDataFrame.blockWidgetSignals():
+            for aspect, label in self.aspectScreen.items():
+                if aspect in self.preferences.general.aspectRatios:
+                    value = self.preferences.general.aspectRatios[aspect]
+                    self.aspectData[aspect].setValue(value)
 
         self._settingsChanged()
 

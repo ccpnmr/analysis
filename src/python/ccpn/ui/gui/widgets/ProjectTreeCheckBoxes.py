@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-07 01:36:21 +0100 (Fri, August 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-29 09:47:40 +0100 (Tue, September 29, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -492,6 +492,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                 self.projectItem.setText(0, self.project.name)
             if self._enableCheckBoxes:
                 self.projectItem.setFlags(self.projectItem.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+                # self.projectItem.setCheckState(0, QtCore.Qt.Unchecked)
             else:
                 self.projectItem.setFlags(self.projectItem.flags() & ~(QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable))
             self.projectItem.setExpanded(True)
@@ -503,6 +504,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                 item.setText(0, name)
                 if self._enableCheckBoxes:
                     item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+                    # self.headerItem.setCheckState(0, QtCore.Qt.Unchecked)
                 else:
                     item.setFlags(item.flags() & ~(QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable))
 
@@ -521,7 +523,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                         item.setCheckState(0, self.lockedItems[name])
                 else:
                     if self._enableCheckBoxes:
-                        item.setCheckState(0, QtCore.Qt.Checked)
+                        item.setCheckState(0, QtCore.Qt.Unchecked)
 
     # NOTE:ED - define methods here to match CcpnNefIo
     def content_nef_molecular_system(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag):
@@ -564,6 +566,9 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
             if found:
                 if len(found) == 1:
                     # add to the tree
+
+                    if self._enableCheckBoxes:
+                        found[0].setCheckState(0, QtCore.Qt.Unchecked)
 
                     # NOTE:ED - this defines the list of items that are added to each plural group in the tree
                     #           i.e. Chains = saveFrame._content['chain_code'] from nefToTreeViewMapping

@@ -569,7 +569,7 @@ class PeakList(PMIListABC):
                      eNoiseThresholdFactor=1.5,
                      recalculateSNR = True,
                      deltaPercent=10,
-                     useXRange=10):
+                     useXRange=1):
         from ccpn.core.lib.peakUtils import simple1DPeakPicker
         from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
         from ccpn.core.lib.SpectrumLib import _estimate1DSpectrumSNR
@@ -581,11 +581,12 @@ class PeakList(PMIListABC):
         x, y = spectrum.positions, spectrum.intensities
         masked = _filtered1DArray(np.array([x, y]), ignoredRegions)
         filteredX, filteredY = masked[0].compressed(), masked[1].compressed()
+        deltaAdjustment = 0
         if maxNoiseLevel is None or minNoiseLevel is None:
             maxNoiseLevel, minNoiseLevel = estimateNoiseLevel1D(y, f=useXRange, stdFactor=eNoiseThresholdFactor)
             spectrum.noiseLevel = float(maxNoiseLevel)
             spectrum.negativeNoiseLevel = float(minNoiseLevel)
-        deltaAdjustment = percentage(deltaPercent, maxNoiseLevel) # add to GUI pipe
+            deltaAdjustment = percentage(deltaPercent, maxNoiseLevel) # add to GUI pipe
         maxValues, minValues = simple1DPeakPicker(y=filteredY, x=filteredX, delta=maxNoiseLevel + deltaAdjustment, negDelta=minNoiseLevel + deltaAdjustment, negative=negativePeaks)
         spectrum.noiseLevel = float(maxNoiseLevel)
         spectrum.negativeNoiseLevel = float(minNoiseLevel)

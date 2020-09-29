@@ -181,7 +181,7 @@ def simple1DPeakPicker(y, x, delta, negDelta=None, negative=False):
     mn, mx = Inf, -Inf
     mnpos, mxpos = NaN, NaN
     lookformax = True
-    if not negDelta: negDelta = 0
+    if negDelta is None: negDelta = 0
 
     for i in arange(len(y)):
         this = y[i]
@@ -643,7 +643,7 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     peakDims = apiPeak.sortedPeakDims()
 
     if numDim == 1: # testing
-        _snap1DPeakToClosestExtremum(peak, maximumLimit=1)
+        _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1)
         return
 
     if searchBoxMode and numDim > 1:
@@ -1080,7 +1080,7 @@ def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True):
     minNoiseLevel = peak.peakList.spectrum.negativeNoiseLevel
     if not noiseLevel: #estimate as you can from the spectrum
         noiseLevel, minNoiseLevel = estimateNoiseLevel1D(y)
-
+    print('max L', maximumLimit, noiseLevel, minNoiseLevel)
     x_filtered, y_filtered = _1DregionsFromLimits(x,y, [a,b])
     maxValues, minValues = simple1DPeakPicker(y_filtered, x_filtered, noiseLevel, negDelta=minNoiseLevel, negative=doNeg)
     allValues = maxValues + minValues

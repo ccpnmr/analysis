@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-29 09:47:40 +0100 (Tue, September 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-30 16:44:54 +0100 (Wed, September 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -348,8 +348,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row = 0
 
-        self.languageLabel = Label(parent, text="Language", grid=(row, 0))
-        self.languageBox = PulldownList(parent, grid=(row, 1), hAlign='l')
+        self.languageLabel = Label(parent, text="Language", grid=(row, 0), enabled=False)
+        self.languageBox = PulldownList(parent, grid=(row, 1), hAlign='l', enabled=False)
         self.languageBox.addItems(languages)
         self.languageBox.setMinimumWidth(PulldownListsMinimumWidth)
         # self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))

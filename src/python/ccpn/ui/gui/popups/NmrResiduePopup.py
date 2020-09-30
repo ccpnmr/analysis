@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-29 09:47:39 +0100 (Tue, September 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-30 16:09:19 +0100 (Wed, September 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,8 +31,8 @@ from ccpn.core.NmrResidue import NmrResidue, _getNmrResidue
 
 
 REMOVEPERCENT = '( ?\d+.?\d* ?%)+'
-MERGE = '_merge'
-CREATE = '_create'
+MERGE = 'merge'
+CREATE = 'create'
 
 
 class NmrResiduePopup(AttributeEditorPopupABC):
@@ -92,21 +92,6 @@ class NmrResiduePopup(AttributeEditorPopupABC):
 
     # hWidth = 120
 
-    def __init__(self, *args, **kwds):
-        """Initialise the popup
-        """
-        super(NmrResiduePopup, self).__init__(*args, **kwds)
-
-        # restore the state of the checkBoxes
-        self.MergetoExisting.set(getattr(NmrResiduePopup, MERGE, False))
-        self.CreateNew.set(getattr(NmrResiduePopup, CREATE, False))
-
-    def _cancelClicked(self):
-        """Close the popup on pressing cancel
-        """
-        super(NmrResiduePopup, self)._cancelClicked()
-        self._setState()
-
     def _applyAllChanges(self, changes):
         """Apply all changes - move nmrResidue to new chain as required
         """
@@ -149,16 +134,22 @@ class NmrResiduePopup(AttributeEditorPopupABC):
                                                      )
             self.obj.comment = self.comment.getText()
 
-        self._setState()
+        # self._storeState()
 
-    def _setState(self):
+    def restoreState(self):
+        """Restore the state of the checkBoxes
+        """
+        self.MergetoExisting.set(NmrResiduePopup._storedState.get(MERGE, False))
+        self.CreateNew.set(NmrResiduePopup._storedState.get(CREATE, False))
+
+    def storeState(self):
         """Store the state of the checkBoxes between popups
         """
         merge = self.MergetoExisting.isChecked()
         create = self.CreateNew.isChecked()
 
-        setattr(NmrResiduePopup, MERGE, merge)
-        setattr(NmrResiduePopup, CREATE, create)
+        NmrResiduePopup._storedState[MERGE] = merge
+        NmrResiduePopup._storedState[CREATE] = create
 
     def _setValue(self, attr, setFunction, value):
         """Not needed here - subclass so does no operation

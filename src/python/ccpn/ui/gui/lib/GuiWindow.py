@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-08 12:34:08 +0100 (Tue, September 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-30 16:09:18 +0100 (Wed, September 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -75,10 +75,17 @@ class GuiWindow():
         addShortCut("m, x", self, partial(self.createMark, 0), context=context)
         addShortCut("m, y", self, partial(self.createMark, 1), context=context)
         addShortCut("m, z", self, partial(self.createMark, 2), context=context)
+        addShortCut("m, w", self, partial(self.createMark, 3), context=context)
         addShortCut("p, m", self, self.createPeakAxisMarks, context=context)
         addShortCut("p, x", self, partial(self.createPeakAxisMarks, 0), context=context)
         addShortCut("p, y", self, partial(self.createPeakAxisMarks, 1), context=context)
         addShortCut("p, z", self, partial(self.createPeakAxisMarks, 2), context=context)
+        addShortCut("p, w", self, partial(self.createPeakAxisMarks, 3), context=context)
+        addShortCut("u, m", self, self.createMultipletAxisMarks, context=context)
+        addShortCut("u, x", self, partial(self.createMultipletAxisMarks, 0), context=context)
+        addShortCut("u, y", self, partial(self.createMultipletAxisMarks, 1), context=context)
+        addShortCut("u, z", self, partial(self.createMultipletAxisMarks, 2), context=context)
+        addShortCut("u, w", self, partial(self.createMultipletAxisMarks, 3), context=context)
         addShortCut("f, n", self, partial(navigateToCurrentNmrResiduePosition, self.application), context=context)
         addShortCut("f, p", self, partial(navigateToCurrentPeakPosition, self.application), context=context)
         addShortCut("c, a", self, partial(AssignmentLib.propagateAssignments, current=self.application.current), context=context)
@@ -116,7 +123,7 @@ class GuiWindow():
         addShortCut("z, n", self, self.nextZoom, context=context)
         addShortCut("z, i", self, self.zoomIn, context=context)
         addShortCut("z, o", self, self.zoomOut, context=context)
-        addShortCut("=", self, self.zoomIn, context=context)                # overrides openGL _panSpectrum
+        addShortCut("=", self, self.zoomIn, context=context)  # overrides openGL _panSpectrum
         addShortCut("+", self, self.zoomIn, context=context)
         addShortCut("-", self, self.zoomOut, context=context)
 
@@ -299,6 +306,7 @@ class GuiWindow():
         """
 
         from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
+
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
                 strip = self.application.current.strip
@@ -407,7 +415,6 @@ class GuiWindow():
 
         with undoBlock():
             if set(clickedPeaks or []):
-
                 from ccpn.ui.gui.popups.ReorderPeakListAxes import ReorderPeakListAxes as ReorderPeakListAxesPopup
 
                 popup = ReorderPeakListAxesPopup(parent=self, mainWindow=self, peakList=clickedPeaks[0].peakList)
@@ -419,12 +426,11 @@ class GuiWindow():
             if self.application.current.strip:
                 strip = self.application.current.strip
         if strip and not strip.isDeleted:
+            spectra = [spectrumView.spectrum for spectrumView in strip.spectrumDisplay.spectrumViews
+                       if spectrumView.isVisible()]
+            listOfPeaks = [peakList.peaks for spectrum in spectra for peakList in spectrum.peakLists]
 
-                spectra = [spectrumView.spectrum for spectrumView in strip.spectrumDisplay.spectrumViews
-                           if spectrumView.isVisible()]
-                listOfPeaks = [peakList.peaks for spectrum in spectra for peakList in spectrum.peakLists]
-
-                self.application.current.peaks = [peak for peaks in listOfPeaks for peak in peaks]
+            self.application.current.peaks = [peak for peaks in listOfPeaks for peak in peaks]
 
     def addMultiplet(self):
         """add current peaks to a new multiplet"""
@@ -503,18 +509,18 @@ class GuiWindow():
 
     def newPhasingTrace(self):
         strip = self.application.current.strip
-        if strip:               # and (strip.spectrumDisplay.window is self):
+        if strip:  # and (strip.spectrumDisplay.window is self):
             strip._newPhasingTrace()
 
     def stackSpectra(self):
         strip = self.application.current.strip
-        if strip:               # and (strip.spectrumDisplay.window is self):
+        if strip:  # and (strip.spectrumDisplay.window is self):
             strip._toggleStackPhaseFromShortCut()
 
     def setPhasingPivot(self):
 
         strip = self.application.current.strip
-        if strip:               # and (strip.spectrumDisplay.window is self):
+        if strip:  # and (strip.spectrumDisplay.window is self):
             strip._setPhasingPivot()
 
     def removePhasingTraces(self):
@@ -522,7 +528,7 @@ class GuiWindow():
         Removes all phasing traces from all strips.
         """
         strip = self.application.current.strip
-        if strip:               # and (strip.spectrumDisplay.window is self):
+        if strip:  # and (strip.spectrumDisplay.window is self):
             # strip.removePhasingTraces()
             for strip in strip.spectrumDisplay.strips:
                 strip.removePhasingTraces()
@@ -590,11 +596,19 @@ class GuiWindow():
 
     def createPeakAxisMarks(self, axisIndex=None):
         """
-        Creates a mark at the current cursor position in the current strip.
+        Creates marks at the selected peak positions.
         """
         strip = self.application.current.strip
         if strip:
             strip._markSelectedPeaks(axisIndex)
+
+    def createMultipletAxisMarks(self, axisIndex=None):
+        """
+        Creates marks at the selected multiplet positions.
+        """
+        strip = self.application.current.strip
+        if strip:
+            strip._markSelectedMultiplets(axisIndex)
 
     @logCommand('mainWindow.')
     def clearMarks(self):
@@ -823,7 +837,7 @@ class GuiWindow():
         else:
             getLogger().warning('No current strip. Select a strip first.')
 
-    def panSpectrum(self, direction: str='up'):
+    def panSpectrum(self, direction: str = 'up'):
         """
         Pan/Zoom the current strip with the cursor keys
         """
@@ -832,7 +846,7 @@ class GuiWindow():
         else:
             getLogger().warning('No current strip. Select a strip first.')
 
-    def movePeaks(self, direction: str='up'):
+    def movePeaks(self, direction: str = 'up'):
         """
         Move the peaks in the current strip with the cursors
         """

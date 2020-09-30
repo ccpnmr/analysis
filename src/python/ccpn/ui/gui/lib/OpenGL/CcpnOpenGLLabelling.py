@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-14 13:54:20 +0100 (Mon, September 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-30 16:09:18 +0100 (Wed, September 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -44,6 +44,22 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_DRAW, GLRENDERM
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 
+
+# NOTE:ED - remember these for later, may create larger vertex arrays for symbols, but should be quicker
+#       --
+#       x = np.array([1, 2, 3, -1, 5, 0, 3, 4, 4, 7, 3, 5, 9, 0, 5, 4, 3], dtype=np.uint32)
+#       seems to be the fastest way of getting masked values
+#           SKIPINDEX = np.uint32(-1) = 4294967295
+#           i.e. max index number, use as fill
+#           timeit.timeit('import numpy as np; x = np.array([1, 2, 3, -1, 5, 0, 3, 4, 4, 7, 3, 5, 9, 0, 5, 4, 3], dtype=np.uint32); x[np.where(x != 3)]', number=200000)
+#       fastest way to create filled arrays
+#           *** timeit.timeit('import numpy as np; x = np.array([1, 2, 3, -1, 5, 0, 3, 4, 4, 7, 3, 5, 9, 0, 5, 4, 3], dtype=np.uint32); a = x[x != SKIPINDEX]', number=200000)
+#               timeit.timeit('import numpy as np; x = np.array([1, 2, 3, -1, 5, 0, 3, 4, 4, 7, 3, 5, 9, 0, 5, 4, 3], dtype=np.uint32); mx = np.full(200000, SKIPINDEX, dtype=np.uint32)', number=20000)
+#       --
+#       np.take(x, np.where(x != 3))
+#       mx = np.ma.masked_values(x, 3)
+#       a = x[np.where(x != 3)]
+#       *** a = x[x != SKIPINDEX]
 
 try:
     from OpenGL import GL, GLU, GLUT

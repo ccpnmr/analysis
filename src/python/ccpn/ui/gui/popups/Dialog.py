@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-16 12:14:32 +0100 (Wed, September 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-30 16:09:18 +0100 (Wed, September 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -87,6 +87,9 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
     EDITMODE = True
     DEFAULTMARGINS = (14, 14, 14, 14)
+
+    # a dict to store any required widgets' states between popups
+    _storedState = {}
 
     def __init__(self, parent=None, windowTitle='', setLayout=False,
                  orientation=HORIZONTAL, size=None, **kwds):
@@ -164,6 +167,9 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             self.getButton(self.APPLYBUTTON).setEnabled(False)
         if self.getButton(self.RESETBUTTON):
             self.getButton(self.RESETBUTTON).setEnabled(False)
+
+        # restore the state of any required widgets
+        self.restoreState()
 
     def _setDialogSize(self):
         """Set the fixed/free dialog size from size or sizeHint
@@ -428,7 +434,14 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self._currentNumApplies += 1
         if self.dialogButtons.button(self.RESETBUTTON):
             self.dialogButtons.button(self.RESETBUTTON).setEnabled(True)
+
         return True
+
+    def accept(self):
+        super(CcpnDialogMainWidget, self).accept()
+
+        # store the state of any required widgets
+        self.storeState()
 
     def _refreshGLItems(self):
         """emit a signal to rebuild any required GL items
@@ -441,6 +454,18 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
+
+    def restoreState(self):
+        """Restore the state of any required widgets
+        """
+        # TO BE SUBCLASSED
+        pass
+
+    def storeState(self):
+        """Store the state of any required widgets between popups
+        """
+        # TO BE SUBCLASSED
+        pass
 
 
 class CcpnDialog(QtWidgets.QDialog, Base):

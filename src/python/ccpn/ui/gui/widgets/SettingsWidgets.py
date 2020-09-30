@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-29 09:47:40 +0100 (Tue, September 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-30 16:09:19 +0100 (Wed, September 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -634,8 +634,17 @@ class _commonSettings():
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 LINKTOACTIVESTATE = True
 
+STOREDISPLAY = 'displaySettings'
+STORESEQUENTIAL = 'sequentialStripsWidget'
+STOREMARKS = 'markPositionsWidget'
+STORECLEAR = 'autoClearMarksWidget'
+STOREACTIVE = 'activePulldownClass'
+STORELIST = 'listButtons'
+STORENMRCHAIN = 'includeNmrChainPullSelection'
 
-class StripPlot(Widget, _commonSettings):
+
+class StripPlot(Widget, _commonSettings, SignalBlocking):
+    _storedState = {}
 
     def __init__(self, parent=None,
                  mainWindow=None,
@@ -839,6 +848,50 @@ class StripPlot(Widget, _commonSettings):
 
         self.maxRows = rows
         self._registerNotifiers()
+
+    def storeState(self):
+        """Store the state of the checkBoxes between popups
+        """
+        if self.displaysWidget:
+            StripPlot._storedState[STOREDISPLAY] = self.displaysWidget.getTexts()
+        if self.sequentialStripsWidget:
+            StripPlot._storedState[STORESEQUENTIAL] = self.sequentialStripsWidget.get()
+        StripPlot._storedState[STOREMARKS] = self.markPositionsWidget.get()
+        StripPlot._storedState[STORECLEAR] = self.autoClearMarksWidget.get()
+        if self.activePulldownClass is not None:
+            checked = getattr(self, LINKTOPULLDOWNCLASS).get()
+            StripPlot._storedState[STOREACTIVE] = checked
+        StripPlot._storedState[STORELIST] = self.listButtons.getIndex()
+        if self.includeNmrChainPullSelection:
+            StripPlot._storedState[STORENMRCHAIN] = self.ncWidget.getIndex()
+
+    def restoreState(self):
+        """Restore the state of the checkBoxes
+        """
+        with self.blockWidgetSignals():
+            if self.displaysWidget:
+                value = StripPlot._storedState.get(STOREDISPLAY, [])
+                self.displaysWidget.setTexts(value)
+            if self.sequentialStripsWidget:
+                value = StripPlot._storedState.get(STORESEQUENTIAL, False)
+                self.sequentialStripsWidget.set(value)
+            value = StripPlot._storedState.get(STOREMARKS, True)
+            self.markPositionsWidget.set(value)
+            value = StripPlot._storedState.get(STORECLEAR, True)
+            self.autoClearMarksWidget.set(value)
+            if self.activePulldownClass is not None:
+                value = StripPlot._storedState.get(STOREACTIVE, LINKTOACTIVESTATE)
+                getattr(self, LINKTOPULLDOWNCLASS).set(value)
+            value = StripPlot._storedState.get(STORELIST, 0)
+            try:
+                self.listButtons.setIndex(value)
+            except:
+                # may be out of range
+                pass
+            if self.includeNmrChainPullSelection:
+                value = StripPlot._storedState.get(STORENMRCHAIN, self.includeNmrChainPullSelection)
+                self.ncWidget.setIndex(value)
+            pass
 
     def setLabelText(self, label):
         """Set the text for the label attached to the list widget

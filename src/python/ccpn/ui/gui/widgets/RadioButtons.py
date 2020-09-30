@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-09-30 16:09:19 +0100 (Wed, September 30, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -185,7 +185,6 @@ class RadioButtons(QtWidgets.QWidget, Base):
                     return name
 
     def setIndex(self, i):
-
         self.radioButtons[i].setChecked(True)
 
     def deselectAll(self):

@@ -5,7 +5,7 @@ A widget to get     concentration Values and  concentrationUnits
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:26 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-09-30 16:47:46 +0100 (Wed, September 30, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -99,8 +99,9 @@ class _NmrAtomsSelection(CcpnDialog):
             labelRelativeContribution = Label(self, text='%s Relative Contribution' % name, grid=(i, 0))
             self.atomWeightSpinBox = DoubleSpinbox(self, value=value,
                                                    decimals = 3,
-                                                   step=0.1,
-                                                   prefix=str('Weight' + (' ' * 2)), grid=(i, 1),
+                                                   step=0.01,
+                                                   # prefix=str('Weight' + (' ' * 2)),
+                                                   grid=(i, 1),
                                                    tipText='Relative Contribution for the selected nmrAtom')
             self.atomWeightSpinBox.setObjectName(name)
             self.atomWeightSpinBox.setMaximumWidth(150)
@@ -118,7 +119,7 @@ class _NmrAtomsSelection(CcpnDialog):
         self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
 
         n = 0
-        nmrAtomNames.sort() #sort alphabetically than divede in sublists
+        nmrAtomNames.sort() #sort alphabetically than divide in sublists
         nmrAtomNamesGroups = [list(g) for k, g in groupby(nmrAtomNames, key=lambda x: x[0])]
         for groupNmrAtoms in nmrAtomNamesGroups:
             if len(groupNmrAtoms)>0:

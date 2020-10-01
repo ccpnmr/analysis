@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-01 11:15:34 +0100 (Thu, October 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -70,6 +70,7 @@ class NmrAtomPopup(AttributeEditorPopupABC):
         """
         atomName = self.nmrAtomname.getText()
         nmrResidue = self.nmrResidue.getText()
+        comment = self.comment.getText()
 
         destNmrResidue = self.project.getByPid('NR:{}'.format(nmrResidue))
         if not destNmrResidue:
@@ -80,13 +81,15 @@ class NmrAtomPopup(AttributeEditorPopupABC):
 
         if destNmrAtom and destNmrAtom == self.obj:
             # same nmrAtom so skip
-            pass
+            self.obj.comment = comment
+
         elif destNmrAtom:
             # different name and/or different nmrResidue
             if not merge:
                 # raise error to notify popup
                 raise ValueError('Cannot re-assign NmrAtom to an existing NmrAtom of another NmrResidue without merging')
             destNmrAtom.mergeNmrAtoms(self.obj)
+            destNmrAtom.comment = comment
 
         else:
             # assign to a new nmrAtom
@@ -95,6 +98,7 @@ class NmrAtomPopup(AttributeEditorPopupABC):
                               residueType=destNmrResidue.residueType,
                               name=atomName,
                               mergeToExisting=merge)
+            self.obj.comment = comment
 
             self.pid.setText(self.obj.pid)
 

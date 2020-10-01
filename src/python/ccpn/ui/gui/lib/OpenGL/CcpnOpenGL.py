@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-11 19:09:41 +0100 (Fri, September 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-01 11:15:34 +0100 (Thu, October 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -71,15 +71,11 @@ import math
 import re
 import time
 import numpy as np
-from functools import partial
 from contextlib import contextmanager
-# from threading import Thread
-# from queue import Queue
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
 from PyQt5.QtWidgets import QApplication, QOpenGLWidget
 from PyQt5.QtGui import QSurfaceFormat
-
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import PaintModes
 from ccpn.util.Logging import getLogger
 from pyqtgraph import functions as fn
@@ -87,29 +83,23 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 from ccpn.core.Integral import Integral
 from ccpn.core.Multiplet import Multiplet
-# from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
 from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, IntegralMenu, \
     MultipletMenu, PhasingMenu, AxisMenu
-
-# from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
     CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours, \
     CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA, \
     CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, \
     CCPNGLWIDGET_HARDSHADE
-# from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation  # temp until I rewrite
 import ccpn.util.Phasing as Phasing
 from ccpn.ui.gui.lib.mouseEvents import \
     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK, \
     makeDragEvent
 
-
 try:
     # used to test whether all the arrays are defined correctly
     # os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'true'})
-
     from OpenGL import GL, GLU, GLUT
 except ImportError:
     app = QtWidgets.QApplication(sys.argv)
@@ -136,7 +126,6 @@ from ccpn.util.Common import getAxisCodeMatchIndices
 from typing import Tuple
 from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTIVEAXES, \
     DOUBLEAXIS_ACTIVEAXES, DOUBLEAXIS_FULLATOMNAME, DOUBLEAXIS_MATCHATOMTYPE, MOUSEDICTSTRIP
-
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from ccpn.core.lib.ContextManagers import undoBlock
@@ -148,8 +137,6 @@ UNITS_PPM = 'ppm'
 UNITS_HZ = 'Hz'
 UNITS_POINT = 'point'
 UNITS = [UNITS_PPM, UNITS_HZ, UNITS_POINT]
-SINGLECLICK = 'click'
-DOUBLECLICK = 'doubleClick'
 
 ZOOMTIMERDELAY = 1
 ZOOMMAXSTORE = 1
@@ -248,16 +235,6 @@ class CcpnGLWidget(QOpenGLWidget):
         # initialise the pyqtsignal notifier
         self.GLSignals = GLNotifier(parent=self, strip=strip)
 
-        # # set the pyqtsignal responders
-        # self.GLSignals.glXAxisChanged.connect(self._glXAxisChanged)
-        # self.GLSignals.glYAxisChanged.connect(self._glYAxisChanged)
-        # self.GLSignals.glAllAxesChanged.connect(self._glAllAxesChanged)
-        # self.GLSignals.glMouseMoved.connect(self._glMouseMoved)
-        # self.GLSignals.glEvent.connect(self._glEvent)
-        # self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
-        # self.GLSignals.glAxisUnitsChanged.connect(self._glAxisUnitsChanged)
-        # self.GLSignals.glKeyEvent.connect(self._glKeyEvent)
-
         self.lastPixelRatio = None
 
     def _initialiseAll(self):
@@ -323,6 +300,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._lastClick = None
         self._mousePressed = False
         self._draggingLabel = False
+        self._lastTimeClicked = time.time_ns() // 1e6
+        self._clickInterval = QtWidgets.QApplication.instance().doubleClickInterval()
 
         self.buildMarks = True
         self._marksList = None
@@ -2430,40 +2409,38 @@ class CcpnGLWidget(QOpenGLWidget):
             # if integralPressed:
             #   break
 
-    def _mousePressedEvent(self, ev):
-        """Handle mouse press event for single click and beginning of mouse drag event
-        when dragging strip label
+    def _checkMousePressAllowed(self):
+        """Check whether a mouse click is allowed
         """
-        if not self._lastClick:
-            self._lastClick = SINGLECLICK
+        # get delta between now and last mouse click
+        _lastTime = self._lastTimeClicked
+        _thisTime = time.time_ns() // 1e6
+        delta = _thisTime - _lastTime
 
-        if self._lastClick == SINGLECLICK:
-            self._draggingLabel = True
-            mouseDict = getMouseEventDict(ev)
+        # if interval large enough then reset timer and return True
+        if delta > self._clickInterval:
+            self._lastTimeClicked = _thisTime
+            return True
 
-            # set up a singleshot event, but a bit quicker than the normal interval (which seems a little long)
-            QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() // 2,
-                                     partial(self._handleMouseClicked, mouseDict, ev))
+    # def _setMouseDelay(self):
+    #     QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() // 1,
+    #                              self._handleMouseClicked)
 
-        elif self._lastClick == DOUBLECLICK:
-
-            # reset the doubleClick history
-            self._lastClick = None
-            self._mousePressed = False
-            self._draggingLabel = False
-
-    def _handleMouseClicked(self, mouseDict, ev):
-        """handle a single mouse event, but ignore double click events for dragging strip label
+    def _handleLabelDrag(self, event):
+        """handle a mouse drag event of a label
         """
-        if self._lastClick == SINGLECLICK and self._mousePressed:
-            self._dragStrip(mouseDict)
-
-        # reset the doubleClick history
-        self._lastClick = None
-        self._mousePressed = False
-        self._draggingLabel = False
+        if self._mouseButton == QtCore.Qt.LeftButton and self._pids:
+            if (event.pos() - self._dragStartPosition).manhattanLength() >= QtWidgets.QApplication.startDragDistance():
+                mouseDict = getMouseEventDict(event)
+                self._dragStrip(mouseDict)
+                self._draggingLabel = False
 
     def mousePressEvent(self, ev):
+
+        # disable mouse presses in the double-click interval
+        if not self._checkMousePressAllowed():
+            return
+
         cursorCoordinate = self.getCurrentCursorCoordinate()
         self._mousePressed = True
         self.lastPos = ev.pos()
@@ -2504,14 +2481,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     self._drawMouseMoveLine = True
                     self._drawDeltaOffset = True
 
-        # self._drawSelectionBox = True
-
-        # if not self.mousePressInRegion(self._externalRegions._regions):
-        #   self.mousePressInIntegralLists()
-
         if self.mousePressInLabel(mx, my, top):
-            # self._dragStrip(ev)
-            self._mousePressedEvent(ev)
+            self._draggingLabel = True
 
         else:
             # check if the corner buttons have been pressed
@@ -2531,12 +2502,15 @@ class CcpnGLWidget(QOpenGLWidget):
         self.update()
 
     def mouseDoubleClickEvent(self, ev):
-        self._lastClick = DOUBLECLICK
+        self._mouseDoubleClickEvent(ev)
 
     def mouseReleaseEvent(self, ev):
 
         # if no self.current then strip is not defined correctly
         if not getattr(self.current, 'mouseMovedDict', None):
+            return
+
+        if not self._mousePressed:
             return
 
         self._mousePressed = False
@@ -2554,13 +2528,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # add a 2-pixel tolerance to the click event - in case of a small wiggle on coordinates
         if not self._widthsChangedEnough(self._mouseStart, self._mouseEnd, tol=2):
-
             # perform click action
             self._mouseClickEvent(ev)
 
         else:
-            # if self._selectionMode != 0:
-
             # end of drag event - perform action
             self._mouseDragEvent(ev)
 
@@ -2724,6 +2695,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if not self._ordering:  # strip.spectrumViews:
             return
         if self._draggingLabel:
+            self._handleLabelDrag(event)
             return
 
         if abs(self.axisL - self.axisR) < 1.0e-6 or abs(self.axisT - self.axisB) < 1.0e-6:
@@ -3027,32 +2999,6 @@ class CcpnGLWidget(QOpenGLWidget):
     def updateVisibleSpectrumViews(self):
         self._visibleSpectrumViewsChange = True
         self.update()
-
-    # def _updateVisibleSpectrumViews(self):
-    #     """Update the list of visible spectrumViews when change occurs
-    #     """
-    #
-    #     # make the list of ordered spectrumViews
-    #     self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
-    #     for specView in tuple(self._spectrumSettings.keys()):
-    #         if specView not in self._ordering:
-    #             del self._spectrumSettings[specView]
-    #
-    #     # make a list of the visible and not-deleted spectrumViews
-    #     visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
-    #     visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
-    #
-    #     # set the first visible, or the first in the ordered list
-    #     self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[0].isDeleted else None
-    #     self.visiblePlaneList = {}
-    #     self.visiblePlaneListPointValues = {}
-    #     for visibleSpecView in self._ordering:
-    #         self.visiblePlaneList[visibleSpecView] = visibleSpecView._getVisiblePlaneList(self._firstVisible)
-    #
-    #     # update the labelling lists
-    #     self._GLPeaks.setListViews(self._ordering)
-    #     self._GLIntegrals.setListViews(self._ordering)
-    #     self._GLMultiplets.setListViews(self._ordering)
 
     @contextmanager
     def glBlocking(self):
@@ -6779,6 +6725,50 @@ class CcpnGLWidget(QOpenGLWidget):
         # return the list of objects
         return objDict
 
+    def _selectPeaksFromMultiplets(self, multiplets):
+        peaks = set(self.current.peaks)
+        for multiplet in multiplets:
+            # add/remove the multiplet peaks
+            newPeaks = multiplet.peaks
+            self.current.peaks = list(peaks | set(newPeaks))  # symmetric difference
+
+    def _selectMultipletPeaks(self, xPosition, yPosition):
+        # get the list of multiplets under the mouse
+        multiplets = self._mouseInMultiplet(xPosition, yPosition, firstOnly=True)
+
+        peaks = set(self.current.peaks)
+        for multiplet in multiplets:
+            # add/remove the multiplet peaks
+            newPeaks = multiplet.peaks
+            self.current.peaks = list(peaks ^ set(newPeaks))  # symmetric difference
+
+    def _mouseDoubleClickEvent(self, event: QtGui.QMouseEvent, axis=None):
+        """handle the mouse click event
+        """
+        # get the mouse coordinates
+        cursorCoordinate = self.getCurrentCursorCoordinate()
+        xPosition = cursorCoordinate[0]  # self.mapSceneToView(event.pos()).x()
+        yPosition = cursorCoordinate[1]  # self.mapSceneToView(event.pos()).y()
+
+        if leftMouse(event):
+            multiplets = self._mouseInMultiplet(xPosition, yPosition, firstOnly=True)
+
+            if multiplets:
+                # Left-doubleClick; select only peaks attached to multiplets
+                self._resetBoxes()
+                self.current.clearPeaks()
+                self._selectPeaksFromMultiplets(multiplets)
+                event.accept()
+
+        elif controlLeftMouse(event):
+            multiplets = self._mouseInMultiplet(xPosition, yPosition, firstOnly=True)
+
+            if multiplets:
+                # Control-left-doubleClick; (de-)select multiplet peaks and add/remove to selection
+                self._resetBoxes()
+                self._selectMultipletPeaks(xPosition, yPosition)
+                event.accept()
+
     def _mouseClickEvent(self, event: QtGui.QMouseEvent, axis=None):
         """handle the mouse click event
         """
@@ -7214,261 +7204,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def exportToPS(self, filename='default.ps', params=None):
         return GLExporter(self, self.strip, filename, params)
-
-    # def cohenSutherlandClip(self, x0, y0, x1, y1):
-    #     """Implement Cohen-Sutherland clipping
-    #     :param x0, y0 - co-ordinates of first point:
-    #     :param x1, y1 - co-ordinates of second point:
-    #     :return None if not clipped else (xs, ys, xe, ye) - start, end of clipped line
-    #     """
-    #     INSIDE, LEFT, RIGHT, BOTTOM, TOP = 0, 1, 2, 4, 8
-    #
-    #     xMin = min([self.axisL, self.axisR])
-    #     xMax = max([self.axisL, self.axisR])
-    #     yMin = min([self.axisB, self.axisT])
-    #     yMax = max([self.axisB, self.axisT])
-    #
-    #     def computeCode(x, y):
-    #         """calculate region that point lies in
-    #         :param x, y - point:
-    #         :return code:
-    #         """
-    #         code = INSIDE
-    #         if x < xMin:  # to the left of rectangle
-    #             code |= LEFT
-    #         elif x > xMax:  # to the right of rectangle
-    #             code |= RIGHT
-    #         if y < yMin:  # below the rectangle
-    #             code |= BOTTOM
-    #         elif y > yMax:  # above the rectangle
-    #             code |= TOP
-    #         return code
-    #
-    #     code1 = computeCode(x0, y0)
-    #     code2 = computeCode(x1, y1)
-    #     accept = False
-    #
-    #     while not accept:
-    #
-    #         # If both endpoints lie within rectangle
-    #         if code1 == 0 and code2 == 0:
-    #             accept = True
-    #
-    #         # If both endpoints are outside rectangle
-    #         elif (code1 & code2) != 0:
-    #             return None
-    #
-    #         # Some segment lies within the rectangle
-    #         else:
-    #
-    #             # Line Needs clipping
-    #             # At least one of the points is outside,
-    #             # select it
-    #             x = 1.0
-    #             y = 1.0
-    #             if code1 != 0:
-    #                 code_out = code1
-    #             else:
-    #                 code_out = code2
-    #
-    #             # Find intersection point
-    #             # using formulas y = y0 + slope * (x - x0),
-    #             # x = x0 + (1 / slope) * (y - y0)
-    #             if code_out & TOP:
-    #
-    #                 # point is above the clip rectangle
-    #                 x = x0 + (x1 - x0) * \
-    #                     (yMax - y0) / (y1 - y0)
-    #                 y = yMax
-    #
-    #             elif code_out & BOTTOM:
-    #
-    #                 # point is below the clip rectangle
-    #                 x = x0 + (x1 - x0) * \
-    #                     (yMin - y0) / (y1 - y0)
-    #                 y = yMin
-    #
-    #             elif code_out & RIGHT:
-    #
-    #                 # point is to the right of the clip rectangle
-    #                 y = y0 + (y1 - y0) * \
-    #                     (xMax - x0) / (x1 - x0)
-    #                 x = xMax
-    #
-    #             elif code_out & LEFT:
-    #
-    #                 # point is to the left of the clip rectangle
-    #                 y = y0 + (y1 - y0) * \
-    #                     (xMin - x0) / (x1 - x0)
-    #                 x = xMin
-    #
-    #             # Now intersection point x,y is found
-    #             # We replace point outside clipping rectangle
-    #             # by intersection point
-    #             if code_out == code1:
-    #                 x0 = x
-    #                 y0 = y
-    #                 code1 = computeCode(x0, y0)
-    #
-    #             else:
-    #                 x1 = x
-    #                 y1 = y
-    #                 code2 = computeCode(x1, y1)
-    #
-    #     return [x0, y0, x1, y1]
-
-    # def pointVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
-    #     """return true if the line has visible endpoints
-    #     """
-    #     if (self.between(lineList[0], self.axisL, self.axisR) and
-    #             (self.between(lineList[1], self.axisT, self.axisB))):
-    #         lineList[0] = x + width * (lineList[0] - self.axisL) / (self.axisR - self.axisL)
-    #         lineList[1] = y + height * (lineList[1] - self.axisB) / (self.axisT - self.axisB)
-    #         return True
-    #
-    # def lineVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
-    #     """return the list of visible lines
-    #     """
-    #     # make into a list of tuples
-    #     newList = []
-    #     newLine = [[lineList[ll], lineList[ll + 1]] for ll in range(0, len(lineList), 2)]
-    #     if len(newLine) > 2:
-    #         newList = self.clipPoly(newLine)
-    #     elif len(newLine) == 2:
-    #         newList = self.clipLine(newLine)
-    #
-    #     try:
-    #         if newList:
-    #             newList = [pp for outPoint in newList for pp in (x + width * (outPoint[0] - self.axisL) / (self.axisR - self.axisL),
-    #                                                              y + height * (outPoint[1] - self.axisB) / (self.axisT - self.axisB))]
-    #     except Exception as es:
-    #         pass
-    #
-    #     return newList
-    #
-    # def clipPoly(self, subjectPolygon):
-    #     """Apply Sutherland-Hodgman algorithm for clipping polygons
-    #     """
-    #     if self.INVERTXAXIS != self.INVERTYAXIS:
-    #         clipPolygon = [[self.axisL, self.axisB],
-    #                        [self.axisL, self.axisT],
-    #                        [self.axisR, self.axisT],
-    #                        [self.axisR, self.axisB]]
-    #     else:
-    #         clipPolygon = [[self.axisL, self.axisB],
-    #                        [self.axisR, self.axisB],
-    #                        [self.axisR, self.axisT],
-    #                        [self.axisL, self.axisT]]
-    #
-    #     def inside(p):
-    #         return (cp2[0] - cp1[0]) * (p[1] - cp1[1]) > (cp2[1] - cp1[1]) * (p[0] - cp1[0])
-    #
-    #     def get_intersect():
-    #         """Returns the point of intersection of the lines passing through a2,a1 and b2,b1.
-    #         """
-    #         pp = np.vstack([s, e, cp1, cp2])  # s for stacked
-    #
-    #         h = np.hstack((pp, np.ones((4, 1))))  # h for homogeneous
-    #         l1 = np.cross(h[0], h[1])  # get first line
-    #         l2 = np.cross(h[2], h[3])  # get second line
-    #         x, y, z = np.cross(l1, l2)  # point of intersection
-    #         if z == 0:  # lines are parallel
-    #             return (float('inf'), float('inf'))
-    #         return (x / z, y / z)
-    #
-    #     outputList = subjectPolygon
-    #     cLen = len(clipPolygon)
-    #     cp1 = clipPolygon[cLen - 1]
-    #
-    #     for clipVertex in clipPolygon:
-    #         cp2 = clipVertex
-    #         inputList = outputList
-    #         outputList = []
-    #         if not inputList:
-    #             break
-    #
-    #         ilLen = len(inputList)
-    #         s = inputList[ilLen - 1]
-    #
-    #         for e in inputList:
-    #             if inside(e):
-    #                 if not inside(s):
-    #                     outputList.append(get_intersect())
-    #                 outputList.append(e)
-    #             elif inside(s):
-    #                 outputList.append(get_intersect())
-    #             s = e
-    #         cp1 = cp2
-    #     return outputList
-    #
-    # def clipLine(self, subjectPolygon):
-    #     """Apply Sutherland-Hodgman algorithm for clipping polygons
-    #     """
-    #     if self.INVERTXAXIS != self.INVERTYAXIS:
-    #         clipPolygon = [[self.axisL, self.axisB],
-    #                        [self.axisL, self.axisT],
-    #                        [self.axisR, self.axisT],
-    #                        [self.axisR, self.axisB]]
-    #     else:
-    #         clipPolygon = [[self.axisL, self.axisB],
-    #                        [self.axisR, self.axisB],
-    #                        [self.axisR, self.axisT],
-    #                        [self.axisL, self.axisT]]
-    #
-    #     def inside(p):
-    #         return (cp2[0] - cp1[0]) * (p[1] - cp1[1]) > (cp2[1] - cp1[1]) * (p[0] - cp1[0])
-    #
-    #     def get_intersect():
-    #         """Returns the point of intersection of the lines passing through a2,a1 and b2,b1.
-    #         """
-    #         pp = np.vstack([s, e, cp1, cp2])  # s for stacked
-    #
-    #         h = np.hstack((pp, np.ones((4, 1))))  # h for homogeneous
-    #         l1 = np.cross(h[0], h[1])  # get first line
-    #         l2 = np.cross(h[2], h[3])  # get second line
-    #         x, y, z = np.cross(l1, l2)  # point of intersection
-    #         if z == 0:  # lines are parallel
-    #             return (float('inf'), float('inf'))
-    #         return (x / z, y / z)
-    #
-    #     outputList = subjectPolygon
-    #     cLen = len(clipPolygon)
-    #     cp1 = clipPolygon[cLen - 1]
-    #
-    #     for clipVertex in clipPolygon:
-    #         cp2 = clipVertex
-    #         inputList = outputList
-    #         outputList = []
-    #         if not inputList:
-    #             break
-    #
-    #         ilLen = len(inputList)
-    #         s = inputList[ilLen - 1]
-    #
-    #         for e in inputList:
-    #             if inside(e):
-    #                 if not inside(s):
-    #                     outputList.append(get_intersect())
-    #                 outputList.append(e)
-    #             elif inside(s):
-    #                 outputList.append(get_intersect())
-    #             s = e
-    #         cp1 = cp2
-    #     return outputList
-    #
-    # def lineFit(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
-    #     for pp in range(0, len(lineList), 2):
-    #         if (self.between(lineList[pp], self.axisL, self.axisR) and
-    #                 (self.between(lineList[pp + 1], self.axisT, self.axisB) or checkIntegral)):
-    #             fit = True
-    #             break
-    #     else:
-    #         fit = False
-    #
-    #     for pp in range(0, len(lineList), 2):
-    #         lineList[pp] = x + width * (lineList[pp] - self.axisL) / (self.axisR - self.axisL)
-    #         lineList[pp + 1] = y + height * (lineList[pp + 1] - self.axisB) / (self.axisT - self.axisB)
-    #     return fit
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

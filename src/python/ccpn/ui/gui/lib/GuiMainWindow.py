@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:22 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-01 11:15:34 +0100 (Thu, October 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1181,12 +1181,18 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """
         previousStrip = data[Notifier.PREVIOUSVALUE]
         currentStrip = data[Notifier.VALUE]
-        if previousStrip and not previousStrip.isDeleted:
+
+        if previousStrip == currentStrip:
+            return
+
+        if previousStrip and not (previousStrip.isDeleted or previousStrip._flaggedForDelete):
             previousStrip._highlightStrip(False)
-        if currentStrip and not currentStrip.isDeleted:
+            previousStrip.spectrumDisplay._highlightAxes(previousStrip, False)
+
+        if currentStrip and not (currentStrip.isDeleted or currentStrip._flaggedForDelete):
             currentStrip._highlightStrip(True)
             currentStrip._attachZPlaneWidgets()
-            currentStrip.spectrumDisplay._highlightAxes(currentStrip)
+            currentStrip.spectrumDisplay._highlightAxes(currentStrip, True)
 
     def printToFile(self):
         self.application.showPrintSpectrumDisplayPopup()

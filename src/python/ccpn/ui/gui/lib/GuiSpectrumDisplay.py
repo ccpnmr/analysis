@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-29 09:47:39 +0100 (Tue, September 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-01 11:15:34 +0100 (Thu, October 01, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2463,14 +2463,13 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self.update()
 
-    def _highlightAxes(self, strip):
+    def _highlightAxes(self, strip, state):
         """Highlight the last row axis if strip
         """
         _row = self.stripRow(0)
-        if _row:
-            highlight = (_row[-1] == strip)
-            self._rightGLAxis.highlightCurrentStrip(highlight)
-            self._bottomGLAxis.highlightCurrentStrip(highlight)
+        if _row and len(_row) > 1 and (_row[-1] == strip):
+            self._rightGLAxis.highlightCurrentStrip(state)
+            self._bottomGLAxis.highlightCurrentStrip(state)
 
     #===========================================================================================
     # new'Object' and other methods

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 12:08:52 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -444,3 +444,33 @@ if __name__ == '__main__':
     popup.show()
     popup.raise_()
     app.start()
+
+    # # test - adding a different widget to a combobox
+    # import sys
+    # from PyQt5.QtCore import Qt, QVariant
+    # from PyQt5 import QtGui, QtWidgets
+    #
+    #
+    # app = QtWidgets.QApplication(sys.argv)
+    # model = QtGui.QStandardItemModel()
+    #
+    # items = [("ABC", True),
+    #          ("DEF", False),
+    #          ("GHI", False)]
+    #
+    # for text, checked in items:
+    #     text_item = QtGui.QStandardItem(text)
+    #     checked_item = QtGui.QStandardItem()
+    #     checked_item.setData(QVariant(checked), Qt.CheckStateRole)
+    #     model.appendRow([text_item, checked_item])
+    #
+    # view = QtWidgets.QTreeView()
+    # view.header().hide()
+    # view.setRootIsDecorated(False)
+    #
+    # combo = QtWidgets.QComboBox()
+    # combo.setView(view)
+    # combo.setModel(model)
+    # combo.show()
+    #
+    # sys.exit(app.exec_())

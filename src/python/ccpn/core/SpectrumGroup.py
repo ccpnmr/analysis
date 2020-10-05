@@ -267,6 +267,34 @@ class SpectrumGroup(AbstractWrapperObject):
 
         self.setParameter(SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESTYPE, value)
 
+    def sortSpectraBySeries(self, reverse=True):
+        import numpy as np
+        if not None in self.series:
+            series = np.array(self.series)
+            if reverse:
+                ind = series.argsort()[::-1]
+            else:
+                ind = series.argsort()
+            self.spectra = list(np.array(self.spectra)[ind])
+            self.series = list(series[ind])
+
+    def clone(self):
+        takenNames = list(map(lambda x: x.name, self.project.spectrumGroups))
+        name = self.name
+        while name in takenNames:
+            name += '_copy'
+        newSpectrumGroup = self.project.newSpectrumGroup(name=name, spectra=self.spectra)
+        attrNames = ['series', 'seriesType', 'seriesUnits', 'sliceColour',
+                 'positiveContourColour', 'negativeContourColour', 'comment']
+        for name in attrNames:
+            val = getattr(self, name, None)
+            try:
+                setattr(newSpectrumGroup, name, val)
+            except Exception as e:
+                getLogger().warning('Error cloning: %s. Invalid attr: %s' %(self.pid, name))
+
+        return newSpectrumGroup
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================

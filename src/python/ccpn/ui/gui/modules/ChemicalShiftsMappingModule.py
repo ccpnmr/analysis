@@ -395,14 +395,11 @@ class ChemicalShiftsMapping(CcpnModule):
     self.editSGLabel = Label(self.scrollAreaWidgetContents, text='Edit SpectrumGroup ', grid=(i, 0))
     self.editSGButton = Button(self.scrollAreaWidgetContents, text='Edit series...', callback=self._editSpectrumGroup,
                                           grid=(i, 1))
-
     i += 1
     self.modeLabel = Label(self.scrollAreaWidgetContents, text='Calculation mode ', grid=(i, 0))
     self.modeButtons = RadioButtons(self.scrollAreaWidgetContents, selectedInd=0, texts=MODES,
                                     callback=self._toggleRawDataOption, grid=(i, 1))
-
     i += 1
-
     self.displayDataLabel = Label(self.scrollAreaWidgetContents, text='Display data ', grid=(i, 0))
     self.displayDataButton = RadioButtons(self.scrollAreaWidgetContents, selectedInd=0, texts=DISPLAYDATA,
                                      grid=(i, 1), hAlign='l')
@@ -772,7 +769,7 @@ class ChemicalShiftsMapping(CcpnModule):
               else:
                 for i,p in enumerate(peaks):
                   peaksPids.append(p.pid)
-            if all(sg.series):
+            if not None in sg.series:
               concentrationsValues = sg.series
               self._seriesUnit = sg.seriesUnits
             else:

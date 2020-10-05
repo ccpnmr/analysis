@@ -43,6 +43,7 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.TextEditor import PlainTextEditor
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
@@ -722,6 +723,13 @@ class SeriesFrame(Frame):
         # unitsLabel = Label(self, text='Series Units', grid=(row, col), hAlign='l')
         # self.unitsEditor = LineEdit(self, grid=(row, col + 1))
         # unitsLabel.setFixedHeight(30)
+        reorderLabel = Label(self, text='Reorder spectra by series', grid=(row, col), hAlign='l')
+        self._orderButtons = ButtonList(self, texts=['Ascending','Descending'],
+                                        icons=[Icon('icons/sort-up'),Icon('icons/sort-down')],
+                                        callbacks=[partial(self._reorderSpectraBySeries, False),
+                                                   partial(self._reorderSpectraBySeries, True)],
+                                        grid=(row, col + 1))
+        row += 1
         self.unitsEditor = PulldownListCompoundWidget(self, labelText='Series Units', grid=(row, col), gridSpan=(1, 3), hAlign='l',
                                                       editable=True, sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents)
         self.unitsEditor.pulldownList.pulldownTextEdited.connect(partial(self._queueChangeSeriesUnits, self.unitsEditor, self.defaultObject))
@@ -767,6 +775,15 @@ class SeriesFrame(Frame):
 
         # get colours from the lineEdit and copy to the plainTextEdit
         # yourWidget.palette().highlight().color().name()?
+
+    def _reorderSpectraBySeries(self, reverse=True):
+        idx = self.seriesType.getIndex()
+        if idx == SeriesTypes.FLOAT.value or idx == SeriesTypes.INTEGER.value:
+            dd = OrderedDict((k, v.get()) for k, v in sorted(self._editors.items(), key=lambda item: float(item[1].get()), reverse=reverse))
+            self._parent._groupedObjects = [i.pid for i in dd.keys()]
+            for v, e in zip(dd.values(), self._editors.values()):
+                e.set(v)
+        self.seriesType.setIndex(idx)
 
     def _fillSeriesFrame(self, defaultItems, spectrumGroup=None):
         """Reset the contents of the series frame for changed spectrum list

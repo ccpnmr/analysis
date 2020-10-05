@@ -98,13 +98,14 @@ from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
 from ccpn.ui.gui.widgets.CheckBox import CheckBox, EditableCheckBox
-from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
+from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.GuiTable import exportTableDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.LegendItem import LegendItem
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.HLine import HLine
@@ -119,6 +120,7 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
+from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.modules.NmrResidueTable import _CSMNmrResidueTable, KD, Deltas
 from ccpn.ui.gui.widgets.ConcentrationsWidget import ConcentrationWidget
 from ccpn.ui.gui.popups.ConcentrationUnitsPopup import ConcentrationUnitsPopup
@@ -137,7 +139,7 @@ from ccpn.core.lib.peakUtils import getNmrResidueDeltas,_getKd, oneSiteBindingCu
                                     getRawDataFrame, RAW, getNmrResiduePeakProperty, _getPeaksForNmrResidue
 from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib.DataFrameObject import  DATAFRAME_OBJECT
-from ccpn.core.NmrChain import NmrChain
+from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.Peak import Peak
 from ccpn.core.NmrResidue import NmrResidue
@@ -151,7 +153,7 @@ DefaultThreshould = 0.1
 DefaultConcentrationUnit = concentrationUnits[0]
 
 # General Labels
-DefaultKDunit = ''
+DefaultSeriesUnit = ''
 RelativeDisplacement = 'Relative Displacement'
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 DELTA = '\u0394'
@@ -161,6 +163,8 @@ PreferredNmrAtoms = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
 ONESITE = 'One-site binding'
 DECAY = 'Exponential decay'
 NIY = "This option has not been implemented yet"
+DropHereLabel = 'Drop SpectrumGroup here to start'
+NewSG = '<New SpectrumGroup>'
 
 FittingAvailable=[ONESITE, DECAY]
 
@@ -272,7 +276,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.updateIcon = Icon('icons/update')
     self._zoomOnInit = True
     self._bindingItemClicked = None #used for the bindingPlot callback
-    self._kDunit = DefaultKDunit
+    self._seriesUnit = DefaultSeriesUnit
     self._availableFittingPlots  = {
                           ONESITE: self._plot1SiteBindFitting, # Only this implemented
                           DECAY: self._plotExponentialDecay,
@@ -285,7 +289,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak', self._peakDeletedCallBack)
     self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'NmrResidue',self._nmrObjectChanged)
     self._nrDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'NmrResidue',self._nmrResidueDeleted)
-
+    self._sgNotifier = Notifier(self.project, [Notifier.CREATE, Notifier.DELETE], 'SpectrumGroup', self._setSpectrumGroupPulldown)
 
     # self._addSettingsWAttr(self.nmrAtomsCheckBoxes)
     # self._selectCurrentNmrResiduesNotifierCallback()
@@ -295,13 +299,14 @@ class ChemicalShiftsMapping(CcpnModule):
         if self.nmrResidueTable.ncWidget.getIndex() == 0:
           # self.spectraSelectionWidget._toggleAll()
           self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
+          self.spectrumGroupPulldown.select(self.project.spectrumGroups[-1])
           self._setThresholdLineBySTD()
-          self._setKdUnit()
           if len(self.selectedNmrAtomNames) == 0:
-            spectra = self.spectraSelectionWidget.getSelections()
-            if len(spectra) > 0:
-              self.selectedNmrAtomNames = spectra[0].axisCodes
-              self._updateModule()
+            sg = self.spectrumGroupPulldown.getObject()
+            if isinstance(sg, SpectrumGroup):
+              if len(sg.spectra) > 0:
+                self.selectedNmrAtomNames = sg.spectra[0].axisCodes
+                self._updateModule()
 
   #####################################################
   #############   Main widgets creation    ############
@@ -333,7 +338,6 @@ class ChemicalShiftsMapping(CcpnModule):
                                                setLayout=True, grid = (0, 0))
     self.nmrResidueTable.chemicalShiftsMappingModule = self
     self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
-
     self.tabWidget = Tabs(self.mainWidget, setLayout=True)
 
     ## 1 Tab binding Plot
@@ -365,8 +369,6 @@ class ChemicalShiftsMapping(CcpnModule):
     self.hPlotsTableSplitter.addWidget(self.nmrResidueTable)
     self.hPlotsTableSplitter.addWidget(self.tabWidget)
     self.hPlotsTableSplitter.setStretchFactor(0, 1)
-
-
     self.vBarTableSplitter.addWidget(self.hPlotsTableSplitter) # Foundamental! The horizontal splitter MUST be added
                                                                # to the vertical as a widget before adding any other widgets to it ( to the vertical).
                                                                # Then, only the vertical splitter is added to the main widget Layout.
@@ -382,28 +384,18 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _initSettingsWidgets(self):
 
-    # self.scrollAreaWidgetContents = ScrollableFrame(self.settingsWidget, setLayout=True, spacing=DEFAULTSPACING,
-    #                  scrollBarPolicies=('asNeeded', 'asNeeded'), margins=TABMARGINS, grid=(0,0))
-    # NOTE:ED - Luca, this is already a scrollWidget
     self.scrollAreaWidgetContents = self.settingsWidget
 
     i = 0
-    self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select input data', grid=(i, 0), vAlign='t')
-    self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, mainWindow=self.mainWindow,
-                                                         grid=(i, 1), gridSpan=(1, 2))
-    self.spectraSelectionWidget.setMinimumHeight(100)
-    if len(self.project.spectra) > 0:
-      self._addSettingsWAttr(self.spectraSelectionWidget.selectSpectraOption.radioButtons)
-      self._addSettingsWAttr(self.spectraSelectionWidget.allSpectraCheckBoxes)
-      self._addSettingsWAttr(self.spectraSelectionWidget.allSGCheckBoxes)
-      self._checkSpectraWithPeakListsOnly()
-
+    self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select Spectrum Group', grid=(i, 0), vAlign='t')
+    self.spectrumGroupPulldown = PulldownList(self.scrollAreaWidgetContents, callback=self._sgPulldownCallback,
+                                              grid=(i, 1))
+    self._setSpectrumGroupPulldown()
     i += 1
-    self.concentrationLabel = Label(self.scrollAreaWidgetContents, text='Concentrations', grid=(i, 0), vAlign='t')
-    self.concentrationButton = Button(self.scrollAreaWidgetContents, text='Setup...',
-                                      callback=self._setupConcentrationsPopup,
-                                      grid=(i, 1))
-    # self.spectraSelectionWidget.setMaximumHeight(150)
+    self.editSGLabel = Label(self.scrollAreaWidgetContents, text='Edit SpectrumGroup ', grid=(i, 0))
+    self.editSGButton = Button(self.scrollAreaWidgetContents, text='Edit series...', callback=self._editSpectrumGroup,
+                                          grid=(i, 1))
+
     i += 1
     self.modeLabel = Label(self.scrollAreaWidgetContents, text='Calculation mode ', grid=(i, 0))
     self.modeButtons = RadioButtons(self.scrollAreaWidgetContents, selectedInd=0, texts=MODES,
@@ -557,7 +549,6 @@ class ChemicalShiftsMapping(CcpnModule):
           if label.isBelowThreshold and not self.barGraphWidget.customViewBox.allLabelsShown:
             label.setVisible(False)
 
-
   def _barGraphClickEvent(self, event):
 
     position = int(event.pos().x())
@@ -618,7 +609,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self._bindingPlotViewbox.mouseClickEvent = self._bindingViewboxMouseClickEvent
     self.bindingVLine =  pg.InfiniteLine(angle=90, pos=0, pen=OriginAxes, movable=False, )
     self.bindingHLine = pg.InfiniteLine(angle=0, pos=0, pen=OriginAxes, movable=False, )
-    self.bindingPlot.setLabel('bottom', self._kDunit)
+    self.bindingPlot.setLabel('bottom', self._seriesUnit)
     self.bindingPlot.setLabel('left', DELTA+Delta)
     self.bindingPlot.setMenuEnabled(False)
     self.bindingPlot.getAxis('bottom').setPen(GridPen)
@@ -723,11 +714,7 @@ class ChemicalShiftsMapping(CcpnModule):
             plot.sigPointsClicked.connect(self._bindingPlotSingleClick)
             self.bindingPlot.autoRange()
             self.bindingPlot.setLabel('left','Y')# DELTA+Delta)
-            self.bindingPlot.setLabel('bottom', self._kDunit)
-
-
-
-
+            self.bindingPlot.setLabel('bottom', self._seriesUnit)
 
   def _bindingPlotSingleClick(self, item, points):
     """sig callback from the binding plot. Gets the obj from the curve name."""
@@ -735,8 +722,6 @@ class ChemicalShiftsMapping(CcpnModule):
 
     for p in points:
         if isinstance(p.data(), (Spectrum, Peak)):
-          print('CLicked', p.data(), p.pos())
-
           self._bindingItemClicked = p.data()
 
   def _bindingPlotDoubleClick(self, event):
@@ -748,11 +733,9 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _getBindingCurves(self, nmrResidues, singleColumn=False):
     """
-
     :param nmrResidues:
     :return: dataframe
     """
-
     mode = self.modeButtons.getSelectedText()
     if not mode in MODES:
       return
@@ -760,54 +743,45 @@ class ChemicalShiftsMapping(CcpnModule):
     selectedAtomNames = self.selectedNmrAtomNames
     values = []
     peaksDFs = []
-    for nmrResidue in nmrResidues:
-      if self._isInt(nmrResidue.sequenceCode):
-        spectra = self.spectraSelectionWidget.getSelections()
-        concentrationsValues = []
-        peaksPids = []
-
-        if len(spectra)>1:
-          if self.displayDataButton.get() == RAW and mode in [HEIGHT, VOLUME] :
-            deltas, peaks = getNmrResiduePeakProperty(nmrResidue, selectedAtomNames, spectra, mode)
-            for i, p in enumerate(peaks):
-              spectrum = p.peakList.spectrum
-              concentrations, units = self._getConcentrationsFromSpectra([spectrum])
-              if len(concentrations) > 0:
-                concentration = concentrations[0]
-                if concentration is None:
-                  concentration = i
-                concentrationsValues.append(concentration)
+    sg = self.spectrumGroupPulldown.getObject()
+    if sg is not None:
+      spectra = sg.spectra
+      for nmrResidue in nmrResidues:
+        if self._isInt(nmrResidue.sequenceCode):
+          peaksPids = []
+          if len(spectra)>1:
+            if self.displayDataButton.get() == RAW and mode in [HEIGHT, VOLUME] :
+              deltas, peaks = getNmrResiduePeakProperty(nmrResidue, selectedAtomNames, spectra, mode)
+              for i, p in enumerate(peaks):
                 peaksPids.append(p.pid)
 
-          else:
-            zeroSpectrum, otherSpectra = spectra[0], spectra[1:]
-            deltas = []
-            peaks = _getPeaksForNmrResidue(nmrResidue, selectedAtomNames, spectra)
-            # deltas.append(0)
-            for i, spectrum in enumerate(spectra):
-              if nmrResidue._includeInDeltaShift:
-                  delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=[zeroSpectrum, spectrum],
-                                              atomWeights=weights)
-                  deltas.append(delta)
-              else:
-                deltas.append(None)
-            if len(spectra) != len(peaks):
-              continue
             else:
-              for i,p in enumerate(peaks):
-                spectrum = p.peakList.spectrum
-                concentrations, units =  self._getConcentrationsFromSpectra([spectrum])
-                if len(concentrations)>0:
-                  concentration = concentrations[0]
-                  if concentration is None:
-                    concentration = i
-                  concentrationsValues.append( concentration)
+              zeroSpectrum, otherSpectra = spectra[0], spectra[1:]
+              deltas = []
+              peaks = _getPeaksForNmrResidue(nmrResidue, selectedAtomNames, spectra)
+              # deltas.append(0)
+              for i, spectrum in enumerate(spectra):
+                if nmrResidue._includeInDeltaShift:
+                    delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=[zeroSpectrum, spectrum],
+                                                atomWeights=weights)
+                    deltas.append(delta)
+                else:
+                  deltas.append(None)
+              if len(spectra) != len(peaks):
+                continue
+              else:
+                for i,p in enumerate(peaks):
                   peaksPids.append(p.pid)
-          df = pd.DataFrame([deltas], index=[nmrResidue], columns=concentrationsValues)
-          dfPeaks = pd.DataFrame([peaksPids], index=[nmrResidue], columns=concentrationsValues)
-          df = df.replace(np.nan, 0)
-          values.append(df)
-          peaksDFs.append(dfPeaks)
+            if all(sg.series):
+              concentrationsValues = sg.series
+              self._seriesUnit = sg.seriesUnits
+            else:
+              concentrationsValues = [i for i in range(len(spectra))]
+            df = pd.DataFrame([deltas], index=[nmrResidue], columns=concentrationsValues)
+            dfPeaks = pd.DataFrame([peaksPids], index=[nmrResidue], columns=concentrationsValues)
+            df = df.replace(np.nan, 0)
+            values.append(df)
+            peaksDFs.append(dfPeaks)
     if len(values)>0:
       df = pd.concat(values)
       dfPeaks = pd.concat(peaksDFs)
@@ -849,7 +823,6 @@ class ChemicalShiftsMapping(CcpnModule):
     layoutParent.getLayout().addWidget(self._fittingPlotView)
 
 
-
   #####################################################
   #################   Scatter Plot     ################
   #####################################################
@@ -875,7 +848,6 @@ class ChemicalShiftsMapping(CcpnModule):
     self._plotItem.addItem(self.scatterXLine)
     self._plotItem.addItem(self.scatterYLine)
     layoutParent.getLayout().addWidget(self._scatterView)
-
 
   ########### Selection box for scatter Plot ############
 
@@ -910,8 +882,6 @@ class ChemicalShiftsMapping(CcpnModule):
     self._successiveClicks = None
     self._scatterSelectionBox.hide()
     self._scatterViewbox.rbScaleBox.hide()
-
-
 
   def _scatterMouseClickEvent(self, ev):
     """
@@ -980,7 +950,6 @@ class ChemicalShiftsMapping(CcpnModule):
         df.index = self.tableData[DATAFRAME_OBJECT]
         return df
 
-
   def _plotScatters(self, dataFrame, selectedObjs=None, *args):
     """
 
@@ -1034,11 +1003,37 @@ class ChemicalShiftsMapping(CcpnModule):
         self._raiseScatterContextMenu(event)
 
 
-
-
   #############################################################
   ############   Settings widgets callbacks    ################
   #############################################################
+
+  def _editSpectrumGroup(self):
+    sg = self.spectrumGroupPulldown.getObject()
+    if isinstance(sg, SpectrumGroup):
+      sge = SpectrumGroupEditor(parent=self, mainWindow=self.mainWindow,obj=sg, editMode=True)
+      sge._tabWidget.setCurrentIndex(2) # the series tab is the last
+      sge.exec_()
+
+  def _sgPulldownCallback(self, text):
+    if self.spectrumGroupPulldown.getText() == NewSG:
+      sge = SpectrumGroupEditor(parent=self, mainWindow=self.mainWindow, editMode=False)
+      sge.exec_()
+      sg = sge.obj
+      if isinstance(sg, SpectrumGroup):
+        self.spectrumGroupPulldown.select(sg)
+      else:
+        self.spectrumGroupPulldown.setCurrentIndex(0)
+    sg = self.spectrumGroupPulldown.getObject()
+    if isinstance(sg, SpectrumGroup):
+      if sg.seriesUnits:
+        self._seriesUnit = sg.seriesUnits
+        self.fittingPlot.setLabel('bottom', self._seriesUnit)
+        self.bindingPlot.setLabel('bottom', self._seriesUnit)
+
+  def _setSpectrumGroupPulldown(self, *args):
+    objects = [None] + self.project.spectrumGroups
+    texts  = [NewSG] + [sg.name for sg in self.project.spectrumGroups]
+    self.spectrumGroupPulldown.setData(texts=texts, objects=objects, headerText='Select', headerEnabled=False)
 
   def showNmrAtomsSettings(self):
     from ccpn.ui.gui.widgets.NmrAtomsSelections import _NmrAtomsSelection
@@ -1105,19 +1100,6 @@ class ChemicalShiftsMapping(CcpnModule):
     for n, w in enumerate(checkboxes):
       setattr(self, w.text(), w)
 
-  def _checkSpectraWithPeakListsOnly(self):
-    for cb in self.spectraSelectionWidget.allSpectraCheckBoxes:
-      sp = self.project.getByPid(cb.text())
-      lsts = []
-      if sp:
-        for pl in sp.peakLists:
-          if len(pl.peaks)>0:
-            lsts.append(True)
-      if not any(lsts):
-        cb.setChecked(False)
-      else:
-        cb.setChecked(True)
-
   def _toggleRawDataOption(self):
     value = self.modeButtons.getSelectedText()
     if value == HEIGHT or value ==  VOLUME:
@@ -1141,11 +1123,6 @@ class ChemicalShiftsMapping(CcpnModule):
           if std:
             self.thresholdLinePos = std
             self.thresholdSpinBox.set(std)
-
-  def _setKdUnit(self):
-    spectra = self.spectraSelectionWidget.getSelections()
-    vs, u = self._getConcentrationsFromSpectra(spectra)
-    self._kDunit = u
 
   def _displayTableForNmrChain(self, nmrChain):
     """ Add custom action when selecting a chain on the table pulldown"""
@@ -1233,37 +1210,40 @@ class ChemicalShiftsMapping(CcpnModule):
       return
     weights = self.relativeContribuitions
     selectedAtomNames = self.selectedNmrAtomNames
-    spectra = self.spectraSelectionWidget.getSelections()
-    if self.nmrResidueTable:
-      if self.nmrResidueTable._nmrChain is not None:
-        for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
-          if self._isInt(nmrResidue.sequenceCode):
-            self._updatedPeakCount(nmrResidue, spectra)
-            if nmrResidue._includeInDeltaShift:
-              nmrResidue.spectraCount = len(spectra)
-              nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
-              nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
-              nmrResidue._delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
+    sg = self.spectrumGroupPulldown.getObject()
 
-              df,peaksdf = self._getBindingCurves([nmrResidue])
-              bindingCurves = self._getScaledBindingCurves(df)
-              if bindingCurves is not None:
-                plotData = bindingCurves.replace(np.nan, 0)
-                columns = df.columns
-                y = plotData.values.flatten(order='F')
-                xss = np.array([columns] * plotData.shape[0])
-                x = xss.flatten(order='F')
-                kd = _getKd(oneSiteBindingCurve, x, y)
-                if not kd:
-                  getLogger().debug('Kd not set for nmrResidue %s' % nmrResidue.pid)
-                nmrResidue._estimatedKd = kd
-            else:
-              nmrResidue._delta = None
-        if not silent:
-          self._updateTable(self.nmrResidueTable._nmrChain)
-          self._updateBarGraph()
-          self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
-          self._plotBindingCFromCurrent()
+    if isinstance(sg, SpectrumGroup):
+      spectra =  sg.spectra
+      if self.nmrResidueTable:
+        if self.nmrResidueTable._nmrChain is not None:
+          for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
+            if self._isInt(nmrResidue.sequenceCode):
+              self._updatedPeakCount(nmrResidue, spectra)
+              if nmrResidue._includeInDeltaShift:
+                nmrResidue.spectraCount = len(spectra)
+                nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
+                nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
+                nmrResidue._delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
+
+                df,peaksdf = self._getBindingCurves([nmrResidue])
+                bindingCurves = self._getScaledBindingCurves(df)
+                if bindingCurves is not None:
+                  plotData = bindingCurves.replace(np.nan, 0)
+                  columns = df.columns
+                  y = plotData.values.flatten(order='F')
+                  xss = np.array([columns] * plotData.shape[0])
+                  x = xss.flatten(order='F')
+                  kd = _getKd(oneSiteBindingCurve, x, y)
+                  if not kd:
+                    getLogger().debug('Kd not set for nmrResidue %s' % nmrResidue.pid)
+                  nmrResidue._estimatedKd = kd
+              else:
+                nmrResidue._delta = None
+          if not silent:
+            self._updateTable(self.nmrResidueTable._nmrChain)
+            self._updateBarGraph()
+            self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
+            self._plotBindingCFromCurrent()
 
   def _showOnMolecularViewer(self):
     """
@@ -1368,7 +1348,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.fittingLine.label.setText('kd '+str(round(x_atHalf_Y,3)))
     self.fittingLine.show()
     self.fittingPlot.setLabel('left', RelativeDisplacement)
-    self.fittingPlot.setLabel('bottom', self._kDunit)
+    self.fittingPlot.setLabel('bottom', self._seriesUnit)
     self.fittingPlot.setRange(xRange=[0, max(xf)], yRange=[0, 1])
     self.bindingPlot.autoRange()
 
@@ -1396,94 +1376,13 @@ class ChemicalShiftsMapping(CcpnModule):
     if openSpectra:
       try:
         from ccpn.ui.gui.lib.MenuActions import _openItemObject
-
-        spectra = self.spectraSelectionWidget.getSelections()
-        _openItemObject(self.mainWindow, spectra)
+        sg = self.spectrumGroupPulldown.getObject()
+        if sg is not None:
+          _openItemObject(self.mainWindow, sg.spectra)
         return True
       except:
         getLogger().warning('Failed to open selected objects')
     return False
-
-  def _setupConcentrationsPopup(self):
-
-    spectra = self.spectraSelectionWidget.getSelections()
-    names = [sp.name for sp in spectra]
-    vs, u = self._getConcentrationsFromSpectra(spectra)
-    popup = ConcentrationUnitsPopup(self, mainWindow=self.mainWindow, names=names, values=vs, unit=u)
-    popup.show()
-    popup.raise_()
-
-    # # popup = CcpnDialog(windowTitle='Setup Concentrations', setLayout=True, size=(1000, 500))
-    #
-    # spectra = self.spectraSelectionWidget.getSelections()
-    # names = [sp.name for sp in spectra]
-    # w = ConcentrationWidget(popup, names=names, grid=(0,0))
-    # vs, u = self._getConcentrationsFromSpectra(spectra)
-    # w.setValues(vs)
-    # w.setUnit(u)
-    #
-    # buttons = ButtonList(popup, texts=['Cancel', 'Apply', 'Ok'],
-    #                      callbacks=[popup.reject, partial(self._applyConcentrations,w),
-    #                                                                         partial(self._closeConcentrationsPopup,popup,w)],
-    #                      grid=(1,0))
-    # popup.show()
-    # popup.raise_()
-
-  # def _applyConcentrations(self, w):
-  #   spectra = self.spectraSelectionWidget.getSelections()
-  #   vs, u = w.getValues() , w.getUnit()
-  #   self._addConcentrationsFromSpectra(spectra, vs, u)
-  #   self._kDunit = u
-  #   self.bindingPlot.setLabel('bottom', self._kDunit)
-  #   self.fittingPlot.setLabel('bottom', self._kDunit)
-
-  # def _closeConcentrationsPopup(self,popup, w):
-  #   self._applyConcentrations(w)
-  #   popup.accept()
-
-  def  _getConcentrationsFromSpectra(self, spectra):
-
-    vs = []
-    # us = []
-    u = DefaultConcentrationUnit
-    with undoBlockWithoutSideBar():
-      for spectrum in spectra:
-
-        if spectrum.sample:
-          sampleComponent = spectrum.sample._fetchSampleComponent(name=spectrum.name)
-          v = sampleComponent.concentration
-          u = sampleComponent.concentrationUnit
-        else:
-          v = None
-          u = DefaultConcentrationUnit
-
-        vs.append(v)
-        # us.append(u)
-        # this is unfortunate. We can select only one unit for all
-
-      return vs, u
-
-
-
-  def _addConcentrationsFromSpectra(self, spectra, concentrationValues, concentrationUnit):
-    """
-    # add concentrations. To be changed with series from SpectrumGroups
-    """
-
-    with undoBlockWithoutSideBar():
-      for spectrum, value in zip(spectra, concentrationValues):
-        if not spectrum.sample:
-          sample = self.project.newSample(name=spectrum.name)
-          sample.spectra = [spectrum]
-          newSampleComponent = sample.newSampleComponent(name=spectrum.name)
-          newSampleComponent.concentration = value
-          newSampleComponent.concentrationUnit = concentrationUnit
-
-        else:
-          sample = spectrum.sample
-          newSampleComponent = sample._fetchSampleComponent(name=spectrum.name)
-          newSampleComponent.concentration = value
-          newSampleComponent.concentrationUnit = concentrationUnit
 
   #############################################################
   ######   Updating widgets (plots and table) callbacks #######

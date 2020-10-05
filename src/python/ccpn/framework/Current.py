@@ -58,7 +58,7 @@ PCAcomponents = 'pcaComponents'
 MacroFiles = 'macroFiles'
 
 _currentClasses = {
-    SpectrumGroup    : {SingularOnly: True},
+    SpectrumGroup    : {},
     Peak             : {},
     Integral         : {},
     NmrChain         : {},

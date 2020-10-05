@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ LABELLING = ['None', TYPENEW, '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 'IL
 BUTTONSTATES = ['New', 'From Existing']
 
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
-    RadioButtonsCompoundWidget, PulldownListCompoundWidget, SpinBoxCompoundWidget
+    RadioButtonsCompoundWidget, PulldownListCompoundWidget, SpinBoxCompoundWidget, TextEditorCompoundWidget
 
 
 class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
@@ -120,7 +120,11 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
                               hWidth=None,
                               group=1,
                               ),
-                        VList([('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}), ],
+                        # VList([('comment', TextEditorCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <',
+                        #                                                                             'addGrip': False, 'addWordWrap': True,
+                        #                                                                             'fitToContents': True,
+                        #                                                                             'maximumRows': 5}), ],
+                        VList([('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <',}), ],
                               hWidth=None,
                               group=1,
                               ),

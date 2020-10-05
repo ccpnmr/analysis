@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-29 09:47:39 +0100 (Tue, September 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 11:10:15 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -201,6 +201,8 @@ LABEL_BACKGROUND = 'LABEL_BACKGROUND'
 LABEL_SELECTEDBACKGROUND = 'LABEL_SELECTEDBACKGROUND'
 LABEL_SELECTEDFOREGROUND = 'LABEL_SELECTEDFOREGROUND'
 LABEL_HIGHLIGHT = 'LABEL_HIGHLIGHT'
+LABEL_WARNINGFOREGROUND = 'LABEL_WARNINGFOREGROUND'
+
 DIVIDER = 'DIVIDER'
 SOFTDIVIDER = 'SOFTDIVIDER'
 
@@ -227,6 +229,7 @@ BORDERFOCUS = 'BORDER_FOCUS'
 
 # Colours
 TEXT_COLOUR = '#555D85'
+TEXT_COLOUR_WARNING = '#E06523'
 SOFT_DIVIDER_COLOUR = '#888DA5'
 LIGHT_GREY = 'rgb(250,250,250)'
 STEEL = 'rgb(102,102,102)'  # from apple
@@ -296,6 +299,7 @@ colourSchemes = {
         DRAG_FOREGROUND                  : 'white',
         DRAG_BACKGROUND                  : HIGHLIGHT_COLOUR,
         LABEL_FOREGROUND                 : TEXT_COLOUR,
+        LABEL_WARNINGFOREGROUND          : TEXT_COLOUR_WARNING,
         DIVIDER                          : '#a9a9a9',  # could be could CCPN_WIDGET_BORDER_COLOUR, was TEXT_COLOUR
         SOFTDIVIDER                      : SOFT_DIVIDER_COLOUR,
         LABEL_SELECTEDBACKGROUND         : 'mediumseagreen',

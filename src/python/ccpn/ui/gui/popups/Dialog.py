@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-30 16:09:18 +0100 (Wed, September 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -169,7 +169,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             self.getButton(self.RESETBUTTON).setEnabled(False)
 
         # restore the state of any required widgets
-        self.restoreState()
+        self.restoreWidgetState()
 
     def _setDialogSize(self):
         """Set the fixed/free dialog size from size or sizeHint
@@ -441,7 +441,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         super(CcpnDialogMainWidget, self).accept()
 
         # store the state of any required widgets
-        self.storeState()
+        self.storeWidgetState()
 
     def _refreshGLItems(self):
         """emit a signal to rebuild any required GL items
@@ -455,14 +455,14 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
 
-    def restoreState(self):
-        """Restore the state of any required widgets
+    def storeWidgetState(self):
+        """Store the state of any required widgets between popups
         """
         # TO BE SUBCLASSED
         pass
 
-    def storeState(self):
-        """Store the state of any required widgets between popups
+    def restoreWidgetState(self):
+        """Restore the state of any required widgets
         """
         # TO BE SUBCLASSED
         pass

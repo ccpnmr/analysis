@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -41,6 +42,8 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.CompoundBaseWidget import CompoundBaseWidget
 from ccpn.ui.gui.widgets.CompoundView import CompoundView
+from ccpn.ui.gui.widgets.TextEditor import TextEditor, PlainTextEditor
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.util.Colour import spectrumColours
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
@@ -303,8 +306,8 @@ class EntryCompoundWidget(CompoundBaseWidget):
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
 
-        if sizeAdjustPolicy is not None:
-            self.pulldownList.setSizeAdjustPolicy(sizeAdjustPolicy)
+        # if sizeAdjustPolicy is not None:
+        #     self.Entry.setSizeAdjustPolicy(sizeAdjustPolicy)
 
     def getText(self):
         "Convenience: Return text of Entry"
@@ -313,6 +316,97 @@ class EntryCompoundWidget(CompoundBaseWidget):
     def setText(self, text):
         "Convenience: set text of Entry"
         self.entry.setText(text)
+
+
+class TextEditorCompoundWidget(CompoundBaseWidget):
+    """
+    Compound class comprising a Label and a Entry widget, combined in a CompoundBaseWidget (i.e. a Frame)
+
+      orientation       widget layout
+      ------------      ------------------------
+      left:             Label       Entry
+
+      right:            Entry       Label
+
+      top:              Label
+                        Entry
+
+      bottom:           Entry
+                        Label
+
+    """
+    layoutDict = dict(
+            # grid positions for label and Entry for the different orientations
+            left=[(0, 0), (0, 1)],
+            right=[(0, 1), (0, 0)],
+            top=[(0, 0), (1, 0)],
+            bottom=[(1, 0), (0, 0)],
+            )
+
+    def __init__(self, parent=None, mainWindow=None,
+                 showBorder=False, orientation='left',
+                 minimumWidths=None, maximumWidths=None, fixedWidths=None,
+                 labelText='', callback=None, default=None, editable=True,
+                 sizeAdjustPolicy=None, compoundKwds=None,
+                 **kwds):
+        """
+        :param parent: parent widget
+        :param showBorder: flag to display the border of Frame (True, False)
+        :param orientation: flag to determine the orientation of the labelText relative to the Entry widget.
+                            Allowed values: 'left', 'right', 'top', 'bottom'
+        :param minimumWidths: tuple of two values specifying the minimum width of the Label and Entry widget, respectively
+        :param maximumWidths: tuple of two values specifying the maximum width of the Label and Entry widget, respectively
+        :param labelText: Text for the Label
+        :param callback: (optional) callback for the Entry
+        :param default: (optional) initial text of the Entry
+        :param editable: (optional) set Entry to editable
+        :param kwds: (optional) keyword, value pairs for the gridding of Frame
+        """
+
+        CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                    showBorder=showBorder, **kwds)
+        _labelFrame = Frame(self, setLayout=True, vAlign='t')
+        # self.label = Label(parent=self, text=labelText, vAlign='center')
+        # self._addWidget(self.label)
+
+        Spacer(_labelFrame, 4, 4, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed,
+               grid=(0, 0))
+        self.label = Label(parent=_labelFrame, text=labelText, grid=(1, 0))
+        Spacer(_labelFrame, 2, 2, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+               grid=(2, 0))
+
+        self._addWidget(_labelFrame)
+
+        self.textEditor = TextEditor(parent=self, callback=callback, editable=editable, **compoundKwds)
+        self._addWidget(self.textEditor)
+
+        if default is not None:
+            self.setText(default)
+
+        if minimumWidths is not None:
+            self.setMinimumWidths(minimumWidths)
+
+        if maximumWidths is not None:
+            self.setMinimumWidths(maximumWidths)
+
+        if fixedWidths is not None:
+            self.setFixedWidths(fixedWidths)
+
+        # if sizeAdjustPolicy is not None:
+        #     self.textEditor.setSizeAdjustPolicy(sizeAdjustPolicy)
+
+        if 'fitToContents' in compoundKwds:
+            self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+
+    def getText(self):
+        """Convenience: Return text of textEditor
+        """
+        return self.textEditor.get()
+
+    def setText(self, text):
+        """Convenience: set text of textEditor
+        """
+        self.textEditor.set(text)
 
 
 class PulldownListCompoundWidget(CompoundBaseWidget):

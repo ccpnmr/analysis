@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-16 17:52:18 +0000 (Mon, March 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 11:10:15 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -133,7 +133,8 @@ class DataFrameObject(object):
         columns = list(range(table.columnCount()))
         columnNum = None
         for c in columns:
-            if column == table.horizontalHeaderItem(c).text():
+            colItem = table.horizontalHeaderItem(c)
+            if colItem and column == colItem.text():
                 columnNum = c
                 break
 
@@ -166,7 +167,8 @@ class DataFrameObject(object):
         columns = list(range(table.columnCount()))
         columnNum = None
         for c in columns:
-            if column == table.horizontalHeaderItem(c).text():
+            colItem = table.horizontalHeaderItem(c)
+            if colItem and column == colItem.text():
                 columnNum = c
                 break
         else:

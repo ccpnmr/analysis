@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-01 11:15:34 +0100 (Thu, October 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -6740,7 +6740,7 @@ class CcpnGLWidget(QOpenGLWidget):
         for multiplet in multiplets:
             # add/remove the multiplet peaks
             newPeaks = multiplet.peaks
-            self.current.peaks = list(peaks ^ set(newPeaks))  # symmetric difference
+            self.current.peaks = list(peaks | set(newPeaks))  # symmetric difference
 
     def _mouseDoubleClickEvent(self, event: QtGui.QMouseEvent, axis=None):
         """handle the mouse click event

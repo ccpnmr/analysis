@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -33,9 +33,12 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Action import Action
 # from ccpn.ui.gui.guiSettings import fixedWidthFont
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
+from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
-from ccpn.ui.gui.widgets.Font import setWidgetFont
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
+from ccpn.ui.gui.widgets.ScrollBarVisibilityWatcher import ScrollBarVisibilityWatcher
 
 
 ATTRIBUTE_CHECK_LIST = ('_mouseStart', '_minimumWidth', '_widthStart', '_minimumHeight', '_heightStart')
@@ -48,17 +51,21 @@ class TextEditor(QtWidgets.QTextEdit, Base):
 
     _minimumHeight = 25
 
-    def __init__(self, parent=None, filename=None, **kwds):
+    def __init__(self, parent=None, filename=None, callback=None,
+                 listener=None, stripEndWhitespace=True, editable=True,
+                 backgroundText='<default>',
+                 acceptRichText=False, addGrip=False, addWordWrap=False, wordWrap=False,
+                 fitToContents=False, maximumRows=None,
+                 **kwds):
         super().__init__(parent)
-        Base._init(self, **kwds)
+        Base._init(self, setLayout=True, **kwds)
 
         self.filename = filename
+        self.setAcceptRichText(acceptRichText)
 
-        # from ccpn.framework.Application import getApplication
-        # getApp = getApplication()
-        # if getApp and hasattr(getApp, '_fontSettings'):
-        #     self.setFont(getApp._fontSettings.fixedWidthFont)
         setWidgetFont(self, )
+        self._minimumHeight = self._height = getFontHeight()
+        self._maximumRows = maximumRows
 
         self._changed = False
         self.setTabChangesFocus(True)
@@ -70,7 +77,74 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         palette = self.viewport().palette()
         self._background = palette.color(self.viewport().backgroundRole())
 
+        self.backgroundText = backgroundText
+        if self.backgroundText:
+            self.setPlaceholderText(str(self.backgroundText))
+
+        if not editable:
+            self.setReadOnly(True)
+            self.setEnabled(False)
+
+        self._fitToContents = fitToContents
+        self._lastRowCount = 0
+        # layout = QtWidgets.QHBoxLayout(self)
+        layout = self.getLayout()
+        if addWordWrap:
+            self._wrapIconOn = Icon('icons/wordwrap-on')
+            self._wrapIconOff = Icon('icons/wordwrap-off')
+            self._label = ActiveLabel(self)
+            layout.addWidget(self._label, 0, 0, 0, 0, QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
+            self._label.setContentsMargins(0, 0, 16 if addGrip else 0, 0)
+            self._label.setSelectionCallback(self._toggleWordWrap)
+            self._setWrapIcon(wordWrap)
+            self._label.setToolTip('Enable/disable Word-wrap')
+
+        if addGrip:
+            _gripIcon = Icon('icons/grip')
+
+            gripper = QtWidgets.QSizeGrip(self)
+            # layout.addWidget(gripper, 0, QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
+            layout.addWidget(gripper, 0, 0, 0, 0, QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
+            gripper.setStyleSheet("""QSizeGrip {
+                            image: url(%s);
+                            width: 20px; height: 20px;
+            }""" % (_gripIcon._filePath))
+
         self._setFocusColour()
+
+    def _toggleWordWrap(self):
+        wordWrap = (self.lineWrapMode() != QtWidgets.QTextEdit.WidgetWidth)
+        self._setWrapIcon(wordWrap)
+
+    def _setWrapIcon(self, wordWrap):
+        if wordWrap:
+            self._label.setPixmap(self._wrapIconOn.pixmap(20, 20))
+        else:
+            self._label.setPixmap(self._wrapIconOff.pixmap(20, 20))
+        self.setLineWrapMode(QtWidgets.QTextEdit.WidgetWidth if wordWrap else QtWidgets.QTextEdit.NoWrap)
+
+    def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
+        hBar = self.horizontalScrollBar()
+        vBar = self.verticalScrollBar()
+        dy = hBar.height() if hBar.isVisible() else 0
+        dx = vBar.width() if vBar.isVisible() else 0
+        layout = self.getLayout()
+        layout.setContentsMargins(0, 0, dx, dy)
+
+        self._updateheight()
+        super(TextEditor, self).resizeEvent(a0)
+
+    def _updateheight(self):
+        # Override the resize event to fit to contents
+        if self._fitToContents:
+            rowHeight = getFontHeight()
+            lineCount = min(self.document().lineCount(), self._maximumRows) if self._maximumRows is not None else self.document().lineCount()
+
+            if lineCount != self._lastRowCount:
+                minHeight = (rowHeight + 1) * (lineCount + 1)
+                self._maxHeight = max(2 * rowHeight, minHeight)
+                self.setFixedHeight(self._maxHeight)
+                self._lastRowCount = lineCount
 
     def _setFocusColour(self, focusColour=None, noFocusColour=None):
         """Set the focus/noFocus colours for the widget
@@ -79,27 +153,27 @@ class TextEditor(QtWidgets.QTextEdit, Base):
         noFocusColour = getColours()[BORDERNOFOCUS]
         styleSheet = "QTextEdit { " \
                      "border: 1px solid;" \
-                     "border-radius: 1px;" \
+                     "border-radius: 3px;" \
                      "border-color: %s;" \
                      "} " \
                      "QTextEdit:focus { " \
                      "border: 1px solid %s; " \
-                     "border-radius: 1px; " \
+                     "border-radius: 3px; " \
                      "}" % (noFocusColour, focusColour)
         self.setStyleSheet(styleSheet)
 
-    def _addGrip(self):
-        # an idea to add a grip handle - can't thing of any other way
-        self._gripIcon = Icon('icons/grip')
-        self._gripLabel = Label(self)
-        self._gripLabel.setPixmap(self._gripIcon.pixmap(16))
-        self._gripLabel.mouseMoveEvent = self._mouseMoveEvent
-        self._gripLabel.mousePressEvent = self._mousePressEvent
-        self._gripLabel.mouseReleaseEvent = self._mouseReleaseEvent
-
-        layout = QtWidgets.QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self._gripLabel, 0, QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
+    # def _addGrip(self):
+    #     # an idea to add a grip handle - can't thing of any other way
+    #     self._gripIcon = Icon('icons/grip')
+    #     self._gripLabel = Label(self)
+    #     self._gripLabel.setPixmap(self._gripIcon.pixmap(16))
+    #     self._gripLabel.mouseMoveEvent = self._mouseMoveEvent
+    #     self._gripLabel.mousePressEvent = self._mousePressEvent
+    #     self._gripLabel.mouseReleaseEvent = self._mouseReleaseEvent
+    #
+    #     layout = QtWidgets.QHBoxLayout(self)
+    #     layout.setContentsMargins(0, 0, 0, 0)
+    #     layout.addWidget(self._gripLabel, 0, QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
 
     def context_menu(self):
         a = self.createStandardContextMenu()
@@ -124,6 +198,7 @@ class TextEditor(QtWidgets.QTextEdit, Base):
 
     def _handle_text_changed(self):
         self._changed = True
+        self._updateheight()
 
     def setTextChanged(self, state=True):
         self._changed = state
@@ -160,36 +235,36 @@ class TextEditor(QtWidgets.QTextEdit, Base):
             printer.setOutputFileName(filename)
             self.document().print_(printer)
 
-    def _mousePressEvent(self, event):
-        """Handle mouse press in the grip
-        """
-        super().mousePressEvent(event)
-        self._resizing = True
-        self._widthStart = self.width()
-        self._heightStart = self.height()
-        self._mouseStart = event.globalPos()
-
-    def _mouseReleaseEvent(self, event):
-        """Handle mouse release in the grip
-        """
-        super().mouseReleaseEvent(event)
-        self._resizing = False
-
-    def _mouseMoveEvent(self, event):
-        """Update widget size as the grip is dragged
-        """
-        super().mouseMoveEvent(event)
-        if self._resizing and all(hasattr(self, att) for att in ATTRIBUTE_CHECK_LIST):
-            delta = event.globalPos() - self._mouseStart
-            width = max(self._minimumWidth, self._widthStart + delta.x())
-            height = max(self._minimumHeight, self._heightStart + delta.y())
-            self.setMinimumSize(width, height)
+    # def _mousePressEvent(self, event):
+    #     """Handle mouse press in the grip
+    #     """
+    #     super().mousePressEvent(event)
+    #     self._resizing = True
+    #     self._widthStart = self.width()
+    #     self._heightStart = self.height()
+    #     self._mouseStart = event.globalPos()
+    #
+    # def _mouseReleaseEvent(self, event):
+    #     """Handle mouse release in the grip
+    #     """
+    #     super().mouseReleaseEvent(event)
+    #     self._resizing = False
+    #
+    # def _mouseMoveEvent(self, event):
+    #     """Update widget size as the grip is dragged
+    #     """
+    #     super().mouseMoveEvent(event)
+    #     if self._resizing and all(hasattr(self, att) for att in ATTRIBUTE_CHECK_LIST):
+    #         delta = event.globalPos() - self._mouseStart
+    #         width = max(self._minimumWidth, self._widthStart + delta.x())
+    #         height = max(self._minimumHeight, self._heightStart + delta.y())
+    #         self.setMinimumSize(width, height)
 
     def sizeHint(self) -> QtCore.QSize:
-        return QtCore.QSize(200, 20)
+        return QtCore.QSize(self._height * 15, self._height * 3)
 
     def minimumSizeHint(self) -> QtCore.QSize:
-        return QtCore.QSize(200, 20)
+        return QtCore.QSize(self._height * 15, self._height * 3)
 
 
 class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
@@ -198,7 +273,10 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
 
     _minimumHeight = 25
 
-    def __init__(self, parent=None, filename=None, fitToContents=False, **kwds):
+    def __init__(self, parent=None, filename=None, fitToContents=False, callback=None,
+                 listener=None, stripEndWhitespace=True, editable=True,
+                 backgroundText='<default>',
+                 **kwds):
 
         super().__init__(parent)
         Base._init(self, **kwds)
@@ -353,6 +431,54 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
             minHeight = (rowHeight + 1) * (lineCount + 1)
             self._maxHeight = max(self._minimumHeight, minHeight)
             self.setMaximumHeight(self._maxHeight)
+
+
+# class Grip(QtWidgets.QLabel):
+#     def __init__(self, parent, move_widget):
+#         super(Grip, self).__init__(parent)
+#         self.move_widget = move_widget
+#
+#         self._gripIcon = Icon('icons/grip')
+#         self.setPixmap(self._gripIcon.pixmap(16))
+#
+#         self.min_height = 50
+#
+#         self.mouse_start = None
+#         self.height_start = self.move_widget.height()
+#         self.resizing = False
+#         self.setMouseTracking(True)
+#
+#         self.setCursor(QtCore.Qt.SizeVerCursor)
+#
+#     def showEvent(self, event):
+#         super(Grip, self).showEvent(event)
+#         self.reposition()
+#
+#     def mousePressEvent(self, event):
+#         super(Grip, self).mousePressEvent(event)
+#         self.resizing = True
+#         self.height_start = self.move_widget.height()
+#         self.mouse_start = event.globalPos()
+#
+#     def mouseMoveEvent(self, event):
+#         super(Grip, self).mouseMoveEvent(event)
+#         if self.resizing:
+#             delta = event.globalPos() - self.mouse_start
+#             height = self.height_start + delta.y()
+#             if height > self.min_height:
+#                 self.move_widget.setFixedHeight(height)
+#             else:
+#                 self.move_widget.setFixedHeight(self.min_height)
+#
+#             self.reposition()
+#
+#     def mouseReleaseEvent(self, event):
+#         super(Grip, self).mouseReleaseEvent(event)
+#         self.resizing = False
+#
+#     def reposition(self):
+#         rect = self.move_widget.geometry()
+#         self.move(rect.width() - 18, rect.height() - 18)
 
 
 if __name__ == '__main__':

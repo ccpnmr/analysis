@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-29 09:47:39 +0100 (Tue, September 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -68,7 +68,8 @@ from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, Chec
     ColourSelectionWidget, LineEditPopup, ListCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import _PulldownABC
 from ccpn.core.lib.Notifiers import NotifierBase
-from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget, SpinBoxCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, TextEditorCompoundWidget, \
+    RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget, SpinBoxCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
@@ -101,6 +102,7 @@ CommonWidgets = {
     QCodeEditor.__name__                : (QCodeEditor.get, QCodeEditor.set),
 
     EntryCompoundWidget.__name__        : (EntryCompoundWidget.getText, EntryCompoundWidget.setText),
+    TextEditorCompoundWidget.__name__   : (TextEditorCompoundWidget.getText, TextEditorCompoundWidget.setText),
     NmrChainPulldown.__name__           : (NmrChainPulldown.getText, NmrChainPulldown.select),
 
     # ADD TABLES
@@ -142,6 +144,7 @@ CommonWidgetsEdits = {
     QCodeEditor.__name__                    : (QCodeEditor.get, QCodeEditor.set, None),
 
     EntryCompoundWidget.__name__            : (EntryCompoundWidget.getText, EntryCompoundWidget.setText, 'entry.textEdited'),
+    TextEditorCompoundWidget.__name__       : (TextEditorCompoundWidget.getText, TextEditorCompoundWidget.setText, 'textEditor.textChanged'),
     NmrChainPulldown.__name__               : (NmrChainPulldown.getText, NmrChainPulldown.select, 'pulldownList.activated'),
     RadioButtonsCompoundWidget.__name__     : (RadioButtonsCompoundWidget.getIndex, RadioButtonsCompoundWidget.setIndex,
                                                'radioButtons.buttonGroup.buttonClicked'),

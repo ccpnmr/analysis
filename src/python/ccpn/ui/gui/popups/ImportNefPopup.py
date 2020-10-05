@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-29 09:47:39 +0100 (Tue, September 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -303,20 +303,7 @@ class NefDictFrame(Frame):
         # self._treeSplitter.addWidget(self._filterLogFrame)
 
         _row = 0
-        self.wordWrapData = CheckBoxCompoundWidget(
-                self._filterLogFrame.contentsFrame,
-                grid=(_row, 0), hAlign='left',
-                #minimumWidths=(colwidth, 0),
-                fixedWidths=(None, None),
-                orientation='left',
-                labelText='Wordwrap:',
-                checked=False,
-                callback=lambda val: self.logData.setLineWrapMode(QtWidgets.QTextEdit.WidgetWidth if val else QtWidgets.QTextEdit.NoWrap)
-                #self._toggleWordWrap,
-                )
-
-        _row += 1
-        self.logData = TextEditor(self._filterLogFrame.contentsFrame, grid=(_row, 0), gridSpan=(1, 3))
+        self.logData = TextEditor(self._filterLogFrame.contentsFrame, grid=(_row, 0), gridSpan=(1, 3), addWordWrap=True)
         self.logData.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.logData.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
 
@@ -678,21 +665,8 @@ class NefDictFrame(Frame):
                                              setLastButtonFocus=False)
                 row += 1
 
-            self.wordWrapDataOptions = CheckBoxCompoundWidget(
-                    self.frameOptionsFrame,
-                    grid=(row, 0), gridSpan=(1, 3), hAlign='left',
-                    #minimumWidths=(colwidth, 0),
-                    fixedWidths=(None, None),
-                    orientation='left',
-                    labelText='Wordwrap:',
-                    checked=False,
-                    callback=lambda val: self._commentData.setLineWrapMode(QtWidgets.QTextEdit.WidgetWidth if val else QtWidgets.QTextEdit.NoWrap),
-                    enabled=False
-                    )
-            row += 1
-
             Label(self.frameOptionsFrame, text='Comment', grid=(row, 0), enabled=False)
-            self._commentData = TextEditor(self.frameOptionsFrame, grid=(row, 1), gridSpan=(1, 2), enabled=False)
+            self._commentData = TextEditor(self.frameOptionsFrame, grid=(row, 1), gridSpan=(1, 2), enabled=False, addWordWrap=True)
             self._commentData.set('to do ...')
             self._commentData.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
             self._commentData.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)

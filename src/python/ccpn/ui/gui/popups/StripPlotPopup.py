@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-30 16:09:19 +0100 (Wed, September 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -105,15 +105,15 @@ class StripPlotPopup(CcpnDialogMainWidget):
 
         self.accept()
 
-    def restoreState(self):
-        """Restore the state of the widgets
-        """
-        self._newStripPlotWidget.restoreState()
-
-    def storeState(self):
+    def storeWidgetState(self):
         """Store the state of the widgets between popups
         """
-        self._newStripPlotWidget.storeState()
+        self._newStripPlotWidget.storeWidgetState()
+
+    def restoreWidgetState(self):
+        """Restore the state of the widgets
+        """
+        self._newStripPlotWidget.restoreWidgetState()
 
     def _buildStripsFromPeaks(self, peaks=None, spectrumDisplays=None):
         """Build the strips in the selected spectrumDisplays for the nmrAtoms attached to the current peaks

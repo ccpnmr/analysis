@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-05 19:42:03 +0100 (Wed, August 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 11:10:15 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -541,8 +541,8 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': isotopeCode}
     if serial is None:
         dd['name'] = name
-    if comment is None:
-        dd['details'] = name
+    if comment is not None:
+        dd['details'] = comment
 
     # NOTE:ED - check violated name, replaces the isotopeCode with '?' - follows v2 model check
     checkIsotopeCode = isotopeCode.upper()

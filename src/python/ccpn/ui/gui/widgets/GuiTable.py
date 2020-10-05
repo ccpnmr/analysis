@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-29 09:47:40 +0100 (Tue, September 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -274,12 +274,16 @@ GuiTable::item::selected {
         self.setDragDropMode(self.InternalMove)
         self.setDropIndicatorShown(True)
 
+        # stretchLastSection = False
+
         _header = self.horizontalHeader()
         # set Interactive and last column to expanding
-        _header.setResizeMode(QtWidgets.QHeaderView.Interactive)
+        _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
         _header.setStretchLastSection(stretchLastSection)
         _header.setResizeContentsPrecision(0)
-        self.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        _header.setDefaultAlignment(QtCore.Qt.AlignLeft)
+        # self.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
+        # _header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
         # enable the right click menu
         self.searchWidget = None
@@ -385,6 +389,29 @@ GuiTable::item::selected {
         setWidgetFont(self, name=TABLEFONT)
         setWidgetFont(_header, name=TABLEFONT)
         setWidgetFont(self.verticalHeader(), name=TABLEFONT)
+
+    # def resizeEvent(self, ev):
+    #     if getattr(self, '_resizeBlocking', False):
+    #         # header = self.horizontalHeader()
+    #         # header.setSectionResizeMode(self.columnCount()-1, QtWidgets.QHeaderView.Stretch)
+    #         super(GuiTable, self).resizeEvent(ev)
+
+    # def _getLastColumnSize(self):
+    #     # if index.column() == self.stretch_column:
+    #     last = self.columnCount() - 1
+    #     width = self.horizontalHeaderItem(last).columnWidth()
+    #
+    #     total_width = self.viewport().size().width()
+    #     calc_width = width
+    #     for i in range(self._parent.columnCount() - 1):
+    #         option_ = QtWidgets.QStyleOptionViewItem()
+    #         index_ = self._parent.model().index(0, i)
+    #         self.initStyleOption(option_, index_)
+    #         size_ = self.sizeHint(option_, index_)
+    #         calc_width += size_.width()
+    #
+    #     if calc_width < total_width:
+    #         self.horizontalHeaderItem(last).width().setWidth(width + total_width - calc_width)
 
     def _initTableCommonWidgets(self, parent, height=35, setGuiNotifier=None, **kwds):
         """Initialise the common table elements
@@ -498,7 +525,7 @@ GuiTable::item::selected {
     def _postDefaultSort(self, *args):
         """Catch the click event on a header and ensure headers remain consistent
         """
-        self.horizontalHeader().setStretchLastSection(True)
+        self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
         self.resizeColumnsToContents()
 
     @staticmethod
@@ -1252,11 +1279,11 @@ GuiTable::item::selected {
         # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
 
     # def resizeColumnsToContents(self):
-    #   self.hide()
-    #   self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-    #   super(GuiTable, self).resizeColumnsToContents()
-    #   self.show()
-    #   self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
+    #     # for col in range(self.columnCount()-2):
+    #     #     self.resizeColumnToContents(col)
+    #     # super(GuiTable, self).resizeColumnsToContents()
+    #     # print('>>> resize table')
+    #     pass
 
     def setData(self, data):
         """Set the data displayed in the table.
@@ -1373,8 +1400,8 @@ GuiTable::item::selected {
             self.setTableFromDataFrameObject(dataFrameObject=_dataFrameObject, columnDefs=columnDefs)
 
         except Exception as es:
-            raise es
             getLogger().warning('Error populating table', str(es))
+            raise es
 
         finally:
             self._highLightObjs(objs)
@@ -1736,6 +1763,19 @@ GuiTable::item::selected {
             return selectedObjects
         else:
             return None
+
+    def getFirstObject(self):
+        model = self.model()
+
+        data = {}
+        if self._dataFrameObject:
+            if len(self._dataFrameObject._objects) > 0:
+
+                for cc in range(self.columnCount()):
+                    colName = self.horizontalHeaderItem(cc).text()
+                    data[colName] = self.item(0, cc).value
+
+                return data
 
     def clearSelection(self):
         """Clear the current selection in the table
@@ -2587,6 +2627,24 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
 
         except Exception as es:
             getLogger().warning('Error handling cell editing: %i %i %s' % (row, col, str(es)))
+
+    # def sizeHint(self, option, index):
+    #     size = super().sizeHint(option, index)
+    #     # if index.column() == self.stretch_column:
+    #     print('>>> beep')
+    #     if index.column() == self._parent.columnCount() - 1:
+    #         total_width = self._parent.viewport().size().width()
+    #         calc_width = size.width()
+    #         for i in range(self._parent.columnCount()):
+    #             if i != index.column():
+    #                 option_ = QtWidgets.QStyleOptionViewItem()
+    #                 index_ = self._parent.model().index(index.row(), i)
+    #                 self.initStyleOption(option_, index_)
+    #                 size_ = self.sizeHint(option_, index_)
+    #                 calc_width += size_.width()
+    #         if calc_width < total_width:
+    #             size.setWidth(size.width() + total_width - calc_width)
+    #     return size
 
 
 class GuiTableFrame(Frame):

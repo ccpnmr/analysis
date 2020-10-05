@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-30 16:09:19 +0100 (Wed, September 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -134,15 +134,7 @@ class NmrResiduePopup(AttributeEditorPopupABC):
                                                      )
             self.obj.comment = self.comment.getText()
 
-        # self._storeState()
-
-    def restoreState(self):
-        """Restore the state of the checkBoxes
-        """
-        self.MergetoExisting.set(NmrResiduePopup._storedState.get(MERGE, False))
-        self.CreateNew.set(NmrResiduePopup._storedState.get(CREATE, False))
-
-    def storeState(self):
+    def storeWidgetState(self):
         """Store the state of the checkBoxes between popups
         """
         merge = self.MergetoExisting.isChecked()
@@ -150,6 +142,12 @@ class NmrResiduePopup(AttributeEditorPopupABC):
 
         NmrResiduePopup._storedState[MERGE] = merge
         NmrResiduePopup._storedState[CREATE] = create
+
+    def restoreWidgetState(self):
+        """Restore the state of the checkBoxes
+        """
+        self.MergetoExisting.set(NmrResiduePopup._storedState.get(MERGE, False))
+        self.CreateNew.set(NmrResiduePopup._storedState.get(CREATE, False))
 
     def _setValue(self, attr, setFunction, value):
         """Not needed here - subclass so does no operation

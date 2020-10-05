@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -52,18 +52,19 @@ class MoreLessFrame(Frame):
         self._showBorder = showBorder
         self._borderColour = borderColour or QtGui.QColor(getColours()[BORDERNOFOCUS])
 
-        self._minusIcon = Icon('icons/minus')
-        self._plusIcon = Icon('icons/plus')
+        self._minusIcon = Icon('icons/minus-large')
+        self._plusIcon = Icon('icons/plus-large')
 
         self.PIXMAPWIDTH = getFontHeight()
 
         row = 0
         self._openButton = ActiveLabel(self, mainWindow=self.mainWindow, grid=(row, 0))
-        self._openButton.setFixedSize(self.PIXMAPWIDTH, self.PIXMAPWIDTH)
+        self._openButton.setFixedSize(self.PIXMAPWIDTH + 3, self.PIXMAPWIDTH + 3)
         self._openButton.setPixmap(self._minusIcon.pixmap(self.PIXMAPWIDTH, self.PIXMAPWIDTH))
+
         self._label = Label(self, text=name or '', grid=(row, 1))
-        self._labelHeight = self._label.sizeHint().height()
         self._label.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Fixed)
+        # self._labelHeight = self._label.sizeHint().height()
         # self._label.setFixedHeight(self._labelHeight)
 
         row += 1

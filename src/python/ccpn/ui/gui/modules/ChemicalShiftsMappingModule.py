@@ -741,7 +741,7 @@ class ChemicalShiftsMapping(CcpnModule):
     values = []
     peaksDFs = []
     sg = self.spectrumGroupPulldown.getObject()
-    if sg is not None:
+    if isinstance(sg, SpectrumGroup):
       spectra = sg.spectra
       for nmrResidue in nmrResidues:
         if self._isInt(nmrResidue.sequenceCode):

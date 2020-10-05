@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-05 12:21:02 +0100 (Mon, October 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -100,12 +100,15 @@ class NmrResiduePopup(AttributeEditorPopupABC):
 
         _chainId = self.nmrChain.getText()
         _chainPid = 'NC:{}'.format(self.nmrChain.getText())
-        if create:
-            # create a new nmrChain as required
-            _nmrChain = self.project.fetchNmrChain(_chainId)
-        else:
-            # find the existing nmrChain
-            _nmrChain = self.project.getByPid(_chainPid)
+        # if create:
+        #     # create a new nmrChain as required
+        #     _nmrChain = self.project.fetchNmrChain(_chainId)
+        # else:
+        #     # find the existing nmrChain
+        #     _nmrChain = self.project.getByPid(_chainPid)
+
+        # create a new nmrChain as required
+        _nmrChain = self.project.fetchNmrChain(_chainId)
 
         # find the existing nmrResidue
         destNmrResidue = _getNmrResidue(_nmrChain,

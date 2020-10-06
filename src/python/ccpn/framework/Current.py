@@ -378,7 +378,11 @@ class Current:
         # define singular properties
         def getter(self):
             ll = getField(self)
-            return ll[-1] if ll else None
+            if len(ll)>0:
+                v = ll[-1]
+                if not getattr(v, 'isDeleted', False):
+                    return v
+            return None
 
         def setter(self, value):
             setField(self, [value])
@@ -388,7 +392,8 @@ class Current:
         if not singularOnly:
             # define the plural properties
             def getter(self):
-                return tuple(getField(self))
+                vv = [i for i in getField(self) if not getattr(i, 'isDeleted', False)]
+                return tuple(vv)
 
             def setter(self, value):
                 setField(self, list(value))

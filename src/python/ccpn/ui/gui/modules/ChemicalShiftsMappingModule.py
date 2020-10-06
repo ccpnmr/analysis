@@ -297,16 +297,16 @@ class ChemicalShiftsMapping(CcpnModule):
     if self.project:
       if len(self.project.nmrChains) > 0:
         if self.nmrResidueTable.ncWidget.getIndex() == 0:
-          # self.spectraSelectionWidget._toggleAll()
           self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
-          self.spectrumGroupPulldown.select(self.project.spectrumGroups[-1])
-          self._setThresholdLineBySTD()
-          if len(self.selectedNmrAtomNames) == 0:
-            sg = self.spectrumGroupPulldown.getObject()
-            if isinstance(sg, SpectrumGroup):
-              if len(sg.spectra) > 0:
-                self.selectedNmrAtomNames = sg.spectra[0].axisCodes
-                self._updateModule()
+          if len(self.project.spectrumGroups) > 0:
+            self.spectrumGroupPulldown.select(self.project.spectrumGroups[-1])
+            self._setThresholdLineBySTD()
+            if len(self.selectedNmrAtomNames) == 0:
+              sg = self.spectrumGroupPulldown.getObject()
+              if isinstance(sg, SpectrumGroup):
+                if len(sg.spectra) > 0:
+                  self.selectedNmrAtomNames = sg.spectra[0].axisCodes
+                  self._updateModule()
 
   #####################################################
   #############   Main widgets creation    ############
@@ -1010,6 +1010,8 @@ class ChemicalShiftsMapping(CcpnModule):
       sge = SpectrumGroupEditor(parent=self, mainWindow=self.mainWindow,obj=sg, editMode=True)
       sge._tabWidget.setCurrentIndex(2) # the series tab is the last
       sge.exec_()
+    else:
+      MessageDialog.showWarning(title = '', message='No SpectrumGroup selected.\nSelect a SpectrumGroup from the input pulldown.')
 
   def _sgPulldownCallback(self, text):
     if self.spectrumGroupPulldown.getText() == NewSG:
@@ -1029,7 +1031,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _setSpectrumGroupPulldown(self, *args):
     objects = [None] + self.project.spectrumGroups
-    texts  = [NewSG] + [sg.name for sg in self.project.spectrumGroups]
+    texts  = [NewSG] + [sg.name for sg in self.project.spectrumGroups if not sg.isDeleted]
     self.spectrumGroupPulldown.setData(texts=texts, objects=objects, headerText='Select', headerEnabled=False)
 
   def showNmrAtomsSettings(self):
@@ -1530,12 +1532,9 @@ class ChemicalShiftsMapping(CcpnModule):
     try:
       if self._selectCurrentNRNotifier is not None:
         self._selectCurrentNRNotifier.unRegister()
-      # self._peakChangedNotifier.unRegister()
-      if self._peakDeletedNotifier:
+        self._sgNotifier.unRegister()
         self._peakDeletedNotifier.unRegister()
-      if self._nrChangedNotifier:
         self._nrChangedNotifier.unRegister()
-      if self._nrDeletedNotifier:
         self._nrDeletedNotifier.unRegister()
     except Exception as es:
       pass

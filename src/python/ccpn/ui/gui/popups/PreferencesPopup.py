@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-30 16:44:54 +0100 (Wed, September 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:06:41 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -62,6 +62,7 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, USERAUXI
 from ccpn.framework.lib.pipeline.PipesLoader import _fetchUserPipesPath
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLFONT_SIZES, GLFONT_DEFAULTSIZE
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
@@ -540,6 +541,13 @@ class PreferencesPopup(CcpnDialogMainWidget):
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
         row += 1
+        self.glFontSizeLabel = Label(parent, text="SpectrumDisplay Font Size: ", grid=(row, 0))
+        self.glFontSizeData = PulldownList(parent, grid=(row, 1), hAlign='l')
+        self.glFontSizeData.setMinimumWidth(PulldownListsMinimumWidth)
+        self.glFontSizeData.addItems([str(val) for val in GLFONT_SIZES])
+        self.glFontSizeData.currentIndexChanged.connect(self._queueChangeGLFontSize)
+
+        row += 1
         Spacer(parent, 15, 2,
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(row, 1), gridSpan=(1, 1))
@@ -556,6 +564,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
             value = self.preferences.appearance[FONTPREFS.format(fontNum)]
             _fontAttr = getattr(self, FONTDATAFORMAT.format(fontNum))
             self.setFontText(_fontAttr, value)
+
+        self.glFontSizeData.setCurrentIndex(self.glFontSizeData.findText(str(self.preferences.appearance.spectrumDisplayFontSize)))
 
     def _populate(self):
         """Populate the widgets in the tabs
@@ -2142,8 +2152,20 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # Simple font grabber from the system
         _fontAttr = getattr(self, FONTDATAFORMAT.format(dim))
         value = _fontAttr._fontString
-        newFont, ok = QtWidgets.QFontDialog.getFont(QtGui.QFont(value), caption='Select {} Font'.format(fontName))
+        _font = QtGui.QFont()
+        _font.fromString(value)
+        newFont, ok = QtWidgets.QFontDialog.getFont(_font, caption='Select {} Font'.format(fontName))
         if ok:
             self.setFontText(_fontAttr, newFont.toString())
             # add the font change to the apply queue
             self._queueSetFont(dim)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueChangeGLFontSize(self, value):
+        value = int(self.glFontSizeData.getText() or str(GLFONT_DEFAULTSIZE))
+        if value != self.preferences.appearance.spectrumDisplayFontSize:
+            return partial(self._changeGLFontSize, value)
+
+    def _changeGLFontSize(self, value):
+        self.preferences.appearance.spectrumDisplayFontSize = value
+

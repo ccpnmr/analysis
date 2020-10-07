@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:10:54 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:06:41 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -204,11 +204,11 @@ class GLExporter():
     def _importFonts(self):
         import os
         from ccpn.framework.PathsAndUrls import fontsPath
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import SUBSTITUTEFONT
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLFONT_SUBSTITUTE
 
         # load all system fonts to find matches with OpenGl fonts
         for glFonts in self._parent.globalGL.fonts.values():
-            pdfmetrics.registerFont(TTFont(glFonts.fontName, os.path.join(fontsPath, 'open-sans', SUBSTITUTEFONT + '.ttf')))
+            pdfmetrics.registerFont(TTFont(glFonts.fontName, os.path.join(fontsPath, 'open-sans', GLFONT_SUBSTITUTE + '.ttf')))
 
         # set a default fontName
         self.fontName = self._parent.getSmallFont().fontName

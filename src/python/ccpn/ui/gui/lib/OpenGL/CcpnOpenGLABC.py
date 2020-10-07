@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-08 12:26:31 +0100 (Tue, September 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:06:41 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -425,7 +425,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         # self._GLVersion = GLversionFunctions.glGetString(GL.GL_VERSION)
 
         # initialise a common to all OpenGL windows
-        self.globalGL = GLGlobalData(parent=self)
+        self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow)
 
         # initialise the arrays for the grid and axes
         self.gridList = []

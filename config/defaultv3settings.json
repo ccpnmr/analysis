@@ -106,14 +106,16 @@
         "proxyPassword"    : ""
     },
     "externalPrograms" : {
-        "pymol"          : "",
+        "pymol"     : "",
         "PDFViewer" : ""
     },
-    "appearance" : {
-        "font0" : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
-        "font1" : "Monaco,13,-1,5,50,0,0,0,0,0,Regular",
-        "font2" : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
-        "font3" : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular"
+    "appearance"       : {
+        "font0"                   : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
+        "font1"                   : "Monaco,13,-1,5,50,0,0,0,0,0,Regular",
+        "font2"                   : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
+        "font3"                   : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
+        "font4"                   : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
+        "spectrumDisplayFontSize" : 13
     },
     "recentMacros"     : [
     ],

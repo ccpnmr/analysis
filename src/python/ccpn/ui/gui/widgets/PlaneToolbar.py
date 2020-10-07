@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-29 09:47:40 +0100 (Tue, September 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -780,7 +780,7 @@ class ZPlaneToolbar(Frame):
         self.mainWindow = mainWindow
         self._header = Label(self, text='zPlaneWidget', grid=(0, 0))
         self._header.setVisible(showHeader)
-        Spacer(self, 10, 10, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed, grid=(0, 1))
+
         self.labels = []
         axisCodes = strip.axisCodes
         _axisCount = len(axisCodes) - 2
@@ -788,7 +788,6 @@ class ZPlaneToolbar(Frame):
             lbl = Label(self, text=axisCodes[ii + 2], grid=(0, 1 + (ii * 2)), bold=True)
             lbl.setVisible(showLabels)
             self.labels.append(lbl)
-        Spacer(self, 2, 2, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed, grid=(0, 5 + 2 * _axisCount))
 
     def setHeaderText(self, value):
         """Set the header text

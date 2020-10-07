@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -422,6 +422,12 @@ class CcpnModuleArea(ModuleArea, DropBase):
         if wasMaximised:
             module.toggleMaximised()
         return module
+
+    def makeContainer(self, typ):
+        # stop the child containers from collapsing
+        new = super(CcpnModuleArea, self).makeContainer(typ)
+        new.setChildrenCollapsible(False)
+        return new
 
     def getContainer(self, obj):
         if obj is None:

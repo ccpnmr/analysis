@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -57,7 +57,7 @@ from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.core.lib.Util import getParentObjectFromPid
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, showMessage
-from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight, TABLEFONT
 
 
 # BG_COLOR = QtGui.QColor('#E0E0E0')
@@ -373,7 +373,8 @@ GuiTable::item::selected {
         self._defaultHiddenColumns = []
 
         # set the minimum size the table can collapse to
-        self.setMinimumSize(30, 30)
+        _height = getFontHeight(name=TABLEFONT, size='VLARGE')
+        self.setMinimumSize(2 * _height, _height + self.horizontalScrollBar().height())
         self.searchWidget = None
         # self._parent.layout().setVerticalSpacing(0)
 

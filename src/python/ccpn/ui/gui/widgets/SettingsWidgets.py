@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:12:48 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -995,6 +995,7 @@ class _SpectrumRow(Frame):
         self.spinBoxes = []
 
         indices = getAxisCodeMatchIndices(spectrum.axisCodes, spectrumDisplay.axisCodes)
+        _height = getFontHeight()
 
         for ii, axisCode in enumerate(spectrum.axisCodes):
             decimals, step = (2, 0.01) if axisCode[0:1] == 'H' else (1, 0.1)
@@ -1004,7 +1005,7 @@ class _SpectrumRow(Frame):
 
             ds = DoubleSpinBoxCompoundWidget(
                     parent, grid=(row, startCol + indices[ii] + 1), gridSpan=(1, 1), hAlign='left',
-                    fixedWidths=(30, 50),
+                    fixedWidths=(None, _height * 4),
                     labelText=axisCode,
                     value=spectrum.assignmentTolerances[ii],
                     decimals=decimals, step=step, range=(step, None),

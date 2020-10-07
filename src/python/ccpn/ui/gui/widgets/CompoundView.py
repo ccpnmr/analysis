@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:06:39 +0100 (Thu, April 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,17 +26,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-PI = 3.1415926535898
 from PyQt5 import QtCore, QtGui, QtWidgets, QtSvg, QtPrintSupport
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
+from math import atan2, sin, cos, sqrt, degrees, radians, hypot, pi
+from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.FileDialog import FileDialog, USEREXPORTPDFPATH
+from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 
 
 Qt = QtCore.Qt
 QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
-from math import atan2, sin, cos, sqrt, degrees, radians, hypot, pi
-from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USEREXPORTPDFPATH
+PI = 3.1415926535898
 
 
 class CompoundView(QGraphicsView, Base):
@@ -132,6 +133,7 @@ class CompoundView(QGraphicsView, Base):
 
         self.smiles = smiles
         self.setSmiles(self.smiles)
+        self._setFocusColour()
 
     def setSmiles(self, smiles):
         'set the smiles'
@@ -144,6 +146,22 @@ class CompoundView(QGraphicsView, Base):
         self.resetView()
         self.updateAll()
         self.show()
+
+    def _setFocusColour(self, focusColour=None, noFocusColour=None):
+        """Set the focus/noFocus colours for the widget
+        """
+        focusColour = getColours()[BORDERFOCUS]
+        noFocusColour = getColours()[BORDERNOFOCUS]
+        styleSheet = "QGraphicsView { " \
+                     "border: 1px solid;" \
+                     "border-radius: 1px;" \
+                     "border-color: %s;" \
+                     "} " \
+                     "QGraphicsView:focus { " \
+                     "border: 1px solid %s; " \
+                     "border-radius: 1px; " \
+                     "}" % (noFocusColour, focusColour)
+        self.setStyleSheet(styleSheet)
 
     def resizeEvent(self, event):
 

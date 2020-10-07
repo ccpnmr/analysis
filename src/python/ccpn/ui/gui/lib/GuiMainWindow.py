@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-01 11:15:34 +0100 (Thu, October 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:12:46 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -124,8 +124,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         # GuiWindow.__init__(self, application)
         self.application = application
-
-        setWidgetFont(self, )
 
         # Module area
         self.moduleArea = CcpnModuleArea(mainWindow=self)
@@ -460,6 +458,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     def _createMenu(self, spec, targetMenu=None):
         menu = self._addMenu(spec[0], targetMenu)
+        setWidgetFont(menu)
         self._addMenuActions(menu, spec[1])
 
     def _addMenu(self, menuTitle, targetMenu=None):
@@ -498,7 +497,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 menu.addSeparator()
             elif len(action) == 2:
                 if callable(action[1]):
-                    menu.addAction(Action(self, action[0], callback=action[1]))
+                    _action = Action(self, action[0], callback=action[1])
+                    menu.addAction(_action)
                 else:
                     self._createMenu(action, menu)
             elif len(action) == 3:
@@ -794,23 +794,17 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                      callback=partial(self._showSideBarModule, self._sideBarFrame, self, visible)))
 
         for module in self.moduleArea.ccpnModules:
-            moduleSize = module.size()
-            visible = moduleSize.width() != 0 and moduleSize.height() != 0
-
+            visible = module.isVisible()
             modulesMenu.addAction(Action(modulesMenu, text=module.name(),
                                          checkable=True, checked=visible,
-                                         callback=partial(self._showModule, module, self, visible)))
+                                         callback=partial(self._showModule, module)))
 
-    def _showModule(self, module, modulesMenu, visible):
+    def _showModule(self, module):
         try:
             menuItem = self.searchMenuAction(module.name())
             if menuItem:
-                # if module.size().height() != 0 and module.size().width() != 0:  #menuItem.isChecked():    # opposite as it has toggled
+                module.setVisible(not module.isVisible())
 
-                if visible:
-                    module.setStretch(0, 0)
-                else:
-                    module.setStretch(1, 1)
         except Exception as es:
             Logging.getLogger().warning('Error expanding module: %s', module.name())
 

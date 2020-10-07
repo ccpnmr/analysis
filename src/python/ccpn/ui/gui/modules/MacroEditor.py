@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-28 12:46:05 +0100 (Tue, July 28, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -129,10 +129,11 @@ class MacroEditor(CcpnModule):
                 pass
 
            ### Gui settings ###
-        self.mainWidget.layout().setSpacing(5)
-        self.mainWidget.layout().setContentsMargins(10, 10, 10, 10)
+        _spacing = 4
+        self.mainWidget.getLayout().setSpacing(_spacing)
+        self.mainWidget.getLayout().setContentsMargins(_spacing, _spacing, _spacing, _spacing)
         hGrid = 0
-        self.toolbar = ToolBar(self.mainWidget, grid=(hGrid, 0), gridSpan=(1, 2))
+        self.toolbar = ToolBar(self.mainWidget, grid=(hGrid, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
         hGrid += 1
         self.filePathLabel = Label(self.mainWidget, hAlign='l', grid=(hGrid, 0))
         self._fileNameButtons = ButtonList(self.mainWidget, texts=['Save As...'],

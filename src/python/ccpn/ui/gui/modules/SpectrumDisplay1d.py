@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-23 17:10:54 +0100 (Thu, July 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -162,7 +162,7 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
         # skip for 1D for the minute
         pass
 
-    def _highlightAxes(self, strip):
+    def _highlightAxes(self, strip, state):
         """Highlight the last row axis if strip
         """
         pass

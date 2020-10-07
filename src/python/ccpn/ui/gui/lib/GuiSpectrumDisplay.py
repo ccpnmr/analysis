@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-01 11:15:34 +0100 (Thu, October 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:12:46 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -214,8 +214,6 @@ class GuiSpectrumDisplay(CcpnModule):
         super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=name,
                                                  size=(1100, 1300), autoOrientation=False
                                                  )
-        self.setMinimumWidth(150)
-
         self.mainWindow = mainWindow
         self.application = mainWindow.application
         # derive current from application
@@ -266,20 +264,20 @@ class GuiSpectrumDisplay(CcpnModule):
         # TOOLBAR_HEIGHT = _iconSize + _spacing
 
         self.toolBarFrame = Frame(parent=self.qtParent, grid=(spectrumRow, 0), gridSpan=(1, 7), setLayout=True,
-                                  hPolicy='minimal', hAlign='left', showBorder=False,
+                                  hPolicy='preferred', hAlign='left', showBorder=False,
                                   spacing=(_spacing, _spacing), margins=(_spacing, _spacing, _spacing, _spacing))
 
         # Utilities Toolbar; filled in Nd/1d classes
         self.spectrumUtilToolBar = ToolBar(parent=self.toolBarFrame, iconSizes=(_iconSize, _iconSize),
-                                           grid=(0, 0), hPolicy='minimal', hAlign='left')
+                                           grid=(0, 0), hPolicy='preferred', hAlign='left')
 
         # spectrum toolbar - holds spectrum icons for spectrumDisplay
         self.spectrumToolBar = SpectrumToolBar(parent=self.toolBarFrame, widget=self,
-                                               grid=(1, 0), hPolicy='minimal', hAlign='left')
+                                               grid=(1, 0), hPolicy='preferred', hAlign='left')
 
         # spectrumGroupsToolBar - holds spectrumGroup icons, slightly different behaviour
         self.spectrumGroupToolBar = SpectrumGroupToolBar(parent=self.toolBarFrame, spectrumDisplay=self,
-                                                         grid=(2, 0), hPolicy='minimal', hAlign='left')
+                                                         grid=(2, 0), hPolicy='preferred', hAlign='left')
 
         self.spectrumGroupToolBar.hide()
 
@@ -363,9 +361,10 @@ class GuiSpectrumDisplay(CcpnModule):
 
         from ccpn.ui.gui.widgets.PlaneToolbar import ZPlaneToolbar
 
-        self._stripToolBarWidget = Frame(parent=self.qtParent, setLayout=True, grid=(axisRow, 0), gridSpan=(1, 7), hAlign='c')
+        self._stripToolBarWidget = Frame(parent=self.qtParent, setLayout=True, grid=(axisRow, 0), gridSpan=(1, 7),
+                                         hAlign='c', hPolicy='ignored')
         self.zPlaneFrame = ZPlaneToolbar(self._stripToolBarWidget, mainWindow, self, showHeader=True, showLabels=True,
-                                         grid=(0, 0), gridSpan=(1, 1), margins=(2, 2, 2, 2))
+                                         grid=(0, 0), gridSpan=(1, 1), margins=(2, 2, 2, 2), hPolicy='preferred')
         if len(self.axisCodes) < 3:
             self._stripToolBarWidget.setVisible(False)
 

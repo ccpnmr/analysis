@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:22 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:12:46 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,9 +27,7 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 
 import sys
 import typing
-
-from PyQt5 import QtWidgets, QtCore, QtGui
-
+from PyQt5 import QtWidgets, QtCore
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -39,10 +37,9 @@ from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPo
 from ccpn.ui.gui.widgets.Application import Application
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.MessageDialog import showError, showWarning
-from ccpn.ui.gui.widgets.Font import getFontHeight
+from ccpn.ui.gui.widgets.Font import getFontHeight, setWidgetFont
 # This import initializes relative paths for QT style-sheets.  Do not remove!
 from ccpn.framework.PathsAndUrls import userPreferencesPath
-
 from ccpn.util import Logging
 from ccpn.util import Register
 
@@ -172,6 +169,7 @@ class Gui(Ui):
 
         from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView, _spectrumViewHasChanged
         from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
+
         # project.registerNotifier('SpectrumView', 'delete', GuiSpectrumView._deletedSpectrumView)
 
         # project.registerNotifier('SpectrumView', 'create', GuiSpectrumView._createdSpectrumView)
@@ -426,6 +424,8 @@ class MainWindow(coreClass, _GuiMainWindow):
         logger.debug('MainWindow>> application.project: %s' % application.project)
         logger.debug('MainWindow>> application._mainWindow: %s' % application._mainWindow)
         logger.debug('MainWindow>> application.ui.mainWindow: %s' % application.ui.mainWindow)
+
+        setWidgetFont(self, )
 
 
 from ccpn.ui.gui.lib.GuiWindow import GuiWindow as _GuiWindow

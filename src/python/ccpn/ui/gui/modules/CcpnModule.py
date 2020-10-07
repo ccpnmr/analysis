@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,7 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
-# from ccpn.ui.gui.guiSettings import moduleLabelFont
+from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
@@ -219,7 +219,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         DropBase._init(self, acceptDrops=True)
 
         self.hStyle = """
-                  
                   Dock > QWidget {
                       border: 1px solid #a9a9a9;
                       border-radius: 2px;
@@ -247,6 +246,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                   }"""
         self._selectedOverlay = DropAreaSelectedOverlay(self)
         self._selectedOverlay.raise_()
+        # new border to clean up the edges of the module
+        self._borderOverlay = BorderOverlay(self)
+        self._borderOverlay.raise_()
 
         Logging.getLogger().debug('CcpnModule>>> %s %s' % (type(self), mainWindow))
 
@@ -382,7 +384,12 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         self._allChildren = set()
 
-    # Leave this in so I remember ShortcutOverride
+        # set the constaints so the module contracts to the correct size
+        self.mainWidget.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        self.setMinimumSize(6 * self.label.labelSize, 5 * self.label.labelSize)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+
+    # NOTE:ED Leave this in so I remember ShortcutOverride
     # def event(self, event):
     #     if event.type() == QtCore.QEvent.ShortcutOverride:
     #         event.accept()
@@ -788,6 +795,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
             self._splitter.setSizes(sizes)
 
+    def _hideModule(self):
+        self.setVisible(not self.isVisible())
+
     def _closeModule(self):
         """Close the module
         """
@@ -978,7 +988,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
              probably from paint event
         """
 
-        # Padding apears not to work; overriden somewhere else?
+        # Padding apears not to work; overridden somewhere else?
         colours = getColours()
 
         tempStyle = """CcpnModule {
@@ -1030,7 +1040,10 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         mime = QtCore.QMimeData()
         self.drag.setMimeData(mime)
         dragPixmap = self.grab()
-        self.drag.setPixmap(dragPixmap.scaledToWidth(128) if dragPixmap.width() < dragPixmap.height() else dragPixmap.scaledToHeight(128))
+        # make sure that the dragPixmap is not too big
+        self.drag.setPixmap(dragPixmap.scaledToWidth(min(128, dragPixmap.width()))
+                            if dragPixmap.width() < dragPixmap.height() else
+                            dragPixmap.scaledToHeight(min(128, dragPixmap.height())))
         self.widgetArea.setStyleSheet(self.dragStyle)
         self._raiseSelectedOverlay()
         self.updateStyle()
@@ -1078,6 +1091,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
     def resizeEvent(self, ev):
         self._selectedOverlay._resize()
+        self._borderOverlay._resize()
         super().resizeEvent(ev)
 
     #=========================================================================================
@@ -1235,6 +1249,9 @@ class CcpnModuleLabel(DockLabel):
             contextMenu.addAction('Close Others', partial(self.module.mainWindow.moduleArea._closeOthers, self.module))
             contextMenu.addAction('Close All', self.module.mainWindow.moduleArea._closeAll)
 
+        # add option to hide the module (but not close) - add a hide icon?
+        contextMenu.addSeparator()
+        contextMenu.addAction('Hide', self.module._hideModule)
         # numDocks = len(self.module.getDocksInParentArea())
         #
         # if not self.module.maximised and numDocks > 1:
@@ -1392,3 +1409,57 @@ class DropAreaSelectedOverlay(QtWidgets.QWidget):
         p.setBrush(QtGui.QBrush(QtGui.QColor(100, 100, 255, 50)))
         p.setPen(QtGui.QPen(QtGui.QColor(50, 50, 150), 3))
         p.drawRect(rgn)
+        p.end()
+
+
+class BorderOverlay(QtWidgets.QWidget):
+    """Overlay widget that draws a border around the whole of the module
+    ensuring a nice clean edge
+    """
+
+    def __init__(self, parent, borderColour=None):
+        """Initialise widget
+        """
+        QtWidgets.QWidget.__init__(self, parent)
+        self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
+        c1 = self._borderColour = borderColour or QtGui.QColor(getColours()[BORDERNOFOCUS])
+        c2 = self._backgroundColour = parent.palette().color(parent.backgroundRole())
+
+        self._blendColour = QtGui.QColor((c1.red() + c2.red()) // 2,
+                                         (c1.green() + c2.green()) // 2,
+                                         (c1.blue() + c2.blue()) // 2,
+                                         (c1.alpha() + c2.alpha()) // 2
+                                         )
+
+    def _resize(self):
+        """Resize the overlay
+        """
+        prgn = self.parent().rect()
+        rgn = QtCore.QRect(prgn)
+        self.setGeometry(rgn)
+
+    def paintEvent(self, ev):
+        """Paint the overlay to the screen
+        """
+        # clear the bottom corners, and draw a rounded rectangle to cover the edges
+        p = QtGui.QPainter(self)
+        rgn = self.rect().adjusted(0, 0, -1, -1)
+        w = rgn.width()
+        h = rgn.height()
+
+        # clear and smooth the bottom corners
+        p.setPen(QtGui.QPen(self._backgroundColour, 1))
+        p.drawPoints(QtCore.QPoint(0, h),
+                     QtCore.QPoint(w, h),
+                     )
+        p.setPen(QtGui.QPen(self._blendColour, 1))
+        p.drawPoints(QtCore.QPoint(0, h - 1),
+                     QtCore.QPoint(1, h),
+                     QtCore.QPoint(w, h - 1),
+                     QtCore.QPoint(w - 1, h)
+                     )
+
+        # draw the new rectangle around the module
+        p.setPen(QtGui.QPen(self._borderColour, 1))
+        p.drawRoundedRect(rgn, 2, 2)
+        p.end()

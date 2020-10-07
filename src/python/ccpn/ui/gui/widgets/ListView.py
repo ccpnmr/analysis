@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -87,7 +87,7 @@ class ListView(QtWidgets.QListView, Base):
                      "border-radius: 1px;" \
                      "border-color: %s;" \
                      "} " \
-                     "ListWidget:focus { " \
+                     "ListView:focus { " \
                      "border: 1px solid %s; " \
                      "border-radius: 1px; " \
                      "}" % (noFocusColour, focusColour)

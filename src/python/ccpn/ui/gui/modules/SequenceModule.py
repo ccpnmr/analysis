@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -45,7 +45,7 @@ from ccpn.ui.gui.guiSettings import GUICHAINLABEL_TEXT, \
     GUICHAINRESIDUE_DRAGENTER, GUICHAINRESIDUE_DRAGLEAVE, \
     GUICHAINRESIDUE_UNASSIGNED, GUICHAINRESIDUE_ASSIGNED, \
     GUICHAINRESIDUE_POSSIBLE, GUICHAINRESIDUE_WARNING, \
-    SEQUENCEMODULE_DRAGMOVE, SEQUENCEMODULE_TEXT
+    SEQUENCEMODULE_DRAGMOVE, SEQUENCEMODULE_TEXT, BORDERNOFOCUS, BORDERFOCUS
 from ccpn.ui.gui.widgets.Base import Base
 # from ccpn.ui.gui.guiSettings import fixedWidthFont, fixedWidthLargeFont, helvetica8
 # from ccpn.ui.gui.guiSettings import textFontHugeSpacing as fontSpacing
@@ -125,6 +125,7 @@ class SequenceModule():
         #self.scrollContents.setFixedHeight(2*self.widgetHeight)
         # self._parent.setMaximumHeight(100)
         # self.scrollContents.setMaximumHeight(100)
+        self._setFocusColour()
 
         #GWV: explicit intialisation to prevent crashes
         self._chainNotifier = None
@@ -134,6 +135,22 @@ class SequenceModule():
 
         # TODO:ED add highlight if an nmrChain already selected
         # generate a create graph event? and let the response populate the module
+
+    def _setFocusColour(self, focusColour=None, noFocusColour=None):
+        """Set the focus/noFocus colours for the widget
+        """
+        focusColour = getColours()[BORDERFOCUS]
+        noFocusColour = getColours()[BORDERNOFOCUS]
+        styleSheet = "QGraphicsView { " \
+                     "border: 1px solid;" \
+                     "border-radius: 1px;" \
+                     "border-color: %s;" \
+                     "} " \
+                     "QGraphicsView:focus { " \
+                     "border: 1px solid %s; " \
+                     "border-radius: 1px; " \
+                     "}" % (noFocusColour, focusColour)
+        self.scrollArea.setStyleSheet(styleSheet)
 
     def _getGuiItem(self, scene):
         for item in scene.items():

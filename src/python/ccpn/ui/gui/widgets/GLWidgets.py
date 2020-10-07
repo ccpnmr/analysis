@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-15 18:35:35 +0100 (Tue, September 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:06:41 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2024,7 +2024,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # self._GLVersion = GLversionFunctions.glGetString(GL.GL_VERSION)
 
         # initialise a common to all OpenGL windows
-        self.globalGL = GLGlobalData(parent=self, strip=None, spectrumDisplay=self.spectrumDisplay)
+        self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow, strip=None, spectrumDisplay=self.spectrumDisplay)
         self._glClientIndex = self.globalGL.getNextClientIndex()
 
         # initialise the arrays for the grid and axes

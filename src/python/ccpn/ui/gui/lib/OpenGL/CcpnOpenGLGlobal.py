@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-11 19:09:41 +0100 (Fri, September 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:06:41 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -34,34 +34,35 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgram
 
 
-DEFAULTFONT = 'OpenSans-Regular'
-SUBSTITUTEFONT = 'OpenSans-Regular'
-DEFAULTFONTSIZE = 13
-DEFAULT_SCALE = 1
-FONT_SCALES = (1, 2)
-FONT_SIZES = [13, 14, 16]
-FONT_DICT = {}
+GLFONT_DEFAULT = 'OpenSans-Regular'
+GLFONT_SUBSTITUTE = 'OpenSans-Regular'
+GLFONT_DEFAULTSIZE = 13           # moved to preferences.appearance
+GLFONT_DEFAULTSCALE = 1
+GLFONT_SCALES = (1, 2)
+GLFONT_SIZES = [10, 12, 13, 14, 16, 18, 20, 24]
+GLFONT_DICT = {}
 
-FONT_FILE = 0
-FONT_NAME = 1
-FONT_SIZE = 2
-FONT_SCALE = 3
+GLFONT_FILE = 0
+GLFONT_NAME = 1
+GLFONT_SIZE = 2
+GLFONT_SCALE = 3
 
-FONTTRANSPARENT = 'Transparent'
-FONTPATH = 'Fonts'
+GLFONT_TRANSPARENT = 'Transparent'
+GLFONT_PATH = 'Fonts'
 
-TRANSPARENCIES = ('', '-%s' % FONTTRANSPARENT)
-for size in FONT_SIZES:
-    for scale in FONT_SCALES:
+TRANSPARENCIES = ('', '-%s' % GLFONT_TRANSPARENT)
+for size in GLFONT_SIZES:
+    for scale in GLFONT_SCALES:
         for transparency in TRANSPARENCIES:
-            FONT_DICT['%s%s-%i' % (DEFAULTFONT, transparency, size), scale] = ('glFont%i.fnt' % (size * scale), DEFAULTFONT, size, scale, transparency)  # some are double size for retina displays...
+            GLFONT_DICT['%s%s-%i' % (GLFONT_DEFAULT, transparency, size), scale] = ('glFont%i.fnt' % (size * scale), GLFONT_DEFAULT, size, scale, transparency)  # some are double size for retina displays...
 
 
 @singleton
 class GLGlobalData(QtWidgets.QWidget):
-    def __init__(self, parent=None, strip=None, spectrumDisplay=None):
+    def __init__(self, parent=None, mainWindow=None, strip=None, spectrumDisplay=None):
         super(GLGlobalData, self).__init__()
         self._parent = parent
+        self.mainWindow = mainWindow
         self.strip = strip
         self._spectrumDisplay = spectrumDisplay
 
@@ -76,20 +77,25 @@ class GLGlobalData(QtWidgets.QWidget):
         return 1  #self._glClientIndex
 
     def loadFonts(self):
-        for key, fontInfo in FONT_DICT.items():
-            scale = fontInfo[FONT_SCALE]
-            transparentName = fontInfo[FONT_FILE] + FONTTRANSPARENT + str(fontInfo[2])
+        for key, fontInfo in GLFONT_DICT.items():
+            scale = fontInfo[GLFONT_SCALE]
+            transparentName = fontInfo[GLFONT_FILE] + GLFONT_TRANSPARENT + str(fontInfo[2])
 
-            self.fonts[key] = CcpnGLFont(os.path.join(fontsPath, FONTPATH, fontInfo[0]),
+            self.fonts[key] = CcpnGLFont(os.path.join(fontsPath, GLFONT_PATH, fontInfo[0]),
                                          activeTexture=0, scale=scale)
 
             key = transparentName, scale
-            self.fonts[key] = CcpnGLFont(os.path.join(fontsPath, FONTPATH, fontInfo[0]),
+            self.fonts[key] = CcpnGLFont(os.path.join(fontsPath, GLFONT_PATH, fontInfo[0]),
                                          fontTransparency=0.5, activeTexture=1, scale=scale)
 
-        self.glSmallFont = DEFAULTFONT
-        self.glSmallTransparentFont = '%s-%s' % (DEFAULTFONT, FONTTRANSPARENT)
-        self.glSmallFontSize = DEFAULTFONTSIZE
+        self.glSmallFont = GLFONT_DEFAULT
+        self.glSmallTransparentFont = '%s-%s' % (GLFONT_DEFAULT, GLFONT_TRANSPARENT)
+        try:
+            _size = self.mainWindow.application.preferences.appearance.spectrumDisplayFontSize
+            if _size in GLFONT_SIZES:
+                self.glSmallFontSize = _size
+        except:
+            self.glSmallFontSize = GLFONT_DEFAULTSIZE
 
     def initialiseShaders(self):
         # simple shader for standard plotting of contours

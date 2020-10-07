@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-05 11:10:15 +0100 (Mon, October 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-07 17:06:40 +0100 (Wed, October 07, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ __date__ = "$Date: 2016-11-15 21:37:50 +0000 (Tue, 15 Nov 2016) $"
 from PyQt5 import QtCore
 from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONT, \
     DEFAULTFONTSIZE, DEFAULTFONTNAME, CONSOLEFONT, SIDEBARFONT, \
-    TABLEFONT, _readFontFromAppearances
+    TABLEFONT, SEQUENCEGRAPHFONT, _readFontFromAppearances
 from ccpn.util.decorators import singleton
 from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import allColours, hexToRgbRatio, autoCorrectHexColour, \
@@ -39,7 +39,7 @@ from ccpn.util.LabelledEnum import LabelledEnum
 from itertools import product
 
 
-FONTLIST = ['Modules', 'IPython Console', 'Sidebar', 'Tables']
+FONTLIST = ['Modules', 'IPython Console', 'Sidebar', 'Tables', 'Sequence Graph']
 
 
 class FontSizes(LabelledEnum):
@@ -58,7 +58,7 @@ class fontSettings():
     def __init__(self, preferences):
 
         self.defaultFonts = {}
-        for fontNum, fontName in enumerate((DEFAULTFONT, CONSOLEFONT, SIDEBARFONT, TABLEFONT)):
+        for fontNum, fontName in enumerate((DEFAULTFONT, CONSOLEFONT, SIDEBARFONT, TABLEFONT, SEQUENCEGRAPHFONT)):
             _fontAttr = 'font{}'.format(fontNum)
             fontString = _readFontFromAppearances(_fontAttr, preferences)
             self.generateFonts(fontName, fontString)
@@ -306,7 +306,7 @@ colourSchemes = {
         LABEL_SELECTEDFOREGROUND         : 'black',
         LABEL_HIGHLIGHT                  : 'palegreen',
 
-        SEQUENCEGRAPHMODULE_LINE         : 'black',
+        SEQUENCEGRAPHMODULE_LINE         : 'darkgray',
         SEQUENCEGRAPHMODULE_TEXT         : TEXT_COLOUR,
 
         SEQUENCEMODULE_DRAGMOVE          : MEDIUM_BLUE,

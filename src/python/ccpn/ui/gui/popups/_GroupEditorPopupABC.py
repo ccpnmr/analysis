@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:06:41 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-08 11:39:11 +0100 (Thu, October 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -74,7 +74,7 @@ class FeedbackFrame(Frame):
             self.setStyleSheet('FeedbackFrame {border: 2px solid transparent}')
 
 
-class OrderedListWidgteItem(QtWidgets.QListWidgetItem):
+class OrderedListWidgetItem(QtWidgets.QListWidgetItem):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -171,8 +171,8 @@ class OrderedListWidgetItemFactory(DefaultItemFactory):
 
     def instantiateItem(self, item, parent):
 
-        if not isinstance(item, OrderedListWidgteItem):
-            result = OrderedListWidgteItem(item, parent)
+        if not isinstance(item, OrderedListWidgetItem):
+            result = OrderedListWidgetItem(item, parent)
         else:
             result = None
 

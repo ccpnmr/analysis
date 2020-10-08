@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-17 01:55:31 +0000 (Tue, March 17, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-08 17:14:57 +0100 (Thu, October 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import pyqtgraph as pg
-
+from PyQt5 import QtWidgets
 from ccpn.core.lib.AssignmentLib import CCP_CODES
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
@@ -50,29 +50,30 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.mainWindow = mainWindow
         self.project = self.mainWindow.project
 
-        self._settingsFrame = Frame(self, setLayout=True)
-        self._settingsFrame.setStyleSheet('.Frame {padding: 4px}')
-        # GST this isn't very consistent in terms of api...
-        # GST shouldn't CcpnModule have a base so we can use grid etc
-        self.addWidget(self._settingsFrame, 0, 0, 1, 4)
+        self._RCwidgetFrame = Frame(self.mainWidget, setLayout=True,
+                                    grid=(0, 0), gridSpan=(1, 1),
+                                    hPolicy='ignored'
+                                    )
+        self._RCwidget = Frame(self._RCwidgetFrame, setLayout=True,
+                               grid=(0, 0), gridSpan=(1, 1),
+                               hPolicy='minimumExpanding',
+                               hAlign='l', margins=(5, 5, 5, 5))
+        self._RCwidget.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
         bc = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
         self.plotWidget = pg.PlotWidget(background=bc)
         self.plotWidget.invertX()
-        self.addWidget(self.plotWidget, 1, 0, 1, 4)
+        self.mainWidget.getLayout().addWidget(self.plotWidget, 1, 0, 1, 1)
         self.plotWidget.plotItem.addLegend(offset=[1, 10])
 
-        self.residueTypeLabel = Label(self._settingsFrame, "Residue Type:", grid=(0,0))
-        self.residueTypePulldown = PulldownList(self._settingsFrame, callback=self._updateModule, grid=(0,1))
+        self.residueTypeLabel = Label(self._RCwidget, "Residue Type:", grid=(0, 0))
+        self.residueTypePulldown = PulldownList(self._RCwidget, callback=self._updateModule, grid=(0, 1))
         self.residueTypePulldown.setData(CCP_CODES)
-        self.atomTypeLabel = Label(self._settingsFrame, 'Atom Type:', grid=(0,2))
-        self.atomTypePulldown = PulldownList(self._settingsFrame, callback=self._updateModule, grid=(0,3))
+        self.atomTypeLabel = Label(self._RCwidget, 'Atom Type:', grid=(0, 2))
+        self.atomTypePulldown = PulldownList(self._RCwidget, callback=self._updateModule, grid=(0, 3))
         self.atomTypePulldown.setData(['Hydrogen', 'Heavy'])
 
-        self._settingsFrame.layout().setColumnStretch(4,10000)
-
         self._updateModule()
-
 
     def _getDistributionForResidue(self, ccpCode: str, atomType: str):
         """
@@ -92,10 +93,10 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
             x = []
             y = []
             if self.preferences.general.colourScheme == 'dark':
-                col = (11 + 7 * atomNames.index(atomName)) % len(spectrumHexLightColours)-1
+                col = (11 + 7 * atomNames.index(atomName)) % len(spectrumHexLightColours) - 1
                 colour = spectrumHexLightColours[col]
             else:
-                col = (11 + 7 * atomNames.index(atomName)) % len(spectrumHexDarkColours)-1
+                col = (11 + 7 * atomNames.index(atomName)) % len(spectrumHexDarkColours) - 1
                 colour = spectrumHexDarkColours[col]
             for i in range(len(distribution)):
                 x.append(refValue + valuePerPoint * (i - refPoint))

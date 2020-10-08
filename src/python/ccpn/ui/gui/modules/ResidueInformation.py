@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-10-08 17:14:57 +0100 (Thu, October 08, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,6 +45,7 @@ from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.guiSettings import LABEL_SELECTEDBACKGROUND, LABEL_SELECTEDFOREGROUND, LABEL_HIGHLIGHT
 from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay, navigateToNmrAtomsInStrip, _getCurrentZoomRatio
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.Font import setWidgetFont
 
 
 logger = getLogger()
@@ -169,7 +170,8 @@ class ResidueInformation(CcpnModule):
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                              grid=(2, 3), gridSpan=(1, 1))
 
-        self._widget.setContentsMargins(5, 5, 5, 5)
+        self._pulldownFrame.setContentsMargins(0, 5, 5, 5)
+        self._widget.setContentsMargins(5, 0, 5, 0)
 
         if chain is not None:
             self._selectChain(chain)
@@ -337,13 +339,12 @@ class ResidueInformation(CcpnModule):
                             item = ActiveLabel(self, mainWindow=self.mainWindow,
                                                text=checkResidues[rr].id,
                                                hAlign='c')
-                            item.setMaximumHeight(30)
+                            setWidgetFont(item)
                             item.setSelectionCallback(partial(self._residueClicked, checkResidues[rr]))
 
                             if checkResidues[rr].nmrResidue is not None:
                                 item.setStyleSheet(stylesheet)
                                 item.setActionCallback(partial(self._residueDoubleClicked, checkResidues[rr]))
-                                # self._setWidgetColour(label1)
 
                             self.residueWidget.layout().addWidget(item, i, textCols[rr])
 

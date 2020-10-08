@@ -153,6 +153,7 @@ class _NmrAtomsSelection(CcpnDialog):
         if self.parent is not None:
             self.parent.relativeContribuitions = self.getRelativeContribuitions()
             self.parent.selectedNmrAtomNames = self.getNmrAtomNames()
+            #todo add to widgetState
 
         self.reject()
 

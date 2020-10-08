@@ -54,11 +54,7 @@ Module Documentation
     >>>
     
     
-  
 """
-
-
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -83,7 +79,7 @@ __date__ = "$Date: 2017-04-07 10:28:43 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-
+from datetime import datetime
 import os
 import numpy as np
 import pyqtgraph as pg
@@ -1525,6 +1521,14 @@ class ChemicalShiftsMapping(CcpnModule):
       legend.layout.removeAt(0)
     legend.items = []
 
+  def restoreWidgetsState(self, **widgetsState):
+
+    if 'Spectra' or 'Groups' in widgetsState:
+      _BackCompatibility._spectraToSpectrumGroup(self, **widgetsState)
+    super().restoreWidgetsState(**widgetsState)
+    self._updateModule()
+
+
   def _closeModule(self):
     """
     Re-implementation of closeModule function from CcpnModule to unregister notification on current
@@ -1541,6 +1545,67 @@ class ChemicalShiftsMapping(CcpnModule):
     finally:
       super()._closeModule()
 
+class _BackCompatibility():
+  
+  @staticmethod
+  def _spectraToSpectrumGroup(guiModule, **widgetsState):
+    '''
+    A small helper to create spectrumGroups from spectra if opening a project saved before 3.0.3.
+    Up to Version 3.0.3 multiple spectra could be selected from the settings as input data.
+    After 3.0.3 only one spectrumGroup at the time. This methods helps to create a new usable
+    spectrumGroup from the stored spectra in the layout file.
+    Concentrations as series value were stored in sample/samples components. Series are created if this
+    information is fetched.
+
+    :param guiModule: 
+    :param widgetsState: 
+    :return: 
+    '''
+
+    isSpectraSelected = widgetsState.get('Spectra')
+    isSGSelected = widgetsState.get('Groups')
+    if isSpectraSelected:
+      needCreateNewSG = MessageDialog.showYesNo('Chemical Shift Mapping Module changes from version 3.0.3',
+                                                'A single spectrum selection is not allowed from on this module.'
+                                                '\nDo you want create a new SpectrumGroup from the previous selection?')
+      if needCreateNewSG:
+        spectraPids = list(map(lambda x: x.pid, guiModule.project.spectra))
+        pids = [k for k in widgetsState.keys() if k in spectraPids]
+        availableSpectra = [guiModule.project.getByPid(pid) for pid in pids]
+        spectra = []
+        concentrations = []
+        cunits = []
+        for spectrum in availableSpectra:
+          if widgetsState.get(spectrum.pid): #use only if checked
+            if spectrum.sample is not None:
+              sample = spectrum.sample
+              sampleComponent = sample._fetchSampleComponent(name=spectrum.name)
+              concentrations.append(sampleComponent.concentration)
+              cunits.append(sampleComponent.concentrationUnit)
+              spectra.append(spectrum)
+        time = datetime.now().time().strftime("%H:%M:%S")
+        sg = guiModule.project.newSpectrumGroup('Restored_' + time, spectra=spectra)
+        sg.series = concentrations
+        sg.seriesUnits = cunits[-1]
+        sg.sortSpectraBySeries(False)
+        try:
+          guiModule.spectrumGroupPulldown.select(sg)
+        except Exception as e:
+          MessageDialog.showWarning('Chemical Shift Mapping Module',
+                                    'Impossible to select automatically the spectrumGroup')
+
+    if isSGSelected:
+      sgPids = list(map(lambda x: x.pid, guiModule.project.spectrumGroups))
+      pids = [k for k in widgetsState.keys() if k in sgPids]
+      availableSgs = [guiModule.project.getByPid(pid) for pid in pids]
+      for sg in availableSgs:
+        if widgetsState.get(sg.pid):  # use only if checked
+          try:
+            guiModule.spectrumGroupPulldown.select(sg)
+          except Exception as e:
+            MessageDialog.showWarning('Chemical Shift Mapping Module',
+                                      'Impossible to select automatically the spectrumGroup')
+          break
 
 # if __name__ == '__main__':
 #   from PyQt5 import QtGui, QtWidgets

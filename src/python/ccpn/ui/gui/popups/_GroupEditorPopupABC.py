@@ -81,8 +81,7 @@ class OrderedListWidgteItem(QtWidgets.QListWidgetItem):
     def __lt__(self, other):
         self_data = self.data(_ListWidget.SEARCH_ROLE_INDEX)
         other_data = other.data(_ListWidget.SEARCH_ROLE_INDEX)
-        if self_data and other_data:
-            return self_data < other_data
+        return self_data < other_data
 
 
 class DefaultItemFactory:
@@ -714,9 +713,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             result.remove(self.LEFT_EMPTY_TEXT)
         return result
 
-    @_groupedObjects.setter
-    def _groupedObjects(self, vv):
-        self.leftListWidget.setTexts(vv)
+    # @_groupedObjects.setter
+    # def _groupedObjects(self, vv):
+    #     self.leftListWidget.setTexts(vv)
 
     @property
     def _editedObjectItems(self) -> list:

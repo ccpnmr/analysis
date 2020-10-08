@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-11 11:52:33 +0100 (Fri, September 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-08 17:51:28 +0100 (Thu, October 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -727,6 +727,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.autoActiveLabel = Label(self.settingsWidget, 'Auto active', grid=(row, 0))
         self.autoActiveCheckBox = CheckBox(self.settingsWidget, callback=self._autoActiveCallback, grid=(row, 1))
         self.autoActiveCheckBox.setChecked(True)
+        self.settingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
 
     def _itemsDropped(self):
         self.setDataSelection()

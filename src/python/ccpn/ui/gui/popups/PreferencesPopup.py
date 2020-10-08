@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:06:41 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-08 11:19:35 +0100 (Thu, October 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -584,11 +584,18 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Set the contents of the widget the details of the font
         """
         try:
-            name, size, _, _, _, _, _, _, _, _, type = fontString.split(',')
+            fontList = fontString.split(',')
+            if len (fontList) == 10:
+                name, size, _, _, _, _, _, _, _, _ = fontList
+                type = None
+            elif len(fontList) == 11:
+                name, size, _, _, _, _, _, _, _, _, type = fontList
+            else:
+                name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
         except:
             name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
 
-        fontName = '{}, {}pt, {}'.format(name, size, type)
+        fontName = '{}, {}pt, {}'.format(name, size, type) if type else '{}, {}pt'.format(name, size,)
         widget._fontString = fontString
         widget.setText(fontName)
 

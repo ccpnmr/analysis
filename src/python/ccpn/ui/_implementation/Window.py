@@ -240,7 +240,7 @@ class Window(AbstractWrapperObject):
         else:
             return windowStore.sortedWindows()
 
-    @logCommand('mainWindow.')
+    # @logCommand('mainWindow.') there is already a log command internally. This is not needed it and slows down the process.
     def createSpectrumDisplay(self, spectrum, displayAxisCodes: Sequence[str] = (),
                               axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
                               widths: Sequence[float] = (), units: Sequence[str] = (),

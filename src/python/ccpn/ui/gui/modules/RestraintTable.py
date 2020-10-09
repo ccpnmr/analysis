@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-26 12:02:35 +0000 (Thu, March 26, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-09 16:16:13 +0100 (Fri, October 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -87,6 +87,7 @@ class RestraintTableModule(CcpnModule):
                                    includePeakLists=self.includePeakLists,
                                    includeNmrChains=self.includeNmrChains,
                                    includeSpectrumTable=self.includeSpectrumTable,
+                                   includeSequentialStrips=False,
                                    grid=(0, 0))
 
         # main window
@@ -122,7 +123,7 @@ class RestraintTableModule(CcpnModule):
         """
         displays = []
         # check for valid displays
-        gids = self.displaysWidget.getTexts()
+        gids = self._RTwidget.displaysWidget.getTexts()
         if len(gids) == 0: return displays
         if ALL in gids:
             displays = self.application.ui.mainWindow.spectrumDisplays
@@ -361,7 +362,61 @@ class RestraintTable(GuiTable):
         else:
             restraint = objs
 
-        logger.debug(str(NotImplemented))
+        from ccpn.ui.gui.widgets.MessageDialog import showWarning
+        from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+        from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay, _getCurrentZoomRatio
+        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+
+        if restraint and restraint.peaks:
+            self.current.peaks = restraint.peaks
+            pk = restraint.peaks[0]
+
+            displays = self.moduleParent._getDisplays()
+            autoClear = self.moduleParent._RTwidget.autoClearMarksWidget.isChecked()
+            markPositions = self.moduleParent._RTwidget.markPositionsWidget.isChecked()
+
+            with undoBlockWithoutSideBar():
+                # optionally clear the marks
+                if autoClear:
+                    self.mainWindow.clearMarks()
+
+                # navigate the displays
+                for display in displays:
+                    if display and len(display.strips) > 0 and display.strips[0].spectrumViews:
+                        widths = None
+                        if pk.peakList.spectrum.dimensionCount <= 2:
+                            widths = _getCurrentZoomRatio(display.strips[0].viewRange())
+                        navigateToPositionInStrip(strip=display.strips[0],
+                                                  positions=pk.position,
+                                                  axisCodes=pk.axisCodes,
+                                                  widths=widths)
+                        if markPositions:
+                            display.strips[0]._markSelectedPeaks()
+
+                        # navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0,
+                        #                               widths=newWidths,  #['full'] * len(display.strips[0].axisCodes),
+                        #                               showSequentialResidues=(len(display.axisCodes) > 2) and
+                        #                                                      self._SGwidget.checkBoxes['sequentialStrips']['checkBox'].isChecked(),
+                        #                               markPositions=self._SGwidget.checkBoxes['markPositions']['checkBox'].isChecked()
+                        #                               )
+
+            # # navigate to peaks in selected spectrumDisplays
+            # if self.current.strip is not None:
+            #     validPeakListViews = [pp.peakList for pp in self.current.strip.peakListViews if isinstance(pp.peakList, PeakList)]
+            #
+            #     if peak and peak.peakList in validPeakListViews:
+            #         widths = None
+            #
+            #         if peak.peakList.spectrum.dimensionCount <= 2:
+            #             widths = _getCurrentZoomRatio(self.current.strip.viewRange())
+            #         navigateToPositionInStrip(strip=self.current.strip,
+            #                                   positions=peak.position,
+            #                                   axisCodes=peak.axisCodes,
+            #                                   widths=widths)
+            # else:
+            #     logger.warning('Impossible to navigate to peak position. Set a current strip first')
+
+        # logger.debug(str(NotImplemented))
 
     def _selectionPulldownCallback(self, item):
         """

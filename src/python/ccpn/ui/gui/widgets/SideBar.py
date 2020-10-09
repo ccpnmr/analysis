@@ -1297,10 +1297,11 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                 if strip:
                     strip._clear()
                     if isinstance(objFromPid, Spectrum):
-                        strip.spectrumDisplay.displaySpectrum(objFromPid)
+                        strip._displaySpectrum(objFromPid, useUndoBlock = False)
+                        # strip.spectrumDisplay.displaySpectrum(objFromPid)
                     if isinstance(objFromPid, Sample):
                         strip.setStackingMode(False)
-                        _openItemSampleDisplay._openSampleSpectraOnDisplay(objFromPid, strip.spectrumDisplay)
+                        _openItemSampleDisplay._openSampleSpectraOnDisplay(objFromPid, strip)
                         v = strip._getInitialOffset()
                         strip.setStackingMode(True)
 

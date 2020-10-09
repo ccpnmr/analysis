@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-23 09:36:16 +0100 (Wed, September 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-09 18:46:22 +0100 (Fri, October 09, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -110,7 +110,9 @@ PEAKCLUSTERS = 'peakClusters'
 POSITIONCERTAINTY = 'position_uncertainty_'
 POSITIONCERTAINTYLEN = len(POSITIONCERTAINTY)
 
-DEFAULTRESTRAINTLINKLOAD = True
+DEFAULTRESTRAINTLINKLOAD = False
+REGEXREMOVEENDQUOTES = u'\`\d*`+?'
+
 
 # NEf to CCPN tag mapping (and tag order)
 #
@@ -298,21 +300,22 @@ def convertToCcpnDataBlock(project: Project, skipPrefixes: typing.Sequence = (),
     return dataBlock
 
 
+def _tryNumber(value):
+    code = None
+    if value:
+        ll = value.rsplit('`', 2)
+        if len(ll) == 3:
+            try:
+                return int(ll[1])
+            except ValueError:
+                pass
+
+
 def _saveFrameNameFromCategory(saveFrame: StarIo.NmrSaveFrame):
     """Parse the saveframe name to extract pre- and post- numbering
     necessary for restraint and spectrum saveframe names
     """
     _nameFromCategory = namedtuple('_nameFromCategory', ('framecode', 'frameName', 'subname', 'prefix', 'postfix', 'precode', 'postcode', 'category'))
-
-    def _tryNumber(value):
-        code = None
-        if value:
-            ll = value.rsplit('`', 2)
-            if len(ll) == 3:
-                try:
-                    return int(ll[1])
-                except ValueError:
-                    pass
 
     category = saveFrame['sf_category']
     framecode = saveFrame['sf_framecode']
@@ -320,11 +323,11 @@ def _saveFrameNameFromCategory(saveFrame: StarIo.NmrSaveFrame):
 
     # check for any occurrences of `n` in the saveframe name and keep for later reference
     regex = u'\`\d*`+?'
-    names = re.split(regex, frameName)
+    names = re.split(REGEXREMOVEENDQUOTES, frameName)
     if 0 <= len(names) > 3:
         raise TypeError('bad splitting of saveframe name {}'.format(framecode))
-    subName = re.sub(regex, '', frameName)
-    matches = [mm for mm in re.finditer(regex, frameName)]
+    subName = re.sub(REGEXREMOVEENDQUOTES, '', frameName)
+    matches = [mm for mm in re.finditer(REGEXREMOVEENDQUOTES, frameName)]
     prefix = matches[0].group() if matches and matches[0] and matches[0].span()[0] == 0 else ''
     preSerial = _tryNumber(prefix)
     postfix = matches[-1].group() if matches and matches[-1] and matches[-1].span()[1] == len(frameName) else ''
@@ -1507,7 +1510,7 @@ class CcpnNefWriter:
             if restraintListFrame is not None:
                 for restraint in sorted(restraintList.restraints):
                     for peak in sorted(restraint.peaks):
-                        peakListFrame = self.ccpn2SaveFrameName.get(peak.peakList)
+                        peakListFrame = self.ccpn2SaveFrameName.get(peak.peakList.spectrum)
                         if peakListFrame is not None:
                             data.append((peakListFrame, peak.serial, restraintListFrame, restraint.serial))
 
@@ -2482,9 +2485,7 @@ class CcpnNefReader(CcpnNefContent):
                             name = name[len(ss):]
                     else:
                         dataSetSerial = 1
-                    import re
-                    regex = u'\`\d*`+?'
-                    name = re.sub(regex, '', name)  # substitute with ''
+                    name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
                     self._frameCodeToSpectra[saveFrameName] = dataSetSerial
 
                 if selection and saveFrameName not in selection:
@@ -2743,11 +2744,8 @@ class CcpnNefReader(CcpnNefContent):
             # ejb - need to remove the rogue `n` at the beginning of the name if it exists
             #       as it is passed into the namespace and gets added iteratively every save
             #       next three lines remove all occurrences of `n` from name
-            import re
-
             name = saveFrame.name
-            regex = u'\`\d*`+?'
-            name = re.sub(regex, '', name)  # substitute with ''
+            name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
 
             _importList = self._importDict.get(name)  # need to remove any trailing `<n>`
             if _importList:
@@ -3899,10 +3897,7 @@ class CcpnNefReader(CcpnNefContent):
         # ejb - need to remove the rogue `n` at the beginning of the name if it exists
         #       as it is passed into the namespace and gets added iteratively every save
         #       next three lines remove all occurrences of `n` from name
-        import re
-
-        regex = u'\`\d*`+?'
-        name = re.sub(regex, '', name)  # substitute with ''
+        name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
 
         # Make main object
         dataSet = self.fetchDataSet(dataSetSerial)
@@ -3988,10 +3983,7 @@ class CcpnNefReader(CcpnNefContent):
         # ejb - need to remove the rogue `n` at the beginning of the name if it exists
         #       as it is passed into the namespace and gets added iteratively every save
         #       next three lines remove all occurrences of `n` from name
-        import re
-
-        regex = u'\`\d*`+?'
-        name = re.sub(regex, '', name)  # substitute with ''
+        name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
 
         # Make main object
         dataSet = self.getDataSet(dataSetSerial)
@@ -5183,28 +5175,37 @@ class CcpnNefReader(CcpnNefContent):
                             )
                     continue
             else:
-                _spectrumPid = row.get('nmr_spectrum_id')
+                _spectrumPidFrame = row.get('nmr_spectrum_id')
+                _spectrumPid = re.sub(REGEXREMOVEENDQUOTES, '', _spectrumPidFrame)  # substitute with ''
                 _spectrum = project.getByPid('SP:'+_spectrumPid[len('nef_nmr_spectrum_'):])
-                peakListNum = self._frameCodeToSpectra.get(_spectrumPid)
-                if not (_spectrum or peakListNum):
+
+                matches = [mm for mm in re.finditer(REGEXREMOVEENDQUOTES, _spectrumPidFrame)]
+                postfix = matches[-1].group() if matches and matches[-1] and matches[-1].span()[1] == len(_spectrumPidFrame) else ''
+                postSerial = _tryNumber(postfix)
+
+                peakListNum = postSerial or 1       #self._frameCodeToSpectra.get(_spectrumPidFrame)
+                if not (_spectrum and peakListNum):
                     continue
 
                 _restraintPid = row.get('restraint_list_id')
-                dataSetSerial = self._frameCodeToSpectra.get(_restraintPid)
-                _dataSet = project.getDataSet('dataset_{}'.format(dataSetSerial))
-                if _dataSet is not None:
-                    for prefix in ['nef_distance_restraint_list',
-                                         'nef_dihedral_restraint_list',
-                                         'nef_rdc_restraint_list',
-                                         'ccpn_restraint_list']:
-                        if _restraintPid.startswith(prefix):
-                            _name = _restraintPid[len(prefix)+1:]
-                            restraintList = _dataSet.getRestraintList(_name)
-                            break
-                    else:
-                        continue
-                    if not restraintList:
-                        continue
+                # dataSetSerial = self._frameCodeToSpectra.get(_restraintPid)
+                # _dataSet = project.getDataSet('dataset_{}'.format(dataSetSerial))
+                # if _dataSet is not None:
+                #     for prefix in ['nef_distance_restraint_list',
+                #                          'nef_dihedral_restraint_list',
+                #                          'nef_rdc_restraint_list',
+                #                          'ccpn_restraint_list']:
+                #         if _restraintPid.startswith(prefix):
+                #             _name = _restraintPid[len(prefix)+1:]
+                #             restraintList = _dataSet.getRestraintList(_name)
+                #             break
+                #     else:
+                #         continue
+                #     if not restraintList:
+                #         continue
+                restraintList = self.frameCode2Object.get(_restraintPid)
+                if not restraintList:
+                    continue
                 peakList = _spectrum.getPeakList(peakListNum)
                 if not peakList:
                     continue

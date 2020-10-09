@@ -512,16 +512,18 @@ class _openItemSampleDisplay(OpenItemABC):
     contextMenuText = 'Open linked spectra'
 
     @staticmethod
-    def _openSampleSpectraOnDisplay(sample, strip, autoRange=False):
+    def _openSampleSpectraOnDisplay(sample, spectrumDisplay, autoRange=False):
         if len(sample.spectra) > 0:
-            for spectrum in sample.spectra:
-                strip.displaySpectrum(spectrum)
-            for sampleComponent in sample.sampleComponents:
-                if sampleComponent.substance is not None:
-                    for spectrum in sampleComponent.substance.referenceSpectra:
-                        strip._displaySpectrum(spectrum, useUndoBlock = False)
-            if autoRange:
-                strip.spectrumDisplay.autoRange()
+            if len(spectrumDisplay.strips)>0:
+                strip = spectrumDisplay.strips[0]
+                for spectrum in sample.spectra:
+                    strip._displaySpectrum(spectrum, useUndoBlock = False)
+                for sampleComponent in sample.sampleComponents:
+                    if sampleComponent.substance is not None:
+                        for spectrum in sampleComponent.substance.referenceSpectra:
+                            strip._displaySpectrum(spectrum, useUndoBlock = False)
+                if autoRange:
+                    spectrumDisplay.autoRange()
 
     def _openSampleSpectra(self, sample, position=None, relativeTo=None):
         """Add spectra linked to sample and sampleComponent. Particularly used for screening
@@ -560,6 +562,8 @@ class _openItemSpectrumDisplay(OpenItemABC):
         # with undoBlockWithoutSideBar():
 
         spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum, position=position, relativeTo=relativeTo)
+        if len(spectrumDisplay.strips) > 0:
+            mainWindow.current.strip = spectrumDisplay.strips[0]
 
             # with undoStackBlocking() as addUndoItem:
             #     # disable all notifiers in spectrumDisplays
@@ -613,21 +617,22 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
 
             spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0], position=position, relativeTo=relativeTo, isGrouped=True)
             # set the spectrumView colours
-            spectrumDisplay._colourChanged(spectrumGroup)
+            # spectrumDisplay._colourChanged(spectrumGroup)
+            if len(spectrumDisplay.strips)>0:
+                strip = spectrumDisplay.strips[0]
 
-            with undoBlockWithoutSideBar():
-                with notificationEchoBlocking():
-                    for spectrum in spectrumGroup.spectra[1:]:  # Add the other spectra
-                        spectrumDisplay.displaySpectrum(spectrum)
+                with undoBlockWithoutSideBar():
+                    with notificationEchoBlocking():
+                        for spectrum in spectrumGroup.spectra[1:]:  # Add the other spectra
+                            strip._displaySpectrum(spectrum, useUndoBlock=False)
                         # update the spectrumView colours
                         spectrumDisplay._colourChanged(spectrumGroup)
+                        # spectrumDisplay.isGrouped = True
+                        spectrumDisplay.spectrumToolBar.hide()
+                        spectrumDisplay.spectrumGroupToolBar.show()
+                        spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
 
-                    # spectrumDisplay.isGrouped = True
-                    spectrumDisplay.spectrumToolBar.hide()
-                    spectrumDisplay.spectrumGroupToolBar.show()
-                    spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
-
-            mainWindow.application.current.strip = spectrumDisplay.strips[0]
+                mainWindow.application.current.strip = strip
             # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
             spectrumDisplay.autoRange()
             return spectrumDisplay

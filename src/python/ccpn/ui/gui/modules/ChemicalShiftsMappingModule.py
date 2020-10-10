@@ -101,7 +101,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.LegendItem import LegendItem
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown, SELECT
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.HLine import HLine
@@ -260,6 +260,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.mainWindow = mainWindow
     self.relativeContribuitions = DefaultAtomWeights # used in other classes (set in popup)
     self.selectedNmrAtomNames = [] # used in other classes  (set in popup)
+    self._selectedSpectrumGroup = None
     self.project = self.mainWindow.project
     self.application = self.mainWindow.application
     self.current = self.application.current
@@ -285,7 +286,8 @@ class ChemicalShiftsMapping(CcpnModule):
     self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak', self._peakDeletedCallBack)
     self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'NmrResidue',self._nmrObjectChanged)
     self._nrDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'NmrResidue',self._nmrResidueDeleted)
-    self._sgNotifier = Notifier(self.project, [Notifier.CREATE, Notifier.DELETE], 'SpectrumGroup', self._setSpectrumGroupPulldown)
+    self._sgNotifier = Notifier(self.project, [Notifier.CREATE], 'SpectrumGroup', self._onSGcreation)
+    self._sgDeleteNotifier = Notifier(self.project, [Notifier.DELETE], 'SpectrumGroup', self._onSGdeletion)
 
     # self._addSettingsWAttr(self.nmrAtomsCheckBoxes)
     # self._selectCurrentNmrResiduesNotifierCallback()
@@ -299,6 +301,7 @@ class ChemicalShiftsMapping(CcpnModule):
             self._setThresholdLineBySTD()
             if len(self.selectedNmrAtomNames) == 0:
               sg = self.spectrumGroupPulldown.getObject()
+              self._selectedSpectrumGroup = sg
               if isinstance(sg, SpectrumGroup):
                 if len(sg.spectra) > 0:
                   self.selectedNmrAtomNames = sg.spectra[0].axisCodes
@@ -546,22 +549,23 @@ class ChemicalShiftsMapping(CcpnModule):
 
     position = int(event.pos().x())
     df = self.tableData
-    objDf = df.loc[df['Sequence'] == str(position)]
+    if df is not None:
+      objDf = df.loc[df['Sequence'] == str(position)]
 
-    if len(objDf.index)>0:
-      obj = objDf.index[0]
-      selected = set(self.current.nmrResidues)
-      if leftMouse(event):
-        self.current.nmrResidue = obj
-        event.accept()
+      if len(objDf.index)>0:
+        obj = objDf.index[0]
+        selected = set(self.current.nmrResidues)
+        if leftMouse(event):
+          self.current.nmrResidue = obj
+          event.accept()
 
-      elif controlLeftMouse(event):
-      # Control-left-click;  add to selection
-        selected.add(obj)
-        self.current.nmrResidues = selected
-        event.accept()
-      else:
-        event.ignore()
+        elif controlLeftMouse(event):
+        # Control-left-click;  add to selection
+          selected.add(obj)
+          self.current.nmrResidues = selected
+          event.accept()
+        else:
+          event.ignore()
 
   #####################################################
   #################   NMR Table         ################
@@ -736,7 +740,7 @@ class ChemicalShiftsMapping(CcpnModule):
     selectedAtomNames = self.selectedNmrAtomNames
     values = []
     peaksDFs = []
-    sg = self.spectrumGroupPulldown.getObject()
+    sg = self._selectedSpectrumGroup
     if isinstance(sg, SpectrumGroup):
       spectra = sg.spectra
       for nmrResidue in nmrResidues:
@@ -1001,7 +1005,7 @@ class ChemicalShiftsMapping(CcpnModule):
   #############################################################
 
   def _editSpectrumGroup(self):
-    sg = self.spectrumGroupPulldown.getObject()
+    sg = self._selectedSpectrumGroup
     if isinstance(sg, SpectrumGroup):
       sge = SpectrumGroupEditor(parent=self, mainWindow=self.mainWindow,obj=sg, editMode=True)
       sge._tabWidget.setCurrentIndex(2) # the series tab is the last
@@ -1016,19 +1020,53 @@ class ChemicalShiftsMapping(CcpnModule):
       sg = sge.obj
       if isinstance(sg, SpectrumGroup):
         self.spectrumGroupPulldown.select(sg)
+        self._selectedSpectrumGroup = sg
       else:
         self.spectrumGroupPulldown.setCurrentIndex(0)
+        self._selectedSpectrumGroup = None
     sg = self.spectrumGroupPulldown.getObject()
     if isinstance(sg, SpectrumGroup):
+      self._selectedSpectrumGroup = sg
       if sg.seriesUnits:
         self._seriesUnit = sg.seriesUnits
         self.fittingPlot.setLabel('bottom', self._seriesUnit)
         self.bindingPlot.setLabel('bottom', self._seriesUnit)
 
-  def _setSpectrumGroupPulldown(self, *args):
-    objects = [None] + self.project.spectrumGroups
-    texts  = [NewSG] + [sg.name for sg in self.project.spectrumGroups if not sg.isDeleted]
-    self.spectrumGroupPulldown.setData(texts=texts, objects=objects, headerText='Select', headerEnabled=False)
+  def _setSpectrumGroupPulldown(self, objects=None, index=None, *args):
+    if objects is None:
+      objects = [sg for sg in self.project.spectrumGroups if not sg.isDeleted]
+    objects.insert(0, None)
+    texts  = [NewSG] + [getattr(ob, 'name') for ob in objects if ob]
+    self.spectrumGroupPulldown.setData(texts=texts, objects=objects, headerText=SELECT, headerEnabled=False, index=index)
+
+  def _onSGcreation(self, dd):
+    newSg = dd.get('object')
+    objs = self.project.spectrumGroups
+    lastSelected = self._selectedSpectrumGroup
+    if isinstance(lastSelected, SpectrumGroup):
+      ix = self.spectrumGroupPulldown.getItemIndex(lastSelected.name)
+      self._setSpectrumGroupPulldown(objects=objs)
+      self.spectrumGroupPulldown.select(lastSelected.name)
+
+    else:
+      self._setSpectrumGroupPulldown(objects=objs)
+
+  def _onSGdeletion(self, dd):
+    lastSelected = self._selectedSpectrumGroup
+    deleted = dd.get('object')
+    objs = [o for o in self.project.spectrumGroups if o != deleted]
+    if deleted == lastSelected:
+      self._setSpectrumGroupPulldown(objects=objs, index=0)
+      self._selectedSpectrumGroup = None
+      self._updateModule()
+    else:
+      if isinstance(lastSelected, SpectrumGroup):
+        self._setSpectrumGroupPulldown(objects=objs)
+        self.spectrumGroupPulldown.select(lastSelected.name)
+        # no need of updating the whole module if another sg was deleted
+      else:
+        self._setSpectrumGroupPulldown(objects=objs, index=0)
+        self._updateModule()
 
   def showNmrAtomsSettings(self):
     from ccpn.ui.gui.widgets.NmrAtomsSelections import _NmrAtomsSelection
@@ -1205,40 +1243,42 @@ class ChemicalShiftsMapping(CcpnModule):
       return
     weights = self.relativeContribuitions
     selectedAtomNames = self.selectedNmrAtomNames
-    sg = self.spectrumGroupPulldown.getObject()
+    sg = self._selectedSpectrumGroup
 
     if isinstance(sg, SpectrumGroup):
       spectra =  sg.spectra
-      if self.nmrResidueTable:
-        if self.nmrResidueTable._nmrChain is not None:
-          for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
-            if self._isInt(nmrResidue.sequenceCode):
-              self._updatedPeakCount(nmrResidue, spectra)
-              if nmrResidue._includeInDeltaShift:
-                nmrResidue.spectraCount = len(spectra)
-                nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
-                nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
-                nmrResidue._delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
+    else:
+      spectra = []
+    if self.nmrResidueTable:
+      if self.nmrResidueTable._nmrChain is not None:
+        for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
+          if self._isInt(nmrResidue.sequenceCode):
+            self._updatedPeakCount(nmrResidue, spectra)
+            if nmrResidue._includeInDeltaShift:
+              nmrResidue.spectraCount = len(spectra)
+              nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
+              nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
+              nmrResidue._delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
 
-                df,peaksdf = self._getBindingCurves([nmrResidue])
-                bindingCurves = self._getScaledBindingCurves(df)
-                if bindingCurves is not None:
-                  plotData = bindingCurves.replace(np.nan, 0)
-                  columns = df.columns
-                  y = plotData.values.flatten(order='F')
-                  xss = np.array([columns] * plotData.shape[0])
-                  x = xss.flatten(order='F')
-                  kd = _getKd(oneSiteBindingCurve, x, y)
-                  if not kd:
-                    getLogger().debug('Kd not set for nmrResidue %s' % nmrResidue.pid)
-                  nmrResidue._estimatedKd = kd
-              else:
-                nmrResidue._delta = None
-          if not silent:
-            self._updateTable(self.nmrResidueTable._nmrChain)
-            self._updateBarGraph()
-            self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
-            self._plotBindingCFromCurrent()
+              df,peaksdf = self._getBindingCurves([nmrResidue])
+              bindingCurves = self._getScaledBindingCurves(df)
+              if bindingCurves is not None:
+                plotData = bindingCurves.replace(np.nan, 0)
+                columns = df.columns
+                y = plotData.values.flatten(order='F')
+                xss = np.array([columns] * plotData.shape[0])
+                x = xss.flatten(order='F')
+                kd = _getKd(oneSiteBindingCurve, x, y)
+                if not kd:
+                  getLogger().debug('Kd not set for nmrResidue %s' % nmrResidue.pid)
+                nmrResidue._estimatedKd = kd
+            else:
+              nmrResidue._delta = None
+        if not silent:
+          self._updateTable(self.nmrResidueTable._nmrChain)
+          self._updateBarGraph()
+          self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
+          self._plotBindingCFromCurrent()
 
   def _showOnMolecularViewer(self):
     """
@@ -1371,7 +1411,7 @@ class ChemicalShiftsMapping(CcpnModule):
     if openSpectra:
       try:
         from ccpn.ui.gui.lib.MenuActions import _openItemObject
-        sg = self.spectrumGroupPulldown.getObject()
+        sg = self._selectedSpectrumGroup
         if sg is not None:
           _openItemObject(self.mainWindow, sg.spectra)
         return True
@@ -1516,6 +1556,10 @@ class ChemicalShiftsMapping(CcpnModule):
 
       return nmrResidue._spectraWithMissingPeaks
 
+  def _clearModule(self):
+    self.nmrResidueTable.ncWidget.select(SELECT)
+
+
   def _clearLegend(self, legend):
     while legend.layout.count() > 0:
       legend.layout.removeAt(0)
@@ -1534,9 +1578,9 @@ class ChemicalShiftsMapping(CcpnModule):
     Re-implementation of closeModule function from CcpnModule to unregister notification on current
     """
     try:
-      if self._selectCurrentNRNotifier is not None:
         self._selectCurrentNRNotifier.unRegister()
         self._sgNotifier.unRegister()
+        self._sgDeleteNotifier.unRegister()
         self._peakDeletedNotifier.unRegister()
         self._nrChangedNotifier.unRegister()
         self._nrDeletedNotifier.unRegister()
@@ -1550,7 +1594,8 @@ class _BackCompatibility():
   @staticmethod
   def _spectraToSpectrumGroup(guiModule, **widgetsState):
     '''
-    A small helper to create spectrumGroups from spectra if opening a project saved before 3.0.3.
+    A small helper to create spectrumGroups from spectra if opening a project with a CSM module saved in a layout
+    before version 3.0.3.
     Up to Version 3.0.3 multiple spectra could be selected from the settings as input data.
     After 3.0.3 only one spectrumGroup at the time. This methods helps to create a new usable
     spectrumGroup from the stored spectra in the layout file.

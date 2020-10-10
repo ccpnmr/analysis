@@ -741,9 +741,10 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
 
     apiNmrProject = self._wrappedData
     apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore
-
     if apiComponentStore.findFirstComponent(name=name, labeling=apiLabeling) is not None:
-        raise ValueError("Substance %s.%s already exists" % (name, labelling))
+        name = commonUtil._incrementObjectName(self.project, Substance._pluralLinkName, name)
+        oldSubstance = apiComponentStore.findFirstComponent(name=name)
+        # raise ValueError("Substance %s.%s already exists" % (name, labelling))
 
     else:
         oldSubstance = apiComponentStore.findFirstComponent(name=name)

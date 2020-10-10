@@ -401,7 +401,8 @@ def _newSample(self: Project, name: str = None, pH: float = None, ionicStrength:
         name = commonUtil.incrementName(name)
 
     if not isinstance(name, str):
-        raise TypeError("Sample name must be a string")
+        name = str(name)
+        # raise TypeError("Sample name must be a string")
     elif not name:
         raise ValueError("Sample name must be set")
     elif Pid.altCharacter in name:

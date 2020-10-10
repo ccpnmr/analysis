@@ -99,6 +99,12 @@ def incrementName(name):
 
     return name + '_1'
 
+def _incrementObjectName(project, pluralLinkName, name):
+    """ fetch an incremented name if an object in list (project.xs) has already taken it. """
+    names = [d.name for d in getattr(project, pluralLinkName) if hasattr(d, 'name')]
+    while name in names:
+        name = incrementName(name)
+    return name
 
 def recursiveImport(dirname, modname=None, ignoreModules=None, force=False):
     """ recursively import all .py files

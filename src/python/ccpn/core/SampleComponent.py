@@ -279,7 +279,8 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
             )
 
     if not isinstance(name, str):
-        raise TypeError("ccpn.SampleComponent name must be a string")
+        name = str(name)
+        # SampleComponents can be defined as numbers. (1,2,3,4....), don't need to raise TypeErrors.
     elif not name:
         raise ValueError("ccpn.SampleComponent name must be set")
     elif Pid.altCharacter in name:

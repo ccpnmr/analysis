@@ -97,15 +97,15 @@ class _NmrAtomsSelection(CcpnDialog):
         global i
         for name, value in relativeContribuitions.items():
             labelRelativeContribution = Label(self, text='%s Relative Contribution' % name, grid=(i, 0))
-            self.atomWeightSpinBox = DoubleSpinbox(self, value=value,
+            atomWeightSpinBox = DoubleSpinbox(self, value=value,
                                                    decimals = 3,
                                                    step=0.01,
                                                    # prefix=str('Weight' + (' ' * 2)),
                                                    grid=(i, 1),
                                                    tipText='Relative Contribution for the selected nmrAtom')
-            self.atomWeightSpinBox.setObjectName(name)
-            self.atomWeightSpinBox.setMaximumWidth(150)
-            self.atomWeightSpinBoxes.append(self.atomWeightSpinBox)
+            # self.atomWeightSpinBox.setObjectName(name)
+            atomWeightSpinBox.setMaximumWidth(150)
+            self.atomWeightSpinBoxes.append(atomWeightSpinBox)
             self.nmrAtomsLabels.append(labelRelativeContribution)
             i += 1
 
@@ -127,9 +127,9 @@ class _NmrAtomsSelection(CcpnDialog):
                 n += 1
                 for nmrAtomName in groupNmrAtoms:
                         c = nmrAtomName in setChecked
-                        self.atomSelection = CheckBox(self.scrollAreaWidgetContents, text=nmrAtomName,
+                        atomSelection = CheckBox(self.scrollAreaWidgetContents, text=nmrAtomName,
                                                       checked=c, grid=(n, 0))
-                        self.nmrAtomsCheckBoxes.append(self.atomSelection)
+                        self.nmrAtomsCheckBoxes.append(atomSelection)
                         n += 1
         i+=1
 
@@ -149,12 +149,9 @@ class _NmrAtomsSelection(CcpnDialog):
         showInfo('NmrAtom info',text)
 
     def _apply(self):
-        # print( self.getRelativeContribuitions())
         if self.parent is not None:
             self.parent.relativeContribuitions = self.getRelativeContribuitions()
             self.parent.selectedNmrAtomNames = self.getNmrAtomNames()
-            #todo add to widgetState
-
         self.reject()
 
     def uncheckAll(self):

@@ -118,8 +118,6 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.modules.NmrResidueTable import _CSMNmrResidueTable, KD, Deltas
-from ccpn.ui.gui.widgets.ConcentrationsWidget import ConcentrationWidget
-from ccpn.ui.gui.popups.ConcentrationUnitsPopup import ConcentrationUnitsPopup
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.modules.PyMolUtil import _chemicalShiftMappingPymolTemplate
@@ -161,6 +159,8 @@ DECAY = 'Exponential decay'
 NIY = "This option has not been implemented yet"
 DropHereLabel = 'Drop SpectrumGroup here to start'
 NewSG = '<New SpectrumGroup>'
+RelativeContribuitions = 'RelativeContribuitions'
+SelectedNmrAtomNames = 'SelectedNmrAtomNames'
 
 FittingAvailable=[ONESITE, DECAY]
 
@@ -1128,11 +1128,6 @@ class ChemicalShiftsMapping(CcpnModule):
           if self._openSpectra():
             self._navigateToNmrItems()
 
-  def _addSettingsWAttr(self, checkboxes):
-    """For restoring layouts only"""
-    for n, w in enumerate(checkboxes):
-      setattr(self, w.text(), w)
-
   def _toggleRawDataOption(self):
     value = self.modeButtons.getSelectedText()
     if value == HEIGHT or value ==  VOLUME:
@@ -1194,7 +1189,6 @@ class ChemicalShiftsMapping(CcpnModule):
       # obj._finaliseAction('change')
       self._updateModule()
     # pass
-    # print(data)
 
   def _nmrTableSelectionCallback(self, data):
     """
@@ -1569,9 +1563,18 @@ class ChemicalShiftsMapping(CcpnModule):
 
     if 'Spectra' or 'Groups' in widgetsState:
       _BackCompatibility._spectraToSpectrumGroup(self, **widgetsState)
+    self.selectedNmrAtomNames = widgetsState.get(SelectedNmrAtomNames, {})
+    self.relativeContribuitions = widgetsState.get(RelativeContribuitions, {})
     super().restoreWidgetsState(**widgetsState)
     self._updateModule()
 
+  @CcpnModule.widgetsState.getter
+  def widgetsState(self):
+    '''return  {"variableName":"value"}  of all gui Variables  '''
+    widgetsState = super().widgetsState
+    widgetsState[RelativeContribuitions] = self.relativeContribuitions
+    widgetsState[SelectedNmrAtomNames] = self.selectedNmrAtomNames
+    return widgetsState
 
   def _closeModule(self):
     """

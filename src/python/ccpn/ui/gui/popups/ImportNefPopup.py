@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-12 15:28:56 +0100 (Mon, October 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -842,6 +842,12 @@ class NefDictFrame(Frame):
                                                       errorCode='ccpn_restraint_list',
                                                       tableColourFunc=None)
 
+    handleSaveFrames['nef_peak_restraint_links'] = partial(handle_treeView_selection,
+                                                              prefix='nef_peak_restraint_',
+                                                              mappingCode='nef_peak_restraint_links',
+                                                              errorCode='nef_peak_restraint_links',
+                                                              tableColourFunc=None)
+
     handleSaveFrames['ccpn_sample'] = partial(handle_treeView_selection,
                                               prefix='ccpn_sample_component_',
                                               mappingCode='ccpn_sample',
@@ -940,6 +946,12 @@ class NefDictFrame(Frame):
                                                        errorCode='ccpn_restraint_list',
                                                        tableColourFunc=None)
 
+    _setBadSaveFrames['nef_peak_restraint_links'] = partial(_set_bad_saveframe,
+                                                               prefix='nef_peak_restraint_',
+                                                               mappingCode='nef_peak_restraint_links',
+                                                               errorCode='nef_peak_restraint_links',
+                                                               tableColourFunc=None)
+
     _setBadSaveFrames['ccpn_sample'] = partial(_set_bad_saveframe,
                                                prefix='ccpn_sample_component_',
                                                mappingCode='ccpn_sample',
@@ -1031,6 +1043,11 @@ class NefDictFrame(Frame):
                                                      prefix='ccpn_restraint_',
                                                      mappingCode='ccpn_restraint_list',
                                                      )
+
+    applyCheckBoxes['nef_peak_restraint_links'] = partial(apply_checkBox_item,
+                                                             prefix='nef_peak_restraint_',
+                                                             mappingCode='nef_peak_restraint_links',
+                                                             )
 
     applyCheckBoxes['ccpn_sample'] = partial(apply_checkBox_item,
                                              prefix='ccpn_sample_component_',

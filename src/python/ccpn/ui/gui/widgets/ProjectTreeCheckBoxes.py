@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-29 09:47:40 +0100 (Tue, September 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-12 15:28:56 +0100 (Mon, October 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -399,7 +399,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         SpectrumGroup._pluralLinkName,
         Note._pluralLinkName,
         PeakCluster._pluralLinkName,
-        # 'restraintLinks',
+        'restraintLinks',
         ]
 
     lockedItems = {
@@ -427,7 +427,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         'ccpn_notes'                 : (Note._pluralLinkName, Note.className),
         'ccpn_peak_cluster'          : (PeakCluster._pluralLinkName, PeakCluster.className),
         # 'ccpn_peak_cluster_serial'          : (PeakCluster._pluralLinkName, PeakCluster.className),
-        'nef_peak_restraint_link'    : ('restraintLinks','RestraintLink')
+        'nef_peak_restraint_links'   : ('restraintLinks','RestraintLink')
         }
 
     nefProjectToSaveFramesMapping = {

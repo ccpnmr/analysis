@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-09 18:46:22 +0100 (Fri, October 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-12 15:28:56 +0100 (Mon, October 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3778,6 +3778,7 @@ class CcpnNefReader(CcpnNefContent):
     renames['nef_dihedral_restraint_list'] = rename_saveframe
     renames['nef_rdc_restraint_list'] = rename_saveframe
     renames['ccpn_restraint_list'] = rename_saveframe
+    renames['nef_peak_restraint_links'] = rename_saveframe
     renames['ccpn_sample'] = rename_saveframe
     renames['ccpn_complex'] = rename_saveframe
     renames['ccpn_spectrum_group'] = rename_saveframe

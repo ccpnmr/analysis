@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-23 09:36:16 +0100 (Wed, September 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-12 15:28:56 +0100 (Mon, October 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -785,6 +785,20 @@ class CcpnNefContent:
 
     contents['nef_sequence'] = content_nef_sequence
 
+    def content_nef_peak_restraint_links(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
+        name = framecode[len(category) + 1:]
+
+        result = {category: (name,)}
+
+        self._contentLoops(project, saveFrame)
+        self.updateContent(saveFrame, result)
+
+    contents['nef_peak_restraint_links'] = content_nef_peak_restraint_links
+    contents['nef_peak_restraint_link'] = _noLoopContent
+
     def traverseDataBlock(self, project: Project, dataBlock: StarIo.NmrDataBlock,
                           projectIsEmpty: bool = True,
                           selection: typing.Optional[dict] = None,
@@ -828,6 +842,7 @@ class CcpnNefContent:
                                                                                projectIsEmpty=projectIsEmpty,
                                                                                selection=selection))
 
+    # these are the empty ones that need methods adding as required
     contents['nef_nmr_meta_data'] = _contentLoops
     contents['nef_related_entries'] = _noLoopContent
     contents['nef_program_script'] = _noLoopContent
@@ -835,8 +850,6 @@ class CcpnNefContent:
     contents['nef_spectrum_dimension_transfer'] = _noLoopContent
     contents['ccpn_spectrum_dimension'] = _noLoopContent
     contents['nef_spectrum_dimension'] = _noLoopContent
-    contents['nef_peak_restraint_links'] = _contentLoops
-    contents['nef_peak_restraint_link'] = _noLoopContent
     contents['ccpn_substance_synonym'] = _noLoopContent
     contents['ccpn_additional_data'] = _contentLoops
     contents['ccpn_internal_data'] = _noLoopContent

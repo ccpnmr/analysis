@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-12 15:20:30 +0100 (Mon, October 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -89,7 +89,7 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
     defaultMinimumSizes = (0, 20)
 
     def __init__(self, parent, value=None, min=None, max=None, step=None, prefix=None, suffix=None,
-                 showButtons=True, decimals=None, callback=None, editable=True, **kwds):
+                 showButtons=True, decimals=None, callback=None, editable=True, locale=None, **kwds):
         """
         From the QTdocumentation
         Constructs a spin box with a step value of 1.0 and a precision of 2 decimal places.
@@ -105,6 +105,9 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
 
         super().__init__(parent)
         Base._init(self, **kwds)
+
+        self._qLocale = locale or QtCore.QLocale()
+        self.setLocale(self._qLocale)
 
         # if value is not None:
         #   value = value
@@ -219,8 +222,8 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
         elif self._keyPressed in KEYVALIDATEDECIMAL:
             ii = position - 1
             while ii > 0:
-                # allow th euser to enter zeroes after the decimal point
-                if text[ii] in ['.']:
+                # allow the user to enter zeroes after the decimal point/decimal comma
+                if text[ii] in ['.', ',']:
                     return self.validator.Intermediate, text, position
                 if text[ii] in ['e']:
                     return self.validator.validate(text, position)
@@ -241,7 +244,7 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
 
 # Regular expression to find floats. Match groups are the whole string, the
 # whole coefficient, the decimal part of the coefficient, and the exponent
-# part.
+# part. (decimal point, not decimal comma)
 _float_re = re.compile(r'(([+-]?\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?)')
 
 
@@ -249,9 +252,9 @@ def fexp(f):
     return int(floor(log10(abs(f)))) if f != 0 else 0
 
 
-def validFloat(string):
-    match = _float_re.search(string)
-    return match.groups()[0] == string if match else False
+# def validFloat(string):
+#     match = _float_re.search(string)
+#     return match.groups()[0] == string if match else False
 
 
 class ScientificDoubleSpinBox(DoubleSpinbox):
@@ -264,35 +267,30 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
         _decs = kwargs.get('step')
         # step if defined by 'step' relative to current power
         self._decimalStep = 0.1 if _decs is None else _decs
-        # self._decimalStep = 10 ** _decs
-
-    def fixup(self, text):
-        return self.validator.fixup(text)
 
     def valueFromText(self, text):
         """Values in the spinbox are constrained to the correct sign if the min/max values are
         either both positive or both negative
         """
-        if self.minimum() <= 0 and self.maximum() <= 0:
+        val = super(ScientificDoubleSpinBox, self).valueFromText(text)
+        if self.minimum() <= self.maximum() <= 0:
             # check for maximum
             _lineEdit = self.lineEdit()
-            val = min(-abs(float(text)), self.maximum())
+            val = min(-abs(val), self.maximum())
             # keep the cursor position so it doesn't jump to the end; same below
             _lastPos = _lineEdit.cursorPosition()
             _lineEdit.setText(self.textFromValue(val))
             _lineEdit.setCursorPosition(_lastPos)
-            return val
 
-        elif self.minimum() >= 0 and self.maximum() >= 0:
+        elif 0 <= self.minimum() <= self.maximum():
             # check for minimum
             _lineEdit = self.lineEdit()
-            val = max(abs(float(text)), self.minimum())
+            val = max(abs(val), self.minimum())
             _lastPos = _lineEdit.cursorPosition()
             _lineEdit.setText(self.textFromValue(val))
             _lineEdit.setCursorPosition(_lastPos)
-            return val
 
-        return float(text)
+        return val
 
     def textFromValue(self, value):
         return self.formatFloat(value)
@@ -306,38 +304,41 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
         steps = min(steps, SCIENTIFICSPINBOXSTEP) if steps > 0 else max(steps, -SCIENTIFICSPINBOXSTEP)
 
         text = self.cleanText()
-        groups = _float_re.search(text).groups()
-        decimal = float(groups[1])
-        # decimal += steps * 10 ** fexp(decimal / self._decimalStep)  #     (decimal / 10)
-        decimal += steps * 10 ** fexp(decimal * self._decimalStep)
-        new_string = '{:g}'.format(decimal) + (groups[3] if groups[3] else '')
+        decimal, valid = self._qLocale.toFloat(text)
 
-        # the double convert ensures number stays to the closest Sci notation
-        self.lineEdit().setText(self.textFromValue(self.valueFromText(new_string)))
+        if valid:
+            decimal += steps * 10 ** fexp(decimal * self._decimalStep)
+            new_string = self.formatFloat(decimal)
+
+            self.lineEdit().setText(new_string)
 
     def formatFloat(self, value):
         """Modified form of the 'g' format specifier.
         """
-        string = "{:g}".format(value).replace("e+", "e")
+        string = self._qLocale.toString(float(value), 'g', 6).replace("e+", "e")
         string = re.sub("e(-?)0*(\d+)", r"e\1\2", string)
         return string
 
 
 v = float("{0:.3f}".format(0.024))
-v1 = 0.029
+v1 = 24678.45
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
     from ccpn.ui.gui.widgets.Frame import Frame
 
+    from PyQt5 import QtWidgets, QtCore, QtGui
+
 
     app = TestApplication()
+
     popup = CcpnDialog()
+    # test setting the dialog to French (different float format)
+    # popup.setLocale(QtCore.QLocale(QtCore.QLocale.French))
+
     fr = Frame(popup, setLayout=True)
     sb = DoubleSpinbox(fr, value=v1, decimals=3, step=0.001, grid=(0, 0))
-    # print('REAL = ',v, 'SPINBOX =', sb.value())
-
     sb2 = ScientificDoubleSpinBox(fr, value=v1, decimals=3, grid=(1, 0), min=0.001)
 
     popup.show()

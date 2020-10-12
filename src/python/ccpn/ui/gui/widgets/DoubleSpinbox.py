@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-12 15:20:30 +0100 (Mon, October 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-12 15:26:41 +0100 (Mon, October 12, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -335,7 +335,7 @@ if __name__ == '__main__':
 
     popup = CcpnDialog()
     # test setting the dialog to French (different float format)
-    # popup.setLocale(QtCore.QLocale(QtCore.QLocale.French))
+    # QtCore.QLocale.setDefault(QtCore.QLocale(QtCore.QLocale.French))
 
     fr = Frame(popup, setLayout=True)
     sb = DoubleSpinbox(fr, value=v1, decimals=3, step=0.001, grid=(0, 0))

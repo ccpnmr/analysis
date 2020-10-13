@@ -30,37 +30,25 @@ from collections import OrderedDict as od
 from itertools import groupby
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
-import decimal
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
-
-from functools import partial
-from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from collections import OrderedDict
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.util.Constants import concentrationUnits
 from ccpn.ui.gui.widgets.CheckBox import CheckBox, EditableCheckBox
-from ccpn.core.lib import CcpnSorting
-from ccpn.core.lib.DataFrameObject import  DATAFRAME_OBJECT
-from ccpn.core.NmrChain import NmrChain
-from ccpn.core.Spectrum import Spectrum
-from ccpn.core.Peak import Peak
-from ccpn.core.NmrResidue import NmrResidue
-from ccpn.core.Project import Project
+
 from ccpn.core.lib.peakUtils import  DefaultAtomWeights, H, N, OTHER, C
 
 i = 0 # used globally for layout
+
+PriorityNmrAtoms = [
+    'H', 'Hn', #'HA', 'HB', 'HD1', 'HE' , 'HG',
+    'N', 'Nh', #'ND1', 'ND2', 'NE', 'NE1', 'NE2', 'NZ',
+    'C', 'CA', 'CB', #'CG', 'CD', 'CE', 'CZ'
+    'F' ]
 
 class _NmrAtomsSelection(CcpnDialog):
     """
@@ -117,18 +105,27 @@ class _NmrAtomsSelection(CcpnDialog):
         self.scrollAreaWidgetContents = Frame(self, setLayout=True)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
+        priorityNmrAtoms = [i for i in PriorityNmrAtoms if i in nmrAtomNames]
+        allOthersNmrAtoms = [i for i in nmrAtomNames if i not in priorityNmrAtoms]
 
         n = 0
-        nmrAtomNames.sort() #sort alphabetically than divide in sublists
-        nmrAtomNamesGroups = [list(g) for k, g in groupby(nmrAtomNames, key=lambda x: x[0])]
-        for groupNmrAtoms in nmrAtomNamesGroups:
+        allOthersNmrAtoms.sort() #sort alphabetically than divide in sublists
+        allOthersNmrAtoms = [list(g) for k, g in groupby(allOthersNmrAtoms, key=lambda x: x[0])]
+        for nmrAtomName in priorityNmrAtoms:
+                atomSelection = CheckBox(self.scrollAreaWidgetContents, text=nmrAtomName,
+                                              checked=nmrAtomName in setChecked, grid=(n, 0))
+                self.nmrAtomsCheckBoxes.append(atomSelection)
+                n += 1
+        i += 1
+        labelOthernmrAtomNames = Label(self.scrollAreaWidgetContents, text='Others', grid=(n, 0))
+        i += 1
+        for groupNmrAtoms in allOthersNmrAtoms:
             if len(groupNmrAtoms)>0:
                 line = Label(self.scrollAreaWidgetContents, text='_'*25, grid=(n, 0))
                 n += 1
                 for nmrAtomName in groupNmrAtoms:
-                        c = nmrAtomName in setChecked
                         atomSelection = CheckBox(self.scrollAreaWidgetContents, text=nmrAtomName,
-                                                      checked=c, grid=(n, 0))
+                                                      checked=nmrAtomName in setChecked, grid=(n, 0))
                         self.nmrAtomsCheckBoxes.append(atomSelection)
                         n += 1
         i+=1

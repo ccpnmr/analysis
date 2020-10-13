@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-12 15:28:56 +0100 (Mon, October 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-13 09:51:39 +0100 (Tue, October 13, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -641,19 +641,21 @@ class NefDictFrame(Frame):
             plural, singular = mapping
 
             row = 0
-            # editFrame = Frame(self.frameOptionsFrame, setLayout=True, grid=(row, 0), showBorder=False)
-            Label(self.frameOptionsFrame, text=singular, grid=(row, 0))
-            saveFrameData = LineEdit(self.frameOptionsFrame, text=str(itemName), grid=(row, 1))
-            # editFrame.setFixedHeight(24)
+            if self._renameValid(item=item, saveFrame=saveFrame):
 
-            texts = ('Rename', 'Auto Rename')
-            callbacks = (partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame),
-                         partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame, autoRename=True))
-            tipTexts = ('Rename', 'Automatically rename to the next available\n - dependent on saveframe type')
-            self.buttonList = ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
-                                         grid=(row, 2), gridSpan=(1, 1), direction='v',
-                                         setLastButtonFocus=False)
-            row += 1
+                # editFrame = Frame(self.frameOptionsFrame, setLayout=True, grid=(row, 0), showBorder=False)
+                Label(self.frameOptionsFrame, text=singular, grid=(row, 0))
+                saveFrameData = LineEdit(self.frameOptionsFrame, text=str(itemName), grid=(row, 1))
+                # editFrame.setFixedHeight(24)
+
+                texts = ('Rename', 'Auto Rename')
+                callbacks = (partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame),
+                             partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame, autoRename=True))
+                tipTexts = ('Rename', 'Automatically rename to the next available\n - dependent on saveframe type')
+                self.buttonList = ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
+                                             grid=(row, 2), gridSpan=(1, 1), direction='v',
+                                             setLastButtonFocus=False)
+                row += 1
 
             if saveFrame.get('sf_category') == 'ccpn_assignment':
                 # NOTE:ED - new buttons just for nmrChain/nmrResidue/nmrAtom to rename bad sequenceCodes
@@ -689,6 +691,18 @@ class NefDictFrame(Frame):
         self.logData.append(pretty(_content))
         self.logData.append(('ERROR DICT'))
         self.logData.append(pretty(_errors))
+
+    def _renameValid(self, item=None, saveFrame=None):
+        if not item:
+            return
+
+        parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
+
+        # find the primary handler class for the clicked item, .i.e. chains/peakLists etc.
+        primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
+        func = self._nefReader.renames.get(primaryHandler)
+
+        return func
 
     def _rename(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False):
         """Handle clicking a rename button
@@ -1135,29 +1149,32 @@ class NefDictFrame(Frame):
     def _nefTreeClickedCallback(self, item, column=0):
         """Handle clicking on an item in the nef tree
         """
-        self._nefTables = {}
-        for widg in self._nefWidgets:
-            self._removeWidget(widg, removeTopWidget=True)
-        self._nefWidgets = []
-        self._removeWidget(self.frameOptionsFrame, removeTopWidget=False)
-
         itemName = item.data(0, 0)
         saveFrame = item.data(1, 0)
         if saveFrame and hasattr(saveFrame, '_content'):
-            with self.blockWidgetSignals():
+            with self._tableSplitter.blockWidgetSignals():
+                self._tableSplitter.setVisible(False)
+
+                for widg in self._nefWidgets:
+                    self._removeWidget(widg, removeTopWidget=True)
+                self._nefWidgets = []
+                self._removeWidget(self.frameOptionsFrame, removeTopWidget=False)
+
                 _fillColour = INVALIDTABLEFILLNOCHECKCOLOUR if item.checkState(0) else INVALIDTABLEFILLNOCHECKCOLOUR
 
                 parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
 
-                # add a table from the saveframe attributes
+                # add the first table from the saveframe attributes
                 loop = StarIo.NmrLoop(name=saveFrame.name, columns=('attribute', 'value'))
                 for k, v in saveFrame.items():
                     if not (k.startswith('_') or isinstance(v, StarIo.NmrLoop)):
                         loop.newRow((k, v))
                 _name, _data = saveFrame.name, loop.data
+
+                self._nefTables = {}
                 frame, table = self._addTableToFrame(_data, _name.upper())
                 self._tableSplitter.addWidget(frame)
-                self._nefWidgets.append(frame)
+                self._nefWidgets = [frame,]
 
                 # get the group name add fetch the correct mapping
                 mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
@@ -1171,9 +1188,9 @@ class NefDictFrame(Frame):
                         continue
 
                     _name, _data = loop.name, loop.data
-                    # if self.nefTreeView.nefProjectToSaveFramesMapping
-                    # add new tables
                     frame, table = self._addTableToFrame(_data, _name)
+                    self._tableSplitter.addWidget(frame)
+                    self._nefWidgets.append(frame)
 
                     if loop.name in saveFrame._content and \
                             hasattr(saveFrame, '_rowErrors') and \
@@ -1182,9 +1199,6 @@ class NefDictFrame(Frame):
 
                         for rowIndex in badRows:
                             table.setRowBackgroundColour(rowIndex, _fillColour)
-
-                    self._tableSplitter.addWidget(frame)
-                    self._nefWidgets.append(frame)
 
                 if primaryHandler:
                     handler = self.handleSaveFrames.get(primaryHandler)
@@ -1195,9 +1209,10 @@ class NefDictFrame(Frame):
                 # clicking the checkbox also comes here - above loop may set item._badName
                 self._colourTreeView()
 
-        self._filterLogFrame.setVisible(self._enableFilterFrame)
-        self.nefTreeView.setCurrentItem(item)
-        self.nefTreeView.update()
+                self._filterLogFrame.setVisible(self._enableFilterFrame)
+                self.nefTreeView.setCurrentItem(item)
+
+            self._tableSplitter.setVisible(True)
 
     def _addTableToFrame(self, _data, _name):
         """Add a new gui table into a moreLess frame to hold a nef loop
@@ -1208,6 +1223,7 @@ class NefDictFrame(Frame):
         table.setData(_data)
         table.resizeColumnsToContents()
         self._nefTables[_name] = table
+
         return frame, table
 
     def _fillPopup(self, nefObject=None):
@@ -1312,8 +1328,8 @@ class ImportNefPopup(CcpnDialogMainWidget):
         self._activeImportWindow = None
 
         # enable the buttons
-        self.setOkButton(callback=self._okClicked, text='Import', tipText='Import Nef File')
-        self.setCancelButton(callback=self.reject, tipText='Cancel Import')
+        self.setOkButton(callback=self._okClicked, text='Import', tipText='Import nef file over existing project')
+        self.setCancelButton(callback=self.reject, tipText='Cancel import')
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
         self.__postInit__()
 

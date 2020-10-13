@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-12 15:28:56 +0100 (Mon, October 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-13 09:51:39 +0100 (Tue, October 13, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -791,7 +791,7 @@ class CcpnNefContent:
         # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
         name = framecode[len(category) + 1:]
 
-        result = {category: (name,)}
+        result = {category: (name or 'restraintLinks',)}        # should be 'name' but can only be one
 
         self._contentLoops(project, saveFrame)
         self.updateContent(saveFrame, result)

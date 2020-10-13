@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-12 15:28:56 +0100 (Mon, October 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-13 09:51:39 +0100 (Tue, October 13, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -311,18 +311,23 @@ def _tryNumber(value):
                 pass
 
 
+_nameFromCategory = namedtuple('_nameFromCategory', ('framecode', 'frameName', 'subname', 'prefix', 'postfix', 'precode', 'postcode', 'category'))
+
+
 def _saveFrameNameFromCategory(saveFrame: StarIo.NmrSaveFrame):
     """Parse the saveframe name to extract pre- and post- numbering
     necessary for restraint and spectrum saveframe names
     """
-    _nameFromCategory = namedtuple('_nameFromCategory', ('framecode', 'frameName', 'subname', 'prefix', 'postfix', 'precode', 'postcode', 'category'))
-
     category = saveFrame['sf_category']
     framecode = saveFrame['sf_framecode']
+    # frameName = framecode[len(category) + 1:]
+    return _getNameFromCategory(category, framecode)
+
+
+def _getNameFromCategory(category, framecode):
+    # check for any occurrences of `n` in the saveframe name and keep for later reference
     frameName = framecode[len(category) + 1:]
 
-    # check for any occurrences of `n` in the saveframe name and keep for later reference
-    regex = u'\`\d*`+?'
     names = re.split(REGEXREMOVEENDQUOTES, frameName)
     if 0 <= len(names) > 3:
         raise TypeError('bad splitting of saveframe name {}'.format(framecode))
@@ -3213,13 +3218,20 @@ class CcpnNefReader(CcpnNefContent):
 
         return newName
 
-    def _renameDataBlock(self, dataBlock, saveFrame, newFrameName):
+    def _renameDataBlock(self, project, dataBlock, saveFrame, newSaveFrameName):
         """Rename the key of a datBlock because the saveFrame.name has changed in the connected saveFrame
         """
+        oldName = saveFrame.name
+        saveFrame.name = newSaveFrameName
+
+        # replace all occurrences of the saveframe name in the datablock
+        self.searchReplace(project, dataBlock, True, None, oldName, newSaveFrameName, replace=True)
+        saveFrame['sf_framecode'] = newSaveFrameName
+
         data = [(k, val) for k, val in dataBlock.items()]
         for ii, (k, val) in enumerate(data):
             if val == saveFrame:
-                data[ii] = (newFrameName, val)
+                data[ii] = (newSaveFrameName, val)
                 # should only be one
                 break
         newData = OD((k, val) for k, val in data)
@@ -3236,7 +3248,10 @@ class CcpnNefReader(CcpnNefContent):
         """
         # category = saveFrame['sf_category']
         # framecode = saveFrame['sf_framecode']
-        if not itemName or newName == itemName:
+        # if not itemName or newName == itemName:
+        #     return
+
+        if newName == itemName:
             return
 
         _frameID = _saveFrameNameFromCategory(saveFrame)
@@ -3263,20 +3278,23 @@ class CcpnNefReader(CcpnNefContent):
             newSaveFrameName = '_'.join([category, prefix + itemName + postfix])
             newName = itemName
             while newSaveFrameName in frameNames:
-                newSaveFrameName = commonUtil.incrementName(newSaveFrameName)
+                # newSaveFrameName = commonUtil.incrementName(newSaveFrameName)
                 newName = commonUtil.incrementName(newName)
+                newSaveFrameName = '_'.join([category, prefix + newName + postfix])
+                # newName = _getNameFromCategory(category, newSaveFrameName).frameName
 
         if newName is not None:
-            oldName = framecode
-            saveFrame.name = newSaveFrameName
+            # oldName = framecode
+            # saveFrame.name = newSaveFrameName
+            #
+            # # replace all occurrences of the saveframe name in the datablock
+            # self.searchReplace(project, dataBlock, True, None, oldName, newSaveFrameName, replace=True)
 
-            # replace all occurrences of the saveframe name in the datablock
-            self.searchReplace(project, dataBlock, True, None, oldName, newSaveFrameName, replace=True)
-
-            # remove the old saveFrame in the dataBlock and replace with the new
-            # NOTE:ED - may need to check dict ordering here
-            del dataBlock[oldName]
-            dataBlock[newSaveFrameName] = saveFrame
+            # # remove the old saveFrame in the dataBlock and replace with the new
+            # # NOTE:ED - may need to check dict ordering here
+            # del dataBlock[oldName]
+            # dataBlock[newSaveFrameName] = saveFrame
+            self._renameDataBlock(project, dataBlock, saveFrame, newSaveFrameName)
 
             return newName
 
@@ -3658,13 +3676,13 @@ class CcpnNefReader(CcpnNefContent):
                 newSaveFrameName = '_'.join([category, prefix + _framename + postfix])
 
         if newName is not None:
-            oldFramecode = framecode
-            saveFrame.name = newSaveFrameName
+            # oldFramecode = framecode
+            # saveFrame.name = newSaveFrameName
             saveFrame['name'] = name
             saveFrame['labelling'] = newLabelling
 
-            # replace all occurrences of the saveframe name in the datablock
-            self.searchReplace(project, dataBlock, True, None, oldFramecode, newSaveFrameName, replace=True)
+            # # replace all occurrences of the saveframe name in the datablock
+            # self.searchReplace(project, dataBlock, True, None, oldFramecode, newSaveFrameName, replace=True)
 
             # replace name
             frameList = [frame.name for frame in frameCats if _saveFrameNameFromCategory(frame).category == 'ccpn_sample']
@@ -3675,7 +3693,7 @@ class CcpnNefReader(CcpnNefContent):
                                    loopSearchList=loopList, rowSearchList=replaceList)
 
             # remove the old saveFrame in the dataBlock and replace with the new
-            self._renameDataBlock(dataBlock, saveFrame, newSaveFrameName)
+            self._renameDataBlock(project, dataBlock, saveFrame, newSaveFrameName)
 
             return Pid.IDSEP.join([name, newLabelling])
 
@@ -3749,8 +3767,8 @@ class CcpnNefReader(CcpnNefContent):
         # if postSerial is not None:
         # may not be necessary
         newFrameCode = '_'.join([category, prefix + subName + '`{}`'.format(newSerial)])
-        saveFrame.name = newFrameCode
-        saveFrame['sf_framecode'] = newFrameCode
+        # saveFrame.name = newFrameCode
+        # saveFrame['sf_framecode'] = newFrameCode
 
         if saveFrame.get('ccpn_peaklist_serial') is not None:
             saveFrame['ccpn_peaklist_serial'] = newSerial
@@ -3770,7 +3788,7 @@ class CcpnNefReader(CcpnNefContent):
                                frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
         # need to rename the key in dataBlock
-        self._renameDataBlock(dataBlock, saveFrame, newFrameCode)
+        self._renameDataBlock(project, dataBlock, saveFrame, newFrameCode)
         return newName
 
     renames['nef_chemical_shift_list'] = rename_saveframe
@@ -3778,7 +3796,7 @@ class CcpnNefReader(CcpnNefContent):
     renames['nef_dihedral_restraint_list'] = rename_saveframe
     renames['nef_rdc_restraint_list'] = rename_saveframe
     renames['ccpn_restraint_list'] = rename_saveframe
-    renames['nef_peak_restraint_links'] = rename_saveframe
+    # renames['nef_peak_restraint_links'] = rename_saveframe
     renames['ccpn_sample'] = rename_saveframe
     renames['ccpn_complex'] = rename_saveframe
     renames['ccpn_spectrum_group'] = rename_saveframe

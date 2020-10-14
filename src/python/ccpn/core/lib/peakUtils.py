@@ -307,7 +307,7 @@ def _traverse(o, tree_types=(list, tuple)):
         yield o
 
 
-def __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra):
+def _getPeaksForNmrResidueByNmrAtomNames(nmrResidue, nmrAtomsNames, spectra):
     peaks = []
     nmrAtoms = []
 
@@ -361,7 +361,7 @@ def getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty='h
     if not theProperty in ['height', 'volume']:
         getLogger().warning('Property not currently available %s' % theProperty)
         return
-    peaks = __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra)
+    peaks = _getPeaksForNmrResidueByNmrAtomNames(nmrResidue, nmrAtomsNames, spectra)
     if len(peaks) > 0:
         for peak in peaks:
             if peak.peakList.spectrum in spectra:
@@ -397,7 +397,7 @@ def getRawDataFrame(nmrResidues, nmrAtomsNames, spectra, theProperty):
 def _getPeaksForNmrResidue(nmrResidue, nmrAtomsNames, spectra):
     if len(spectra) <= 1:
         return
-    _peaks = __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra)
+    _peaks = _getPeaksForNmrResidueByNmrAtomNames(nmrResidue, nmrAtomsNames, spectra)
     usepeaks = []
     if len(_peaks) > 0:
         for peak in _peaks:
@@ -419,7 +419,7 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
 
     if len(spectra) <= 1:
         return
-    peaks = __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra)
+    peaks = _getPeaksForNmrResidueByNmrAtomNames(nmrResidue, nmrAtomsNames, spectra)
 
     if atomWeights is None:
         atomWeights = DefaultAtomWeights

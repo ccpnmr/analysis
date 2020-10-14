@@ -154,6 +154,22 @@ class ChemicalShiftList(AbstractWrapperObject):
     # Implementation functions
     #=========================================================================================
 
+    def clone(self):
+        from ccpn.util.Common import _incrementObjectName
+        name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
+        ncs = self.project.newChemicalShiftList(name, spectra=self.spectra)
+        attrNames = ['unit', 'autoUpdate', 'isSimulated', 'comment']
+        for name in attrNames:
+            val = getattr(self, name, None)
+            setattr(ncs, name, val)
+        for cs in self.chemicalShifts:
+            ncs.newChemicalShift(cs.value, nmrAtom=cs.nmrAtom,
+                                 valueError=cs.valueError,
+                                 figureOfMerit= cs.figureOfMerit,
+                                 comment=cs.comment)
+
+
+
     @classmethod
     def _getAllWrappedData(cls, parent: Project) -> List[Nmr.ShiftList]:
         """get wrappedData (ShiftLists) for all ShiftList children of parent Project"""

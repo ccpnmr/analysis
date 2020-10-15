@@ -133,6 +133,16 @@ class ChemicalShift(AbstractWrapperObject):
     # Implementation functions
     #=========================================================================================
 
+    def copyTo(self, targetChemicalShiftList: ChemicalShiftList) -> 'ChemicalShift':
+        """Make (and return) a copy of the ChemicalShiftList in targetChemicalShiftList."""
+        cs = _newChemicalShift(self=targetChemicalShiftList,
+                               value=self.value,
+                               nmrAtom=self.nmrAtom,
+                               valueError=self.valueError,
+                               figureOfMerit=self.figureOfMerit,
+                               comment=self.comment,)
+        return cs
+
     @classmethod
     def _getAllWrappedData(cls, parent: ChemicalShiftList) -> list:
         """get wrappedData (ApiShift) for all ChemicalShift children of parent ChemicalShiftList"""

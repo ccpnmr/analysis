@@ -36,7 +36,7 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
-
+from ccpn.util.Common import _incrementObjectName
 
 class ChemicalShiftList(AbstractWrapperObject):
     """An object containing Chemical Shifts. Note: the object is not a (subtype of a) Python list.
@@ -155,21 +155,18 @@ class ChemicalShiftList(AbstractWrapperObject):
     #=========================================================================================
 
     def duplicate(self, includeSpectra=False, autoUpdate=False):
-        from ccpn.util.Common import _incrementObjectName
+        """
+        :param includeSpectra: move the spectra to the newly created ChemicalShiftList
+        :param autoUpdate: automatically update according to the project changes.
+        :return: a duplicated copy of itself containing all chemicalShifts.
+        """
         name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
-        ncs = self.project.newChemicalShiftList(name)
-        if includeSpectra:
-            ncs.spectra = self.spectra
-        ncs.autoUpdate = autoUpdate
-        attrNames = ['unit', 'isSimulated', 'comment']
-        for att in attrNames:
-            val = getattr(self, att, None)
-            setattr(ncs, att, val)
-        for cs in self.chemicalShifts:
-            ncs.newChemicalShift(cs.value, nmrAtom=cs.nmrAtom,
-                                 valueError=cs.valueError,
-                                 figureOfMerit= cs.figureOfMerit,
-                                 comment=cs.comment)
+        ncsl = self.project.newChemicalShiftList(name)
+        ncsl.spectra = self.spectra if includeSpectra else ()
+        ncsl.autoUpdate = autoUpdate
+        for att in ['unit', 'isSimulated', 'comment']:
+            setattr(ncsl, att, getattr(self, att, None))
+        map(lambda cs: cs.copyTo(ncsl), self.chemicalShifts)
 
     @classmethod
     def _getAllWrappedData(cls, parent: Project) -> List[Nmr.ShiftList]:

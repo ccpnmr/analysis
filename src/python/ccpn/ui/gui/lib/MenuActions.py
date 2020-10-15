@@ -434,6 +434,21 @@ class _openItemChemicalShiftListTable(OpenItemABC):
     openItemMethod = 'showChemicalShiftTable'
     objectArgumentName = 'chemicalShiftList'
 
+    def _openContextMenu(self, parentWidget, position, objs):
+        """Open a context menu.
+        """
+        contextMenu = Menu('', parentWidget, isFloatWidget=True)
+        if self.openAction:
+            contextMenu.addAction(self.contextMenuText, self.openAction)
+        contextMenu.addAction('Duplicate', partial(self._duplicateAction, objs))
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+        contextMenu.move(position)
+        contextMenu.exec()
+
+    def _duplicateAction(self, objs):
+        for obj in objs:
+            obj.duplicate()
+
 
 class _openItemPeakListTable(OpenItemABC):
     openItemMethod = 'showPeakTable'

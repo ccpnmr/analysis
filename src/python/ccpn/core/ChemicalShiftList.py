@@ -154,6 +154,7 @@ class ChemicalShiftList(AbstractWrapperObject):
     # Implementation functions
     #=========================================================================================
 
+    @logCommand(get='self')
     def duplicate(self, includeSpectra=False, autoUpdate=False):
         """
         :param includeSpectra: move the spectra to the newly created ChemicalShiftList
@@ -166,7 +167,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         ncsl.autoUpdate = autoUpdate
         for att in ['unit', 'isSimulated', 'comment']:
             setattr(ncsl, att, getattr(self, att, None))
-        map(lambda cs: cs.copyTo(ncsl), self.chemicalShifts)
+        list(map(lambda cs: cs.copyTo(ncsl), self.chemicalShifts))
 
     @classmethod
     def _getAllWrappedData(cls, parent: Project) -> List[Nmr.ShiftList]:

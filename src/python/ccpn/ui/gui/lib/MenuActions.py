@@ -753,7 +753,7 @@ def _openItemObjects(mainWindow, objs, **kwds):
             # FIXME STOP TOOLBAR REBUILDING EVERY SPECTRUM DROPPED
         for obj in objs:
             if obj:
-                try:
+                # try:
                     if obj.__class__ in OpenObjAction:
 
                         # if a spectrum object has already been opened then attach to that spectrumDisplay
@@ -772,6 +772,6 @@ def _openItemObjects(mainWindow, objs, **kwds):
                     else:
                         info = showInfo('Not implemented yet!',
                                         'This function has not been implemented in the current version')
-                except Exception as e:
-                    getLogger().warning('Error: %s' % e)
+                # except Exception as e:
+                #     getLogger().warning('Error: %s' % e)
                     # raise e

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-16 14:38:52 +0100 (Fri, October 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 from ast import literal_eval
 from typing import Tuple, Any
 from collections import OrderedDict, Iterable
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from Common import _compareDict
 from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.core.lib.ContextManagers import queueStateChange
@@ -43,13 +43,12 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumGroupPulldown
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.TextEditor import PlainTextEditor
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import ColourTab, ContoursTab, Colour1dFrame, ColourNdFrame
 from ccpn.util.AttrDict import AttrDict
-from ccpn.util.Constants import ALL_UNITS, ERRORSTRING
+from ccpn.util.Constants import ALL_UNITS
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 
 
@@ -906,33 +905,6 @@ class SeriesFrame(Frame):
         finally:
             self._validateEditors()
 
-    def _compareDict(self, d1, d2):
-        """Compare the keys in two dictionaries
-        Routine is recursive, empty dicts are ignored
-        """
-        for k in d1:
-            if k not in d2:
-                return False
-            if type(d1[k]) == dict and d1[k]:
-                if type(d2[k]) == dict and d2[k]:
-                    compare = self._compareDict(d1[k], d2[k])
-                    if not compare:
-                        return False
-                else:
-                    return False
-        for k in d2:
-            if k not in d1:
-                return False
-            if type(d2[k]) == dict and d2[k]:
-                if type(d1[k]) == dict and d1[k]:
-                    compare = self._compareDict(d1[k], d2[k])
-                    if not compare:
-                        return False
-                else:
-                    return False
-
-        return True
-
     def _validateEditors(self):
         """Check that all the editors contain the same type of seriesValues
         """
@@ -962,7 +934,7 @@ class SeriesFrame(Frame):
                         literalDictCompare = seriesValue
                     else:
                         if isinstance(literalDictCompare, dict) and isinstance(seriesValue, dict):
-                            cmp = self._compareDict(literalDictCompare, seriesValue)
+                            cmp = _compareDict(literalDictCompare, seriesValue)
                             if not cmp:
                                 colour = INVALIDROWCOLOUR
                                 errorDict = True

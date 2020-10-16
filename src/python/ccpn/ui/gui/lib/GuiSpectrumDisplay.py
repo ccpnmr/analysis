@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:46 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-16 14:38:52 +0100 (Fri, October 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -568,11 +568,11 @@ class GuiSpectrumDisplay(CcpnModule):
         _specViews = [specView for spec in spectrumGroup.spectra for specView in self.spectrumViews if specView.spectrum == spec]
 
         _sliceColours = (None,)
-        if _sliceCol.startswith('#'):
+        if _sliceCol and _sliceCol.startswith('#'):
             _sliceColours = (_sliceCol,)
         elif _sliceCol in Colour.colorSchemeTable:
             _sliceColours = Colour.colorSchemeTable[_sliceCol]
-        # get the sliceitive contour colour list
+        # get the slice contour colour list
         stepX = len(_specViews) - 1
         step = stepX
         stepY = len(_sliceColours) - 1

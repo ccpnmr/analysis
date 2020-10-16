@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:06:41 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-16 14:38:52 +0100 (Fri, October 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,8 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 
 import numpy as np
 from PyQt5 import QtGui, QtCore
+from ccpn.framework.Application import getApplication
+from ccpn.util.Logging import getLogger
 
 
 DEFAULTFONT = 'defaultFont'
@@ -77,9 +79,8 @@ class Font(QtGui.QFont):
 
 
 def setWidgetFont(widget, name=DEFAULTFONT, size='MEDIUM', bold=False, italic=False):
-    from ccpn.framework.Application import getApplication
-    from ccpn.util.Logging import getLogger
-
+    """Set the font in the specified widget
+    """
     try:
         getApp = getApplication()
         font = getApp._fontSettings.getFont(name, size, bold, italic)
@@ -89,9 +90,8 @@ def setWidgetFont(widget, name=DEFAULTFONT, size='MEDIUM', bold=False, italic=Fa
 
 
 def getWidgetFontHeight(name=DEFAULTFONT, size='MEDIUM', bold=False, italic=False):
-    from ccpn.framework.Application import getApplication
-    from ccpn.util.Logging import getLogger
-
+    """Get the font height form the specified font
+    """
     try:
         getApp = getApplication()
         font = getApp._fontSettings.getFont(name, size, bold, italic)
@@ -102,9 +102,8 @@ def getWidgetFontHeight(name=DEFAULTFONT, size='MEDIUM', bold=False, italic=Fals
 
 
 def getFontHeight(name=DEFAULTFONT, size='MEDIUM'):
-    from ccpn.framework.Application import getApplication
-    from ccpn.util.Logging import getLogger
-
+    """Get the font height form the specified font
+    """
     try:
         getApp = getApplication()
         font = getApp._fontSettings.getFont(name, size, False, False)
@@ -115,9 +114,8 @@ def getFontHeight(name=DEFAULTFONT, size='MEDIUM'):
 
 
 def getFont(name=DEFAULTFONT, size='MEDIUM'):
-    from ccpn.framework.Application import getApplication
-    from ccpn.util.Logging import getLogger
-
+    """Get the specified font from the fonts dict
+    """
     try:
         getApp = getApplication()
         font = getApp._fontSettings.getFont(name, size, False, False)
@@ -128,9 +126,8 @@ def getFont(name=DEFAULTFONT, size='MEDIUM'):
 
 
 def getTextDimensionsFromFont(name=DEFAULTFONT, size='MEDIUM', bold=False, italic=False, textList=None):
-    from ccpn.framework.Application import getApplication
-    from ccpn.util.Logging import getLogger
-
+    """Get the bounding box for the specified text
+    """
     try:
         getApp = getApplication()
         font = getApp._fontSettings.getFont(name, size, bold, italic)

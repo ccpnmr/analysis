@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-05 11:10:15 +0100 (Mon, October 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-16 14:38:52 +0100 (Fri, October 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -84,8 +84,7 @@ class NmrAtom(AbstractWrapperObject):
     @property
     def _parent(self) -> NmrResidue:
         """Parent (containing) object."""
-        if self._wrappedData.resonanceGroup in self._project._data2Obj:
-            return self._project._data2Obj[self._wrappedData.resonanceGroup]
+        return self._project._data2Obj.get(self._wrappedData.resonanceGroup)
 
     nmrResidue = _parent
 

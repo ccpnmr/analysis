@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-23 18:26:47 +0100 (Tue, June 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-16 14:38:52 +0100 (Fri, October 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -144,6 +144,7 @@ def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalS
 
     predictions = {}
     spinSystem = nmrResidue._wrappedData
+
     for code in CCP_CODES:
         predictions[code] = float(getSpinSystemResidueProbability(spinSystem, chemicalShiftList._wrappedData, code, prior=prior))
     tot = sum(predictions.values())
@@ -158,7 +159,7 @@ def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalS
 
     for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
         key = [key for key, val in refinedPredictions.items() if val == value][0]
-        finalPredictions.append([key, str(value) + ' %'])
+        finalPredictions.append((key, str(value) + ' %'))
 
     return finalPredictions
 
@@ -333,6 +334,179 @@ def propagateAssignments(peaks: typing.List[Peak] = None, referencePeak: Peak = 
                 for nmrAtom in assignNmrAtoms:
                     peak.assignDimension(axisCode, nmrAtom)
 
+from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import _getResidueProbability
+
+
+def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
+                      chains: typing.List[Chain], shiftLists: typing.List[ChemicalShiftList]) -> {}:
+    try:
+        apiProject = project._wrappedData
+        apiSpinSystems = [nmrResidue._wrappedData for nmrResidue in nmrResidues]
+        apiChains = [chain._wrappedData for chain in chains]
+        apiShiftLists = [shiftList._wrappedData for shiftList in shiftLists]
+
+        apiShifts = [[(apiSpinSystem, [(resonance, shift)
+                      for resonance in apiSpinSystem.resonances
+                      for shift in [resonance.findFirstShift(parentList=apiShiftList)] if shift])
+                      for apiSpinSystem in apiSpinSystems
+                      ]
+                     for apiShiftList in apiShiftLists]
+
+        chainCodes = [[('Cyss' if (residue.ccpCode == 'Cys' and residue.descriptor == 'link:SG') else residue.ccpCode, residue.molType)
+                       for residue in apiChain.residues] for apiChain in apiChains]
+        setChainCodes = [set(chainCode) for chainCode in chainCodes]
+
+        priorCodes = []
+        for chainCode, setChainCode in zip(chainCodes, setChainCodes):
+            n = float(len(chainCode))
+            priorCodes.append({ccpCode: chainCode.count(ccpCode) / n for ccpCode in setChainCode})
+
+        # now calculate probabilities
+
+        count = 0
+        probs = {}
+        for ii, (apiChain, setChainCode, priorCode) in enumerate(zip(apiChains, setChainCodes, priorCodes)):
+
+            hash = ii
+            probHash = probs[hash] = {}
+
+            for jj, _spinSystems  in enumerate(apiShifts):
+
+                spinHash = probHash[jj] = {}
+
+                for _spinSystem in _spinSystems:
+                    apiSpinSystem, apiShift = _spinSystem
+
+                    for ccpCode, molType in setChainCode:
+
+                        ppms = []
+                        elements = []
+                        atomNames = []
+                        ppmsAppend = ppms.append
+                        elementsAppend = elements.append
+                        atomNamesAppend = atomNames.append
+
+                        for resonance, shift in apiShift:
+
+                            isotope = resonance.isotope
+                            if isotope:
+                                ppmsAppend(shift.value)
+                                elementsAppend(isotope.chemElement.symbol)
+                                atomNamesAppend(resonance.implName)
+
+                        prob = _getResidueProbability(ppms, ccpCode, elements,
+                                                      atomNames, prior=0.05, molType=molType)
+
+                        if apiSpinSystem not in spinHash:
+                            spinHash[apiSpinSystem] = {}
+                        if ccpCode not in spinHash[apiSpinSystem]:
+                            spinHash[apiSpinSystem][ccpCode] = prob
+                        # probHash[apiSpinSystem][ccpCode].append(prob)
+
+                        count += 1
+
+                    # calculate scores from here
+                    scores = spinHash[apiSpinSystem]
+                    total = sum(scores.values())
+
+                    if total:
+                        for ccpCode in scores:
+                            scores[ccpCode] *= 100.0 / total
+
+        # print('>>> spinProbability count {}'.format(count))
+
+        assignDict = {}
+        for spinSystem in apiProject.resonanceGroups:
+            residue = spinSystem.assignedResidue
+            if residue:
+                assignDict[residue] = spinSystem
+
+        matchesDict = {}
+
+        for ii, (apiChain, probsLists) in enumerate(zip(apiChains, probs.values())):
+
+            matchesChain = matchesDict[ii] = []
+
+            for jj, probsList in enumerate(probsLists.values()):
+                window = len(nmrResidues)
+                textMatrix = []
+                objectList = []
+
+                if probsList:
+                    matches = []
+
+                    residues = apiChain.sortedResidues()
+                    seq = [r.ccpCode for r in residues]
+
+                    seq = [None, None] + seq + [None, None]
+                    residues = [None, None] + residues + [None, None]
+                    nRes = len(seq)
+
+                    if nRes >= window:
+                        scoreDicts = []
+                        ccpCodes = getCcpCodes(apiChain)
+
+                        for scores in probsList.values():       # should iterate through residues
+                            scoreDict = {}
+                            for ccpCode in ccpCodes:
+                                scoreDict[ccpCode] = None
+                            # scoreDict = {ccpCode: None for ccpCode in ccpCodes}
+
+                            for data in scores.items():
+                                if data:
+                                    # score, ccpCode = data
+                                    ccpCode, score = data
+                                    scoreDict[ccpCode] = score
+
+                            scoreDicts.append(scoreDict)
+                        sumScore = 0.0
+                        for i in range(nRes - window):
+
+                            score = 1.0
+
+                            for j in range(window):
+                                ccpCode = seq[i + j]
+                                score0 = scoreDicts[j].get(ccpCode)
+
+                                if (ccpCode is None) and (apiSpinSystems[j]):
+                                    break
+                                if score0:
+                                    score *= score0
+                                elif score0 == 0.0:
+                                    break
+
+                            else:
+                                matches.append((score, residues[i:i + window]))
+                                sumScore += score
+
+                        matches.sort()
+                        matches.reverse()
+
+                        for i, data in enumerate(matches[:10]):
+                            score, residues = data
+                            if sumScore > 0:
+                                score /= sumScore
+                            datum = [i + 1, 100.0 * score]
+
+                            for residue in residues:
+                                if residue:
+                                    datum.append(residue.seqCode)
+                                else:
+                                    datum.append(None)
+                                    # colors.append(None)
+
+                            textMatrix.append(datum)
+                            residues2 = [project._data2Obj.get(residue) for residue in residues]
+                            objectList.append([100 * score, residues2])
+
+                    if objectList:
+                        matchesChain.append(objectList)
+
+        return matchesDict
+
+    except Exception as es:
+        print(str(es))
+
 
 def getSpinSystemsLocation(project: Project, nmrResidues: typing.List[NmrResidue],
                            chain: Chain, chemicalShiftList: ChemicalShiftList) -> list:
@@ -358,22 +532,28 @@ def getSpinSystemsLocation(project: Project, nmrResidues: typing.List[NmrResidue
     N = len(ccpCodes)
 
     for spinSystem0 in spinSystems:
-        scoreList = [None] * N
+        # scoreList = [None] * N
 
         if spinSystem0:
-            shifts = []
-            for resonance in spinSystem0.resonances:
-                shift = resonance.findFirstShift(parentList=shiftList)
-                if shift:
-                    shifts.append(shift)
+            # shifts = []
+            # for resonance in spinSystem0.resonances:
+            #     shift = resonance.findFirstShift(parentList=shiftList)
+            #     if shift:
+            #         shifts.append(shift)
+            shifts = [(resonance, shift) for resonance in spinSystem0.resonances for shift in [resonance.findFirstShift(parentList=shiftList)] if shift]
+            # if shifts != _shifts: raise RuntimeError("shift difference")
 
             scores = getSpinSystemScore(spinSystem0, shifts, chain, shiftList)
 
-            for i, ccpCode in enumerate(ccpCodes):
-                scoreList[i] = (scores[ccpCode], ccpCode)
+            # for i, ccpCode in enumerate(ccpCodes):
+            #     scoreList[i] = (scores[ccpCode], ccpCode)
+            scoreList = [(scores[ccpCode], ccpCode) for ccpCode in ccpCodes]
+            # if scoreList != _scoreList: raise RuntimeError("scoreList difference")
 
-            scoreList.sort()
-            scoreList.reverse()
+            scoreList.sort(reverse=True)
+            # scoreList.reverse()
+        else:
+            scoreList = [None] * N
 
         scoreMatrix.append(scoreList)
 

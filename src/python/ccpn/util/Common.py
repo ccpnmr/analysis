@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-16 14:38:52 +0100 (Fri, October 16, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1180,3 +1180,31 @@ if __name__ == '__main__':
     print('dataDict string: \n{}'.format(dd))
     recover = pretty.literal_eval(dd)
     print('Recovered python object: {} '.format(recover))
+
+
+def _compareDict(d1, d2):
+    """Compare the keys in two dictionaries
+    Routine is recursive, empty dicts are ignored
+    """
+    for k in d1:
+        if k not in d2:
+            return False
+        if type(d1[k]) == dict and d1[k]:
+            if type(d2[k]) == dict and d2[k]:
+                compare = _compareDict(d1[k], d2[k])
+                if not compare:
+                    return False
+            else:
+                return False
+    for k in d2:
+        if k not in d1:
+            return False
+        if type(d2[k]) == dict and d2[k]:
+            if type(d1[k]) == dict and d1[k]:
+                compare = _compareDict(d1[k], d2[k])
+                if not compare:
+                    return False
+            else:
+                return False
+
+    return True

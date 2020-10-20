@@ -75,9 +75,6 @@ class Peak(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.Peak._metaclass.qualifiedName()
 
-    # _linkedPeak = None
-    _linkedPeaksName = 'linkedPeaks'
-
     # CCPN properties
     @property
     def _apiPeak(self) -> Nmr.Peak:
@@ -756,33 +753,33 @@ class Peak(AbstractWrapperObject):
 
         self._wrappedData.integral = integral._wrappedData if integral else None
 
-    def _linkPeaks(self, peaks):
-        """
-        NB: this is needed for screening spectrumHits and peakHits. You might see peakCluster instead.
-        Saves the peaks in _ccpnInternalData as pids
-        """
-        pids = [str(peak.pid) for peak in peaks if peak != self and isinstance(peak, Peak)]
-        if isinstance(self._ccpnInternalData, dict):
-
-            # a single write is required to the api to notify that a change has occurred,
-            # this will prompt for a save of the v2 data
-            tempCcpn = self._ccpnInternalData.copy()
-            tempCcpn[self._linkedPeaksName] = pids
-            self._ccpnInternalData = tempCcpn
-        else:
-            raise ValueError("Peak.linkPeaks: CCPN internal must be a dictionary")
-
-    @property
-    def _linkedPeaks(self):
-        """
-        NB: this is needed for screening spectrumHits and peakHits. You might see peakCluster instead.
-        It returns a list of peaks belonging to other peakLists or spectra which are required to be linked to this particular peak.
-        This functionality is not implemented in the model. Saves the Peak pids in _ccpnInternalData.
-        :return: a list of peaks
-        """
-        pids = self._ccpnInternalData.get(self._linkedPeaksName) or []
-        peaks = [self.project.getByPid(pid) for pid in pids if pid is not None]
-        return peaks
+    # def _linkPeaks(self, peaks):
+    #     """
+    #     NB: this is needed for screening spectrumHits and peakHits. You might see peakCluster instead.
+    #     Saves the peaks in _ccpnInternalData as pids
+    #     """
+    #     pids = [str(peak.pid) for peak in peaks if peak != self and isinstance(peak, Peak)]
+    #     if isinstance(self._ccpnInternalData, dict):
+    #
+    #         # a single write is required to the api to notify that a change has occurred,
+    #         # this will prompt for a save of the v2 data
+    #         tempCcpn = self._ccpnInternalData.copy()
+    #         tempCcpn[self._linkedPeaksName] = pids
+    #         self._ccpnInternalData = tempCcpn
+    #     else:
+    #         raise ValueError("Peak.linkPeaks: CCPN internal must be a dictionary")
+    #
+    # @property
+    # def _linkedPeaks(self):
+    #     """
+    #     NB: this is needed for screening spectrumHits and peakHits. You might see peakCluster instead.
+    #     It returns a list of peaks belonging to other peakLists or spectra which are required to be linked to this particular peak.
+    #     This functionality is not implemented in the model. Saves the Peak pids in _ccpnInternalData.
+    #     :return: a list of peaks
+    #     """
+    #     pids = self._ccpnInternalData.get(self._linkedPeaksName) or []
+    #     peaks = [self.project.getByPid(pid) for pid in pids if pid is not None]
+    #     return peaks
 
     def _getSNRatio(self, ratio=2.5):
         from ccpn.core.PeakList import estimateSNR_1D

@@ -312,6 +312,9 @@ class PeakListTableWidget(GuiTable):
         columnDefs.append(('Merit', lambda pk: pk.figureOfMerit, figureOfMeritTipText,
                            lambda pk, value: self._setFigureOfMerit(pk, value), None)
         )
+        # annotation column
+        annotationTipText = 'Any other peak label (excluded assignments)'
+        columnDefs.append(('Annotation', lambda pk: pk.annotation, annotationTipText, None, None))
 
         # comment column
         commentsTipText = 'Textual notes about the peak'

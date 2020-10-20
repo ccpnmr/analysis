@@ -93,10 +93,11 @@ DEFAULT_LABELLING = '_NATURAL_ABUNDANCE'
 # Default parameters - 10Hz/pt, 0.1ppm/point for 1H; 10 Hz/pt, 1ppm/pt for 13C
 # NB this is in order to give simple numbers. it does NOT match the gyromagnetic ratios
 DEFAULT_SPECTRUM_PARAMETERS = {
-    '1H' : {'numPoints': 128, 'sf': 100., 'sw': 1280, 'refppm': 11.8, 'refpt': 1, },
-    '2H' : {'numPoints': 128, 'sf': 100., 'sw': 1280, 'refppm': 11.8, 'refpt': 1, },
-    '3H' : {'numPoints': 128, 'sf': 100., 'sw': 1280, 'refppm': 11.8, 'refpt': 1, },
-    '13C': {'numPoints': 256, 'sf': 10., 'sw': 2560, 'refppm': 236., 'refpt': 1, }
+    '1H' : {'numPoints': 12800, 'sf': 100., 'sw': 1280, 'refppm': 11.8, 'refpt': 1, },
+    '2H' : {'numPoints': 12800, 'sf': 100., 'sw': 1280, 'refppm': 11.8, 'refpt': 1, },
+    '3H' : {'numPoints': 12800, 'sf': 100., 'sw': 1280, 'refppm': 11.8, 'refpt': 1, },
+    '13C': {'numPoints': 25600, 'sf': 100., 'sw': 2560, 'refppm': 236., 'refpt': 1, },
+    '19F': {'numPoints': 25600, 'sf': 100., 'sw': 20000,'refppm': -40.4,'refpt': 0, }
     }
 
 # Map of (lower-cased) NmrExpPrototype.measurementType to element type code

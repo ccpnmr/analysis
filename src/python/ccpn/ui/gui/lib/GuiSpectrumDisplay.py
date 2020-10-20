@@ -491,7 +491,8 @@ class GuiSpectrumDisplay(CcpnModule):
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
         GLSignals = GLNotifier(parent=None)
-        GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict={})
+        if len(self.strips)>0:
+            GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict={})
 
     def _spectrumGroupChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame

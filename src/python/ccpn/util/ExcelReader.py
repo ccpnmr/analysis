@@ -86,6 +86,17 @@ plateIdentifier = 'plateIdentifier'
 rowNumber = 'rowNumber'
 columnNumber = 'columnNumber'
 
+# shifts
+ChemicalShift = 'ChemicalShift'
+ChemicalShiftLabel = 'ChemicalShiftLabel'
+ChemicalShiftAnnotation = 'ChemicalShiftAnnotation'
+ChemicalShiftMerit = 'ChemicalShiftMerit'
+ChemicalShiftComment = 'ChemicalShiftComment'
+TimeStamp = 'TimeStamp_'
+Valid = 'Valid'
+Salt = 'Salt'
+Other = 'Other'
+
 SAMPLE_PROPERTIES = [comment, pH, ionicStrength, amount, amountUnit, isHazardous, creationDate, batchIdentifier,
                      plateIdentifier, rowNumber, columnNumber]
 

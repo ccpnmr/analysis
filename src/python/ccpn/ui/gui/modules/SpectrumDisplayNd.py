@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-05 18:43:27 +0100 (Wed, August 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 18:39:17 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,9 @@ from ccpn.util.Logging import getLogger
 
 
 class SpectrumDisplayNd(GuiSpectrumDisplay):
+
+    MAXPEAKLABELTYPES = 6
+    MAXPEAKSYMBOLTYPES = 4
 
     def __init__(self, mainWindow, name):
         """

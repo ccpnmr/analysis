@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-08 12:34:08 +0100 (Tue, September 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 18:39:16 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -97,8 +97,8 @@ class GuiStrip1d(GuiStrip):
                           :return <Tuple>:(<Peak>, ...)
     """
 
-    MAXPEAKLABELTYPES = 1
-    MAXPEAKSYMBOLTYPES = 1
+    # MAXPEAKLABELTYPES = 6
+    # MAXPEAKSYMBOLTYPES = 1
 
     def __init__(self, spectrumDisplay):
         """
@@ -174,6 +174,28 @@ class GuiStrip1d(GuiStrip):
 
         self.spectrumDisplay.phasingFrame.applyCallback = self._applyPhasing
         self.spectrumDisplay.phasingFrame.applyButton.setEnabled(True)
+
+    @property
+    def symbolType(self):
+        """Get the symbol type for the strip
+        """
+        return self._CcpnGLWidget._symbolType
+
+    @symbolType.setter
+    def symbolType(self, value):
+        """Set the symbol type for the strip
+        """
+        if not isinstance(value, int):
+            raise TypeError('Error: symbolType not an int')
+
+        oldValue = self._CcpnGLWidget._symbolType
+        self._CcpnGLWidget._symbolType = value if (value in range(self.spectrumDisplay.MAXPEAKSYMBOLTYPES)) else 0
+        if self._CcpnGLWidget._symbolType in [1, 2]:
+            self._CcpnGLWidget._symbolType = 3
+        if value != oldValue:
+            self._setSymbolType()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
 
     def _resize(self):
         """Resize event to handle resizing of frames that overlay the OpenGL frame
@@ -393,15 +415,15 @@ class GuiStrip1d(GuiStrip):
         """
         pass
 
-    def cycleSymbolLabelling(self):
-        """Toggles whether peak labelling is minimal is visible in the strip.
-        """
-        pass
+    # def cycleSymbolLabelling(self):
+    #     """Toggles whether peak labelling is minimal is visible in the strip.
+    #     """
+    #     pass
 
-    def cyclePeakSymbols(self):
-        """Cycle through peak symbol types.
-        """
-        pass
+    # def cyclePeakSymbols(self):
+    #     """Cycle through peak symbol types.
+    #     """
+    #     self.symbolType += 1
 
     def _createObjectMark(self, obj, axisIndex=None):
         """Create a mark at the object position.

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 12:56:14 +0100 (Fri, October 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 18:39:16 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -69,8 +69,8 @@ class GuiStrip(Frame):
     optionsChanged = QtCore.pyqtSignal(dict)
     stripResized = QtCore.pyqtSignal(tuple)
 
-    MAXPEAKLABELTYPES = 6
-    MAXPEAKSYMBOLTYPES = 4
+    # MAXPEAKLABELTYPES = 6
+    # MAXPEAKSYMBOLTYPES = 4
 
     def __init__(self, spectrumDisplay):
         """
@@ -168,8 +168,8 @@ class GuiStrip(Frame):
 
             _firstStrip = spectrumDisplay.strips[0]
             # copy the values form the first strip
-            self.symbolLabelling = min(_firstStrip.symbolLabelling, self.MAXPEAKLABELTYPES - 1)
-            self.symbolType = min(_firstStrip.symbolType, self.MAXPEAKSYMBOLTYPES - 1)
+            self.symbolLabelling = min(_firstStrip.symbolLabelling, self.spectrumDisplay.MAXPEAKLABELTYPES - 1)
+            self.symbolType = min(_firstStrip.symbolType, self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
             self.symbolSize = _firstStrip.symbolSize
             self.symbolThickness = _firstStrip.symbolThickness
 
@@ -187,8 +187,8 @@ class GuiStrip(Frame):
         else:
 
             # get the values from the preferences
-            self.symbolLabelling = min(self._preferences.annotationType, self.MAXPEAKLABELTYPES - 1)
-            self.symbolType = min(self._preferences.symbolType, self.MAXPEAKSYMBOLTYPES - 1)
+            self.symbolLabelling = min(self._preferences.annotationType, self.spectrumDisplay.MAXPEAKLABELTYPES - 1)
+            self.symbolType = min(self._preferences.symbolType, self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
             self.symbolSize = self._preferences.symbolSizePixel
             self.symbolThickness = self._preferences.symbolThickness
 
@@ -1422,7 +1422,7 @@ class GuiStrip(Frame):
             raise TypeError('Error: symbolLabelling not an int')
 
         oldValue = self._CcpnGLWidget._symbolLabelling
-        self._CcpnGLWidget._symbolLabelling = value if (value in range(self.MAXPEAKLABELTYPES)) else 0
+        self._CcpnGLWidget._symbolLabelling = value if (value in range(self.spectrumDisplay.MAXPEAKLABELTYPES)) else 0
         if value != oldValue:
             self._setSymbolLabelling()
             if self.spectrumViews:
@@ -1482,7 +1482,7 @@ class GuiStrip(Frame):
             raise TypeError('Error: symbolType not an int')
 
         oldValue = self._CcpnGLWidget._symbolType
-        self._CcpnGLWidget._symbolType = value if (value in range(self.MAXPEAKSYMBOLTYPES)) else 0
+        self._CcpnGLWidget._symbolType = value if (value in range(self.spectrumDisplay.MAXPEAKSYMBOLTYPES)) else 0
         if value != oldValue:
             self._setSymbolType()
             if self.spectrumViews:

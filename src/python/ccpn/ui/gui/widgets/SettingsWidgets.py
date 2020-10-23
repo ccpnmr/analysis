@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 12:56:14 +0100 (Fri, October 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 18:39:17 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -189,11 +189,17 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=12)
 
-        if not self._spectrumDisplay.is1D:
+        if self._spectrumDisplay.MAXPEAKSYMBOLTYPES:
+        # if not self._spectrumDisplay.is1D:
             row += 1
+            _texts = ['Cross', 'lineWidths', 'Filled lineWidths', 'Plus']
+            _names = ['symSDS_Cross', 'symSDS_lineWidths', 'symSDS_Filled lineWidths', 'symSDS_Plus']
+            _texts = _texts[:self._spectrumDisplay.MAXPEAKSYMBOLTYPES]
+            _names = _names[:self._spectrumDisplay.MAXPEAKSYMBOLTYPES]
+
             self.symbolsLabel = Label(parent, text="Symbol Type", grid=(row, 0))
-            self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths', 'Plus'],
-                                       objectNames=['symSDS_Cross', 'symSDS_lineWidths', 'symSDS_Filled lineWidths', 'symSDS_Plus'],
+            self.symbol = RadioButtons(parent, texts=_texts,
+                                       objectNames=_names,
                                        selectedInd=symbolType,
                                        callback=self._symbolsChanged,
                                        direction='h',
@@ -201,10 +207,22 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                        tipTexts=None,
                                        )
 
+            if self._spectrumDisplay.is1D:
+                self.symbol.radioButtons[1].setEnabled(False)
+                self.symbol.radioButtons[2].setEnabled(False)
+                self.symbol.radioButtons[1].setVisible(False)
+                self.symbol.radioButtons[2].setVisible(False)
+
+        if self._spectrumDisplay.MAXPEAKLABELTYPES:
             row += 1
+            _texts = ['Short', 'Full', 'Pid', 'Minimal', 'Peak Id', 'Annotation']
+            _names = ['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id', 'annSDS_Annotation']
+            _texts = _texts[:self._spectrumDisplay.MAXPEAKLABELTYPES]
+            _names = _names[:self._spectrumDisplay.MAXPEAKLABELTYPES]
+
             self.annotationsLabel = Label(parent, text="Symbol Annotation", grid=(row, 0))
-            self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Peak Id', 'Annotation'],
-                                                objectNames=['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id', 'annSDS_Annotation'],
+            self.annotationsData = RadioButtons(parent, texts=_texts,
+                                                objectNames=_names,
                                                 selectedInd=annotationType,
                                                 callback=self._symbolsChanged,
                                                 direction='horizontal',
@@ -273,8 +291,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 AXISYUNITS         : self.yAxisUnitsButtons.getIndex(),
                 AXISASPECTRATIOMODE: self.useAspectRatioModeButtons.getIndex(),
                 AXISASPECTRATIOS   : aspectRatios,
-                SYMBOLTYPES        : self.symbol.getIndex() if not self._spectrumDisplay.is1D else 0,
-                ANNOTATIONTYPES    : self.annotationsData.getIndex() if not self._spectrumDisplay.is1D else 0,
+                SYMBOLTYPES        : self.symbol.getIndex(), # if not self._spectrumDisplay.is1D else 0,
+                ANNOTATIONTYPES    : self.annotationsData.getIndex(), # if not self._spectrumDisplay.is1D else 0,
                 SYMBOLSIZE         : int(self.symbolSizePixelData.text()),
                 SYMBOLTHICKNESS    : int(self.symbolThicknessData.text())
                 }
@@ -357,10 +375,10 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             values = aDict[GLNotifier.GLVALUES]
             self.blockSignals(True)
 
-            if not self._spectrumDisplay.is1D:
+            # if not self._spectrumDisplay.is1D:
                 # only update if Nd
-                self.symbol.setIndex(values[SYMBOLTYPES])
-                self.annotationsData.setIndex(values[ANNOTATIONTYPES])
+            self.symbol.setIndex(values[SYMBOLTYPES])
+            self.annotationsData.setIndex(values[ANNOTATIONTYPES])
 
             self.symbolSizePixelData.set(values[SYMBOLSIZE])
             self.symbolThicknessData.set(values[SYMBOLTHICKNESS])
@@ -1068,6 +1086,9 @@ class SequenceGraphSettings(Widget):  #, _commonSettings):
 
         self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[])
 
+        row += 1
+        self.chainsWidget = ChainSelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[])
+
         self.checkBoxes = {}
         if settingsDict:
             optionTexts = []
@@ -1243,6 +1264,111 @@ class SpectrumDisplaySelectionWidget(ListCompoundWidget):
         else:
             displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
         return displays
+
+
+class ObjectSelectionWidget(ListCompoundWidget):
+
+    KLASS = None
+
+    def __init__(self, parent=None, mainWindow=None, vAlign='top', stretch=(0, 0), hAlign='left',
+                 vPolicy='minimal', fixedWidths=(None, None, None), orientation='left',
+                 labelText=None, tipText=None,
+                 texts=None, callback=None, displayWidgetChangedCallback=None,
+                 defaultListItem=None, displayText=[],
+                 **kwds):
+
+        if not self.KLASS:
+            raise RuntimeError('Klass must be specified')
+
+        if not texts:
+            texts = [ALL] + defaultListItem.pid if defaultListItem else ([ALL] + displayText)
+
+        self.mainWindow = mainWindow
+        self.application = mainWindow.application
+        self.project = mainWindow.application.project
+        self._displayWidgetChangedCallback = displayWidgetChangedCallback
+        self._selectDisplayInListCallback = callback
+
+        labelText = labelText or 'Select {}:'.format((self.KLASS._pluralLinkName).capitalize())
+        tipText = tipText or 'Set active {} for module:'.format((self.KLASS._pluralLinkName).capitalize())
+
+        super().__init__(parent=parent,
+                         vAlign=vAlign, stretch=stretch, hAlign=hAlign, vPolicy=vPolicy,
+                         fixedWidths=fixedWidths, orientation=orientation,
+                         labelText=labelText, tipText=tipText, texts=texts,
+                         callback=self._selectDisplayInList, **kwds)
+
+        # default to 5 rows
+        self.setFixedHeights((None, None, 5 * getFontHeight()))
+        self.setPreSelect(self._fillDisplayWidget)
+
+        # handle signals when the items in the displaysWidget have changed
+        model = self.listWidget.model()
+        model.rowsInserted.connect(self._displayWidgetChanged)
+        model.rowsRemoved.connect(self._displayWidgetChanged)
+        self.listWidget.cleared.connect(self._displayWidgetChanged)
+
+    def _selectDisplayInList(self):
+        """Handle clicking items in display selection
+        """
+        if self._selectDisplayInListCallback:
+            self._selectDisplayInListCallback()
+
+    def _displayWidgetChanged(self):
+        """Handle adding/removing items from display selection
+        """
+        if self._displayWidgetChangedCallback:
+            self._displayWidgetChangedCallback()
+
+    def _changeAxisCode(self):
+        """Handle clicking the axis code buttons
+        """
+        pass
+
+    def _fillDisplayWidget(self):
+        """Fill the display box with the currently available spectrumDisplays
+        """
+        ll = ['> select-to-add <'] + [ALL]
+        if self.project:
+            ll += [display.pid for display in getattr(self.project, self.KLASS._pluralLinkName, [])]
+        self.pulldownList.setData(texts=ll)
+
+    def _getDisplays(self):
+        """Return list of displays to navigate - if needed
+        """
+        if not self.application:
+            return []
+
+        displays = []
+        # check for valid displays
+        gids = self.getTexts()
+        if len(gids) == 0: return displays
+        if ALL in gids:
+            displays = self.mainWindow.spectrumDisplays
+        else:
+            displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
+        return displays
+
+    def _getObjects(self):
+        """Return list of objects in the selection
+        """
+        if not self.application:
+            return []
+
+        objects = []
+        gids = self.getTexts()
+        if len(gids) == 0: return objects
+        if ALL in gids:
+            objects = getattr(self.project, self.KLASS._pluralLinkName, [])
+        else:
+            objects = [self.application.getByGid(gid) for gid in gids if gid != ALL]
+        return objects
+
+
+from ccpn.core.Chain import Chain
+
+class ChainSelectionWidget(ObjectSelectionWidget):
+    KLASS = Chain
 
 
 if __name__ == '__main__':

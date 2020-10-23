@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-16 14:38:52 +0100 (Fri, October 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 18:39:16 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -192,6 +192,9 @@ class GuiSpectrumDisplay(CcpnModule):
                           :param axisCode:
                           :return axis
     """
+
+    MAXPEAKLABELTYPES = 0
+    MAXPEAKSYMBOLTYPES = 0
 
     # overide in specific module implementations
     includeSettingsWidget = True

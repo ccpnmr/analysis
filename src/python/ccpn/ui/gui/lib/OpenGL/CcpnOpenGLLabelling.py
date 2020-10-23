@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 12:56:14 +0100 (Fri, October 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 18:39:16 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2161,7 +2161,7 @@ class GL1dLabelling():
         index = 0
         indexPtr = 0
 
-        if symbolType is not None:
+        if symbolType == 0 or symbolType == 3:
             listView = self.objectList(objListView)
             listCol = getAutoColourRgbRatio(objListView.symbolColour or GLDefs.DEFAULTCOLOUR, listView.spectrum,
                                             self.autoColour,
@@ -2221,6 +2221,12 @@ class GL1dLabelling():
                 index += numPoints
 
             drawList.updateTextArrayVBOColour(enableVBO=True)
+
+        elif symbolType == 1 or symbolType == 2:
+            pass
+
+        else:
+            raise ValueError('GL Error: bad symbol type')
 
     def _insertSymbolItem(self, strip, obj, listCol, indexList, r, w,
                           spectrumFrequency, symbolType, drawList, spectrumView,
@@ -2334,7 +2340,7 @@ class GL1dLabelling():
                         cols = listCol
 
                     self._insertSymbolItem(strip, obj, cols, indexing, r, w,
-                                           spectrumFrequency, 0, drawList,
+                                           spectrumFrequency, symbolType, drawList,
                                            spectrumView, buildIndex)
 
             drawList.defineIndexVBO(enableVBO=True)
@@ -2351,7 +2357,7 @@ class GL1dLabelling():
 
         r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
-        if symbolType is not None:  #== 0:  # a cross
+        if symbolType == 0 or symbolType == 3:  # a cross/plus
             # drawList.clearVertices()
             # drawList.vertices.copy(drawList.attribs)
             # offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w, 0, 0, 0, -w, 0, +w, +r, 0, -r, 0], np.float32)
@@ -2367,6 +2373,12 @@ class GL1dLabelling():
                 except Exception as es:
                     pass
 
+        elif symbolType == 1 or symbolType == 2:
+            pass
+
+        else:
+            raise ValueError('GL Error: bad symbol type')
+
     def _appendSymbol(self, spectrumView, objListView, obj):
         """Append a new symbol to the end of the list
         """
@@ -2378,7 +2390,7 @@ class GL1dLabelling():
 
         r, w, symbolType, symbolWidth = self._getSymbolWidths()
 
-        if symbolType is not None:  #== 0:  # a cross
+        if symbolType == 0 or symbolType == 3:  # a cross/plus
 
             # change the ratio on resize
             drawList.refreshMode = GLREFRESHMODE_REBUILD
@@ -2427,7 +2439,7 @@ class GL1dLabelling():
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
             return
 
-        if symbolType is not None:  #== 0:
+        if symbolType == 0 or symbolType == 3:  # a cross/plus
 
             # draw a cross
             _selected = False
@@ -2542,7 +2554,7 @@ class GL1dLabelling():
         """
         symbolType = self.strip.symbolType
 
-        if symbolType is not None:  #== 0:  # a cross
+        if symbolType == 0 or symbolType == 3:  # a cross/plus
 
             r, w, _, symbolWidth = self._getSymbolWidths()
 

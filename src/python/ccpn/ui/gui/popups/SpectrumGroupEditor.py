@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-16 14:38:52 +0100 (Fri, October 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 16:30:46 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 from ast import literal_eval
 from typing import Tuple, Any
 from collections import OrderedDict, Iterable
-from Common import _compareDict
+from ccpn.util.Common import _compareDict
 from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.core.lib.ContextManagers import queueStateChange

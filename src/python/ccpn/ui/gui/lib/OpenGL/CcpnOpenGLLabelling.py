@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 18:39:16 +0100 (Fri, October 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 19:00:46 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -226,7 +226,7 @@ class GLLabelling():
             drawList = self._GLLabels[pll]
 
             for drawStr in drawList.stringList:
-                if drawStr.object == obj:
+                if drawStr.stringObject == obj:
                     drawList.stringList.remove(drawStr)
                     break
 
@@ -1186,7 +1186,7 @@ class GLLabelling():
 
         for drawStr in drawList.stringList:
 
-            obj = drawStr.object
+            obj = drawStr.stringObject
 
             if obj and not obj.isDeleted:
                 # get visible/plane status
@@ -3317,7 +3317,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
 
         for drawStr in drawList.stringList:
 
-            obj = drawStr.object
+            obj = drawStr.stringObject
 
             if obj and not obj.isDeleted:
 

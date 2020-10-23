@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-14 13:54:20 +0100 (Mon, September 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 19:00:46 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -92,7 +92,7 @@ class GLSimpleStrings():
 
         # iterate over and draw all strings for visible spectrumViews
         for specView, string in self.strings.items():
-            if specView in self._GLParent._visibleOrdering and string.object and not string.object.isDeleted:
+            if specView in self._GLParent._visibleOrdering and string.stringObject and not string.stringObject.isDeleted:
                 string.drawTextArrayVBO(enableVBO=True)
 
     def objectText(self, obj):
@@ -156,7 +156,7 @@ class GLSimpleStrings():
     def renameString(self, obj):
         """Rename a string in the list, if it exists
         """
-        strings = [(specView, string) for specView, string in self.strings.items() if string.object is obj]
+        strings = [(specView, string) for specView, string in self.strings.items() if string.stringObject is obj]
 
         for specView, string in strings:
             string.text = self.objectText(specView)
@@ -326,7 +326,7 @@ class GLSimpleLegend(GLSimpleStrings):
 
         # iterate over and draw all strings for visible spectrumViews
         for specView, string in self.strings.items():
-            if specView in self._GLParent._visibleOrdering and string.object and not string.object.isDeleted:
+            if specView in self._GLParent._visibleOrdering and string.stringObject and not string.stringObject.isDeleted:
                 string.drawTextArrayVBO(enableVBO=True)
 
     def objectText(self, obj):
@@ -403,7 +403,7 @@ class GLSimpleLegend(GLSimpleStrings):
 
             try:
                 _posColours = (ERRORCOLOUR, )
-                _posCol = stringObj.object.sliceColour
+                _posCol = stringObj.stringObject.sliceColour
                 if _posCol and _posCol.startswith('#'):
                     _posColours = (_posCol,)
                 elif _posCol in colorSchemeTable:

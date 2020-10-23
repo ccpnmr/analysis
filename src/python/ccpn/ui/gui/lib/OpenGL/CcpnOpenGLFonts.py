@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 15:29:24 +0100 (Fri, October 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 19:00:46 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -246,7 +246,7 @@ class GLString(GLVertexArray):
             text = ''
         self.text = text
         self.font = font
-        self.object = obj
+        self.stringObject = obj
         self.pid = obj.pid if hasattr(obj, 'pid') else None
         self.serial = serial
         self.colour = colour
@@ -264,7 +264,7 @@ class GLString(GLVertexArray):
         colour = self.colour
         x, y = self._position
         ox, oy = self._offset
-        self.pid = self.object.pid if hasattr(self.object, 'pid') else None
+        self.pid = self.stringObject.pid if hasattr(self.stringObject, 'pid') else None
 
         # each object can have a unique serial number if required
         self.height = (font.height / self.scale)  # NOTE:ED - not sure why I have to do this here

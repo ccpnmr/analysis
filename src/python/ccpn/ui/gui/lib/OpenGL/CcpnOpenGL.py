@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:06:40 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 19:00:46 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3205,8 +3205,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     self._GLIntegrals.drawSymbolRegions(self._spectrumSettings)
                     self.drawRegions()
 
-        with self._disableGLAliasing():
-            self.drawMarksRulers()
+            with self._disableGLAliasing():
+                self.drawMarksRulers()
 
         # change to the text shader
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()

@@ -3,7 +3,7 @@ borderBottom=1
 borderLeft=1
 borderRight=1
 borderTop=1
-charList=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?-+\\/():;%&`'*#$=[]@^{}_~\"><\x2013\x2014\xab\xbb\x201c\x201d|\xa9\xae"
+charList=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?-+\\/():;%&`'*#$=[]@^{}_~\"><\x2013\x2014\xab\xbb\x201c\x201d|\xa9\xae\xa7\xb1\xa3"
 distanceField=false
 encoding=UNICODE
 heuristic=1
@@ -11,10 +11,10 @@ imageInXML=false
 kerning=true
 merge=true
 mergeBF=false
-outDir=/Volumes/the_loft_2/Dropbox/git/ccpnmr/AnalysisV3/src/python/ccpn/ui/gui/widgets/fonts/Fonts
+outDir=/Users/ejb66/PycharmProjects/Git/AnalysisV3/src/python/ccpn/ui/gui/widgets/fonts/Fonts
 outFile=glFont28
 outFormat=0
-sortOrder=2
+sortOrder=3
 textureH=256
 textureW=256
 transparent=true

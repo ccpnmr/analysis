@@ -337,7 +337,7 @@ class Sample(AbstractWrapperObject):
         '''
         Gets spectra linked to sampleComponents through substances.
         These spectra are normally the reference spectra used in screening/metabolomics, and used to match signal
-        to the sample.spectra when a sample its a mixtures.
+        to the sample.spectra when a sample it's a mixtures.
         '''
         spectra = []
         for sampleComponent in self.sampleComponents:

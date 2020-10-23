@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-01-28 16:27:16 +0000 (Tue, January 28, 2020) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-10-23 12:56:14 +0100 (Fri, October 23, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -292,6 +292,9 @@ class GLString(GLVertexArray):
         for i, charCode in enumerate(text):
             c = ord(charCode)
             glyph = font.fontGlyph[c]
+
+            if not glyph:
+                continue
 
             # if glyph or c == 10 or c == 9:  # newline and tab
 

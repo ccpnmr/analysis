@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-08 11:19:35 +0100 (Thu, October 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 12:56:14 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1071,7 +1071,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # except:
         #     annType = 0
         #     self.preferences.general.annotationType = annType
-        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Peak Id'],
+        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Peak Id', 'Annotation'],
                                             # selectedInd=annType,
                                             callback=self._queueSetAnnotations,
                                             direction='h',

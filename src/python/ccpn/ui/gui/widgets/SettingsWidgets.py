@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:48 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 12:56:14 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -203,8 +203,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
             row += 1
             self.annotationsLabel = Label(parent, text="Symbol Annotation", grid=(row, 0))
-            self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Peak Id'],
-                                                objectNames=['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id'],
+            self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Peak Id', 'Annotation'],
+                                                objectNames=['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id', 'annSDS_Annotation'],
                                                 selectedInd=annotationType,
                                                 callback=self._symbolsChanged,
                                                 direction='horizontal',

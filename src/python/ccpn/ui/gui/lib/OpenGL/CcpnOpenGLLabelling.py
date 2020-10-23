@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-30 16:09:18 +0100 (Wed, September 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 12:56:14 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2062,9 +2062,12 @@ class GLpeakListMethods():
         elif labelType == 3:
             # return the minimal form
             text = _getScreenPeakAnnotation(obj, useShortCode=True, useMinimalCode=True)
-
-        else:
+        elif labelType == 4:
+            # return the minimal form
             text = _getPeakId(obj)
+        else:
+            # return the peak annotation
+            text = _getPeakAnnotation(obj)
 
         return text
 

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-23 09:34:54 +0100 (Wed, September 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 12:56:14 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -241,8 +241,11 @@ class Peak(AbstractWrapperObject):
         return self._wrappedData.annotation
 
     @annotation.setter
-    def annotation(self, value: str):
-        self._wrappedData.annotation = value
+    def annotation(self, value: Optional[str]):
+        if not isinstance(value, (str, type(None))):
+            raise ValueError("annotation must be a string or None")
+        else:
+            self._wrappedData.annotation = value
 
     # @property
     # def comment(self) -> Optional[str]:

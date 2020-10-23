@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-08 12:34:08 +0100 (Tue, September 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 12:56:14 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -69,7 +69,7 @@ class GuiStrip(Frame):
     optionsChanged = QtCore.pyqtSignal(dict)
     stripResized = QtCore.pyqtSignal(tuple)
 
-    MAXPEAKLABELTYPES = 5
+    MAXPEAKLABELTYPES = 6
     MAXPEAKSYMBOLTYPES = 4
 
     def __init__(self, spectrumDisplay):

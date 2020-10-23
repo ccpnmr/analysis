@@ -158,13 +158,25 @@ class RadioButtons(QtWidgets.QWidget, Base):
             raise ValueError('radioButton %s not found in the list' % text)
 
     def get(self):
-        if self.getIndex():
-            return self.texts[self.getIndex()]
+        texts = []
+        for i in self.radioButtons:
+            if i.isChecked():
+                texts.append(i.text())
+        if self.isExclusive:
+            return texts[-1]
+        else:
+            return texts
 
 
     def getIndex(self):
-        if self.buttonGroup.checkedButton() is not None:
-            return self.radioButtons.index(self.buttonGroup.checkedButton())
+        ixs = []
+        for i, rb in enumerate(self.radioButtons):
+            if rb.isChecked():
+                ixs.append(i)
+        if self.isExclusive:
+            return ixs[-1]
+        else:
+            return ixs
 
     @property
     def isChecked(self):
@@ -212,22 +224,22 @@ if __name__ == '__main__':
     from ccpn.ui.gui.widgets.BasePopup import BasePopup
 
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
+    from functools import partial
 
-
-    def testCallback():
-        print('TEST')
-
+    def testCallback(self, *args):
+        print(self.get(), self.getIndex())
 
     app = TestApplication()
     popup = CcpnDialog(windowTitle='Test radioButtons', setLayout=True)
 
     buttonGroup = QtWidgets.QButtonGroup(popup)
-    # radioButtons = RadioButtons(parent=popup,
-    #              callback=testCallback, grid=(0, 0))
-    for i in range(10):
-        button = RadioButton(popup, text='TEST', grid=(i, 0),
-                             callback=None)  # partial(self.assignSelect
-        buttonGroup.addButton(button)
+    radioButtons = RadioButtons(parent=popup, texts=['a', 'b'],
+                  grid=(0, 0), exclusive=False,)
+    radioButtons.setCallback(partial(testCallback, radioButtons))
+    # for i in range(10):
+    #     button = RadioButton(popup, text='TEST', grid=(i, 0),
+    #                          callback=testCallback)  # partial(self.assignSelect
+    #     buttonGroup.addButton(button)
 
     popup.raise_()
     popup.exec()

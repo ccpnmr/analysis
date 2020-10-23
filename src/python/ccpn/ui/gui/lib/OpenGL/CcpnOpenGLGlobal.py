@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:06:41 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 15:29:24 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ GLFONT_SUBSTITUTE = 'OpenSans-Regular'
 GLFONT_DEFAULTSIZE = 13           # moved to preferences.appearance
 GLFONT_DEFAULTSCALE = 1
 GLFONT_SCALES = (1, 2)
-GLFONT_SIZES = [10, 12, 13, 14, 16, 18, 20, 24]
+GLFONT_SIZES = [10, 11, 12, 13, 14, 16, 18, 20, 22, 24]
 GLFONT_DICT = {}
 
 GLFONT_FILE = 0

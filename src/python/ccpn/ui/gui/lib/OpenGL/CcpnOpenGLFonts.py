@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 13:16:17 +0100 (Fri, October 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-23 15:29:24 +0100 (Fri, October 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -267,7 +267,7 @@ class GLString(GLVertexArray):
         self.pid = self.object.pid if hasattr(self.object, 'pid') else None
 
         # each object can have a unique serial number if required
-        self.height = (font.height/self.scale)                  # NOTE:ED - not sure why I have to do this here
+        self.height = (font.height / self.scale)  # NOTE:ED - not sure why I have to do this here
         self.width = 0
 
         lenText = len(text)
@@ -301,7 +301,7 @@ class GLString(GLVertexArray):
 
             if (c > 32):  # visible characters
 
-                kerning = font.get_kerning(charCode, prev)
+                kerning = font.get_kerning(charCode, prev) if (prev and ord(prev) > 32) else 0
 
                 x0 = penX + glyph[GlyphPX0] + kerning  # penX + glyph.offset[0] + kerning
                 y0 = penY + glyph[GlyphPY0]  # penY + glyph.offset[1]
@@ -341,12 +341,10 @@ class GLString(GLVertexArray):
                 # self.attribs[i * 4:i * 4 + 4] = attribs
                 # self.offsets[i * 4:i * 4 + 4] = offsets
 
-                penX = penX + glyph[GlyphOrigW] + kerning
-                self.width = max(self.width, penX / self.scale)
+                penX += glyph[GlyphOrigW] + kerning
 
-            if (c == 32):  # space
+            elif (c == 32):  # space
                 penX += font.spaceWidth
-                self.width = max(self.width, penX / self.scale)
 
             elif (c == 10):  # newline
                 penX = 0
@@ -356,12 +354,14 @@ class GLString(GLVertexArray):
 
                 # occasional strange - RuntimeWarning: invalid value encountered in add
                 # self.vertices[:, 1] += font.height
-                self.vertices[1::2] += (font.height/self.scale)
-                self.height += (font.height/self.scale)
+                # move all characters up by font height, centred bottom-left
+                self.vertices[1::2] += (font.height / self.scale)
+                self.height += (font.height / self.scale)
 
             elif (c == 9):  # tab
-                penX = penX + 4 * font.spaceWidth
-                self.width = max(self.width, penX / self.scale)
+                penX += 4 * font.spaceWidth
+
+            self.width = max(self.width, penX / self.scale)
 
             # penY = penY + glyph[GlyphHeight]
             prev = charCode

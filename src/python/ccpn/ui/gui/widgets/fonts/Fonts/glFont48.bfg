@@ -3,13 +3,13 @@ borderBottom=1
 borderLeft=1
 borderRight=1
 borderTop=1
-charList=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?-+\\/():;%&`'*#$=[]@^{}_~\"><\x2013\x2014\xab\xbb\x201c\x201d|\xa9\xae\xa7\xb1\xa3"
+charList=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?-+\\/():;%&`'*#$=[]@^{}_~\"><\x2013\x2014\xab\xbb\x201c\x201d|\xa9\xae\xa7\xb1\xa3\n\t"
 distanceField=false
 encoding=UNICODE
 heuristic=1
 imageInXML=false
 kerning=true
-merge=true
+merge=false
 mergeBF=false
 outDir=/Users/ejb66/PycharmProjects/Git/AnalysisV3/src/python/ccpn/ui/gui/widgets/fonts/Fonts
 outFile=glFont48

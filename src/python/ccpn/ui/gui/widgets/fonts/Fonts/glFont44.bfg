@@ -12,14 +12,14 @@ kerning=true
 merge=false
 mergeBF=false
 outDir=/Users/ejb66/PycharmProjects/Git/AnalysisV3/src/python/ccpn/ui/gui/widgets/fonts/Fonts
-outFile=glFont16
+outFile=glFont44
 outFormat=0
 sortOrder=3
-textureH=128
-textureW=128
+textureH=256
+textureW=512
 transparent=true
 trim=true
 
 [fonts]
-1\font="Open Sans, 16 pt smooth"
+1\font="Open Sans, 44 pt smooth"
 size=1

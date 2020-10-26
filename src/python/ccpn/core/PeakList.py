@@ -618,7 +618,7 @@ class PeakList(PMIListABC):
         Peaklist attributes can be passed in as keyword arguments"""
 
         singleValueTags = ['isSimulated', 'symbolColour', 'symbolStyle', 'textColour', 'textColour',
-                           'title', 'comment']
+                           'title', 'comment', 'meritThreshold', 'meritEnabled', 'meritColour']
 
         targetSpectrum = self.project.getByPid(targetSpectrum) if isinstance(targetSpectrum, str) else targetSpectrum
         if not targetSpectrum:

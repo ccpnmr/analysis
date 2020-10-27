@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-08 17:14:57 +0100 (Thu, October 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-27 09:43:02 +0000 (Tue, October 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -111,7 +111,8 @@ class ResidueInformation(CcpnModule):
         # initialise the sequence module
         self.thisSequenceModule = SequenceModule(moduleParent=self,
                                                  parent=self._sequenceModuleFrame,
-                                                 mainWindow=mainWindow)
+                                                 mainWindow=mainWindow,
+                                                 chains=self.project.chains)
 
         # add a scroll area to contain the residue table
         self._widgetScrollArea = ScrollArea(parent=self.mainWidget, grid=(0, 0), scrollBarPolicies=('asNeeded', 'asNeeded'), **kwds)

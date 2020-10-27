@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-27 09:43:02 +0000 (Tue, October 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -75,7 +75,7 @@ class SequenceModule():
 
     className = 'SequenceModule'
 
-    def __init__(self, moduleParent=None, parent=None, mainWindow=None, name='Sequence'):
+    def __init__(self, moduleParent=None, parent=None, mainWindow=None, name='Sequence', chains=None):
         #CcpnModule.__init__(self, size=(10, 30), name='Sequence', closable=False)
         #TODO: make closable
         # CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
@@ -87,6 +87,8 @@ class SequenceModule():
         self.mainWindow = mainWindow
         self.project = mainWindow.application.project
         #self.label.hide()
+
+        self._chains = chains or []
 
         # self.setAcceptDrops(True)
         self._parent.setAcceptDrops(True)
@@ -340,8 +342,9 @@ class SequenceModule():
         CCPN INTERNAL called in predictSequencePosition method of SequenceGraph.
         Highlights regions on the sequence specified by the list of residues passed in.
         """
-        for res1 in self.chainLabels[chainNum].residueDict.values():
-            res1._styleResidue()
+        if self.chainLabels and chainNum in range(len(self.chainLabels)):
+            for res1 in self.chainLabels[chainNum].residueDict.values():
+                res1._styleResidue()
 
     def _highlightPossibleStretches(self, chainNum, residues: typing.List[Residue]):
         """
@@ -352,22 +355,19 @@ class SequenceModule():
         #   res1._styleResidue()
 
         try:
-            for residue in residues:
-                guiResidue = self.chainLabels[chainNum].residueDict[residue.sequenceCode]
-                guiResidue._styleResidue()
+            # self._clearStretches(chainNum)
+
             guiResidues = []
+            _labelDict = self.chainLabels[chainNum].residueDict
             for residue in residues:
-                guiResidue = self.chainLabels[chainNum].residueDict[residue.sequenceCode]
+                guiResidue = _labelDict[residue.sequenceCode]
                 guiResidues.append(guiResidue)
 
                 if guiResidue.residue.nmrResidue is not None:
                     guiResidue._setStyleWarningAssigned()
                 else:
                     guiResidue._setStylePossibleAssigned()
-                # guiResidue._setStylePossibleAssigned()
 
-                # guiResidue.setHtml('<div style="color: %s;text-align: center; padding: 0px;">' %
-                #                     self.colours[GUICHAINRESIDUE_POSSIBLE] +  residue.shortName+'</div>')
         except Exception as es:
             getLogger().warning('_highlightPossibleStretches: %s' % str(es))
 
@@ -380,7 +380,7 @@ class SequenceModule():
     def _addChainLabel(self, chain: Chain, placeholder=False, tryToUseSequenceCodes=False):
         """Creates and adds a GuiChainLabel to the sequence module.
         """
-        if len(self.project.chains) == 1 and len(self.chainLabels) == 1:
+        if len(self._chains) == 1 and len(self.chainLabels) == 1:
             # first new chain created so get rid of placeholder label
             self.chainLabels = []
             self.scrollArea.scene.removeItem(self.chainLabel)
@@ -476,6 +476,10 @@ class SequenceModule():
         """
         self._closeModule()  # ejb - needed when closing/opening project
 
+    def setChains(self, chains):
+        self._chains = chains
+        self._initialiseChainLabels()
+
     def _initialiseChainLabels(self):
         """initialise the chain label widgets
         """
@@ -486,10 +490,10 @@ class SequenceModule():
         self.chainLabels = []
         self.widgetHeight = 0  # dynamically calculated from the number of chains
 
-        if not self.project.chains:
+        if not self._chains:
             self._addChainLabel(chain=None, placeholder=True)
         else:
-            for chain in self.project.chains:
+            for chain in self._chains:
                 if not (chain._flaggedForDelete or chain.isDeleted):
                     self._addChainLabel(chain, tryToUseSequenceCodes=True)
 
@@ -498,11 +502,8 @@ class SequenceModule():
         self._highlight = QtWidgets.QGraphicsTextItem()
         self._highlight.setDefaultTextColor(QtGui.QColor(self.colours[SEQUENCEMODULE_TEXT]))
 
-        # self._highlight.setFont(self.mainWindow.application._fontSettings.fixedWidthLargeFont)
         setWidgetFont(self._highlight, size='LARGE')
-
         self._highlight.setPlainText('')
-        # self._highlight.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
         self.scrollArea.scene.addItem(self._highlight)
 
     def _refreshChainLabels(self, data=None):
@@ -540,7 +541,7 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
         self.setPos(QtCore.QPointF(position[0], position[1]))
 
         if placeholder:
-            self.text = 'No Chains in Project!'
+            self.text = 'No Chains Selected'
         else:
             self.text = '%s:%s' % (chain.compoundName, chain.shortName)
         self.setHtml('<div style=><strong>' + self.text + ' </strong></div>')

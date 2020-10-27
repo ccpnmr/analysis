@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 18:39:17 +0100 (Fri, October 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-27 09:43:03 +0000 (Tue, October 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -51,6 +51,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.Base import SignalBlocking
+from ccpn.core.Chain import Chain
 
 
 ALL = '<all>'
@@ -190,7 +191,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=12)
 
         if self._spectrumDisplay.MAXPEAKSYMBOLTYPES:
-        # if not self._spectrumDisplay.is1D:
+            # if not self._spectrumDisplay.is1D:
             row += 1
             _texts = ['Cross', 'lineWidths', 'Filled lineWidths', 'Plus']
             _names = ['symSDS_Cross', 'symSDS_lineWidths', 'symSDS_Filled lineWidths', 'symSDS_Plus']
@@ -291,8 +292,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 AXISYUNITS         : self.yAxisUnitsButtons.getIndex(),
                 AXISASPECTRATIOMODE: self.useAspectRatioModeButtons.getIndex(),
                 AXISASPECTRATIOS   : aspectRatios,
-                SYMBOLTYPES        : self.symbol.getIndex(), # if not self._spectrumDisplay.is1D else 0,
-                ANNOTATIONTYPES    : self.annotationsData.getIndex(), # if not self._spectrumDisplay.is1D else 0,
+                SYMBOLTYPES        : self.symbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
+                ANNOTATIONTYPES    : self.annotationsData.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
                 SYMBOLSIZE         : int(self.symbolSizePixelData.text()),
                 SYMBOLTHICKNESS    : int(self.symbolThicknessData.text())
                 }
@@ -376,7 +377,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.blockSignals(True)
 
             # if not self._spectrumDisplay.is1D:
-                # only update if Nd
+            # only update if Nd
             self.symbol.setIndex(values[SYMBOLTYPES])
             self.annotationsData.setIndex(values[ANNOTATIONTYPES])
 
@@ -1267,7 +1268,6 @@ class SpectrumDisplaySelectionWidget(ListCompoundWidget):
 
 
 class ObjectSelectionWidget(ListCompoundWidget):
-
     KLASS = None
 
     def __init__(self, parent=None, mainWindow=None, vAlign='top', stretch=(0, 0), hAlign='left',
@@ -1330,42 +1330,30 @@ class ObjectSelectionWidget(ListCompoundWidget):
         """
         ll = ['> select-to-add <'] + [ALL]
         if self.project:
-            ll += [display.pid for display in getattr(self.project, self.KLASS._pluralLinkName, [])]
+            ll += [obj.pid for obj in getattr(self.project, self.KLASS._pluralLinkName, [])]
         self.pulldownList.setData(texts=ll)
 
     def _getDisplays(self):
         """Return list of displays to navigate - if needed
         """
-        if not self.application:
-            return []
-
-        displays = []
-        # check for valid displays
-        gids = self.getTexts()
-        if len(gids) == 0: return displays
-        if ALL in gids:
-            displays = self.mainWindow.spectrumDisplays
-        else:
-            displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
-        return displays
+        pass
 
     def _getObjects(self):
         """Return list of objects in the selection
         """
-        if not self.application:
+        if not self.project:
             return []
 
         objects = []
-        gids = self.getTexts()
-        if len(gids) == 0: return objects
-        if ALL in gids:
+        pids = self.getTexts()
+        if len(pids) == 0: return objects
+
+        if ALL in pids:
             objects = getattr(self.project, self.KLASS._pluralLinkName, [])
         else:
-            objects = [self.application.getByGid(gid) for gid in gids if gid != ALL]
+            objects = [self.project.getByPid(pid) for pid in pids if pid != ALL]
         return objects
 
-
-from ccpn.core.Chain import Chain
 
 class ChainSelectionWidget(ObjectSelectionWidget):
     KLASS = Chain

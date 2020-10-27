@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-16 14:38:52 +0100 (Fri, October 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-27 09:43:02 +0000 (Tue, October 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -136,7 +136,7 @@ def assignBetas(nmrResidue: NmrResidue, peaks: typing.List[Peak], axisCode='C'):
         peaks[0].assignDimension(axisCode=axisCode, value=[nmrResidue.fetchNmrAtom(name='CB')])
 
 
-def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalShiftList, prior: float = 0.05) -> list:
+def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalShiftList, prior: float = 0.05, resShifts = None) -> list:
     """
     Takes an NmrResidue and a ChemicalShiftList and returns a dictionary of the residue type to
     confidence levels for that NmrResidue.
@@ -144,9 +144,15 @@ def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalS
 
     predictions = {}
     spinSystem = nmrResidue._wrappedData
+    shiftList = chemicalShiftList._wrappedData
+
+    if not resShifts:
+        resShifts = [(resonance, shift) for resonance in spinSystem.resonances
+                     for shift in [resonance.findFirstShift(parentList=shiftList)] if shift]
 
     for code in CCP_CODES:
-        predictions[code] = float(getSpinSystemResidueProbability(spinSystem, chemicalShiftList._wrappedData, code, prior=prior))
+        predictions[code] = float(getSpinSystemResidueProbability(spinSystem, chemicalShiftList._wrappedData, code,
+                                                                  prior=prior, resShifts=resShifts))
     tot = sum(predictions.values())
     refinedPredictions = {}
     for code in CCP_CODES:

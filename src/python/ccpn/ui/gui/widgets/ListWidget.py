@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-10-27 09:43:02 +0000 (Tue, October 27, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -53,6 +53,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
 
     dropped = pyqtSignal(list)
     cleared = pyqtSignal()
+    changed = pyqtSignal()
 
     def __init__(self, parent=None, objects=None, callback=None,
                  rightMouseCallback=None,
@@ -109,6 +110,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
         # self.setStyleSheet(self._styleSheet)
 
         self._setFocusColour()
+        self._setChangedConnections()
 
     def _setFocusColour(self, focusColour=None, noFocusColour=None):
         """Set the focus/noFocus colours for the widget
@@ -125,6 +127,12 @@ class ListWidget(QtWidgets.QListWidget, Base):
                      "border-radius: 1px; " \
                      "}" % (noFocusColour, focusColour)
         self.setStyleSheet(styleSheet)
+
+    def _setChangedConnections(self):
+        self.model().dataChanged.connect(lambda val: self.changed.emit())
+        self.model().rowsRemoved.connect(lambda val: self.changed.emit())
+        self.model().rowsInserted.connect(lambda val: self.changed.emit())
+        self.model().rowsMoved.connect(lambda val: self.changed.emit())
 
     def minimumSizeHint(self) -> QtCore.QSize:
         result = super().minimumSizeHint()
@@ -368,6 +376,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
     def _deleteAll(self):
         self.clear()
         self.cleared.emit()
+        self.changed.emit()
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():

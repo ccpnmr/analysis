@@ -342,6 +342,18 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self._editedText = self.getText()
         self.pulldownTextEdited.emit()
 
+    def setPulldownColour(self, selectColour='lime'):
+        from ccpn.util.Colour import spectrumColours
+        import random
+        for item in spectrumColours.items():
+            pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+            pix.fill(QtGui.QColor(item[0]))
+            self.addItem(icon=QtGui.QIcon(pix), text=item[1])
+        try:
+            self.select(selectColour)
+        except:
+            self.select(random.choice(self.texts))
+
     # def _blockEvents(self, blanking=False):
     #     """Block all updates/signals/notifiers in the widget.
     #     """

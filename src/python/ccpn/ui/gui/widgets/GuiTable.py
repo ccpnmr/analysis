@@ -165,6 +165,49 @@ def exportTableDialog(dataFrame, columns=None, path='~/table.xlsx'):
         findExportFormats(path, dataFrame, filterType=filterType, columns=columns)
 
 
+####  GUI Convenient (Private) Functions #####
+def _selectRowsOnTable(table, values=[], rows=None, doCallback=False, scrollToSelection=True):
+    """ccpn internal """
+    model = table.model()
+    selectionModel = table.selectionModel()
+    selectionModel.clearSelection()
+    rows =  rows or []
+    for value in values:
+        for i in table.items:
+            try:
+                if i.text() == value:
+                    row = i.row()
+                    rows.append(row)
+            except Exception as e:
+                getLogger().debug('Error in selecting a table row. %s' %e)
+                return
+    rows = list(set(rows))
+    if len(rows) > 0:
+        rows.sort(key=lambda c: int(c))
+        rowIndex = model.index(rows[0], 0)
+        table.setCurrentIndex(rowIndex)
+        for row in rows[1:]:
+            rowIndex = model.index(row, 0)
+            selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
+        if scrollToSelection and not table._scrollOverride:
+            table.scrollToSelectedIndex()
+        if doCallback:
+            table._selectionTableCallback(None)
+
+def _colourTableByValue(table, values, removeValueFromTable=True):
+    """ccpn internal """
+    # values = {'pid': 'colourCode'}
+    for value in values:
+        try:
+            for i in table.items:
+                if i.text() == value:
+                    if removeValueFromTable:
+                        i.setValue('')
+                    colour = QtGui.QColor(value)
+                    i.setBackground(colour)
+        except Exception as e:
+            getLogger().debug('Error setting colour on table row. %s' %e)
+
 class GuiTable(TableWidget, Base):
     # selectionUserChanged = QtCore.pyqtSignal(QtCore.QItemSelection)
 

@@ -216,6 +216,8 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
         if self.callback and button:
             # button = self.buttonGroup.buttons[ind]
+            # FIXME the callback should also pass in the selected value. like pulldown checkbox etc...
+            #  e.g. self.callback(self.get())
             self.callback()
 
 

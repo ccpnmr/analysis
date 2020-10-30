@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import sys
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.util.floatUtils import fRound
@@ -97,14 +97,14 @@ class ZoomPopup(CcpnDialog):
                     region[ax] = _round(region[ax], step, 0.5)  # float(int(region[ax]/step+0.5)*step)
 
                 dim1MinLabel = Label(self, text='%s-min' % axisCode, grid=(2 + ii, 0), vAlign='t')
-                dim1MinDoubleSpinBox = DoubleSpinbox(self, suffix=suffix, step=step,
+                dim1MinDoubleSpinBox = ScientificDoubleSpinBox(self, step=step,
                                                      min=minVal, max=maxVal, value=region[0],
-                                                     grid=(2 + ii, 1), vAlign='t')
+                                                     decimals=4, grid=(2 + ii, 1), vAlign='t')
 
                 dim1MaxLabel = Label(self, text='%s-max' % axisCode, grid=(2 + ii, 2), vAlign='t')
-                dim1MaxDoubleSpinBox = DoubleSpinbox(self, suffix=suffix, step=step,
+                dim1MaxDoubleSpinBox = ScientificDoubleSpinBox(self, step=step,
                                                      min=minVal, max=maxVal, value=region[1],
-                                                     grid=(2 + ii, 3))
+                                                     decimals=4, grid=(2 + ii, 3))
 
                 self.minPositionBoxes.append(dim1MinDoubleSpinBox)
                 self.maxPositionBoxes.append(dim1MaxDoubleSpinBox)

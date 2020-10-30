@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.FillBetweenRegions import FillBetweenRegions
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 import pyqtgraph as pg
 import numpy as np
 from pyqtgraph.graphicsItems.LinearRegionItem import LinearRegionItem
@@ -101,9 +101,9 @@ class GLTargetButtonSpinBoxes(Widget):
         self.spinBoxes = []
         self.values = values or [0, 0]
         self.bounds = bounds or [-1e10, 1e10]
-        self.pointBox1 = DoubleSpinbox(self, value=self.values[0], step=step, max=self.bounds[1], min=self.bounds[0],
+        self.pointBox1 = ScientificDoubleSpinBox(self, value=self.values[0], step=step, max=self.bounds[1], min=self.bounds[0],
                                        decimals=decimals, grid=(0, 1), hAlign='l', vAlign='l')
-        self.pointBox2 = DoubleSpinbox(self, value=self.values[1], step=step, max=self.bounds[1], min=self.bounds[0],
+        self.pointBox2 = ScientificDoubleSpinBox(self, value=self.values[1], step=step, max=self.bounds[1], min=self.bounds[0],
                                        decimals=decimals, grid=(0, 2), hAlign='l', vAlign='l')
         self.spinBoxes.append(self.pointBox1)
         self.spinBoxes.append(self.pointBox2)
@@ -258,6 +258,8 @@ class GLTargetButtonSpinBoxes(Widget):
         self._turnOffPositionPicking()
         self.destroy(bool_destroyWindow=bool_destroyWindow, bool_destroySubWindows=bool_destroySubWindows)
 
+    # def _spinBoxesValidator(self, w, *args):
+    #     return super(DoubleSpinbox, w).validate(*args)
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication

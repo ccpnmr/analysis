@@ -40,15 +40,16 @@ class ZoomToPositionPopup(CcpnDialog):
 
   def __init__(self, parent=None, mainWindow=None, strip=None, title='Zoom To Position', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
-
-    self.mainWindow = mainWindow
-    self.application = mainWindow.application
-    self.project = mainWindow.application.project
-    self.current = mainWindow.application.current
-    self.strip = strip or self.current.strip
-    if not self.strip:
-      showWarning('No Strip', 'Select a strip first')
-      self.reject()
+    self.strip = None
+    if mainWindow:
+      self.mainWindow = mainWindow
+      self.application = mainWindow.application
+      self.project = mainWindow.application.project
+      self.current = mainWindow.application.current
+      self.strip = strip or self.current.strip
+      if not self.strip:
+        showWarning('No Strip', 'Select a strip first')
+        self.reject()
 
     self._dictValues = {}
     self._createWidget()
@@ -57,15 +58,15 @@ class ZoomToPositionPopup(CcpnDialog):
     n=0
     pLabel = Label(self, text="Positions", grid=(0,0))
     rLabel = Label(self, text="Width Region", grid=(0,1))
-
-    for i, axis in enumerate(self.strip.axisCodes):
-      n=+i
-      positionBoxWidget = DoubleSpinbox(self, prefix=axis, grid=(n,0))
-      widthWidget = DoubleSpinbox(self, prefix='Width', tipText='Width of the zoom in ppm',grid=(n, 1))
-      self._dictValues[axis]=[positionBoxWidget,widthWidget]
-    n+=1
-    buttonList = ButtonList(self, ['Cancel', 'Go'], [self.reject, self._okButton], grid=(n, 1))
-
+    if self.strip:
+      for i, axis in enumerate(self.strip.axisCodes):
+        n=+i
+        positionBoxWidget = ScientificDoubleSpinBox(self, prefix=axis, step=0.01, decimals=4, grid=(n,0))
+        widthWidget = ScientificDoubleSpinBox(self, prefix='Width',
+                                              step=0.01, decimals=4, tipText='Width of the zoom in ppm',grid=(n, 1))
+        self._dictValues[axis]=[positionBoxWidget,widthWidget]
+      n+=1
+      buttonList = ButtonList(self, ['Cancel', 'Go'], [self.reject, self._okButton], grid=(n, 1))
 
   def _okButton(self):
     """

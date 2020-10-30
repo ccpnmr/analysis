@@ -568,7 +568,7 @@ class GuiPipe(Dock, GuiPipeDrop):
                     for text in texts:
                         if len(widgetVariable.split('_'))>0:
                             for subText in widgetVariable.split('_'):
-                                if subText in text:
+                                if subText.lower() in text.lower():
                                     selected = text
                                     continue
                 _getWidgetByAtt(self, widgetVariable).select(selected)

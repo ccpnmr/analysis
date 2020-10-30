@@ -133,20 +133,30 @@ def _getShiftForSpectra(referenceSpectrum, spectra, referenceRegion=(3, 2), engi
             return float(shift)
 
 
-def addIndividualShiftToSpectra(spectra, shifts):
+def addIndividualShiftToSpectra(spectra, shifts, shiftPeaks=True):
     alignedSpectra = []
     for sp, shift in zip(spectra, shifts):
         sp.positions -= shift
+        if shiftPeaks:
+            _shiftPeaks(sp, shift)
         alignedSpectra.append(sp)
     return alignedSpectra
 
 
-def addShiftToSpectra(spectra, shift):
+def addShiftToSpectra(spectra, shift, shiftPeaks=True):
     alignedSpectra = []
     for sp in spectra:
         sp.positions -= shift
+        if shiftPeaks:
+            _shiftPeaks(sp, shift)
         alignedSpectra.append(sp)
     return alignedSpectra
+
+def _shiftPeaks(spectrum, shift):
+    if spectrum.dimensionCount == 1:
+        for peakList in spectrum.peakLists:
+            for peak in peakList.peaks:
+                peak.position = [peak.position[0]-shift,]
 
 
 ########################################################################################################################

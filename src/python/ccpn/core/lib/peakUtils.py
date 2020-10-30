@@ -1080,7 +1080,6 @@ def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True):
     minNoiseLevel = peak.peakList.spectrum.negativeNoiseLevel
     if not noiseLevel: #estimate as you can from the spectrum
         noiseLevel, minNoiseLevel = estimateNoiseLevel1D(y)
-    print('max L', maximumLimit, noiseLevel, minNoiseLevel)
     x_filtered, y_filtered = _1DregionsFromLimits(x,y, [a,b])
     maxValues, minValues = simple1DPeakPicker(y_filtered, x_filtered, noiseLevel, negDelta=minNoiseLevel, negative=doNeg)
     allValues = maxValues + minValues

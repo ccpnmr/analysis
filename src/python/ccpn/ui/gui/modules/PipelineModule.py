@@ -148,6 +148,7 @@ class GuiPipeline(CcpnModule, Pipeline):
                 if os.path.exists(widgetsState[PipelinePath]):
                     self._openSavedPipeline(widgetsState[PipelinePath])
 
+
     def _getGuiFromPipes(self, pipes):
         allGuiPipes = []
         for pipe in pipes:
@@ -626,8 +627,8 @@ class GuiPipeline(CcpnModule, Pipeline):
                 guiPipe.setActive(isActive)
 
                 self.pipelineArea.addBox(guiPipe)
-
         self.pipelineArea._restoreState(state)
+        self.setDataSelection()
 
     def _savePipeline(self):
         """jsonData = [{pipelineArea.state}, [guiPipesState]]   """

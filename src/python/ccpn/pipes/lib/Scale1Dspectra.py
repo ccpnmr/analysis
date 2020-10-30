@@ -63,6 +63,6 @@ def scaleSpectraByRegion(spectra, limits, engine = 'mean', resetScale=True):
     if targetValue == 0 : return
     scaleValues = targetValue/maxs
     for sp, y, v in zip(spectra, ys, scaleValues):
-        # sp.scale = float(v) # the scale is being a black-magic pain! Disable temporanely until scale works properly
-        sp.intensities = sp.intensities * v     #in case don't want use the scale property
+        sp.scale = float(v)
+        # sp.intensities = sp.intensities * v     #in case don't want use the scale property
 

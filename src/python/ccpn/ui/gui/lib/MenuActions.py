@@ -531,12 +531,13 @@ class _openItemSampleDisplay(OpenItemABC):
         if len(sample.spectra) > 0:
             if len(spectrumDisplay.strips)>0:
                 strip = spectrumDisplay.strips[0]
-                for spectrum in sample.spectra:
-                    strip._displaySpectrum(spectrum, useUndoBlock = False)
+
                 for sampleComponent in sample.sampleComponents:
                     if sampleComponent.substance is not None:
                         for spectrum in sampleComponent.substance.referenceSpectra:
                             strip._displaySpectrum(spectrum, useUndoBlock = False)
+                for spectrum in sample.spectra:
+                    strip._displaySpectrum(spectrum, useUndoBlock = False)
                 if autoRange:
                     spectrumDisplay.autoRange()
 

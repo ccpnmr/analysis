@@ -1287,34 +1287,34 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
             else:
                 super().dragMoveEvent(event)
 
-    def _displaySelectedSpectrum(self):
+    def _displaySelectedSpectrum(self, text):
+        if text is not None:
+            objFromPid = self.project.getByPid(text)
+            strip = self.application.current.strip
+            if strip:
+                strip._clear()
+                if isinstance(objFromPid, Spectrum):
+                    strip._displaySpectrum(objFromPid, useUndoBlock = False)
+                if isinstance(objFromPid, Sample):
+                    strip.setStackingMode(False)
+                    _openItemSampleDisplay._openSampleSpectraOnDisplay(objFromPid, strip.spectrumDisplay)
+                    v = strip._getInitialOffset()
+                    strip.setStackingMode(True)
 
-        for item in self.selectedItems():
-            if item is not None:
-                dataPid = item.data(0, QtCore.Qt.DisplayRole)
-                objFromPid = self.project.getByPid(dataPid)
-                strip = self.application.current.strip
-                if strip:
-                    strip._clear()
-                    if isinstance(objFromPid, Spectrum):
-                        strip._displaySpectrum(objFromPid, useUndoBlock = False)
-                        # strip.spectrumDisplay.displaySpectrum(objFromPid)
-                    if isinstance(objFromPid, Sample):
-                        strip.setStackingMode(False)
-                        _openItemSampleDisplay._openSampleSpectraOnDisplay(objFromPid, strip)
-                        v = strip._getInitialOffset()
-                        strip.setStackingMode(True)
-
-    def _keyPressEvent(self, event):
-        """This functionality is under testing. Used for quickly display spectra via key press on
-        sidebar on large datasets on the current strip. Only work if spectra are of the same type
-        (previous/next same as currently displayed) Usefull for screening """
-        if event.key() == QtCore.Qt.Key_Up:
-            super().keyPressEvent(event)
-            self._displaySelectedSpectrum()
-        if event.key() == QtCore.Qt.Key_Down:
-            super().keyPressEvent(event)
-            self._displaySelectedSpectrum()
+    def keyPressEvent(self, e):
+        """
+        Re-implementation of key press events.
+        N.B. Experimental: Ctrl+up/down to display previous/next compatible spectrum on current strip.
+        """
+        k = QtCore.Qt
+        if e.modifiers() & QtCore.Qt.ControlModifier and e.key() in [k.Key_Up, k.Key_Down, k.Key_Left, k.Key_Right]:
+            self.clearSelection()
+            self.setCurrentItem(self.currentItem())
+            if e.key() == QtCore.Qt.Key_Up:
+                self._displaySelectedSpectrum(self.currentItem().text(0))
+            if e.key() == QtCore.Qt.Key_Down:
+                self._displaySelectedSpectrum(self.currentItem().text(0))
+        super().keyPressEvent(e)
 
     def _cloneObject(self, objs):
         """Clones the specified objects.
@@ -1387,6 +1387,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
     def selectPid(self, pid):
         """Select the item in the sideBar with the given pid.
         """
+        self.clearSelection()
         item = self._sidebarData.findChildNode(pid)
         if item and item.widget:
             self.setCurrentItem(item.widget)

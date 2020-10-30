@@ -183,6 +183,8 @@ class AlignSpectraGuiPipe(GuiPipe):
         self.tregionLabel = Label(self.pipeFrame, text=ReferenceRegion, grid=(row, 0))
         setattr(self, ReferenceRegion, GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
                                                                values=DefaultReferenceRegion, orientation='v',
+                                                               decimals=4,
+                                                               step=0.001,
                                                                grid=(row, 1)))
 
         row += 1
@@ -225,6 +227,10 @@ class AlignSpectraGuiPipe(GuiPipe):
         else:
             _getWidgetByAtt(self, ReferenceSpectrum)._clear()
 
+    def _closePipe(self):
+        'remove the lines from plotwidget if any'
+        _getWidgetByAtt(self, ReferenceRegion)._turnOffPositionPicking()
+        self.closePipe()
 
 ########################################################################################################################
 ##########################################       PIPE      #############################################################

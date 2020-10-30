@@ -28,7 +28,7 @@ from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, _getWidgetByAtt
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_GENERIC
@@ -87,19 +87,21 @@ class NoiseThresholdGuiPipe(GuiPipe):
         self.noiseThresholdLabel = Label(self.pipeFrame, text=UseRegion, grid=(i, 0))
         setattr(self, UseRegion,
                 GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application, colour='red',
-                                        orientation='v', values=DefaultCalibration_region, grid=(i, 1)))
+                                        orientation='v', decimals=4, step=0.001,
+                                        values=DefaultCalibration_region, grid=(i, 1)))
 
         i += 1
         self.addError = Label(self.pipeFrame, IncreaseBySTD, grid=(i, 0))
         setattr(self, IncreaseBySTD,
-                DoubleSpinbox(self.pipeFrame, value=DefaultIncreaseBySTD, min=0.0, max=None,
+                ScientificDoubleSpinBox(self.pipeFrame, value=DefaultIncreaseBySTD, min=0.0, max=None,
                               step=0.5, prefix=None, suffix=None, showButtons=True, decimals=3, grid=(i, 1)))
 
         # manual noise widgets
         i += 1
         self.noiseThresholdLabel = Label(self.pipeFrame, text=NoiseThreshold, grid=(i, 0))
         setattr(self, NoiseThreshold, GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application, colour='green',
-                                                              orientation='h', grid=(i, 1)))
+                                                              orientation='h', decimals=4,
+                                                               step=0.001, grid=(i, 1)))
         self._manageButtons()
 
     def _manageButtons(self):

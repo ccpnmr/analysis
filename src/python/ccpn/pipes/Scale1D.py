@@ -24,7 +24,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
@@ -77,6 +77,8 @@ class Scale1DGuiPipe(GuiPipe):
         self.tregionLabel = Label(self.pipeFrame, text=ReferenceRegion, grid=(row, 0))
         setattr(self, ReferenceRegion, GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
                                                                values=DefaultReferenceRegion, orientation='v',
+                                                               decimals=4,
+                                                               step=0.001,
                                                                grid=(row, 1)))
 
         row += 1
@@ -84,6 +86,10 @@ class Scale1DGuiPipe(GuiPipe):
         self.enginesLabel = Label(self.pipeFrame, EnginesVar, grid=(row, 0))
         setattr(self, EnginesVar, PulldownList(self.pipeFrame, texts=Engines, grid=(row, 1)))
 
+    def _closePipe(self):
+        'remove the lines from plotwidget if any'
+        _getWidgetByAtt(self, ReferenceRegion)._turnOffPositionPicking()
+        self.closePipe()
 
 
 ########################################################################################################################

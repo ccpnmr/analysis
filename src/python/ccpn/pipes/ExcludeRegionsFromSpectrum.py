@@ -78,7 +78,8 @@ class ExcludeRegionsGuiPipe(GuiPipe):
 
         setattr(self, ExcludeRegions + str(self.count), Label(self.pipeFrame, text=Region + str(self.count), grid=(self.count, 0)))
         setattr(self, Region + str(self.count), GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
-                                                                        orientation='v', decimals=3, grid=(self.count, 1)))
+                                                                        orientation='v', decimals=4,
+                                                                        step=0.001, grid=(self.count, 1)))
 
         setattr(self, _STORE, Spinbox(self.pipeFrame, value=self.count, grid=(0, 0), hidden=True)) # used to store how many entries there are
 
@@ -93,7 +94,8 @@ class ExcludeRegionsGuiPipe(GuiPipe):
         self.setMaximumHeight(self.sizeHint().height() + self.maximumTargetButtonWidgetSize)
         setattr(self, ExcludeRegions + str(self.count), Label(self.pipeFrame, text=Region + str(self.count), grid=(self.count, 0)))
         setattr(self, Region + str(self.count), GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
-                                                                        decimals=3, orientation='v', grid=(self.count, 1)))
+                                                                        decimals=4,
+                                                                        step=0.001, orientation='v', grid=(self.count, 1)))
         # self.count += 1
         getattr(self, _STORE).set(self.count)
 

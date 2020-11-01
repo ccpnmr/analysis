@@ -77,8 +77,8 @@ def _oldEstimateNoiseLevel1D(y, factor=0.5):
 
 def _calibrateX1D(spectrum, currentPosition, newPosition):
     shift = newPosition - currentPosition
+    spectrum.referenceValues = [spectrum.referenceValues[0] + shift]
     spectrum.positions = spectrum.positions + shift
-
 
 def _calibrateY1D(spectrum, currentPosition, newPosition):
     shift = newPosition - currentPosition

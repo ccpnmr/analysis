@@ -206,8 +206,8 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
                     ppmDelta = Label(spectrumFrame, text='%.3f' % (self.primaryPeak.ppmPositions[dim] - peak.ppmPositions[ind]), grid=(specRow, 6))
 
                     self._matchToAxisPulldowns[str(peak.id) + str(ind)] = (matchToAxis, ppmLabel, ppmDelta, dim, peak, ind)
-
-                    self._spectraCheckBoxes[str(peak.id) + str(ind)] = CheckBox(spectrumFrame, grid=(specRow, 0), vAlign='t', hAlign='c', checked=True)
+                    checked = True if thisSpec.axisCodes[ind] != 'intensity' else False
+                    self._spectraCheckBoxes[str(peak.id) + str(ind)] = CheckBox(spectrumFrame, grid=(specRow, 0), vAlign='t', hAlign='c', checked=checked)
 
             specRow += 1
 
@@ -334,6 +334,7 @@ class CalibrateSpectraFromPeaksPopup1d(CalibrateSpectraFromPeaksPopupNd):
 
             if specView and not specView.isDeleted:
                 specView.buildContours = True
+                specView.refreshData()
 
     def _fillSpectrumFrame(self):
         """Rebuild the spectrum frame as the primary peak has been updated

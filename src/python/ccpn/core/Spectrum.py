@@ -1501,8 +1501,8 @@ assignmentTolerances
         self._intensities = value
 
         # # temporary hack for showing straight the result of intensities change
-        # for spectrumView in self.spectrumViews:
-        #     spectrumView.refreshData()
+        for spectrumView in self.spectrumViews:
+            spectrumView.refreshData()
 
     @property
     def positions(self) -> np.array:
@@ -1527,8 +1527,8 @@ assignmentTolerances
         self._positions = value
 
         # # temporary hack for showing straight the result of intensities change
-        # for spectrumView in self.spectrumViews:
-        #     spectrumView.refreshData()
+        for spectrumView in self.spectrumViews:
+            spectrumView.refreshData()
 
     @property
     @_includeInCopy

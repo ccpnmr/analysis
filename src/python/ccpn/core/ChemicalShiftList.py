@@ -229,7 +229,8 @@ def getter(self: Spectrum) -> ChemicalShiftList:
 
 def setter(self: Spectrum, value: ChemicalShiftList):
     value = self.getByPid(value) if isinstance(value, str) else value
-    self._apiDataSource.experiment.shiftList = value._apiShiftList
+    if isinstance(value, ChemicalShiftList):
+        self._apiDataSource.experiment.shiftList = value._apiShiftList
 
 
 Spectrum.chemicalShiftList = property(getter, setter, None,

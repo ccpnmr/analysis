@@ -43,6 +43,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.QPythonEditor import PyCodeEditor
 from ccpn.framework.PathsAndUrls import macroPath as ccpnMacroPath
 from pyqode.python.widgets import PyConsole, PyInteractiveConsole
+from ccpn.ui.gui.widgets.CheckBox import EditableCheckBox, CheckBox
 import sys
 from pyqode.core.api import TextHelper
 from collections import OrderedDict as od
@@ -63,7 +64,7 @@ class MacroEditor(CcpnModule):
     Other text files
 
     """
-    includeSettingsWidget = False
+    includeSettingsWidget = True
     className = 'MacroEditor'
 
 
@@ -78,7 +79,7 @@ class MacroEditor(CcpnModule):
         self._pythonConsole = None
         self.ccpnMacroPath = ccpnMacroPath
         self._editor_windows = []         # used when running the macro externally on Analysis
-        self.autoOpenPythonConsole = True # When run: always open the PythonConsole module to see the output.
+        self.autoOpenPythonConsole = False# When run: always open the PythonConsole module to see the output.
         self._preEditorText = ''          # text as appeared the first time the file was opened
         self._lastTimestp = None          # used to check if the file has been changed externally
         self._lastSaved = None
@@ -159,11 +160,21 @@ class MacroEditor(CcpnModule):
         self.openPath(self.filePath)
         self._setFileName()
         self._setToolBar()
+        self._createWidgetSettings()
         self.droppedNotifier = GuiNotifier(self.textEditor,
                                            [GuiNotifier.DROPEVENT], [DropBase.URLS],
                                            self._processDroppedItems)
 
 
+    def _createWidgetSettings(self):
+        hGrid = 0
+        self.autoOpenPythonConsoleLabel = Label(self.settingsWidget, 'Auto-Open PythonConsole', grid=(hGrid, 0),)
+        self.autoOpenPythonConsoleCB = CheckBox(self.settingsWidget,
+                                                checked=self.autoOpenPythonConsole,
+                                                callback=self._setAutoOpenPythonConsole, grid=(hGrid, 1))
+
+    def _setAutoOpenPythonConsole(self, value):
+        self.autoOpenPythonConsole = value
 
     def run(self):
         if self._pythonConsole is not None:
@@ -282,7 +293,6 @@ class MacroEditor(CcpnModule):
                         self.openPath(self.filePath)
                 return
 
-
     def _getToolBarDefs(self):
 
         toolBarDefs = (
@@ -353,7 +363,6 @@ class MacroEditor(CcpnModule):
                             ['enabled', True],
                             ['shortcut', '⌃r']
                         ])],
-
         )
         return toolBarDefs
 
@@ -467,8 +476,6 @@ class MacroEditor(CcpnModule):
             self._lastTimestp = os.stat(self.filePath).st_mtime
             self._setFileName()
 
-
-
     def _openMacroFile(self):
         """
         Opens a file dialog box at the macro path specified in the application preferences and loads the
@@ -524,12 +531,8 @@ class MacroEditor(CcpnModule):
     def restoreWidgetsState(self, **widgetsState):
         """
         Restore the gui params. To Call it: _setParams(**{"variableName":"value"})
-
-
-
         :param widgetsState:
         """
-
         self._setNestedWidgetsAttrToModule()
         widgetsState = od(sorted(widgetsState.items()))
         for variableName, value in widgetsState.items():
@@ -543,12 +546,8 @@ class MacroEditor(CcpnModule):
                                 self._deleteTempFile()
                             self.openPath(value)
                         continue
-
-
             except Exception as e:
                 getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
-
-
 
     def _closeModule(self):
         """Re-implementation of closeModule  """

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:53 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -37,8 +37,8 @@ class PeakListPropertiesPopup(PMIListPropertiesPopupABC):
 
     # class of lists handled by popup
     klass = PeakList
-    attributes = [('id', getattr, None, {'backgroundText': '> Not defined <'}),
-                  ('comment', getattr, setattr, {'backgroundText': '> Optional <'}),
+    attributes = [('Id', getattr, None, {'backgroundText': '> Not defined <'}),
+                  ('Comment', getattr, setattr, {'backgroundText': '> Optional <'}),
                   ]
     _symbolColourOption = True
     _textColourOption = True
@@ -46,8 +46,8 @@ class PeakListPropertiesPopup(PMIListPropertiesPopupABC):
     _meritColourOption = True
     _meritOptions = True
 
-    def __init__(self, parent=None, mainWindow=None, peakList=None, title=None, **kwds):
-        super().__init__(parent=parent, mainWindow=mainWindow, ccpnList=peakList,
+    def __init__(self, parent=None, mainWindow=None, peakList=None, spectrum=None, title=None, **kwds):
+        super().__init__(parent=parent, mainWindow=mainWindow, ccpnList=peakList, spectrum=spectrum,
                          title='%s Properties' % self.klass.className, **kwds)
 
         self.__postInit__()
@@ -60,5 +60,27 @@ class PeakListPropertiesPopup(PMIListPropertiesPopupABC):
     def _getListViews(self, ccpnList):
         """Return the listViews containing this list
         """
-        return [peakListView for peakListView in ccpnList.project.peakListViews
+        return [peakListView for peakListView in self.project.peakListViews
                 if peakListView.peakList == ccpnList]
+
+    def _applyAllChanges(self, changes):
+        """Apply all changes - add new peaklist to the spectrum
+        """
+        super()._applyAllChanges(changes)
+        if not self.EDITMODE:
+
+            if 'id' in self.ccpnList:
+                del self.ccpnList['id']
+
+            # create the new peakList
+            self.spectrum.newPeakList(**self.ccpnList)
+
+    def _populateInitialValues(self):
+        """Populate the initial values for an empty object
+        """
+        super()._populateInitialValues()
+
+        # need to get the next available peaklist name
+        _num = len(self.spectrum.peakLists) + 1
+        self.ccpnList.id = '{}.{}'.format(self.spectrum.name, _num)
+

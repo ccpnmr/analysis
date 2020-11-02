@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:30 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import Sequence, Union
-from functools import partial
+from ccpn.util.Common import _validateName
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -33,7 +33,6 @@ from ccpn.core.DataSet import DataSet
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
 from ccpn.util.Tensor import Tensor
-
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
 
@@ -257,7 +256,7 @@ class RestraintList(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename RestraintList, changing its name and Pid.
         """
-        self._validateName(value=value, allowWhitespace=False)
+        _validateName(self.project, RestraintList, value=value, allowWhitespace=False)
 
         # rename functions from here
         oldName = self.name
@@ -369,12 +368,9 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
     :return: a new RestraintList instance.
     """
 
-    if name:
-        if Pid.altCharacter in name:
-            raise ValueError("Character %s not allowed in ccpn.RestraintList.name:" % Pid.altCharacter)
-    else:
-        # This may not be unique, but that should be handled downstream
-        name = restraintType
+    if not name:
+        name = RestraintList._nextAvailableName(RestraintList, self)
+    _validateName(self, RestraintList, name)
 
     if restraintItemLength is None:
         restraintItemLength = coreConstants.constraintListType2ItemLength.get(restraintType)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 12:56:14 +0100 (Fri, October 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -340,7 +340,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.tabWidget.addTab(fr.scrollArea, tabName)
             tabFunc(parent=fr)
 
-        self.useApplyToSpectrumDisplaysLabel = Label(self.mainWidget, text="Apply to All Spectrum Displays: ", grid=(1, 0))
+        self.useApplyToSpectrumDisplaysLabel = Label(self.mainWidget, text="Apply to All Spectrum Displays", grid=(1, 0))
         self.useApplyToSpectrumDisplaysBox = CheckBox(self.mainWidget, grid=(1, 1))
         self.useApplyToSpectrumDisplaysBox.toggled.connect(partial(self._queueApplyToSpectrumDisplays, 'applyToSpectrumDisplays'))
 
@@ -357,19 +357,19 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.languageBox.currentIndexChanged.connect(self._queueChangeLanguage)
 
         row += 1
-        self.autoSaveLayoutOnQuitLabel = Label(parent, text="Auto Save Layout On Quit: ", grid=(row, 0))
+        self.autoSaveLayoutOnQuitLabel = Label(parent, text="Auto Save Layout On Quit", grid=(row, 0))
         self.autoSaveLayoutOnQuitBox = CheckBox(parent, grid=(row, 1))  #,
         # checked=self.preferences.general.autoSaveLayoutOnQuit)
         self.autoSaveLayoutOnQuitBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoSaveLayoutOnQuit'))
 
         row += 1
-        self.restoreLayoutOnOpeningLabel = Label(parent, text="Restore Layout On Opening: ", grid=(row, 0))
+        self.restoreLayoutOnOpeningLabel = Label(parent, text="Restore Layout On Opening", grid=(row, 0))
         self.restoreLayoutOnOpeningBox = CheckBox(parent, grid=(row, 1))  #,
         # checked=self.preferences.general.restoreLayoutOnOpening)
         self.restoreLayoutOnOpeningBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'restoreLayoutOnOpening'))
 
         row += 1
-        self.autoBackupEnabledLabel = Label(parent, text="Auto Backup On: ", grid=(row, 0))
+        self.autoBackupEnabledLabel = Label(parent, text="Auto Backup On", grid=(row, 0))
         self.autoBackupEnabledBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.autoBackupEnabled)
         self.autoBackupEnabledBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoBackupEnabled'))
 
@@ -441,7 +441,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.userPipesPath.textChanged.connect(self._queueSetPipesFilesPath)
 
         row += 1
-        self.useProjectPathLabel = Label(parent, text="Set Working Path to Project Path: ", grid=(row, 0))
+        self.useProjectPathLabel = Label(parent, text="Set Working Path to Project Path", grid=(row, 0))
         self.useProjectPathBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useProjectPath)
         self.useProjectPathBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useProjectPath'))
         self.useProjectPathLabel.setToolTip('Set the current user working path to the project folder on loading')
@@ -451,38 +451,38 @@ class PreferencesPopup(CcpnDialogMainWidget):
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
         row += 1
-        self.useProxyLabel = Label(parent, text="Use Proxy Settings: ", grid=(row, 0))
+        self.useProxyLabel = Label(parent, text="Use Proxy Settings", grid=(row, 0))
         self.useProxyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.proxySettings.useProxy)
         self.useProxyBox.toggled.connect(self._queueSetUseProxy)
 
         row += 1
-        self.proxyAddressLabel = Label(parent, text="   Web Proxy Server: ", grid=(row, 0), hAlign='l')
+        self.proxyAddressLabel = Label(parent, text="   Web Proxy Server", grid=(row, 0), hAlign='l')
         self.proxyAddressData = LineEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyAddressData.setMinimumWidth(LineEditsMinimumWidth)
         # self.proxyAddressData.setText(str(self.preferences.proxySettings.proxyAddress))
         self.proxyAddressData.textEdited.connect(self._queueSetProxyAddress)
 
         row += 1
-        self.proxyPortLabel = Label(parent, text="   Port: ", grid=(row, 0), hAlign='l')
+        self.proxyPortLabel = Label(parent, text="   Port", grid=(row, 0), hAlign='l')
         self.proxyPortData = LineEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyPortData.setMinimumWidth(LineEditsMinimumWidth)
         # self.proxyPortData.setText(str(self.preferences.proxySettings.proxyPort))
         self.proxyPortData.textEdited.connect(self._queueSetProxyPort)
 
         row += 1
-        self.useProxyPasswordLabel = Label(parent, text="   Proxy Server Requires Password: ", grid=(row, 0))
+        self.useProxyPasswordLabel = Label(parent, text="   Proxy Server Requires Password", grid=(row, 0))
         self.useProxyPasswordBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.proxySettings.useProxyPassword)
         self.useProxyPasswordBox.toggled.connect(self._queueSetUseProxyPassword)
 
         row += 1
-        self.proxyUsernameLabel = Label(parent, text="        Username: ", grid=(row, 0), hAlign='l')
+        self.proxyUsernameLabel = Label(parent, text="        Username", grid=(row, 0), hAlign='l')
         self.proxyUsernameData = LineEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyUsernameData.setMinimumWidth(LineEditsMinimumWidth)
         # self.proxyUsernameData.setText(str(self.preferences.proxySettings.proxyUsername))
         self.proxyUsernameData.textEdited.connect(self._queueSetProxyUsername)
 
         row += 1
-        self.proxyPasswordLabel = Label(parent, text="        Password: ", grid=(row, 0), hAlign='l')
+        self.proxyPasswordLabel = Label(parent, text="        Password", grid=(row, 0), hAlign='l')
         self.proxyPasswordData = PasswordEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyPasswordData.setMinimumWidth(LineEditsMinimumWidth)
         # self.proxyPasswordData.setText(self._userPreferences.decodeValue(str(self.preferences.proxySettings.proxyPassword)))
@@ -511,19 +511,22 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.colourSchemeBox.currentIndexChanged.connect(self._queueChangeColourScheme)
 
         row += 1
-        self.useNativeFileLabel = Label(parent, text="Use Native File Dialogs: ", grid=(row, 0))
+        self.useNativeFileLabel = Label(parent, text="Use Native File Dialogs", grid=(row, 0))
         self.useNativeFileBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNative)
         self.useNativeFileBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNative'))
 
         row += 1
-        self.useNativeLabel = Label(parent, text="Use Native Menus (requires restart): ", grid=(row, 0))
+        self.useNativeLabel = Label(parent, text="Use Native Menus (requires restart)", grid=(row, 0))
         self.useNativeMenus = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNativeMenus)
         self.useNativeMenus.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeMenus'))
 
         row += 1
-        self.useNativeWebLabel = Label(parent, text="Use Native Web Browser: ", grid=(row, 0))
+        self.useNativeWebLabel = Label(parent, text="Use Native Web Browser", grid=(row, 0))
         self.useNativeWebBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNativeWebbrowser)
         self.useNativeWebBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeWebbrowser'))
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
         # NOTE:ED - testing new font loader
         row += 1
@@ -531,17 +534,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         for num, fontName in enumerate(FONTLIST):
             row += 1
-            _label = Label(parent, text="    {}: ".format(fontName), grid=(row, 0))
+            _label = Label(parent, text="    {}".format(fontName), grid=(row, 0))
             _data = Button(parent, grid=(row, 1), callback=partial(self._getFont, num, fontName))
 
             setattr(self, FONTLABELFORMAT.format(num), _label)
             setattr(self, FONTDATAFORMAT.format(num), _data)
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
-
-        row += 1
-        self.glFontSizeLabel = Label(parent, text="SpectrumDisplay Font Size: ", grid=(row, 0))
+        self.glFontSizeLabel = Label(parent, text="SpectrumDisplay Font Size", grid=(row, 0))
         self.glFontSizeData = PulldownList(parent, grid=(row, 1), hAlign='l')
         self.glFontSizeData.setMinimumWidth(PulldownListsMinimumWidth)
         self.glFontSizeData.addItems([str(val) for val in GLFONT_SIZES])
@@ -741,7 +741,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """
 
         row = 0
-        self.autoSetDataPathLabel = Label(parent, text="Auto Set dataPath: ", grid=(row, 0))
+        self.autoSetDataPathLabel = Label(parent, text="Auto Set dataPath", grid=(row, 0))
         self.autoSetDataPathBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.autoSetDataPath)
         self.autoSetDataPathBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoSetDataPath'))
 
@@ -827,51 +827,51 @@ class PreferencesPopup(CcpnDialogMainWidget):
         ###  Needs more testing for different spectra formats etc. Disabled until completion.
         # row += 1
         # self.keepSPWithinProjectTipText = 'Keep a copy of spectra inside the project directory. Useful when changing the original spectra location path'
-        # self.keepSPWithinProject = Label(parent, text="Keep a Copy Inside Project: ", grid=(row, 0))
+        # self.keepSPWithinProject = Label(parent, text="Keep a Copy Inside Project", grid=(row, 0))
         # self.keepSPWithinProjectBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.keepSpectraInsideProject,
         #                                        tipText=self.keepSPWithinProjectTipText)
         # self.keepSPWithinProjectBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'keepSpectraInsideProject'))
 
         row += 1
-        self.showToolbarLabel = Label(parent, text="Show ToolBar(s): ", grid=(row, 0))
+        self.showToolbarLabel = Label(parent, text="Show ToolBar(s)", grid=(row, 0))
         self.showToolbarBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showToolbar)
         self.showToolbarBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showToolbar'))
 
         row += 1
-        self.spectrumBorderLabel = Label(parent, text="Show Spectrum Borders: ", grid=(row, 0))
+        self.spectrumBorderLabel = Label(parent, text="Show Spectrum Borders", grid=(row, 0))
         self.spectrumBorderBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showSpectrumBorder)
         self.spectrumBorderBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSpectrumBorder'))
 
         row += 1
-        self.showGridLabel = Label(parent, text="Show Grids: ", grid=(row, 0))
+        self.showGridLabel = Label(parent, text="Show Grids", grid=(row, 0))
         self.showGridBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showGrid)
         self.showGridBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showGrid'))
 
         row += 1
-        self.showCrosshairLabel = Label(parent, text="Show Crosshairs: ", grid=(row, 0))
+        self.showCrosshairLabel = Label(parent, text="Show Crosshairs", grid=(row, 0))
         self.showCrosshairBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showCrosshair)
         self.showCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showCrosshair'))
 
         row += 1
-        self.showDoubleCrosshairLabel = Label(parent, text="    and Double Crosshairs: ", grid=(row, 0))
+        self.showDoubleCrosshairLabel = Label(parent, text="    and Double Crosshairs", grid=(row, 0))
         self.showDoubleCrosshairBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showDoubleCrosshair)
         self.showDoubleCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCrosshair'))
 
         row += 1
-        self.showSideBandsLabel = Label(parent, text="Show MAS Side Bands: ", grid=(row, 0))
+        self.showSideBandsLabel = Label(parent, text="Show MAS Side Bands", grid=(row, 0))
         self.showSideBandsBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.showGrid)
         self.showSideBandsBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSideBands'))
 
         row += 1
         # numSideBands = self.preferences.general.numSideBands
-        self.showSideBands = Label(parent, text='    number of MAS side bands shown:', grid=(row, 0), hAlign='l')
+        self.showSideBands = Label(parent, text='    number of MAS side bands shown', grid=(row, 0), hAlign='l')
         self.showSideBandsData = DoubleSpinbox(parent, step=1, min=0, max=25, grid=(row, 1), hAlign='l', decimals=0)
         # self.showSideBandsData.setValue(int(numSideBands))
         self.showSideBandsData.setMinimumWidth(LineEditsMinimumWidth)
         self.showSideBandsData.valueChanged.connect(self._queueSetNumSideBands)
 
         row += 1
-        self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis: ", grid=(row, 0))
+        self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis", grid=(row, 0))
         self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.lastAxisOnly)
         self.showLastAxisOnlyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lastAxisOnly'))
 
@@ -901,7 +901,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
         # row += 1
-        #self.showDoubleCursorLabel = Label(parent, text="Show Double Cursor: ", grid=(row, 0))
+        #self.showDoubleCursorLabel = Label(parent, text="Show Double Cursor", grid=(row, 0))
         #self.showDoubleCursorBox = CheckBox(parent, grid=(row, 1), tipText=NotImplementedTipText)#, checked=self.preferences.general.showDoubleCursor)
         # TODO enable DoubleCursor
         #self.showDoubleCursorBox.setDisabled(True)
@@ -938,7 +938,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.stripWidthZoomPercentData.valueChanged.connect(self._queueSetStripWidthZoomPercent)
 
         row += 1
-        self.showZoomXLimitApplyLabel = Label(parent, text="Apply Zoom limit to X axis: ", grid=(row, 0))
+        self.showZoomXLimitApplyLabel = Label(parent, text="Apply Zoom limit to X axis", grid=(row, 0))
         self.showZoomXLimitApplyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.zoomXLimitApply)
         self.showZoomXLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomXLimitApply'))
 
@@ -947,7 +947,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # self.showZoomXLimitApplyBox.setEnabled(False)
 
         row += 1
-        self.showZoomYLimitApplyLabel = Label(parent, text="Apply Zoom limit to Y axis: ", grid=(row, 0))
+        self.showZoomYLimitApplyLabel = Label(parent, text="Apply Zoom limit to Y axis", grid=(row, 0))
         self.showZoomYLimitApplyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.zoomYLimitApply)
         self.showZoomYLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomYLimitApply'))
 
@@ -976,12 +976,12 @@ class PreferencesPopup(CcpnDialogMainWidget):
         #                                 )
 
         # row += 1
-        # self.showGridLabel = Label(parent, text="Show Grids: ", grid=(row, 0))
+        # self.showGridLabel = Label(parent, text="Show Grids", grid=(row, 0))
         # self.showGridBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showGrid)
         # self.showGridBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showGrid'))
         #
         # row += 1
-        # self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis: ", grid=(row, 0))
+        # self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis", grid=(row, 0))
         # self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.lastAxisOnly)
         # self.showLastAxisOnlyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lastAxisOnly'))
 
@@ -1018,7 +1018,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.aspectDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
 
         row += 1
-        self.useSearchBoxModeLabel = Label(parent, text="Use Search Box Widths: ", grid=(row, 0))
+        self.useSearchBoxModeLabel = Label(parent, text="Use Search Box Widths", grid=(row, 0))
         self.useSearchBoxModeBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.searchBoxWidthsSettings.useSearchBoxMode)
         self.useSearchBoxModeBox.toggled.connect(self._queueSetUseSearchBoxMode)
         self.useSearchBoxModeLabel.setToolTip(
@@ -1027,14 +1027,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
                 'Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
 
         row += 1
-        self.useSearchBoxDoFitLabel = Label(parent, text="Apply Peak Fitting Method\n after Snap To Extrema: ", grid=(row, 0))
+        self.useSearchBoxDoFitLabel = Label(parent, text="Apply Peak Fitting Method\n after Snap To Extrema", grid=(row, 0))
         self.useSearchBoxDoFitBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.searchBoxDoFitSettings.useSearchBoxDoFit)
         self.useSearchBoxDoFitBox.toggled.connect(self._queueSetUseSearchBoxDoFit)
         self.useSearchBoxDoFitLabel.setToolTip('Option to apply fitting method after initial snap to extrema')
         self.useSearchBoxDoFitBox.setToolTip('Option to apply fitting method after initial snap to extrema')
 
         row += 1
-        self.defaultSearchBox1dRatioLabel = Label(parent, text="1d Search Box Widths (ppm): ", grid=(row, 0), hAlign='r')
+        self.defaultSearchBox1dRatioLabel = Label(parent, text="1d Search Box Widths (ppm)", grid=(row, 0), hAlign='r')
 
         row += 1
         self.searchBox1dLabel = {}
@@ -1043,7 +1043,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.searchBox1dDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
 
         row += 1
-        self.defaultSearchBoxNdRatioLabel = Label(parent, text="Nd Search Box Widths (ppm): ", grid=(row, 0), hAlign='r')
+        self.defaultSearchBoxNdRatioLabel = Label(parent, text="Nd Search Box Widths (ppm)", grid=(row, 0), hAlign='r')
 
         row += 1
         self.searchBoxNdLabel = {}
@@ -1120,12 +1120,12 @@ class PreferencesPopup(CcpnDialogMainWidget):
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
         row += 1
-        self.autoCorrectLabel = Label(parent, text="Autocorrect Colours: ", grid=(row, 0))
+        self.autoCorrectLabel = Label(parent, text="Autocorrect Colours", grid=(row, 0))
         self.autoCorrectBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.autoCorrectColours)
         self.autoCorrectBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoCorrectColours'))
 
         row += 1
-        self.marksDefaultColourLabel = Label(parent, text="Default Marks Colour:", grid=(row, 0))
+        self.marksDefaultColourLabel = Label(parent, text="Default Marks Colour", grid=(row, 0))
         self.marksDefaultColourBox = PulldownList(parent, grid=(row, 1), )  #hAlign='l', )
 
         # populate colour pulldown and set to the current colour
@@ -1141,7 +1141,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
         row += 1
-        self.multipletAveragingLabel = Label(parent, text="Multiplet Averaging:", grid=(row, 0))
+        self.multipletAveragingLabel = Label(parent, text="Multiplet Averaging", grid=(row, 0))
         # multipletAveraging = self.preferences.general.multipletAveraging
         self.multipletAveraging = RadioButtons(parent, texts=MULTIPLETAVERAGINGTYPES,
                                                # selectedInd=MULTIPLETAVERAGINGTYPES.index(
@@ -1156,7 +1156,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
         row += 1
-        self.singleContoursLabel = Label(parent, text="Generate Single Contours\n   per Plane: ", grid=(row, 0))
+        self.singleContoursLabel = Label(parent, text="Generate Single Contours\n   per Plane", grid=(row, 0))
         self.singleContoursBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.generateSinglePlaneContours)
         self.singleContoursBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'generateSinglePlaneContours'))
 
@@ -1521,8 +1521,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         if checked != self.preferences.general[option]:
             return partial(self._toggleGeneralOptions, option, checked)
 
-    def _toggleGeneralOptions(self, preference, checked):
-        self.preferences.general[preference] = checked
+    def _toggleGeneralOptions(self, option, checked):
+        self.preferences.general[option] = checked
         # if preference == 'showToolbar':
         #     for spectrumDisplay in self.project.spectrumDisplays:
         #         spectrumDisplay.spectrumUtilToolBar.setVisible(checked)
@@ -1530,8 +1530,20 @@ class PreferencesPopup(CcpnDialogMainWidget):
         #     for strip in self.project.strips:
         #         for spectrumView in strip.spectrumViews:
         #             spectrumView._setBorderItemHidden(checked)
-        if preference == 'autoBackupEnabled':
+        if option == 'autoBackupEnabled':
             self.application.updateAutoBackup()
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueToggleAppearanceOptions(self, option, checked):
+        """Toggle a general checkbox option in the preferences
+        Requires the parameter to be called 'option' so that the decorator gives it a unique name
+        in the internal updates dict
+        """
+        if checked != self.preferences.appearance[option]:
+            return partial(self._toggleAppearanceOptions, option, checked)
+
+    def _toggleAppearanceOptions(self, option, checked):
+        self.preferences.appearance[option] = checked
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetPymolPath(self):

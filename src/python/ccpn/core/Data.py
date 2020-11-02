@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:28 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import Optional
+from ccpn.util.Common import _validateName
 from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import Data as ApiData
@@ -35,7 +36,6 @@ from ccpn.core.DataSet import DataSet
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
 from ccpn.util.Logging import getLogger
-from functools import partial
 
 
 class Data(AbstractWrapperObject):
@@ -177,7 +177,7 @@ class Data(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Data, changing its name and Pid.
         """
-        self._validateName(value=value, allowWhitespace=False)
+        _validateName(self.project, Data, value=value, allowWhitespace=False)
 
         # rename functions from here
         oldName = self.name

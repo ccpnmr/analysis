@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:22 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -838,9 +838,9 @@ class NmrResidueTable(GuiTable):
             currentNmrResidue = data.get(DATAFRAME_OBJECT)
 
             if currentNmrResidue:
-                from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
+                from ccpn.ui.gui.popups.NmrResiduePopup import NmrResidueEditPopup
 
-                popup = NmrResiduePopup(parent=self.mainWindow, mainWindow=self.mainWindow, obj=currentNmrResidue)
+                popup = NmrResidueEditPopup(parent=self.mainWindow, mainWindow=self.mainWindow, obj=currentNmrResidue)
                 popup.exec_()
 
 

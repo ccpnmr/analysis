@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 19:00:46 +0100 (Fri, October 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -558,10 +558,10 @@ class CcpnGLWidget(QOpenGLWidget):
         base = self._preferences._baseAspectRatioAxisCode
         if kx == base:
             if ky != base:
-                self._lockedAspectRatios[ky] = self._lockedAspectRatios[kx] * self.pixelY / self.pixelX
+                self._lockedAspectRatios[ky] = abs(self._lockedAspectRatios[kx] * self.pixelY / self.pixelX)
         elif ky == base:
             if kx != base:
-                self._lockedAspectRatios[kx] = self._lockedAspectRatios[ky] * self.pixelX / self.pixelY
+                self._lockedAspectRatios[kx] = abs(self._lockedAspectRatios[ky] * self.pixelX / self.pixelY)
 
         self.symbolX = abs(self._symbolSize * self.pixelX)
         self.symbolY = abs(self._symbolSize * self.pixelY)
@@ -908,7 +908,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def _getValidLockedAspectRatio(self, axisCode):
         va = [ax for ax in self._lockedAspectRatios.keys() if ax.upper()[0] == axisCode.upper()[0]]
         if va and len(va) > 0:
-            return self._lockedAspectRatios[va[0]]
+            return abs(self._lockedAspectRatios[va[0]])
         else:
             return 1.0
 
@@ -6175,6 +6175,18 @@ class CcpnGLWidget(QOpenGLWidget):
                     gr.renderMode = GLRENDERMODE_REBUILD
             self.update()
 
+    def getAxisPosition(self, axisCode):
+        stripAxisIndex = self.axisCodes.index(axisCode)
+
+        position = None
+        if stripAxisIndex == 0:
+            position = (self.axisR + self.axisL) / 2.0
+
+        elif stripAxisIndex == 1:
+            position = (self.axisT + self.axisB) / 2.0
+
+        return position
+
     def setAxisPosition(self, axisCode, position, update=True):
         # if not self.glReady: return
 
@@ -6193,6 +6205,18 @@ class CcpnGLWidget(QOpenGLWidget):
             self.axisT = position + diff
 
             self._rescaleYAxis(update=update)
+
+    def getAxisWidth(self, axisCode):
+        stripAxisIndex = self.axisCodes.index(axisCode)
+
+        width = None
+        if stripAxisIndex == 0:
+            width = abs(self.axisR - self.axisL)
+
+        elif stripAxisIndex == 1:
+            width = abs(self.axisT - self.axisB)
+
+        return width
 
     def setAxisWidth(self, axisCode, width, update=True):
         # if not self.glReady: return

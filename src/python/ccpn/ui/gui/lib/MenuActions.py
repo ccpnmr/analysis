@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -52,9 +52,9 @@ from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
 from ccpn.ui.gui.popups.DataSetPopup import DataSetPopup
 from ccpn.ui.gui.popups.IntegralListPropertiesPopup import IntegralListPropertiesPopup
 from ccpn.ui.gui.popups.MultipletListPropertiesPopup import MultipletListPropertiesPopup
-from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomPopup
+from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomEditPopup, NmrAtomNewPopup
 from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup
-from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
+from ccpn.ui.gui.popups.NmrResiduePopup import NmrResidueEditPopup, NmrResidueNewPopup
 from ccpn.ui.gui.popups.NotesPopup import NotesPopup
 from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
 from ccpn.ui.gui.popups.RestraintListPopup import RestraintListEditPopup, RestraintListNewPopup
@@ -128,6 +128,14 @@ class _createNewNmrAtom(CreateNewObjectABC):
     parentMethodName = 'newNmrAtom'
 
 
+class _createNewComplex(CreateNewObjectABC):
+    parentMethodName = 'newComplex'
+
+
+class _createNewRestraintList(CreateNewObjectABC):
+    parentMethodName = 'newRestraintList'
+
+
 class _createNewNote(CreateNewObjectABC):
     parentMethodName = 'newNote'
 
@@ -138,6 +146,14 @@ class _createNewIntegralList(CreateNewObjectABC):
 
 class _createNewSample(CreateNewObjectABC):
     parentMethodName = 'newSample'
+
+
+class _createNewSampleComponent(CreateNewObjectABC):
+    parentMethodName = 'newSampleComponent'
+
+
+class _createNewSubstance(CreateNewObjectABC):
+    parentMethodName = 'newSubstance'
 
 
 class _createNewStructureEnsemble(CreateNewObjectABC):
@@ -217,11 +233,13 @@ class _raiseChemicalShiftListPopup(RaisePopupABC):
 class _raisePeakListPopup(RaisePopupABC):
     popupClass = PeakListPropertiesPopup
     objectArgumentName = 'peakList'
+    parentObjectArgumentName = 'spectrum'
 
 
 class _raiseMultipletListPopup(RaisePopupABC):
     popupClass = MultipletListPropertiesPopup
     objectArgumentName = 'multipletList'
+    parentObjectArgumentName = 'spectrum'
 
 
 class _raiseCreateNmrChainPopup(RaisePopupABC):
@@ -235,12 +253,22 @@ class _raiseNmrChainPopup(RaisePopupABC):
 
 
 class _raiseNmrResiduePopup(RaisePopupABC):
-    popupClass = NmrResiduePopup
+    popupClass = NmrResidueEditPopup
+    # objectArgumentName = 'nmrResidue'
+
+
+class _raiseNmrResidueNewPopup(RaisePopupABC):
+    popupClass = NmrResidueNewPopup
     # objectArgumentName = 'nmrResidue'
 
 
 class _raiseNmrAtomPopup(RaisePopupABC):
-    popupClass = NmrAtomPopup
+    popupClass = NmrAtomEditPopup
+    # objectArgumentName = 'nmrAtom'
+
+
+class _raiseNmrAtomNewPopup(RaisePopupABC):
+    popupClass = NmrAtomNewPopup
     # objectArgumentName = 'nmrAtom'
 
 
@@ -252,6 +280,7 @@ class _raiseNotePopup(RaisePopupABC):
 class _raiseIntegralListPopup(RaisePopupABC):
     popupClass = IntegralListPropertiesPopup
     objectArgumentName = 'integralList'
+    parentObjectArgumentName = 'spectrum'
 
 
 class _raiseRestraintListEditPopup(RaisePopupABC):

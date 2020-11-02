@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:32:49 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -279,7 +279,7 @@ def _getMimeQVariant(value):
     return result
 
 
-def makeDragEvent(self, dataDict, texts, label=None, action=QtCore.Qt.CopyAction):
+def makeDragEvent(self, dataDict, texts, label=None, action=QtCore.Qt.CopyAction, alignCentre=True):
     """Create a new drag event with 'self' as the source
 
     :param self: source of the new drag event
@@ -324,8 +324,9 @@ def makeDragEvent(self, dataDict, texts, label=None, action=QtCore.Qt.CopyAction
         # set pixmap if label is defined other defaults to mimeData.text
         drag.setPixmap(pixmap)
 
-    # set the hotspot as the centre
-    drag.setHotSpot(QtCore.QPoint(dragLabel.width() // 2, dragLabel.height() // 2))
+    if alignCentre:
+        # set the hotspot as the centre
+        drag.setHotSpot(QtCore.QPoint(dragLabel.width() // 2, dragLabel.height() // 2))
 
     # invoke the drag event
     drag.exec_(action)

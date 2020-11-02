@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -86,10 +86,10 @@ from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
 # from PyQt5.QtGui import QListView, QAbstractItemView
 
 from ccpn.ui.gui.lib.MenuActions import _createNewDataSet, _createNewPeakList, _createNewChemicalShiftList, _createNewMultipletList, _createNewNmrResidue, \
-    _createNewNmrAtom, \
+    _createNewNmrAtom, _createNewComplex, _createNewRestraintList, _createNewSampleComponent, _createNewSubstance, \
     _createNewNote, _createNewIntegralList, _createNewSample, _createNewStructureEnsemble, _raiseNewChainPopup, _raiseChainPopup, _raiseComplexEditorPopup, \
     _raiseDataSetPopup, _raiseChemicalShiftListPopup, _raisePeakListPopup, _raiseMultipletListPopup, _raiseCreateNmrChainPopup, _raiseNmrChainPopup, \
-    _raiseNmrResiduePopup, _raiseNmrAtomPopup, _raiseNotePopup, _raiseIntegralListPopup, \
+    _raiseNmrResiduePopup, _raiseNmrResidueNewPopup, _raiseNmrAtomPopup, _raiseNmrAtomNewPopup, _raiseNotePopup, _raiseIntegralListPopup, \
     _raiseRestraintListEditPopup, _raiseRestraintListNewPopup, _raiseSamplePopup, \
     _raiseSampleComponentPopup, _raiseSpectrumPopup, _raiseSpectrumGroupEditorPopup, _raiseStructureEnsemblePopup, _raiseSubstancePopup
 
@@ -795,17 +795,20 @@ class SideBarStructure(object):
                 SidebarClassTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup(),
                                       menuAction=_openItemSpectrumDisplay(position='right', relativeTo=None), isDraggable=True, children=[
                         SidebarTree('PeakLists', closed=False, children=[
-                            SidebarItem('<New PeakList>', callback=_createNewPeakList()),
+                            SidebarItem('<New PeakList>', callback=_raisePeakListPopup(editMode=False, useParent=True)),
+
                             SidebarClassItems(klass=PeakList, callback=_raisePeakListPopup(),
                                               menuAction=_openItemPeakListTable(position='left', relativeTo=None), isDraggable=True),
                             ]),
                         SidebarTree('MultipletLists', children=[
-                            SidebarItem('<New MultipletList>', callback=_createNewMultipletList()),
+                            SidebarItem('<New MultipletList>', callback=_raiseMultipletListPopup(editMode=False, useParent=True)),
+
                             SidebarClassItems(klass=MultipletList, callback=_raiseMultipletListPopup(),
                                               menuAction=_openItemMultipletListTable(position='left', relativeTo=None), isDraggable=True),
                             ]),
                         SidebarTree('IntegralLists', children=[
-                            SidebarItem('<New IntegralList>', callback=_createNewIntegralList()),
+                            SidebarItem('<New IntegralList>', callback=_raiseIntegralListPopup(editMode=False, useParent=True)),
+
                             SidebarClassItems(klass=IntegralList, callback=_raiseIntegralListPopup(),
                                               menuAction=_openItemIntegralListTable(position='left', relativeTo=None), isDraggable=True),
                             ]),
@@ -814,8 +817,9 @@ class SideBarStructure(object):
 
             #------ SpectrumGroups ------
             SidebarTree('SpectrumGroups', closed=True, children=[
-                SidebarItem('<New SpectrumGroup>', callback=_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False)),
-                SidebarClassTreeItems(klass=SpectrumGroup, callback=_raiseSpectrumGroupEditorPopup(editMode=True),
+                SidebarItem('<New SpectrumGroup>', callback=_raiseSpectrumGroupEditorPopup(editMode=False, useNone=True)),
+
+                SidebarClassTreeItems(klass=SpectrumGroup, callback=_raiseSpectrumGroupEditorPopup(),
                                       menuAction=_openItemSpectrumGroupDisplay(position='right', relativeTo=None),
                                       triggers=ALL_NOTIFIERS, isDraggable=True, children=[
                         SidebarClassSpectrumTreeItems(klass=Spectrum, callback=_raiseSpectrumPopup(),
@@ -825,22 +829,26 @@ class SideBarStructure(object):
 
             #------ ChemicalShiftLists ------
             SidebarTree('ChemicalShiftLists', closed=True, children=[
-                SidebarItem('<New ChemicalShiftList>', callback=_raiseChemicalShiftListPopup(useNone=True, editMode=False)),
-                SidebarClassTreeItems(klass=ChemicalShiftList, callback=_raiseChemicalShiftListPopup(editMode=True),
+                SidebarItem('<New ChemicalShiftList>', callback=_raiseChemicalShiftListPopup(editMode=False, useNone=True)),
+
+                SidebarClassTreeItems(klass=ChemicalShiftList, callback=_raiseChemicalShiftListPopup(),
                                       menuAction=_openItemChemicalShiftListTable(position='left', relativeTo=None), isDraggable=True),
                 ]),
 
             #------ NmrChains, NmrResidues, NmrAtoms ------
             SidebarTree('NmrChains', closed=True, children=[
                 SidebarItem('<New NmrChain>', callback=_raiseCreateNmrChainPopup()),
+
                 SidebarClassTreeItems(klass=NmrChain, rebuildOnRename='NmrChain-ClassTreeItems',
                                       callback=_raiseNmrChainPopup(),
                                       menuAction=_openItemNmrChainTable(position='left', relativeTo=None), isDraggable=True, children=[
-                        SidebarItem('<New NmrResidue>', callback=_createNewNmrResidue()),
+                        SidebarItem('<New NmrResidue>', callback=_raiseNmrResidueNewPopup(editMode=False)),
+
                         SidebarClassNmrResidueTreeItems(klass=NmrResidue, rebuildOnRename='NmrChain-ClassTreeItems',
                                                         callback=_raiseNmrResiduePopup(),
                                                         menuAction=_openItemNmrResidueItem(position='left', relativeTo=None), isDraggable=True, children=[
-                                SidebarItem('<New NmrAtom>', callback=_createNewNmrAtom()),
+                                SidebarItem('<New NmrAtom>', callback=_raiseNmrAtomNewPopup(editMode=False)),
+
                                 SidebarClassItems(klass=NmrAtom, rebuildOnRename='NmrChain-ClassTreeItems',
                                                   callback=_raiseNmrAtomPopup(),
                                                   menuAction=_openItemNmrAtomItem(position='left', relativeTo=None), isDraggable=True),
@@ -850,11 +858,14 @@ class SideBarStructure(object):
 
             #------ Samples, SampleComponents ------
             SidebarTree('Samples', closed=True, children=[
-                SidebarItem('<New Sample>', callback=_createNewSample()),
+                SidebarItem('<New Sample>', callback=_raiseSamplePopup(editMode=False, useNone=True)),
+
                 SidebarClassTreeItems(klass=Sample, rebuildOnRename='Sample-ClassTreeItems',
                                       callback=_raiseSamplePopup(),
+
                                       menuAction=_openItemSampleDisplay(position='right', relativeTo=None), isDraggable=True, children=[
                         SidebarItem('<New SampleComponent>', callback=_raiseSampleComponentPopup(useParent=True, newSampleComponent=True)),
+
                         SidebarClassItems(klass=SampleComponent, rebuildOnRename='Sample-ClassTreeItems',
                                           callback=_raiseSampleComponentPopup(newSampleComponent=False),
                                           menuAction=_openItemSampleComponentTable(position='right', relativeTo=None), isDraggable=True),
@@ -863,7 +874,8 @@ class SideBarStructure(object):
 
             #------ Substances ------
             SidebarTree('Substances', closed=True, children=[
-                SidebarItem('<New Substance>', callback=_raiseSubstancePopup(useNone=True, newSubstance=True)),
+                SidebarItem('<New Substance>', callback=_raiseSubstancePopup(newSubstance=True, useNone=True)),
+
                 SidebarClassItems(klass=Substance, callback=_raiseSubstancePopup(newSubstance=False),
                                   menuAction=_openItemSubstanceTable(position='bottom', relativeTo=None), isDraggable=True),
                 ]),
@@ -871,6 +883,7 @@ class SideBarStructure(object):
             #------ Chains, Residues ------
             SidebarTree('Chains', closed=True, children=[
                 SidebarItem('<New Chain>', callback=_raiseNewChainPopup(useParent=True)),
+
                 SidebarClassTreeItems(klass=Chain, rebuildOnRename='Chain-ClassTreeItems',
                                       callback=_raiseChainPopup(),
                                       menuAction=_openItemChainTable(position='bottom', relativeTo=None), isDraggable=True, children=[
@@ -881,36 +894,41 @@ class SideBarStructure(object):
 
             #------ Complexes ------
             SidebarTree('Complexes', closed=True, children=[
-                SidebarItem('<New Complex>', callback=_raiseComplexEditorPopup(useNone=True, editMode=False)),
+                SidebarItem('<New Complex>', callback=_raiseComplexEditorPopup(editMode=False, useNone=True)),
+
                 SidebarClassTreeItems(klass=Complex, rebuildOnRename='Complex-ClassTreeItems',
-                                      callback=_raiseComplexEditorPopup(editMode=True),
+                                      callback=_raiseComplexEditorPopup(),
                                       menuAction=_openItemComplexTable(position='bottom', relativeTo=None),
                                       triggers=ALL_NOTIFIERS, isDraggable=True),
                 ]),
 
             #------ StructureEnsembles ------
             SidebarTree('StructureEnsembles', closed=True, children=[
-                SidebarItem('<New StructureEnsemble>', callback=_createNewStructureEnsemble()),
+                SidebarItem('<New StructureEnsemble>', callback=_raiseStructureEnsemblePopup(editMode=False, useNone=True)),
+
                 SidebarClassItems(klass=StructureEnsemble, callback=_raiseStructureEnsemblePopup(),
                                   menuAction=_openItemStructureEnsembleTable(position='bottom', relativeTo=None), isDraggable=True),
                 ]),
 
             #------ DataSets ------
             SidebarTree('DataSets', closed=True, children=[
-                SidebarItem('<New DataSet>', callback=_createNewDataSet()),
+                SidebarItem('<New DataSet>', callback=_raiseDataSetPopup(editMode=False, useNone=True)),
+
                 SidebarClassTreeItems(klass=DataSet, rebuildOnRename='DataSet-ClassTreeItems',
                                       callback=_raiseDataSetPopup(),
                                       menuAction=_openItemDataSetTable(position='left', relativeTo=None), isDraggable=True, children=[
-                        SidebarItem('<New RestraintList>', callback=_raiseRestraintListNewPopup(editMode=False, useParent=True)),
+                        SidebarItem('<New RestraintList>', callback=_raiseRestraintListNewPopup(editMode=False, useNone=False, useParent=True)),
+
                         SidebarClassTreeItems(klass=RestraintList, rebuildOnRename='DataSet-ClassTreeItems',
-                                              callback=_raiseRestraintListEditPopup(editMode=True),
+                                              callback=_raiseRestraintListEditPopup(),
                                               menuAction=_openItemRestraintListTable(position='left', relativeTo=None), isDraggable=True),
                         ]),
                 ]),
 
             #------ Notes ------
             SidebarTree('Notes', closed=True, children=[
-                SidebarItem('<New Note>', callback=_createNewNote()),
+                SidebarItem('<New Note>', callback=_raiseNotePopup(editMode=False, useNone=True)),
+
                 SidebarClassItems(klass=Note, callback=_raiseNotePopup(),
                                   menuAction=_openItemNoteTable(position='bottom', relativeTo=None), isDraggable=True),
                 ]),

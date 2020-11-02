@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -133,7 +133,7 @@ class ListCompoundWidget(CompoundBaseWidget):
         self._addWidget(self.pulldownList)
 
         # listWidget
-        self.listWidget = ListWidget(parent=self, callback=callback, infiniteHeight=True)
+        self.listWidget = ListWidget(parent=self, callback=callback, infiniteHeight=True, **(compoundKwds or {}))
         self.listWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self._uniqueList = uniqueList
         if defaults is not None:
@@ -269,7 +269,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', callback=None, default=None, editable=True,
-                 sizeAdjustPolicy=None, compoundKwds=None,
+                 sizeAdjustPolicy=None, compoundKwds=None, tipText=None,
                  **kwds):
         """
         :param parent: parent widget
@@ -290,6 +290,8 @@ class EntryCompoundWidget(CompoundBaseWidget):
 
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
+        if tipText:
+            self.label.setToolTip(tipText)
 
         self.entry = Entry(parent=self, callback=callback, editable=editable, **compoundKwds)
         self._addWidget(self.entry)

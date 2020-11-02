@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-16 14:38:52 +0100 (Fri, October 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -35,12 +35,16 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import datetime
 import os
 import random
+import re
 import sys
 import string
 import itertools
 from functools import partial
 from collections.abc import Iterable
 from collections import OrderedDict
+from string import whitespace
+
+from ccpn.core.lib import Pid
 from ccpn.util.LabelledEnum import LabelledEnum
 from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
 from ccpn.util.FrozenDict import FrozenDict
@@ -61,7 +65,9 @@ validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
                           + defaultFileNameChar)
 validCcpnFileNameChars = validFileNamePartChars + '-.' + separatorFileNameChar
-
+CAMELCASEPTN = r'((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))'
+CAMELCASEREP = r' \1'
+# alternative camelCase split = r'((?<=[a-z])[A-Z]|(?<=[A-Z])[A-Z](?=[a-z]))''
 
 # # Not used - Rasmus 20/2/2017
 # Sentinel = collections.namedtuple('Sentinel', ['value'])
@@ -99,12 +105,14 @@ def incrementName(name):
 
     return name + '_1'
 
+
 def _incrementObjectName(project, pluralLinkName, name):
     """ fetch an incremented name if an object in list (project.xs) has already taken it. """
     names = [d.name for d in getattr(project, pluralLinkName) if hasattr(d, 'name')]
     while name in names:
         name = incrementName(name)
     return name
+
 
 def recursiveImport(dirname, modname=None, ignoreModules=None, force=False):
     """ recursively import all .py files
@@ -565,6 +573,10 @@ def stringifier(*fields, **options):
 
 def contains_whitespace(s):
     return True in [c in s for c in string.whitespace]
+
+
+def contains_whitespace_nospace(s):
+    return True in [c in s for c in string.whitespace if c != ' ']
 
 
 def resetSerial(apiObject, newSerial):
@@ -1208,3 +1220,67 @@ def _compareDict(d1, d2):
                 return False
 
     return True
+
+
+def _validateName(project, cls, value: str, attribName: str = 'name', allowWhitespace: bool = False, allowEmpty: bool = False,
+                  allowNone: bool = False, allowLeadingTrailingWhitespace: bool = False, allowSpace: bool = True,
+                  checkExisting: bool = True):
+    """Check that the attribName is valid
+    """
+    if value is not None:
+        if not isinstance(value, str):
+            raise TypeError('{}.{} must be a string'.format(cls.className, attribName))
+        if not value and not allowEmpty:
+            raise ValueError('{}.{} must be set'.format(cls.className, attribName))
+        if Pid.altCharacter in value:
+            raise ValueError('Character {} not allowed in {}.{}'.format(Pid.altCharacter, cls.className, attribName))
+        if allowWhitespace:
+            if not allowSpace and ' ' in value:
+                raise ValueError('space not allowed in {}.{}'.format(cls.className, attribName))
+        else:
+            if allowSpace and contains_whitespace_nospace(value):
+                raise ValueError('whitespace not allowed in {}.{}'.format(cls.className, attribName))
+            elif not allowSpace and contains_whitespace(value):
+                raise ValueError('whitespace not allowed in {}.{}'.format(cls.className, attribName))
+        if not allowLeadingTrailingWhitespace and value != value.strip():
+            raise ValueError('{}.{} cannot contain leading/trailing whitespace'.format(cls.className, attribName))
+
+    elif not allowNone:
+        raise ValueError('None not allowed in {}.{}'.format(cls.className, attribName))
+
+    # previous = project.getByRelativeId(value)
+    # if previous not in (None, cls):
+    #     raise ValueError('{} already exists'.format(previous.longPid))
+
+    if checkExisting:
+        found = [obj for obj in getattr(project, cls._pluralLinkName, []) if getattr(obj, attribName, None) == value]
+        if found:
+            raise ValueError('{} already exists'.format(found[0].id))
+
+    # will only get here if all the tests pass
+    return True
+
+
+def stringToCamelCase(label):
+    """Change string to camelCase format
+    Removes whitespaces, and changes first character to lower case
+    """
+    attr = label.translate({ord(c): None for c in whitespace})
+    return attr[0].lower() + attr[1:]
+
+
+def camelCaseToString(name):
+    """Change a camelCase string to string with spaces infront of capitals.
+    Groups of capitals are taken as acronyms and only the last letter of a group is separated.
+    The first letter is capitalised except in the special case of a camel case string beginning
+    <lowerCase,uppercase>, in which case the first lowercase letter is preserved.
+    e.g.
+    camelCase -> Camel Case
+    TLAAcronym -> TLA Acronym
+    pHValue -> pH Value
+    """
+    if name[0:1].islower() and name[1:2].isupper():
+        return name[0:1] + re.sub(CAMELCASEPTN, CAMELCASEREP, name[1:])
+    else:
+        label = re.sub(CAMELCASEPTN, CAMELCASEREP, name)
+        return label[0:1].upper() + label[1:]

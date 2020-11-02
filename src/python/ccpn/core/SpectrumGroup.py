@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import Tuple, Any
-# from enum import Enum
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -36,7 +35,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameObject
 from ccpn.util.Logging import getLogger
 from ccpn.util.LabelledEnum import LabelledEnum
-from ccpn.util.Common import _incrementObjectName
+from ccpn.util.Common import _incrementObjectName, _validateName
 
 SPECTRUMGROUP = 'spectrumGroup'
 SPECTRUMGROUPCOMMENT = 'spectrumGroupComment'
@@ -344,7 +343,7 @@ class SpectrumGroup(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename SpectrumGroup, changing its name and Pid.
         """
-        self._validateName(value=value, allowWhitespace=False)
+        _validateName(self.project, SpectrumGroup, value=value, allowWhitespace=False)
 
         # rename functions from here
         oldName = self.name

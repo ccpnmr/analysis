@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-22 14:49:57 +0100 (Wed, April 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -86,7 +86,7 @@ class TestSubstanceCreation(WrapperTesting):
         """
         Test that creating a new Substance with 42.0 (non-string) raises TypeError
         """
-        with self.assertRaisesRegexp(TypeError, 'name must be a string'):
+        with self.assertRaisesRegexp(TypeError, 'must be a string'):
             s = self.project.newSubstance(42.0)
         self.assertEqual(len(self.project.substances), 0)
 
@@ -94,7 +94,7 @@ class TestSubstanceCreation(WrapperTesting):
         """
         Test that creating a new Substance with no parameter raises TypeError.
         """
-        with self.assertRaisesRegexp(ValueError, 'name must be set'):
+        with self.assertRaisesRegexp(ValueError, 'must be set'):
             self.project.newSubstance()
         self.assertEqual(len(self.project.substances), 0)
 
@@ -102,7 +102,7 @@ class TestSubstanceCreation(WrapperTesting):
         """
         Test that creating a new Substance with None raises ValueError.
         """
-        with self.assertRaisesRegexp(ValueError, 'name must be set'):
+        with self.assertRaisesRegexp(ValueError, 'must be set'):
             self.project.newSubstance(None)
         self.assertEqual(len(self.project.substances), 0)
 
@@ -110,7 +110,7 @@ class TestSubstanceCreation(WrapperTesting):
         """
         Test that creating a new Substance with '' raises ValueError.
         """
-        with self.assertRaisesRegexp(ValueError, 'name must be set'):
+        with self.assertRaisesRegexp(ValueError, 'must be set'):
             self.project.newSubstance('')
         self.assertEqual(len(self.project.substances), 0)
 
@@ -118,7 +118,7 @@ class TestSubstanceCreation(WrapperTesting):
         """
         Test that creating a new Substance with leading/trailing whitespace raises ValueError.
         """
-        with self.assertRaisesRegexp(ValueError, 'name contains leading/trailing whitespace'):
+        with self.assertRaisesRegexp(ValueError, 'leading/trailing whitespace'):
             self.project.newSubstance(' newName ')
         self.assertEqual(len(self.project.substances), 0)
 
@@ -139,7 +139,7 @@ class TestSubstanceCreation(WrapperTesting):
         """
         Test that creating a new Substance with leading/trailing whitespace raises ValueError.
         """
-        with self.assertRaisesRegexp(ValueError, 'name contains leading/trailing whitespace'):
+        with self.assertRaisesRegexp(ValueError, 'leading/trailing whitespace'):
             self.project.newSubstance('newName', ' whitespaceLabel ')
         self.assertEqual(len(self.project.substances), 0)
 
@@ -493,7 +493,7 @@ class Test_MoleculeSubstance(WrapperTesting):
         """
         Test that Substance can be set with labelling
         """
-        with self.assertRaisesRegexp(ValueError, 'name must be set'):
+        with self.assertRaisesRegexp(ValueError, 'must be set'):
             s = self.project.newSubstance('test substance',
                                           substanceType='Molecule',
                                           labelling='')
@@ -504,7 +504,7 @@ class Test_MoleculeSubstance(WrapperTesting):
         Test that the Substance set with ^badname raises an error
         Substance is not initialised
         """
-        with self.assertRaisesRegexp(ValueError, 'not allowed in ccpn.Substance'):
+        with self.assertRaisesRegexp(ValueError, 'not allowed in'):
             s = self.project.newSubstance('test substance',
                                           substanceType='Molecule',
                                           labelling='^Badname')
@@ -515,7 +515,7 @@ class Test_MoleculeSubstance(WrapperTesting):
         Test that the Substance set with non-string raises an error
         Substance is not initialised
         """
-        with self.assertRaisesRegexp(TypeError, 'name must be a string'):
+        with self.assertRaisesRegexp(TypeError, 'must be a string'):
             s = self.project.newSubstance('test substance',
                                           substanceType='Molecule',
                                           labelling=12)
@@ -744,7 +744,7 @@ class Test_PolymerSubstance(WrapperTesting):
         """
         Test that the labelling property of Substance can be set.
         """
-        with self.assertRaisesRegexp(ValueError, 'name must be set'):
+        with self.assertRaisesRegexp(ValueError, 'must be set'):
             s = self.project.createPolymerSubstance('acd',
                                                     name='test polymer substance',
                                                     molType='protein',
@@ -755,8 +755,8 @@ class Test_PolymerSubstance(WrapperTesting):
         """
         Test that the labelling property of Substance can be set.
         """
-        # with self.assertRaisesRegexp(ValueError, 'not allowed in ccpn.Substance'):
-        with self.assertRaisesRegexp(ValueError, 'not allowed in ccpn.Substance'):
+        # with self.assertRaisesRegexp(ValueError, 'not allowed in '):
+        with self.assertRaisesRegexp(ValueError, 'not allowed in '):
             s = self.project.createPolymerSubstance('acd',
                                                     name='test polymer substance',
                                                     molType='protein',
@@ -767,8 +767,8 @@ class Test_PolymerSubstance(WrapperTesting):
         """
         Test that the labelling property of Substance can be set.
         """
-        # with self.assertRaisesRegexp(ValueError, 'not allowed in ccpn.Substance'):
-        with self.assertRaisesRegexp(ValueError, 'name contains leading/trailing whitespace'):
+        # with self.assertRaisesRegexp(ValueError, 'not allowed in '):
+        with self.assertRaisesRegexp(ValueError, 'leading/trailing whitespace'):
             s = self.project.createPolymerSubstance('acd',
                                                     name='test polymer substance',
                                                     molType='protein',
@@ -779,7 +779,7 @@ class Test_PolymerSubstance(WrapperTesting):
         """
         Test that the labelling property of Substance can be set.
         """
-        with self.assertRaisesRegexp(TypeError, 'name must be a string'):
+        with self.assertRaisesRegexp(TypeError, 'must be a string'):
             s = self.project.createPolymerSubstance('acd',
                                                     name='test polymer substance',
                                                     molType='protein',

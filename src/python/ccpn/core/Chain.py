@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -298,7 +298,7 @@ class Chain(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Chain, changing its shortName and Pid.
         """
-        self._validateName(value=value, allowWhitespace=False)
+        commonUtil._validateName(self.project, Chain, value=value, allowWhitespace=False, allowSpace=False)
 
         # rename functions from here
         oldName = self.shortName
@@ -417,7 +417,7 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     if not shortName:
         shortName = apiMolSystem.nextChainCode()
     else:
-        self._validateName(value=shortName, allowWhitespace=False)
+        commonUtil._validateName(self, Chain, value=shortName, allowWhitespace=False)
 
     previous = self._project.getChain(shortName.translate(Pid.remapSeparators))
     if previous is not None:
@@ -427,7 +427,7 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     if compoundName is None:
         name = self._uniqueSubstanceName()
     elif apiRefComponentStore.findFirstComponent(name=compoundName) is None:
-        self._validateName(value=compoundName, allowWhitespace=False)
+        commonUtil._validateName(self, Chain, value=compoundName, allowWhitespace=False)
 
         name = compoundName
     else:

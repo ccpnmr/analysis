@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,9 +31,18 @@ from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget
 
 
 class NotesPopup(AttributeEditorPopupABC):
-    """Notes attributes editor popup"""
+    """Notes attributes editor popup
+    """
 
     klass = Note
-    attributes = [('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+    attributes = [('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                  ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ]
+
+    def _applyAllChanges(self, changes):
+        """Apply all changes - add new note
+        """
+        super()._applyAllChanges(changes)
+        if not self.EDITMODE:
+            # create the new note
+            self.project.newNote(**self.obj)

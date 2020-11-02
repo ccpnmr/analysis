@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:35 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -119,15 +119,15 @@ class SubstanceTest(WrapperTesting):
         self.assertEqual(substance1._id, 'notmuch.')
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
-        with self.assertRaisesRegexp(ValueError, 'Substance name must be set'):
+        with self.assertRaisesRegexp(ValueError, 'must be set'):
             substance1.rename(name='', labelling=None)
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
-        with self.assertRaisesRegexp(ValueError, 'not allowed in Substance'):
+        with self.assertRaisesRegexp(ValueError, 'not allowed in'):
             substance1.rename(name='^Badname', labelling=None)
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
-        with self.assertRaisesRegexp(TypeError, 'Substance name must be a string'):
+        with self.assertRaisesRegexp(TypeError, 'must be a string'):
             substance1.rename(name=12, labelling=None)
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
@@ -136,11 +136,11 @@ class SubstanceTest(WrapperTesting):
         substance1.rename(name='notmuch', labelling='')
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
-        with self.assertRaisesRegexp(ValueError, 'not allowed in Labelling name'):
+        with self.assertRaisesRegexp(ValueError, 'not allowed in'):
             substance1.rename(name='notmuch', labelling='^Badname')
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
-        with self.assertRaisesRegexp(TypeError, 'Labelling name must be a string'):
+        with self.assertRaisesRegexp(TypeError, 'must be a string'):
             substance1.rename(name='notmuch', labelling=12)
         self.assertEqual(sc1._id, 'S1.notmuch.')
 

@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:28 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import datetime
-from functools import partial
 from typing import Optional
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -36,6 +35,7 @@ from ccpn.core.lib import Pid
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
+from ccpn.util.Logging import getLogger
 
 
 class DataSet(AbstractWrapperObject):
@@ -86,24 +86,46 @@ class DataSet(AbstractWrapperObject):
     def title(self) -> str:
         """Title of DataSet.
         """
-        # Reading V2 project resulted in name being None; create one on the fly
-        if self._wrappedData.name is None:
-            nextNumber = len(self._project.dataSets)
-            title = '%s_%s' % (self._defaultName(self), nextNumber) if nextNumber > 0 else self._defaultName(self)
-            while self._project._wrappedData.findFirstNmrConstraintStore(name=title) is not None:
-                title = commonUtil.incrementName(title)
-            self._wrappedData.__dict__['name'] = title  # The only way to access this
+        getLogger().warning('Deprecated, please use DataSet.name')
+        return self.name
 
-        return self._wrappedData.name
+        # # Reading V2 project resulted in name being None; create one on the fly
+        # if self._wrappedData.name is None:
+        #     nextNumber = len(self._project.dataSets) + 1
+        #     title = 'my%s_%s' % (self._defaultName(self), nextNumber) # if nextNumber > 0 else self._defaultName(self)
+        #
+        #     while self._project._wrappedData.findFirstNmrConstraintStore(name=title) is not None:
+        #         title = commonUtil.incrementName(title)
+        #     self._wrappedData.__dict__['name'] = title  # The only way to access this
+        #
+        # return self._wrappedData.name
 
     @title.setter
     def title(self, value: str):
         """Set title of the DataSet.
         """
-        self.rename(value)
+        getLogger().warning('Deprecated, please use DataSet.name')
+        self.name = value
 
-    # fix for now
-    name = title
+    # # fix for now
+    # name = title
+
+    @property
+    def name(self) -> str:
+        """Name of DataSet.
+        """
+        # Reading V2 project resulted in name being None; create one on the fly
+        if self._wrappedData.name is None:
+            name = DataSet._nextAvailableWrappedName(DataSet, self.project)
+            self._wrappedData.__dict__['name'] = name  # The only way to access this
+
+        return self._wrappedData.name
+
+    @name.setter
+    def name(self, value: str):
+        """Set title of the DataSet.
+        """
+        self.rename(value)
 
     @property
     def programName(self) -> str:
@@ -219,7 +241,7 @@ class DataSet(AbstractWrapperObject):
         """Rename DataSet, changing its name and Pid.
         NB, the serial remains immutable.
         """
-        self._validateName(value=value, allowWhitespace=False)
+        commonUtil._validateName(self.project, DataSet, value=value, allowWhitespace=False)
 
         # rename functions from here
         oldName = self.name
@@ -326,14 +348,14 @@ class DataSet(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(DataSet)
-def _newDataSet(self: Project, title: str = None, programName: str = None, programVersion: str = None,
+def _newDataSet(self: Project, title: str = None, name: str = None, programName: str = None, programVersion: str = None,
                 dataPath: str = None, creationDate: datetime.datetime = None, uuid: str = None,
                 comment: str = None, serial: int = None) -> DataSet:
     """Create new DataSet
 
     See the DataSet class for details.
 
-    :param title:
+    :param name:
     :param programName:
     :param programVersion:
     :param dataPath:
@@ -344,22 +366,18 @@ def _newDataSet(self: Project, title: str = None, programName: str = None, progr
     :return: a new DataSet instance.
     """
 
+    if title and name:
+        raise TypeError('Cannot create new DataSet with title and name; DataSet.title is deprecated, please use DataSet.name')
+    if title:
+        getLogger().warning('DataSet.title is deprecated, please use DataSet.name')
+        name = title
+
+    if not name:
+        name = DataSet._nextAvailableName(DataSet, self)
+    # match the error message to the attribute
+    commonUtil._validateName(self, DataSet, value=name, attribName='title' if title else 'name')
+
     nmrProject = self._wrappedData
-
-    if not title:
-        # Make default name
-        # nextNumber = len(nmrProject.sortedNmrConstraintStores())
-        # GWV: use V3 attributes whenever possible
-        nextNumber = len(self.dataSets)
-        title = '%s_%s' % (self._defaultName(DataSet), nextNumber) if nextNumber > 0 else self._defaultName(DataSet)
-    titles = [d.title for d in self.dataSets]
-    while title in titles:
-        title = commonUtil.incrementName(title)
-
-    if not isinstance(title, str):
-        raise TypeError("DataSet name must be a string")  # ejb catch non-string
-    if Pid.altCharacter in title:
-        raise ValueError("Character %s not allowed in DataSet name" % Pid.altCharacter)
 
     if programName is not None and not isinstance(programName, str):
         raise TypeError("programName must be a string")
@@ -367,7 +385,7 @@ def _newDataSet(self: Project, title: str = None, programName: str = None, progr
         raise TypeError("programName must be a string")
 
     apiNmrConstraintStore = nmrProject.root.newNmrConstraintStore(nmrProject=nmrProject,
-                                                                  name=title,
+                                                                  name=name,
                                                                   programName=programName,
                                                                   programVersion=programVersion,
                                                                   dataPath=dataPath,

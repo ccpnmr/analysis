@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -155,6 +155,9 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self.setWindowFilePath('')
         self.setWindowIcon(QtGui.QIcon())
 
+        _styleSheet = 'QToolTip { font-size: %dpt }' % self.font().pointSize()
+        self.setStyleSheet(_styleSheet)
+
     def __postInit__(self):
         """post initialise functions
         """
@@ -162,7 +165,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self._setDialogSize()
 
         if self.getButton(self.OKBUTTON) and self.DISABLEOK:
-            self.getButton(self.OKBUTTON).setEnabled(False)
+            self.getButton(self.OKBUTTON).setEnabled(False or not self.EDITMODE)
         if self.getButton(self.APPLYBUTTON):
             self.getButton(self.APPLYBUTTON).setEnabled(False)
         if self.getButton(self.RESETBUTTON):
@@ -340,7 +343,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         if popup:
             # disable the required buttons
             if okButton:
-                okButton.setEnabled(False)
+                okButton.setEnabled(False or not self.EDITMODE)
             if applyButton:
                 applyButton.setEnabled(False)
             if revertButton:
@@ -425,7 +428,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         # check for any errors
         if error.errorValue:
             # repopulate popup on an error
-            self._populate()
+            # self._populate()
             return False
 
         # remove all changes
@@ -629,7 +632,7 @@ def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
         applyChanges = changeState and applyState
         revertChanges = changeState or revertState
         if okButton:
-            okButton.setEnabled(applyChanges)
+            okButton.setEnabled(applyChanges or not self.EDITMODE)
         if applyButton:
             applyButton.setEnabled(applyChanges)
         if revertButton:

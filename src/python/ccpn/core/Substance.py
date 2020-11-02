@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-23 18:45:24 +0100 (Thu, April 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from collections import OrderedDict
 import typing
-from functools import partial
 from ccpn.util import Common as commonUtil
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
@@ -589,16 +588,16 @@ class Substance(AbstractWrapperObject):
         oldName = self.name
         if name is None:
             name = oldName
-        self._validateName(value=name, allowWhitespace=False)
+        commonUtil._validateName(self.project, Substance, value=name, allowWhitespace=False, checkExisting=False)
 
         oldLabelling = self.labelling
-        apiLabeling = labelling
-        if labelling is None:
-            apiLabeling = DEFAULT_LABELLING
-        elif not labelling:
-            apiLabeling = DEFAULT_LABELLING
-        self._validateName(value=labelling, attribName='Labelling',
-                           allowWhitespace=False, allowEmpty=True, allowNone=True)
+        apiLabeling = labelling = labelling or DEFAULT_LABELLING
+        commonUtil._validateName(self.project, Substance, value=labelling, attribName='labelling',
+                                 allowNone=True, checkExisting=False)
+
+        apiNmrProject = self.project._wrappedData
+        if apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name, labeling=apiLabeling) is not None:
+            raise ValueError("%s.%s already exists" % (name, labelling if labelling != DEFAULT_LABELLING else ''))
 
         # rename functions from here
         for sampleComponent in self.sampleComponents:
@@ -711,40 +710,21 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
     :return: a new Substance instance.
     """
 
-    if labelling is None:
-        apiLabeling = DEFAULT_LABELLING
-    else:
-        apiLabeling = labelling
+    apiLabeling = _labelling = labelling or DEFAULT_LABELLING
 
     if isinstance(name, int):
         name = str(name)
-    if not isinstance(name, (str, type(None))):
-        raise TypeError("ccpn.Substance name must be a string")
-    elif not name:
-        raise ValueError("ccpn.Substance name must be set")
-    elif name != name.strip():
-        raise ValueError("ccpn.Substance name contains leading/trailing whitespace")
-    elif Pid.altCharacter in name:
-        raise ValueError("Character %s not allowed in ccpn.Substance id: %s.%s" %
-                         (Pid.altCharacter, name, labelling))
-
-    if labelling is not None:  # 'None' caught by below as default
-        if not isinstance(labelling, str):
-            raise TypeError("ccpn.Substance 'labelling' name must be a string")
-        elif not labelling:
-            raise ValueError("ccpn.Substance 'labelling' name must be set")
-        elif labelling != labelling.strip():
-            raise ValueError("ccpn.Substance 'labelling' name contains leading/trailing whitespace")
-        elif Pid.altCharacter in labelling:
-            raise ValueError("Character %s not allowed in ccpn.Substance labelling, id: %s.%s" %
-                             (Pid.altCharacter, name, labelling))
+    if name is None:
+        name = Substance._nextAvailableName(Substance, self)
+    commonUtil._validateName(self, Substance, name, allowNone=True, checkExisting=False)
+    commonUtil._validateName(self, Substance, _labelling, allowNone=True, checkExisting=False, attribName='labelling')
 
     apiNmrProject = self._wrappedData
     apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore
     if apiComponentStore.findFirstComponent(name=name, labeling=apiLabeling) is not None:
-        name = commonUtil._incrementObjectName(self.project, Substance._pluralLinkName, name)
-        oldSubstance = apiComponentStore.findFirstComponent(name=name)
-        # raise ValueError("Substance %s.%s already exists" % (name, labelling))
+        # name = commonUtil._incrementObjectName(self.project, Substance._pluralLinkName, name)
+        # oldSubstance = apiComponentStore.findFirstComponent(name=name)
+        raise ValueError('{}.{} already exists'.format(name, _labelling if _labelling != DEFAULT_LABELLING else ''))
 
     else:
         oldSubstance = apiComponentStore.findFirstComponent(name=name)
@@ -889,33 +869,24 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
     :return: a new Substance instance.
     """
 
-    if labelling is None:
-        apiLabeling = DEFAULT_LABELLING
-    else:
-        apiLabeling = labelling
+    apiLabeling = labelling = labelling or DEFAULT_LABELLING
 
-    apiNmrProject = self._wrappedData
+    if isinstance(name, int):
+        name = str(name)
+    if name is None:
+        name = Substance._nextAvailableName(Substance, self)
+    commonUtil._validateName(self, Substance, name, allowNone=True, checkExisting=False)
+    commonUtil._validateName(self, Substance, labelling, allowNone=True, attribName='labelling', checkExisting=False)
 
     if not sequence:
         raise ValueError("createPolymerSubstance requires non-empty sequence")
 
-    elif apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name,
-                                                                              labeling=apiLabeling) is not None:
-        raise ValueError("Substance %s.%s already exists" % (name, labelling))
+    apiNmrProject = self._wrappedData
+    if apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name, labeling=apiLabeling) is not None:
+        raise ValueError("%s.%s already exists" % (name, labelling if labelling != DEFAULT_LABELLING else ''))
 
     elif apiNmrProject.root.findFirstMolecule(name=name) is not None:
         raise ValueError("Molecule name %s is already in use for API Molecule" % name)
-
-    if labelling is not None:
-        if not isinstance(labelling, str):
-            raise TypeError("ccpn.Substance 'labelling' name must be a string")
-        elif not labelling:
-            raise ValueError("ccpn.Substance 'labelling' name must be set")
-        elif labelling != labelling.strip():
-            raise ValueError("ccpn.Substance 'labelling' name contains leading/trailing whitespace")
-        elif Pid.altCharacter in labelling:
-            raise ValueError("Character %s not allowed in ccpn.Substance labelling, id: %s.%s" %
-                             (Pid.altCharacter, name, labelling))
 
     # NOTE: ED I need to open the undoStack here so this adds to the list
     apiMolecule = MoleculeModify.createMolecule(apiNmrProject.root, sequence, molType=molType,
@@ -929,9 +900,6 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
 
     mol = apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule, labeling=apiLabeling)
     result = self._data2Obj[mol]
-
-    # print('>>>create substance:', apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule))
-    # print('>>>result          :', result)
 
     if result is None:
         raise RuntimeError('Unable to generate new PolymerSubstance item')

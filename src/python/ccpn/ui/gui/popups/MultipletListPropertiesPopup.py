@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:53 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,9 +30,11 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
-from ccpn.ui.gui.popups.PMIListPropertiesPopupABC import PMIListPropertiesPopupABC, queueStateChange
+from ccpn.ui.gui.popups.PMIListPropertiesPopupABC import PMIListPropertiesPopupABC, queueStateChange, BUTTONOPTIONS
 from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
 from ccpn.core.MultipletList import MultipletList
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import getAttributeTipText
+from Common import camelCaseToString
 
 
 MULTIPLETAVERAGING = 'multipletAveraging'
@@ -45,8 +47,8 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
 
     # class of lists handled by popup
     klass = MultipletList
-    attributes = [('id', getattr, None, {'backgroundText': '> Not defined <'}),
-                  ('comment', getattr, setattr, {'backgroundText': '> Optional <'}),
+    attributes = [('Id', getattr, None, {'backgroundText': '> Not defined <'}),
+                  ('Comment', getattr, setattr, {'backgroundText': '> Optional <'}),
                   ]
     _symbolColourOption = True
     _textColourOption = True
@@ -58,7 +60,11 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
         super().__init__(parent=parent, mainWindow=mainWindow, ccpnList=multipletList,
                          title='%s Properties' % self.klass.className, **kwds)
 
-        self.multipletAveragingLabel = Label(self.mainWidget, text="Multiplet Averaging:", grid=(self._rowForNewItems, 0))
+        self.multipletAveragingLabel = Label(self.mainWidget, text=camelCaseToString(MULTIPLETAVERAGING), grid=(self._rowForNewItems, 0))
+        tipText = getAttributeTipText(self.klass, MULTIPLETAVERAGING)
+        if tipText:
+            self.multipletAveragingLabel.setToolTip(tipText)
+
         multipletAveraging = self.ccpnList.multipletAveraging
         self.multipletAveraging = RadioButtons(self.mainWidget, texts=MULTIPLETAVERAGINGTYPES,
                                                selectedInd=MULTIPLETAVERAGINGTYPES.index(
@@ -116,8 +122,30 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
     def _getListViews(self, ccpnList):
         """Return the listViews containing this list
         """
-        return [multipletListView for multipletListView in ccpnList.project.multipletListViews
+        return [multipletListView for multipletListView in self.project.multipletListViews
                 if multipletListView.multipletList == ccpnList]
+
+    def _applyAllChanges(self, changes):
+        """Apply all changes - add new multipletList to the spectrum
+        """
+        super()._applyAllChanges(changes)
+        if not self.EDITMODE:
+
+            if 'id' in self.ccpnList:
+                del self.ccpnList['id']
+
+            # create the new multipletList
+            self.spectrum.newMultipletList(**self.ccpnList)
+
+    def _populateInitialValues(self):
+        """Populate the initial values for an empty object
+        """
+        super()._populateInitialValues()
+
+        # need to get the next available multipletList name
+        _num = len(self.spectrum.multipletLists) + 1
+        self.ccpnList.id = '{}.{}'.format(self.spectrum.name, _num)
+        self.ccpnList.multipletAveraging = 0
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,12 +30,13 @@ from ccpn.ui.gui.popups.SimpleAttributeEditorPopupABC import SimpleAttributeEdit
 
 
 class ChainPopup(SimpleAttributeEditorPopupABC):
-    """Chain attributes editor popup"""
+    """Chain attributes editor popup
+    """
 
     klass = Chain
-    attributes = [('name', getattr, setattr, {'backgroundText': '> Enter name <'}),
-                  ('comment', getattr, setattr, {'backgroundText': '> Optional <'}),
-                  ('compoundName', getattr, None, {}),
+    attributes = [('Name', getattr, setattr, {'backgroundText': '> Enter name <'}),
+                  ('Comment', getattr, setattr, {'backgroundText': '> Optional <'}),
+                  ('Compound Name', getattr, None, {}),
                   # ('isCyclic',     getattr, None,    {}),
-                  ('nmrChain', getattr, None, {}),
+                  ('NmrChain', getattr, None, {}),
                   ]

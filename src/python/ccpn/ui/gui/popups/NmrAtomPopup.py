@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-05 11:10:16 +0100 (Mon, October 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
 from ccpn.util.Common import greekKey, getIsotopeListFromCode
 from ccpn.core.NmrAtom import NmrAtom
@@ -36,12 +35,71 @@ from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, TextEditorC
 MERGE = 'merge'
 
 
-class NmrAtomPopup(AttributeEditorPopupABC):
+class NmrAtomNewPopup(AttributeEditorPopupABC):
     """
-    NmrAtom attributes editor popup
+    NmrAtom attributes new popup
     """
-    # FIXEDWIDTH = False
-    # FIXEDHEIGHT = False
+
+    def _getNewNmrAtomTypes(self, nmrAtom):
+        """Populate the nmrAtom pulldown
+        """
+        atomNames = getIsotopeListFromCode(None)
+        self.name.modifyTexts(sorted(list(set(atomNames)), key=greekKey))
+
+    def _getNewNmrResidueTypes(self, nmrResidue):
+        """Populate the nmrResidue pulldown
+        """
+        self.nmrResidue.modifyTexts([x.id for x in self.project.nmrResidues])
+        self.nmrResidue.select(self._parentNmrResidue.id)
+
+    klass = NmrAtom
+    attributes = [('Name', PulldownListCompoundWidget, getattr, None, _getNewNmrAtomTypes, None, {'editable': True}),
+                  ('NmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNewNmrResidueTypes, None, {'editable': False},),
+                  ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                  # ('comment', TextEditorCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <',
+                  #                                                                      'addWordWrap': True}),
+                  ]
+
+    def __init__(self, parent=None, mainWindow=None, obj=None, **kwds):
+        self._parentNmrResidue = obj
+        super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, **kwds)
+
+    def _applyAllChanges(self, changes):
+        """Apply all changes - update nmrAtom name
+        """
+        atomName = self.name.getText()
+        nmrResidue = self.nmrResidue.getText()
+        comment = self.comment.getText()
+
+        destNmrResidue = self.project.getByPid('NR:{}'.format(nmrResidue))
+        if not destNmrResidue:
+            raise TypeError('nmrResidue does not exist')
+
+        if not destNmrResidue.getNmrAtom(atomName):
+            destNmrResidue.newNmrAtom(name=atomName, comment=comment)
+        else:
+            raise TypeError('nmrAtom {}.{} already exists'.format(nmrResidue, atomName))
+
+    def storeWidgetState(self):
+        """Store the state of the checkBoxes between popups
+        """
+        pass
+
+    def restoreWidgetState(self):
+        """Restore the state of the checkBoxes
+        """
+        pass
+
+    def _setValue(self, attr, setFunction, value):
+        """Not needed here - subclass so does no operation
+        """
+        pass
+
+
+class NmrAtomEditPopup(AttributeEditorPopupABC):
+    """
+    NmrAtom attributes edit existing popup
+    """
 
     def _getNmrAtomTypes(self, nmrAtom):
         """Populate the nmrAtom pulldown
@@ -52,9 +110,9 @@ class NmrAtomPopup(AttributeEditorPopupABC):
         if self.obj.name not in atomNames:
             atomNames.insert(0, self.obj.name)
 
-        self.nmrAtomname.modifyTexts(sorted(list(set(atomNames)), key=greekKey))
+        self.name.modifyTexts(sorted(list(set(atomNames)), key=greekKey))
         if self.obj.name:
-            self.nmrAtomname.select(self.obj.name)
+            self.name.select(self.obj.name)
 
     def _getNmrResidueTypes(self, nmrResidue):
         """Populate the nmrResidue pulldown
@@ -63,21 +121,19 @@ class NmrAtomPopup(AttributeEditorPopupABC):
         self.nmrResidue.select(self.obj.nmrResidue.id)
 
     klass = NmrAtom
-    attributes = [('pid', EntryCompoundWidget, getattr, None, None, None, {}),
-                  ('nmrAtom name', PulldownListCompoundWidget, getattr, None, _getNmrAtomTypes, None, {'editable': True}),
-                  ('nmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNmrResidueTypes, None, {}),
+    attributes = [('Pid', EntryCompoundWidget, getattr, None, None, None, {}),
+                  ('Name', PulldownListCompoundWidget, getattr, None, _getNmrAtomTypes, None, {'editable': True}),
+                  ('NmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNmrResidueTypes, None, {'editable': False}),
                   ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {}),
-                  ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                  ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   # ('comment', TextEditorCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <',
                   #                                                                      'addWordWrap': True}),
                   ]
 
-    # hWidth = 120
-
     def _applyAllChanges(self, changes):
         """Apply all changes - update nmrAtom name
         """
-        atomName = self.nmrAtomname.getText()
+        atomName = self.name.getText()
         nmrResidue = self.nmrResidue.getText()
         comment = self.comment.getText()
 
@@ -86,7 +142,7 @@ class NmrAtomPopup(AttributeEditorPopupABC):
             raise TypeError('nmrResidue does not exist')
 
         destNmrAtom = destNmrResidue.getNmrAtom(atomName)
-        merge = self.MergetoExisting.isChecked()
+        merge = self.mergetoExisting.isChecked()
 
         if destNmrAtom and destNmrAtom == self.obj:
             # same nmrAtom so skip
@@ -114,13 +170,13 @@ class NmrAtomPopup(AttributeEditorPopupABC):
     def storeWidgetState(self):
         """Store the state of the checkBoxes between popups
         """
-        merge = self.MergetoExisting.isChecked()
-        NmrAtomPopup._storedState[MERGE] = merge
+        merge = self.mergetoExisting.isChecked()
+        NmrAtomEditPopup._storedState[MERGE] = merge
 
     def restoreWidgetState(self):
         """Restore the state of the checkBoxes
         """
-        self.MergetoExisting.set(NmrAtomPopup._storedState.get(MERGE, False))
+        self.mergetoExisting.set(NmrAtomEditPopup._storedState.get(MERGE, False))
 
     def _setValue(self, attr, setFunction, value):
         """Not needed here - subclass so does no operation

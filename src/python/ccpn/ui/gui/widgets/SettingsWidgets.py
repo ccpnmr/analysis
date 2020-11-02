@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-27 09:43:03 +0000 (Tue, October 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, DoubleSp
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER, SOFTDIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, SpectrumDisplayPulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, SpectrumDisplayPulldown, ChemicalShiftListPulldown
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from functools import partial
@@ -170,7 +170,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             aspectValue = _aspectRatios[aspect]
             self.aspectLabel[aspect] = Label(self.aspectLabelFrame, text=aspect, grid=(ii, 0), hAlign='r')
 
-            self.aspectData[aspect] = ScientificDoubleSpinBox(self.aspectDataFrame, min=1, grid=(ii, 0), hAlign='l', decimals=2)
+            self.aspectData[aspect] = ScientificDoubleSpinBox(self.aspectDataFrame, min=0.01, grid=(ii, 0), hAlign='l', decimals=2)
             self.aspectData[aspect].setValue(aspectValue)
             self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
             if aspect[0] == _baseAspectRatioAxisCode[0]:
@@ -1088,7 +1088,7 @@ class SequenceGraphSettings(Widget):  #, _commonSettings):
         self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[])
 
         row += 1
-        self.chainsWidget = ChainSelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[])
+        self.chainsWidget = ChainSelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[], defaults=[ALL])
 
         self.checkBoxes = {}
         if settingsDict:
@@ -1100,25 +1100,38 @@ class SequenceGraphSettings(Widget):  #, _commonSettings):
 
             for item, data in settingsDict.items():
                 row += 1
-                newItem = CheckBoxCompoundWidget(
-                        self,
-                        grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                        #minimumWidths=(colwidth, 0),
-                        fixedWidths=(colwidth, None),
-                        orientation='left',
-                        labelText=data['label'] if 'label' in data else '',
-                        tipText=data['tipText'] if 'tipText' in data else '',
-                        checked=data['checked'] if 'checked' in data else False,
-                        callback=data['callBack'] if 'callBack' in data else None,
-                        # enabled=data['enabled']
-                        )
-                if 'enabled' in data:
-                    newItem.setEnabled(data['enabled'])
+                if 'type' in data:
+                    newItem = ChemicalShiftListPulldown(self, self.mainWindow, grid=(row, 0),
+                                                        showSelectName=False,
+                                                        # fixedWidths=(colwidth, colwidth, colwidth),
+                                                        callback=data['callBack'] if 'callBack' in data else None
+                                                        )
 
-                self.checkBoxes[item] = {'checkBox'  : newItem,
-                                         'item'      : item,
-                                         'signalFunc': None
-                                         }
+                    self.checkBoxes[item] = {'pulldownList': newItem,
+                                             'item'        : item,
+                                             'signalFunc'  : None
+                                             }
+
+                else:
+                    newItem = CheckBoxCompoundWidget(
+                            self,
+                            grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                            #minimumWidths=(colwidth, 0),
+                            fixedWidths=(colwidth, None),
+                            orientation='left',
+                            labelText=data['label'] if 'label' in data else '',
+                            tipText=data['tipText'] if 'tipText' in data else '',
+                            checked=data['checked'] if 'checked' in data else False,
+                            callback=data['callBack'] if 'callBack' in data else None,
+                            # enabled=data['enabled']
+                            )
+                    if 'enabled' in data:
+                        newItem.setEnabled(data['enabled'])
+
+                    self.checkBoxes[item] = {'checkBox'  : newItem,
+                                             'item'      : item,
+                                             'signalFunc': None
+                                             }
 
                 # if data['_init']:
                 #     # attach a one-off signal to the checkBox

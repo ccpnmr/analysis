@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -90,19 +90,19 @@ class CreateChainPopup(AttributeEditorPopupABC):
         super().__init__(parent, mainWindow=mainWindow, size=(500, 300), **kwds)
 
         row = 2
-        label2a = Label(self.mainWidget, text="name", grid=(row, 0))
+        label2a = Label(self.mainWidget, text="Name", grid=(row, 0))
         self.moleculeEdit = LineEdit(self.mainWidget, text="", grid=(row, 1), gridSpan=(1, 1), textAlignment='l', backgroundText='> Enter name <')
         label2b = Label(self.mainWidget, text="Molecule Type", grid=(row, 2))
         self.molTypePulldown = PulldownList(self.mainWidget, grid=(row, 3))
         row += 1
 
-        comment = Label(self.mainWidget, text="comment", grid=(row, 0))
+        comment = Label(self.mainWidget, text="Comment", grid=(row, 0))
         self.commentName = LineEdit(self.mainWidget, text="", grid=(row, 1), gridSpan=(1, 1), textAlignment='l', backgroundText='> Optional <')
         row += 1
 
         self.molTypes = ['protein', 'DNA', 'RNA']
         self.molTypePulldown.setData(self.molTypes)
-        label3a = Label(self.mainWidget, text="sequence", grid=(row, 0))
+        label3a = Label(self.mainWidget, text="Sequence", grid=(row, 0))
         tipText = """Sequence may be entered a set of one letter codes without
                  spaces or a set of three letter codes with spaces inbetween"""
         self.sequenceEditor = TextEditor(self.mainWidget, grid=(row, 1), gridSpan=(1, 3), tipText=tipText)

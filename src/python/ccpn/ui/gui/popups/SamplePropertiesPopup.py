@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 from functools import partial
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import ComplexAttributeEditorPopupABC, VList, HList
-from ccpn.core.Sample import Sample
+from ccpn.core.Sample import Sample, DEFAULTAMOUNTUNITS, DEFAULTIONICSTRENGTHUNITS
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
     SpinBoxCompoundWidget, PulldownListCompoundWidget
 from ccpn.util.Constants import AMOUNT_UNITS, amountUnits, IONICSTRENGTH_UNITS
@@ -70,16 +70,16 @@ class SamplePropertiesPopup(ComplexAttributeEditorPopupABC):
     klass = Sample  # The class whose properties are edited/displayed
     HWIDTH = 50
     SHORTWIDTH = 140
-    attributes = VList([('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                        ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+    attributes = VList([('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                        ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                         # ('amountUnit', RadioButtonsCompoundWidget, _get, _set, None, None, {'texts'      : AMOUNT_UNITS,
                         #                                                                     'selectedInd': 1,
                         #                                                                     'direction'  : 'h'}),
-                        HList([VList([('amount', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}), ],
+                        HList([VList([('Amount', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}), ],
                                      hWidth=None,
                                      group=1,
                                      ),
-                               VList([('amountUnits', PulldownListCompoundWidget,
+                               VList([('Amount Units', PulldownListCompoundWidget,
                                        getattr, _setUnits, partial(_getUnits, unitType='amountUnits', unitList=('',) + AMOUNT_UNITS), None,
                                        {'editable': False}), ],
                                      hWidth=None,
@@ -87,11 +87,11 @@ class SamplePropertiesPopup(ComplexAttributeEditorPopupABC):
                                      ), ],
                               hWidth=None,
                               ),
-                        HList([VList([('ionicStrength', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}), ],
+                        HList([VList([('Ionic Strength', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}), ],
                                      hWidth=None,
                                      group=1,
                                      ),
-                               VList([('ionicStrengthUnits', PulldownListCompoundWidget,
+                               VList([('Ionic Strength Units', PulldownListCompoundWidget,
                                        getattr, _setUnits, partial(_getUnits, unitType='ionicStrengthUnits', unitList=('',) + IONICSTRENGTH_UNITS), None,
                                        {'editable': False}), ],
                                      hWidth=None,
@@ -100,15 +100,14 @@ class SamplePropertiesPopup(ComplexAttributeEditorPopupABC):
                               hWidth=None,
                               ),
                         ('pH', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0, 'max': 14, 'decimals': 2}),
-                        ('batchIdentifier', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
-                        ('plateIdentifier', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
-                        ('rowNumber', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0, 'step': 1}),
-                        ('columnNumber', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0, 'step': 1}),
+                        ('Batch Identifier', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                        ('Plate Identifier', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                        ('Row Number', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0, 'step': 1}),
+                        ('Column Number', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0, 'step': 1}),
                         ],
                        hWidth=None,
                        )
 
-    # hWidth = 120
     FIXEDWIDTH = True
     FIXEDHEIGHT = True
     ENABLEREVERT = True
@@ -117,3 +116,18 @@ class SamplePropertiesPopup(ComplexAttributeEditorPopupABC):
                  sample=None, **kwds):
         obj = sample
         super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, **kwds)
+
+    def _applyAllChanges(self, changes):
+        """Apply all changes - add new restraintList
+        """
+        super()._applyAllChanges(changes)
+        if not self.EDITMODE:
+            # use the blank container as a dict for creating the new restraintList
+            self.project.newSample(**self.obj)
+
+    def _populateInitialValues(self):
+        super(SamplePropertiesPopup, self)._populateInitialValues()
+
+        # set the defaults for the units pulldowns
+        self.obj.amountUnits = DEFAULTAMOUNTUNITS
+        self.obj.ionicStrengthUnits = DEFAULTIONICSTRENGTHUNITS

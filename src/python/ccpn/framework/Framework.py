@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-29 09:47:39 +0100 (Tue, September 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1371,12 +1371,30 @@ class Framework(NotifierBase):
             # ("More...", self.showTutorials)
             # ])),
 
+            # ("Show Shortcuts", self.showShortcuts),
+            # ("Show API Documentation", self.showVersion3Documentation),
+            # ("CcpNmr V3 Forum", self.showForum),
+            # (),
+            # ("About CcpNmr V3...", self.showAboutPopup),
+            # ("CcpNmr Homepage", self.showAboutCcpn),
+            # ("Show License", self.showCcpnLicense),
+            # (),
+            # # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'),
+            # #                                                    ('enabled', False)]),
+            # # ("Show Issues...", self.showIssuesList),
+            #
+            # ("Check for Updates...", self.showUpdatePopup),
+            # ("Register...", self.showRegisterPopup),
+            # (),
+            # ("Submit Feedback...", self.showFeedbackPopup),
+            # # ("Submit Macro...", self.showSubmitMacroPopup)
+
             ("Show Shortcuts", self.showShortcuts),
-            ("Show CcpNmr V3 Documentation", self.showVersion3Documentation),
+            ("Show API Documentation", self.showVersion3Documentation),
+            ("Show License", self.showCcpnLicense),
             (),
-            ("About CcpNmr V3...", self.showAboutPopup),
-            ("About CCPN...", self.showAboutCcpn),
-            ("Show License...", self.showCcpnLicense),
+            ("CcpNmr Homepage", self.showAboutCcpn),
+            ("CcpNmr V3 Forum", self.showForum),
             (),
             # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'),
             #                                                    ('enabled', False)]),
@@ -1387,6 +1405,8 @@ class Framework(NotifierBase):
             (),
             ("Submit Feedback...", self.showFeedbackPopup),
             # ("Submit Macro...", self.showSubmitMacroPopup)
+            (),
+            ("About CcpNmr V3...", self.showAboutPopup),
             ]
                    ))
 
@@ -3098,6 +3118,12 @@ class Framework(NotifierBase):
         from ccpn.framework.PathsAndUrls import documentationPath
 
         self._showHtmlFile("Analysis Version-3 Documentation", documentationPath)
+
+    def showForum(self):
+        """Displays Forum in a module."""
+        from ccpn.framework.PathsAndUrls import ccpnForum
+
+        self._showHtmlFile("Analysis Version-3 Forum", ccpnForum)
 
     def showShortcuts(self):
         from ccpn.framework.PathsAndUrls import shortcutsPath

@@ -3,7 +3,6 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpn.framework.constants import CCPNMR_PREFIX
 
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
@@ -15,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-04 17:37:09 +0100 (Mon, May 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,21 +26,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import functools
-import itertools
-import operator
 import typing
 import re
 from collections import OrderedDict
 from copy import deepcopy
 from ccpn.core import _importOrder
 # from ccpn.core.lib import CcpnSorting
-from ccpn.core.lib import Util as coreUtil
 from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, undoStackBlocking
-from ccpn.core.lib.Notifiers import NotifierBase, Notifier
+from ccpn.core.lib.ContextManagers import deleteObject
+from ccpn.core.lib.Notifiers import NotifierBase
 
 
 @functools.total_ordering
@@ -280,6 +276,32 @@ class AbstractWrapperObject(NotifierBase):
     def _defaultName(self, cls):
         return cls.className.lower()
 
+    @staticmethod
+    def _nextAvailableName(cls, project):
+        # Get the next available name
+        _cls = getattr(project, cls._pluralLinkName)
+        nextNumber = len(_cls) + 1
+        _name = cls.className  #._defaultName(cls, cls)
+        name = 'my%s_%s' % (_name, nextNumber)  # if nextNumber > 0 else sampleName
+        names = [d.name for d in _cls]
+        while name in names:
+            name = commonUtil.incrementName(name)
+
+        return name
+
+    @staticmethod
+    def _nextAvailableWrappedName(cls, project):
+        # Get the next available name
+        _cls = getattr(project, cls._pluralLinkName)
+        nextNumber = len(_cls) + 1
+        _name = cls.className  #._defaultName(cls, cls)
+        name = 'my%s_%s' % (_name, nextNumber)  # if nextNumber > 0 else sampleName
+        names = [d._wrappedData.name for d in _cls]
+        while name in names:
+            name = commonUtil.incrementName(name)
+
+        return name
+
     @property
     def _ccpnInternalData(self) -> dict:
         """Dictionary containing arbitrary type data for internal use.
@@ -321,19 +343,19 @@ class AbstractWrapperObject(NotifierBase):
 
     CCPNMR_NAMESPACE = '_ccpNmrV3internal'
 
-    def _setInternalParameter(self, parameterName:str, value):
+    def _setInternalParameter(self, parameterName: str, value):
         """Sets parameterName for CCPNINTERNAL namespace to value; value must be json seriliasable"""
         self.setParameter(self.CCPNMR_NAMESPACE, parameterName, value)
 
-    def _getInternalParameter(self, parameterName:str):
+    def _getInternalParameter(self, parameterName: str):
         """Gets parameterName for CCPNINTERNAL namespace"""
         return self.getParameter(self.CCPNMR_NAMESPACE, parameterName)
 
-    def _hasInternalParameter(self, parameterName:str):
+    def _hasInternalParameter(self, parameterName: str):
         """Returns true if parameterName for CCPNINTERNAl namespace exists"""
         return self.hasParameter(self.CCPNMR_NAMESPACE, parameterName)
 
-    def setParameter(self, namespace:str, parameterName:str, value):
+    def setParameter(self, namespace: str, parameterName: str, value):
         """Sets parameterName for namespace to value; value must be json serialisable"""
         data = deepcopy(self._ccpnInternalData)
         space = data.setdefault(namespace, {})
@@ -348,7 +370,7 @@ class AbstractWrapperObject(NotifierBase):
             raise RuntimeError("data cannot contain xml tags '{}' at pos {}".format(pos.group(), pos.span()))
         self._wrappedData.ccpnInternalData = data
 
-    def getParameter(self, namespace:str, parameterName:str):
+    def getParameter(self, namespace: str, parameterName: str):
         """Returns value of parameterName for namespace; returns None if not present"""
         data = self._ccpnInternalData
         space = data.get(namespace)
@@ -356,7 +378,7 @@ class AbstractWrapperObject(NotifierBase):
             return None
         return deepcopy(space.get(parameterName))
 
-    def hasParameter(self, namespace:str, parameterName:str):
+    def hasParameter(self, namespace: str, parameterName: str):
         """Returns true if parameterName for namespace exists"""
         data = self._ccpnInternalData
         space = data.get(namespace)
@@ -400,7 +422,7 @@ class AbstractWrapperObject(NotifierBase):
         """Convenience: restore order of objects from saved pids under key in the CcpNmr internal space.
         Order needed to be stored previously with _saveObjectOrder
         """
-        if not isinstance(objs, (list,tuple)):
+        if not isinstance(objs, (list, tuple)):
             raise ValueError('Expected a list or tuple for "objects" argument')
 
         result = objs
@@ -856,7 +878,7 @@ class AbstractWrapperObject(NotifierBase):
         dd = self._project._pid2Obj.get(cls.className)
         if dd:
             if self is self._project:
-                key = '{}'.format(relativeId)               # NOTE:ED - should always be a string
+                key = '{}'.format(relativeId)  # NOTE:ED - should always be a string
             else:
                 key = '{}{}{}'.format(self._id, Pid.IDSEP, relativeId)
             return dd.get(key)
@@ -941,7 +963,7 @@ class AbstractWrapperObject(NotifierBase):
                 try:
                     obj._initializeAll()
                 except Exception as er:
-                    getLogger().warning('Error initialising object %s. %s1' %(obj,er))
+                    getLogger().warning('Error initialising object %s. %s1' % (obj, er))
                 # getLogger().info(str(obj))   # ejb - temp
 
     def _unwrapAll(self):
@@ -1139,27 +1161,6 @@ class AbstractWrapperObject(NotifierBase):
                     for notifier in tuple(dd):
                         notifier(self)
 
-    def _validateName(self, value: str, attribName: str = None, allowWhitespace: bool = False, allowEmpty: bool = False, allowNone: bool = False):
-        attrib = attribName if attribName else self.className
-        if value is not None:
-            if not isinstance(value, str):
-                raise TypeError("%s name must be a string" % attrib)
-            if not value and not allowEmpty:
-                raise ValueError("%s name must be set" % attrib)
-            if Pid.altCharacter in value:
-                raise ValueError("Character %s not allowed in %s name" % (Pid.altCharacter, attrib))
-            if not allowWhitespace and commonUtil.contains_whitespace(value):
-                raise ValueError("whitespace not allowed in %s name" % attrib)
-        elif not allowNone:
-            raise ValueError("None not allowed in %s name" % attrib)
-
-        previous = self.getByRelativeId(value)
-        if previous not in (None, self):
-            raise ValueError("%s already exists" % previous.longPid)
-
-        # will only get here if all the tests pass
-        return True
-
     def resetSerial(self, newSerial: int):
         """ADVANCED Reset serial of object to newSerial, resetting parent link
         and the nextSerial of the parent.
@@ -1176,16 +1177,16 @@ class AbstractWrapperObject(NotifierBase):
         """
         od = OrderedDict()
         for i in dir(self):
-            try: # deals with badly set property which will raise an error instead of returning an attribute.
+            try:  # deals with badly set property which will raise an error instead of returning an attribute.
                 att = getattr(self, i)
                 if not callable(att):
                     if _includePrivate:
-                            od[i] = att
+                        od[i] = att
                     else:
                         if not i.startswith('_'):
                             od[i] = att
             except Exception as e:
-                getLogger().warning('Potential error for the property %s in creating dictionary from object: %s . Error: %s'  % (i, self, e))
+                getLogger().warning('Potential error for the property %s in creating dictionary from object: %s . Error: %s' % (i, self, e))
         return od
 
     # def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None, propertySetter=False,

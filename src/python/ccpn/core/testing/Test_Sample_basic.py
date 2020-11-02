@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:35 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -46,7 +46,7 @@ class TestSample_No_setUp(WrapperTesting):
         Test that creating a new Sample with no parameter creates a valid Sample.
         """
         newSample = self.project.newSample()
-        self.assertEqual(newSample.name, 'sample')
+        self.assertEqual(newSample.name, 'mySample_1')
         self.assertEqual(len(self.project.samples), 1)
 
     def test_newSample_None(self):
@@ -54,7 +54,7 @@ class TestSample_No_setUp(WrapperTesting):
         Test that creating a new Sample with None creates a valid Sample.
         """
         newSample = self.project.newSample(None)
-        self.assertEqual(newSample.name, 'sample')
+        self.assertEqual(newSample.name, 'mySample_1')
         self.assertEqual(len(self.project.samples), 1)
 
     #=========================================================================================
@@ -120,7 +120,7 @@ class TestSample_setUp(WrapperTesting):
         """
         Test that renaming to '' raises an error and does not alter the original Sample.
         """
-        with self.assertRaisesRegexp(ValueError, 'Sample name must be set'):
+        with self.assertRaisesRegexp(ValueError, 'must be set'):
             self.newSample.rename('')
         self.assertEqual(self.newSample.name, 'ValidSample')
 
@@ -140,7 +140,7 @@ class TestSample_setUp(WrapperTesting):
         # with self.assertRaisesRegexp(ValueError, 'Sample name must be set'):
         #   self.newSample.rename(None)
         #
-        with self.assertRaisesRegexp(ValueError, 'None not allowed in Sample name'):
+        with self.assertRaisesRegexp(ValueError, 'None not allowed in'):
             self.newSample.rename(None)
         self.assertEqual(self.newSample.name, 'ValidSample')
 
@@ -151,7 +151,7 @@ class TestSample_setUp(WrapperTesting):
         # with self.assertRaisesRegexp(TypeError, 'argument of type'):
         #   self.newSample.rename(42)
         #
-        with self.assertRaisesRegexp(TypeError, 'Sample name must be a string'):
+        with self.assertRaisesRegexp(TypeError, 'must be a string'):
             self.newSample.rename(42)
         self.assertEqual(self.newSample.name, 'ValidSample')
 

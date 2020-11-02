@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.util.Constants import concentrationUnits
-from ccpn.ui.gui.popups.AttributeEditorPopupABC import ComplexAttributeEditorPopupABC, VList, _blankContainer
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import ComplexAttributeEditorPopupABC, VList, _complexAttribContainer
 from ccpn.core.SampleComponent import SampleComponent
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
     RadioButtonsCompoundWidget, PulldownListCompoundWidget
@@ -36,7 +36,7 @@ SELECT = '> Select <'
 TYPECOMPONENT = [SELECT, 'Compound', 'Solvent', 'Buffer', 'Target', 'Inhibitor ', 'Other']
 C_COMPONENT_UNIT = concentrationUnits
 TYPENEW = 'Type_New'
-LABELLING = ['None', TYPENEW, '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 'ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
+LABELLING = ['', TYPENEW, '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 'ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
 BUTTONSTATES = ['New', 'From Substances']
 WIDTH = 150
 
@@ -76,11 +76,11 @@ class SampleComponentPopup(ComplexAttributeEditorPopupABC):
         """Populate the labelling pulldown
         """
         labels = LABELLING.copy()
-        newLabel = str(self.obj.labelling)
+        newLabel = str(self.obj.labelling or '')
         if newLabel not in labels:
             labels.append(newLabel)
         self.labelling.modifyTexts(labels)
-        self.labelling.select(newLabel or 'None')
+        self.labelling.select(newLabel or '')
 
     def _getCurrentSubstances(self, sampleComponent):
         """Populate the current substances pulldown
@@ -88,26 +88,32 @@ class SampleComponentPopup(ComplexAttributeEditorPopupABC):
         substancePulldownData = [SELECT]
         for substance in self.project.substances:
             substancePulldownData.append(str(substance.id))
-        self.Currentsubstances.pulldownList.setData(substancePulldownData)
+        self.currentSubstances.pulldownList.setData(substancePulldownData)
+
+    def _setLabelling(self, attr, value):
+        """Set the labelling with None replacing empty string from the pulldown
+        """
+        value = value if value else None
+        setattr(self, attr, value)
 
     klass = SampleComponent  # The class whose properties are edited/displayed
     HWIDTH = 150
-    attributes = VList([VList([('Select source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
+    attributes = VList([VList([('Select Source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
                                                                                                       'selectedInd': 1,
                                                                                                       'direction'  : 'h',
                                                                                                       'hAlign'     : 'l'}),
-                               ('Current substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
+                               ('Current Substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
                                ],
                               queueStates=False,
                               hWidth=None,
                               group=1,
                               ),
-                        ('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                        ('labelling', PulldownListCompoundWidget, getattr, setattr, _getLabelling, None, {'editable': True}),
-                        ('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                        ('role', PulldownListCompoundWidget, getattr, setattr, _getRoleTypes, None, {'editable': False}),
-                        ('concentrationUnit', PulldownListCompoundWidget, getattr, setattr, _getConcentrationUnits, None, {'editable': False}),
-                        ('concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                        ('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                        ('Labelling', PulldownListCompoundWidget, getattr, _setLabelling, _getLabelling, None, {'editable': True}),
+                        ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
+                        ('Role', PulldownListCompoundWidget, getattr, setattr, _getRoleTypes, None, {'editable': False}),
+                        ('Concentration Unit', PulldownListCompoundWidget, getattr, setattr, _getConcentrationUnits, None, {'editable': False}),
+                        ('Concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
                         ],
                        hWidth=None,
                        group=1,
@@ -131,7 +137,7 @@ class SampleComponentPopup(ComplexAttributeEditorPopupABC):
         self.sampleComponent = sampleComponent
 
         if newSampleComponent:
-            obj = _blankContainer(self)
+            obj = _complexAttribContainer(self)
         else:
             obj = sampleComponent
 
@@ -140,15 +146,15 @@ class SampleComponentPopup(ComplexAttributeEditorPopupABC):
 
         # attach callbacks to the new/fromSubstances radioButton
         if self.EDITMODE:
-            self.Selectsource.setEnabled(False)
-            self.Currentsubstances.setEnabled(False)
-            self.Selectsource.setVisible(False)
-            self.Currentsubstances.setVisible(False)
+            self.selectSource.setEnabled(False)
+            self.currentSubstances.setEnabled(False)
+            self.selectSource.setVisible(False)
+            self.currentSubstances.setVisible(False)
             self.name.setEnabled(False)
             self.labelling.setEnabled(False)
         else:
-            self.Selectsource.radioButtons.buttonGroup.buttonClicked.connect(self._changeSource)
-            self.Currentsubstances.pulldownList.activated.connect(self._fillInfoFromSubstance)
+            self.selectSource.radioButtons.buttonGroup.buttonClicked.connect(self._changeSource)
+            self.currentSubstances.pulldownList.activated.connect(self._fillInfoFromSubstance)
 
         self.labelling.pulldownList.activated.connect(self._labellingSpecialCases)
 
@@ -158,24 +164,24 @@ class SampleComponentPopup(ComplexAttributeEditorPopupABC):
 
     def _setEnabledState(self, fromSubstances):
         if fromSubstances:
-            self.Currentsubstances.setEnabled(True)
+            self.currentSubstances.setEnabled(True)
         else:
-            self.Currentsubstances.setEnabled(False)
+            self.currentSubstances.setEnabled(False)
             self.labelling.setEnabled(True)
 
     def _changeSource(self, button):
         self._setEnabledState(True if button.get() == BUTTONSTATES[1] else False)
 
     def _fillInfoFromSubstance(self, index):
-        selected = self.Currentsubstances.getText()
+        selected = self.currentSubstances.getText()
         if selected != SELECT:
             substance = self.project.getByPid('SU:' + selected)
             if substance:
                 self.name.setText(str(substance.name))
-                newLabel = str(substance.labelling)
+                newLabel = str(substance.labelling or '')
                 if newLabel not in self.labelling.getTexts():
                     self.labelling.pulldownList.addItem(text=newLabel)
-                self.labelling.pulldownList.set(newLabel or 'None')
+                self.labelling.pulldownList.set(newLabel)
                 self.labelling.setEnabled(self.LABELEDITING)
         else:
             self.name.setText('')

@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:50 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,15 +26,25 @@ __date__ = "$Date: 2017-07-04 09:28:16 +0000 (Tue, July 04, 2017) $"
 #=========================================================================================
 
 from ccpn.core.StructureEnsemble import StructureEnsemble
-from ccpn.ui.gui.popups.SimpleAttributeEditorPopupABC import SimpleAttributeEditorPopupABC
-from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget
 
 
-class StructureEnsemblePopup(SimpleAttributeEditorPopupABC):
-    """DataSet attributes editor popup"""
+class StructureEnsemblePopup(AttributeEditorPopupABC):
+    """StructureEnsemble attributes editor popup
+    """
+
+    # FIXEDWIDTH = False
 
     klass = StructureEnsemble
-    attributes = [('name',     getattr, setattr, {'backgroundText':'> Enter name <'}),
-                  ('comment',  getattr, setattr, {'backgroundText':'> Optional <'}),
-                  # ('serial',   getattr, None   , {}),
+    attributes = [('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                  ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ]
+
+    def _applyAllChanges(self, changes):
+        """Apply all changes - add new structureEnsemble
+        """
+        super()._applyAllChanges(changes)
+        if not self.EDITMODE:
+            # create the new structureEnsemble
+            self.project.newStructureEnsemble(**self.obj)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-29 09:47:39 +0100 (Tue, September 29, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,11 +27,10 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 import numpy as np
 from PyQt5 import QtCore
-from string import whitespace
 from functools import partial
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange
-from ccpn.util.Common import makeIterableList
+from ccpn.util.Common import makeIterableList, stringToCamelCase
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont
@@ -41,6 +40,39 @@ ATTRGETTER = 0
 ATTRSETTER = 1
 ATTRSIGNAL = 2
 ATTRPRESET = 3
+
+
+def getAttributeTipText(klass, attr):
+    """Generate a tipText from the attribute of the given class.
+     tipText is of the form:
+      klass.attr
+
+      Type: <type of the attribute>
+
+      DocString: <string read from klass.attr.__doc__>
+
+    :param klass: klass containing the attribute
+    :param attr: attribute name
+    :return: tipText string
+    """
+    try:
+        attrib = getattr(klass, attr)
+        at = attr
+        ty = type(attrib).__name__
+        st = attrib.__str__()
+        dc = attrib.__doc__
+
+        if ty == 'property':
+            return '{}.{}\n' \
+                   'Type:   {}\n' \
+                   'DocString:  {}'.format(klass.__name__, at, ty, dc)
+        else:
+            return '{}.{}\n' \
+                   'Type:   {}\n' \
+                   'String form:    {}\n' \
+                   'DocString:  {}'.format(klass.__name__, at, ty, st, dc)
+    except:
+        return None
 
 
 class AttributeEditorPopupABC(CcpnDialogMainWidget):
@@ -67,10 +99,14 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
     FIXEDWIDTH = True
     FIXEDHEIGHT = True
 
-    def __init__(self, parent=None, mainWindow=None, obj=None, **kwds):
+    def __init__(self, parent=None, mainWindow=None, obj=None, editMode=None, **kwds):
         """
         Initialise the widget
         """
+        if editMode is not None:
+            self.EDITMODE = editMode
+            self.WINDOWPREFIX = 'Edit ' if editMode else 'New '
+
         super().__init__(parent, setLayout=True,
                          windowTitle=self.WINDOWPREFIX + self.klass.className, **kwds)
 
@@ -78,7 +114,12 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         self.application = mainWindow.application
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
-        self.obj = obj
+
+        if self.EDITMODE:
+            self.obj = obj
+        else:
+            self.obj = self._newContainer()
+            self._populateInitialValues()
 
         # create the list of widgets and set the callbacks for each
         self._setAttributeWidgets()
@@ -116,13 +157,16 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
 
         # create the list of widgets and set the callbacks for each
         row = 0
-        for attr, attrType, getFunction, setFunction, presetFunction, callback, kwds in self.attributes:
-            editable = setFunction is not None
-            newWidget = attrType(self.mainWidget, mainWindow=self.mainWindow, labelText=attr, editable=editable,
-                                 grid=(row, 0), fixedWidths=(self.hWidth, None), compoundKwds=kwds)  #, **kwds)
+        for _label, attrType, getFunction, setFunction, presetFunction, callback, kwds in self.attributes:
 
             # remove whitespaces to give the attribute name in the class
-            attr = attr.translate({ord(c): None for c in whitespace})
+            attr = stringToCamelCase(_label)
+            tipText = getAttributeTipText(self.klass, attr)
+
+            editable = setFunction is not None
+            newWidget = attrType(self.mainWidget, mainWindow=self.mainWindow, labelText=_label, editable=editable,
+                                 grid=(row, 0), fixedWidths=(self.hWidth, None),
+                                 tipText=tipText, compoundKwds=kwds)  #, **kwds)
 
             # connect the signal
             if attrType and attrType.__name__ in CommonWidgetsEdits:
@@ -159,9 +203,9 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
 
         self._changes.clear()
         with self._changes.blockChanges():
-            for attr, attrType, getFunction, _, _presetFunction, _, _ in self.attributes:
+            for _label, attrType, getFunction, _, _presetFunction, _, _ in self.attributes:
                 # remove whitespaces to give the attribute name in the class
-                attr = attr.translate({ord(c): None for c in whitespace})
+                attr = stringToCamelCase(_label)
 
                 # populate the widget
                 if attr in self.edits and attrType and attrType.__name__ in CommonWidgetsEdits:
@@ -172,10 +216,20 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
                         # call the preset function for the widget (e.g. populate pulldowns with modified list)
                         _presetFunction(self, self.obj)
 
-                    if getFunction:  # and self.EDITMODE:
+                    if getFunction:     # and self.EDITMODE:
                         # set the current value
                         value = getFunction(self.obj, attr, None)
                         attrSetter(self.edits[attr], value)
+
+    def _populateInitialValues(self):
+        """Populate the initial values for an empty object
+        """
+        self.obj.name = self.klass._nextAvailableName(self.klass, self.project)
+
+    def _newContainer(self):
+        """Make a new container to hold attributes for objects not created yet
+        """
+        return _attribContainer(self)
 
     def _getChangeState(self):
         """Get the change state from the _changes dict
@@ -199,7 +253,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
             attrGetter = CommonWidgetsEdits[attrType.__name__][ATTRGETTER]
             value = attrGetter(self.edits[attr])
 
-            if getFunction:  # and self.EDITMODE:
+            if getFunction: # and self.EDITMODE:
                 oldValue = getFunction(self.obj, attr, None)
                 if value != oldValue:
                     return partial(self._setValue, attr, setFunction, value)
@@ -275,16 +329,18 @@ class AttributeABC():
         from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
 
         # add widget here
-        attr, attrType, getFunction, setFunction, presetFunction, callback, kwds = attribItem
+        _label, attrType, getFunction, setFunction, presetFunction, callback, kwds = attribItem
+
+        # remove whitespaces to give the attribute name in the class
+        attr = stringToCamelCase(_label)
+        tipText = getAttributeTipText(parentRoot.klass, attr)
 
         editable = setFunction is not None
         newWidget = attrType(self._container, mainWindow=parentRoot.mainWindow,
-                             labelText=attr, editable=editable,
+                             labelText=_label, editable=editable,
                              grid=(self._row, self._col),
-                             fixedWidths=(self._hWidth, None), compoundKwds=kwds)  #, **kwds)
-
-        # remove whitespaces to give the attribute name in the class
-        attr = attr.translate({ord(c): None for c in whitespace})
+                             fixedWidths=(self._hWidth, None),
+                             tipText=tipText, compoundKwds=kwds)  #, **kwds)
 
         # connect the signal
         if attrType and attrType.__name__ in CommonWidgetsEdits:
@@ -442,8 +498,8 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
                 # these are now in the containerList
                 attr, attrType, getFunction, _, _presetFunction, _, _ = attribItem
 
-                # remove whitespaces to give the attribute name in the class
-                attr = attr.translate({ord(c): None for c in whitespace})
+                # remove whitespaces to give the attribute name in the class, make first letter lowercase
+                attr = stringToCamelCase(attr)
 
                 # populate the widget
                 if attr in self.edits and attrType and attrType.__name__ in CommonWidgetsEdits:
@@ -454,7 +510,7 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
                         # call the preset function for the widget (e.g. populate pulldowns with modified list)
                         _presetFunction(self, self.obj)
 
-                    if getFunction:  # and self.EDITMODE:
+                    if getFunction:     # and self.EDITMODE:
                         # set the current value
                         value = getFunction(self.obj, attr, None)
                         attrSetter(self.edits[attr], value)
@@ -478,8 +534,13 @@ class ComplexAttributeEditorPopupABC(AttributeEditorPopupABC):
         if attr in self._VALIDATTRS:
             setFunction(self.obj, attr, value)
 
+    def _newContainer(self):
+        """Make a new container to hold attributes for objects not created yet
+        """
+        return _complexAttribContainer(self)
 
-class _blankContainer(AttrDict):
+
+class _complexAttribContainer(AttrDict):
     """
     Class to simulate a blank object in new/edit popup.
     """
@@ -492,7 +553,8 @@ class _blankContainer(AttrDict):
                 self._setAttributes(attribItem)
 
             elif isinstance(attribItem, tuple):
-                self[attribItem[0]] = None
+                _label = stringToCamelCase(attribItem[0])
+                self[_label] = None
 
             else:
                 raise RuntimeError('Container type not defined')
@@ -501,6 +563,20 @@ class _blankContainer(AttrDict):
         """Create a list of attributes from the container class
         """
         super().__init__()
-        self._popupClass = popupClass
+        # self._popupClass = popupClass
 
         self._setAttributes(popupClass.attributes)
+
+
+class _attribContainer(AttrDict):
+    """
+    Class to simulate a simple blank object in new/edit popup.
+    """
+
+    def __init__(self, popupClass):
+        """Create a list of attributes from the container class
+        """
+        super().__init__()
+        for attribItem in popupClass.attributes:
+            _label = stringToCamelCase(attribItem[0])
+            self[_label] = None

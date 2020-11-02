@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -395,6 +395,15 @@ class SpectrumView(AbstractWrapperObject):
         """
         return sorted(parent._wrappedData.stripSpectrumViews,
                       key=operator.attrgetter('spectrumView.spectrumName'))
+
+    def _finaliseAction(self, action: str):
+        super(SpectrumView, self)._finaliseAction(action)
+
+        # all are attached to the same click
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        GLSignals = GLNotifier(parent=self)
+        GLSignals.emitPaintEvent()
 
 #=========================================================================================
 # Connections to parents:

@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:30 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import collections
-from functools import partial
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
@@ -161,7 +160,7 @@ class StructureEnsemble(AbstractWrapperObject):
         """Rename StructureEnsemble, changing its name and Pid.
         NB, the serial remains immutable.
         """
-        self._validateName(value=value, allowWhitespace=False)
+        commonUtil._validateName(self.project, StructureEnsemble, value=value, allowWhitespace=False)
 
         # rename functions from here
         oldName = self.name
@@ -211,21 +210,11 @@ def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, d
     :return: a new StructureEnsemble instance.
     """
 
-    nmrProject = self._wrappedData
-
     if not name:
-        # Make default name
-        nextNumber = len(self.structureEnsembles)
-        strName = self._defaultName(StructureEnsemble)
-        name = '%s_%s' % (strName, nextNumber) if nextNumber > 0 else strName
-    names = [d.name for d in self.structureEnsembles]
-    while name in names:
-        name = commonUtil.incrementName(name)
+        name = StructureEnsemble._nextAvailableName(StructureEnsemble, self)
+    commonUtil._validateName(self, StructureEnsemble, name)
 
-    if not isinstance(name, str):
-        raise TypeError("StructureEnsemble name must be a string")
-    if Pid.altCharacter in name:
-        raise ValueError("Character %s not allowed in StructureEnsemble name" % Pid.altCharacter)
+    nmrProject = self._wrappedData
 
     if serial is None:
         ll = nmrProject.root.structureEnsembles

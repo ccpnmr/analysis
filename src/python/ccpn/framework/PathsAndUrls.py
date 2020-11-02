@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-14 18:09:10 +0100 (Tue, July 14, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -62,8 +62,9 @@ tutorialsPath                   = os.path.join(ccpnCodePath, 'tutorials')
 beginnersTutorialPath           = os.path.join(ccpnCodePath, 'tutorials', 'BeginnersTutorial.pdf')
 backboneAssignmentTutorialPath  = os.path.join(ccpnCodePath, 'tutorials', 'BackboneAssignmentTutorial.pdf')
 screenTutorialPath              = os.path.join(ccpnCodePath, 'tutorials', 'CcpNmr_AnalysisScreen_Tutorial_Beta2Release.pdf')
-cspTutorialPath                 = os.path.join(ccpnCodePath, 'tutorials', 'CSPtutorial.pdf')
+cspTutorialPath                 = os.path.join(ccpnCodePath, 'tutorials', 'CSPTutorial.pdf')
 solidStateTutorialPath          = os.path.join(ccpnCodePath, 'tutorials', 'SolidStateAssignmentTutorial.pdf')
+analysisScreenTutorialPath      = os.path.join(ccpnCodePath, 'tutorials', 'ScreenTutorial.pdf')
 
 documentationPath               = os.path.join(ccpnCodePath, 'doc', 'build', 'html', 'index.html')
 licensePath                     = os.path.join(ccpnCodePath, 'LICENSE.txt')

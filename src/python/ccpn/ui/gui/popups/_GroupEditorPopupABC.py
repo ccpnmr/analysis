@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-08 11:39:11 +0100 (Thu, October 08, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -579,11 +579,11 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         # self.leftTopLabel = Label(self._dialogWidget, '', bold=True, grid=(0, 0), gridSpan=(1, 3))
 
         if not self.editMode:
-            labelName = 'New %s name' % self.GROUP_NAME
+            labelName = 'New %s Name' % self.GROUP_NAME
         else:
-            labelName = 'name'
+            labelName = 'Name'
 
-        optionTexts = [labelName, 'comment', self.GROUP_NAME, 'Selection']
+        optionTexts = [labelName, 'Comment', self.GROUP_NAME, 'Selection']
         _, maxDim = getTextDimensionsFromFont(textList=optionTexts)
         self._FIXEDWIDTH = maxDim.width()
 
@@ -593,7 +593,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self.nameEdit = LineEdit(self._nameEditFrame, backgroundText='%s Name' % self.GROUP_NAME, hAlign='l', textAlignment='left', grid=(row, 1))
 
         row += 1
-        self.commentLabel = Label(self._dialogWidget, 'comment', grid=(row, 0))
+        self.commentLabel = Label(self._dialogWidget, 'Comment', grid=(row, 0))
         self.commentEdit = LineEdit(self._dialogWidget, backgroundText='> Optional <', textAlignment='left', grid=(row, 1), gridSpan=(1, 2))
 
         # GST need something better than this..!

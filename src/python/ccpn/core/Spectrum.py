@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-23 09:34:54 +0100 (Wed, September 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -69,7 +69,6 @@ import sys
 from typing import Sequence, Tuple, Optional, Union
 from functools import partial
 import decorator
-
 from ccpn.util import Constants
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -82,7 +81,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.framework.constants import CCPNMR_PREFIX
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSimple, \
     undoStackBlocking, renameObject, undoBlock, notificationBlanking, ccpNmrV3CoreSetter
-from ccpn.util.Common import getAxisCodeMatchIndices
+from ccpn.util.Common import getAxisCodeMatchIndices, _validateName
 from ccpn.util.Path import Path, aPath
 from ccpn.util.Common import isIterable, incrementName
 from ccpn.util.Constants import SCALETOLERANCE
@@ -2825,7 +2824,7 @@ assignmentTolerances
     def rename(self, value: str):
         """Rename Spectrum, changing its name and Pid.
         """
-        self._validateName(value=value, allowWhitespace=False)
+        _validateName(self.project, Spectrum, value=value, allowWhitespace=False)
 
         # rename functions from here
         oldName = self.name
@@ -2868,10 +2867,10 @@ assignmentTolerances
                     for integral in integralList.integrals:
                         integral._finaliseAction(action=action)
 
-            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-            GLSignals = GLNotifier(parent=self)
-            GLSignals.emitPaintEvent()
+            # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+            #
+            # GLSignals = GLNotifier(parent=self)
+            # GLSignals.emitPaintEvent()
 
     @logCommand(get='self')
     def delete(self):

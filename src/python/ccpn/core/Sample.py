@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-10 09:40:39 +0100 (Fri, July 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,6 @@ __date__ = "$Date: 2017-04-10 11:42:40 +0000 (Mon, April 10, 2017) $"
 
 from datetime import datetime
 from typing import Sequence, Tuple, Optional
-from functools import partial
 from ccpn.core.Project import Project
 from ccpn.core.PseudoDimension import PseudoDimension
 from ccpn.core.Spectrum import Spectrum
@@ -322,7 +321,7 @@ class Sample(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Sample, changing its name and Pid.
         """
-        self._validateName(value=value, allowWhitespace=False)
+        commonUtil._validateName(self.project, Sample, value=value, allowWhitespace=False)
 
         # rename functions from here
         oldName = self.name
@@ -380,7 +379,8 @@ class Sample(AbstractWrapperObject):
 def _newSample(self: Project, name: str = None, pH: float = None, ionicStrength: float = None,
                amount: float = None, amountUnit: str = None, isVirtual: bool = False, isHazardous: bool = None,
                creationDate: datetime = None, batchIdentifier: str = None, plateIdentifier: str = None,
-               rowNumber: int = None, columnNumber: int = None, comment: str = None, serial: int = None) -> Sample:
+               rowNumber: int = None, columnNumber: int = None, comment: str = None, serial: int = None,
+               amountUnits = None, ionicStrengthUnits = None) -> Sample:
     """Create new Sample.
 
     See the Sample class for details.
@@ -402,25 +402,12 @@ def _newSample(self: Project, name: str = None, pH: float = None, ionicStrength:
     :return: a new Sample instance.
     """
 
+    if not name:
+        name = Sample._nextAvailableName(Sample, self)
+    commonUtil._validateName(self, Sample, name)
+
     nmrProject = self._wrappedData
     apiSampleStore = nmrProject.sampleStore
-
-    if not name:
-        # Make default name
-        nextNumber = len(self.samples)
-        sampleName = self._defaultName(Sample)
-        name = '%s_%s' % (sampleName, nextNumber) if nextNumber > 0 else sampleName
-    names = [d.name for d in self.samples]
-    while name in names:
-        name = commonUtil.incrementName(name)
-
-    if not isinstance(name, str):
-        name = str(name)
-        # raise TypeError("Sample name must be a string")
-    elif not name:
-        raise ValueError("Sample name must be set")
-    elif Pid.altCharacter in name:
-        raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
 
     if amountUnit is not None and amountUnit not in Constants.amountUnits:
         self._project._logger.warning(
@@ -438,6 +425,9 @@ def _newSample(self: Project, name: str = None, pH: float = None, ionicStrength:
     result = self._data2Obj.get(newApiSample)
     if result is None:
         raise RuntimeError('Unable to generate new Sample item')
+
+    result.amountUnits = amountUnits
+    result.ionicStrengthUnits = ionicStrengthUnits
 
     if serial is not None:
         try:

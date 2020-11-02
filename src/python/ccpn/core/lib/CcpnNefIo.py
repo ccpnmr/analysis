@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-13 09:51:39 +0100 (Tue, October 13, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -6189,14 +6189,14 @@ class CcpnNefReader(CcpnNefContent):
             # default not set - create one
             dataSet = self.project.newDataSet()
             serial = dataSet.serial
-            dataSet.title = 'dataset_%s' % serial
+            dataSet.title = 'DataSet_%s' % serial
             self.defaultDataSetSerial = serial
             self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
 
         else:
             # take or create dataSet matching serial
             # dataSet = self.project.getDataSet(str(serial))
-            dataSet = self.project.getDataSet('dataset_%s' % serial)
+            dataSet = self.project.getDataSet('DataSet_%s' % serial)
             if dataSet is None:
                 dataSet = self.project.newDataSet(serial=serial)
                 # dataSet.resetSerial(serial)
@@ -6204,7 +6204,7 @@ class CcpnNefReader(CcpnNefContent):
                 # modelUtil.resetSerial(dataSet._wrappedData, serial, 'nmrConstraintStores')
 
                 # dataSet._finaliseAction('rename')
-                dataSet.title = 'dataset_%s' % serial
+                dataSet.title = 'DataSet_%s' % serial
 
                 self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
         #
@@ -6220,7 +6220,7 @@ class CcpnNefReader(CcpnNefContent):
 
         if serial is None:
             serial = self.defaultDataSetSerial or 1
-        return self.project.getDataSet('dataset_{}'.format(serial))
+        return self.project.getDataSet('DataSet_{}'.format(serial))
 
 
 def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict,

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
-from ccpn.ui.gui.popups.AttributeEditorPopupABC import ComplexAttributeEditorPopupABC, VList, MoreLess, _blankContainer
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import ComplexAttributeEditorPopupABC, VList, MoreLess, _complexAttribContainer
 from ccpn.ui.gui.widgets.CompoundWidgets import CompoundViewCompoundWidget
 from ccpn.core.Substance import Substance
 
@@ -37,7 +37,7 @@ SELECT = '> Select <'
 LESS_BUTTON = 'Show less'
 MORE_BUTTON = 'Show more'
 TYPENEW = 'Type_New'
-LABELLING = ['None', TYPENEW, '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 'ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
+LABELLING = ['', TYPENEW, '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 'ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
 BUTTONSTATES = ['New', 'From Existing']
 
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \
@@ -53,11 +53,11 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
         """Populate the labelling pulldown
         """
         labels = LABELLING.copy()
-        newLabel = str(self.obj.labelling)
+        newLabel = str(self.obj.labelling or '')
         if newLabel not in labels:
             labels.append(newLabel)
         self.labelling.modifyTexts(labels)
-        self.labelling.select(newLabel or 'None')
+        self.labelling.select(newLabel or '')
 
     def _getCurrentSubstances(self, obj):
         """Populate the current substances pulldown
@@ -65,7 +65,7 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
         substancePulldownData = [SELECT]
         for substance in self.project.substances:
             substancePulldownData.append(str(substance.id))
-        self.Currentsubstances.pulldownList.setData(substancePulldownData)
+        self.currentSubstances.pulldownList.setData(substancePulldownData)
 
     def _getSpectrum(self, attr, default):
         """change the value from the substance object into a pid for the pulldown
@@ -106,15 +106,21 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
         else:
             setattr(self, attr, [])
 
+    def _setLabelling(self, attr, value):
+        """Set the labelling with None replacing empty string from the pulldown
+        """
+        value = value if value else None
+        setattr(self, attr, value)
+
     klass = Substance
     HWIDTH = 150
-    attributes = VList([VList([('Select source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
+    attributes = VList([VList([('Select Source', RadioButtonsCompoundWidget, None, None, None, None, {'texts'      : BUTTONSTATES,
                                                                                                       'selectedInd': 1,
                                                                                                       'direction'  : 'h',
                                                                                                       'hAlign'     : 'l'}),
-                               ('Current substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
-                               ('name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                               ('labelling', PulldownListCompoundWidget, getattr, setattr, _getLabelling, None, {'editable': True}),
+                               ('Current Substances', PulldownListCompoundWidget, None, None, _getCurrentSubstances, None, {'editable': False}),
+                               ('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
+                               ('Labelling', PulldownListCompoundWidget, getattr, _setLabelling, _getLabelling, None, {'editable': True}),
                                ],
                               queueStates=False,
                               hWidth=None,
@@ -124,32 +130,32 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
                         #                                                                             'addGrip': False, 'addWordWrap': True,
                         #                                                                             'fitToContents': True,
                         #                                                                             'maximumRows': 5}), ],
-                        VList([('comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <',}), ],
+                        VList([('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <',}), ],
                               hWidth=None,
                               group=1,
                               ),
-                        MoreLess([('synonyms', EntryCompoundWidget, _getSynonym, _setSynonym, None, None, {'backgroundText': ''}),
-                                  ('referenceSpectra', PulldownListCompoundWidget, _getSpectrum, _setSpectrum, _getCurrentSpectra, None, {'editable': False}),
-                                  ('empiricalFormula', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
-                                  ('molecularMass', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
-                                  ('userCode', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
-                                  ('casNumber', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
-                                  ('atomCount', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
-                                  ('bondCount', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
-                                  ('ringCount', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
-                                  ('hBondDonorCount', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
-                                  ('hBondAcceptorCount', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
-                                  ('polarSurfaceArea', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
-                                  ('logPartitionCoefficient', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                        MoreLess([('Synonyms', EntryCompoundWidget, _getSynonym, _setSynonym, None, None, {'backgroundText': ''}),
+                                  ('Reference Spectra', PulldownListCompoundWidget, _getSpectrum, _setSpectrum, _getCurrentSpectra, None, {'editable': False}),
+                                  ('Empirical Formula', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                                  ('Molecular Mass', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                                  ('User Code', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                                  ('Cas Number', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''}),
+                                  ('Atom Count', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                                  ('Bond Count', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                                  ('Ring Count', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                                  ('hBond Donor Count', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                                  ('hBond Acceptor Count', SpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                                  ('Polar Surface Area', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
+                                  ('Log Partition Coefficient', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
                                   ],
                                  hWidth=None,
                                  name='Advanced',
                                  ),
-                        MoreLess([VList([('smiles', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''})],
+                        MoreLess([VList([('Smiles', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': ''})],
                                         hWidth=None,
                                         group=2,
                                         ),
-                                  VList([('Compound view', CompoundViewCompoundWidget, None, None, None, None, {})],
+                                  VList([('Compound View', CompoundViewCompoundWidget, None, None, None, None, {})],
                                         queueStates=False,
                                         hWidth=None,
                                         group=2,
@@ -176,7 +182,7 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
         self.WINDOWPREFIX = 'New ' if newSubstance else 'Edit '
 
         if newSubstance:
-            obj = _blankContainer(self)
+            obj = _complexAttribContainer(self)
         else:
             obj = substance
 
@@ -188,15 +194,15 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
 
         # attach callbacks to the new/fromSubstances radioButton
         if self.EDITMODE:
-            self.Selectsource.setEnabled(False)
-            self.Currentsubstances.setEnabled(False)
-            self.Selectsource.setVisible(False)
-            self.Currentsubstances.setVisible(False)
+            self.selectSource.setEnabled(False)
+            self.currentSubstances.setEnabled(False)
+            self.selectSource.setVisible(False)
+            self.currentSubstances.setVisible(False)
             self.name.setEnabled(True)  # False
             self.labelling.setEnabled(True)  # False
         else:
-            self.Selectsource.radioButtons.buttonGroup.buttonClicked.connect(self._changeSource)
-            self.Currentsubstances.pulldownList.activated.connect(self._fillInfoFromSubstance)
+            self.selectSource.radioButtons.buttonGroup.buttonClicked.connect(self._changeSource)
+            self.currentSubstances.pulldownList.activated.connect(self._fillInfoFromSubstance)
 
         self.labelling.pulldownList.activated.connect(self._labellingSpecialCases)
         self.smiles.entry.textEdited.connect(self._smilesChanged)
@@ -219,24 +225,24 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
 
     def _setEnabledState(self, fromSubstances):
         if fromSubstances:
-            self.Currentsubstances.setEnabled(True)
+            self.currentSubstances.setEnabled(True)
         else:
-            self.Currentsubstances.setEnabled(False)
+            self.currentSubstances.setEnabled(False)
             self.labelling.setEnabled(True)
 
     def _changeSource(self, button):
         self._setEnabledState(True if button.get() == BUTTONSTATES[1] else False)
 
     def _fillInfoFromSubstance(self, index):
-        selected = self.Currentsubstances.getText()
+        selected = self.currentSubstances.getText()
         if selected != SELECT:
             substance = self.project.getByPid('SU:' + selected)
             if substance:
                 self.name.setText(str(substance.name))
-                newLabel = str(substance.labelling)
+                newLabel = str(substance.labelling or '')
                 if newLabel not in self.labelling.getTexts():
                     self.labelling.pulldownList.addItem(text=newLabel)
-                self.labelling.pulldownList.set(newLabel or 'None')
+                self.labelling.pulldownList.set(newLabel or '')
                 self.labelling.setEnabled(True)  # False
         else:
             self.name.setText('')
@@ -267,20 +273,20 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
         if self.EDITMODE:
             super()._applyAllChanges(changes)
             name = self.name.getText()
-            labelling = self.labelling.getText()
+            labelling = self.labelling.getText() or None
             if name != self.obj.name or labelling != self.obj.labelling:
                 self.obj.rename(name=name, labelling=labelling)
         else:
             # if new substance then call the new method - self.obj is container of new attributes
             name = self.name.getText()
-            labelling = self.labelling.getText()
+            labelling = self.labelling.getText() or None
             self.obj = self.project.newSubstance(name=name, labelling=labelling)
 
             # only apply items that are not in the _VALIDATTRS list - defined by queueStates=True in attributes
             super()._applyAllChanges(changes)
 
     def _initialiseCompoundView(self):
-        view = self.Compoundview.compoundView
+        view = self.compoundView.compoundView
         if self.obj:
             smiles = self.obj.smiles
             if smiles is None:
@@ -293,7 +299,7 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
         # NOTE:ED - initial size has been moved to resizeEvent in compoundWidget
 
     def _smilesChanged(self, value):
-        view = self.Compoundview.compoundView
+        view = self.compoundView.compoundView
         view.setSmiles(value or '')
         # resize to the new items
         view.updateAll()

@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:35 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -56,7 +56,7 @@ class TestSampleComponentCreation(WrapperTesting):
         # with self.assertRaisesRegexp(TypeError, 'required positional argument'):
         #   self.sample.newSampleComponent()
         #
-        with self.assertRaisesRegexp(TypeError, 'SampleComponent name must be a string'):
+        with self.assertRaisesRegexp(TypeError, 'must be a string'):
             self.sample.newSampleComponent()
         self.assertEqual(len(self.project.sampleComponents), 0)
         self.assertEqual(len(self.project.substances), 0)
@@ -69,7 +69,7 @@ class TestSampleComponentCreation(WrapperTesting):
         # with self.assertRaisesRegexp(ApiError, 'Empty string not allowed'):
         #   self.sample.newSampleComponent('')
         #
-        with self.assertRaisesRegexp(ValueError, 'SampleComponent name must be set'):
+        with self.assertRaisesRegexp(ValueError, 'must be set'):
             self.sample.newSampleComponent('')
         self.assertEqual(len(self.project.sampleComponents), 0)
         self.assertEqual(len(self.project.substances), 0)
@@ -93,7 +93,7 @@ class TestSampleComponentCreation(WrapperTesting):
         # with self.assertRaisesRegexp(ApiError, 'Line input is not of a valid type'):
         #   self.sample.newSampleComponent(None)
         #
-        with self.assertRaisesRegexp(TypeError, 'SampleComponent name must be a string'):
+        with self.assertRaisesRegexp(TypeError, 'must be a string'):
             self.sample.newSampleComponent(None)
         self.assertEqual(len(self.project.sampleComponents), 0)
         self.assertEqual(len(self.project.substances), 0)
@@ -106,7 +106,7 @@ class TestSampleComponentCreation(WrapperTesting):
         # with self.assertRaisesRegexp(TypeError, 'not iterable'):
         #   self.sample.newSampleComponent(42)
         #
-        with self.assertRaisesRegexp(TypeError, 'SampleComponent name must be a string'):
+        with self.assertRaisesRegexp(TypeError, 'must be a string'):
             self.sample.newSampleComponent(42)
         self.assertEqual(len(self.project.sampleComponents), 0)
         self.assertEqual(len(self.project.substances), 0)

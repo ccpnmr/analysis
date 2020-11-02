@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -62,7 +62,7 @@ from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForSpectrumPo
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.popups.AttributeEditorPopupABC import _blankContainer
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import _complexAttribContainer
 from ccpn.util.AttrDict import AttrDict
 
 
@@ -486,18 +486,18 @@ class GeneralTab(Widget):
                grid=(row, 3))
         row += 1
 
-        Label(self, text="pid ", vAlign='t', hAlign='l', grid=(row, 0))
+        Label(self, text="Pid ", vAlign='t', hAlign='l', grid=(row, 0))
         # self.layout().addItem(QtWidgets.QSpacerItem(0, 5), 0, 0)
         self.spectrumPidLabel = Label(self, vAlign='t', grid=(row, 1))
         row += 1
 
-        Label(self, text="name ", grid=(row, 0))
+        Label(self, text="Name ", grid=(row, 0))
         self.nameData = LineEdit(self, textAlignment='left', vAlign='t', grid=(row, 1), backgroundText='> Enter name <')
         # self.nameData.setText(spectrum.name)
         self.nameData.textChanged.connect(partial(self._queueSpectrumNameChange, spectrum))  # ejb - was editingFinished
         row += 1
 
-        Label(self, text="comment ", grid=(row, 0))
+        Label(self, text="Comment ", grid=(row, 0))
         self.commentData = LineEdit(self, textAlignment='left', vAlign='t', grid=(row, 1), backgroundText='> Optional <')
         # self.commentData.setText(spectrum.name)
         self.commentData.textChanged.connect(partial(self._queueSpectrumCommentChange, spectrum))  # ejb - was editingFinished
@@ -534,7 +534,7 @@ class GeneralTab(Widget):
         #     index = spectrum.project.chemicalShiftLists.index(spectrum.chemicalShiftList)
         # except:
         #     index = 0
-        Label(self, text="ChemicalShiftList ", vAlign='t', hAlign='l', grid=(row, 0))
+        Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(row, 0))
         self.chemicalShiftListPulldown = PulldownList(self, vAlign='t', grid=(row, 1),
                                                       # texts=[csList.pid for csList in spectrum.project.chemicalShiftLists] + ['<New>'],
                                                       callback=partial(self._queueChemicalShiftListChange, spectrum))
@@ -586,7 +586,7 @@ class GeneralTab(Widget):
             #     self.spectrumType.select(spectrum.experimentType)
             row += 1
 
-            Label(self, text="Spinning rate (Hz)", grid=(row, 0), hAlign='l')
+            Label(self, text="Spinning Rate (Hz)", grid=(row, 0), hAlign='l')
             self.spinningRateData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0, max=100000.0)
             self.spinningRateData.valueChanged.connect(partial(self._queueSpinningRateChange, spectrum, self.spinningRateData.textFromValue))
             row += 1

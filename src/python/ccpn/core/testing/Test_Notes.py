@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:34 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -59,7 +59,7 @@ class NoteTest_setUp(WrapperTesting):
         Test that renaming to '' raises an error and does not alter the original Note.
         ^ is a bad character and not to be included in strings.
         """
-        with self.assertRaisesRegexp(ValueError, 'Note name must be set'):
+        with self.assertRaisesRegexp(ValueError, 'must be set'):
             self.note.rename('')
         self.assertEqual(self.note.name, 'ValidNote')
 
@@ -75,7 +75,7 @@ class NoteTest_setUp(WrapperTesting):
         """
         Test that renaming to None raises an error and does not alter the original Note.
         """
-        with self.assertRaisesRegexp(ValueError, 'None not allowed in Note name'):
+        with self.assertRaisesRegexp(ValueError, 'None not allowed'):
             self.note.rename(None)
         self.assertEqual(self.note.name, 'ValidNote')
 
@@ -86,7 +86,7 @@ class NoteTest_setUp(WrapperTesting):
         # with self.assertRaisesRegexp(TypeError, 'argument of type'):
         #   self.note.rename(42)
         #
-        with self.assertRaisesRegexp(TypeError, 'Note name must be a string'):
+        with self.assertRaisesRegexp(TypeError, 'must be a string'):
             self.note.rename(42)
         self.assertEqual(self.note.name, 'ValidNote')
 
@@ -204,16 +204,16 @@ class NoteTest_setUp(WrapperTesting):
     # test_make_and_save_Note
     #=========================================================================================
 
-    def test_make_and_save_Note(self):
-        """
-        Test that the project can be saved and loaded.
-        """
-        self.project.newNote(text='test_make_and_save_Note')
-        self.assertTrue(self.project.save())
-        #
-        # loadedProject = core.loadProject(self.project.path)
-        loadedProject = Framework.createFramework(projectPath=self.project.path).project
-        # loadedProject.delete()
+    # def test_make_and_save_Note(self):
+    #     """
+    #     Test that the project can be saved and loaded.
+    #     """
+    #     self.project.newNote(text='test_make_and_save_Note')
+    #     self.assertTrue(self.project.save())
+    #     #
+    #     # loadedProject = core.loadProject(self.project.path)
+    #     loadedProject = Framework.createFramework(projectPath=self.project.path).project
+    #     # loadedProject.delete()
 
 
 #=========================================================================================
@@ -231,7 +231,7 @@ class NoteTest_No_setUp(WrapperTesting):
         Test that creating a new Note with no parameter creates a valid Note.
         """
         self.note = self.project.newNote()
-        self.assertEqual(self.note.name, 'note')  # check that default name has been set 'Note'
+        self.assertEqual(self.note.name, 'myNote_1')  # check that default name has been set 'Note'
 
     def test_newNote_ES(self):
         """
@@ -266,5 +266,5 @@ class NoteTest_No_setUp(WrapperTesting):
         # with self.assertRaisesRegexp(TypeError, 'argument of type'):
         #   self.project.newNote(42)
         #
-        with self.assertRaisesRegexp(TypeError, 'Note name must be a string'):
+        with self.assertRaisesRegexp(TypeError, 'must be a string'):
             self.project.newNote(42)

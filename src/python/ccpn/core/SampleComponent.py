@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-03 15:13:56 +0100 (Wed, June 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -24,9 +24,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import collections
 import typing
-
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
 from ccpn.core.SpectrumHit import SpectrumHit
@@ -34,6 +32,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.lib import Pid
 from ccpn.util import Constants
 from ccpn.util.Constants import DEFAULT_LABELLING
+from ccpn.util import Common as commonUtil
 from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpnmodel.ccpncore.api.ccp.lims.Sample import SampleComponent as ApiSampleComponent
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
@@ -234,6 +233,7 @@ SpectrumHit.sampleComponent = property(getter, None, None,
                                        "ccpn.SampleComponent in which ccpn.SpectrumHit is found")
 del getter
 
+
 def _newComponent(self: Sample, name: str = None, labelling=DEFAULT_LABELLING, **kwargs) -> SampleComponent:
     """internal. Used to avoid the overhead of decorators.
     """
@@ -243,9 +243,11 @@ def _newComponent(self: Sample, name: str = None, labelling=DEFAULT_LABELLING, *
         substance = self._project._data2Obj[apiSubstance]
     else:
         from ccpn.core.Substance import _newSubstance
+
         substance = _newSubstance(self._project, name=name, labelling=labelling)
     obj = self._wrappedData.newSampleComponent(name=name, labeling=substance._wrappedData.labeling, **kwargs)
     return self._project._data2Obj.get(obj)
+
 
 @newObjectList(('SampleComponent', 'Substance'))
 def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, role: str = None,  # ejb
@@ -270,41 +272,31 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
     :return: a new SampleComponent instance.
     """
 
-    # Default values for 'new' function, as used for echoing to console
-    defaults = collections.OrderedDict(
-            (('name', None), ('labelling', None), ('role', None),
-             ('concentration', None), ('concentrationError', None), ('concentrationUnit', None),
-             ('purity', None), ('comment', None),
-             )
-            )
+    labelling = labelling or DEFAULT_LABELLING
+
+    if not name:
+        name = SampleComponent._nextAvailableName(SampleComponent, self)
+    commonUtil._validateName(self, SampleComponent, name, checkExisting=False)
+    commonUtil._validateName(self, SampleComponent, labelling, attribName='labelling',
+                             allowNone=True, checkExisting=False)
 
     if not isinstance(name, str):
         name = str(name)
-        # SampleComponents can be defined as numbers. (1,2,3,4....), don't need to raise TypeErrors.
-    elif not name:
-        raise ValueError("ccpn.SampleComponent name must be set")
-    elif Pid.altCharacter in name:
-        raise ValueError("Character %s not allowed in ccpn.SampleComponent id: %s.%s" %
-                         (Pid.altCharacter, name, labelling))
 
-    if labelling is not None:  # 'None' caught by below as default
-        if not isinstance(labelling, str):
-            raise TypeError("ccpn.SampleComponent 'labelling' name must be a string")
-        elif not labelling:
-            raise ValueError("ccpn.SampleComponent 'labelling' name must be set")
-        elif Pid.altCharacter in labelling:
-            raise ValueError("Character %s not allowed in ccpn.SampleComponent labelling, id: %s.%s" %
-                             (Pid.altCharacter, name, labelling))
+    existing = [sC for sC in self._apiSample.sortedSampleComponents() if sC.name == name and sC.labeling == labelling]
+    if existing:
+        raise ValueError('{}.{}.{} already exists'.format(self._apiSample.name, name, labelling if labelling != DEFAULT_LABELLING else ''))
 
     if concentrationUnit is not None and concentrationUnit not in Constants.concentrationUnits:
-        self._project._logger.warning(
-                "Unsupported value %s for SampleComponent.concentrationUnit"
-                % concentrationUnit)
-        raise ValueError("SampleComponent.concentrationUnit must be in the list: %s" % Constants.concentrationUnits)  # ejb
+        self._project._logger.warning("Unsupported value %s for SampleComponent.concentrationUnit"
+                                      % concentrationUnit)
+        raise ValueError("SampleComponent.concentrationUnit must be in the list: %s" % Constants.concentrationUnits)
 
     apiSample = self._wrappedData
+
     existingSubstances = [substance for substance in self._project.substances if (substance.name == name and substance.labelling == labelling)]
     if len(existingSubstances) > 1:
+        # should only return one element
         raise RuntimeError('Too many identical substances')
     substance = existingSubstances[0] if existingSubstances else self._project.fetchSubstance(name=name, labelling=labelling)
 
@@ -315,6 +307,7 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
                                        concentrationError=concentrationError,
                                        concentrationUnit=concentrationUnit, details=comment,
                                        purity=purity)
+
     result = self._project._data2Obj.get(obj)
     if result is None:
         raise RuntimeError('Unable to generate new SampleComponent item')
@@ -326,7 +319,7 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
             getLogger().warning("Could not reset serial of %s to %s - keeping original value"
                                 % (result, serial))
 
-    # first element in the list must be the primary object
+    # if substance already exists then don't flag for delete through the newObject decorator
     if existingSubstances:
         return (result,)
     else:

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-16 14:38:52 +0100 (Fri, October 16, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from ccpn.core.lib import Pid
 from ccpn.core.lib.Util import AtomIdTuple
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Constants
-from ccpn.util.Common import name2IsotopeCode, makeIterableList
+from ccpn.util.Common import name2IsotopeCode, makeIterableList, _validateName
 from ccpn.util.Constants import PSEUDO_ATOM_NAMES
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoBlock, renameObjectContextManager
@@ -377,7 +377,7 @@ class NmrAtom(AbstractWrapperObject):
 
         # NB This is a VERY special case
         # - API code and notifiers will take care of resetting id and Pid
-        self._validateName(value=value, allowWhitespace=False, allowNone=True)
+        _validateName(self.project, NmrAtom, value=value, allowWhitespace=False, allowNone=True)
 
         with renameObjectContextManager(self) as addUndoItem:
             oldName = self.name

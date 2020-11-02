@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,8 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import getAttributeTipText
+from ccpn.util.Common import stringToCamelCase
 
 
 class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
@@ -66,15 +68,20 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
         self.labels = {}  # An (attributeName, Label-widget) dict
         self.edits = {}  # An (attributeName, LineEdit-widget) dict
 
-        for attr, getFunction, setFunction, kwds in self.attributes:
+        for _label, getFunction, setFunction, kwds in self.attributes:
             # value = getFunction(self.obj, attr)
+            attr = stringToCamelCase(_label)
+
             editable = setFunction is not None
-            self.labels[attr] = Label(self.mainWidget, attr, grid=(row, 0))
+            self.labels[attr] = Label(self.mainWidget, _label, grid=(row, 0))
             self.edits[attr] = LineEdit(self.mainWidget, textAlignment='left', editable=editable,
                                         vAlign='t', grid=(row, 1), **kwds)
             self.edits[attr].textChanged.connect(partial(self._queueSetValue, attr, getFunction, setFunction, row))
             if self.hWidth:
                 self.labels[attr].setFixedWidth(self.hWidth)
+
+            tipText = getAttributeTipText(self.klass, attr)
+            self.labels[attr].setToolTip(tipText)
 
             row += 1
 
@@ -101,7 +108,9 @@ class SimpleAttributeEditorPopupABC(CcpnDialogMainWidget):
         """
         self._changes.clear()
         with self._changes.blockChanges():
-            for attr, getFunction, _, _ in self.attributes:
+            for _label, getFunction, _, _ in self.attributes:
+                attr = stringToCamelCase(_label)
+
                 if getFunction and attr in self.edits:
                     value = getFunction(self.obj, attr)
                     self.edits[attr].setText(str(value) if value is not None else '')

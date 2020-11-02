@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,15 +30,12 @@ from ccpn.ui.gui.popups.SimpleAttributeEditorPopupABC import SimpleAttributeEdit
 
 
 class NmrChainPopup(SimpleAttributeEditorPopupABC):
-    """
-    NmrChain attributes editor popup
+    """NmrChain attributes editor popup
     """
 
     klass = NmrChain
-    attributes = [('name', getattr, setattr, {'backgroundText': '> Enter name <'}),
-                  ('comment', getattr, setattr, {'backgroundText': '> Optional <'}),
-                  ('isConnected', getattr, None, {}),
-                  ('chain', getattr, None, {}),
+    attributes = [('Name', getattr, setattr, {'backgroundText': '> Enter name <'}),
+                  ('Comment', getattr, setattr, {'backgroundText': '> Optional <'}),
+                  ('Is Connected', getattr, None, {}),
+                  ('Chain', getattr, None, {}),
                   ]
-
-    # hWidth = 120

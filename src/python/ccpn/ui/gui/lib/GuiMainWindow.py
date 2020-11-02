@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:46 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -62,7 +62,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
-from ccpn.util.Common import uniquify
+from ccpn.util.Common import uniquify, camelCaseToString
 from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
@@ -871,17 +871,18 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         modulesMenu.clear()
 
         from ccpn.framework.PathsAndUrls import tutorialsPath, beginnersTutorialPath, \
-            backboneAssignmentTutorialPath, cspTutorialPath, solidStateTutorialPath
+            backboneAssignmentTutorialPath, cspTutorialPath, solidStateTutorialPath, analysisScreenTutorialPath
 
         from os import walk
 
         importantList = (('Beginners Tutorial', beginnersTutorialPath),
                          ('Backbone Tutorial', backboneAssignmentTutorialPath),
-                         ('CSP Tutorial', cspTutorialPath),
+                         ('Chemical Shift Perturbation Tutorial', cspTutorialPath),
+                         ('Screen Tutorial', analysisScreenTutorialPath),
                          ('Solid State Tutorial', solidStateTutorialPath))
 
         # add link to website videos
-        modulesMenu.addAction(Action(modulesMenu, text='Video Tutorials',
+        modulesMenu.addAction(Action(modulesMenu, text='Video Tutorials && Manual',
                                      callback=self._showCCPNTutorials))
         modulesMenu.addSeparator()
 
@@ -909,7 +910,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             filename, fileExt = os.path.splitext(file)
 
             if file not in [ff[1] for ff in importantList] and fileExt == '.pdf':
-                modulesMenu.addAction(Action(modulesMenu, text=os.path.basename(filename),
+                _label = camelCaseToString(os.path.basename(filename))
+                _label = _label.replace('Chem Build', 'ChemBuild')
+                modulesMenu.addAction(Action(modulesMenu, text=_label,
                                              callback=partial(self._showTutorial, file, self)))
 
     def _showCCPNTutorials(self):

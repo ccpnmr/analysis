@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-05 13:15:45 +0100 (Mon, October 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1634,7 +1634,7 @@ class Project(AbstractWrapperObject):
                                sequenceCode=sequenceCode, residueType=residueType, name=name)
 
     @logCommand('project.')
-    def newNote(self, name: str = None, text: str = None, **kwds):
+    def newNote(self, name: str = None, text: str = None, comment: str = None, **kwds):
         """Create new Note.
 
         See the Note class for details.
@@ -1647,7 +1647,7 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.Note import _newNote
 
-        return _newNote(self, name=name, text=text, **kwds)
+        return _newNote(self, name=name, text=text, comment=comment, **kwds)
 
     @logCommand('project.')
     def newWindow(self, title: str = None, position: tuple = (), size: tuple = (), **kwds):
@@ -1741,10 +1741,11 @@ class Project(AbstractWrapperObject):
         :return: new or existing Sample instance.
         """
         from ccpn.core.Sample import _fetchSample
+
         return _fetchSample(self, name)
 
     @logCommand('project.')
-    def newDataSet(self, title: str = None, programName: str = None, programVersion: str = None,
+    def newDataSet(self, title: str = None, name: str = None, programName: str = None, programVersion: str = None,
                    dataPath: str = None, creationDate: datetime = None, uuid: str = None,
                    comment: str = None, **kwds):
         """Create new DataSet
@@ -1753,7 +1754,8 @@ class Project(AbstractWrapperObject):
 
         Optional keyword arguments can be passed in; see DataSet._newDataSet for details.
 
-        :param title:
+        :param title: deprecated - original name for dataSet, please use .name
+        :param name:
         :param programName:
         :param programVersion:
         :param dataPath:
@@ -1764,7 +1766,7 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.DataSet import _newDataSet
 
-        return _newDataSet(self, title=title, programName=programName, programVersion=programVersion,
+        return _newDataSet(self, title=title, name=name, programName=programName, programVersion=programVersion,
                            dataPath=dataPath, creationDate=creationDate, uuid=uuid, comment=comment, **kwds)
 
     @logCommand('project.')

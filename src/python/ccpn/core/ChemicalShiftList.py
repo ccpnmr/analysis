@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-23 19:03:39 +0100 (Thu, April 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -180,7 +180,7 @@ class ChemicalShiftList(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename ChemicalShiftList, changing its name and Pid.
         """
-        self._validateName(value=value, allowWhitespace=False)
+        commonUtil._validateName(self.project, ChemicalShiftList, value=value, allowWhitespace=False)
 
         # rename functions from here
         oldName = self.name
@@ -284,18 +284,8 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
         spectra = [getByPid(x) if isinstance(x, str) else x for x in spectra]
 
     if not name:
-        # Make default name
-        nextNumber = len(self.chemicalShiftLists)
-        chemName = self._defaultName(ChemicalShiftList)
-        name = '%s_%s' % (chemName, nextNumber) if nextNumber > 0 else chemName
-    names = [d.name for d in self.chemicalShiftLists]
-    while name in names:
-        name = commonUtil.incrementName(name)
-
-    if not isinstance(name, str):
-        raise TypeError("ChemicalShiftList name must be a string")  # ejb catch non-string
-    if Pid.altCharacter in name:
-        raise ValueError("Character %s not allowed in ChemicalShiftList name" % Pid.altCharacter)
+        name = ChemicalShiftList._nextAvailableName(ChemicalShiftList, self)
+    commonUtil._validateName(self, ChemicalShiftList, name)
 
     dd = {'name': name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
           'details': comment}
@@ -346,16 +336,10 @@ def _getChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
         getByPid = self._project.getByPid
         spectra = [getByPid(x) if isinstance(x, str) else x for x in spectra]
 
-    if not name:
-        # Make default name
-        nextNumber = len(self.chemicalShiftLists)
-        chemName = self._defaultName(ChemicalShiftList)
-        name = '%s_%s' % (chemName, nextNumber) if nextNumber > 0 else chemName
-
-    if not isinstance(name, str):
-        raise TypeError("ChemicalShiftList name must be a string")  # ejb catch non-string
-    if Pid.altCharacter in name:
-        raise ValueError("Character %s not allowed in ChemicalShiftList name" % Pid.altCharacter)
+    # if not name:
+    #     name = ChemicalShiftList._nextAvailableName(ChemicalShiftList, self)
+    # # match the error message to the attribute
+    # commonUtil._validateName(self, ChemicalShiftList, name)
 
     dd = {'name': name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
           'details': comment}

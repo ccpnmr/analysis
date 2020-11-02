@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 12:01:35 +0100 (Thu, June 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import typing
 from functools import partial
+from ccpn.util.Common import _validateName
 from ccpn.core.Project import Project
 from ccpn.core.Chain import Chain
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -136,7 +137,7 @@ class Complex(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Complex, changing its name and Pid.
         """
-        self._validateName(value=value, allowWhitespace=False)
+        _validateName(self.project, Complex, value=value, allowWhitespace=False)
 
         # rename functions from here
         oldName = self.name
@@ -169,6 +170,10 @@ def _newComplex(self: Project, name: str, chains=(), serial: int = None, comment
     :param comment: optional comment.
     :return: a new Complex instance.
     """
+
+    if not name:
+        name = Complex._nextAvailableName(Complex, self)
+    _validateName(self, Complex, name)
 
     if name and Pid.altCharacter in name:
         raise ValueError("Character %s not allowed in ccpn.Complex.name" % Pid.altCharacter)

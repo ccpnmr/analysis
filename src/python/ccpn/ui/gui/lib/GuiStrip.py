@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 18:39:16 +0100 (Fri, October 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2333,6 +2333,18 @@ class GuiStrip(Frame):
         """Return the width/height for the mainView of the OpenGL widget
         """
         return self._CcpnGLWidget.mainViewSize()
+
+    def getAxisPosition(self, axisCode):
+        return self._CcpnGLWidget.getAxisPosition(axisCode)
+
+    def setAxisPosition(self, axisCode, position, update=False):
+        self._CcpnGLWidget.setAxisPosition(axisCode, position, update)
+
+    def getAxisWidth(self, axisCode):
+        return self._CcpnGLWidget.getAxisWidth(axisCode)
+
+    def setAxisWidth(self, axisCode, width, update=False):
+        self._CcpnGLWidget.setAxisWidth(axisCode, width, update)
 
 
 # Notifiers:

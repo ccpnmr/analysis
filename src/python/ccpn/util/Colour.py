@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -887,8 +887,8 @@ def selectPullDownColour(pulldown, colourString, allowAuto=False):
         pulldown.setCurrentText(spectrumColours[colourString])
     elif colourString in colorSchemeTable:
         pulldown.setCurrentText(colourString)
-    elif allowAuto and '#' in pulldown.texts:
-        pulldown.setCurrentText('#')
+    elif allowAuto and '<auto>' in pulldown.texts:
+        pulldown.setCurrentText('<auto>')
 
 
 # ICON_SIZE = 20

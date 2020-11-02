@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-02 09:52:52 +0100 (Tue, June 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import typing
 from ccpn.util import Constants as utilConstants
-from functools import partial
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
@@ -35,6 +34,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
 from ccpn.util.Logging import getLogger
 from ccpn.util import Common as commonUtil
+
 
 NOTE = 'note'
 NOTECOMMENT = 'noteComment'
@@ -155,7 +155,7 @@ class Note(AbstractWrapperObject):
         """Rename Note, changing its name and Pid.
 
         NB, the serial remains immutable."""
-        self._validateName(value=value, allowWhitespace=False)
+        commonUtil._validateName(self.project, Note, value=value, allowWhitespace=False)
 
         # rename functions from here
         oldName = self.name
@@ -177,7 +177,7 @@ class Note(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(Note)
-def _newNote(self: Project, name: str = None, text: str = None, serial: int = None) -> Note:
+def _newNote(self: Project, name: str = None, text: str = None, comment: str = None, serial: int = None) -> Note:
     """Create new Note.
 
     See the Note class for details.
@@ -189,20 +189,9 @@ def _newNote(self: Project, name: str = None, text: str = None, serial: int = No
     """
 
     if not name:
-        # Make default name
-        nextNumber = len(self.notes)
-        noteName = self._defaultName(Note)
-        name = '%s_%s' % (noteName, nextNumber) if nextNumber > 0 else noteName
-    names = [d.name for d in self.notes]
-    while name in names:
-        name = commonUtil.incrementName(name)
+        name = Note._nextAvailableName(Note, self)
+    commonUtil._validateName(self, Note, name)
 
-    if not isinstance(name, str):
-        raise TypeError("Note name must be a string")
-    if not name:
-        raise ValueError("Note name must be set")
-    if Pid.altCharacter in name:
-        raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
     if text is not None:
         if not isinstance(text, str):
             raise TypeError("Note text must be a string")
@@ -218,6 +207,8 @@ def _newNote(self: Project, name: str = None, text: str = None, serial: int = No
         except ValueError:
             getLogger().warning("Could not reset serial of %s to %s - keeping original value"
                                 % (result, serial))
+
+    result.comment = comment
 
     return result
 

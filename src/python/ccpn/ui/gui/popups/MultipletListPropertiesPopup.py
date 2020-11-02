@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 19:08:45 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from ccpn.ui.gui.popups.PMIListPropertiesPopupABC import PMIListPropertiesPopupA
 from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
 from ccpn.core.MultipletList import MultipletList
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import getAttributeTipText
-from Common import camelCaseToString
+from ccpn.util.Common import camelCaseToString
 
 
 MULTIPLETAVERAGING = 'multipletAveraging'

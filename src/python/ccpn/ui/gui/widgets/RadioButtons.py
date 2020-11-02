@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-30 16:09:19 +0100 (Wed, September 30, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 18:41:24 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -174,7 +174,8 @@ class RadioButtons(QtWidgets.QWidget, Base):
             if rb.isChecked():
                 ixs.append(i)
         if self.isExclusive:
-            return ixs[-1]
+            # if exclusive then one-and-only-one MUST be set
+            return ixs[-1] if ixs else 0
         else:
             return ixs
 

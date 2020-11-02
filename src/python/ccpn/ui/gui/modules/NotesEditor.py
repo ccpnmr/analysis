@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:22 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-02 18:41:24 +0000 (Mon, November 02, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -220,7 +220,8 @@ class NotesEditorModule(CcpnModule):
             try:
                 if name != self.note.name or text != self.note.text or comment != self.note.comment:
                     with undoBlock():
-                        self.note.rename(name)
+                        if name != self.note.name:
+                            self.note.rename(name)
                         self.note.text = text
                         self.note.comment = comment
             except Exception as es:

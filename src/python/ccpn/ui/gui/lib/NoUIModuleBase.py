@@ -162,7 +162,10 @@ class _DataModuleBase(object):
         self._autoUpdateEnabled = value
         self.settingsChanged.enabled = value
         if not value:
-            self.settingsChanged._blockingLevel = 0
+            self._clearSettingsChangedQueue()
+
+    def _clearSettingsChangedQueue(self):
+        self.settingsChanged._blockingLevel = 0
 
     @settingsChanged.register
     def update(self, *args, **kwargs):

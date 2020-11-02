@@ -24,6 +24,7 @@ class _SettingsChanged(object):
         else:
             if callable(self.silentCallback):
                 self.silentCallback()
+                self._blockingLevel += 1
 
     def register(self, callback):
         self.callbacks += [callback]
@@ -160,6 +161,8 @@ class _DataModuleBase(object):
     def autoUpdateEnabled(self, value:bool):
         self._autoUpdateEnabled = value
         self.settingsChanged.enabled = value
+        if not value:
+            self.settingsChanged._blockingLevel = 0
 
     @settingsChanged.register
     def update(self, *args, **kwargs):

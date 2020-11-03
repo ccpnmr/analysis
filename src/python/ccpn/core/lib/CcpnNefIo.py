@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-03 16:03:15 +0000 (Tue, November 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3712,6 +3712,10 @@ class CcpnNefReader(CcpnNefContent):
 
         return newName
 
+    def _stripSpectrumName(self, value):
+        ll = value.rsplit('`', 2)
+        return ll[0]
+
     def _stripSpectrumSerial(self, value):
         ll = value.rsplit('`', 2)
         if len(ll) == 3:
@@ -4287,10 +4291,6 @@ class CcpnNefReader(CcpnNefContent):
     #
     importers['nef_nmr_spectrum'] = load_nef_nmr_spectrum
 
-    def _stripSpectrumName(self, value):
-        ll = value.rsplit('`', 2)
-        return ll[0]
-
     def verify_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         _rowSpectrumErrors = saveFrame._rowErrors[saveFrame.name] = OrderedSet()
         # _rowPeakErrors = saveFrame._rowErrors['nef_peak_list'] = OrderedSet()
@@ -4316,31 +4316,19 @@ class CcpnNefReader(CcpnNefContent):
         spectrumName = framecode[len(category) + 1:]
         _spectrumNameNoPostfix = spectrumName
 
-        if spectrumName.endswith('`'):
-            peakListSerial = peakListParameters.get('serial')
-            if peakListSerial:
-                ss = '`%s`' % peakListSerial
-                # Remove peakList serial suffix (which was added for disambiguation)
-                # So that multiple peakLists all go to one Spectrum
-
-                # if spectrumName.endswith(ss):
-                #     spectrumName = spectrumName[:-len(ss)]
-            else:
-                ll = spectrumName.rsplit('`', 2)
-                if len(ll) == 3:
-                    # name is of form abc`xyz`
-                    try:
-                        peakListParameters['serial'] = int(ll[1])
-                    except ValueError:
-                        pass
-                    # else:
-                    #     spectrumName = ll[0]
-            spectrumName = self._stripSpectrumName(spectrumName)
+        # get the serial number become stripping name
+        peakListSerial = self._stripSpectrumSerial(spectrumName) or peakListParameters.get('serial') or 1
+        spectrumName = self._stripSpectrumName(spectrumName)
 
         spectrum = project.getSpectrum(spectrumName)
         if spectrum is not None:
-            self.error('nef_nmr_spectrum - Spectrum {} already exists'.format(spectrum), saveFrame, (spectrum,))
-            _rowSpectrumErrors.add(spectrumName)
+            # search
+            peakListId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (spectrumName, peakListSerial))
+            peakList = project.getObjectsByPartialId(className='PeakList', idStartsWith=peakListId)
+
+            if peakList:
+                self.error('nef_nmr_spectrum - Peaklist {} already exists'.format(peakListId), saveFrame, (spectrum,))
+                _rowSpectrumErrors.add((spectrumName, peakListSerial))
 
             # peakList = spectrum.getPeakList(peakListParameters['serial'])
             # if peakList is not None:
@@ -4354,7 +4342,8 @@ class CcpnNefReader(CcpnNefContent):
             self._verifyLoops(spectrum, saveFrame, dimensionCount=saveFrame['num_dimensions'],
                               excludeList=('nef_spectrum_dimension', 'ccpn_spectrum_dimension',  #'nef_peak',
                                            'nef_spectrum_dimension_transfer',
-                                           ))
+                                           ),
+                              spectrumListSerial=peakListSerial)
 
     verifiers['nef_nmr_spectrum'] = verify_nef_nmr_spectrum
 
@@ -5091,23 +5080,27 @@ class CcpnNefReader(CcpnNefContent):
     importers['nef_peak'] = load_nef_peak
 
     # def verify_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, dimensionCount: int = None):
-    def verify_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, dimensionCount: int = None):
+    def verify_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, dimensionCount: int = None,
+                        spectrumListSerial=None):
         """Serves to verify nef_peak loop"""
         _ID = 'nef_peak'
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
         mapping = nef2CcpnMap[loop.name]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+
             serial = parameters['serial']
-            peakListSerial = row.get('ccpn_peak_list_serial') or 1
-            peakLabel = Pid.IDSEP.join(('' if x is None else str(x)) for x in (peakListSerial, serial))
+            peakListSerial = spectrumListSerial or row.get('ccpn_peak_list_serial') or 1
+            # peakLabel = Pid.IDSEP.join(('' if x is None else str(x)) for x in (peakListSerial, serial))
 
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, peakListSerial])
             peakID = '_'.join([_ID, listName])
 
             peakList = spectrum.getPeakList(peakListSerial)
+            # peakList = self.project.getObjectsByPartialId(className='PeakList', idStartsWith=listName)
             if peakList is not None:
                 peak = peakList.getPeak(serial)
 

@@ -59,6 +59,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.pipes import loadedPipes as LP
 import threading
+from ccpn.ui.gui.widgets import MessageDialog
 
 
 Qt = QtCore.Qt
@@ -495,9 +496,9 @@ class GuiPipeline(CcpnModule, Pipeline):
                                     pipe.inputData = self.inputData
                                     pipe.spectrumGroups = self.spectrumGroups
                                     result = pipe.runPipe(self.inputData)
-                                    print(guiPipe.pipeName)
-                                    print(guiPipe._kwargs)
-                                    print(self._kwargs)
+                                    # print(guiPipe.pipeName)
+                                    # print(guiPipe._kwargs)
+                                    # print(self._kwargs)
                                     # time.sleep(11.3)  # seconds
                                     self.inputData = result or set()
                                 else:
@@ -509,7 +510,7 @@ class GuiPipeline(CcpnModule, Pipeline):
             self._updateGuiInputData()
 
         self.project._logger.info('Pipeline: Finished.')
-        # showInfo('Pipeline','Finished')
+        MessageDialog.showInfo('Pipeline','Finished')
         self.goButton.setEnabled(True)
 
     def _closeModule(self):

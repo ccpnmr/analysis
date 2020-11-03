@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-03 12:23:50 +0000 (Tue, November 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -625,9 +625,14 @@ class GuiPipe(Dock, GuiPipeDrop):
         mime = QtCore.QMimeData()
         self.drag.setMimeData(mime)
         dragPixmap = self.grab()
-        self.drag.setPixmap(
-            dragPixmap.scaledToWidth(128) if dragPixmap.width() < dragPixmap.height() else dragPixmap.scaledToHeight(
-                128))
+        # self.drag.setPixmap(
+        #     dragPixmap.scaledToWidth(128) if dragPixmap.width() < dragPixmap.height() else dragPixmap.scaledToHeight(
+        #         128))
+        # make sure that the dragPixmap is not too big
+        self.drag.setPixmap(dragPixmap.scaledToWidth(min(128, dragPixmap.width()))
+                            if dragPixmap.width() < dragPixmap.height() else
+                            dragPixmap.scaledToHeight(min(128, dragPixmap.height())))
+
         self.widgetArea.setStyleSheet(self.dragStyle)
         self.update()
         action = self.drag.exec_()

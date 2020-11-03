@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-11 19:09:41 +0100 (Fri, September 11, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-03 12:10:02 +0000 (Tue, November 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -56,7 +56,7 @@ class Offset1DWidget(Frame):
         ii = 0
         self.labelOffset = Label(self, OffsetX, grid=(0, ii))
         ii += 1
-        self.boxXOffset = ScientificDoubleSpinBox(self, step=0.0001, grid=(0, ii), min=-10000, max=10000, decimals=5)
+        self.boxXOffset = DoubleSpinbox(self, step=0.001, grid=(0, ii), min=-10000, max=10000, decimals=3)
 
         ii += 1
         self.labelOffset = Label(self, OffsetY, grid=(0, ii))

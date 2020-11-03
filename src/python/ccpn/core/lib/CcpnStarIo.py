@@ -9,6 +9,8 @@ from collections import OrderedDict as od
 from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.framework.PathsAndUrls import macroPath as mp
 from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.util.Logging import getLogger
+
 NMRSTARVersion = '3.2.1.32'
 NMRSTARV3GROUPS = od([
                     ("citations",
@@ -149,6 +151,8 @@ Atom_type = "Atom_type"
 Val = "Val"
 Val_err = "Val_err"
 Details = "Details"
+Resonance_ID = 'Resonance_ID'
+Auth_seq_ID = 'Auth_seq_ID'
 STOP = "stop_"
 Atom_chem_shift = _Atom_chem_shift+ID
 
@@ -189,6 +193,13 @@ def makeDataFrame(bmrbLines):
     shortColumns = [c.replace(_Atom_chem_shift,'') for c in columns]
     return pd.DataFrame(table, columns=shortColumns)
 
+def _isfloat(value):
+  try:
+    float(value)
+    return True
+  except ValueError:
+    return False
+
 def makeCSLfromDF(project, df, chemicalShiftListName=None):
     """
 
@@ -198,19 +209,20 @@ def makeCSLfromDF(project, df, chemicalShiftListName=None):
     """
 
     chemicalShiftList = project.newChemicalShiftList(name=chemicalShiftListName)
-
     nmrChain = project.fetchNmrChain()
     for index, row in df.iterrows():
-        nmrResidue = nmrChain.fetchNmrResidue(residueType=row[Comp_ID], sequenceCode=row[Seq_ID])
+        nmrResidue = nmrChain.fetchNmrResidue(residueType=row[Comp_ID], sequenceCode=row[Auth_seq_ID])
         nmrAtom = nmrResidue.fetchNmrAtom(row[Atom_ID])
         if chemicalShiftList:
             try:
-                if row[Val] is not None:
-                    cs = chemicalShiftList.newChemicalShift(value=float(row[Val]), nmrAtom=nmrAtom)
-                    if row[Val_err] is not None:
-                        cs.valueError = float(row[Val_err])
+                csValue = row[Val]
+                if _isfloat(csValue):
+                    cs = chemicalShiftList.newChemicalShift(value=float(csValue), nmrAtom=nmrAtom)
+                    valueErr = row[Val_err]
+                    if _isfloat(valueErr):
+                        cs.valueError = float(valueErr)
             except Exception as e:
-                print('Error in creating new shift.', e)
+                getLogger().warn('Error in creating new shift: %s' %e)
     return chemicalShiftList
 
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-03 12:27:19 +0000 (Tue, November 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1041,9 +1041,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.drag.setMimeData(mime)
         dragPixmap = self.grab()
         # make sure that the dragPixmap is not too big
-        self.drag.setPixmap(dragPixmap.scaledToWidth(min(128, dragPixmap.width()))
+        self.drag.setPixmap(dragPixmap.scaledToWidth(max(32, min(128, dragPixmap.width())))
                             if dragPixmap.width() < dragPixmap.height() else
-                            dragPixmap.scaledToHeight(min(128, dragPixmap.height())))
+                            dragPixmap.scaledToHeight(max(32, min(128, dragPixmap.height()))))
         self.widgetArea.setStyleSheet(self.dragStyle)
         self._raiseSelectedOverlay()
         self.updateStyle()

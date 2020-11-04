@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-13 09:51:39 +0100 (Tue, October 13, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-04 13:35:46 +0000 (Wed, November 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,8 +27,8 @@ __date__ = "$Date: 2020-07-01 13:14:51 +0000 (Wed, July 01, 2020) $"
 
 import typing
 from functools import partial
-from collections import OrderedDict as OD, namedtuple
-from typing import List, Union, Optional, Sequence, Tuple
+from collections import OrderedDict as OD
+from typing import Optional
 from ccpn.core.lib import Pid
 from ccpn.util import Common as commonUtil
 from ccpn.util.nef import StarIo
@@ -43,7 +43,7 @@ from ccpn.core.RestraintList import RestraintList
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.AttrDict import AttrDict
-from ccpn.core.lib.CcpnNefCommon import nef2CcpnMap, _isALoop, _parametersFromLoopRow, _traverse
+from ccpn.core.lib.CcpnNefCommon import nef2CcpnMap, _isALoop, _parametersFromLoopRow, _stripSpectrumName, _stripSpectrumSerial
 
 
 class CcpnNefContent:
@@ -491,19 +491,6 @@ class CcpnNefContent:
 
     contents['nef_molecular_system'] = content_nef_molecular_system
 
-    def _stripSpectrumName(self, value):
-        ll = value.rsplit('`', 2)
-        return ll[0]
-
-    def _stripSpectrumSerial(self, value):
-        ll = value.rsplit('`', 2)
-        if len(ll) == 3:
-            # name is of form abc`xyz`
-            try:
-                return int(ll[1])
-            except ValueError:
-                pass
-
     def content_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
@@ -515,25 +502,8 @@ class CcpnNefContent:
 
         # Get name from spectrum parameters, or from the framecode
         spectrumName = framecode[len(category) + 1:]
-        if spectrumName.endswith('`'):
-            peakListSerial = peakListParameters.get('serial')
-            if peakListSerial:
-                ss = '`%s`' % peakListSerial
-                # Remove peakList serial suffix (which was added for disambiguation)
-                # So that multiple peakLists all go to one Spectrum
-                # if spectrumName.endswith(ss):
-                #     spectrumName = spectrumName[:-len(ss)]
-            else:
-                ll = spectrumName.rsplit('`', 2)
-                if len(ll) == 3:
-                    # name is of form abc`xyz`
-                    try:
-                        peakListParameters['serial'] = int(ll[1])
-                    except ValueError:
-                        pass
-                    # else:
-                    #     spectrumName = ll[0]
-            spectrumName = self._stripSpectrumName(spectrumName)
+        peakListSerial = peakListParameters.get('serial') or _stripSpectrumSerial(spectrumName) or 1
+        spectrumName = _stripSpectrumName(spectrumName)
 
         result = {category: OrderedSet([spectrumName]), }
         # 'nef_peak_list': OrderedSet([peakListParameters['serial']])}
@@ -562,7 +532,7 @@ class CcpnNefContent:
         # peakListSerial = parentFrame['ccpn_peaklist_serial']
         # peakListSerial = parentFrame.get('ccpn_peaklist_serial') or 1
         _parentName = parentFrame['sf_framecode']
-        _parentSerial = self._stripSpectrumSerial(_parentName)
+        _parentSerial = _stripSpectrumSerial(_parentName)
 
         # get the list of peaks
         mapping = nef2CcpnMap[loop.name]
@@ -604,7 +574,7 @@ class CcpnNefContent:
         # NOTE:ED - not correct yet, need 2 lists
         # peakListSerial = parentFrame['ccpn_peaklist_serial']
         _parentName = parentFrame['sf_framecode']
-        _parentSerial = self._stripSpectrumSerial(_parentName)
+        _parentSerial = _stripSpectrumSerial(_parentName)
 
         # get the list of peaks
         mapping = nef2CcpnMap[loop.name]
@@ -791,7 +761,7 @@ class CcpnNefContent:
         # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
         name = framecode[len(category) + 1:]
 
-        result = {category: (name or 'restraintLinks',)}        # should be 'name' but can only be one
+        result = {category: (name or 'restraintLinks',)}  # should be 'name' but can only be one
 
         self._contentLoops(project, saveFrame)
         self.updateContent(saveFrame, result)

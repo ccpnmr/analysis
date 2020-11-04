@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-03 16:03:15 +0000 (Tue, November 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-04 13:35:46 +0000 (Wed, November 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ from typing import List, Union, Optional, Sequence, Tuple
 from ccpn.core.lib import Pid
 from ccpn.core import _coreImportOrder
 from ccpn.core.lib.CcpnNefCommon import nef2CcpnMap, saveFrameReadingOrder, _isALoop, \
-    saveFrameWritingOrder, _parametersFromLoopRow, _traverse
+    saveFrameWritingOrder, _parametersFromLoopRow, _traverse, _stripSpectrumName, _stripSpectrumSerial
 from ccpn.util import Common as commonUtil
 from ccpn.util import Constants
 from ccpn.util import jsonIo
@@ -301,10 +301,10 @@ def convertToCcpnDataBlock(project: Project, skipPrefixes: typing.Sequence = (),
 
 
 def _tryNumber(value):
-    code = None
-    if value:
+    if isinstance(value, str):
         ll = value.rsplit('`', 2)
         if len(ll) == 3:
+            # name is of form abc`xyz`
             try:
                 return int(ll[1])
             except ValueError:
@@ -2465,18 +2465,9 @@ class CcpnNefReader(CcpnNefContent):
                 if sf_category == 'nef_nmr_spectrum':
                     getLogger().debug2('>>>  -- SPECTRUM {}'.format(saveFrameName))
 
-                    peakListSerial = saveFrame.get('ccpn_peaklist_serial')
-                    if not peakListSerial:
-                        ll = saveFrameName.rsplit('`', 2)
-                        if len(ll) == 3:
-                            # name is of form abc`xyz`
-                            try:
-                                peakListSerial = int(ll[1])
-                            except ValueError:
-                                pass
-                            else:
-                                peakListSerial = 1
+                    peakListSerial = saveFrame.get('ccpn_peaklist_serial') or _stripSpectrumSerial(saveFrameName) or 1
                     self._frameCodeToSpectra[saveFrameName] = peakListSerial
+
                 elif sf_category in ['nef_distance_restraint_list',
                                      'nef_dihedral_restraint_list',
                                      'nef_rdc_restraint_list',
@@ -3354,7 +3345,7 @@ class CcpnNefReader(CcpnNefContent):
                            loopSearchList=loopList, rowSearchList=replaceList)
 
         loopList = ('nef_chemical_shift')
-        replaceList = ('chain_code', )
+        replaceList = ('chain_code',)
         self.searchReplace(project, dataBlock, True, None, itemName, newName, replace=True,
                            loopSearchList=loopList, rowSearchList=replaceList)
 
@@ -3711,19 +3702,6 @@ class CcpnNefReader(CcpnNefContent):
         #                    frameSearchList=frameList, loopSearchList=loopList, rowSearchList=replaceList)
 
         return newName
-
-    def _stripSpectrumName(self, value):
-        ll = value.rsplit('`', 2)
-        return ll[0]
-
-    def _stripSpectrumSerial(self, value):
-        ll = value.rsplit('`', 2)
-        if len(ll) == 3:
-            # name is of form abc`xyz`
-            try:
-                return int(ll[1])
-            except ValueError:
-                pass
 
     def rename_ccpn_peak_list(self, project: Project,
                               dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
@@ -4181,30 +4159,10 @@ class CcpnNefReader(CcpnNefContent):
 
         # Get name from spectrum parameters, or from the framecode
         spectrumName = framecode[len(category) + 1:]
-        oldSerial = 1
-        if spectrumName.endswith('`'):
 
-            # NOTE:ED - should only get here for old nef
-            peakListSerial = peakListParameters.get('serial')
-            if peakListSerial:
-                ss = '`%s`' % peakListSerial
-                # Remove peakList serial suffix (which was added for disambiguation)
-                # So that multiple peakLists all go to one Spectrum
-                # if spectrumName.endswith(ss):
-                #     spectrumName = spectrumName[:-len(ss)]
-            else:
-                ll = spectrumName.rsplit('`', 2)
-                if len(ll) == 3:
-                    # name is of form abc`xyz`
-                    try:
-                        peakListParameters['serial'] = int(ll[1])
-                    except ValueError:
-                        pass
-                    # else:
-                    #     spectrumName = ll[0]
-
-            spectrumName = self._stripSpectrumName(spectrumName)
-            oldSerial = peakListParameters['serial']
+        peakListSerial = peakListParameters.get('serial') or _stripSpectrumSerial(spectrumName) or 1
+        peakListParameters['serial'] = peakListSerial
+        spectrumName = _stripSpectrumName(spectrumName)
 
         spectrum = project.getSpectrum(spectrumName)
         if spectrum is None:
@@ -4317,8 +4275,8 @@ class CcpnNefReader(CcpnNefContent):
         _spectrumNameNoPostfix = spectrumName
 
         # get the serial number become stripping name
-        peakListSerial = self._stripSpectrumSerial(spectrumName) or peakListParameters.get('serial') or 1
-        spectrumName = self._stripSpectrumName(spectrumName)
+        peakListSerial = peakListParameters.get('serial') or _stripSpectrumSerial(spectrumName) or 1
+        spectrumName = _stripSpectrumName(spectrumName)
 
         spectrum = project.getSpectrum(spectrumName)
         if spectrum is not None:
@@ -5189,13 +5147,13 @@ class CcpnNefReader(CcpnNefContent):
             else:
                 _spectrumPidFrame = row.get('nmr_spectrum_id')
                 _spectrumPid = re.sub(REGEXREMOVEENDQUOTES, '', _spectrumPidFrame)  # substitute with ''
-                _spectrum = project.getByPid('SP:'+_spectrumPid[len('nef_nmr_spectrum_'):])
+                _spectrum = project.getByPid('SP:' + _spectrumPid[len('nef_nmr_spectrum_'):])
 
                 matches = [mm for mm in re.finditer(REGEXREMOVEENDQUOTES, _spectrumPidFrame)]
                 postfix = matches[-1].group() if matches and matches[-1] and matches[-1].span()[1] == len(_spectrumPidFrame) else ''
                 postSerial = _tryNumber(postfix)
 
-                peakListNum = postSerial or 1       #self._frameCodeToSpectra.get(_spectrumPidFrame)
+                peakListNum = postSerial or 1  #self._frameCodeToSpectra.get(_spectrumPidFrame)
                 if not (_spectrum and peakListNum):
                     continue
 

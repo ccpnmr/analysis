@@ -33,7 +33,7 @@ from __future__ import unicode_literals
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -42,9 +42,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Rasmus H Fogh $"
-__dateModified__ = "$dateModified: 2017-09-20 17:23:41 +0100 (Wed, September 20, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-11-04 13:35:46 +0000 (Wed, November 04, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -152,6 +152,23 @@ def loadNefFile(path, memopsRoot=None, overwriteExisting=False):
     nefReader.importNewProject(memopsRoot, dataBlock)
     #
     return memopsRoot
+
+
+def _stripSpectrumName(value):
+    if isinstance(value, str):
+        ll = value.rsplit('`', 2)
+        return ll[0]
+
+
+def _stripSpectrumSerial(value):
+    if isinstance(value, str):
+        ll = value.rsplit('`', 2)
+        if len(ll) == 3:
+            # name is of form abc`xyz`
+            try:
+                return int(ll[1])
+            except ValueError:
+                pass
 
 
 class CcpnNefReader:
@@ -781,24 +798,8 @@ class CcpnNefReader:
 
         # Get name from spectrum parameters, or from the framecode
         spectrumName = framecode[len(category) + 1:]
-        if spectrumName.endswith('`'):
-            peakListSerial = peakListParams.get('serial')
-            if peakListSerial:
-                ss = '`%s`' % peakListSerial
-                # Remove peakList serial suffix (which was added for disambiguation)
-                # So that multiple peakLists all go to one Spectrum
-                if spectrumName.endswith(ss):
-                    spectrumName = spectrumName[:-len(ss)]
-            else:
-                ll = spectrumName.rsplit('`', 2)
-                if len(ll) == 3:
-                    # name is of form abc`xyz`
-                    try:
-                        peakListParams['serial'] = int(ll[1])
-                    except ValueError:
-                        pass
-                    else:
-                        spectrumName = ll[0]
+        peakListSerial = peakListParams.get('serial') or _stripSpectrumSerial(spectrumName) or 1
+        spectrumName = _stripSpectrumName(spectrumName)
         dataSourceParams['name'] = spectrumName
 
         for experiment in nmrProject.sortedExperiments():

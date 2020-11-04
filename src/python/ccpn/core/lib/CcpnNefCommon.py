@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-01 19:47:12 +0100 (Wed, July 01, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-04 13:35:46 +0000 (Wed, November 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -44,6 +44,7 @@ def _getSaveFramesInOrder(dataBlock: StarIo.NmrDataBlock) -> OD:
         ll.append(saveFrame)
     #
     return result
+
 
 def _traverse(cls, project: Project, dataBlock: StarIo.NmrDataBlock,
               projectIsEmpty: bool = True,
@@ -930,3 +931,20 @@ nef2CcpnMap = {
         )),
 
     }
+
+
+def _stripSpectrumName(value):
+    if isinstance(value, str):
+        ll = value.rsplit('`', 2)
+        return ll[0]
+
+
+def _stripSpectrumSerial(value):
+    if isinstance(value, str):
+        ll = value.rsplit('`', 2)
+        if len(ll) == 3:
+            # name is of form abc`xyz`
+            try:
+                return int(ll[1])
+            except ValueError:
+                pass

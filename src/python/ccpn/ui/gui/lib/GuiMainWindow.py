@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-04 15:06:01 +0000 (Wed, November 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -381,6 +381,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # create 2 more containers for the search bar and the results
         self.searchWidgetContainer = Frame(self._sideBarFrame, setLayout=True, grid=(1, 0))  # in this frame is inserted the search widget
         self.searchResultsContainer = Frame(self, setLayout=True)  # in this frame is inserted the search widget
+        self.searchResultsContainer.setMinimumHeight(100)
 
         # create a SideBar pointing to the required containers
         self.sideBar = SideBar(parent=self, mainWindow=self,
@@ -390,10 +391,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # insert into the splitter
         self._sidebarSplitter.insertWidget(0, self.sideBar)
         self._sidebarSplitter.insertWidget(1, self.searchResultsContainer)
+        self._sidebarSplitter.setChildrenCollapsible(False)
 
-        # GST resizing the splitter by hand causes problems so currently disable it!
-        for i in range(self._sidebarSplitter.count()):
-            self._sidebarSplitter.handle(i).setEnabled(False)
+        # # GST resizing the splitter by hand causes problems so currently disable it!
+        # for i in range(self._sidebarSplitter.count()):
+        #     self._sidebarSplitter.handle(i).setEnabled(False)
 
         # create a splitter to put the sidebar on the left
         self._horizontalSplitter = Splitter(horizontal=True)

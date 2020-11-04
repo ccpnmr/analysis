@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-04 15:06:02 +0000 (Wed, November 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
+from ccpn.ui.gui.lib.mouseEvents import makeDragEvent
 
 
 HEADERHEIGHT = 24
@@ -47,8 +48,9 @@ class ListView(QtWidgets.QListView, Base):
         Also advisable to set the sizePolicy of the container:
         e.g. listViewContainer.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
     """
+
     def __init__(self, parent=None, mainWindow=None, fitToContents=False, listViewContainer=None,
-                 maxmimumRows=200, headerHeight=None, minRowCount = None, **kwds):
+                 maximumRows=200, headerHeight=None, minRowCount=None, multiSelect=False, **kwds):
         """Initialise the class
         """
         super().__init__(parent)
@@ -68,7 +70,13 @@ class ListView(QtWidgets.QListView, Base):
         self._parent = parent
         self._fitToContents = fitToContents
         self._listViewContainer = listViewContainer
-        self._maximumRows = maxmimumRows
+        self._maximumRows = maximumRows
+
+        self.multiSelect = multiSelect
+        if self.multiSelect:
+            self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        else:
+            self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
 
         self.setDragEnabled(True)
         self.setDragDropMode(self.DragDrop)
@@ -108,18 +116,17 @@ class ListView(QtWidgets.QListView, Base):
         if self._fitToContents:
             rc = self.model().rowCount()
             if rc > 0:
-                rc  = self._minRowCount if rc < self._minRowCount else rc
-            rh = self.sizeHintForRow(0)
+                rc = self._minRowCount if rc < self._minRowCount else rc
+            rh = self.sizeHintForRow(0) + 1  # allow padding between rows
             fh = self.frameWidth() * 2
 
             maxListHeight = (self._minRows(rc) * rh) + fh
             maxContainerHeight = maxListHeight + self._headerHeight
-
+            maxContainerHeight = max(maxContainerHeight, self._listViewContainer.minimumHeight())
             # GST 4 rows is a good height as it gves a sensible scrollbar
             # left in for future improvments: user adjustable results size
             # minListHeight = (self._minRowCount * rh) + fh
             # minContainerHeight = minListHeight + self._headerHeight
-
 
             if self._listViewContainer:
                 self._listViewContainer.setMaximumHeight(maxContainerHeight if rc else 0)
@@ -128,26 +135,34 @@ class ListView(QtWidgets.QListView, Base):
 
         super(ListView, self).resizeEvent(ev)
 
-    def dragEnterEvent(self, event):
-        """Handle drag enter event to create a new drag/drag item.
+    def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
+        """Keep a list of the selected items when the left mouse button is pressed
         """
-        if event.mimeData().hasUrls():
-            event.accept()
-        else:
-            pids = []
-            for item in self.selectionModel().selection():
-                if item is not None:
+        # call superclass to update selected items
+        super().mousePressEvent(event)
 
-                    dataPid = item.indexes()[0].data()          #item.data(0, QtCore.Qt.DisplayRole)
+        if event.button() == QtCore.Qt.LeftButton:
+            # keep the list if left button pressed
+            self._dragStartPosition = event.pos()
+
+            pids = []
+            for item in sorted(self.selectionModel().selectedRows(0), key=lambda val: val.row()):
+                if item is not None:
+                    dataPid = item.data()  #item.data(0, QtCore.Qt.DisplayRole)
+                    # dataPid = item.indexes()[0].data()  #item.data(0, QtCore.Qt.DisplayRole)
                     if self.project and self.project.getByPid(dataPid):
                         pids.append(str(dataPid))
 
-            itemData = json.dumps({'pids': pids})
+            self._pids = list(pids) or None
+        else:
+            self._dragStartPosition = None
+            self._pids = None
 
-            tempData = QtCore.QByteArray()
-            stream = QtCore.QDataStream(tempData, QtCore.QIODevice.WriteOnly)
-            stream.writeQString(itemData)
-            event.mimeData().setData(ccpnmrJsonData, tempData)
-            event.mimeData().setText(itemData)
+        self._mouseButton = event.button()
 
-            event.accept()
+    def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
+        """Create a mouse drag event with the selected items when dragging with the left button
+        """
+        if self._mouseButton == QtCore.Qt.LeftButton and self._pids:
+            if (event.pos() - self._dragStartPosition).manhattanLength() >= QtWidgets.QApplication.startDragDistance():
+                makeDragEvent(self, {'pids': self._pids}, self._pids, '\n'.join(self._pids))

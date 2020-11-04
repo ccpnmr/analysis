@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-04 15:06:02 +0000 (Wed, November 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1114,8 +1114,8 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self._resultsLabel = Label(self._resultsFrame, text='Search Results', grid=(0, 0))
         self._resultsLabel.setAlignment(QtCore.Qt.AlignCenter)
         self._resultsLabel.setContentsMargins(0, 0, 0, 0)
-        self._resultsList = ListView(self._resultsFrame, mainWindow=self.mainWindow, grid=(0, 0), fitToContents=True,
-                                     listViewContainer=self._resultsFrame)
+        self._resultsList = SideBarSearchListView(self._resultsFrame, mainWindow=self.mainWindow, grid=(0, 0), fitToContents=True,
+                                                  listViewContainer=self._resultsFrame, multiSelect=True)
 
         # frame can collapse to nothing
         self._resultsFrame.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
@@ -1160,13 +1160,15 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
 
     def _resultsListSelection(self, rowSelection, columnSelection):
 
-        row = rowSelection.indexes()[0].row()
-        pid = self._results_list[row]
-        self._searchSelection.clear()
-        self._searchSelection.append(pid)
+        _selection = rowSelection.indexes()
+        if _selection:
+            row = _selection[0].row()
+            pid = self._results_list[row]
+            self._searchSelection.clear()
+            self._searchSelection.append(pid)
 
-        # call the original search selection
-        self._searchWidgetSideBarCallback(pid)
+            # call the original search selection
+            self._searchWidgetSideBarCallback(pid)
 
     def _clearQTreeWidget(self, tree):
         """Clear contents of the sidebar.
@@ -1299,7 +1301,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
             event.setDropAction(QtCore.Qt.CopyAction)
             event.accept()
         else:
-            if isinstance(event.source(), SideBar):  #(SideBar, SideBar)):
+            if isinstance(event.source(), (SideBar, SideBarSearchListView)):
                 # disable/ignore internal move events
                 event.ignore()
             else:
@@ -1312,7 +1314,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
             if strip:
                 strip._clear()
                 if isinstance(objFromPid, Spectrum):
-                    strip._displaySpectrum(objFromPid, useUndoBlock = False)
+                    strip._displaySpectrum(objFromPid, useUndoBlock=False)
                 if isinstance(objFromPid, Sample):
                     strip.setStackingMode(False)
                     _openItemSampleDisplay._openSampleSpectraOnDisplay(objFromPid, strip.spectrumDisplay)
@@ -1514,13 +1516,18 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         #         notifier = self._project.registerNotifier('AbstractWrapperObject', action, self._notify_pids_changed, onceOnly=True)
         #         self._searchNotifiers.append(notifier)
 
-        self._resultsList.adjustSize()
+        # self._resultsFrame.setMaximumHeight(self._resultsFrame.sizeHint().height())
+        # self._resultsFrame.updateGeometry()
+        # self._resultsList.adjustSize()
 
     def _notify_pids_changed(self, *args, **kwargs):
         self._searchWidgetCallback()
 
 
-class sideBarSearchWidget(Frame):
+class SideBarSearchListView(ListView):
+    """
+    Class that allows items from listView to be dropped into the dropArea
+    """
     pass
 
 

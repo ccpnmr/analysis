@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-04 15:06:02 +0000 (Wed, November 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,7 @@ from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.SideBar import SideBar      #,SideBar
+from ccpn.ui.gui.widgets.SideBar import SideBar, SideBarSearchListView
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
 from ccpn.ui.gui.widgets.Font import Font
 # from ccpn.ui.gui.guiSettings import helveticaBold36
@@ -155,7 +155,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
         source = event.source()
 
         # drop an item from the sidebar onto the drop area
-        if DropBase.PIDS in data and isinstance(data['event'].source(), SideBar):      #(SideBar, SideBar)):
+        if DropBase.PIDS in data and isinstance(data['event'].source(), (SideBar, SideBarSearchListView)):
 
             # process Pids
             self.mainWindow._processPids(data, position=self.dropArea)
@@ -210,7 +210,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
         event = args[0]
         data = self.parseEvent(event)
 
-        if DropBase.PIDS in data and isinstance(data['event'].source(), SideBar):      #(SideBar, SideBar)):
+        if DropBase.PIDS in data and isinstance(data['event'].source(), (SideBar, SideBarSearchListView)):
             DockArea.dragEnterEvent(self, *args)
             event.accept()
         else:

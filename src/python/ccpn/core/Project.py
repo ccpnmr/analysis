@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-04 17:16:40 +0000 (Wed, November 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,7 @@ from collections import OrderedDict
 from time import time
 from datetime import datetime
 import traceback
-from ccpn.util.Common import _traverse, _getChildren
+from ccpn.util.Common import isValidPath, isValidFileNameLength
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
@@ -258,6 +258,15 @@ class Project(AbstractWrapperObject):
         Unlike lower-level functions, this function ensures that data in high level caches are saved.
         Return True if save succeeded otherwise return False (or throw error)"""
         # self._flushCachedData()
+
+        # path is empty for save under the same name
+        if newPath:
+            # check validity of the newPath
+            if not isValidPath(newPath, stripFullPath=True, stripExtension=True):
+                raise ValueError('Filename can only contain alphanumeric characters and underscores')
+            if not isValidFileNameLength(newPath, stripFullPath=True, stripExtension=True):
+                raise ValueError('Filename must be 32 characters or fewer')
+
         savedOk = apiIo.saveProject(self._wrappedData.root, newPath=newPath,
                                     changeBackup=changeBackup, createFallback=createFallback,
                                     overwriteExisting=overwriteExisting, checkValid=checkValid,

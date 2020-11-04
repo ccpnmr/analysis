@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-04 17:16:40 +0000 (Wed, November 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -77,7 +77,7 @@ from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar
-from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, USERMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
+from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
 
 import faulthandler
 
@@ -1866,7 +1866,6 @@ class Framework(NotifierBase):
             return
 
         with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s'):
-
             with undoBlockWithoutSideBar():
                 self._importNefFile(path=path, makeNewProject=False)
             self.ui.mainWindow.sideBar.buildTree(self.project)
@@ -1876,8 +1875,8 @@ class Framework(NotifierBase):
 
         from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
         from ccpn.ui.gui.popups.ImportNefPopup import ImportNefPopup, NEFFRAMEKEY_ENABLERENAME, \
-            NEFFRAMEKEY_IMPORT, NEFFRAMEKEY_ENABLEMOUSEMENU, NEFDICTFRAMEKEYS, NEFFRAMEKEY_PATHNAME, \
-            NEFDICTFRAMEKEYS_REQUIRED, NEFFRAMEKEY_ENABLEFILTERFRAME, NEFFRAMEKEY_ENABLECHECKBOXES
+            NEFFRAMEKEY_IMPORT, NEFFRAMEKEY_ENABLEMOUSEMENU, NEFFRAMEKEY_PATHNAME, \
+            NEFFRAMEKEY_ENABLEFILTERFRAME, NEFFRAMEKEY_ENABLECHECKBOXES
         from ccpn.util.nef import NefImporter as Nef
         from ccpn.framework.PathsAndUrls import nefValidationPath
 
@@ -2024,21 +2023,22 @@ class Framework(NotifierBase):
         oldPath = self.project.path
         newPath = getSaveDirectory(self.ui.mainWindow, self.preferences)
 
-        if newPath:
-            # Next line unnecessary, but does not hurt
-            newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
-            successful = self._saveProject(newPath=newProjectPath, createFallback=False)
+        with catchExceptions(application=self, errorStringTemplate='Error saving project: %s'):
+            if newPath:
+                # Next line unnecessary, but does not hurt
+                newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
+                successful = self._saveProject(newPath=newProjectPath, createFallback=False)
 
-            if not successful:
-                getLogger().warning("Saving project to %s aborted" % newProjectPath)
-        else:
-            successful = False
-            getLogger().info("Project not saved - no valid destination selected")
+                if not successful:
+                    getLogger().warning("Saving project to %s aborted" % newProjectPath)
+            else:
+                successful = False
+                getLogger().info("Project not saved - no valid destination selected")
 
-        self._getRecentFiles(oldPath=oldPath)  # this will also update the list
-        self.ui.mainWindow._fillRecentProjectsMenu()  # Update the menu
+            self._getRecentFiles(oldPath=oldPath)  # this will also update the list
+            self.ui.mainWindow._fillRecentProjectsMenu()  # Update the menu
 
-        return successful
+            return successful
 
         # NBNB TODO Consider appropriate failure handling. Is this OK?
 
@@ -2995,7 +2995,6 @@ class Framework(NotifierBase):
             macroEditor = MacroEditor(mainWindow=mainWindow, filePath=filePath)
             mainWindow.moduleArea.addModule(macroEditor, position='top', relativeTo=mainWindow.moduleArea)
 
-
     def openCcpnMacroOnEditor(self):
         """
         Displays macro editor.
@@ -3004,7 +3003,6 @@ class Framework(NotifierBase):
         self.editor = MacroEditor(mainWindow=mainWindow)
         mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
         self.editor._openMacroFile()
-
 
     def defineUserShortcuts(self):
 
@@ -3138,6 +3136,7 @@ class Framework(NotifierBase):
 
     def showAboutCcpn(self):
         from ccpn.framework.PathsAndUrls import ccpnUrl
+
         # import webbrowser
 
         # webbrowser.open(ccpnUrl)
@@ -3145,6 +3144,7 @@ class Framework(NotifierBase):
 
     def showCcpnLicense(self):
         from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
+
         # import webbrowser
 
         # webbrowser.open(ccpnLicenceUrl)
@@ -3156,6 +3156,7 @@ class Framework(NotifierBase):
 
     def showIssuesList(self):
         from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
+
         # import webbrowser
 
         # webbrowser.open(ccpnIssuesUrl)
@@ -3163,6 +3164,7 @@ class Framework(NotifierBase):
 
     def showTutorials(self):
         from ccpn.framework.PathsAndUrls import ccpnTutorials
+
         # import webbrowser
 
         # webbrowser.open(ccpnTutorials)
@@ -3259,49 +3261,6 @@ class Framework(NotifierBase):
         self._fontSettings = fontSettings(self.preferences)
 
 
-def isValidPath(projectName, stripFullPath=True, stripExtension=True):
-    """Check whether the project name is valid after stripping fullpath and extension
-    Can only contain alphanumeric characters and underscores
-
-    :param projectName: name of project to check
-    :param stripFullPath: set to true to remove leading directory
-    :param stripExtension: set to true to remove extension
-    :return: True if valid else False
-    """
-    if not projectName:
-        return
-
-    if isinstance(projectName, str):
-
-        name = os.path.basename(projectName) if stripFullPath else projectName
-        name = os.path.splitext(name)[0] if stripExtension else name
-
-        STRIPCHARS = '_'
-        for ss in STRIPCHARS:
-            name = name.replace(ss, '')
-
-        if name.isalnum():
-            return True
-
-def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
-    """Check whether the project name is valid after stripping fullpath and extension
-    Can only contain alphanumeric characters and underscores
-
-    :param projectName: name of project to check
-    :param stripFullPath: set to true to remove leading directory
-    :param stripExtension: set to true to remove extension
-    :return: True if length <= 32 else False
-    """
-    if not projectName:
-        return
-
-    if isinstance(projectName, str):
-        name = os.path.basename(projectName) if stripFullPath else projectName
-        name = os.path.splitext(name)[0] if stripExtension else name
-
-        return len(name) <= 32
-
-
 def getSaveDirectory(parent, preferences=None):
     """Opens save Project as dialog box and gets directory specified in the file dialog."""
 
@@ -3320,17 +3279,6 @@ def getSaveDirectory(parent, preferences=None):
 
     # ignore if empty
     if not newPath:
-        return
-
-    # check validity of the newPath
-    if not isValidPath(newPath, stripFullPath=True, stripExtension=True):
-        getLogger().warning('Filename can only contain alphanumeric characters and underscores')
-        MessageDialog.showWarning('Save Project', 'Filename can only contain alphanumeric characters and underscores')
-        return
-
-    if not isValidFileNameLength(newPath, stripFullPath=True, stripExtension=True):
-        getLogger().warning('Filename must be 32 characters or fewer')
-        MessageDialog.showWarning('Save Project', 'Filename must be 32 characters or fewer')
         return
 
     if newPath:

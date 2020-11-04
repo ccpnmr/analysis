@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-04 17:16:40 +0000 (Wed, November 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -92,8 +92,8 @@ def _resumeNotification(application):
     cause fatal errors.
     """
     with catchExceptions(application=application,
-                         errorStringTemplate='*** ERROR in resumeNotification: "%s"',
-                         popupAsWarning=False):
+                         errorStringTemplate='*** FATAL ERROR in resumeNotification: %s',
+                         popupAsWarning=False, printTraceBack=True):
         application.project.resumeNotification()
 
 
@@ -446,7 +446,7 @@ undoBlock = undoBlockWithSideBar
 
 
 @contextmanager
-def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAsWarning=True):
+def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAsWarning=True, printTraceBack=False):
     """Catches exceptions in try except; logging it as warning;
 
     errorStringTemplate: string with one '%s'; used to output the exception to logger as warning
@@ -465,7 +465,8 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
 
     except Exception as es:
         getLogger().warning(errorStringTemplate % str(es))
-        traceback.print_exc() # please give more info about the error!
+        if printTraceBack:
+            traceback.print_exc() # please give more info about the error!
         if application.hasGui and popupAsWarning:
             from ccpn.ui.gui.widgets import MessageDialog  # Local import: in case of no-gui, we never get here
 

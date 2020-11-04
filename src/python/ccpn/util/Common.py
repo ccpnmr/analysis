@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-04 17:16:40 +0000 (Wed, November 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1284,3 +1284,47 @@ def camelCaseToString(name):
     else:
         label = re.sub(CAMELCASEPTN, CAMELCASEREP, name)
         return label[0:1].upper() + label[1:]
+
+
+def isValidPath(projectName, stripFullPath=True, stripExtension=True):
+    """Check whether the project name is valid after stripping fullpath and extension
+    Can only contain alphanumeric characters and underscores
+
+    :param projectName: name of project to check
+    :param stripFullPath: set to true to remove leading directory
+    :param stripExtension: set to true to remove extension
+    :return: True if valid else False
+    """
+    if not projectName:
+        return
+
+    if isinstance(projectName, str):
+
+        name = os.path.basename(projectName) if stripFullPath else projectName
+        name = os.path.splitext(name)[0] if stripExtension else name
+
+        STRIPCHARS = '_'
+        for ss in STRIPCHARS:
+            name = name.replace(ss, '')
+
+        if name.isalnum():
+            return True
+
+
+def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
+    """Check whether the project name is valid after stripping fullpath and extension
+    Can only contain alphanumeric characters and underscores
+
+    :param projectName: name of project to check
+    :param stripFullPath: set to true to remove leading directory
+    :param stripExtension: set to true to remove extension
+    :return: True if length <= 32 else False
+    """
+    if not projectName:
+        return
+
+    if isinstance(projectName, str):
+        name = os.path.basename(projectName) if stripFullPath else projectName
+        name = os.path.splitext(name)[0] if stripExtension else name
+
+        return len(name) <= 32

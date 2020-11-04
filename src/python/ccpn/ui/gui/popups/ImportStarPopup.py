@@ -268,7 +268,9 @@ class StarImporterPopup(CcpnDialog):
         assignToSpectumCodes = self.assignToSpectumCodes.get().replace(" ","").split(',')
         for bmrbCode, sac in zip(bmrbCodes,assignToSpectumCodes):
           self._axesCodesMap[bmrbCode]=sac
-        _importAndCreateV3Objs(self.project, bmrbFile, self._axesCodesMap, simulateSpectra=simulateSpectra)
+        success = _importAndCreateV3Objs(self.project, bmrbFile, self._axesCodesMap, simulateSpectra=simulateSpectra)
+        if not success:
+            showWarning('Import Failed', 'Check the log file/outputs for more info')
         self.accept()
 
 ############################################

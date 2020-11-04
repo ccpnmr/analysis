@@ -11,6 +11,8 @@ from ccpn.framework.PathsAndUrls import macroPath as mp
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+from ccpn.core.ChemicalShiftList import ChemicalShiftList
+from ccpn.util.Common import _incrementObjectName
 
 NMRSTARVersion = '3.2.1.32'
 NMRSTARV3GROUPS = od([
@@ -264,12 +266,13 @@ def makeCSLfromDF(project, df):
     requiredColumns = [Entry_ID, Entity_assembly_ID, Seq_ID, Auth_seq_ID, Comp_ID, Val, Val_err, Details]
     if not set(requiredColumns).issubset(df.columns):
         missingColumns = [c for c in requiredColumns if not c in df.columns]
-        raise ValueError('Creating ChemicalShiftList failed. Missing required Tags (%s).' %', '.join(missingColumns))
-
+        getLogger().warn('Creating ChemicalShiftList failed. Missing some of the required Tags (%s) in the NmrStar file.' %', '.join(missingColumns))
+        return
     ## check if the Auth_seq_ID is present (not as '.'). Use the author value as preferred option.
     useAuthSeqID = True if not df[Auth_seq_ID].eq('.').all() else False
     with notificationEchoBlocking():
         chemicalShiftListName = df[Entry_ID].astype(str, errors='ignore').unique()[-1] #Mandatory tag. Values always present
+        chemicalShiftListName = _incrementObjectName(project, ChemicalShiftList._pluralLinkName, chemicalShiftListName)
         chemicalShiftList = project.newChemicalShiftList(name=chemicalShiftListName)
         for index, row in df.iterrows():
             nmrChain = project.fetchNmrChain(row[Entity_assembly_ID])
@@ -284,7 +287,7 @@ def makeCSLfromDF(project, df):
             try:
                 if _isfloat(row[Val]):
                     cs = chemicalShiftList.newChemicalShift(value=float(row[Val]), nmrAtom=nmrAtom)
-                    cs.comment = cs.comment+ ' Imported: ' +row[Details]
+                    cs.comment = cs.comment+ ' Imported: '+row[Details]
                     valueErr = row[Val_err]
                     if _isfloat(valueErr):
                         cs.valueError = float(valueErr)
@@ -302,12 +305,13 @@ def _simulatedSpectrumFromCSL(project, csl, axesCodesMap):
     :param axesCodesMap: Ordered Dict containing Atoms of interest and parallel Spectrum Axes Codes
     :return:
     """
+    success = False
     if csl is None:
         getLogger().warn("Provide a Chemical Shift List")
-        return
+        return success
     if axesCodesMap is None:
         getLogger().warn("Select NmrAtom to use and axis codes")
-        return
+        return success
     with notificationEchoBlocking():
         nmrAtomNames = list(axesCodesMap.keys())
         targetSpectrumAxCodes = list(axesCodesMap.values())
@@ -353,15 +357,24 @@ def _simulatedSpectrumFromCSL(project, csl, axesCodesMap):
             message = 'Could not fully assign peaks for NmrResidue(s): %s. ' \
                       'Not enough nmrAtom information.' %', '.join(incompleteNmrResiduesAssignments)
             getLogger().warn(message)
+    success = True
+    return success
+
 
 def _importAndCreateV3Objs(project, file, acMap, simulateSpectra=False):
     getLogger().info('NmrStar file import started...')
+    success = False
     lines = _getCSListLinesFromBmrbFile(file)
     df = makeCSLDataFrame(lines)
     with undoBlock():
         csl = makeCSLfromDF(project, df)
         if csl is not None:
+            success = True
             if simulateSpectra:
-                _simulatedSpectrumFromCSL(project, csl, axesCodesMap=acMap)
+                success = _simulatedSpectrumFromCSL(project, csl, axesCodesMap=acMap)
+        else:
+            getLogger().warn('NmrStar file import aborted.')
+            return success
     getLogger().info('NmrStar file import completed.')
+    return success
 

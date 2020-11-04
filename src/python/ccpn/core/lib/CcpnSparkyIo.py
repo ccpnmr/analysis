@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2018-12-20 15:53:00 +0000 (Thu, December 20, 2018) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2020-11-04 18:52:33 +0000 (Wed, November 04, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -43,6 +43,7 @@ except:
 # from datetime import datetime
 from collections import OrderedDict
 from ccpn.core.Project import Project
+from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.nef.GenericStarParser import NamedOrderedDict
 
@@ -587,8 +588,8 @@ class CcpnSparkyReader:
         # quotedValueTags = (TOKEN_SQUOTE_STRING, TOKEN_DQUOTE_STRING, TOKEN_MULTILINE)
 
         stack = self.stack
+        name = aPath(path).basename
 
-        name = os.path.splitext(os.path.basename(path))[0]
         # result = SparkyProjectBlock(name=name)
         # stack.append(result)
 
@@ -618,7 +619,7 @@ class CcpnSparkyReader:
 
                             processValue("sparky %s" % value)  # put the type on the stack
                             processValue("name %s" % name)
-                            processValue("pathname %s" % os.path.dirname(path))
+                            processValue("pathname %s" % aPath(path).parent)
 
                         elif typ == SP_TOKEN_SPARKY_DICT:
                             self._openSparkyDict(value)
@@ -716,7 +717,7 @@ class CcpnSparkyReader:
 
         return list
 
-    def importSpectra(self, project, saveBlock):
+    def importSpectra(self, project, saveBlock, parentBlock=None):
         getLogger().info('Importing Sparky spectra: %s' % saveBlock.name)
         # process the save files to get the spectra
         pathName = saveBlock.getDataValues(SPARKY_PATHNAME, firstOnly=True)
@@ -724,13 +725,20 @@ class CcpnSparkyReader:
         spectra = saveBlock.getBlocks(SPARKY_SPECTRUM, firstOnly=True)
         fileName = spectra.getDataValues(SPARKY_NAME, firstOnly=True)
         filePath = spectra.getDataValues(SPARKY_PATHNAME, firstOnly=True)
+        # workshopPath = os.path.abspath(
+        #         os.path.join(pathName, '../lists/' + fileName + '.list.workshop'))
 
-        spectrumPath = os.path.abspath(os.path.join(pathName, filePath))
-        workshopPath = os.path.abspath(
-                os.path.join(pathName, '../lists/' + fileName + '.list.workshop'))
+        spectrumPath = (aPath(pathName) / aPath(filePath)).normalise()
 
         getLogger().info('Loading spectrum: %s' % spectrumPath)
         loadedSpectrum = self.project.loadData(spectrumPath)  # load the spectrum
+        if not loadedSpectrum:
+            if parentBlock:
+                fileName = aPath(parentBlock.getDataValues(SPARKY_NAME, firstOnly=True))
+                filePath = aPath(parentBlock.getDataValues(SPARKY_PATHNAME, firstOnly=True))
+                raise ValueError('Error in .proj file:\n{}\n<savefile>: {}'.format(filePath / fileName, spectrumPath))
+            else:
+                raise ValueError('Error in .save file.\n<savefile>: {}'.format(spectrumPath))
 
         # need to remove any bad characters from the spectrum name
         spectrumName = loadedSpectrum[0].id  # returns a list
@@ -992,7 +1000,7 @@ class CcpnSparkyReader:
             saveFiles = sparkyDict.getBlocks(SPARKY_SAVEFILES, firstOnly=True)
             loadedBlocks = []
             for sp in saveFiles.getData():
-                savefilePath = os.path.abspath(os.path.join(filePath, sp))
+                savefilePath = (aPath(filePath) / aPath(sp)).normalise()
                 loadedBlocks.append(self.parseSparkyFile(savefilePath))
 
             # now import the molecule from the main project file
@@ -1000,7 +1008,7 @@ class CcpnSparkyReader:
 
             # load spectrum data
             for isf in loadedBlocks:
-                self.importSpectra(project, isf)  # modify to load from the project
+                self.importSpectra(project, isf, sparkyDict)  # modify to load from the project
                 self.importPeakLists(project, isf, sparkyDict)  # modify to load from the project
 
         elif sparkyType == SPARKY_SAVE:

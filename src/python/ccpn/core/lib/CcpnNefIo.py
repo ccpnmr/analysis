@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-04 13:35:46 +0000 (Wed, November 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-05 15:37:49 +0000 (Thu, November 05, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -3069,7 +3069,7 @@ class CcpnNefReader(CcpnNefContent):
         if self.defaultChemicalShiftList is None:
             # ChemicalShiftList should default to the unique ChemicalShIftList in the file
             # A file with multiple ChemicalShiftLists MUST have explicit chemical shift lists
-            # given for all spectra- but this is nto hte place for validity checking
+            # given for all spectra- but this is not the place for validity checking
             self.defaultChemicalShiftList = result
 
         if self.testing:
@@ -4170,14 +4170,11 @@ class CcpnNefReader(CcpnNefContent):
             # NB For CCPN-exported projects spectra with multiple peakLists are handled this way
 
             framecode = saveFrame.get('chemical_shift_list')
-            if framecode:
-                spectrumParameters['chemicalShiftList'] = self.frameCode2Object[framecode]
-            else:
-                # Defaults to first (there should be only one, but we want the read to work) ShiftList
-                spectrumParameters['chemicalShiftList'] = self.defaultChemicalShiftList
+            # Defaults to first (there should be only one, but we want the read to work) ShiftList
+            spectrumParameters['chemicalShiftList'] = self.frameCode2Object.get(framecode) or self.defaultChemicalShiftList
 
             framecode = saveFrame.get('ccpn_sample')
-            if framecode:
+            if framecode and framecode in self.frameCode2Object:
                 spectrumParameters['sample'] = self.frameCode2Object[framecode]
 
             # get per-dimension data - NB these are mandatory and cannot be worked around

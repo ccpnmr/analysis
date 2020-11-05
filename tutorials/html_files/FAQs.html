@@ -11,17 +11,26 @@
 <div class="headerBar">FAQs</div>
 <p class="tutorial">
 <h2>FAQs</h2>
-<p><a href="#V2Feat">What has happened to my favourite V2 features?</a>
-<br><a href="#ShouldISwitch">Should I switch from V2.4 to V3?</a>
+<p><a href="#V2Feat">What has happened to my favourite Version 2 features?</a>
+<br><a href="#ShouldISwitch">Should I switch from Version 2 to Version 3?</a>
+<br><a href="V2toV3">Can I open Version 2 projects in Version 3?</a>
+<br><a href="V3toV2">Can I open Version 3 projects in Version 2?</a>
 <br><a href="#Catalina">How can I can I install CcpNmr Analysis V3 on MacOS Catalina?</a>
 <br><a href="#ChemBuildMol">How can I get a molecule from ChemBuild into CcpNmr Analysis V3?</a>
 <br><a href="#ChemBuildXml">How can I save a molecule created in ChemBuild as a ChemComp .xml file?</a>
 
-<h3><a name="V2Feat"></a>What has happened to my favourite V2 features?</h3></p>
+<h3><a name="V2Feat"></a>What has happened to my favourite Version 2 features?</h3></p>
 <p>Have a look at our <a href="PopularV2FeaturesInV3.html">Popular V2 Features in V3</a> page for a list of V2 features and how they have been implemented in V3. You may also be interested in our <a href="V2ToV3Translation.html">V2 to V3 translation</a> page which gives a direct translation of V2 mouse and keyboard commands to the new V3 commands.</p>
 
-<h3><a name="ShouldISwitch"></a>Should I switch from V2.4 to V3?</h3>
+<h3><a name="ShouldISwitch"></a>Should I switch from Version 2 to Version 3?</h3>
 <p>Overall, V3 is a nicer, more flexible and more user-friendly programme than V2.4, as illustrated in our <a href="https://www.youtube.com/watch?v=k08ZwgZY8yA&t=914s">Switching to CcpNmr Analysis V3</a> talk from our 2019 conference. However, as yet, not all features have been ported from V2.4. Our <a href="PopularV2FeaturesInV3.html">Popular V2 Features in V3</a> page will give you a bit of an idea of whether there are elements of V2.4 that are not yet present in V3 and that you don't want to do without. In general, smaller projects involving assignments and chemical shift mapping will work well in V3. Anything involving structures, relaxation data analysis and regular use of synthetic peaks lists is currently better served in V2.4.</p>
+
+<h3><a name="V2toV3"></a>Can I open Version 2 projects in Version 3?</h3>
+<p>Yes! This is very easy - Version 2 projects can be opened directly in Version 3. See our <a href="ImportingV2Projects.html">Importing V2 Projects</a> tutorial on how to do this. The only caveat is if your V2 project uses labelling schemes, then at the moment you will have to do a small work-around shown in <a href="https://youtu.be/Cz-DwGuAurY">this video</a>.</p>
+
+<h3><a name="V3toV2"></a>Can I open Version 3 projects in Version 2?</h3>
+<p>Yes, but with some caveats. You will need to save the Version 3 project as a NEF file: go to <span class="action">Project / Export / NEF File</span> or type <span class="action">EX</span> and save everything with CCPN tags. You can then import the NEF file into Version 2.5 (not 2.4!) by going to <span class="action">Project / Load NEF</span>.
+<br>Please be aware that this process is not foolproof as Version 3 contains features not contained in Version 2. In particular, you are likely to encounter problems if your project contains molecules that are not simply proteins made up of natural amino acids. Similarly, labelling is handled very differently, and any explicit labelling of molecules in Version 3 may cause problems when going back to Version 2.</p>
 
 <h3><a name="Catalina"></a>How can I can I install CcpNmr Analysis V3 on MacOS Catalina?</h3>
 <p>Try following these instructions quite closely:</p>

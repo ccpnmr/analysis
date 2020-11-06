@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-09 12:55:47 +0100 (Thu, July 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-06 12:03:50 +0000 (Fri, November 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -124,7 +124,8 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
             if ii < len(positions) and positions[ii]:
                 strip._CcpnGLWidget.setAxisPosition(axisCode=flippedAxisCode, position=positions[ii], update=False)
 
-            if widths is not None and strip._CcpnGLWidget.aspectRatioMode == 0:
+            if widths is not None:  # and strip._CcpnGLWidget.aspectRatioMode == 0:
+
                 if ii < len(widths) and widths[ii]:
 
                     if isinstance(widths[ii], float):
@@ -293,6 +294,7 @@ def navigateToNmrAtomsInStrip(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom], w
     for specNum, thisSpecView in enumerate(strip.spectrumDisplay.spectrumViews):
         thisSpecView.buildContours = True
         thisSpecView.update()
+
 
 def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None,
                                   showSequentialResidues=False, markPositions=True,

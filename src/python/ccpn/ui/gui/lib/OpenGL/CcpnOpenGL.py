@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-05 13:32:34 +0000 (Thu, November 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-06 12:03:50 +0000 (Fri, November 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1154,7 +1154,45 @@ class CcpnGLWidget(QOpenGLWidget):
 
         event.accept()
 
-    def _scaleToXAxis(self, rescale=True):
+    def emitAllAxesChanged(self, allStrips=False):
+        """Signal all strips in the spectrumDisplay to refresh
+        Strips will be scaled to the Y-Axis if aspect ratio is set to Locked/Fixed
+        :param allStrips: True/False, if true, apply scaling to all strips; False, ignore the current strip in spectrumDisplay
+        """
+        tilePos = self.strip.tilePosition if self.strip else self.tilePosition
+        self.GLSignals._emitAllAxesChanged(source=None if allStrips else self,
+                                         strip=None, spectrumDisplay=self.spectrumDisplay,
+                                         axisB=self.axisB, axisT=self.axisT,
+                                         axisL=self.axisL, axisR=self.axisR,
+                                         row=tilePos[0], column=tilePos[1])
+
+    def emitYAxisChanged(self, allStrips=False):
+        """Signal all strips in the spectrumDisplay to refresh
+        Strips will be scaled to the Y-Axis if aspect ratio is set to Locked/Fixed
+        :param allStrips: True/False, if true, apply scaling to all strips; False, ignore the current strip in spectrumDisplay
+        """
+        tilePos = self.strip.tilePosition if self.strip else self.tilePosition
+        self.GLSignals._emitYAxisChanged(source=None if allStrips else self,
+                                         strip=None, spectrumDisplay=self.spectrumDisplay,
+                                         axisB=self.axisB, axisT=self.axisT,
+                                         axisL=self.axisL, axisR=self.axisR,
+                                         row=tilePos[0], column=tilePos[1],
+                                         aspectRatios=None)
+
+    def emitXAxisChanged(self, allStrips=False):
+        """Signal all strips in the spectrumDisplay to refresh
+        Strips will be scaled to the X-Axis if aspect ratio is set to Locked/Fixed
+        :param allStrips: True/False, if true, apply scaling to all strips; False, ignore the current strip in spectrumDisplay
+        """
+        tilePos = self.strip.tilePosition if self.strip else self.tilePosition
+        self.GLSignals._emitXAxisChanged(source=None if allStrips else self,
+                                         strip=None, spectrumDisplay=self.spectrumDisplay,
+                                         axisB=self.axisB, axisT=self.axisT,
+                                         axisL=self.axisL, axisR=self.axisR,
+                                         row=tilePos[0], column=tilePos[1],
+                                         aspectRatios=None)
+
+    def _scaleToXAxis(self, rescale=True, update=False):
         _useFirstDefault = getattr(self.strip.spectrumDisplay, '_useFirstDefault', False)
         if (self._aspectRatioMode or _useFirstDefault):
             mby = 0.5 * (self.axisT + self.axisB)
@@ -1181,10 +1219,13 @@ class CcpnGLWidget(QOpenGLWidget):
             self.axisB = mby + ratio * self.sign(self.axisB - mby)
             self.axisT = mby - ratio * self.sign(mby - self.axisT)
 
-        if rescale:
-            self._rescaleAllAxes()
+            if rescale:
+                self._rescaleAllAxes(update)
+        else:
+            if rescale:
+                self._rescaleXAxis(update)
 
-    def _scaleToYAxis(self, rescale=True):
+    def _scaleToYAxis(self, rescale=True, update=False):
         _useFirstDefault = getattr(self.strip.spectrumDisplay, '_useFirstDefault', False)
         if (self._aspectRatioMode or _useFirstDefault):
             mbx = 0.5 * (self.axisR + self.axisL)
@@ -1211,8 +1252,11 @@ class CcpnGLWidget(QOpenGLWidget):
             self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
             self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
 
-        if rescale:
-            self._rescaleAllAxes()
+            if rescale:
+                self._rescaleAllAxes()
+        else:
+            if rescale:
+                self._rescaleYAxis(update)
 
     def _getSelectionBoxRatio(self, delta=(0.0, 0.0)):
         """Get the current deltas for the selection box and restrict to the aspectRatio if locked/fixed
@@ -1373,8 +1417,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # spawn rebuild event for the grid
         self._updateAxes = True
-        for gr in self.gridList:
-            gr.renderMode = GLRENDERMODE_REBUILD
+        if self.gridList:
+            for gr in self.gridList:
+                gr.renderMode = GLRENDERMODE_REBUILD
 
         if not mouseMoveOnly:
             # if (self._useLockedAspect or self._useDefaultAspect):
@@ -5722,7 +5767,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         return position
 
-    def setAxisPosition(self, axisCode, position, update=True):
+    def setAxisPosition(self, axisCode, position, rescale=True, update=True):
         # if not self.glReady: return
 
         stripAxisIndex = self.axisCodes.index(axisCode)
@@ -5732,14 +5777,18 @@ class CcpnGLWidget(QOpenGLWidget):
             self.axisL = position - diff
             self.axisR = position + diff
 
-            self._rescaleXAxis(update=update)
+            if rescale:
+                # self._scaleToXAxis(rescale=True, update=update)
+                self._rescaleXAxis(update=update)
 
         elif stripAxisIndex == 1:
             diff = (self.axisT - self.axisB) / 2.0
             self.axisB = position - diff
             self.axisT = position + diff
 
-            self._rescaleYAxis(update=update)
+            if rescale:
+                # self._scaleToYAxis(rescale=True, update=update)
+                self._rescaleYAxis(update=update)
 
     def getAxisWidth(self, axisCode):
         stripAxisIndex = self.axisCodes.index(axisCode)
@@ -5753,7 +5802,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         return width
 
-    def setAxisWidth(self, axisCode, width, update=True):
+    def setAxisWidth(self, axisCode, width, rescale=True, update=True):
         # if not self.glReady: return
 
         stripAxisIndex = self.axisCodes.index(axisCode)
@@ -5764,7 +5813,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.axisL = mid - diff
             self.axisR = mid + diff
 
-            self._rescaleXAxis(update=update)
+            self._scaleToXAxis(rescale=rescale, update=update)
 
         elif stripAxisIndex == 1:
             diff = np.sign(self.axisT - self.axisB) * abs(width) / 2.0
@@ -5772,7 +5821,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.axisB = mid - diff
             self.axisT = mid + diff
 
-            self._rescaleYAxis(update=update)
+            self._scaleToYAxis(rescale=rescale, update=update)
 
     def setAxisRange(self, axisCode, range, update=True):
         # if not self.glReady: return

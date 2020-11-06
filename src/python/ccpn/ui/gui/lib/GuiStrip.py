@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-06 12:03:50 +0000 (Fri, November 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -2337,14 +2337,20 @@ class GuiStrip(Frame):
     def getAxisPosition(self, axisCode):
         return self._CcpnGLWidget.getAxisPosition(axisCode)
 
-    def setAxisPosition(self, axisCode, position, update=False):
-        self._CcpnGLWidget.setAxisPosition(axisCode, position, update)
+    def setAxisPosition(self, axisCode, position, rescale=True, update=True):
+        """Set the axis position of the strip
+        if rescale is False, the symbols, etc., must explicitly be refreshed
+        """
+        self._CcpnGLWidget.setAxisPosition(axisCode, position, rescale=rescale, update=update)
 
     def getAxisWidth(self, axisCode):
         return self._CcpnGLWidget.getAxisWidth(axisCode)
 
-    def setAxisWidth(self, axisCode, width, update=False):
-        self._CcpnGLWidget.setAxisWidth(axisCode, width, update)
+    def setAxisWidth(self, axisCode, width, rescale=True, update=True):
+        """Set the axis width of the strip, centred on the axis position
+        if rescale is False, the symbols, etc., must explicitly be refreshed
+        """
+        self._CcpnGLWidget.setAxisWidth(axisCode, width, rescale=rescale, update=update)
 
 
 # Notifiers:

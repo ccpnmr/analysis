@@ -70,7 +70,7 @@ class DataSet(AbstractWrapperObject):
         """id string - serial number converted to string"""
         #return str(self._wrappedData.serial)
         #return str(self.title)+'_'+str(self.serial)
-        return self.title.translate(Pid.remapSeparators)  # Title should not be unique
+        return self.name.translate(Pid.remapSeparators)  # Title should not be unique
 
     @property
     def serial(self) -> int:

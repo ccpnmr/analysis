@@ -1,8 +1,8 @@
 """
 
 WARNING:
-        These routines have been ported from Version 2.4. They still need to be converted to the "V3-nomenclature".
-
+        These routines have been ported from Version 2.4.
+        They still need to be converted to the "V3-nomenclature" and fully tested.
 
 """
 import re, operator

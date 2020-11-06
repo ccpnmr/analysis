@@ -1,5 +1,8 @@
 """
-These routines have been ported from Version 2.4. Need to convert to the V3 and Python 3 style.
+
+WARNING:
+        These routines have been ported from Version 2.4. They still need to be converted to the "V3-nomenclature".
+
 
 """
 import re, operator

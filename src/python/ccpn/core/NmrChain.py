@@ -320,6 +320,17 @@ class NmrChain(AbstractWrapperObject):
                 self._project._logger.warning("Only %s nmrResidues found in range %s to %s"
                                               % (len(changedNmrResidues), start, stop))
 
+    def _connectNmrResidues(self):
+        updatingNmrChain = None
+        nrs = self.nmrResidues
+        for i in range(len(nrs) - 1):
+            currentItem, nextItem = nrs[i], nrs[i + 1]
+            if currentItem and nextItem:
+                # check that the sequence codes are consecutive
+                if int(nextItem.sequenceCode) == int(currentItem.sequenceCode) + 1:
+                    updatingNmrChain = currentItem.connectNext(nextItem, )
+        return updatingNmrChain
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================

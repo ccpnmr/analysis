@@ -211,6 +211,18 @@ def makeCSLDataFrame(bmrbLines):
     shortColumns = [c.replace(_Atom_chem_shift,'') for c in columns]
     return pd.DataFrame(table, columns=shortColumns)
 
+def _connectNmrResidues(nmrChain):
+    updatingNmrChain = None
+    nrs = nmrChain.nmrResidues
+    for i in range(len(nrs) - 1):
+        currentItem, nextItem = nrs[i], nrs[i + 1]
+        if currentItem and nextItem:
+
+            # check that the sequence codes are consecutive
+            if int(nextItem.sequenceCode) == int(currentItem.sequenceCode) + 1:
+                updatingNmrChain = currentItem.connectNext(nextItem, )
+    return updatingNmrChain
+
 def _isfloat(value):
   try:
     float(value)
@@ -270,6 +282,7 @@ def makeCSLfromDF(project, df):
         return
     ## check if the Auth_seq_ID is present (not as '.'). Use the author value as preferred option.
     useAuthSeqID = True if not df[Auth_seq_ID].eq('.').all() else False
+    nmrChains = set()
     with notificationEchoBlocking():
         chemicalShiftListName = df[Entry_ID].astype(str, errors='ignore').unique()[-1] #Mandatory tag. Values always present
         chemicalShiftListName = _incrementObjectName(project, ChemicalShiftList._pluralLinkName, chemicalShiftListName)
@@ -293,6 +306,10 @@ def makeCSLfromDF(project, df):
                         cs.valueError = float(valueErr)
             except Exception as e:
                 getLogger().warn('Error creating a new ChemicalShift: %s' %e)
+            nmrChains.add(nmrChain)
+        for nmrChain in nmrChains:
+            nmrChain._connectNmrResidues()
+
     return chemicalShiftList
 
 def _simulatedSpectrumFromCSL(project, csl, axesCodesMap):

@@ -2173,14 +2173,15 @@ def makePeakListFromShifts(spectrum, chemicalShiftList, useUnassigned=True, chai
                 figOfMerit *= shift.figOfMerit
                 position.append(shift.value)
 
-            # peak = pickPeak(peakList, position, unit=unit, figOfMerit=figOfMerit, doFit=False)
-            raise NotImplementedError('TO do this bit for v3 objects')
             peak = peakList.newPeak(position)
-            peakDims = peak.sortedPeakDims()
+            apiPeak = peak._wrappedData
+            peakDims = apiPeak.sortedPeakDims()
 
-            for dim, resonance in enumerate(resonances):
-                peak.assignDimension(peakDims[dim], resonance)
-                # assignResToDim(peakDims[dim], resonance, tolerance=10.0)
+            for dim, res in enumerate(resonances):
+                atom = peak.project._data2Obj[res]
+                axisCode = spectrum.axisCodes[dim]
+                peak.assignDimension(axisCode=axisCode, value=[atom])
+
     else:
         msg = 'Experiment type not supported or '
         msg += 'cannot find resonance intersections to make any peaks'
@@ -2189,4 +2190,15 @@ def makePeakListFromShifts(spectrum, chemicalShiftList, useUnassigned=True, chai
     return peakList
 
 
-
+# Move this to the spectrum core class or anyother more direct object ....:
+#     def newPeakListFromChemicalShiftList(self, chemicalShiftList, useUnassigned=True, chain=None,
+#                                                   bondLimit=6, residueLimit=1):
+#         from ccpn.core.lib.ChemicalShiftListLib import makePeakListFromShifts
+#         with undoBlock():
+#             with notificationEchoBlocking():
+#                 peakList = makePeakListFromShifts(self, chemicalShiftList,
+#                                                   useUnassigned=useUnassigned, chain=chain,
+#                                                   bondLimit=bondLimit, residueLimit=residueLimit)
+#                 return peakList
+#
+#

@@ -223,7 +223,7 @@ class StarImporterPopup(CcpnDialog):
 
         row += 1
         self.dynamicsWidgets = []
-        createSimulatedPeakList = Label(self, text="Simulate PeakList", grid=(row, 0))
+        createSimulatedPeakList = Label(self, text="Simulate Peaks From Atoms", grid=(row, 0))
         self.simulatePLCheckBox = CheckBox(self, checked=False, callback=self._showMapLabel, grid=(row, 1))
 
         row +=1

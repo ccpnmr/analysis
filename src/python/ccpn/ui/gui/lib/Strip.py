@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-06 12:03:50 +0000 (Fri, November 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-06 15:09:01 +0000 (Fri, November 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -123,10 +123,12 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
             flippedAxisCode = strip.axisCodes[stripAxisIndex]
             if ii < len(positions) and positions[ii]:
                 strip._CcpnGLWidget.setAxisPosition(axisCode=flippedAxisCode, position=positions[ii], update=False)
+            print('>>>  strip pos {}   {}'.format(strip, positions[ii]))
 
             if widths is not None:  # and strip._CcpnGLWidget.aspectRatioMode == 0:
 
                 if ii < len(widths) and widths[ii]:
+                    print('>>>  strip wid {}   {} {}'.format(strip, widths[ii], type(widths[ii])))
 
                     if isinstance(widths[ii], float):
 

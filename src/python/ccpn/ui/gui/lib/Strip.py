@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-06 16:01:07 +0000 (Fri, November 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-06 19:17:39 +0000 (Fri, November 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -66,109 +66,64 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
 
     indices = getAxisCodeMatchIndices(axisCodes, strip.axisCodes)
 
-    # for ii, axisCode in enumerate(axisCodes):
-    #     if indices[ii] is None or ii >= len(positions):
-    #         continue
-    #
-    #     stripAxisIndex = indices[ii]
-    #     if positions[ii]:  # and strip.orderedAxes[stripAxisIndex]:
-    #         strip.orderedAxes[stripAxisIndex].position = positions[ii]
-    #
-    #     # try:
-    #     #     stripAxisIndex = strip.axisCodes.index(axisCode)
-    #     # except ValueError as e:
-    #     #     continue
-    #     # if len(positions) > ii:  # this used to say 1 rather than ii (coupled with the else below)
-    #     #     if positions[ii]:           # and strip.orderedAxes[stripAxisIndex]:
-    #     #         strip.orderedAxes[stripAxisIndex].position = positions[ii]
-    #
-    #     #else: # what in the world is the case this is trying to deal with??
-    #     # why would you want to set all the positions to the same thing??
-    #     #  strip.orderedAxes[stripAxisIndex].position = positions[0]
-    #
-    #     if widths is not None and strip._CcpnGLWidget.aspectRatioMode == 0:
-    #         try:
-    #             if widths[ii]:  # FIXME this can be out of range
-    #                 # if this item in the list contains a float, set the axis width to that float value
-    #                 if isinstance(widths[ii], float):
-    #                     strip.orderedAxes[stripAxisIndex].width = widths[ii]
-    #                 elif isinstance(widths[ii], str):
-    #                     # if the list item is a str with value, full, reset the corresponding axis
-    #                     if widths[ii] == 'full':
-    #                         strip.resetAxisRange(stripAxisIndex)
-    #                     if widths[ii] == 'default' and stripAxisIndex < 2:
-    #                         # if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H
-    #                         if (commonUtil.name2IsotopeCode(axisCode) == '13C' or
-    #                                 commonUtil.name2IsotopeCode(axisCode) == '15N'):
-    #                             strip.orderedAxes[stripAxisIndex].width = 5
-    #                         else:
-    #                             strip.orderedAxes[stripAxisIndex].width = 0.5
-    #         except:
-    #             continue
+    for ii, axisCode in enumerate(axisCodes):
+        if indices[ii] is None or ii >= len(positions):
+            continue
+        stripAxisIndex = indices[ii]
 
-    # TODO:ED now do the same for the OpenGL widget
-    # OR just copy from the strip axes
-    try:
-        for ii, axisCode in enumerate(axisCodes):
+        if positions[ii]:
+            _setStripAxisPosition(strip, axisIndex=stripAxisIndex, position=positions[ii], update=True)
 
-            if indices[ii] is None:
-                continue
-
-            stripAxisIndex = indices[ii]
-            # try:
-            #     stripAxisIndex = strip.axisCodes.index(axisCode)
-            # except ValueError as e:
-            #     continue
-
-            flippedAxisCode = strip.axisCodes[stripAxisIndex]
-            if ii < len(positions) and positions[ii]:
-                strip._CcpnGLWidget.setAxisPosition(axisCode=flippedAxisCode, position=positions[ii], update=False)
-                # print('>>>  strip pos {}   {}'.format(strip, positions[ii]))
-
-            if widths is not None:  # and strip._CcpnGLWidget.aspectRatioMode == 0:
-
-                if ii < len(widths) and widths[ii]:
-                    # print('>>>  strip wid {}   {} {}'.format(strip, widths[ii], type(widths[ii])))
+        if widths:# is not None:      # and strip._CcpnGLWidget.aspectRatioMode == 0:
+            try:
+                if widths[ii]:
 
                     if isinstance(widths[ii], float):
-
-                        strip._CcpnGLWidget.setAxisWidth(axisCode=flippedAxisCode, width=widths[ii],
-                                                         update=False)
+                        # if this item in the list contains a float, set the axis width to that float value
+                        _setStripAxisWidth(strip, axisIndex=stripAxisIndex, width=widths[ii], update=True)
 
                     elif isinstance(widths[ii], str):
                         # if the list item is a str with value, full, reset the corresponding axis
                         if widths[ii] == 'full':
+                            _setStripRange(strip, axisIndex=stripAxisIndex, update=True)
 
-                            range = strip.getAxisRange(stripAxisIndex)
-                            strip._CcpnGLWidget.setAxisRange(axisCode=flippedAxisCode, range=range,
-                                                             update=False)
-
-                        elif widths[ii] == 'default':
+                        elif widths[ii] == 'default' and stripAxisIndex < 2:
                             # if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H
-
                             if (commonUtil.name2IsotopeCode(axisCode) == '13C' or
                                     commonUtil.name2IsotopeCode(axisCode) == '15N'):
-
-                                strip._CcpnGLWidget.setAxisWidth(axisCode=flippedAxisCode, width=5,
-                                                                 update=False)
+                                _setStripAxisWidth(strip, axisIndex=stripAxisIndex, width=5, update=True)
                             else:
-                                strip._CcpnGLWidget.setAxisWidth(axisCode=flippedAxisCode, width=0.5,
-                                                                 update=False)
+                                _setStripAxisWidth(strip, axisIndex=stripAxisIndex, width=0.5, update=True)
+            except:
+                continue
 
-        # redraw the contours
-        strip._updateVisibility()
-        if len(strip.orderedAxes) > 2:
-            strip.axisRegionChanged(strip.orderedAxes[2])
+    # redraw the contours
+    strip._updateVisibility()
+    if len(strip.orderedAxes) > 2:
+        strip.axisRegionChanged(strip.orderedAxes[2])
 
-        # build here so it doesn't conflict with OpenGl update
-        strip._CcpnGLWidget.buildAllContours()
-        strip._CcpnGLWidget.update()
+    # build here so it doesn't conflict with OpenGl update
+    strip._CcpnGLWidget.buildAllContours()
+    strip._CcpnGLWidget.update()
 
-    except:
-        getLogger().debugGL('OpenGL widget not instantiated', strip=strip)
 
-    # if _undo is not None:
-    #   _undo.decreaseBlocking()
+def _setStripAxisPosition(strip, axisIndex, position, update=True):
+    if axisIndex < 2:
+        strip.setAxisPosition(axisIndex=axisIndex, position=position, update=update)
+    else:
+        strip.orderedAxes[axisIndex].position = position
+
+
+def _setStripAxisWidth(strip, axisIndex, width, update=True):
+    if axisIndex < 2:
+        strip.setAxisWidth(axisIndex=axisIndex, width=width, update=update)
+    else:
+        strip.orderedAxes[axisIndex].width = width
+
+
+def _setStripRange(strip, axisIndex, update=True):
+    range = strip.getAxisRange(axisIndex)
+    strip.setAxisRange(axisIndex=axisIndex, range=range, update=update)
 
 
 def copyStripPosition(self, toStrip):
@@ -241,7 +196,7 @@ def isPositionWithinfBounds(strip: GuiStrip, shift: ChemicalShift, axis: object)
 
 def navigateToNmrAtomsInStrip(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom], widths=None,
                               markPositions: bool = False, setNmrResidueLabel=False,
-                              ignoreAxes=None):
+                              axisMask=None):
     """
     Takes an NmrResidue and optional spectrum displays and strips and navigates the strips
     and spectrum displays to the positions specified by the peak.
@@ -279,10 +234,8 @@ def navigateToNmrAtomsInStrip(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom], w
         else:
             positions.append('')
 
-    print('>>> positions pre  {}'.format(positions))
-    # if ignoreAxes:
-    #     positions = [None if mask else pos for pos, mask in zip(positions, ignoreAxes)]
-    print('>>> positions post {}'.format(positions))
+    if axisMask:
+        positions = [pos if mask else None for pos, mask in zip(positions, axisMask)]
     navigateToPositionInStrip(strip, positions, widths=widths)
 
     if markPositions:
@@ -306,7 +259,7 @@ def navigateToNmrAtomsInStrip(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom], w
 
 def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None,
                                   showSequentialResidues=False, markPositions=True,
-                                  showDropHeaders=False, ignoreAxes=None):
+                                  showDropHeaders=False, axisMask=None):
     """
     Navigate in to nmrResidue in strip[stripIndex] of display, with optionally-1, +1 residues in
     strips[stripIndex-1] and strips[stripIndex+1].
@@ -402,7 +355,7 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
         for ii, nr in enumerate(nmrResidues):
             navigateToNmrAtomsInStrip(strips[ii], nr.nmrAtoms,
                                       widths=widths, markPositions=markPositions, setNmrResidueLabel=True,
-                                      ignoreAxes=ignoreAxes)
+                                      axisMask=axisMask)
 
             # add connection tags to start/end sequential strips - may later allow insertion of nmrResidues
             if allNmrResidues.index(nr) == 0:

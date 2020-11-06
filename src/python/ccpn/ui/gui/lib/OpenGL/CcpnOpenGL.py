@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-06 14:12:06 +0000 (Fri, November 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-06 19:17:39 +0000 (Fri, November 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -670,6 +670,20 @@ class CcpnGLWidget(QOpenGLWidget):
             # if self._stackingMode:
             #     stackCount += 1
 
+    def setXRegion(self, axisL=None, axisR=None):
+        if axisL is not None:
+            self.axisL = axisL
+        if axisR is not None:
+            self.axisR = axisR
+        self._setRegion(self._orderedAxes[0], (self.axisL, self.axisR))
+
+    def setYRegion(self, axisT=None, axisB=None):
+        if axisT is not None:
+            self.axisT = axisT
+        if axisB is not None:
+            self.axisB = axisB
+        self._setRegion(self._orderedAxes[1], (self.axisT, self.axisB))
+
     def _setRegion(self, region, value):
         self.strip.project._undo.increaseBlocking()
         if region:
@@ -685,27 +699,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self._buildSpectrumSetting(spectrumView)
 
-            axis = self._orderedAxes[0]
-            # axis.region = (float(self._minX), float(self._maxX))
-            self._setRegion(axis, (float(self._minX), float(self._maxX)))
-
             if self.INVERTXAXIS:
-                self.axisL = max(axis.region[0], axis.region[1])
-                self.axisR = min(axis.region[0], axis.region[1])
+                self.setXRegion(float(self._maxX), float(self._minX))
             else:
-                self.axisL = min(axis.region[0], axis.region[1])
-                self.axisR = max(axis.region[0], axis.region[1])
-
-            axis = self._orderedAxes[1]
-            # axis.region = (float(self._minY), float(self._maxY))
-            self._setRegion(axis, (float(self._minY), float(self._maxY)))
+                self.setXRegion(float(self._minX), float(self._maxX))
 
             if self.INVERTYAXIS:
-                self.axisB = max(axis.region[0], axis.region[1])
-                self.axisT = min(axis.region[0], axis.region[1])
+                self.setYRegion(float(self._minY), float(self._maxY))
             else:
-                self.axisB = min(axis.region[0], axis.region[1])
-                self.axisT = max(axis.region[0], axis.region[1])
+                self.setYRegion(float(self._maxY), float(self._minY))
+            self.update()
 
     def _buildSpectrumSetting(self, spectrumView, stackCount=0):
         # if spectrumView.spectrum.headerSize == 0:
@@ -1288,53 +1291,49 @@ class CcpnGLWidget(QOpenGLWidget):
             dx = abs(width * delta[1] * ax0 / (ax1 * height)) * np.sign(delta[0])
             return (dx, delta[1])
 
-    def _rescaleXAxis(self, update=True):
-        self._testAxisLimits()
-        self.rescale(rescaleStaticHTraces=False)
+    def _rescaleXAxis(self, rescale=True, update=True):
+        if rescale:
+            self._testAxisLimits()
+            self.rescale(rescaleStaticHTraces=False)
 
-        # spawn rebuild event for the grid
-        self._updateAxes = True
-        if self.gridList:
-            for gr in self.gridList:
-                gr.renderMode = GLRENDERMODE_REBUILD
+            # spawn rebuild event for the grid
+            self._updateAxes = True
+            if self.gridList:
+                for gr in self.gridList:
+                    gr.renderMode = GLRENDERMODE_REBUILD
 
-        # ratios have changed so rescale the peak/multiplet symbols
-        self._GLPeaks.rescale()
-        self._GLMultiplets.rescale()
+            # ratios have changed so rescale the peak/multiplet symbols
+            self._GLPeaks.rescale()
+            self._GLMultiplets.rescale()
 
-        self._rescaleOverlayText()
+            self._rescaleOverlayText()
 
-        if update:
-            self.update()
-
-        try:
-            self._setRegion(self._orderedAxes[0], (self.axisL, self.axisR))
-        except:
-            getLogger().debug('error setting viewing window X-range')
-
-    def _rescaleYAxis(self, update=True):
-        self._testAxisLimits()
-        self.rescale(rescaleStaticVTraces=False)
-
-        # spawn rebuild event for the grid
-        self._updateAxes = True
-        if self.gridList:
-            for gr in self.gridList:
-                gr.renderMode = GLRENDERMODE_REBUILD
-
-        # ratios have changed so rescale the peak/multiplet symbols
-        self._GLPeaks.rescale()
-        self._GLMultiplets.rescale()
-
-        self._rescaleOverlayText()
+        self.setXRegion()
 
         if update:
             self.update()
 
-        try:
-            self._setRegion(self._orderedAxes[1], (self.axisT, self.axisB))
-        except Exception as es:
-            getLogger().debug('error setting viewing window Y-range')
+    def _rescaleYAxis(self, rescale=True, update=True):
+        if rescale:
+            self._testAxisLimits()
+            self.rescale(rescaleStaticVTraces=False)
+
+            # spawn rebuild event for the grid
+            self._updateAxes = True
+            if self.gridList:
+                for gr in self.gridList:
+                    gr.renderMode = GLRENDERMODE_REBUILD
+
+            # ratios have changed so rescale the peak/multiplet symbols
+            self._GLPeaks.rescale()
+            self._GLMultiplets.rescale()
+
+            self._rescaleOverlayText()
+
+        self.setYRegion()
+
+        if update:
+            self.update()
 
     def _testAxisLimits(self, setLimits=False):
         xRange = abs(self.axisL - self.axisR) / 3.0
@@ -1433,16 +1432,11 @@ class CcpnGLWidget(QOpenGLWidget):
             self._GLMultiplets.rescale()
 
         self._rescaleOverlayText()
+        self.setXRegion()
+        self.setYRegion()
 
         if update:
             self.update()
-
-        try:
-            self._setRegion(self._orderedAxes[0], (self.axisL, self.axisR))
-            self._setRegion(self._orderedAxes[1], (self.axisT, self.axisB))
-
-        except Exception as es:
-            getLogger().debug('error setting viewing window XY-range')
 
     def _movePeaks(self, direction: str = 'up'):
         """Move the peaks with the cursor keys
@@ -5760,59 +5754,43 @@ class CcpnGLWidget(QOpenGLWidget):
                     gr.renderMode = GLRENDERMODE_REBUILD
             self.update()
 
-    def getAxisPosition(self, axisCode):
-        stripAxisIndex = self.axisCodes.index(axisCode)
-
+    def getAxisPosition(self, axisIndex):
         position = None
-        if stripAxisIndex == 0:
+        if axisIndex == 0:
             position = (self.axisR + self.axisL) / 2.0
 
-        elif stripAxisIndex == 1:
+        elif axisIndex == 1:
             position = (self.axisT + self.axisB) / 2.0
 
         return position
 
-    def setAxisPosition(self, axisCode, position, rescale=True, update=True):
-        # if not self.glReady: return
-
-        stripAxisIndex = self.axisCodes.index(axisCode)
-
-        if stripAxisIndex == 0:
+    def setAxisPosition(self, axisIndex, position, rescale=True, update=True):
+        if axisIndex == 0:
             diff = (self.axisR - self.axisL) / 2.0
             self.axisL = position - diff
             self.axisR = position + diff
 
-            if rescale:
-                # self._scaleToXAxis(rescale=True, update=update)
-                self._rescaleXAxis(update=update)
+            self._rescaleXAxis(rescale=rescale, update=update)
 
-        elif stripAxisIndex == 1:
+        elif axisIndex == 1:
             diff = (self.axisT - self.axisB) / 2.0
             self.axisB = position - diff
             self.axisT = position + diff
 
-            if rescale:
-                # self._scaleToYAxis(rescale=True, update=update)
-                self._rescaleYAxis(update=update)
+            self._rescaleYAxis(rescale=rescale, update=update)
 
-    def getAxisWidth(self, axisCode):
-        stripAxisIndex = self.axisCodes.index(axisCode)
-
+    def getAxisWidth(self, axisIndex):
         width = None
-        if stripAxisIndex == 0:
+        if axisIndex == 0:
             width = abs(self.axisR - self.axisL)
 
-        elif stripAxisIndex == 1:
+        elif axisIndex == 1:
             width = abs(self.axisT - self.axisB)
 
         return width
 
-    def setAxisWidth(self, axisCode, width, rescale=True, update=True):
-        # if not self.glReady: return
-
-        stripAxisIndex = self.axisCodes.index(axisCode)
-
-        if stripAxisIndex == 0:
+    def setAxisWidth(self, axisIndex, width, rescale=True, update=True):
+        if axisIndex == 0:
             diff = np.sign(self.axisR - self.axisL) * abs(width) / 2.0
             mid = (self.axisR + self.axisL) / 2.0
             self.axisL = mid - diff
@@ -5820,7 +5798,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self._scaleToXAxis(rescale=rescale, update=update)
 
-        elif stripAxisIndex == 1:
+        elif axisIndex == 1:
             diff = np.sign(self.axisT - self.axisB) * abs(width) / 2.0
             mid = (self.axisT + self.axisB) / 2.0
             self.axisB = mid - diff
@@ -5828,12 +5806,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self._scaleToYAxis(rescale=rescale, update=update)
 
-    def setAxisRange(self, axisCode, range, update=True):
-        # if not self.glReady: return
-
-        stripAxisIndex = self.axisCodes.index(axisCode)
-
-        if stripAxisIndex == 0:
+    def setAxisRange(self, axisIndex, range, rescale=True, update=True):
+        if axisIndex == 0:
             if self.INVERTXAXIS:
                 self.axisL = max(range)
                 self.axisR = min(range)
@@ -5841,9 +5815,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisL = min(range)
                 self.axisR = max(range)
 
-            self._rescaleXAxis(update=update)
+            self._rescaleXAxis(rescale=rescale, update=update)
 
-        elif stripAxisIndex == 1:
+        elif axisIndex == 1:
             if self.INVERTXAXIS:
                 self.axisB = max(range)
                 self.axisT = min(range)
@@ -5851,7 +5825,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisB = min(range)
                 self.axisT = max(range)
 
-            self._rescaleYAxis(update=update)
+            self._rescaleYAxis(rescale=rescale, update=update)
 
     @pyqtSlot(dict)
     def _glYAxisChanged(self, aDict):

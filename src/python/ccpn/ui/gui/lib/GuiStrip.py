@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-06 12:03:50 +0000 (Fri, November 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-06 19:17:39 +0000 (Fri, November 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1863,8 +1863,8 @@ class GuiStrip(Frame):
                 # self._restoreZoom(zoomState=zoomState)
                 axisL, axisR, axisB, axisT = zoomState[0], zoomState[1], zoomState[2], zoomState[3]
 
-                self._CcpnGLWidget._setRegion(self._CcpnGLWidget._orderedAxes[0], (axisL, axisR))
-                self._CcpnGLWidget._setRegion(self._CcpnGLWidget._orderedAxes[1], (axisT, axisB))
+                self._CcpnGLWidget.setXRegion(axisL, axisR)
+                self._CcpnGLWidget.setYRegion(axisT, axisB)
 
     def _restoreZoom(self, zoomState=None):
         """Restores last saved region to the zoom stack for the strip.
@@ -2334,23 +2334,23 @@ class GuiStrip(Frame):
         """
         return self._CcpnGLWidget.mainViewSize()
 
-    def getAxisPosition(self, axisCode):
-        return self._CcpnGLWidget.getAxisPosition(axisCode)
+    def getAxisPosition(self, axisIndex):
+        return self._CcpnGLWidget.getAxisPosition(axisIndex)
 
-    def setAxisPosition(self, axisCode, position, rescale=True, update=True):
+    def setAxisPosition(self, axisIndex, position, rescale=True, update=True):
         """Set the axis position of the strip
         if rescale is False, the symbols, etc., must explicitly be refreshed
         """
-        self._CcpnGLWidget.setAxisPosition(axisCode, position, rescale=rescale, update=update)
+        self._CcpnGLWidget.setAxisPosition(axisIndex, position, rescale=rescale, update=update)
 
-    def getAxisWidth(self, axisCode):
-        return self._CcpnGLWidget.getAxisWidth(axisCode)
+    def getAxisWidth(self, axisIndex):
+        return self._CcpnGLWidget.getAxisWidth(axisIndex)
 
-    def setAxisWidth(self, axisCode, width, rescale=True, update=True):
+    def setAxisWidth(self, axisIndex, width, rescale=True, update=True):
         """Set the axis width of the strip, centred on the axis position
         if rescale is False, the symbols, etc., must explicitly be refreshed
         """
-        self._CcpnGLWidget.setAxisWidth(axisCode, width, rescale=rescale, update=update)
+        self._CcpnGLWidget.setAxisWidth(axisIndex, width, rescale=rescale, update=update)
 
 
 # Notifiers:

@@ -171,7 +171,7 @@ class OutputSpectraPipe(SpectraPipe):
                             index=False, )
                 sucess = True
             if mode == DataSet:
-                newDataSet = self.project.newDataSet(title=self.pipeline.pipelineName)
+                newDataSet = self.project.newDataSet(name=self.pipeline.pipelineName)
                 data = newDataSet.newData(name=self.pipeline.pipelineName)
                 data.setParameter(self.pipeline.pipelineName, df)
 

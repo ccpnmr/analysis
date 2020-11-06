@@ -43,13 +43,12 @@ from functools import partial
 from collections.abc import Iterable
 from collections import OrderedDict
 from string import whitespace
-
 from ccpn.core.lib import Pid
 from ccpn.util.LabelledEnum import LabelledEnum
 from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
 from ccpn.util.FrozenDict import FrozenDict
 from ccpn.util import Constants
-
+from ccpn.util.Logging import getLogger
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt = 2000000000
@@ -108,9 +107,12 @@ def incrementName(name):
 
 def _incrementObjectName(project, pluralLinkName, name):
     """ fetch an incremented name if an object in list (project.xs) has already taken it. """
+    originalName = name
     names = [d.name for d in getattr(project, pluralLinkName) if hasattr(d, 'name')]
     while name in names:
         name = incrementName(name)
+    if originalName != name:
+        getLogger().info('Name:% already assigned. Renamed to %s' %(originalName, name))
     return name
 
 

@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-06 12:03:50 +0000 (Fri, November 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-06 14:12:06 +0000 (Fri, November 06, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -614,6 +614,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if rescaleStaticVTraces:
             self.rescaleStaticVTraces()
+
+    def mainViewHeight(self):
+        if self.viewports:
+            vp = self.viewports.getViewportFromWH(self._currentView, self.w, self.h)
+            return vp.height
 
     def setStackingValue(self, val):
         self._stackingValue = val

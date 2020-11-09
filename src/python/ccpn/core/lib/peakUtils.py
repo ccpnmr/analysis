@@ -1090,17 +1090,16 @@ def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True):
         heights = allValues[:,1]
         nearestPosition = find_nearest(positions, peak.position[0])
         nearestHeight = heights[positions == nearestPosition]
-        if a == nearestPosition or b == nearestPosition: # avoid to snap to an existing peak, as it might be a wrong snap.
+        if a == nearestPosition or b == nearestPosition: # avoid snapping to an existing peak, as it might be a wrong snap.
             peak.height = peak.peakList.spectrum.getIntensity(peak.position)
-        # TODO elif... need to find a way to avoid snapping on the noise if not maxima found
+        elif abs(nearestPosition) > abs(peak.position[0] + maximumLimit):  # avoid snapping on the noise if not maximum found
+            peak.height = peak.peakList.spectrum.getIntensity(peak.position)
         else:
             peak.position = [nearestPosition,]
             peak.height = nearestHeight[0]
 
     else:
         peak.height = peak.peakList.spectrum.getIntensity(peak.position)
-        if peak.comment: peak.comment = peak.comment + '.' + ' Orphan'
-        else: peak.comment = 'Orphan'
         getLogger().info('No maxima found within tolerances for %s. Kept original positions %s' %(peak.pid, str(round(peak.position[0],3))))
 
 

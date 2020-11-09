@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-04 17:16:40 +0000 (Wed, November 04, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -35,17 +35,20 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import datetime
 import os
 import random
+import re
 import sys
 import string
 import itertools
 from functools import partial
 from collections.abc import Iterable
 from collections import OrderedDict
+from string import whitespace
+from ccpn.core.lib import Pid
 from ccpn.util.LabelledEnum import LabelledEnum
 from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
 from ccpn.util.FrozenDict import FrozenDict
 from ccpn.util import Constants
-
+from ccpn.util.Logging import getLogger
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt = 2000000000
@@ -61,7 +64,9 @@ validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
                           + defaultFileNameChar)
 validCcpnFileNameChars = validFileNamePartChars + '-.' + separatorFileNameChar
-
+CAMELCASEPTN = r'((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))'
+CAMELCASEREP = r' \1'
+# alternative camelCase split = r'((?<=[a-z])[A-Z]|(?<=[A-Z])[A-Z](?=[a-z]))''
 
 # # Not used - Rasmus 20/2/2017
 # Sentinel = collections.namedtuple('Sentinel', ['value'])
@@ -98,6 +103,17 @@ def incrementName(name):
             pass
 
     return name + '_1'
+
+
+def _incrementObjectName(project, pluralLinkName, name):
+    """ fetch an incremented name if an object in list (project.xs) has already taken it. """
+    originalName = name
+    names = [d.name for d in getattr(project, pluralLinkName) if hasattr(d, 'name')]
+    while name in names:
+        name = incrementName(name)
+    if originalName != name:
+        getLogger().info('Name:% already assigned. Renamed to %s' %(originalName, name))
+    return name
 
 
 def recursiveImport(dirname, modname=None, ignoreModules=None, force=False):
@@ -559,6 +575,10 @@ def stringifier(*fields, **options):
 
 def contains_whitespace(s):
     return True in [c in s for c in string.whitespace]
+
+
+def contains_whitespace_nospace(s):
+    return True in [c in s for c in string.whitespace if c != ' ']
 
 
 def resetSerial(apiObject, newSerial):
@@ -1174,3 +1194,159 @@ if __name__ == '__main__':
     print('dataDict string: \n{}'.format(dd))
     recover = pretty.literal_eval(dd)
     print('Recovered python object: {} '.format(recover))
+
+
+def _compareDict(d1, d2):
+    """Compare the keys in two dictionaries
+    Routine is recursive, empty dicts are ignored
+    """
+    for k in d1:
+        if k not in d2:
+            return False
+        if type(d1[k]) == dict and d1[k]:
+            if type(d2[k]) == dict and d2[k]:
+                compare = _compareDict(d1[k], d2[k])
+                if not compare:
+                    return False
+            else:
+                return False
+    for k in d2:
+        if k not in d1:
+            return False
+        if type(d2[k]) == dict and d2[k]:
+            if type(d1[k]) == dict and d1[k]:
+                compare = _compareDict(d1[k], d2[k])
+                if not compare:
+                    return False
+            else:
+                return False
+
+    return True
+
+
+def _validateName(project, cls, value: str, attribName: str = 'name', allowWhitespace: bool = False, allowEmpty: bool = False,
+                  allowNone: bool = False, allowLeadingTrailingWhitespace: bool = False, allowSpace: bool = True,
+                  checkExisting: bool = True):
+    """Check that the attribName is valid
+    """
+    if value is not None:
+        if not isinstance(value, str):
+            raise TypeError('{}.{} must be a string'.format(cls.className, attribName))
+        if not value and not allowEmpty:
+            raise ValueError('{}.{} must be set'.format(cls.className, attribName))
+        if Pid.altCharacter in value:
+            raise ValueError('Character {} not allowed in {}.{}'.format(Pid.altCharacter, cls.className, attribName))
+        if allowWhitespace:
+            if not allowSpace and ' ' in value:
+                raise ValueError('space not allowed in {}.{}'.format(cls.className, attribName))
+        else:
+            if allowSpace and contains_whitespace_nospace(value):
+                raise ValueError('whitespace not allowed in {}.{}'.format(cls.className, attribName))
+            elif not allowSpace and contains_whitespace(value):
+                raise ValueError('whitespace not allowed in {}.{}'.format(cls.className, attribName))
+        if not allowLeadingTrailingWhitespace and value != value.strip():
+            raise ValueError('{}.{} cannot contain leading/trailing whitespace'.format(cls.className, attribName))
+
+    elif not allowNone:
+        raise ValueError('None not allowed in {}.{}'.format(cls.className, attribName))
+
+    # previous = project.getByRelativeId(value)
+    # if previous not in (None, cls):
+    #     raise ValueError('{} already exists'.format(previous.longPid))
+
+    if checkExisting:
+        found = [obj for obj in getattr(project, cls._pluralLinkName, []) if getattr(obj, attribName, None) == value]
+        if found:
+            raise ValueError('{} already exists'.format(found[0].id))
+
+    # will only get here if all the tests pass
+    return True
+
+
+def stringToCamelCase(label):
+    """Change string to camelCase format
+    Removes whitespaces, and changes first character to lower case
+    """
+    attr = label.translate({ord(c): None for c in whitespace})
+    return attr[0].lower() + attr[1:]
+
+
+def camelCaseToString(name):
+    """Change a camelCase string to string with spaces infront of capitals.
+    Groups of capitals are taken as acronyms and only the last letter of a group is separated.
+    The first letter is capitalised except in the special case of a camel case string beginning
+    <lowerCase,uppercase>, in which case the first lowercase letter is preserved.
+    e.g.
+    camelCase -> Camel Case
+    TLAAcronym -> TLA Acronym
+    pHValue -> pH Value
+    """
+    if name[0:1].islower() and name[1:2].isupper():
+        return name[0:1] + re.sub(CAMELCASEPTN, CAMELCASEREP, name[1:])
+    else:
+        label = re.sub(CAMELCASEPTN, CAMELCASEREP, name)
+        return label[0:1].upper() + label[1:]
+
+
+def isValidPath(projectName, stripFullPath=True, stripExtension=True):
+    """Check whether the project name is valid after stripping fullpath and extension
+    Can only contain alphanumeric characters and underscores
+
+    :param projectName: name of project to check
+    :param stripFullPath: set to true to remove leading directory
+    :param stripExtension: set to true to remove extension
+    :return: True if valid else False
+    """
+    if not projectName:
+        return
+
+    if isinstance(projectName, str):
+
+        name = os.path.basename(projectName) if stripFullPath else projectName
+        name = os.path.splitext(name)[0] if stripExtension else name
+
+        STRIPCHARS = '_'
+        for ss in STRIPCHARS:
+            name = name.replace(ss, '')
+
+        if name.isalnum():
+            return True
+
+
+def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
+    """Check whether the project name is valid after stripping fullpath and extension
+    Can only contain alphanumeric characters and underscores
+
+    :param projectName: name of project to check
+    :param stripFullPath: set to true to remove leading directory
+    :param stripExtension: set to true to remove extension
+    :return: True if length <= 32 else False
+    """
+    if not projectName:
+        return
+
+    if isinstance(projectName, str):
+        name = os.path.basename(projectName) if stripFullPath else projectName
+        name = os.path.splitext(name)[0] if stripExtension else name
+
+        return len(name) <= 32
+
+def zipCycle(*iterables, emptyDefault=None):
+    """
+    Make an iterator returning elements from the iterable and saving a copy of each.
+    When the iterable is exhausted, return elements from the saved copy.
+
+    example:
+            for i in zipCycle(range(2), range(5), ['a', 'b', 'c'], []):
+                print(i)
+            Outputs:
+            (0, 0, 'a', None)
+            (1, 1, 'b', None)
+            (0, 2, 'c', None)
+            (1, 3, 'a', None)
+            (0, 4, 'b', None)
+    """
+    from itertools import cycle, zip_longest
+    cycles = [cycle(i) for i in iterables]
+    for _ in zip_longest(*iterables):
+        yield tuple(next(i, emptyDefault) for i in cycles)

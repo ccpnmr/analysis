@@ -1330,3 +1330,23 @@ def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
         name = os.path.splitext(name)[0] if stripExtension else name
 
         return len(name) <= 32
+
+def zipCycle(*iterables, emptyDefault=None):
+    """
+    Make an iterator returning elements from the iterable and saving a copy of each.
+    When the iterable is exhausted, return elements from the saved copy.
+
+    example:
+            for i in zipCycle(range(2), range(5), ['a', 'b', 'c'], []):
+                print(i)
+            Outputs:
+            (0, 0, 'a', None)
+            (1, 1, 'b', None)
+            (0, 2, 'c', None)
+            (1, 3, 'a', None)
+            (0, 4, 'b', None)
+    """
+    from itertools import cycle, zip_longest
+    cycles = [cycle(i) for i in iterables]
+    for _ in zip_longest(*iterables):
+        yield tuple(next(i, emptyDefault) for i in cycles)

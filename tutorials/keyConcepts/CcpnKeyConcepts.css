@@ -1,0 +1,38 @@
+
+body {
+	background: #ffffff none repeat scroll 0% 0%;
+	color: #333;
+	line-height: 1.4;
+	margin: 30px;
+	margin-bottom: 150px;
+	text-decoration: none;
+	font-size: 13px;
+	font-family: "Lucida Grande", Open, sans-serif;
+}
+
+
+a:link {
+	color: #803594;
+	text-decoration: none;
+}
+
+a:visited {
+	color: #803594;
+	text-decoration: none;
+}
+
+a:hover,
+a:active {
+	color: #803594;
+	text-decoration: underline;
+}
+
+h1 {
+	color: #803594;
+	padding-left: 2px;
+}
+
+.action {
+	color: #803594;
+	font-weight:bold;
+}

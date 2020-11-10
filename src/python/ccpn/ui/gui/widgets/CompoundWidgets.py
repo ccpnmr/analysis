@@ -269,7 +269,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', callback=None, default=None, editable=True,
-                 sizeAdjustPolicy=None, compoundKwds=None, tipText=None,
+                 sizeAdjustPolicy=None, compoundKwds={}, tipText=None,
                  **kwds):
         """
         :param parent: parent widget

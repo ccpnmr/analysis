@@ -147,20 +147,21 @@ class _PulldownABC(PulldownListCompoundWidget):
                 self.select(default, blockSignals=True)
 
         # add a notifier to update the pulldown list
-        self._notifier1 = Notifier(project,
-                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                   self._className,
-                                   self._updatePulldownList)
-        self._notifier1.setDebug(DEBUG)
+        if project:
+            self._notifier1 = Notifier(project,
+                                       [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                       self._className,
+                                       self._updatePulldownList)
+            self._notifier1.setDebug(DEBUG)
 
-        self._notifier2 = None
-        if self._followCurrent:
-            self._notifier2 = Notifier(self.current,
-                                       [Notifier.CURRENT],
-                                       targetName=self._currentAttributeName,
-                                       callback=self._updateFromCurrent
-                                       )
-            self._notifier2.setDebug(DEBUG)
+            self._notifier2 = None
+            if self._followCurrent:
+                self._notifier2 = Notifier(self.current,
+                                           [Notifier.CURRENT],
+                                           targetName=self._currentAttributeName,
+                                           callback=self._updateFromCurrent
+                                           )
+                self._notifier2.setDebug(DEBUG)
 
 
     @property
@@ -256,26 +257,28 @@ class _PulldownABC(PulldownListCompoundWidget):
     def _getPids(self) -> list:
         """Return a list of pids defined by 'self._attributeName' from project.
         """
-        pids = [self.object2value(obj) for obj in getattr(self.project, self._attributeName)]
-        if self._filterFunction:
-            pids = self._filterFunction(pids)
-        if self._followCurrent:
-            # add current if it is not part of the pids
-            current = self.getCurrentObject()
-            if current is not None:
-                currentPid = self.object2value(current)
-                if currentPid not in pids:
-                    pids = [currentPid] + pids
-            if current is None and not self._showSelectName:
-                pids = [UNDEFINED] + pids
+        if self.project:
+            pids = [self.object2value(obj) for obj in getattr(self.project, self._attributeName)]
+            if self._filterFunction:
+                pids = self._filterFunction(pids)
+            if self._followCurrent:
+                # add current if it is not part of the pids
+                current = self.getCurrentObject()
+                if current is not None:
+                    currentPid = self.object2value(current)
+                    if currentPid not in pids:
+                        pids = [currentPid] + pids
+                if current is None and not self._showSelectName:
+                    pids = [UNDEFINED] + pids
 
-        if self._showSelectName:
-            if self._selectNoneText:
-                select = [self._selectNoneText]
-            else:
-                select = [SELECT]
-            pids = select + pids
-        return pids
+            if self._showSelectName:
+                if self._selectNoneText:
+                    select = [self._selectNoneText]
+                else:
+                    select = [SELECT]
+                pids = select + pids
+            return pids
+        return []
 
     def _updatePulldownList(self, callbackDict=None):
         """Callback to update the pulldown list; triggered by object creation, deletion or renaming

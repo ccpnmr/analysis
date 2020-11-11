@@ -1,25 +1,24 @@
 
 body {
 	background: #ffffff none repeat scroll 0% 0%;
-	color: #333;
+	color: #000000;
 	line-height: 1.4;
-	margin: 30px;
-	margin-bottom: 150px;
 	text-decoration: none;
-	font-size: 13px;
+	font-size: 20px;
 	font-family: "Lucida Grande", Open, sans-serif;
 }
 
 
 a:link {
-	color: #803594;
+	color: #000000;
 	text-decoration: none;
 }
 
 a:visited {
-	color: #803594;
+	color: #000000;
 	text-decoration: none;
 }
+
 
 a:hover,
 a:active {
@@ -27,12 +26,25 @@ a:active {
 	text-decoration: underline;
 }
 
-h1 {
-	color: #803594;
-	padding-left: 2px;
+.centre {
+	margin-left: auto;
+	margin-right: auto;
 }
 
-.action {
-	color: #803594;
-	font-weight:bold;
+.centre_img {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.links {
+	height: 412px;
+}
+
+td {
+	padding: 10px;
+}
+
+p {
+	text-align: center;
 }

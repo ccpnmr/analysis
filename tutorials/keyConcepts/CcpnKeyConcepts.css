@@ -8,22 +8,12 @@ body {
 	font-family: "Lucida Grande", Open, sans-serif;
 }
 
-
-a:link {
-	color: #000000;
-	text-decoration: none;
+td {
+	padding: 10px;
 }
 
-a:visited {
-	color: #000000;
-	text-decoration: none;
-}
-
-
-a:hover,
-a:active {
-	color: #803594;
-	text-decoration: underline;
+p {
+	text-align: center;
 }
 
 .centre {
@@ -38,13 +28,34 @@ a:active {
 }
 
 .links {
-	height: 412px;
+	height: 382px;
+	padding-top: 50px;
 }
 
-td {
-	padding: 10px;
+.links a:link, .links a:visited {
+	color: #000000;
+	text-decoration: none;
 }
 
-p {
+.links a:hover,
+.links a:active {
+	color: #803594;
+	text-decoration: underline;
+}
+
+.more_info_links {
 	text-align: center;
+	height: 40px;
+}
+
+.more_info_links a:link,
+.more info_links a:visited {
+	color: #803594;
+	text-decoration: none;
+}
+
+.more_info_links a:hover,
+.more_info_links a:active {
+	color: #803594;
+	text-decoration: underline;
 }

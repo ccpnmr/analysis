@@ -669,6 +669,14 @@ assignmentTolerances
         return self.path.exists()
 
     @property
+    def dataFormat(self):
+        """Return the spectrum data-format identifier (e.g. HDF5, NMRPIPE) or None if not defined
+        """
+        if self._wrappedData is None or self._wrappedData.dataStore is None:
+            return None
+        return self._wrappedData.dataStore.fileType
+
+    @property
     def headerSize(self) -> Optional[int]:
         """File header size in bytes."""
         xx = self._wrappedData.dataStore
@@ -676,8 +684,6 @@ assignmentTolerances
             return xx.headerSize
         else:
             return None
-
-    # NBNB TBD Should this be made modifiable? Would be a bit of work ...
 
     @property
     def numberType(self) -> Optional[str]:

@@ -28,7 +28,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.framework.Translation import translator
-from ccpn.ui.gui.widgets.Font import getFontHeight
+from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
 
 
 class RadioButton(QtWidgets.QRadioButton, Base):
@@ -72,3 +73,81 @@ class RadioButton(QtWidgets.QRadioButton, Base):
         if callback:
             # self.connect(self, QtCore.SIGNAL('clicked()'), callback)
             self.clicked.connect(callback)
+
+class EditableRadioButton(Widget):
+    def __init__(self, parent, text=None, backgroundText=None, callback=None, tipText=None,
+                 editable=True, callbackOneditingFinished=True, **kwds):
+
+        """editingFinishedCallback = True. it will re-fired the radioButton callback
+        """
+        super().__init__(parent, setLayout=True,)
+        # Base._init(self, setLayout=True, **kwds)
+        # self.setEnabled(False)
+        self.radioButton = RadioButton(self, callback=callback, tipText=tipText, grid=(0,0))
+        self.lineEdit = LineEdit(self, text=text, backgroundText=backgroundText, grid=(0,1))#  hAlign='l',)
+        self.lineEdit.hide()
+        self.editable = editable
+        if editable:
+            self.lineEdit.show()
+        else:
+            self.radioButton.setText(text)
+        # self.lineEdit.setContentsMargins(0,0,0,0)
+        # self.lineEdit.setMinimumWidth(250)
+        # self.setMinimumHeight(30)
+        self.callbackOneditingFinished = callbackOneditingFinished
+        self.callback = callback
+        # self.radioButton.setText = self._setText
+        if self.callbackOneditingFinished:
+            self.lineEdit.editingFinished.connect(self._editingFinishedCallback)
+
+        # self.__class__ = QtWidgets.QAbstractButton
+
+    def text(self):
+        if self.editable:
+            return self.lineEdit.text()
+        else:
+            return self.radioButton.text()
+
+    def get(self):
+        return self.text()
+
+    def set(self, value):
+        self.setText(value)
+
+    def setText(self, value):
+        if self.editable:
+            self.lineEdit.setText(value)
+        else:
+            self.radioButton.setText(value)
+
+    def isChecked(self):
+        return self.radioButton.isChecked()
+
+    def setChecked(self, value):
+        return self.radioButton.setChecked(value)
+
+    def _editingFinishedCallback(self):
+        self.radioButton.setChecked(True)
+        if self.callback:
+            self.callback()
+
+
+
+
+
+
+if __name__ == '__main__':
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.popups.Dialog import CcpnDialog
+    app = TestApplication()
+
+    def callback():
+        print('callback ~~~~')
+
+    popup = CcpnDialog(setLayout=True)
+
+    rb = EditableRadioButton(parent=popup, text="test", editable=False, callback=callback, grid=(0, 0))
+
+    popup.show()
+    popup.raise_()
+    app.start()

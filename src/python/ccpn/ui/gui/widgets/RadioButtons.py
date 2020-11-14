@@ -24,10 +24,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.RadioButton import RadioButton
+from ccpn.ui.gui.widgets.RadioButton import RadioButton, EditableRadioButton
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Font import setWidgetFont
-
+from functools import partial
+from ccpn.ui.gui.widgets.Widget import Widget
 
 CHECKED = QtCore.Qt.Checked
 UNCHECKED = QtCore.Qt.Unchecked
@@ -37,7 +38,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
     def __init__(self, parent, texts=None, selectedInd=None, exclusive=True,
                  callback=None, direction='h', tipTexts=None, objectNames=None,
-                 icons=None,
+                 icons=None, initButtons=True,
                  **kwds):
 
         super().__init__(parent)
@@ -70,8 +71,8 @@ class RadioButtons(QtWidgets.QWidget, Base):
             icons = [None] * len(texts)
 
         self.radioButtons = []
-        self.setButtons(texts, selectedInd, direction, tipTexts, objectNames,
-                        icons=icons)
+        if initButtons:
+            self.setButtons(texts, selectedInd, direction, tipTexts, objectNames, icons=icons)
 
         # for i, text in enumerate(texts):
         #   if 'h' in direction:
@@ -89,8 +90,8 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
         # buttonGroup.connect(buttonGroup, QtCore.SIGNAL('buttonClicked(int)'), self._callback)
         buttonGroup.buttonClicked.connect(self._callback)
-
         self.setCallback(callback)
+
 
     def setButtons(self, texts=None, selectedInd=None, direction='h', tipTexts=None, objectNames=None, silent=False,
                    icons=None):
@@ -221,27 +222,201 @@ class RadioButtons(QtWidgets.QWidget, Base):
             #  e.g. self.callback(self.get())
             self.callback()
 
+def _fillMissingValuesInSecondList(aa, bb, value):
+    if not value:
+        value = ''
+    if bb is None:
+        bb = [value] * len(aa)
+    if len(aa) != len(bb):
+        if len(aa) > len(bb):
+            m = len(aa) - len(bb)
+            bb += [value] * m
+        else:
+            raise NameError('Lists are not of same length.')
+    return aa, bb
+
+class EditableRadioButtons(Widget, Base):
+    """
+    Re-implementation of RadioButtons with the option to edit a selection
+    """
+
+    def __init__(self, parent, texts=None, backgroundTexts=None, editables=None, selectedInd=None,
+                 callback=None, direction='h', tipTexts=None, objectNames=None, icons=None, exclusive=True,
+                 **kwds):
+        super().__init__(parent, setLayout=True, **kwds)
+
+        if texts is None:
+            texts = []
+
+        self.texts = texts
+        direction = direction.lower()
+        self.direction = direction
+        self.isExclusive = exclusive
+
+        texts, editables = _fillMissingValuesInSecondList(texts, editables, value=False)
+        texts, tipTexts = _fillMissingValuesInSecondList(texts, tipTexts, value='')
+        texts, backgroundTexts = _fillMissingValuesInSecondList(texts, backgroundTexts, value='')
+        texts, icons = _fillMissingValuesInSecondList(texts, icons, value=None)
+
+        self.radioButtons = []
+        self.callback = callback
+
+        self._setButtons(texts=texts, editables=editables, selectedInd=selectedInd, direction=direction,
+                        tipTexts=tipTexts, backgroundTexts=backgroundTexts, objectNames=objectNames, icons=icons,)
+
+    def setButtons(self,  *args, **kwargs):
+        self._setButtons(*args, **kwargs)
+
+    def _setButtons(self, texts=None, editables=None, selectedInd=None, direction='h', tipTexts=None,
+                   objectNames=None, backgroundTexts=None, silent=False, icons=None):
+        """Change the buttons in the button group """
+        texts, editables = _fillMissingValuesInSecondList(texts, editables, value=False)
+        texts, tipTexts = _fillMissingValuesInSecondList(texts, tipTexts, value='')
+        texts, backgroundTexts = _fillMissingValuesInSecondList(texts, backgroundTexts, value='')
+        selected = self.getSelectedText()
+        for btn in self.radioButtons:
+            btn.deleteLater()
+        self.radioButtons = []
+        # rebuild the button list
+        for i, text in enumerate(texts):
+            if 'h' in direction: grid = (0, i)
+            else: grid = (i, 0)
+            button = EditableRadioButton(self, text=text, editable=editables[i], tipText=tipTexts[i],
+                                          backgroundText = backgroundTexts[i],
+                                          callbackOneditingFinished=False) #callback=self.callback,
+            button.lineEdit.editingFinished.connect(partial(self._editingFinishedCallback, button, i))
+            button.radioButton.clicked.connect(partial(self._buttonClicked, button, i))
+            self.radioButtons.append(button)
+            layout = self.getLayout()
+            layout.addWidget(button, *grid)
+            if objectNames and objectNames[i]:
+                button.setObjectName(objectNames[i])
+            if icons and icons[i]:
+                thisIcon = icons[i]
+                if isinstance(thisIcon, str):
+                    button.setIcon(Icon(thisIcon))
+                elif isinstance(thisIcon, (list, tuple)):
+                    if thisIcon and isinstance(thisIcon[0], str):
+                        button.setIcon(Icon(thisIcon[0]))
+                        if len(thisIcon) == 2:
+                            iconSize = thisIcon[1]
+                            if isinstance(iconSize, (list, tuple)) and len(iconSize) == 2 and \
+                                    all(isinstance(iconVal, int) for iconVal in iconSize):
+                                button.setIconSize(QtCore.QSize(*iconSize))
+        self.texts = texts
+        if selectedInd is not None:
+            self.radioButtons[selectedInd].setChecked(True)
+        elif selected and selected in self.texts:
+            self.set(selected, silent=silent)
+        else:
+            self.radioButtons[0].setChecked(True)
+
+    def getRadioButton(self, text):
+        for rb in self.radioButtons:
+            if rb.text() == text:
+                return rb
+        else:
+            raise ValueError('radioButton %s not found in the list' % text)
+
+    def get(self):
+        texts = []
+        for i in self.radioButtons:
+            if i.isChecked():
+                texts.append(i.text())
+        if self.isExclusive:
+            return texts[-1]
+        else:
+            return texts
+
+
+    def getIndex(self):
+        ixs = []
+        for i, rb in enumerate(self.radioButtons):
+            if rb.isChecked():
+                ixs.append(i)
+        if self.isExclusive:
+            # if exclusive then one-and-only-one MUST be set
+            return ixs[-1] if ixs else 0
+        else:
+            return ixs
+
+    def set(self, text, silent=False):
+        if self.isExclusive:
+            self.deselectAll()
+        if text in self.texts:
+            i = self.texts.index(text)
+            self.setIndex(i)
+            if self.callback and not silent:
+                self.callback()
+
+
+
+    def setExclusive(self, value):
+        # raise ValueError('Not implemented yet')
+        self.isExclusive = value
+
+    def getSelectedText(self):
+        for radioButton in self.radioButtons:
+            if radioButton.isChecked():
+                name = radioButton.text()
+                if name:
+                    return name
+
+    def setIndex(self, i):
+        if self.isExclusive:
+            self.deselectAll()
+        self.radioButtons[i].setChecked(True)
+
+    def _buttonClicked(self, button, index):
+        if not self.isExclusive:
+            self.radioButtons[index].setChecked(button.isChecked())
+            self._callback(button)
+        else:
+            self.setIndex(index)
+            self._callback(button)
+
+    def deselectAll(self):
+        for i in self.radioButtons:
+            i.setChecked(False)
+
+    def setCallback(self, callback):
+        self.callback = callback
+
+    def _callback(self, button):
+
+        if self.callback and button:
+            self.callback(self.get())
+
+    def _editingFinishedCallback(self, button, index):
+        if button:
+            self._buttonClicked(button, index)
+
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.BasePopup import BasePopup
 
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
-    from functools import partial
 
     def testCallback(self, *args):
-        print(self.get(), self.getIndex())
+        print('GET:', self.get())
+        print('INDEX',self.getIndex())
+        print('SELECTED:', self.getSelectedText())
 
+    def testCall(*args):
+        print('ddd', args)
     app = TestApplication()
     popup = CcpnDialog(windowTitle='Test radioButtons', setLayout=True)
 
     buttonGroup = QtWidgets.QButtonGroup(popup)
-    radioButtons = RadioButtons(parent=popup, texts=['a', 'b'],
-                  grid=(0, 0), exclusive=False,)
-    radioButtons.setCallback(partial(testCallback, radioButtons))
+    radioButtons = EditableRadioButtons(parent=popup, texts=['a', ''], tipTexts=['',''],
+                                        editables=[False, True], grid=(0, 0),
+                                        callback=testCall, direction='v')
+
+    # radioButtons.setCallback(partial(testCallback, radioButtons))
     # for i in range(10):
     #     button = RadioButton(popup, text='TEST', grid=(i, 0),
-    #                          callback=testCallback)  # partial(self.assignSelect
+    #                          callback=testCall)  # partial(self.assignSelect
     #     buttonGroup.addButton(button)
 
     popup.raise_()

@@ -41,6 +41,8 @@ HCACO                      Hca, CAh, CO    *(CA is treated as a separate type)*
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+from ccpnmodel.ccpncore.lib.spectrum.Spectrum import createBlockedMatrix
+
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -69,7 +71,7 @@ from typing import Sequence, Tuple, Optional, Union
 from functools import partial
 import decorator
 
-from ccpn.util import Constants
+from ccpn.util import Constants, Common
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
@@ -236,10 +238,17 @@ class Spectrum(AbstractWrapperObject):
         self._intensities = None
         self._positions = None
 
+        self._dataSource = None  # Reference to dataSource object corresponding to (binary) data file
+
         super().__init__(project, wrappedData)
 
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
+
+        # Assure at least one peakList; due to the silly bottom-up intitalisation, this appears to
+        # result in duplicate peakLists
+        # if len(self.peakLists) == 0:
+        #     self.newPeakList()
 
     def _infoString(self, includeDimensions=False):
         """Return info string about self, optionally including dimensional
@@ -307,9 +316,9 @@ assignmentTolerances
 
     @property
     def _localCcpnSortKey(self) -> Tuple:
-        """Local sorting key, in context of parent."""
-        dataSource = self._wrappedData
-        return (dataSource.experiment.serial, dataSource.serial)
+        """Local sorting key, in context of parent.
+        """
+        return (self._wrappedData.experiment.serial, self._wrappedData.serial)
 
     @property
     def name(self) -> str:
@@ -2976,11 +2985,139 @@ assignmentTolerances
 #=========================================================================================
 
 @newObject(Spectrum)
-def _newSpectrum(self: Project, name: str, serial: int = None) -> Spectrum:
-    """Creation of new Spectrum NOT IMPLEMENTED.
-    Use Project.loadData or Project.createDummySpectrum instead"""
+def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
+    """Creation of new Spectrum;
+    :return: Spectrum instance or None on error
+    """
 
-    raise NotImplementedError("Not implemented. Use loadSpectrum instead")
+    from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
+
+    #raise NotImplementedError("Not implemented. Use loadSpectrum instead")
+
+    logger = getLogger()
+
+    _path = aPath(path)
+    dir, base, ext = _path.split3()
+
+    if name is None:
+        name = base
+
+    # assure unique name
+    names = [sp.name for sp in self.spectra]
+    if name in names:
+        i = 1
+        while '%s_%s' % (name, i) in names:
+            i += 1
+        name = '%s_%s' % (name, i)
+
+    dataSource = checkPathForSpectrumFormats(path=_path)
+    if dataSource is None:
+        logger.warning('Invalid spectrum path "%s"' % path) # report the argument given
+        return None
+
+    apiProject = self._wrappedData
+
+# Experiment:
+# dataDict['applicationData'] = list()
+# dataDict['details'] = None
+# dataDict['endDate'] = None
+# dataDict['isLocked'] = None
+# dataDict['lastEditedDate'] = None
+# dataDict['name'] = None
+# dataDict['serial'] = None
+# dataDict['startDate'] = None
+# dataDict['status'] = None
+# dataDict['access'] = None
+# dataDict['annotations'] = set()
+# dataDict['blueprintStatuss'] = set()
+# dataDict['creator'] = None
+# dataDict['expBlueprint'] = None
+# dataDict['experimentGroup'] = None
+# dataDict['experimentType'] = None
+# dataDict['group'] = None
+# dataDict['instrument'] = None
+# dataDict['lastEditor'] = None
+# dataDict['method'] = None
+# dataDict['next'] = set()
+# dataDict['outputSamples'] = {}
+# dataDict['parameters'] = {}
+# dataDict['previous'] = set()
+# dataDict['protocol'] = None
+# dataDict['sampleIos'] = {}
+
+    # apiExperiment = apiProject.createExperiment(name=name,
+    #                                             numDim=dataSource.dimensionCount,
+    #                                             sf=dataSource.spectrometerFrequencies,
+    #                                             isotopeCodes=dataSource.isotopeCodes
+    #                                             )
+
+    apiExperiment = apiProject.newExperiment(name=name,
+                                             numDim=dataSource.dimensionCount,
+                                            )
+    # Define the dimension axes
+    for n, expDim in enumerate(apiExperiment.sortedExpDims()):
+        expDim.isAcquisition = False
+        expDim.newExpDimRef(isotopeCodes=(dataSource.isotopeCodes[n],),
+                            axisCode=dataSource.axisCodes[n],
+                            sf=dataSource.spectrometerFrequencies[n],
+                            unit='ppm'
+                           )
+
+    apiUrl = apiProject.root.fetchDataUrl(dir)
+
+# BlockedBinaryMatrix
+# dataDict['_ID'] = None
+# dataDict['applicationData'] = list()
+# dataDict['blockHeaderSize'] = 0
+# dataDict['blockSizes'] = list()
+# dataDict['ccpnInternalData'] = None
+# dataDict['complexStoredBy'] = 'dimension'
+# dataDict['details'] = None
+# dataDict['fileType'] = None
+# dataDict['hasBlockPadding'] = True
+# dataDict['headerSize'] = 0
+# dataDict['isBigEndian'] = True
+# dataDict['isComplex'] = list()
+# dataDict['nByte'] = 4
+# dataDict['numPoints'] = list()
+# dataDict['numRecords'] = 1
+# dataDict['numberType'] = 'float'
+# dataDict['path'] = None
+# dataDict['scaleFactor'] = 1.0
+# dataDict['serial'] = None
+# dataDict['dataUrl'] = None
+# dataDict['nmrDataSources'] = set()
+    dataStore =  createBlockedMatrix(
+                               dataUrl=apiUrl,
+                               path=path,
+                               numPoints=dataSource.pointCounts,
+                               blockSizes=dataSource.blockSizes,
+                               fileType=dataSource.dataFormat,
+#                               isComplex=[False]*dataSource.dimensionCount,
+#                               complexStoredBy=['timepoint']*dataSource.dimensionCount
+                               )
+
+    apiDataSource = apiExperiment.createDataSource(
+                                                   name=name,
+                                                   dataStore = dataStore,
+                                                   numPoints=dataSource.pointCounts,
+                                                   sw=dataSource.spectralWidthsHz,
+                                                   refppm=dataSource.referenceValues,
+                                                   refpt=dataSource.referencePoints,
+                                                   sampledValues=dataSource.sampledValues,
+                                                   sampledErrors=dataSource.sampledSigmas,
+                                                   # notOverRide=False, # prevent callback to create Spectrum instance
+                                                   )
+
+
+    spectrum = self._data2Obj[apiDataSource]
+    spectrum._dataSource = dataSource
+    dataSource.exportToSpectrum(spectrum)
+
+    # Link to default chemicalShiftList
+    spectrum.chemicalShiftList = self.chemicalShiftLists[0]
+
+    return spectrum
 
 
 @newObject(Spectrum)

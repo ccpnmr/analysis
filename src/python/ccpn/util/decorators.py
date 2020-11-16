@@ -313,7 +313,8 @@ def logCommand(prefix='', get=None, isProperty=False):
 
         application = self.project.application
         blocking = application._echoBlocking
-        if blocking == 0:
+
+        if blocking == 0 and application.ui is not None:
             _pref = prefix
             if get == 'self':
                 _pref += "get('%s')." % args[0].pid

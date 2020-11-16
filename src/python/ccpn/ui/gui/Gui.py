@@ -254,12 +254,14 @@ class Gui(Ui):
         """Echo commands strings, one by one, to logger
         and store them in internal list for perusal
         """
-        console = self.application.ui.mainWindow.pythonConsole
-        logger = self.application.project._logger
-
+        logger = Logging.getLogger()
         for command in commands:
-            console._write(command + '\n')
             logger.info(command)
+
+        if self.application.ui is not None and self.application.ui.mainWindow is not None:
+            console = self.application.ui.mainWindow.pythonConsole
+            for command in commands:
+                console._write(command + '\n')
 
     #TODO:RASMUS: should discuss how application should deal with it
     def getByGid(self, gid):

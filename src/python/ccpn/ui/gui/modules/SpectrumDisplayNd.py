@@ -85,21 +85,21 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         toolBarItemsForBoth = [
             #  action name,        icon,                  tooltip,                                     active, callback
 
-            ('increaseTraceScale', 'icons/tracescale-up', 'Increase trace scale of strips in display', True, self.increaseTraceScale),
-            ('decreaseTraceScale', 'icons/tracescale-down', 'Decrease trace scale of strips in display', True, self.decreaseTraceScale),
+            ('increaseTraceScale', 'icons/tracescale-up', 'Increase scale of 1D traces in display', True, self.increaseTraceScale),
+            ('decreaseTraceScale', 'icons/tracescale-down', 'Decrease scale of 1D traces in display', True, self.decreaseTraceScale),
             ('increaseStripWidth', 'icons/range-expand', 'Increase the width of strips in display', True, self.increaseStripSize),
             ('decreaseStripWidth', 'icons/range-contract', 'Decrease the width of strips in display', True, self.decreaseStripSize),
             ('addStrip', 'icons/plus', 'Duplicate the rightmost strip', True, self.addStrip),
             ('removeStrip', 'icons/minus', 'Remove the current strip', True, self.removeCurrentStrip),
             ]
         toolBarItemsForNd = [
-            ('raiseBase', 'icons/contour-base-up', 'Raise Contour Base Level', True, self.raiseContourBase),
-            ('lowerBase', 'icons/contour-base-down', 'Lower Contour Base Level', True, self.lowerContourBase),
-            ('maximiseZoom', 'icons/zoom-full', 'Maximise Zoom', True, self._resetAllZooms),
-            ('storeZoom', 'icons/zoom-store', 'Store Zoom', True, self._storeZoom),
-            ('restoreZoom', 'icons/zoom-restore', 'Restore Zoom', True, self._restoreZoom),
-            ('undoZoom', 'icons/zoom-undo', 'Previous Zoom', True, self._previousZoom),
-            ('redoZoom', 'icons/zoom-redo', 'Next Zoom', True, self._nextZoom),
+            ('raiseBase', 'icons/contour-base-up', 'Raise Contour Base Level (Shift + Mouse Wheel)', True, self.raiseContourBase),
+            ('lowerBase', 'icons/contour-base-down', 'Lower Contour Base Level (Shift + Mouse Wheel)', True, self.lowerContourBase),
+            ('maximiseZoom', 'icons/zoom-full', 'Maximise Zoom (ZA)', True, self._resetAllZooms),
+            ('storeZoom', 'icons/zoom-store', 'Store Zoom (ZS)', True, self._storeZoom),
+            ('restoreZoom', 'icons/zoom-restore', 'Restore Zoom (ZR)', True, self._restoreZoom),
+            ('undoZoom', 'icons/zoom-undo', 'Previous Zoom (ZP)', True, self._previousZoom),
+            ('redoZoom', 'icons/zoom-redo', 'Next Zoom (ZN)', True, self._nextZoom),
             ]
 
         # create the actions from the lists

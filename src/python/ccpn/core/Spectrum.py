@@ -3017,44 +3017,17 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
 
     apiProject = self._wrappedData
 
-# Experiment:
-# dataDict['applicationData'] = list()
-# dataDict['details'] = None
-# dataDict['endDate'] = None
-# dataDict['isLocked'] = None
-# dataDict['lastEditedDate'] = None
-# dataDict['name'] = None
-# dataDict['serial'] = None
-# dataDict['startDate'] = None
-# dataDict['status'] = None
-# dataDict['access'] = None
-# dataDict['annotations'] = set()
-# dataDict['blueprintStatuss'] = set()
-# dataDict['creator'] = None
-# dataDict['expBlueprint'] = None
-# dataDict['experimentGroup'] = None
-# dataDict['experimentType'] = None
-# dataDict['group'] = None
-# dataDict['instrument'] = None
-# dataDict['lastEditor'] = None
-# dataDict['method'] = None
-# dataDict['next'] = set()
-# dataDict['outputSamples'] = {}
-# dataDict['parameters'] = {}
-# dataDict['previous'] = set()
-# dataDict['protocol'] = None
-# dataDict['sampleIos'] = {}
-
-    # apiExperiment = apiProject.createExperiment(name=name,
-    #                                             numDim=dataSource.dimensionCount,
-    #                                             sf=dataSource.spectrometerFrequencies,
-    #                                             isotopeCodes=dataSource.isotopeCodes
-    #                                             )
+# Consolidating previous API calls:
+#   NmrProject.createExperiment
+#   spectrum.Spectrum.createBlockedMatrix
+#   Nmr.Expertiment.createDataSource
+#
+# First creating the api data structures with minimal parameters and once in place updating all values
 
     apiExperiment = apiProject.newExperiment(name=name,
                                              numDim=dataSource.dimensionCount,
                                             )
-    # Define the dimension axes
+    # Define the experiment dimensions
     for n, expDim in enumerate(apiExperiment.sortedExpDims()):
         expDim.isAcquisition = False
         expDim.newExpDimRef(isotopeCodes=(dataSource.isotopeCodes[n],),
@@ -3064,58 +3037,51 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
                            )
 
     apiUrl = apiProject.root.fetchDataUrl(dir)
+    urlPath = aPath(apiUrl.url.path)
+    relPath = _path.relative_to(urlPath)
 
-# BlockedBinaryMatrix
-# dataDict['_ID'] = None
-# dataDict['applicationData'] = list()
-# dataDict['blockHeaderSize'] = 0
-# dataDict['blockSizes'] = list()
-# dataDict['ccpnInternalData'] = None
-# dataDict['complexStoredBy'] = 'dimension'
-# dataDict['details'] = None
-# dataDict['fileType'] = None
-# dataDict['hasBlockPadding'] = True
-# dataDict['headerSize'] = 0
-# dataDict['isBigEndian'] = True
-# dataDict['isComplex'] = list()
-# dataDict['nByte'] = 4
-# dataDict['numPoints'] = list()
-# dataDict['numRecords'] = 1
-# dataDict['numberType'] = 'float'
-# dataDict['path'] = None
-# dataDict['scaleFactor'] = 1.0
-# dataDict['serial'] = None
-# dataDict['dataUrl'] = None
-# dataDict['nmrDataSources'] = set()
-    dataStore =  createBlockedMatrix(
+    apiDataStore =  apiUrl.dataLocationStore.newBlockedBinaryMatrix(
                                dataUrl=apiUrl,
-                               path=path,
+                               path=str(relPath),
                                numPoints=dataSource.pointCounts,
+                               isComplex=dataSource.isComplex,
                                blockSizes=dataSource.blockSizes,
                                fileType=dataSource.dataFormat,
-#                               isComplex=[False]*dataSource.dimensionCount,
-#                               complexStoredBy=['timepoint']*dataSource.dimensionCount
-                               )
+                              )
 
-    apiDataSource = apiExperiment.createDataSource(
-                                                   name=name,
-                                                   dataStore = dataStore,
-                                                   numPoints=dataSource.pointCounts,
-                                                   sw=dataSource.spectralWidthsHz,
-                                                   refppm=dataSource.referenceValues,
-                                                   refpt=dataSource.referencePoints,
-                                                   sampledValues=dataSource.sampledValues,
-                                                   sampledErrors=dataSource.sampledSigmas,
-                                                   # notOverRide=False, # prevent callback to create Spectrum instance
+    apiDataSource = apiExperiment.newDataSource(name=name,
+                                                dataStore=apiDataStore,
+                                                numDim=dataSource.dimensionCount,
+                                                dataType='processed'
+                                                )
+    # Intialise the freq/time dimensions
+    for n, expDim in enumerate(apiExperiment.sortedExpDims()):
+        _nPoints = dataSource.pointCounts[n]
+        freqDataDim = apiDataSource.newFreqDataDim(dim=n+1, expDim=expDim,
+                                                   numPoints=_nPoints,
+                                                   numPointsOrig=_nPoints,
+                                                   pointOffset=0,
+                                                   isComplex=dataSource.isComplex[n],
+                                                   valuePerPoint=dataSource.spectralWidthsHz[n]/float(_nPoints)
                                                    )
-
+        expDimRef = (expDim.findFirstExpDimRef(measurementType='Shift') or expDim.findFirstExpDimRef())
+        if expDimRef:
+            freqDataDim.newDataDimRef(expDimRef=expDimRef)
 
     spectrum = self._data2Obj[apiDataSource]
-    spectrum._dataSource = dataSource
+    spectrum._apiExperiment = apiExperiment
+    spectrum._apiDataStore = apiDataStore
+
+    # Update all values from the dataSource to the Spectrum instance; retain the dataSource instance
     dataSource.exportToSpectrum(spectrum)
+    spectrum._dataSource = dataSource
 
     # Link to default chemicalShiftList
     spectrum.chemicalShiftList = self.chemicalShiftLists[0]
+
+    # Assure at least one peakList
+    if len(spectrum.peakLists) == 0:
+        spectrum.newPeakList()
 
     return spectrum
 
@@ -3191,3 +3157,82 @@ Project._apiNotifiers.extend(
              DataLocation.AbstractDataStore._metaclass.qualifiedName(), ''),
             )
         )
+
+
+# Experiment:
+# dataDict['applicationData'] = list()
+# dataDict['details'] = None
+# dataDict['endDate'] = None
+# dataDict['isLocked'] = None
+# dataDict['lastEditedDate'] = None
+# dataDict['name'] = None
+# dataDict['serial'] = None
+# dataDict['startDate'] = None
+# dataDict['status'] = None
+# dataDict['access'] = None
+# dataDict['annotations'] = set()
+# dataDict['blueprintStatuss'] = set()
+# dataDict['creator'] = None
+# dataDict['expBlueprint'] = None
+# dataDict['experimentGroup'] = None
+# dataDict['experimentType'] = None
+# dataDict['group'] = None
+# dataDict['instrument'] = None
+# dataDict['lastEditor'] = None
+# dataDict['method'] = None
+# dataDict['next'] = set()
+# dataDict['outputSamples'] = {}
+# dataDict['parameters'] = {}
+# dataDict['previous'] = set()
+# dataDict['protocol'] = None
+# dataDict['sampleIos'] = {}
+
+# apiExperiment = apiProject.createExperiment(name=name,
+#                                             numDim=dataSource.dimensionCount,
+#                                             sf=dataSource.spectrometerFrequencies,
+#                                             isotopeCodes=dataSource.isotopeCodes
+#                                             )
+
+# BlockedBinaryMatrix
+# dataDict['_ID'] = None
+# dataDict['applicationData'] = list()
+# dataDict['blockHeaderSize'] = 0
+# dataDict['blockSizes'] = list()
+# dataDict['ccpnInternalData'] = None
+# dataDict['complexStoredBy'] = 'dimension'
+# dataDict['details'] = None
+# dataDict['fileType'] = None
+# dataDict['hasBlockPadding'] = True
+# dataDict['headerSize'] = 0
+# dataDict['isBigEndian'] = True
+# dataDict['isComplex'] = list()
+# dataDict['nByte'] = 4
+# dataDict['numPoints'] = list()
+# dataDict['numRecords'] = 1
+# dataDict['numberType'] = 'float'
+# dataDict['path'] = None
+# dataDict['scaleFactor'] = 1.0
+# dataDict['serial'] = None
+# dataDict['dataUrl'] = None
+# dataDict['nmrDataSources'] = set()
+#     dataStore =  createBlockedMatrix(
+#                                dataUrl=apiUrl,
+#                                path=path,
+#                                numPoints=dataSource.pointCounts,
+#                                blockSizes=dataSource.blockSizes,
+#                                fileType=dataSource.dataFormat,
+#                               isComplex=[False]*dataSource.dimensionCount,
+#                               complexStoredBy=['timepoint']*dataSource.dimensionCount
+#                               )
+
+# apiDataSource = apiExperiment.createDataSource(
+#                                                name=name,
+#                                                dataStore = apiDataStore,
+#                                                numPoints=dataSource.pointCounts,
+#                                                sw=dataSource.spectralWidthsHz,
+#                                                refppm=dataSource.referenceValues,
+#                                                refpt=dataSource.referencePoints,
+#                                                sampledValues=dataSource.sampledValues,
+#                                                sampledErrors=dataSource.sampledSigmas,
+#                                                # notOverRide=False, # prevent callback to create Spectrum instance
+#                                                )

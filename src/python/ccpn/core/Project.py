@@ -1395,13 +1395,11 @@ class Project(AbstractWrapperObject):
     #     pass
 
     @logCommand('project.')
-    def newSpectrum(self, name: str):
-        """Creation of new Spectrum NOT IMPLEMENTED.
-        Use Project.loadData or Project.createDummySpectrum instead.
+    def newSpectrum(self, path:str, name: str = None):
+        """Creation of new Spectrum defined by path; optionally set name.
         """
         from ccpn.core.Spectrum import _newSpectrum
-
-        return _newSpectrum(self, name=name)
+        return _newSpectrum(self, path=path, name=name)
 
     @logCommand('project.')
     def createDummySpectrum(self, axisCodes: Sequence[str], name=None,

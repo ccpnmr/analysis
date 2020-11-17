@@ -30,3 +30,8 @@ BACKUP_SUFFIX = '.backup'
 ARCHIVE_SUFFIX = '.archive'
 
 CCPNMR_PREFIX = '_ccpNmrV3_'
+
+
+# General
+UNDEFINED_STRING = '<Undefined>'
+NONE_STRING = '<None>'

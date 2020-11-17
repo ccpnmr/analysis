@@ -36,12 +36,13 @@ import pathlib
 
 from collections import OrderedDict
 from traitlets import \
-    Long, Complex, CComplex, \
-    Unicode, Bytes, CUnicode, CBytes, ObjectName, DottedObjectName, \
+    Long, Complex, CComplex, Bytes, CBytes, \
+    ObjectName, DottedObjectName, \
     Instance, Type, This, ForwardDeclaredInstance, ForwardDeclaredType, ForwardDeclaredMixin, \
-    Enum, CaselessStrEnum, TCPAddress, CRegExp, Any, \
+    Enum, CaselessStrEnum, TCPAddress, CRegExp, \
     TraitType, default, validate, observe, Undefined, HasTraits
 
+from traitlets import Any as _Any
 from traitlets import Int as _Int
 from traitlets import CInt as _CInt
 from traitlets import Float as _Float
@@ -70,6 +71,12 @@ class _Ordered(object):
     def __init__(self):
         self._traitOrder = _Ordered._globalTraitOrder
         _Ordered._globalTraitOrder += 1
+
+
+class Any(_Any, _Ordered):
+    def __init__(self, *args, **kwargs):
+        _Any.__init__(self, *args, **kwargs)
+        _Ordered.__init__(self)
 
 
 class Int(_Int, _Ordered):

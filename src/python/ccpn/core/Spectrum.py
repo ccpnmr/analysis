@@ -72,6 +72,8 @@ from functools import partial
 import decorator
 
 from ccpn.util import Constants, Common
+from ccpn.framework import constants
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
@@ -87,6 +89,7 @@ from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.util.Path import Path, aPath
 from ccpn.util.Common import isIterable
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+from ccpn.core.lib.DataStore import dataUrlsDict
 
 # 2019010:ED test new matching
 # from ccpn.util.Common import axisCodeMapping
@@ -256,6 +259,7 @@ class Spectrum(AbstractWrapperObject):
         """
         string = '================= %s =================\n' % self
         string += 'path = %s\n' % self.filePath
+        string += 'dataFormat = %s\n' % self.dataFormat
         for cache in self._dataCaches:
             if hasattr(self, cache):
                 string += str(getattr(self, cache)) + '\n'
@@ -630,12 +634,23 @@ assignmentTolerances
 
     @property
     def filePath(self) -> Optional[str]:
-        """Absolute path to NMR data file."""
-        xx = self._wrappedData.dataStore
-        if xx:
-            return xx.fullPath
-        else:
-            return None
+        """Absolute path to NMR data file
+        """
+        # xx = self._wrappedData.dataStore
+        # if xx:
+        #     return xx.fullPath
+        # else:
+        #     return None
+        fPath = constants.UNDEFINED_STRING
+
+        apiDataStore = self._apiDataSource.dataStore
+        if apiDataStore and apiDataStore.dataLocationStore.name == 'standard':
+            # this fails on the first loading of V2 projects - ordering issue?
+            dataUrlName = apiDataStore.dataUrl.name
+            if dataUrlName in dataUrlsDict:
+                fPath = '%s/%s' % (dataUrlsDict[dataUrlName], apiDataStore.path)
+
+        return fPath
 
     @filePath.setter
     def filePath(self, value: str):
@@ -643,15 +658,7 @@ assignmentTolerances
         apiDataStore = self._wrappedData.dataStore
         if apiDataStore is None:
 
-            # # the spectrum does not have an attached file
-            # numPoints = [x.numPoints for x in self._wrappedData.sortedDataDims()]
-            # self._wrappedData.addDataStore(value, numPoints=numPoints)
-            #
-            # # need to save the file
-            # from ccpn.util.Hdf5 import convertDataToHdf5
-            # convertDataToHdf5(self, value)
-
-            raise ValueError("Spectrum is not stored, cannot change file path")
+            pass
 
         elif not value:
             raise ValueError("Spectrum file path cannot be set to None")
@@ -821,7 +828,8 @@ assignmentTolerances
         for FreqDataDims these are the points after transformation before cutting down.
 
         NB, changing the totalPointCount will *not* modify the resolution (or dwell time),
-        so the implied total width will change."""
+        so the implied total width will change.
+        """
         result = []
         for dataDim in self._wrappedData.sortedDataDims():
             if hasattr(dataDim, 'numPointsOrig'):
@@ -891,46 +899,6 @@ assignmentTolerances
     #
     #     for n, dataDimVal in enumerate(self._wrappedData.sortedDataDims()):
     #         pass
-
-        # from NMR.Experiment - createDataSource
-
-        # self: 'Experiment', name: str, numPoints: Sequence[int], sw: Sequence[float],
-        # refppm: Sequence[float], refpt: Sequence[float], dataStore: 'DataStore' = None,
-        # scale: float = 1.0, details:str = None, numPointsOrig:Sequence[int] = None,
-        # pointOffset: Sequence[int] = None, isComplex:Sequence[bool] = None,
-        # sampledValues: Sequence[Sequence[float]] = None,
-        # sampledErrors: Sequence[Sequence[float]] = None,
-        # ** additionalParameters) -> 'DataSource':
-
-        # if not numPointsOrig:
-        #     numPointsOrig = numPoints
-        #
-        # if not pointOffset:
-        #     pointOffset = (0,) * numDim
-        #
-        # if not isComplex:
-        #     isComplex = (False,) * numDim
-        #
-        # for n, expDim in enumerate(self.sortedExpDims()):
-        #
-        #     numPointsOrig = expDim.numPointsOrig
-        #     pointOffset = expDim
-        #     values = sampledValues[n] if sampledValues else None
-        #     if values:
-        #         errors = sampledErrors[n] if sampledErrors else None
-        #         sampledDataDim = spectrum.newSampledDataDim(dim=n + 1, numPoints=numPoints[n], expDim=expDim,
-        #                                                     isComplex=isComplex[n], pointValues=values, pointErrors=errors)
-        #     else:
-        #         freqDataDim = spectrum.newFreqDataDim(dim=n + 1, numPoints=numPoints[n],
-        #                                               isComplex=isComplex[n], numPointsOrig=numPointsOrig[n],
-        #                                               pointOffset=pointOffset[n],
-        #                                               valuePerPoint=sw[n] / float(numPoints[n]), expDim=expDim)
-        #         expDimRef = (expDim.findFirstExpDimRef(measurementType='Shift') or expDim.findFirstExpDimRef())
-        #         if expDimRef:
-        #             freqDataDim.newDataDimRef(refPoint=refpt[n], refValue=refppm[n], expDimRef=expDimRef)
-
-
-                # dataDim classnames are FidDataDim, FreqDataDim, SampledDataDim
 
     @property
     @_includeInDimensionalCopy
@@ -2565,6 +2533,7 @@ assignmentTolerances
     @cached(_PLANEDATACACHE, maxItems=64, debug=False)
     def _getPlaneData(self, position, xDim: int, yDim: int):
         "Internal routine to improve caching: Calling routine set the positions of xDim, yDim to 1 "
+        # Calls Nmr.DataSource.getPlaneData"
         return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
     @logCommand(get='self')
@@ -2614,8 +2583,8 @@ assignmentTolerances
 
         # check if we have something valid to return
         if result is None:
-            raise RuntimeError('Failed to get plane data along dimensions (%s,%s) at position %s' %
-                               (xDim, yDim, position))
+            raise RuntimeError('%s: Failed to get plane data along dimensions (%s,%s) at position %s' %
+                               (self, xDim, yDim, position))
 
         return result
 
@@ -3010,12 +2979,11 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
             i += 1
         name = '%s_%s' % (name, i)
 
+    # Try to determine data format from the path and intialise a dataSource instance with parsed parameters
     dataSource = checkPathForSpectrumFormats(path=_path)
     if dataSource is None:
         logger.warning('Invalid spectrum path "%s"' % path) # report the argument given
         return None
-
-    apiProject = self._wrappedData
 
 # Consolidating previous API calls:
 #   NmrProject.createExperiment
@@ -3024,21 +2992,15 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
 #
 # First creating the api data structures with minimal parameters and once in place updating all values
 
+    apiProject = self._wrappedData
+    apiUrl = apiProject.root.fetchDataUrl(dir)
+
+    urlPath = aPath(apiUrl.url.path)
+    relPath = _path.relative_to(urlPath)
+
     apiExperiment = apiProject.newExperiment(name=name,
                                              numDim=dataSource.dimensionCount,
                                             )
-    # Define the experiment dimensions
-    for n, expDim in enumerate(apiExperiment.sortedExpDims()):
-        expDim.isAcquisition = False
-        expDim.newExpDimRef(isotopeCodes=(dataSource.isotopeCodes[n],),
-                            axisCode=dataSource.axisCodes[n],
-                            sf=dataSource.spectrometerFrequencies[n],
-                            unit='ppm'
-                           )
-
-    apiUrl = apiProject.root.fetchDataUrl(dir)
-    urlPath = aPath(apiUrl.url.path)
-    relPath = _path.relative_to(urlPath)
 
     apiDataStore =  apiUrl.dataLocationStore.newBlockedBinaryMatrix(
                                dataUrl=apiUrl,
@@ -3054,8 +3016,18 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
                                                 numDim=dataSource.dimensionCount,
                                                 dataType='processed'
                                                 )
-    # Intialise the freq/time dimensions
+
+    # Intialise the freq/time dimensions; This seems a very complicated datastructure! (GWV)
+    # dataDim classnames are FidDataDim, FreqDataDim, SampledDataDim
     for n, expDim in enumerate(apiExperiment.sortedExpDims()):
+        expDim.isAcquisition = False  #(dataSource.aquisitionAxisCode == dataSource.axisCodes[n]),
+        expDimRef = expDim.newExpDimRef(
+                            isotopeCodes=(dataSource.isotopeCodes[n],),
+                            axisCode=dataSource.axisCodes[n],
+                            sf=dataSource.spectrometerFrequencies[n],
+                            unit='ppm'
+                           )
+
         _nPoints = dataSource.pointCounts[n]
         freqDataDim = apiDataSource.newFreqDataDim(dim=n+1, expDim=expDim,
                                                    numPoints=_nPoints,
@@ -3064,7 +3036,7 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
                                                    isComplex=dataSource.isComplex[n],
                                                    valuePerPoint=dataSource.spectralWidthsHz[n]/float(_nPoints)
                                                    )
-        expDimRef = (expDim.findFirstExpDimRef(measurementType='Shift') or expDim.findFirstExpDimRef())
+        # expDimRef = (expDim.findFirstExpDimRef(measurementType='Shift') or expDim.findFirstExpDimRef())
         if expDimRef:
             freqDataDim.newDataDimRef(expDimRef=expDimRef)
 

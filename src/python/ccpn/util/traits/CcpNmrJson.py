@@ -531,7 +531,8 @@ class CcpNmrJson(TraitBase):
         """
 
         # get all traits that need saving to json
-        traits = [constants.METADATA] + self.keys() if self.saveAllTraitsToJson else self.keys(saveToJson=lambda i: i)
+        traits = [constants.METADATA]
+        traits += self.keys() if self.saveAllTraitsToJson else self.keys(saveToJson=lambda i: i)
 
         # create a list of (trait, value) tuples
         dataList = []
@@ -552,7 +553,8 @@ class CcpNmrJson(TraitBase):
             return self
         # json file was saved as list of (trait, value) tuples
         try:
-            dataDict = AttributeDict(json.loads(string))
+            data = json.loads(string)
+            dataDict = dict(data)
         except json.JSONDecodeError:
             getLogger().warning('%s.fromJson: error decoding, retaining default values' % self.__class__.__name__)
             return self

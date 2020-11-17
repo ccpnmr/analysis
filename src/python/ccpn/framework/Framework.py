@@ -760,85 +760,90 @@ class Framework(NotifierBase):
         self.correctColours()
 
         # Initialise strips
-        for strip in project.strips:
-            GuiStrip._setupGuiStrip(project, strip._wrappedData)
+        try:
+            for strip in project.strips:
+                GuiStrip._setupGuiStrip(project, strip._wrappedData)
 
-            # if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:
-            #   strip.setZWidgets()
+                # if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:
+                #   strip.setZWidgets()
+        except Exception as e:
+            getLogger().warning('Impossible to restore GuiStrip %s' % e)
 
         # Initialise SpectrumViews
-        for spectrumDisplay in project.spectrumDisplays:
+        try:
+            for spectrumDisplay in project.spectrumDisplays:
 
-            strips = spectrumDisplay.orderedStrips
-            for si, strip in enumerate(strips):
+                strips = spectrumDisplay.orderedStrips
+                for si, strip in enumerate(strips):
 
-                # temporary to catch bad strips from ordering bug
-                if not strip:
-                    continue
+                    # temporary to catch bad strips from ordering bug
+                    if not strip:
+                        continue
 
-                # get the new tilePosition of the strip - tilePosition is always (x, y) relative to screen stripArrangement
-                #                                       changing screen arrangement does NOT require flipping tilePositions
-                #                                       i.e. Y = (across, down); X = (down, across)
-                #                                       - check delete/undo/redo strips
-                tilePosition = strip.tilePosition
+                    # get the new tilePosition of the strip - tilePosition is always (x, y) relative to screen stripArrangement
+                    #                                       changing screen arrangement does NOT require flipping tilePositions
+                    #                                       i.e. Y = (across, down); X = (down, across)
+                    #                                       - check delete/undo/redo strips
+                    tilePosition = strip.tilePosition
 
-                # move to the correct place in the widget - check stripDirection to display as row or column
-                if spectrumDisplay.stripArrangement == 'Y':
+                    # move to the correct place in the widget - check stripDirection to display as row or column
+                    if spectrumDisplay.stripArrangement == 'Y':
 
-                    if True:  # tilePosition is None:
-                        spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
-                        strip.tilePosition = (0, si)
+                        if True:  # tilePosition is None:
+                            spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
+                            strip.tilePosition = (0, si)
+                        else:
+                            spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[0], tilePosition[1])
+
+                    elif spectrumDisplay.stripArrangement == 'X':
+
+                        if True:  #tilePosition is None:
+                            spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
+                            strip.tilePosition = (0, si)
+                        else:
+                            spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[1], tilePosition[0])
+
+                    elif spectrumDisplay.stripArrangement == 'T':
+
+                        # NOTE:ED - Tiled plots not fully implemented yet
+                        getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(spectrumDisplay))
+
                     else:
-                        spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[0], tilePosition[1])
+                        getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(spectrumDisplay))
 
-                elif spectrumDisplay.stripArrangement == 'X':
+                    if not spectrumDisplay.isGrouped:
 
-                    if True:  #tilePosition is None:
-                        spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
-                        strip.tilePosition = (0, si)
+                        # spectra are not grouped
+                        specViews = strip.spectrumViews
+                        # for iSV, spectrumView in enumerate(strip.orderedSpectrumViews(includeDeleted=False)):
+
+                        for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):
+                            _createdSpectrumView({Notifier.OBJECT: spectrumView})
+                            # for peakList in spectrumView.spectrum.peakLists:
+                            #     strip.showPeaks(peakList)
+
                     else:
-                        spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[1], tilePosition[0])
+                        # spectra are grouped
+                        specViews = strip.spectrumViews
 
-                elif spectrumDisplay.stripArrangement == 'T':
+                        for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):
+                            _createdSpectrumView({Notifier.OBJECT: spectrumView})
 
-                    # NOTE:ED - Tiled plots not fully implemented yet
-                    getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(spectrumDisplay))
+                        spectrumDisplay.spectrumToolBar.hide()
+                        spectrumDisplay.spectrumGroupToolBar.show()
 
-                else:
-                    getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(spectrumDisplay))
+                        _spectrumGroups = [project.getByPid(pid) for pid in spectrumDisplay._getSpectrumGroups()]
 
-                if not spectrumDisplay.isGrouped:
+                        for group in _spectrumGroups:
+                            spectrumDisplay.spectrumGroupToolBar._forceAddAction(group)
 
-                    # spectra are not grouped
-                    specViews = strip.spectrumViews
-                    # for iSV, spectrumView in enumerate(strip.orderedSpectrumViews(includeDeleted=False)):
-
-                    for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):
-                        _createdSpectrumView({Notifier.OBJECT: spectrumView})
-                        # for peakList in spectrumView.spectrum.peakLists:
-                        #     strip.showPeaks(peakList)
-
-                else:
-                    # spectra are grouped
-                    specViews = strip.spectrumViews
-
-                    for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):
-                        _createdSpectrumView({Notifier.OBJECT: spectrumView})
-
-                    spectrumDisplay.spectrumToolBar.hide()
-                    spectrumDisplay.spectrumGroupToolBar.show()
-
-                    _spectrumGroups = [project.getByPid(pid) for pid in spectrumDisplay._getSpectrumGroups()]
-
-                    for group in _spectrumGroups:
-                        spectrumDisplay.spectrumGroupToolBar._forceAddAction(group)
-
-            # some of the strips may not be instantiated at this point
-            # resize the stripFrame to the spectrumDisplay - ready for first resize event
-            # spectrumDisplay.stripFrame.resize(spectrumDisplay.width() - 2, spectrumDisplay.stripFrame.height())
-            spectrumDisplay.showAxes(stretchValue=True, widths=True,
-                                     minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
-
+                # some of the strips may not be instantiated at this point
+                # resize the stripFrame to the spectrumDisplay - ready for first resize event
+                # spectrumDisplay.stripFrame.resize(spectrumDisplay.width() - 2, spectrumDisplay.stripFrame.height())
+                spectrumDisplay.showAxes(stretchValue=True, widths=True,
+                                         minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
+        except Exception as e:
+            getLogger().warning('Impossible to restore spectrumDisplay(s) %s' % e)
         #~~~~~~~~~~~~~~~~
         #
         # # Initialise SpectrumDisplays, SpectrumViews

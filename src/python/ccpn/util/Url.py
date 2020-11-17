@@ -51,8 +51,8 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
 
     # create the options list for creating an http connection
     options = {
-               # 'cert_reqs': 'CERT_REQUIRED',
-               # 'ca_certs' : certifi.where(),
+               'cert_reqs': 'CERT_REQUIRED',
+               'ca_certs' : certifi.where(),
                # 'timeout'  : urllib3.Timeout(connect=3.0, read=3.0),
                'retries'  : urllib3.Retry(1, redirect=False)
                }
@@ -76,7 +76,6 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
         verifySSL = proxySettings.get(VERIFYSSL)
         if verifySSL:
             options.update(cert_reqs=ssl.CERT_REQUIRED)
-            options.update(ca_certs=certifi.where())  # double check this
         else:
             options.update(cert_reqs=ssl.CERT_NONE)
             urllib3.disable_warnings()

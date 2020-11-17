@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 BAD_DOWNLOAD = 'Exception: '
+from ccpn.util.Logging import getLogger
 
 
 def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
@@ -49,15 +50,17 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     urllib3.contrib.pyopenssl.inject_into_urllib3()
 
     # create the options list for creating an http connection
-    options = {'cert_reqs': 'CERT_REQUIRED',
-               'ca_certs' : certifi.where(),
+    options = {
+               # 'cert_reqs': 'CERT_REQUIRED',
+               # 'ca_certs' : certifi.where(),
                # 'timeout'  : urllib3.Timeout(connect=3.0, read=3.0),
                'retries'  : urllib3.Retry(1, redirect=False)
                }
 
+
     # check whether a proxy is required
     from ccpn.util.UserPreferences import UserPreferences, USEPROXY, USEPROXYPASSWORD, PROXYADDRESS, \
-        PROXYPORT, PROXYUSERNAME, PROXYPASSWORD, USESYSTEMPROXY
+        PROXYPORT, PROXYUSERNAME, PROXYPASSWORD, USESYSTEMPROXY, VERIFYSSL
 
     def _getProxyIn(proxyDict):
         """Get the first occurrence of a proxy type in the supplied dict
@@ -69,6 +72,16 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
             if proxyUrl:
                 return proxyUrl
 
+    if proxySettings:
+        verifySSL = proxySettings.get(VERIFYSSL)
+        if verifySSL:
+            options.update(cert_reqs=ssl.CERT_REQUIRED)
+            options.update(ca_certs=certifi.where())  # double check this
+        else:
+            options.update(cert_reqs=ssl.CERT_NONE)
+            urllib3.disable_warnings()
+            getLogger().warn('SSL certificates validity check skipped.')
+
     if proxySettings and proxySettings.get(USEPROXY):
 
         # Use the user settings if set
@@ -77,7 +90,6 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
         proxyPort = proxySettings.get(PROXYPORT)
         proxyUsername = proxySettings.get(PROXYUSERNAME)
         proxyPassword = proxySettings.get(PROXYPASSWORD)
-
         if useProxyPassword:
             # grab the decode from the userPreferences
             _userPreferences = UserPreferences(readPreferences=False)
@@ -85,7 +97,6 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
             options.update({'headers': urllib3.make_headers(proxy_basic_auth='%s:%s' %
                                                                              (proxyUsername,
                                                                               _userPreferences.decodeValue(proxyPassword)))})
-
         proxyUrl = "http://%s:%s/" % (str(proxyAddress), str(proxyPort)) if proxyAddress else None
 
     else:
@@ -127,12 +138,14 @@ def fetchUrl(url, data=None, headers=None, timeout=2.0, proxySettings=None, deco
         _userPreferences = UserPreferences(readPreferences=True)
         if _userPreferences.proxyDefined:
             proxyNames = ['useProxy', 'proxyAddress', 'proxyPort', 'useProxyPassword',
-                          'proxyUsername', 'proxyPassword']
+                          'proxyUsername', 'proxyPassword', 'verifySSL']
             proxySettings = {}
             for name in proxyNames:
                 proxySettings[name] = _userPreferences._getPreferencesParameter(name)
 
-    response = fetchHttpResponse('POST', url, data=data, headers=headers, proxySettings=proxySettings)
+
+    response = fetchHttpResponse('POST', url, data=data, headers=headers,
+                                 proxySettings=proxySettings)
 
     # if response:
     #     ll = len(response.data)
@@ -170,3 +183,25 @@ def checkInternetConnection():
 
     except Exception as es:
         return False
+
+
+## testing
+if __name__ == '__main__':
+    from ccpn.util.UserPreferences import UserPreferences, USEPROXY, USEPROXYPASSWORD, PROXYADDRESS, \
+        PROXYPORT, PROXYUSERNAME, PROXYPASSWORD, USESYSTEMPROXY
+
+    # bad urls certificates from  https://badssl.com/dashboard/
+    expiredCertificate = 'https://expired.badssl.com'
+    wrongHost ='https://wrong.host.badssl.com'
+    proxySettings = {
+                    # USEPROXYPASSWORD:'admin',
+                    PROXYADDRESS:'187.9.212.50',
+                    PROXYPORT:'3128',
+                    PROXYUSERNAME:'',
+                    # PROXYPASSWORD:'admin',
+                    USEPROXY:True
+                    }
+
+
+    print(fetchHttpResponse('Post', expiredCertificate, proxySettings=proxySettings))
+    # fetchUrl(wrongHost)

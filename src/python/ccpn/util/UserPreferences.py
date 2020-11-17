@@ -36,6 +36,7 @@ PROXYADDRESS = 'proxyAddress'
 PROXYPORT = 'proxyPort'
 PROXYUSERNAME = 'proxyUsername'
 PROXYPASSWORD = 'proxyPassword'
+VERIFYSSL = 'verifySSL'
 
 
 def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):

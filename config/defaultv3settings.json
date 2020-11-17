@@ -97,6 +97,7 @@
         "zPlaneNavigationMode"                 : 0
     },
     "proxySettings"    : {
+        "verifySSL"        : true,
         "useProxy"         : false,
         "useSystemProxy"   : false,
         "proxyAddress"     : "",

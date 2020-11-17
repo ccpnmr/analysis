@@ -449,7 +449,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
-
+        row += 1
+        self.verifySSLLabel = Label(parent, text="Verify SSL certificates", grid=(row, 0))
+        self.verifySSLBox = CheckBox(parent, grid=(row, 1))
+        self.verifySSLBox.toggled.connect(self._queueSetVerifySSL)
         row += 1
         self.useProxyLabel = Label(parent, text="Use Proxy Settings", grid=(row, 0))
         self.useProxyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.proxySettings.useProxy)
@@ -620,7 +623,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.userPipesPath.setText(str(userPipesPath))
 
         self.useProjectPathBox.setChecked(self.preferences.general.useProjectPath)
-
+        self.verifySSLBox.setChecked(self.preferences.proxySettings.verifySSL)
         self.useProxyBox.setChecked(self.preferences.proxySettings.useProxy)
         self.proxyAddressData.setText(str(self.preferences.proxySettings.proxyAddress))
         self.proxyPortData.setText(str(self.preferences.proxySettings.proxyPort))
@@ -2028,6 +2031,15 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # except:
         #     return
         self.preferences.general.volumeIntegralLimit = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetVerifySSL(self):
+        value = self.verifySSLBox.get()
+        if value != self.preferences.proxySettings.verifySSL:
+            return partial(self._setVerifySSL, value)
+
+    def _setVerifySSL(self, value):
+        self.preferences.proxySettings.verifySSL = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetUseProxy(self):

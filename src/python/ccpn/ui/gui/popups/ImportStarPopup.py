@@ -107,7 +107,7 @@ recognisedValues = [assigned_chem_shift_list, shift_set]
 defaultAxesCodesMap = od([                           #                   replace with the atom and axes of interest
                             ("N", "N"),
                             ("H", "H"),
-                            ("CA", "C"),
+                            # ("CA", "C"),
                             ])
 
 

@@ -76,6 +76,9 @@ InfoMessage = """
            The residue 1 MET will be skipped as only the Atom_ID H is found.  
             
     """
+DeprecationWarningMessageTitle = 'Simulate Peaks Warning'
+DeprecationWarningMessage = 'This is currently an experimental feature and it will be deprecated in a future release.' \
+                            '\nA fully dedicated module will be available instead.'
 
 
 #######################################
@@ -107,7 +110,6 @@ recognisedValues = [assigned_chem_shift_list, shift_set]
 defaultAxesCodesMap = od([                           #                   replace with the atom and axes of interest
                             ("N", "N"),
                             ("H", "H"),
-                            # ("CA", "C"),
                             ])
 
 
@@ -211,6 +213,7 @@ class StarImporterPopup(CcpnDialog):
         self.directory = directory or ''
         self.project = project
         self.dataBlock = dataBlock or {}
+        self._deprecationMessageShown = False
         row = 0
         bmrbFileLabel = Label(self, text="BMRB File", grid=(row, 0))
         self.fileName = LineEdit(self, text=os.path.basename(self.bmrbFilePath), grid=(row, 1))
@@ -237,7 +240,7 @@ class StarImporterPopup(CcpnDialog):
         row += 1
         self.buttonList = ButtonList(self, ['Info','Cancel', 'Import'], [self._showInfo, self.reject, self._okButton], grid=(row, 1))
 
-        self._showMapLabel(False)
+        self._showMapLabel(False, False)
 
     def _limititedFunctionalities(self):
         self.treeView._uncheckAll()
@@ -249,8 +252,12 @@ class StarImporterPopup(CcpnDialog):
                 chemicalShiftListOnly.append(i)
         self.treeView.selectObjects(chemicalShiftListOnly)
 
-    def _showMapLabel(self, value):
+    def _showMapLabel(self, value, _showWarning=True):
         self._togleVisibility(self.dynamicsWidgets, value)
+
+        if not self._deprecationMessageShown and _showWarning:
+            showWarning(DeprecationWarningMessageTitle, DeprecationWarningMessage)
+            self._deprecationMessageShown = True
 
     def _togleVisibility(self, ll:list=[], value:bool=True):
         for l in ll:

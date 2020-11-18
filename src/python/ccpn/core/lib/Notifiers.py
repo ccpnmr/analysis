@@ -49,8 +49,6 @@ from itertools import permutations
 from ccpn.util.Logging import getLogger
 
 
-logger = getLogger()
-
 DEBUG = False
 
 
@@ -337,6 +335,7 @@ class Notifier(NotifierABC):
         """
         wrapper, accommodating the different triggers before firing the callback
         """
+        logger = getLogger()
 
         if not self.isRegistered():
             logger.warning('Triggering unregistered notifier %s' % self)

@@ -2206,8 +2206,11 @@ class Framework(NotifierBase):
         else:
             from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
 
-            popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
-            popup.exec_()
+            try:
+                popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
+                popup.exec_()
+            except Exception as es:
+                raise es
 
     def showPeakPick1DPopup(self):
         """

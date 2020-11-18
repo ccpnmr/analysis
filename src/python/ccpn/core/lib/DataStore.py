@@ -34,7 +34,7 @@ import os, sys
 from ccpn.util.Path import aPath, Path
 from ccpn.framework import constants
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
-from ccpn.util.traits.CcpNmrTraits import Unicode, Any, CPath
+from ccpn.util.traits.CcpNmrTraits import Unicode, Any, CPath, Bool
 
 from ccpn.framework.Application import getApplication
 
@@ -57,16 +57,16 @@ dataUrlsDict = {
 }
 
 
-def getDataStores(project):
-    """
-    Return a list of DataStore objects corresponding to the various spectrum files in project
-
-    """
-    # dataUrls = [url for store in project._wrappedData.root.sortedDataLocationStores()
-    #                     for url in store.sortedDataUrls()]
-    # dataStores = [DataStore(s) for url in dataUrls for s in url.sortedDataStores()]
-    dataStores = [DataStore.newFromSpectrum(s) for s in project.spectra]
-    return dataStores
+# def getDataStores(project):
+#     """
+#     Return a list of DataStore objects corresponding to the various spectrum files in project
+#
+#     """
+#     # dataUrls = [url for store in project._wrappedData.root.sortedDataLocationStores()
+#     #                     for url in store.sortedDataUrls()]
+#     # dataStores = [DataStore(s) for url in dataUrls for s in url.sortedDataStores()]
+#     dataStores = [DataStore.newFromSpectrum(s) for s in project.spectra]
+#     return dataStores
 
 
 class DataStore(CcpNmrJson):
@@ -80,7 +80,10 @@ class DataStore(CcpNmrJson):
 
     version = 1.0
 
+    _path = CPath(allow_none=True, default_value=None).tag(saveToJson=True)
     spectrum = Any(allow_none=True, default_value=None).tag(saveToJson=False)
+    expandData = Bool(default_value=True).tag(saveToJson=False)
+    autoRedirect = Bool(default_value=False).tag(saveToJson=False)
 
     # api dataStore
     apiDataStore = Any(allow_none=True, default_value=None).tag(saveToJson=False)
@@ -88,6 +91,7 @@ class DataStore(CcpNmrJson):
     apiDataStoreDir = Unicode(allow_none=True, default_value=None).tag(saveToJson=True)
     apiDataStorePath = Unicode(allow_none=True, default_value=None).tag(saveToJson=True)
 
+    # Redirection paths
     insidePath = CPath(allow_none=True, default_value=None).tag(saveToJson=True,
                                                                 identifier=INSIDE_INDENTIFIER,
                                                                 apiName=INSIDE_DATAURL_NAME)
@@ -98,85 +102,91 @@ class DataStore(CcpNmrJson):
                                                               identifier=DATA_INDENTIFIER,
                                                               apiName=DATA_DATAURL_NAME)
 
-    _path = CPath(allow_none=True, default_value=None).tag(saveToJson=True)
 
-    def __init__(self, expandData=True, autoRedirect=False):
+    def __init__(self, spectrum=None, expandData=True, autoRedirect=False):
         """expandData: optionally expand $DATA to home directory if not defined
         autoRedirect: optionally try to redefine path into $DATA, $ALONGSIDE, $INSIDE redirections
         """
-
         super().__init__()
+        self.spectrum = spectrum
         self.expandData = expandData
         self.autoRedirect = autoRedirect
-        self._path = None  # Bit redundant, as the trailet guarantees this too
+        
+        if spectrum is not None:
+            self._importFromSpectrum(spectrum)
 
     @classmethod
-    def newFromSpectrum(cls, spectrum):
+    def newFromPath(cls, path, expandData=True, autoRedirect=False):
+        """Create and return a new instance from path
+        """
+        instance = cls(expandData=expandData, autoRedirect=autoRedirect)
+        instance.path = path
+        return instance
+
+    def _importFromSpectrum(self, spectrum):
+        """Restore state from spectrum, either from internal parameter store or from api-dataStores
+        Returns self
+        """
         if spectrum is None:
             raise ValueError('Invalid spectrum "%s"' % spectrum)
 
-        if spectrum._hasInternalParameter(cls.__name__):
-            instance = cls()
-            instance.spectrum = spectrum
-            instance._restoreInternal()
+        if spectrum._hasInternalParameter(self.__class__.__name__):
+            self.spectrum = spectrum
+            self._restoreInternal()
         else:
-            instance = cls.newFromApiSpectrum(spectrum._wrappedData)
-            instance.spectrum = spectrum
-            instance._saveInternal()
+            self._restoreFromApiSpectrum(spectrum._wrappedData)
+            self.spectrum = spectrum
+            self._saveInternal()
 
-        return instance
+        return self
 
     def _saveInternal(self):
-        "Save into spectrum internal parameter store"
+        """Save into spectrum internal parameter store
+        CCPNINTERNAL: e.g. _newSpectrum
+        """
         if self.spectrum is None:
             raise RuntimeError('%s._saveInternal: spectrum not defined' % self.__class__.__name__)
         jsonData = self.toJson()
         self.spectrum._setInternalParameter(self.__class__.__name__, jsonData)
 
     def _restoreInternal(self):
-        "Restore from spectrum internal parameter store"
+        """Restore from spectrum internal parameter store
+        CCPNINTERNAL: e.g. _newSpectrum
+        """
         if self.spectrum is None:
             raise RuntimeError('%s._restoreInternal: spectrum not defined' % self.__class__.__name__)
         jsonData = self.spectrum._getInternalParameter(self.__class__.__name__)
         self.fromJson(jsonData)
 
-    @classmethod
-    def newFromApiSpectrum(cls, apiSpectrum):
+    def _restoreFromApiSpectrum(self, apiSpectrum):
         """This routine implements the extraction from the old storage mechanism (using api DataStores).
-        Return an DataStore instance
+        Returns self
         """
         if apiSpectrum is None:
             raise ValueError('Invalid spectrum "%s"' % apiSpectrum)
 
-        instance = cls()
-        instance.apiDataStore = apiSpectrum.dataStore
+        self.apiDataStore = apiSpectrum.dataStore
 
-        if instance.apiDataStore is not None:
-            instance.apiDataStoreName = instance.apiDataStore.dataUrl.name
-            instance.apiDataStoreDir = instance.apiDataStore.dataUrl.url.path
-            instance.apiDataStorePath = instance.apiDataStore.path
+        if self.apiDataStore is not None:
+            self.apiDataStoreName = self.apiDataStore.dataUrl.name
+            self.apiDataStoreDir = self.apiDataStore.dataUrl.url.path
+            self.apiDataStorePath = self.apiDataStore.path
 
             # Encode the different dataStores
-            if instance.apiDataStoreName in dataUrlsDict:
-                instance._path = os.path.join(dataUrlsDict[instance.apiDataStoreName], instance.apiDataStorePath)
+            if self.apiDataStoreName in dataUrlsDict:
+                self._path = os.path.join(dataUrlsDict[self.apiDataStoreName], self.apiDataStorePath)
             else:
-                instance._path = os.path.join(instance.apiDataStoreDir, instance.apiDataStorePath)
+                self._path = os.path.join(self.apiDataStoreDir, self.apiDataStorePath)
 
-        return instance
+        return self
 
     def _setPaths(self):
-        """Set paths and return a list of (identifier, path) tuples
-        optionally expand $DATA to home directory if not defined
+        """Set redirection paths and return a list of (identifier, path) tuples
+        optionally (depending on expandData flag) expand $DATA to home directory if not defined
         """
-        application = getApplication()
-
-        dataPath = application.preferences.general.get('dataPath')
-        if (dataPath is None or len(dataPath) == 0) and self.expandData:
-            self.dataPath = Path.home()
-        else:
-            self.dataPath = Path(dataPath)
-        self.insidePath = Path(application.project.path)
-        self.alongsidePath = self.insidePath.parent
+        self.dataPath = getDataPath()
+        self.insidePath = getInsidePath()
+        self.alongsidePath = getAlongsidePath()
 
         result = [ (INSIDE_INDENTIFIER, self.insidePath),
                    (ALONGSIDE_INDENTIFIER, self.alongsidePath),
@@ -228,7 +238,8 @@ class DataStore(CcpNmrJson):
         if value is not None and self.autoRedirect:
             value = self.redirectPath(value)
         self._path = value
-        self._saveInternal()
+        if self.spectrum is not None:
+            self._saveInternal()
 
     def exists(self):
         """Return True if self.path exists
@@ -244,85 +255,44 @@ class DataStore(CcpNmrJson):
     __repr__ = __str__
 
 
+def _getPathFromApiStore(storeName):
+    """Return path associated with storeName
+    """
+    if storeName not in dataUrlsDict.keys():
+        raise RuntimeError('_getPathFromApiStore: invalid storeName "%s"' %storeName)
 
-# class DataStore2(object):
-#     """
-#     This class wraps an api DataStore and allows for inplementation of the insideData, remoteData,
-#     alongSideData etc.
-#     """
-#
-#     def __init__(self, spectrum):
-#         if spectrum is None or not isinstance(spectrum, Spectrum):
-#             raise ValueError('Invalid spectrum "%s"' % spectrum)
-#         self.spectrum = spectrum
-#
-#     @property
-#     def apiDataStore(self):
-#         "Return apiDataStore or None if does not exist"
-#         return self.spectrum._wrappedData.dataStore
-#
-#     @apiDataStore.setter
-#     def apiDataStore(self, value):
-#         self.spectrum._wrappedData.dataStore = value
-#
-#     @property
-#     def aPath(self):
-#         """Return aPath instance of self, decoded for insideData, remoteData, alongSideData
-#         redirections
-#         """
-#         if self.apiDataStore is None:
-#             return aPath(constants.UNDEFINED_STRING)
-#
-#         _storeName, _storePath, _path = self.getValues()
-#         return aPath(_storePath) / _path
-#
-#     @property
-#     def path(self):
-#         """Return a string representation of self, encoded for insideData, remoteData, alongSideData
-#         """
-#         if self.apiDataStore is None:
-#             return aPath(constants.UNDEFINED_STRING)
-#
-#         _storeName, _storePath, _path = self.getValues()
-#         if _storeName in constants.dataUrlsDict:
-#             return os.path.join(constants.dataUrlsDict[_storeName], _path)
-#         else:
-#             return os.path.join(_storePath, _path)
-#
-#     # @path.setter
-#     # def path(self, value):
-#     #     """Set path to value; None makes it undefined
-#     #     """
-#     #     _storeName, _storePath, _path = self.getValues()
-#     #     self.apiDataStore.delete()
-#     #
-#     #     if value is None:
-#     #         self.apiDataStore = None
-#     #         return
-#     #
-#     #     apiUrl = self.spectrum._wrappedData.root.fetchDataUrl(value)
-#
-#
-#     def getValues(self):
-#         """Return triple (storeName, storePath, itemPath) or (None, None, <Undefined>) in case there is
-#         no valid datastore
-#         """
-#         if self.apiDataStore is None:
-#             return (None, None, constants.UNDEFINED_STRING)
-#
-#         return (self.apiDataStore.dataUrl.name,
-#                 self.apiDataStore.dataUrl.url.path,
-#                 self.apiDataStore.path)
-#
-#     def exists(self):
-#         """Return True if dataStore path exists
-#         """
-#         if self.apiDataStore is None:
-#             return False
-#         else:
-#             return self.aPath.exists()
-#
-#     def __str__(self):
-#         return '<%s: %s>' % (self.__class__.__name__, self.path)
-#
-#     __repr__ = __str__
+    project = getApplication().project
+    if project is None:
+        raise RuntimeError('_getPathFromApiStore: undefined project')
+
+    dataUrl = project._apiNmrProject.root.findFirstDataLocationStore(
+                name='standard').findFirstDataUrl(name=DATA_DATAURL_NAME)
+    path = dataUrl.url.dataLocation
+    return path
+
+
+def getDataPath(expandDataPath=False):
+    """Return the path corresponding to $DATA
+    Optionally expand to user home directory if it None or has len==0
+    returns aPath instance
+    """
+    path = _getPathFromApiStore(DATA_DATAURL_NAME)
+    if (path is None or len(path) == 0) and expandDataPath:
+        path = Path.home()
+    return aPath(path)
+
+
+def getInsidePath():
+    """Return the path corresponding to $INSIDE
+    returns aPath instance
+    """
+    # path = _getPathFromApiStore(INSIDE_DATAURL_NAME) Incorrect GWV??
+    path = getApplication().project.path
+    return aPath(path)
+
+
+def getAlongsidePath():
+    """Return the path corresponding to $ALONGSIDE
+    returns aPath instance
+    """
+    return getInsidePath().parent

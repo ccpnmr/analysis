@@ -4,6 +4,8 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+from ccpn.core.lib.DataStore import DataStore
+
 __copyright__ = ""
 __credits__ = ""
 __licence__ = ("")
@@ -27,6 +29,12 @@ import os
 from functools import partial
 from PyQt5 import QtWidgets, QtGui
 from ccpn.core.lib import Util as ccpnUtil
+from ccpn.util.Path import aPath, Path
+from ccpn.util.Logging import getLogger
+
+from ccpn.framework.Application import getApplication
+
+
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
@@ -34,7 +42,6 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -60,24 +67,15 @@ class SpectrumValidator(QtGui.QValidator):
         self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
 
     def validate(self, p_str, p_int):
+
         if self.validationType != 'exists':
             raise NotImplemented('%s only checks that the path exists', self.__class__.__name__)
-        filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, self.spectrum, p_str.strip())
 
         palette = self.parent().palette()
 
-        if os.path.exists(filePath):
-            if filePath == self.spectrum.filePath:
-                palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)
-            else:
-                from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
-
-                dataType, subType, usePath = ioFormats.analyseUrl(filePath)
-                if dataType == 'Spectrum':
-                    palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)
-                else:
-                    palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
-
+        ds = DataStore.newFromPath(p_str, expandData=False, autoRedirect=False)
+        if ds.exists():
+            palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)
             state = QtGui.QValidator.Acceptable
         else:
             palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
@@ -106,22 +104,22 @@ class DataUrlValidator(QtGui.QValidator):
     def validate(self, p_str, p_int):
         if self.validationType != 'exists':
             raise NotImplemented('%s only checks that the path exists', self.__class__.__name__)
-        # filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, self.spectrum, p_str.strip())
-        filePath = p_str.strip()
 
+        filePath = aPath(p_str.strip())
         palette = self.parent().palette()
 
-        if os.path.isdir(filePath):
+        if filePath.exists() and filePath.is_dir():
 
-            # validate dataStores
-            localStores = [store for store in self.dataUrl.sortedDataStores()]
-            for store in self.dataUrl.sortedDataStores():
-                if not os.path.exists(os.path.join(filePath, store.path)):
-                    palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
-                    break
-            else:
-                palette.setColor(QtGui.QPalette.Base, self.baseColour)
+            # # validate dataStores
+            # localStores = [store for store in self.dataUrl.sortedDataStores()]
+            # for store in self.dataUrl.sortedDataStores():
+            #     if not os.path.exists(os.path.join(filePath, store.path)):
+            #         palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
+            #         break
+            # else:
+            #     palette.setColor(QtGui.QPalette.Base, self.baseColour)
 
+            palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)
             state = QtGui.QValidator.Acceptable                                 # entry is valid
         else:
             palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
@@ -137,6 +135,126 @@ class DataUrlValidator(QtGui.QValidator):
 
     def resetCheck(self):
         self.validate(self.parent().text(), 0)
+
+
+class PathRowABC(object):
+    """Implements all functionality for a row with label, text and button to select a file path
+    """
+
+    validator = None  # Requires subclassing
+    dialogFileMode = 1
+
+    def __init__(self, topWidget, labelText, obj, enabled=True):
+        """
+        :param parent:
+        :param labelText:
+        :param row:
+        :param obj: object being displayed
+        :param validator:
+        """
+        self.topWidget = topWidget
+        self.labelText = labelText
+        self.obj = obj
+        self.enabled = enabled
+        self.row= None  # Undefined
+
+    def addRow(self, widget, row):
+        """Add the row to widget
+        returns self
+        """
+        self.row = row
+        self.labelWidget = Label(widget, text=self.labelText, grid=(row, 0))
+        self.dataWidget = LineEdit(widget, textAlignment='left', grid=(row, 1))
+
+        if self.enabled:
+            self.dataWidget.setValidator(self.validator(self.obj, parent=self.dataWidget))
+            self.dataWidget.textEdited.connect(self.setPath)
+        else:
+            # set to italic/grey
+            oldFont = self.dataWidget.font()
+            oldFont.setItalic(True)
+            self.dataWidget.setFont(oldFont)
+
+        self.buttonWidget = Button(widget, grid=(self.row, 2),
+                                   callback=self._getDialog,
+                                   icon='icons/directory')
+        self._setDataInWidget()
+
+        self.labelWidget.setEnabled(self.enabled)
+        self.dataWidget.setEnabled(self.enabled)
+        self.buttonWidget.setVisible(self.enabled)
+
+        return self
+
+    def _getDialog(self):
+
+        dialogPath = self.getDialogPath()
+        dialog = FileDialog(parent=self.topWidget, text='Select path', directory=dialogPath,
+                            fileMode=self.dialogFileMode, acceptMode=0)
+        choices = dialog.selectedFiles()
+        if len(choices) > 0:
+            newPath = choices[0]
+            self.setPath(newPath)
+            self._setDataInWidget()
+
+    def setPath(self, path):
+        "Set the path name of the object"
+        pass
+
+    def getPath(self) -> str:
+        "Get the path name from the object to edit"
+        pass
+
+    def getDialogPath(self) -> str:
+        "Get the directry path to start the selection"
+        return str(aPath(self.getPath()))
+
+    def _setDataInWidget(self):
+        path = self.getPath()
+        self.dataWidget.setText(path)
+        valid = self.dataWidget.validator()
+        if valid and hasattr(valid, 'resetCheck'):
+            self.dataWidget.validator().resetCheck()
+
+    def setVisible(self, visible):
+        "set visibilty of row"
+        self.labelWidget.setVisible(visible)
+        self.dataWidget.setVisible(visible)
+        self.buttonWidget.setVisible(visible)
+
+
+class SpectrumPathRow(PathRowABC):
+
+    validator = SpectrumValidator
+    dialogFileMode = 1
+
+    def getPath(self):
+        return self.obj.filePath
+
+    def setPath(self, path):
+        oldPath = self.getPath()
+        if oldPath != path:
+            self.obj.filePath = path
+
+    def getDialogPath(self) -> str:
+        "Get the directory path to start the selection"
+        return str(self.obj.path.parent)
+
+
+class UrlPathRow(PathRowABC):
+
+    validator = DataUrlValidator
+    dialogFileMode = 2
+
+    def getPath(self):
+        return self.obj.url.path
+
+    def setPath(self, path):
+        # self.obj.url.path = path not allowed?
+        oldPath = self.getPath()
+        if oldPath != path:
+            dataUrl = self.obj
+            dataUrl.url = dataUrl.url.clone(path=path)
 
 
 VALIDSPECTRA = 'valid'
@@ -163,7 +281,7 @@ class ValidateSpectraPopup(CcpnDialog):
         self.spectra = spectra
         self.defaultSelected = DEFAULTSELECTED.index(defaultSelected) if defaultSelected in DEFAULTSELECTED else DEFAULTSELECTED.index(ALLSPECTRA)
 
-        # I think there is a QT bug here - need to set a dummy button first otherwise a click is emitted, will investigate
+        # TODO I think there is a QT bug here - need to set a dummy button first otherwise a click is emitted, will investigate
         rogueButton = Button(self, grid=(0, 0))
         rogueButton.hide()
 
@@ -186,47 +304,27 @@ class ValidateSpectraPopup(CcpnDialog):
         scrollRow = 0
         self.dataUrlData = {}
 
-        standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
-        stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
-        urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
+        for urlName, label, enabled in [
+                ('remoteData',    '$DATA (user dataPath)', True),
+                ('insideData',    '$INSIDE              ', False),
+                ('alongsideData', '$ALONGSIDE           ', False),
+            ]:
 
-        self.allUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
-                        for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData')]
+            urls = self._findDataUrl(urlName)
+            if len(urls) > 0:
+                url = urls[0]
+                _row = UrlPathRow(topWidget=self, obj=url, labelText=label, enabled=enabled).addRow(
+                                  widget=self.dataUrlScrollAreaWidgetContents, row=scrollRow)
+                scrollRow += 1
+                self.dataUrlData[url] = _row
 
-        urls = self._findDataUrl('remoteData')
-        for url in urls:
-            label = self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=True)
-            label.setText('$DATA (user datapath)')
-            scrollRow += 1
-
-        urls = self._findDataUrl('insideData')
-        for url in urls:
-            label = self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=False)
-            label.setText('$INSIDE')
-            scrollRow += 1
-
-        urls = self._findDataUrl('alongsideData')
-        for url in urls:
-            label = self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=False)
-            label.setText('$ALONGSIDE')
-            scrollRow += 1
-
-        otherUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
-                     for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
-
-        for url in otherUrls:
-            # only show the urls that contain spectra
-            if url.sortedDataStores():
-                self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=True)
-            else:
-                self._addUrl(self.dataUrlScrollAreaWidgetContents, url, urlList=self.dataUrlData, scrollRow=scrollRow, enabled=False)
-            scrollRow += 1
-
-        # finalise the spectrumScrollArea
+        # finalise the dataUrlScrollArea
         Spacer(self.dataUrlScrollAreaWidgetContents, 2, 2,
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(scrollRow, 1), gridSpan=(1, 1))
         row += 1
+
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         self._spectrumFrame = Frame(self, setLayout=True, grid=(row, 0), gridSpan=(1, 3), showBorder=False)
 
@@ -260,34 +358,14 @@ class ValidateSpectraPopup(CcpnDialog):
         self.spectrumScrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
         specRow += 1
 
-        if not self.spectra:
-            self.spectra = self.project.spectra
-
         # populate the widget with a list of spectrum buttons and filepath buttons
         scrollRow = 0
-        self.spectrumData = {}
-
-        # standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
-        # stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
-        # urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
-        # [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores() for dataUrl in store.sortedDataUrls()]
-
-        for spectrum in self.spectra:
-            # if not spectrum.isValidPath:
-
-            pathLabel = Label(self.spectrumScrollAreaWidgetContents, text=spectrum.pid, grid=(scrollRow, 0))
-            pathData = LineEdit(self.spectrumScrollAreaWidgetContents, textAlignment='left', grid=(scrollRow, 1))
-            pathData.setValidator(SpectrumValidator(parent=pathData, spectrum=spectrum))
-            pathButton = Button(self.spectrumScrollAreaWidgetContents, grid=(scrollRow, 2), callback=partial(self._getSpectrumFile, spectrum),
-                                icon='icons/directory')
-
-            self.spectrumData[spectrum] = (pathData, pathButton, pathLabel)
-            self._setPathData(spectrum)
-
-            # pathData.editingFinished.connect(partial(self._setSpectrumPath, spectrum))
-            pathData.textEdited.connect(partial(self._setSpectrumPath, spectrum))
-
+        self.spectrumData = {}  # dict with (spectrum, SpectrumPathRow) tuples
+        for sp in self.project.spectra:
+            _row = SpectrumPathRow(topWidget=self, labelText=sp.pid, obj=sp, enabled=True).addRow(
+                                   widget=self.spectrumScrollAreaWidgetContents, row=scrollRow)
             scrollRow += 1
+            self.spectrumData[sp] = _row
 
         # finalise the spectrumScrollArea
         Spacer(self.spectrumScrollAreaWidgetContents, 2, 2,
@@ -324,158 +402,8 @@ class ValidateSpectraPopup(CcpnDialog):
         self._badUrls = False
         self._validateAll()
 
-    def _addUrl(self, widget, dataUrl, urlList, scrollRow, enabled=True):
-        """add a url row to the frame
-        """
-        urlLabel = Label(widget, text=dataUrl.name, grid=(scrollRow, 0))
-        urlData = LineEdit(widget, textAlignment='left', grid=(scrollRow, 1))
-
-        if enabled:
-            urlData.setValidator(DataUrlValidator(parent=urlData, dataUrl=dataUrl))
-        else:
-            # set to italic/grey
-            oldFont = urlData.font()
-            oldFont.setItalic(True)
-            urlData.setFont(oldFont)
-
-        urlButton = Button(widget, grid=(scrollRow, 2), callback=partial(self._getDataUrlDialog, dataUrl),
-                           icon='icons/directory')
-
-        urlList[dataUrl] = (urlData, None, urlLabel)
-        self._setUrlData(dataUrl)
-        urlData.setEnabled(enabled)
-        urlButton.setEnabled(enabled)
-        urlButton.setVisible(enabled)
-
-        # urlData.editingFinished.connect(partial(self._setDataUrlPath, dataUrl))
-        urlData.textEdited.connect(partial(self._setDataUrlPath, dataUrl))
-
-        return urlLabel
-
-    def _getDataUrlDialog(self, dataUrl):
-        """Get the path from the widget and call the open dialog.
-        """
-        if dataUrl and dataUrl in self.dataUrlData:
-            urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
-
-            newUrl = urlData.text().strip()
-
-            dialog = FileDialog(self, text='Select DataUrl File', directory=newUrl,
-                                fileMode=FileDialog.Directory, acceptMode=0,
-                                preferences=self.application.preferences.general)
-            directory = dialog.selectedFiles()
-            if len(directory) > 0:
-                newUrl = directory[0]
-
-                # newUrl cannot be '' otherwise the api cannot re-load the project
-                if newUrl and dataUrl.url.dataLocation != newUrl:
-                    dataUrl.url = dataUrl.url.clone(path=newUrl)
-
-                    # set the widget text
-                    # self._setUrlData(dataUrl)
-                    self._validateAll()
-
-    def _setDataUrlPath(self, dataUrl):
-        """Set the path from the widget by pressing enter
-        """
-        if dataUrl and dataUrl in self.dataUrlData:
-            urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
-
-            newUrl = urlData.text().strip()
-
-            # newUrl cannot be '' otherwise the api cannot re-load the project
-            if newUrl and dataUrl.url.dataLocation != newUrl:
-                dataUrl.url = dataUrl.url.clone(path=newUrl)
-
-                # set the widget text
-                # self._setUrlData(dataUrl)
-                self._validateAll()
-
-    def _setUrlData(self, dataUrl):
-        """Set the urlData widgets from the dataUrl.
-        """
-        urlData, urlButton, urlLabel = self.dataUrlData[dataUrl]
-        urlData.setText(dataUrl.url.dataLocation)
-        # if urlData.validator:
-        valid = urlData.validator()
-        if valid and hasattr(valid, 'resetCheck'):
-            urlData.validator().resetCheck()
-
-    def _getSpectrumFile(self, spectrum):
-        """Get the path from the widget and call the open dialog.
-        """
-        if spectrum and spectrum in self.spectrumData:
-            pathData, pathButton, pathLabel = self.spectrumData[spectrum]
-            filePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
-
-            dialog = FileDialog(self, text='Select Spectrum File', directory=filePath,
-                                fileMode=1, acceptMode=0,
-                                preferences=self.application.preferences.general)
-            directory = dialog.selectedFiles()
-            if len(directory) > 0:
-                newFilePath = directory[0]
-
-                # if spectrum.filePath != newFilePath:
-
-                from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
-
-                dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
-                if dataType == 'Spectrum':
-                    spectrum.filePath = newFilePath
-
-                # else:
-                #     getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
-
-                # set the widget text
-                # self._setPathData(spectrum)
-                self._validateAll()
-
-    def _setPathData(self, spectrum):
-        """Set the pathData widgets from the spectrum.
-        """
-        if spectrum and spectrum in self.spectrumData:
-            pathData, pathButton, pathLabel = self.spectrumData[spectrum]
-
-            apiDataStore = spectrum._apiDataSource.dataStore
-            if not apiDataStore:
-                pathData.setText('<None>')
-            elif apiDataStore.dataLocationStore.name == 'standard':
-
-                # this fails on the first loading of V2 projects - ordering issue?
-                dataUrlName = apiDataStore.dataUrl.name
-                if dataUrlName == 'insideData':
-                    pathData.setText('$INSIDE/%s' % apiDataStore.path)
-                elif dataUrlName == 'alongsideData':
-                    pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
-                elif dataUrlName == 'remoteData':
-                    pathData.setText('$DATA/%s' % apiDataStore.path)
-            else:
-                pathData.setText(apiDataStore.fullPath)
-
-            pathData.validator().resetCheck()
-
-    def _setSpectrumPath(self, spectrum):
-        """Set the path from the widget by pressing enter
-        """
-        if spectrum and spectrum in self.spectrumData:
-            pathData, pathButton, pathLabel = self.spectrumData[spectrum]
-            newFilePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
-
-            # if spectrum.filePath != newFilePath:
-
-            from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
-
-            dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
-            if dataType == 'Spectrum':
-                spectrum.filePath = newFilePath
-
-            # else:
-            #     getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
-
-            # set the widget text
-            # self._setPathData(spectrum)
-
     def _toggleValid(self):
+        "Toggle rows on or off depending on their state and the settings of the radio buttons"
         ind = self.showValid.getIndex()
         if ind == 0:
             valid = True
@@ -487,17 +415,9 @@ class ValidateSpectraPopup(CcpnDialog):
             valid = True
             allVisible = True
 
-        for spectrum in self.spectra:
+        for spectrum, row in self.spectrumData.items():
             visible = True if allVisible else (spectrum.isValidPath is valid)
-            if spectrum in self.spectrumData:
-                widgets = self.spectrumData[spectrum]
-                for widg in widgets:
-                    widg.setVisible(visible)
-
-    def _findDataPath(self, storeType):
-        dataUrl = self.project._apiNmrProject.root.findFirstDataLocationStore(
-                name='standard').findFirstDataUrl(name=storeType)
-        return dataUrl.url.dataLocation
+            row.setVisible(visible)
 
     def _findDataUrl(self, storeType):
         dataUrl = self.project._apiNmrProject.root.findFirstDataLocationStore(
@@ -511,13 +431,9 @@ class ValidateSpectraPopup(CcpnDialog):
         """Validate all the objects as the dataUrls may have changed.
         """
         self._badUrls = False
-        for url in self.allUrls:
-            self._setUrlData(url)
-            if not url.url.path:
+        for spectrum, row in self.spectrumData.items():
+            if not spectrum.isValidPath:
                 self._badUrls = True
-
-        for spectrum in self.spectra:
-            self._setPathData(spectrum)
 
         self.applyButtons.getButton('Close').setEnabled(not self._badUrls)
 

@@ -69,7 +69,6 @@ import os
 import sys
 from typing import Sequence, Tuple, Optional, Union
 from functools import partial
-import decorator
 
 from ccpn.util import Constants, Common
 from ccpn.framework import constants
@@ -89,7 +88,8 @@ from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.util.Path import Path, aPath
 from ccpn.util.Common import isIterable
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
-from ccpn.core.lib.DataStore import dataUrlsDict
+from ccpn.core.lib.DataStore import dataUrlsDict, DataStore
+from ccpn.core.lib.Notifiers import Notifier
 
 # 2019010:ED test new matching
 # from ccpn.util.Common import axisCodeMapping
@@ -98,9 +98,18 @@ from ccpn.util.Common import getAxisCodeMatch as axisCodeMapping
 from ccpn.util.Logging import getLogger
 
 from ccpnmodel.ccpncore.lib.Io import Formats
+
+# Dimensions
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FidDataDim as ApiFidDataDim
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FreqDataDim as ApiFreqDataDim
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SampledDataDim as ApiSampledDataDim
+
+DIMENSIONFID = 'Fid'
+DIMENSIONFREQUENCY = 'Frequency'
+DIMENSIONFREQ = 'Freq'
+DIMENSIONSAMPLED = 'Sampled'
+DIMENSIONTYPES = [DIMENSIONFID, DIMENSIONFREQUENCY, DIMENSIONSAMPLED]
+_DIMENSIONCLASSES = {DIMENSIONFID: ApiFidDataDim, DIMENSIONFREQUENCY: ApiFreqDataDim, DIMENSIONSAMPLED: ApiSampledDataDim}
 
 
 INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
@@ -117,18 +126,12 @@ MAXALIASINGRANGE = 3
 SPECTRUMSERIES = 'spectrumSeries'
 SPECTRUMSERIESVALUES = 'spectrumSeriesValues'
 
-DIMENSIONFID = 'Fid'
-DIMENSIONFREQUENCY = 'Frequency'
-DIMENSIONFREQ = 'Freq'
-DIMENSIONSAMPLED = 'Sampled'
-DIMENSIONTYPES = [DIMENSIONFID, DIMENSIONFREQUENCY, DIMENSIONSAMPLED]
-_DIMENSIONCLASSES = {DIMENSIONFID: ApiFidDataDim, DIMENSIONFREQUENCY: ApiFreqDataDim, DIMENSIONSAMPLED: ApiSampledDataDim}
 
 
 def _cumulativeArray(array):
     """ get total size and strides array.
-        NB assumes fastest moving index first """
-
+        NB assumes fastest moving index first
+    """
     ndim = len(array)
     cumul = ndim * [0]
     n = 1
@@ -143,7 +146,6 @@ def _arrayOfIndex(index, cumul):
     """ Get from 1D index to point address tuple
     NB assumes fastest moving index first
     """
-
     ndim = len(cumul)
     array = ndim * [0]
     for i in range(ndim - 1, -1, -1):
@@ -157,8 +159,8 @@ def _arrayOfIndex(index, cumul):
 # Decorators to define the attributes to be copied
 #=========================================================================================
 
+import decorator
 from ccpn.util.decorators import singleton
-
 
 @singleton
 class _includeInCopyList(list):
@@ -169,11 +171,11 @@ class _includeInCopyList(list):
     """
 
     def getNoneDimensional(self):
-        "return a list of one-dimensional attributes"
+        "return a list of one-dimensional attribute names"
         return [attr for attr, isNd in self if isNd == False]
 
     def getMultiDimensional(self):
-        "return a list of one-dimensional attributes"
+        "return a list of one-dimensional attribute names"
         return [attr for attr, isNd in self if isNd == True]
 
     def append(self, attribute, isMultidimensional):
@@ -238,74 +240,34 @@ class Spectrum(AbstractWrapperObject):
 
     def __init__(self, project: Project, wrappedData: Nmr.ShiftList):
 
+        super().__init__(project, wrappedData)
+
         self._intensities = None
         self._positions = None
 
+        self._dataStore = DataStore(spectrum=self)  # Reference to DataStore instance for filePath manipulation
         self._dataSource = None  # Reference to dataSource object corresponding to (binary) data file
-
-        super().__init__(project, wrappedData)
 
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
 
-        # Assure at least one peakList; due to the silly bottom-up intitalisation, this appears to
-        # result in duplicate peakLists
-        # if len(self.peakLists) == 0:
-        #     self.newPeakList()
+#        self.setNotifier(self.project, [Notifier.CREATE], self.className, self._postInit)
 
-    def _infoString(self, includeDimensions=False):
-        """Return info string about self, optionally including dimensional
-        parameters
-        """
-        string = '================= %s =================\n' % self
-        string += 'path = %s\n' % self.filePath
-        string += 'dataFormat = %s\n' % self.dataFormat
-        for cache in self._dataCaches:
-            if hasattr(self, cache):
-                string += str(getattr(self, cache)) + '\n'
-        string += 'dimensions = %s\n' % self.dimensionCount
-        string += 'sizes = (%s)\n' % ' x '.join([str(d) for d in self.pointCounts])
-        for attr in """
-scale 
-noiseLevel 
-experimentName
-""".split():
-            value = getattr(self, attr)
-            string += '%s = %s\n' % (attr, value)
-
-        if includeDimensions:
-            string += '\n'
-            for attr in """
-dimensions
-axisCodes
-pointCounts
-isComplex
-dimensionTypes
-isotopeCodes
-measurementTypes
-spectralWidths
-spectralWidthsHz
-spectrometerFrequencies
-referencePoints
-referenceValues
-axisUnits
-foldingModes
-windowFunctions
-lorentzianBroadenings
-gaussianBroadenings
-phases0
-phases1
-assignmentTolerances
-""".split():
-                values = getattr(self, attr)
-                string += '%-25s: %s\n' % (attr,
-                                           ' '.join(['%-20s' % str(v) for v in values])
-                                           )
-        return string
-
-    def printIt(self, includeDimensions=True):
-        "Print the info string"
-        print(self._infoString(includeDimensions))
+    # def _postInit(self):
+    #     """Silly bottom-up intitalisation; used with notifier on creation
+    #     """
+    #
+    #     pass
+    #     # Assure at least one peakList; due to the silly bottom-up intitalisation, this appears to
+    #     # result in duplicate peakLists
+    #     # if len(self.peakLists) == 0:
+    #     #     self.newPeakList()
+    #
+    # def _finaliseAction(self, action:str):
+    #     "Subclassed to allow for post inti actions on create"
+    #     super()._finaliseAction(action=action)
+    #     if action == 'create':
+    #         self._postInit()
 
     # CCPN properties
     @property
@@ -622,7 +584,8 @@ assignmentTolerances
     @property
     @_includeInCopy
     def experimentName(self) -> str:
-        """Common experiment type descriptor (May not be unique)."""
+        """Common experiment type descriptor (May not be unique).
+        """
         return self._wrappedData.experiment.name
 
     @experimentName.setter
@@ -634,55 +597,56 @@ assignmentTolerances
 
     @property
     def filePath(self) -> Optional[str]:
-        """Absolute path to NMR data file
+        """Path to NMR data file
         """
-        # xx = self._wrappedData.dataStore
-        # if xx:
-        #     return xx.fullPath
-        # else:
-        #     return None
-        fPath = constants.UNDEFINED_STRING
-
-        apiDataStore = self._apiDataSource.dataStore
-        if apiDataStore and apiDataStore.dataLocationStore.name == 'standard':
-            # this fails on the first loading of V2 projects - ordering issue?
-            dataUrlName = apiDataStore.dataUrl.name
-            if dataUrlName in dataUrlsDict:
-                fPath = '%s/%s' % (dataUrlsDict[dataUrlName], apiDataStore.path)
-
-        return fPath
+        if self._dataStore is None:
+            raise RuntimeError('dataStore not defined')
+        return str(self._dataStore.path)
 
     @filePath.setter
     def filePath(self, value: str):
 
-        apiDataStore = self._wrappedData.dataStore
-        if apiDataStore is None:
-
-            pass
-
-        elif not value:
-            raise ValueError("Spectrum file path cannot be set to None")
-
-        else:
-            dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-            apiDataStore.repointToDataUrl(dataUrl)
-            apiDataStore.path = value[len(dataUrl.url.path) + 1:]
-            self._clearCache()
+        # apiDataStore = self._wrappedData.dataStore
+        # if apiDataStore is None:
+        #
+        #     pass
+        #
+        # elif not value:
+        #     raise ValueError("Spectrum file path cannot be set to None")
+        #
+        # else:
+        #     dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
+        #     apiDataStore.repointToDataUrl(dataUrl)
+        #     apiDataStore.path = value[len(dataUrl.url.path) + 1:]
+        #     self._clearCache()
+        if self._dataStore is None:
+            raise RuntimeError('dataStore not defined')
+        self._dataStore.path = value
 
     @property
     def path(self):
         """return a Path instance defining the absolute path of filePath
         """
-        if self.filePath is None:
-            raise RuntimeError('filePath is not defined')
-        return aPath(self.filePath)
+        if self._dataStore is None:
+            raise RuntimeError('dataStore not defined')
+        return self._dataStore.aPath
 
     @property
     def isValidPath(self) -> bool:
         """Return true if the spectrum currently points to an existent file.
         (contents of the file are not checked)
         """
-        return self.path.exists()
+        # # Local  to prevent circular import
+        # from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import isValidSpectrumPath
+        #
+        # if self._dataStore is None:
+        #     raise RuntimeError('dataStore not defined')
+        #
+        # if self._dataStore._path is None:
+        #     return False
+        #
+        # return isValidSpectrumPath(path=self._dataStore.aPath)
+        return self._dataStore.exists()
 
     @property
     def dataFormat(self):
@@ -2766,6 +2730,7 @@ assignmentTolerances
         """Delete Spectrum"""
         with undoBlock():
             self._clearCache()
+            self.deleteAllNotifiers()
 
             # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
             specDisplays = []
@@ -2948,7 +2913,62 @@ assignmentTolerances
                                      foldingMode=foldingMode, axisUnit=axisUnit, referencePoint=referencePoint,
                                      referenceValue=referenceValue, **kwds)
 
+    #=========================================================================================
+    # Output, printing, etc
+    #=========================================================================================
+    def _infoString(self, includeDimensions=False):
+        """Return info string about self, optionally including dimensional
+        parameters
+        """
+        string = '================= %s =================\n' % self
+        string += 'path = %s\n' % self.filePath
+        string += 'dataFormat = %s\n' % self.dataFormat
+        for cache in self._dataCaches:
+            if hasattr(self, cache):
+                string += str(getattr(self, cache)) + '\n'
+        string += 'dimensions = %s\n' % self.dimensionCount
+        string += 'sizes = (%s)\n' % ' x '.join([str(d) for d in self.pointCounts])
+        for attr in """
+scale 
+noiseLevel 
+experimentName
+""".split():
+            value = getattr(self, attr)
+            string += '%s = %s\n' % (attr, value)
 
+        if includeDimensions:
+            string += '\n'
+            for attr in """
+dimensions
+axisCodes
+pointCounts
+isComplex
+dimensionTypes
+isotopeCodes
+measurementTypes
+spectralWidths
+spectralWidthsHz
+spectrometerFrequencies
+referencePoints
+referenceValues
+axisUnits
+foldingModes
+windowFunctions
+lorentzianBroadenings
+gaussianBroadenings
+phases0
+phases1
+assignmentTolerances
+""".split():
+                values = getattr(self, attr)
+                string += '%-25s: %s\n' % (attr,
+                                           ' '.join(['%-20s' % str(v) for v in values])
+                                           )
+        return string
+
+    def print(self, includeDimensions=True):
+        "Print the info string"
+        print(self._infoString(includeDimensions))
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
@@ -2959,6 +2979,7 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
     :return: Spectrum instance or None on error
     """
 
+    # Local  to prevent circular import
     from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
 
     #raise NotImplementedError("Not implemented. Use loadSpectrum instead")
@@ -3115,20 +3136,27 @@ def _createDummySpectrum(self: Project, axisCodes: Sequence[str], name=None,
 Project._apiNotifiers.extend(
         (
             ('_finaliseApiRename', {}, Nmr.DataSource._metaclass.qualifiedName(), 'setName'),
+
             ('_notifyRelatedApiObject', {'pathToObject': 'dataSources', 'action': 'change'},
-             Nmr.Experiment._metaclass.qualifiedName(), ''),
+                                         Nmr.Experiment._metaclass.qualifiedName(), ''),
+
             ('_notifyRelatedApiObject', {'pathToObject': 'dataSource', 'action': 'change'},
-             Nmr.AbstractDataDim._metaclass.qualifiedName(), ''),
+                                         Nmr.AbstractDataDim._metaclass.qualifiedName(), ''),
+
             ('_notifyRelatedApiObject', {'pathToObject': 'dataDim.dataSource', 'action': 'change'},
-             Nmr.DataDimRef._metaclass.qualifiedName(), ''),
+                                         Nmr.DataDimRef._metaclass.qualifiedName(), ''),
+
             ('_notifyRelatedApiObject', {'pathToObject': 'experiment.dataSources', 'action': 'change'},
-             Nmr.ExpDim._metaclass.qualifiedName(), ''),
+                                         Nmr.ExpDim._metaclass.qualifiedName(), ''),
+
             ('_notifyRelatedApiObject', {'pathToObject': 'expDim.experiment.dataSources', 'action': 'change'},
-             Nmr.ExpDimRef._metaclass.qualifiedName(), ''),
+                                         Nmr.ExpDimRef._metaclass.qualifiedName(), ''),
+
             ('_notifyRelatedApiObject', {'pathToObject': 'nmrDataSources', 'action': 'change'},
              DataLocation.AbstractDataStore._metaclass.qualifiedName(), ''),
-            )
+
         )
+)
 
 
 # Experiment:

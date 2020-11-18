@@ -105,11 +105,11 @@ class Project(AbstractWrapperObject):
     _className2Class = {}
 
     # List of CCPN pre-registered api notifiers
-    # Format is (wrapperFuncName, parameterDict, apiClassName, apiFuncName
-    # The function self.wrapperFuncName(**parameterDict) will be registered
-    # in the CCPN api notifier system
-    # api notifiers are set automatically,
-    # and are cleared by self._clearAllApiNotifiers and by self.delete()
+    # Format is (wrapperFuncName, parameterDict, apiClassName, apiFuncName)
+    #
+    # The function self.wrapperFuncName(**parameterDict) will be registered in the CCPN api notifier system
+    # api notifiers are set automatically, and are cleared by self._clearAllApiNotifiers and by self.delete()
+    #
     # RESTRICTED. Direct access in core classes ONLY
     _apiNotifiers = []
 

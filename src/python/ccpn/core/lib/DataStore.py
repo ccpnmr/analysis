@@ -100,11 +100,15 @@ class DataStore(CcpNmrJson):
 
     _path = CPath(allow_none=True, default_value=None).tag(saveToJson=True)
 
-    def __init__(self, path=None, expandData=True):
+    def __init__(self, path=None, expandData=True, autoRedirect=False):
+        """expandData: optionally expand $DATA to home directory if not defined
+        autoRedirect: optionally try to redefine path into $DATA, $ALONGSIDE, $INSIDE redirections
+        """
 
         super().__init__()
-        self.path = path
         self.expandData = expandData
+        self.autoRedirect = autoRedirect
+        self.path = path  # Needs to be last as we need self.autoRedirect to be defined
 
     @classmethod
     def newFromSpectrum(cls, spectrum):
@@ -179,11 +183,22 @@ class DataStore(CcpNmrJson):
         # decode the $DATA, $INSIDE $ALONGSIDE
         _path = Path(self._path)
         for d, p in self._setPaths():
-            if self._path.startswith(d):
+            if str(self._path).startswith(d):
                 _path = p / Path._from_parts(_path.parts[1:])
                 break
 
         return aPath(_path)
+
+    def reDirectPath(self, path):
+        """Redefine path into $DATA, $ALONGSIDE, $INSIDE redirections
+        return Path instance
+        """
+        _path = Path(path)
+        for d, p in self._setPaths():
+            if str(path).startswith(str(p)):
+                _path = Path(d) / _path.relative_to(p)
+                break
+        return _path
 
     @property
     def path(self):
@@ -198,13 +213,9 @@ class DataStore(CcpNmrJson):
     def path(self, value):
         """Set path to value; None makes it undefined
         """
+        if value is not None and self.autoRedirect:
+            value = self.reDirectPath(value)
         self._path = value
-
-        # _path = Path(value)
-        # for d, p in self._getPaths():
-        #     if value.startswith(str(p)):
-        #         _path = _path.relative_to(p)
-
 
     def exists(self):
         """Return True if self.path exists

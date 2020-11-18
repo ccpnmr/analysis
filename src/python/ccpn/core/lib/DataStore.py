@@ -100,7 +100,7 @@ class DataStore(CcpNmrJson):
 
     _path = CPath(allow_none=True, default_value=None).tag(saveToJson=True)
 
-    def __init__(self, path=None, expandData=True, autoRedirect=False):
+    def __init__(self, expandData=True, autoRedirect=False):
         """expandData: optionally expand $DATA to home directory if not defined
         autoRedirect: optionally try to redefine path into $DATA, $ALONGSIDE, $INSIDE redirections
         """
@@ -108,25 +108,37 @@ class DataStore(CcpNmrJson):
         super().__init__()
         self.expandData = expandData
         self.autoRedirect = autoRedirect
-        self.path = path  # Needs to be last as we need self.autoRedirect to be defined
+        self._path = None  # Bit redundant, as the trailet guarantees this too
 
     @classmethod
     def newFromSpectrum(cls, spectrum):
         if spectrum is None:
             raise ValueError('Invalid spectrum "%s"' % spectrum)
 
-        if not spectrum._hasInternalParameter(cls.__name__):
-            instance = cls.newFromApiSpectrum(spectrum._wrappedData)
-            jsonData = instance.toJson()
-            spectrum._setInternalParameter(cls.__name__, jsonData)
-        else:
+        if spectrum._hasInternalParameter(cls.__name__):
             instance = cls()
-            jsonData = spectrum._getInternalParameter(cls.__name__)
-            instance.fromJson(jsonData)
-
-        instance.spectrum = spectrum
+            instance.spectrum = spectrum
+            instance._restoreInternal()
+        else:
+            instance = cls.newFromApiSpectrum(spectrum._wrappedData)
+            instance.spectrum = spectrum
+            instance._saveInternal()
 
         return instance
+
+    def _saveInternal(self):
+        "Save into spectrum internal parameter store"
+        if self.spectrum is None:
+            raise RuntimeError('%s._saveInternal: spectrum not defined' % self.__class__.__name__)
+        jsonData = self.toJson()
+        self.spectrum._setInternalParameter(self.__class__.__name__, jsonData)
+
+    def _restoreInternal(self):
+        "Restore from spectrum internal parameter store"
+        if self.spectrum is None:
+            raise RuntimeError('%s._restoreInternal: spectrum not defined' % self.__class__.__name__)
+        jsonData = self.spectrum._getInternalParameter(self.__class__.__name__)
+        self.fromJson(jsonData)
 
     @classmethod
     def newFromApiSpectrum(cls, apiSpectrum):
@@ -189,7 +201,7 @@ class DataStore(CcpNmrJson):
 
         return aPath(_path)
 
-    def reDirectPath(self, path):
+    def redirectPath(self, path):
         """Redefine path into $DATA, $ALONGSIDE, $INSIDE redirections
         return Path instance
         """
@@ -214,8 +226,9 @@ class DataStore(CcpNmrJson):
         """Set path to value; None makes it undefined
         """
         if value is not None and self.autoRedirect:
-            value = self.reDirectPath(value)
+            value = self.redirectPath(value)
         self._path = value
+        self._saveInternal()
 
     def exists(self):
         """Return True if self.path exists

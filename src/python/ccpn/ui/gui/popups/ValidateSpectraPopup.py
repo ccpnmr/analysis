@@ -52,35 +52,34 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
 LINEEDITSMINIMUMWIDTH = 195
-VALIDROWCOLOUR = QtGui.QColor('palegreen')
 ACCEPTROWCOLOUR =  QtGui.QColor('darkseagreen')
 REJECTROWCOLOUR = QtGui.QColor('orange')
-INVALIDROWCOLOUR = QtGui.QColor('lightpink')
 
+class ValidatorABC(QtGui.QValidator):
 
-class SpectrumValidator(QtGui.QValidator):
+    VALIDROWCOLOUR = QtGui.QColor('palegreen')
+    INVALIDROWCOLOUR = QtGui.QColor('lightpink')
 
-    def __init__(self, spectrum, parent=None, validationType='exists'):
+    def __init__(self, obj, parent=None, validationType='exists'):
         QtGui.QValidator.__init__(self, parent=parent)
-        self.spectrum = spectrum
+        self.obj = obj
         self.validationType = validationType
         self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
-        self.isValid = True
+        self._isValid = True  # The result of the validator
 
     def validate(self, p_str, p_int):
 
         if self.validationType != 'exists':
             raise NotImplemented('%s only checks that the path exists', self.__class__.__name__)
 
-        ds = DataStore.newFromPath(p_str, expandData=False, autoRedirect=False)
-        self.isValid = ds.exists()
+        self._isValid = self.isValid(p_str.strip())
 
         palette = self.parent().palette()
-        if self.isValid:
-            palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)
+        if self._isValid:
+            palette.setColor(QtGui.QPalette.Base, self.VALIDROWCOLOUR)
             state = QtGui.QValidator.Acceptable
         else:
-            palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
+            palette.setColor(QtGui.QPalette.Base, self.INVALIDROWCOLOUR)
             state = QtGui.QValidator.Intermediate
         self.parent().setPalette(palette)
 
@@ -94,41 +93,25 @@ class SpectrumValidator(QtGui.QValidator):
     def resetCheck(self):
         self.validate(self.parent().text(), 0)
 
+    def isValid(self, value):
+        "return True is value is valid; should be subclassed"
+        raise NotImplementedError('Implement %s.isValid' % self.__class__.__name__)
 
-class DataUrlValidator(QtGui.QValidator):
 
-    def __init__(self, dataUrl, parent=None, validationType='exists'):
-        QtGui.QValidator.__init__(self, parent=parent)
-        self.dataUrl = dataUrl
-        self.validationType = validationType
-        self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
-        self.isValid = True
+class SpectrumValidator(ValidatorABC):
 
-    def validate(self, p_str, p_int):
-        if self.validationType != 'exists':
-            raise NotImplemented('%s only checks that the path exists', self.__class__.__name__)
+    def isValid(self, value):
+        "return True is value is valid"
+        ds = DataStore.newFromPath(value, expandData=False, autoRedirect=False)
+        return ds.exists()
 
-        filePath = aPath(p_str.strip())
-        self.isValid = filePath.exists() and filePath.is_dir()
 
-        palette = self.parent().palette()
-        if self.isValid:
-            palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)
-            state = QtGui.QValidator.Acceptable                                 # entry is valid
-        else:
-            palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
-            state = QtGui.QValidator.Intermediate                                   # entry is NOT valid, but can continue editing
-        self.parent().setPalette(palette)
+class DataUrlValidator(ValidatorABC):
 
-        return state, p_str, p_int
-
-    def clearValidCheck(self):
-        palette = self.parent().palette()
-        palette.setColor(QtGui.QPalette.Base, self.baseColour)
-        self.parent().setPalette(palette)
-
-    def resetCheck(self):
-        self.validate(self.parent().text(), 0)
+    def isValid(self, value):
+        "return True is value is valid"
+        filePath = aPath(value)
+        return filePath.exists() and filePath.is_dir()
 
 
 class PathRowABC(object):
@@ -225,7 +208,7 @@ class PathRowABC(object):
             self.dataWidget.validator()
             if hasattr(self.validator, 'resetCheck'):
                 self.validator.resetCheck()
-            self.isValid = self.validator.isValid
+            self.isValid = self.validator._isValid
         return self.isValid
 
     def setVisible(self, visible):

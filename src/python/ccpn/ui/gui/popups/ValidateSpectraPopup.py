@@ -65,16 +65,18 @@ class SpectrumValidator(QtGui.QValidator):
         self.spectrum = spectrum
         self.validationType = validationType
         self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
+        self.isValid = True
 
     def validate(self, p_str, p_int):
 
         if self.validationType != 'exists':
             raise NotImplemented('%s only checks that the path exists', self.__class__.__name__)
 
-        palette = self.parent().palette()
-
         ds = DataStore.newFromPath(p_str, expandData=False, autoRedirect=False)
-        if ds.exists():
+        self.isValid = ds.exists()
+
+        palette = self.parent().palette()
+        if self.isValid:
             palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)
             state = QtGui.QValidator.Acceptable
         else:
@@ -100,25 +102,17 @@ class DataUrlValidator(QtGui.QValidator):
         self.dataUrl = dataUrl
         self.validationType = validationType
         self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
+        self.isValid = True
 
     def validate(self, p_str, p_int):
         if self.validationType != 'exists':
             raise NotImplemented('%s only checks that the path exists', self.__class__.__name__)
 
         filePath = aPath(p_str.strip())
+        self.isValid = filePath.exists() and filePath.is_dir()
+
         palette = self.parent().palette()
-
-        if filePath.exists() and filePath.is_dir():
-
-            # # validate dataStores
-            # localStores = [store for store in self.dataUrl.sortedDataStores()]
-            # for store in self.dataUrl.sortedDataStores():
-            #     if not os.path.exists(os.path.join(filePath, store.path)):
-            #         palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
-            #         break
-            # else:
-            #     palette.setColor(QtGui.QPalette.Base, self.baseColour)
-
+        if self.isValid:
             palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)
             state = QtGui.QValidator.Acceptable                                 # entry is valid
         else:
@@ -141,22 +135,26 @@ class PathRowABC(object):
     """Implements all functionality for a row with label, text and button to select a file path
     """
 
-    validator = None  # Requires subclassing
+    validatorClass = None  # Requires subclassing
     dialogFileMode = 1
 
-    def __init__(self, topWidget, labelText, obj, enabled=True):
+    def __init__(self, topWidget, labelText, obj, enabled=True, callback=None):
         """
         :param parent:
         :param labelText:
         :param row:
         :param obj: object being displayed
-        :param validator:
+        :param callback: func(pathRow) is called when changing value of the dataWidget
         """
         self.topWidget = topWidget
         self.labelText = labelText
         self.obj = obj
         self.enabled = enabled
+        self.callback = callback
+
         self.row= None  # Undefined
+        self.isValid = True
+        self.validator = None
 
     def addRow(self, widget, row):
         """Add the row to widget
@@ -167,18 +165,18 @@ class PathRowABC(object):
         self.dataWidget = LineEdit(widget, textAlignment='left', grid=(row, 1))
 
         if self.enabled:
-            self.dataWidget.setValidator(self.validator(self.obj, parent=self.dataWidget))
-            self.dataWidget.textEdited.connect(self.setPath)
+            self.validator = self.validatorClass(self.obj, parent=self.dataWidget)
+            self.dataWidget.setValidator(self.validator)
+            self.dataWidget.textEdited.connect(self._updateAfterEditCallback)
         else:
             # set to italic/grey
             oldFont = self.dataWidget.font()
             oldFont.setItalic(True)
             self.dataWidget.setFont(oldFont)
 
-        self.buttonWidget = Button(widget, grid=(self.row, 2),
-                                   callback=self._getDialog,
+        self.buttonWidget = Button(widget, grid=(self.row, 2), callback=self._getDialog,
                                    icon='icons/directory')
-        self._setDataInWidget()
+        self._setDataInWidget(self.getPath())
 
         self.labelWidget.setEnabled(self.enabled)
         self.dataWidget.setEnabled(self.enabled)
@@ -195,26 +193,40 @@ class PathRowABC(object):
         if len(choices) > 0:
             newPath = choices[0]
             self.setPath(newPath)
-            self._setDataInWidget()
+            self._setDataInWidget(newPath)
+
+    def _updateAfterEditCallback(self):
+        "Callback after editing "
+        path = self.dataWidget.text()
+        self.setPath(path)
+        self._setDataInWidget(path)
+
+    def _setDataInWidget(self, path):
+        self.dataWidget.setText(path)
+        self.validate()
+        if self.callback:
+            self.callback(self)
 
     def setPath(self, path):
-        "Set the path name of the object"
+        "Set the path name of the object; requires subclassing"
         pass
 
     def getPath(self) -> str:
-        "Get the path name from the object to edit"
+        "Get the path name from the object to edit; requires subclassing"
         pass
 
     def getDialogPath(self) -> str:
-        "Get the directry path to start the selection"
+        "Get the directry path to start the selection dialog; optionally can be subclassed"
         return str(aPath(self.getPath()))
 
-    def _setDataInWidget(self):
-        path = self.getPath()
-        self.dataWidget.setText(path)
-        valid = self.dataWidget.validator()
-        if valid and hasattr(valid, 'resetCheck'):
-            self.dataWidget.validator().resetCheck()
+    def validate(self):
+        "Validate the row, return True if valid"
+        if self.validator is not None:
+            self.dataWidget.validator()
+            if hasattr(self.validator, 'resetCheck'):
+                self.validator.resetCheck()
+            self.isValid = self.validator.isValid
+        return self.isValid
 
     def setVisible(self, visible):
         "set visibilty of row"
@@ -225,7 +237,7 @@ class PathRowABC(object):
 
 class SpectrumPathRow(PathRowABC):
 
-    validator = SpectrumValidator
+    validatorClass = SpectrumValidator
     dialogFileMode = 1
 
     def getPath(self):
@@ -243,7 +255,7 @@ class SpectrumPathRow(PathRowABC):
 
 class UrlPathRow(PathRowABC):
 
-    validator = DataUrlValidator
+    validatorClass = DataUrlValidator
     dialogFileMode = 2
 
     def getPath(self):
@@ -257,6 +269,7 @@ class UrlPathRow(PathRowABC):
             dataUrl.url = dataUrl.url.clone(path=path)
 
 
+# Radiobuttons
 VALIDSPECTRA = 'valid'
 INVALIDSPECTRA = 'invalid'
 ALLSPECTRA = 'all'
@@ -278,8 +291,18 @@ class ValidateSpectraPopup(CcpnDialog):
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
         self.preferences = self.application.preferences
-        self.spectra = spectra
+
+        if spectra is None:
+            self.spectra = self.project.spectra
+        else:
+            self.spectra = spectra
+
         self.defaultSelected = DEFAULTSELECTED.index(defaultSelected) if defaultSelected in DEFAULTSELECTED else DEFAULTSELECTED.index(ALLSPECTRA)
+
+
+        self.dataUrlData = {}  # dict with (url, UrlPathRow) tuples
+        self.spectrumData = {}  # dict with (spectrum, SpectrumPathRow) tuples
+        self._badUrls = False
 
         # TODO I think there is a QT bug here - need to set a dummy button first otherwise a click is emitted, will investigate
         rogueButton = Button(self, grid=(0, 0))
@@ -302,18 +325,16 @@ class ValidateSpectraPopup(CcpnDialog):
 
         # populate the widget with a list of spectrum buttons and filepath buttons
         scrollRow = 0
-        self.dataUrlData = {}
-
-        for urlName, label, enabled in [
-                ('remoteData',    '$DATA (user dataPath)', True),
-                ('insideData',    '$INSIDE              ', False),
-                ('alongsideData', '$ALONGSIDE           ', False),
+        for urlName, label, enabled, callback in [
+                ('remoteData',    '$DATA (user dataPath)', True,  self._validateAll),
+                ('insideData',    '$INSIDE              ', False, None),
+                ('alongsideData', '$ALONGSIDE           ', False, None),
             ]:
 
             urls = self._findDataUrl(urlName)
             if len(urls) > 0:
                 url = urls[0]
-                _row = UrlPathRow(topWidget=self, obj=url, labelText=label, enabled=enabled).addRow(
+                _row = UrlPathRow(topWidget=self, obj=url, labelText=label, enabled=enabled, callback=callback).addRow(
                                   widget=self.dataUrlScrollAreaWidgetContents, row=scrollRow)
                 scrollRow += 1
                 self.dataUrlData[url] = _row
@@ -332,6 +353,7 @@ class ValidateSpectraPopup(CcpnDialog):
         HLine(self._spectrumFrame, grid=(specRow, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
         specRow += 1
 
+        # radiobuttons
         self.buttonFrame = Frame(self._spectrumFrame, setLayout=True, showBorder=False, fShape='noFrame',
                                  grid=(specRow, 0), gridSpan=(1, 3),
                                  vAlign='top', hAlign='left')
@@ -360,7 +382,6 @@ class ValidateSpectraPopup(CcpnDialog):
 
         # populate the widget with a list of spectrum buttons and filepath buttons
         scrollRow = 0
-        self.spectrumData = {}  # dict with (spectrum, SpectrumPathRow) tuples
         for sp in self.project.spectra:
             _row = SpectrumPathRow(topWidget=self, labelText=sp.pid, obj=sp, enabled=True).addRow(
                                    widget=self.spectrumScrollAreaWidgetContents, row=scrollRow)
@@ -395,28 +416,28 @@ class ValidateSpectraPopup(CcpnDialog):
                                        hAlign='r', grid=(row, 0), gridSpan=(1, 3))
 
         self.setMinimumHeight(500)
-        self.setMinimumWidth(600)
+        self.setMinimumWidth(800)
         # self.setFixedWidth(self.sizeHint().width()+24)
 
-        # check for any bad urls
-        self._badUrls = False
-        self._validateAll()
+    def _showRow(self, valid):
+        "Return True/False depending on valid and settings of radio buttons"
+
+        doShow = True
+        if hasattr(self, 'showValid') and self.showValid is not None:
+            ind = self.showValid.getIndex()
+            if ind == 0 and not valid:  # show only valid
+                doShow = False
+            elif ind == 1 and valid: # show only invalid
+                doShow = False
+            else:  # show all
+                doShow = True
+
+        return doShow
 
     def _toggleValid(self):
         "Toggle rows on or off depending on their state and the settings of the radio buttons"
-        ind = self.showValid.getIndex()
-        if ind == 0:
-            valid = True
-            allVisible = False
-        elif ind == 1:
-            valid = False
-            allVisible = False
-        else:
-            valid = True
-            allVisible = True
-
         for spectrum, row in self.spectrumData.items():
-            visible = True if allVisible else (spectrum.isValidPath is valid)
+            visible = self._showRow(row.isValid)
             row.setVisible(visible)
 
     def _findDataUrl(self, storeType):
@@ -427,26 +448,29 @@ class ValidateSpectraPopup(CcpnDialog):
         else:
             return ()
 
-    def _validateAll(self):
-        """Validate all the objects as the dataUrls may have changed.
+    def _validateAll(self, pathRow):
+        """Callback from $DATA url to validate all the spectrum rows as the data Urls may have changed.
         """
         self._badUrls = False
         for spectrum, row in self.spectrumData.items():
-            if not spectrum.isValidPath:
-                self._badUrls = True
+            if row == pathRow:
+                raise RuntimeError('row == pathRow: this should never happen!')
 
-        self.applyButtons.getButton('Close').setEnabled(not self._badUrls)
+            valid = row.validate()
+            if not valid:
+                self._badUrls = True
+            visible = self._showRow(valid)
+            row.setVisible(visible)
+
+        #self._toggleValid()
+        #self.applyButtons.getButton('Close').setEnabled(not self._badUrls)
 
     def _closeButton(self):
         self.accept()
 
     def _apply(self):
         # apply all the buttons
-        for spectrum in self.spectra:
-            self._setSpectrumPath(spectrum)
-        for url in self.allUrls:
-            self._setDataUrlPath(url)
-
+        pass
         self.accept()
 
     def closeEvent(self, event):

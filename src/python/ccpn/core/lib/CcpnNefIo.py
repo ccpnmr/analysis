@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-05 15:37:49 +0000 (Thu, November 05, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-23 17:36:45 +0000 (Mon, November 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -563,9 +563,9 @@ class CcpnNefWriter:
             if len(peakLists) > 0:
                 for peaklistNum, peakList in enumerate(peakLists):
                     saveFrames.append(self.peakList2Nef(spectrum, peakList, peakLists, integralLists, multipletLists, exportCompleteSpectrum=(peaklistNum == 0),
-                                                        spectrumCount=peaklistNum))
+                                                        peakListSerial=peakList.serial))
             else:
-                saveFrames.append(self.peakList2Nef(spectrum, None, peakLists, integralLists, multipletLists, exportCompleteSpectrum=True, spectrumCount=0))
+                saveFrames.append(self.peakList2Nef(spectrum, None, peakLists, integralLists, multipletLists, exportCompleteSpectrum=True, peakListSerial=1))
 
         # # Spectra/PeakLists/IntegralLists/MultipletLists
         # for obj in sorted(peakLists + integralLists + multipletLists):
@@ -1148,7 +1148,8 @@ class CcpnNefWriter:
     # def peakList2Nef(self, spectrum: Spectrum, peakLists, integralLists, multipletLists,
     def peakList2Nef(self, spectrum: Spectrum, peakList: PeakList, peakLists, integralLists, multipletLists,
                      exportCompleteSpectrum: bool = True,
-                     spectrumCount=None,
+                     # spectrumCount=None,
+                     peakListSerial=1,
                      ) -> StarIo.NmrSaveFrame:
         """Convert PeakList to CCPN NEF saveframe.
         Used for all spectrum export, as there is one frame per PeakList
@@ -1170,18 +1171,12 @@ class CcpnNefWriter:
         # Get unique frame name
         obj = spectrum
         name = spectrum.name
-        if spectrumCount:  # spectrumAlreadySaved:
-            # not the first time this spectrum appears.
-            name = '%s`%s`' % (name, spectrumCount + 1)  # NOTE:ED - was peakList, then obj.serial - make sure > 1
-            _foundSpectrum = spectrum.project.getSpectrum(name)
-            if _foundSpectrum:
-                raise TypeError('Spectrum has illegal name {}'.format(_foundSpectrum.name))
-            # while spectrum.project.getSpectrum(name):
-            #     spectrumCount += 1
-            #     # Realistically this should never happen,
-            #     # but it is a further (if imperfect) guard against clashes
-            #     # This name is taken - modify it
-            #     name = '%s`%s`' % (name, spectrumCount)  # NOTE:ED - was peakList
+        # always append the peaklist number to the end of the name
+        name = '%s`%s`' % (name, peakListSerial)  # NOTE:ED - was peakList, then obj.serial - make sure >= 1
+        _foundSpectrum = spectrum.project.getSpectrum(name)
+        if _foundSpectrum:
+            # check that existing spectra don't have this type of postfix
+            raise TypeError('Spectrum {} has illegal name'.format(_foundSpectrum.name))
 
         # Set up frame
         category = 'nef_nmr_spectrum'
@@ -1192,7 +1187,7 @@ class CcpnNefWriter:
             result['ccpn_spectrum_file_path'] = path
 
         self.ccpn2SaveFrameName[obj] = result['sf_framecode']  # NOTE:ED - was peakList
-        if not spectrumCount:  # spectrumAlreadySaved:
+        if peakListSerial > 1:  # add a new saveframe only for the additional peakLists
             self.ccpn2SaveFrameName[spectrum] = result['sf_framecode']
 
         result['chemical_shift_list'] = self.ccpn2SaveFrameName.get(obj.chemicalShiftList)  # NOTE:ED - was peakList
@@ -2465,7 +2460,7 @@ class CcpnNefReader(CcpnNefContent):
                 if sf_category == 'nef_nmr_spectrum':
                     getLogger().debug2('>>>  -- SPECTRUM {}'.format(saveFrameName))
 
-                    peakListSerial = saveFrame.get('ccpn_peaklist_serial') or _stripSpectrumSerial(saveFrameName) or 1
+                    peakListSerial = _stripSpectrumSerial(saveFrameName) or saveFrame.get('ccpn_peaklist_serial') or 1
                     self._frameCodeToSpectra[saveFrameName] = peakListSerial
 
                 elif sf_category in ['nef_distance_restraint_list',
@@ -4160,7 +4155,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get name from spectrum parameters, or from the framecode
         spectrumName = framecode[len(category) + 1:]
 
-        peakListSerial = peakListParameters.get('serial') or _stripSpectrumSerial(spectrumName) or 1
+        peakListSerial = _stripSpectrumSerial(spectrumName) or peakListParameters.get('serial') or 1
         peakListParameters['serial'] = peakListSerial
         spectrumName = _stripSpectrumName(spectrumName)
 
@@ -4272,7 +4267,7 @@ class CcpnNefReader(CcpnNefContent):
         _spectrumNameNoPostfix = spectrumName
 
         # get the serial number become stripping name
-        peakListSerial = peakListParameters.get('serial') or _stripSpectrumSerial(spectrumName) or 1
+        peakListSerial = _stripSpectrumSerial(spectrumName) or peakListParameters.get('serial') or 1
         spectrumName = _stripSpectrumName(spectrumName)
 
         spectrum = project.getSpectrum(spectrumName)
@@ -4962,7 +4957,7 @@ class CcpnNefReader(CcpnNefContent):
 
             # get or make peak
             serial = parameters['serial']
-            peakListSerial = row.get('ccpn_peak_list_serial') or peakListId or 1
+            peakListSerial = peakListId or row.get('ccpn_peak_list_serial') or 1
             peakLabel = Pid.IDSEP.join(('' if x is None else str(x)) for x in (peakListSerial, serial))
             peak = peaks.get(peakLabel)
             # TODO check if peak parameters are the same for all rows, and do something about it
@@ -5143,14 +5138,22 @@ class CcpnNefReader(CcpnNefContent):
                     continue
             else:
                 _spectrumPidFrame = row.get('nmr_spectrum_id')
-                _spectrumPid = re.sub(REGEXREMOVEENDQUOTES, '', _spectrumPidFrame)  # substitute with ''
-                _spectrum = project.getByPid('SP:' + _spectrumPid[len('nef_nmr_spectrum_'):])
+                # _spectrumPid = re.sub(REGEXREMOVEENDQUOTES, '', _spectrumPidFrame)  # substitute with ''
+                # _spectrum = project.getByPid('SP:' + _spectrumPid[len('nef_nmr_spectrum_'):])
 
-                matches = [mm for mm in re.finditer(REGEXREMOVEENDQUOTES, _spectrumPidFrame)]
-                postfix = matches[-1].group() if matches and matches[-1] and matches[-1].span()[1] == len(_spectrumPidFrame) else ''
-                postSerial = _tryNumber(postfix)
+                # matches = [mm for mm in re.finditer(REGEXREMOVEENDQUOTES, _spectrumPidFrame)]
+                # postfix = matches[-1].group() if matches and matches[-1] and matches[-1].span()[1] == len(_spectrumPidFrame) else ''
+                # postSerial = _tryNumber(postfix)
 
-                peakListNum = postSerial or 1  #self._frameCodeToSpectra.get(_spectrumPidFrame)
+                peakListObject = self.frameCode2Object.get(_spectrumPidFrame)
+                peakListSerial = peakListObject.serial if peakListObject else None
+                _spectrum = peakListObject.spectrum if peakListObject else None
+                if not _spectrum:
+                    continue
+
+                _lastPeakListNum = _spectrum.peakLists[-1].serial if _spectrum.peakLists else None
+
+                peakListNum = peakListSerial or _lastPeakListNum or 1
                 if not (_spectrum and peakListNum):
                     continue
 

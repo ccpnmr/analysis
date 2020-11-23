@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-12 15:28:56 +0100 (Mon, October 12, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-23 17:36:45 +0000 (Mon, November 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -430,6 +430,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         'nef_peak_restraint_links'   : ('restraintLinks','RestraintLink')
         }
 
+    # defines the names of the saveframe loops that are displayed
     nefProjectToSaveFramesMapping = {
         # Chain._pluralLinkName : [],
         Chain._pluralLinkName            : ['nef_sequence'],
@@ -438,7 +439,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                                             'nef_dihedral_restraint_list', 'nef_dihedral_restraint',
                                             'nef_rdc_restraint_list', 'nef_rdc_restraint',
                                             'ccpn_restraint_list', 'ccpn_restraint'],
-        PeakList._pluralLinkName         : ['ccpn_peak_list', 'nef_peak'],
+        PeakList._pluralLinkName         : ['ccpn_peak_list', 'nef_peak', 'nef_spectrum_dimension', 'nef_spectrum_dimension_transfer'],
         IntegralList._pluralLinkName     : ['ccpn_integral_list', 'ccpn_integral'],
         MultipletList._pluralLinkName    : ['ccpn_multiplet_list', 'ccpn_multiplet', 'ccpn_multiplet_peaks'],
         Sample._pluralLinkName           : ['ccpn_sample', 'ccpn_sample_component'],

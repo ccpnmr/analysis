@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-23 17:36:45 +0000 (Mon, November 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1199,8 +1199,8 @@ assignmentTolerances
 
         if len(values) != self.dimensionCount:
             raise ValueError("Length of %s does not match number of dimensions." % str(values))
-        if not all(isinstance(dimVal, str) and dimVal in dd.keys() for dimVal in values):
-            raise ValueError("Folding modes must be 'circular', 'mirror'")
+        if not all(isinstance(dimVal, (str, type(None))) and dimVal in dd.keys() for dimVal in values):
+            raise ValueError("Folding modes must be 'circular', 'mirror', None")
 
         self._setExpDimRefAttribute('isFolded', [dd[x] for x in values])
 

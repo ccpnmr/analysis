@@ -43,7 +43,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-04 13:35:46 +0000 (Wed, November 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-23 17:36:46 +0000 (Mon, November 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -798,7 +798,7 @@ class CcpnNefReader:
 
         # Get name from spectrum parameters, or from the framecode
         spectrumName = framecode[len(category) + 1:]
-        peakListSerial = peakListParams.get('serial') or _stripSpectrumSerial(spectrumName) or 1
+        # peakListSerial = _stripSpectrumSerial(spectrumName) or peakListParams.get('serial') or 1
         spectrumName = _stripSpectrumName(spectrumName)
         dataSourceParams['name'] = spectrumName
 

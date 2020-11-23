@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-04 13:35:46 +0000 (Wed, November 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-23 17:36:45 +0000 (Mon, November 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -502,7 +502,7 @@ class CcpnNefContent:
 
         # Get name from spectrum parameters, or from the framecode
         spectrumName = framecode[len(category) + 1:]
-        peakListSerial = peakListParameters.get('serial') or _stripSpectrumSerial(spectrumName) or 1
+        # peakListSerial = _stripSpectrumSerial(spectrumName) or peakListParameters.get('serial') or 1
         spectrumName = _stripSpectrumName(spectrumName)
 
         result = {category: OrderedSet([spectrumName]), }
@@ -538,10 +538,15 @@ class CcpnNefContent:
         mapping = nef2CcpnMap[loop.name]
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
-            parameters = _parametersFromLoopRow(row, map2)
-            peakListSerial = parentFrame.get('ccpn_peaklist_serial') or \
-                             row.get('ccpn_peak_list_serial') or \
-                             _parentSerial or 1  # may not be defined in the list
+            # parameters = _parametersFromLoopRow(row, map2)
+            peakListSerial = _parentSerial or \
+                             parentFrame.get('ccpn_peaklist_serial') or \
+                             row.get('ccpn_peak_list_serial') or 1  # may not be defined in the list
+
+            # peakListSerial = parentFrame.get('ccpn_peaklist_serial') or \
+            #                  row.get('ccpn_peak_list_serial') or \
+            #                  _parentSerial or 1  # may not be defined in the list
+            #
             # serial = parameters['serial']
             # result.add((name, peakListSerial, serial))
 
@@ -583,9 +588,9 @@ class CcpnNefContent:
             parameters = _parametersFromLoopRow(row, map2)
 
             serial = parameters['serial']
-            peakListSerial = parentFrame['ccpn_peaklist_serial'] or \
-                             row.get('ccpn_peak_list_serial') or \
-                             _parentSerial or 1  # may not be defined in the list
+            peakListSerial = _parentSerial or \
+                             parentFrame['ccpn_peaklist_serial'] or \
+                             row.get('ccpn_peak_list_serial') or 1  # may not be defined in the list
             # result.add((name, peakListSerial, serial))
 
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [name, peakListSerial, serial])

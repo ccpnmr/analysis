@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-23 10:34:50 +0000 (Mon, November 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -517,15 +517,15 @@ class ChemicalShiftTable(GuiTable):
         return (len(set(x for x in peaks
                         if x.peakList.chemicalShiftList is chemicalShiftList)))
 
-    def getCellToRows(self, cellItem, attribute):
-        """Get the list of objects which cellItem maps to for this table
-        To be subclassed as required
-        """
-        # classItem is usually a type such as PeakList, MultipletList
-        # with an attribute such as peaks/peaks
-
-        # this is a step towards making guiTableABC and subclass for each table
-        return getattr(cellItem, attribute, []), None
+    # def getCellToRows(self, cellItem, attribute):
+    #     """Get the list of objects which cellItem maps to for this table
+    #     To be subclassed as required
+    #     """
+    #     # classItem is usually a type such as PeakList, MultipletList
+    #     # with an attribute such as peaks/peaks
+    #
+    #     # this is a step towards making guiTableABC and subclass for each table
+    #     return getattr(cellItem, attribute, []), None
 
     @staticmethod
     def _stLamFloat(row, name):

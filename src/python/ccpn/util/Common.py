@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-04 17:16:40 +0000 (Wed, November 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-23 10:34:51 +0000 (Mon, November 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1255,6 +1255,7 @@ def _validateName(project, cls, value: str, attribName: str = 'name', allowWhite
     #     raise ValueError('{} already exists'.format(previous.longPid))
 
     if checkExisting:
+        # this is not valid for nmrAtoms
         found = [obj for obj in getattr(project, cls._pluralLinkName, []) if getattr(obj, attribName, None) == value]
         if found:
             raise ValueError('{} already exists'.format(found[0].id))

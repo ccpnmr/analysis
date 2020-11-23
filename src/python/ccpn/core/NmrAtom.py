@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-11-23 10:34:50 +0000 (Mon, November 23, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -377,7 +377,7 @@ class NmrAtom(AbstractWrapperObject):
 
         # NB This is a VERY special case
         # - API code and notifiers will take care of resetting id and Pid
-        _validateName(self.project, NmrAtom, value=value, allowWhitespace=False, allowNone=True)
+        _validateName(self.project, NmrAtom, value=value, allowWhitespace=False, allowNone=True, checkExisting=False)
 
         with renameObjectContextManager(self) as addUndoItem:
             oldName = self.name

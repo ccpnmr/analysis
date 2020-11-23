@@ -49,6 +49,7 @@ from ccpn.util import Register
 def qtMessageHandler(*errors):
     for err in errors:
         Logging.getLogger().warning('QT error: %s' % err)
+        #sys.stderr.write('QT error: %s\n' % err)
 
 
 # un/suppress messages

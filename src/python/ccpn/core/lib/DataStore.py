@@ -36,6 +36,8 @@ from ccpn.framework import constants
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 from ccpn.util.traits.CcpNmrTraits import Unicode, Any, CPath, Bool
 
+from ccpn.core.lib.ContextManagers import notificationBlanking
+
 from ccpn.framework.Application import getApplication
 
 

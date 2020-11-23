@@ -39,7 +39,7 @@ from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking
+from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, apiNotificationBlanking
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 
 
@@ -294,15 +294,17 @@ class AbstractWrapperObject(NotifierBase):
         trampling by other code"""
         result = self._wrappedData.ccpnInternalData
         if result is None:
-            with notificationBlanking():
-                result = self._wrappedData.ccpnInternalData = {}
+            result = {}
+            self._wrappedData.ccpnInternalData = result
         return result
 
     @_ccpnInternalData.setter
     def _ccpnInternalData(self, value):
         if not (isinstance(value, dict)):
             raise ValueError("_ccpnInternalData must be a dictionary, was %s" % value)
-        self._wrappedData.ccpnInternalData = value
+        with notificationBlanking():
+            with apiNotificationBlanking():
+                self._wrappedData.ccpnInternalData = value
 
     @property
     def comment(self) -> str:

@@ -375,9 +375,18 @@ class SpectrumView(AbstractWrapperObject):
 
 # Spectrum.spectrumViews property
 def getter(spectrum: Spectrum):
-    return tuple(spectrum._project._data2Obj.get(y)
+    specViews = [spectrum._project._data2Obj.get(y)
                  for x in spectrum._wrappedData.sortedSpectrumViews()
-                 for y in x.sortedStripSpectrumViews())
+                 for y in x.sortedStripSpectrumViews()]
+    # #GWV The errors are catched somewhere and not reported; disable for now to yield
+    # # a hard crash instead
+    # if None in specViews:
+    #     #GWV: Bug on restoring project/spectra and using the __init__ of spectrum
+    #     #Sometimes a callback 'change' is triggered that calls _finalise that loops through the
+    #     # spectrumViews that are not yet there. Poor implementation!@£$%
+    #     raise RuntimeError('Spectrum.spectrumViews: invalid list "%s"' %specViews)
+
+    return tuple(specViews)
 
 
 Spectrum.spectrumViews = property(getter, None, None,

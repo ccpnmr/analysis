@@ -168,6 +168,14 @@ class Project(AbstractWrapperObject):
         # Notification blanking level - to allow for nested notification disabling
         self._notificationBlanking = 0
 
+        # api 'change' otification blanking level - to allow for api 'change' call to be
+        # disabled in the _modifiedApiObject method.
+        # To be used with the apiNotificationBlanking contact manager; e.g.
+        # with apiNotificationBlanking():
+        #   do something
+        #
+        self._apiNotificationBlanking = 0
+
         # Wrapper level notifier tracking.  APPLICATION ONLY
         # {(className,action):OrderedDict(notifier:onceOnly)}
         self._context2Notifiers = {}
@@ -751,8 +759,9 @@ class Project(AbstractWrapperObject):
     def _modifiedApiObject(self, wrappedData):
         """ call object-has-changed notifiers
         """
-        obj = self._data2Obj[wrappedData]
-        obj._finaliseAction('change')
+        if self._apiNotificationBlanking == 0:
+            obj = self._data2Obj[wrappedData]
+            obj._finaliseAction('change')
 
     def _finaliseApiDelete(self, wrappedData):
         """Clean up after object deletion

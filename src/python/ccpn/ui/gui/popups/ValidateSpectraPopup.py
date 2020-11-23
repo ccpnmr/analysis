@@ -204,6 +204,7 @@ class PathRowABC(object):
         self._setDataInWidget(path)
 
     def _setDataInWidget(self, path):
+        "Populate the dataWidget, validate and callback"
         self.dataWidget.setText(path)
         self.validate()
 

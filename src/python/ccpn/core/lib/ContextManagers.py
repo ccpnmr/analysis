@@ -607,6 +607,30 @@ def notificationBlanking(application=None):
 
 
 @contextmanager
+def apiNotificationBlanking(application=None):
+    """
+    Block api 'change' notifier, re-enable at the end of the function block.
+    """
+
+    # get the application
+    if not application:
+        application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
+
+    application.project._apiNotificationBlanking += 1
+    try:
+        # transfer control to the calling function
+        yield
+
+    except AttributeError as es:
+        raise es
+
+    finally:
+        # clean up after blocking notifications
+        application.project._apiNotificationBlanking -= 1
+
+@contextmanager
 def notificationEchoBlocking(application=None):
     """
     Disable echoing of commands to the terminal, re-enable at the end of the function block.

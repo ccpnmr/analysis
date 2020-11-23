@@ -83,7 +83,8 @@ from ccpn.core.lib.Cache import cached
 from ccpn.util.decorators import logCommand
 from ccpn.framework.constants import CCPNMR_PREFIX
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
-    undoStackBlocking, renameObject, undoBlock, notificationBlanking, ccpNmrV3CoreSetter
+    undoStackBlocking, renameObject, undoBlock, notificationBlanking, apiNotificationBlanking, \
+    ccpNmrV3CoreSetter
 from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.util.Path import Path, aPath
 from ccpn.util.Common import isIterable
@@ -245,7 +246,13 @@ class Spectrum(AbstractWrapperObject):
         self._intensities = None
         self._positions = None
 
-        self._dataStore = DataStore(spectrum=self)  # Reference to DataStore instance for filePath manipulation
+        # Reference to DataStore instance for filePath manipulation
+        with apiNotificationBlanking():
+            # Upon restore, the DataStore creation for old spectra triggers a call to the the ccpnInternalData
+            # with trigger the api 'change' notifier, which triggers _finaliseAction which crashes
+            # the initialision process; hence apiNotification blanking
+            self._dataStore = DataStore(spectrum=self)
+
         self._dataSource = None  # Reference to dataSource object corresponding to (binary) data file
 
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?

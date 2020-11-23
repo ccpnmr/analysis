@@ -97,15 +97,11 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
         tb = self.spectrumUtilToolBar
         self._spectrumUtilActions = {}
 
-        toolBarItemsForBoth = [
+        toolBarItemsFor1d = [
             #  action name,        icon,                 tooltip,                                   active, callback
 
             ('increaseStripWidth', 'icons/range-expand', 'Increase the width of strips in display', True, self.increaseStripSize),
             ('decreaseStripWidth', 'icons/range-contract', 'Decrease the width of strips in display', True, self.decreaseStripSize),
-            # ('addStrip', 'icons/plus', 'Duplicate the rightmost strip', True, self.addStrip),
-            # ('removeStrip', 'icons/minus', 'Remove the current strip', True, self.removeCurrentStrip),
-            ]
-        toolBarItemsForNd = [
             ('maximiseZoom', 'icons/zoom-full', 'Maximise Zoom', True, self._resetAllZooms),
 
             ('maximiseHeight', 'icons/zoom-best-fit-1d', 'Maximise Height', True, self._resetYZooms),
@@ -115,10 +111,12 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
             ('restoreZoom', 'icons/zoom-restore', 'Restore Zoom', True, self._restoreZoom),
             ('undoZoom', 'icons/zoom-undo', 'Undo Zoom', True, self._previousZoom),
             ('redoZoom', 'icons/zoom-redo', 'Redo Zoom', True, self._nextZoom),
+            # ('addStrip', 'icons/plus', 'Duplicate the rightmost strip', True, self.addStrip),
+            # ('removeStrip', 'icons/minus', 'Remove the current strip', True, self.removeCurrentStrip),
             ]
 
         # create the actions from the lists
-        for aName, icon, tooltip, active, callback in toolBarItemsForBoth + toolBarItemsForNd:
+        for aName, icon, tooltip, active, callback in toolBarItemsFor1d:
             action = tb.addAction(tooltip, callback)
             if icon is not None:
                 ic = Icon(icon)

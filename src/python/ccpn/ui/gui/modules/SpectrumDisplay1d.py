@@ -102,15 +102,15 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
 
             ('increaseStripWidth', 'icons/range-expand', 'Increase the width of strips in display', True, self.increaseStripSize),
             ('decreaseStripWidth', 'icons/range-contract', 'Decrease the width of strips in display', True, self.decreaseStripSize),
-            ('maximiseZoom', 'icons/zoom-full', 'Maximise Zoom', True, self._resetAllZooms),
+            ('maximiseZoom', 'icons/zoom-full', 'Maximise Zoom (ZA)', True, self._resetAllZooms),
 
             ('maximiseHeight', 'icons/zoom-best-fit-1d', 'Maximise Height', True, self._resetYZooms),
             ('maximiseWidth', 'icons/zoom-full-1d', 'Maximise Width', True, self._resetXZooms),
 
-            ('storeZoom', 'icons/zoom-store', 'Store Zoom', True, self._storeZoom),
-            ('restoreZoom', 'icons/zoom-restore', 'Restore Zoom', True, self._restoreZoom),
-            ('undoZoom', 'icons/zoom-undo', 'Undo Zoom', True, self._previousZoom),
-            ('redoZoom', 'icons/zoom-redo', 'Redo Zoom', True, self._nextZoom),
+            ('storeZoom', 'icons/zoom-store', 'Store Zoom (ZS)', True, self._storeZoom),
+            ('restoreZoom', 'icons/zoom-restore', 'Restore Zoom (ZR)', True, self._restoreZoom),
+            ('undoZoom', 'icons/zoom-undo', 'Previous Zoom (ZP)', True, self._previousZoom),
+            ('redoZoom', 'icons/zoom-redo', 'Next Zoom (ZN)', True, self._nextZoom),
             # ('addStrip', 'icons/plus', 'Duplicate the rightmost strip', True, self.addStrip),
             # ('removeStrip', 'icons/minus', 'Remove the current strip', True, self.removeCurrentStrip),
             ]

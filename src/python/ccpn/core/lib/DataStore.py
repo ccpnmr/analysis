@@ -37,11 +37,12 @@ from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 from ccpn.util.traits.CcpNmrTraits import Unicode, Any, CPath, Bool
 
 from ccpn.core.lib.ContextManagers import notificationBlanking
+from ccpn.util.decorators import singleton
 
 from ccpn.framework.Application import getApplication
 
 
-# Data path URL's (not yet used everywhere; i.e. there are still hardcoded instances to track
+# Data path URL's (not yet used everywhere; i.e. there are still hardcoded instances to track)
 INSIDE_DATAURL_NAME = 'insideData'
 INSIDE_INDENTIFIER = '$INSIDE'
 
@@ -58,6 +59,45 @@ dataUrlsDict = {
     DATA_DATAURL_NAME:DATA_INDENTIFIER,
 }
 
+@singleton
+class PathRedirections(CcpNmrJson):
+    """
+    Class to maintain the path redirections $DATA, $ALONGSIDE, $INSIDE
+    """
+
+    _application = Any(default_value=None, allow_none=True)
+
+    _dataPath = CPath(default_value=None, allow_none=True).tag(apiName=DATA_DATAURL_NAME, identifier=DATA_INDENTIFIER)
+    _insidePath = CPath(default_value=None, allow_none=True).tag(apiName=INSIDE_DATAURL_NAME, identifier=INSIDE_INDENTIFIER)
+    _alongsidePath = CPath(default_value=None, allow_none=True).tag(apiName=ALONGSIDE_DATAURL_NAME, identifier=ALONGSIDE_INDENTIFIER)
+
+
+    def __init__(self):
+        super().__init__()
+        self._application = getApplication()
+
+    @property
+    def dataPath(self):
+        if self._dataPath is None:
+            self._dataPath = self._application.preferences.general.dataPath
+        return self._dataPath
+
+    @dataPath.setter
+    def dataPath(self, path):
+        self._dataPath = path
+        self._application.preferences.general.dataPath = path
+
+    @property
+    def insidePath(self):
+        self._insidePath = aPath(self._application.project.path)
+        return self._insidePath
+
+    @property
+    def alongsidePath(self):
+        self._alongsidePath = aPath(self._application.project.path).parent
+        return self._alongsidePath
+
+
 
 # def getDataStores(project):
 #     """
@@ -69,6 +109,7 @@ dataUrlsDict = {
 #     # dataStores = [DataStore(s) for url in dataUrls for s in url.sortedDataStores()]
 #     dataStores = [DataStore.newFromSpectrum(s) for s in project.spectra]
 #     return dataStores
+
 
 
 class DataStore(CcpNmrJson):
@@ -186,9 +227,9 @@ class DataStore(CcpNmrJson):
         """Set redirection paths and return a list of (identifier, path) tuples
         optionally (depending on expandData flag) expand $DATA to home directory if not defined
         """
-        self.dataPath = getDataPath()
-        self.insidePath = getInsidePath()
-        self.alongsidePath = getAlongsidePath()
+        self.dataPath = getDataPath() #PathRedirections().dataPath #
+        self.insidePath = PathRedirections().insidePath
+        self.alongsidePath = PathRedirections().alongsidePath
 
         result = [ (INSIDE_INDENTIFIER, self.insidePath),
                    (ALONGSIDE_INDENTIFIER, self.alongsidePath),
@@ -273,6 +314,7 @@ def _getPathFromApiStore(storeName):
     return path
 
 
+
 def getDataPath(expandDataPath=False):
     """Return the path corresponding to $DATA
     Optionally expand to user home directory if it None or has len==0
@@ -284,17 +326,17 @@ def getDataPath(expandDataPath=False):
     return aPath(path)
 
 
-def getInsidePath():
-    """Return the path corresponding to $INSIDE
-    returns aPath instance
-    """
-    # path = _getPathFromApiStore(INSIDE_DATAURL_NAME) Incorrect GWV??
-    path = getApplication().project.path
-    return aPath(path)
-
-
-def getAlongsidePath():
-    """Return the path corresponding to $ALONGSIDE
-    returns aPath instance
-    """
-    return getInsidePath().parent
+# def getInsidePath():
+#     """Return the path corresponding to $INSIDE
+#     returns aPath instance
+#     """
+#     # path = _getPathFromApiStore(INSIDE_DATAURL_NAME) Incorrect GWV??
+#     path = getApplication().project.path
+#     return aPath(path)
+#
+#
+# def getAlongsidePath():
+#     """Return the path corresponding to $ALONGSIDE
+#     returns aPath instance
+#     """
+#     return getInsidePath().parent

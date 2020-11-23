@@ -30,9 +30,11 @@ import sys
 import tarfile
 import tempfile
 import re
+
 from PyQt5 import QtWidgets
 from distutils.dir_util import copy_tree
 from functools import partial
+
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
@@ -41,6 +43,8 @@ from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo, CcpnSparkyIo
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.Pid import Pid
+
+from ccpn.framework.Application import getApplication
 from ccpn.framework import Version
 from ccpn.framework.Current import Current
 from ccpn.framework.lib.Pipeline import Pipeline
@@ -90,7 +94,14 @@ MacrosDirName = 'macros'
 
 def _ccpnExceptionhook(type, value, tback):
     '''This because PyQT raises and catches exceptions,
-    but doesn't pass them along instead makes the program crashing miserably.'''
+    but doesn't pass them along instead makes the program crashing miserably.
+    '''
+    application = getApplication()
+    if application._isInDebugMode:
+        sys.stderr.write('_ccpnExceptionhook: type = %s\n' % type)
+        sys.stderr.write('_ccpnExceptionhook: value = %s\n' % value)
+        sys.stderr.write('_ccpnExceptionhook: tback = %s\n' % tback)
+
     sys.__excepthook__(type, value, tback)
 
 

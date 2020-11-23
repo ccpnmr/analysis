@@ -61,6 +61,7 @@ from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.util.Common import uniquify
 from ccpn.util import Logging
+from ccpn.util.Path import aPath
 from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
@@ -543,7 +544,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
             if projectDir:
                 # try and load the new project
-                project = self._loadProjectLastValid(projectDir)
+                if aPath(projectDir).exists():
+                    project = self._loadProjectLastValid(projectDir)
+                else:
+                    MessageDialog.showError('loadProject', 'project "%s" not found' % projectDir)
                 # try:
                 #     project = self._loadProject(projectDir)
                 #

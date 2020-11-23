@@ -31,7 +31,7 @@ import sys
 import os
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.util.Path import aPath
+from ccpn.util.Path import aPath, Path
 from ccpn.util.Common import makeIterableList
 
 
@@ -50,12 +50,11 @@ class FileDialog(QtWidgets.QFileDialog):
         #       this is not passed to the super class
 
         # GWV - added default directory and path expansion
-        if directory is None:
-            directory = str(aPath('~'))
-        else:
-            directory = str(aPath(directory))
+        dir = aPath(directory)
+        if directory is None or not dir.exists():
+            dir = Path.home()
 
-        QtWidgets.QFileDialog.__init__(self, parent, caption=text, directory=directory, **kwds)
+        QtWidgets.QFileDialog.__init__(self, parent, caption=text, directory=str(dir), **kwds)
 
         staticFunctionDict = {
             (0, 0)                               : 'getOpenFileName',

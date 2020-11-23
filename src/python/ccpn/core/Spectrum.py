@@ -247,13 +247,14 @@ class Spectrum(AbstractWrapperObject):
         self._positions = None
 
         # Reference to DataStore instance for filePath manipulation
-        with apiNotificationBlanking():
-            # Upon restore, the DataStore creation for old spectra triggers a call to the the ccpnInternalData
-            # with trigger the api 'change' notifier, which triggers _finaliseAction which crashes
-            # the initialision process; hence apiNotification blanking
-            self._dataStore = DataStore(spectrum=self)
+        # with apiNotificationBlanking():
+        #     # Upon restore, the DataStore creation for old spectra triggers a call to the the ccpnInternalData
+        #     # with trigger the api 'change' notifier, which triggers _finaliseAction which crashes
+        #     # the initialision process; hence apiNotification blanking
+        self._dataStore = DataStore(spectrum=self)
 
-        self._dataSource = None  # Reference to dataSource object corresponding to (binary) data file
+        # Reference to dataSource object corresponding to (binary) data file
+        self._dataSource = None
 
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False

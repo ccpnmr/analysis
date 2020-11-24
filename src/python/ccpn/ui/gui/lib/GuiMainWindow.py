@@ -469,31 +469,25 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """Load/Reload project after load dialog.
         """
         project = self.application.loadProject(projectDir)
+        if project is None:
+            raise ValueError('Error loading project "%s"' % projectDir)
 
-        if project:
-            project._mainWindow.sideBar.buildTree(project)
-            project._mainWindow.show()
-            QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+        project._mainWindow.sideBar.buildTree(project)
+        project._mainWindow.show()
+        QtWidgets.QApplication.setActiveWindow(project._mainWindow)
 
-            # if the new project contains invalid spectra then open the popup to see them
-            badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.isValidPath]
-            if badSpectra:
-                from ccpn.ui.gui.widgets.MessageDialog import showWarning
+        # if the new project contains invalid spectra then open the popup to see them
+        badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.isValidPath]
+        if badSpectra:
+            from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
-                showWarning('Spectrum file paths',
-                            '''Detected invalid Spectrum file path(s) for: 
-                            
-                            \t%s
-                            
-                            Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.join(badSpectra)
-                            )
-                # project.application.showValidateSpectraPopup(defaultSelected='invalid')
-                # project.save(createFallback=False, overwriteExisting=True)
+            text = 'Detected invalid Spectrum file path(s) for:\n\n'
+            for sp in badSpectra:
+                text += '\t%s\n' % sp
+            text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
+            showWarning('Spectrum file paths', text)
 
-            return project
-
-        else:
-            raise ValueError("Error loading project")
+        return project
 
     def _loadProjectLastValid(self, projectDir):
         """Try and load a new project, if error try and load the last valid project.

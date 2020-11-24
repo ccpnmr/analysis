@@ -30,7 +30,8 @@ from collections import OrderedDict
 from PyQt5 import QtWidgets, QtGui
 
 from ccpn.core.lib import Util as ccpnUtil
-from ccpn.core.lib.DataStore import DATA_INDENTIFIER, INSIDE_INDENTIFIER, ALONGSIDE_INDENTIFIER, DataStore
+from ccpn.core.lib.DataStore import DATA_INDENTIFIER, INSIDE_INDENTIFIER, ALONGSIDE_INDENTIFIER, DataStore, \
+                                    PathRedirections
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger
 
@@ -165,7 +166,7 @@ class PathRowABC(object):
         self.dataWidget = LineEdit(widget, textAlignment='left', grid=(row, 1))
 
         if self.enabled:
-            self.validator = self.validatorClass(obj=self, parent=self.dataWidget, callback= self._validatorCallback)
+            self.validator = self.validatorClass(obj=self.obj, parent=self.dataWidget, callback= self._validatorCallback)
             self.dataWidget.setValidator(self.validator)
             # self.dataWidget.textEdited.connect(self._updateAfterEditCallback)
         else:
@@ -267,7 +268,7 @@ class SpectrumPathRow(PathRowABC):
     def setPath(self, path):
         oldPath = self.getPath()
         if oldPath != path:
-            self.obj.filePath = path
+            self.obj.filePath = str(path)
 
     def getDialogPath(self) -> str:
         "Get the directory path to start the selection"
@@ -275,22 +276,37 @@ class SpectrumPathRow(PathRowABC):
 # end class
 
 
-class UrlPathRow(PathRowABC):
+# class UrlPathRow(PathRowABC):
+#     """
+#     A class to implement a row for url paths
+#     """
+#     validatorClass = DataUrlValidator
+#     dialogFileMode = 2
+#
+#     def getPath(self):
+#         return self.obj.url.path
+#
+#     def setPath(self, path):
+#         # self.obj.url.path = path not allowed?
+#         oldPath = self.getPath()
+#         if oldPath != path:
+#             dataUrl = self.obj
+#             dataUrl.url = dataUrl.url.clone(path=path)
+# # end class
+
+
+class RedirectPathRow(PathRowABC):
     """
-    A class to implement a row for url paths
+    A class to implement a row for Redirection object
     """
     validatorClass = DataUrlValidator
     dialogFileMode = 2
 
     def getPath(self):
-        return self.obj.url.path
+        return str(self.obj.dataPath)
 
     def setPath(self, path):
-        # self.obj.url.path = path not allowed?
-        oldPath = self.getPath()
-        if oldPath != path:
-            dataUrl = self.obj
-            dataUrl.url = dataUrl.url.clone(path=path)
+        self.obj.dataPath = aPath(path)
 # end class
 
 
@@ -352,21 +368,32 @@ class ValidateSpectraPopup(CcpnDialog):
 
         # populate the widget with a list of spectrum buttons and filepath buttons
         scrollRow = 0
-        for idx, urlName, label, enabled, callback in [
-                (0, 'remoteData',    '$DATA (user dataPath)', True,  self._dataRowCallback),
-                (1, 'insideData',    '$INSIDE              ', False, None),
-                (2, 'alongsideData', '$ALONGSIDE           ', False, None),
-            ]:
-
-            urls = self._findDataUrl(urlName)
-            if len(urls) > 0:
-                url = urls[0]
-                _row = UrlPathRow(topWidget=self, obj=url, labelText=label, enabled=enabled, callback=callback).addRow(
-                                  widget=self.dataUrlScrollAreaWidgetContents, row=scrollRow)
-                scrollRow += 1
-                self.dataUrlData[url] = _row
-                if idx == 0:
-                    self.dataRow = _row  # remember the row for $DATA
+        # for idx, urlName, label, enabled, callback in [
+        #         (0, 'remoteData',    '$DATA (user dataPath)', True,  self._dataRowCallback),
+        #         (1, 'insideData',    '$INSIDE              ', False, None),
+        #         (2, 'alongsideData', '$ALONGSIDE           ', False, None),
+        #     ]:
+        #
+        #     urls = self._findDataUrl(urlName)
+        #     if len(urls) > 0:
+        #         url = urls[0]
+        #         _row = UrlPathRow(topWidget=self, obj=url, labelText=label, enabled=enabled, callback=callback).addRow(
+        #                           widget=self.dataUrlScrollAreaWidgetContents, row=scrollRow)
+        #         scrollRow += 1
+        #         self.dataUrlData[url] = _row
+        #         if idx == 0:
+        #             self.dataRow = _row  # remember the row for $DATA
+        _obj = PathRedirections()
+        _row = RedirectPathRow(topWidget=self, obj=_obj,
+                               labelText='$DATA (user dataPath)', enabled=True,
+                               callback=self._dataRowCallback).addRow(
+                                                        widget=self.dataUrlScrollAreaWidgetContents, row=scrollRow)
+        scrollRow += 1
+        _row = RedirectPathRow(topWidget=self, obj=_obj,
+                               labelText='$INSIDE              ', enabled=False,
+                               callback=None).addRow(
+                                                        widget=self.dataUrlScrollAreaWidgetContents, row=scrollRow)
+        scrollRow += 1
 
         # finalise the dataUrlScrollArea
         Spacer(self.dataUrlScrollAreaWidgetContents, 2, 2,

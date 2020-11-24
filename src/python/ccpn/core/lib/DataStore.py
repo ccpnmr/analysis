@@ -34,7 +34,7 @@ import os, sys
 from ccpn.util.Path import aPath, Path
 from ccpn.framework import constants
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
-from ccpn.util.traits.CcpNmrTraits import Unicode, Any, CPath, Bool
+from ccpn.util.traits.CcpNmrTraits import Unicode, Any, CPath, Bool, Dict
 
 from ccpn.core.lib.ContextManagers import notificationBlanking
 from ccpn.util.decorators import singleton
@@ -59,6 +59,65 @@ dataUrlsDict = {
     DATA_DATAURL_NAME:DATA_INDENTIFIER,
 }
 
+class RedirectionABC(CcpNmrJson):
+
+    apiName = None  # to be subclassed
+    identifier = None # to be subclassed
+    expand = False
+
+    _application = Any(default_value=None, allow_none=True)
+    _path = CPath(default_value=None, allow_none=True).tag(apiName=DATA_DATAURL_NAME, identifier=DATA_INDENTIFIER)
+
+    def __init__(self):
+        super().__init__()
+        self._application = getApplication()
+
+    @property
+    def path(self):
+        if self.expand:
+            return self.expandPath()
+        else:
+            return self._path
+
+    def expandPath(self):
+        "expand path to conteract"
+        if self._path is None or len(self._path) == 0:
+            self._path = Path.home()
+        elif self._path == '.':
+            self._path = Path.cwd()
+        return self._path()
+
+
+class DataRedirection(RedirectionABC):
+
+    apiName = DATA_DATAURL_NAME
+    identifier = DATA_INDENTIFIER
+    expand = True
+
+    @property
+    def path(self):
+        if self._path is None:
+            self._path = aPath(self._application.preferences.general.dataPath)
+        return super().path
+
+    @path.setter
+    def path(self, path):
+        self._path = aPath(path)
+        self._application.preferences.general.dataPath = str(self._path)
+
+
+class InsideRedirection(RedirectionABC):
+
+    apiName = INSIDE_DATAURL_NAME
+    identifier = INSIDE_INDENTIFIER
+    expand = True
+
+    @property
+    def path(self):
+        self._path = aPath(self._application.project.path)
+        return super().path
+
+
 @singleton
 class PathRedirections(CcpNmrJson):
     """
@@ -66,6 +125,7 @@ class PathRedirections(CcpNmrJson):
     """
 
     _application = Any(default_value=None, allow_none=True)
+    _expandData = Bool(default_value=False).tag(saveToJson=False)
 
     _dataPath = CPath(default_value=None, allow_none=True).tag(apiName=DATA_DATAURL_NAME, identifier=DATA_INDENTIFIER)
     _insidePath = CPath(default_value=None, allow_none=True).tag(apiName=INSIDE_DATAURL_NAME, identifier=INSIDE_INDENTIFIER)
@@ -75,17 +135,23 @@ class PathRedirections(CcpNmrJson):
     def __init__(self):
         super().__init__()
         self._application = getApplication()
+        self._expandData = True  # default behavior
 
     @property
     def dataPath(self):
         if self._dataPath is None:
-            self._dataPath = self._application.preferences.general.dataPath
+            self._dataPath = aPath(self._application.preferences.general.dataPath)
+        if self._expandData:
+            if self._dataPath is None or len(self._dataPath) == 0:
+                self._dataPath = Path.home()
+            elif self._dataPath == '.':
+                self._dataPath = Path.cwd()
         return self._dataPath
 
     @dataPath.setter
     def dataPath(self, path):
-        self._dataPath = path
-        self._application.preferences.general.dataPath = path
+        self._dataPath = aPath(path)
+        self._application.preferences.general.dataPath = str(self._dataPath)
 
     @property
     def insidePath(self):
@@ -96,6 +162,13 @@ class PathRedirections(CcpNmrJson):
     def alongsidePath(self):
         self._alongsidePath = aPath(self._application.project.path).parent
         return self._alongsidePath
+
+    def getPaths(self):
+        "Return a list of (identifier, path) tuples"
+        return [ (INSIDE_INDENTIFIER, self.insidePath),
+                 (ALONGSIDE_INDENTIFIER, self.alongsidePath),
+                 (DATA_INDENTIFIER, self.dataPath)
+               ]
 
 
 
@@ -135,16 +208,7 @@ class DataStore(CcpNmrJson):
     apiDataStorePath = Unicode(allow_none=True, default_value=None).tag(saveToJson=True)
 
     # Redirection paths
-    insidePath = CPath(allow_none=True, default_value=None).tag(saveToJson=True,
-                                                                identifier=INSIDE_INDENTIFIER,
-                                                                apiName=INSIDE_DATAURL_NAME)
-    alongsidePath = CPath(allow_none=True, default_value=None).tag(saveToJson=True,
-                                                                   identifier=ALONGSIDE_INDENTIFIER,
-                                                                   apiName=ALONGSIDE_DATAURL_NAME)
-    dataPath = CPath(allow_none=True, default_value=None).tag(saveToJson=True,
-                                                              identifier=DATA_INDENTIFIER,
-                                                              apiName=DATA_DATAURL_NAME)
-
+    pathRedirections = Dict(default_value={}).tag(saveToJson=True)
 
     def __init__(self, spectrum=None, expandData=True, autoRedirect=False):
         """expandData: optionally expand $DATA to home directory if not defined
@@ -154,6 +218,8 @@ class DataStore(CcpNmrJson):
         self.spectrum = spectrum
         self.expandData = expandData
         self.autoRedirect = autoRedirect
+
+        self._getPathRedirections()
         
         if spectrum is not None:
             self._importFromSpectrum(spectrum)
@@ -223,19 +289,10 @@ class DataStore(CcpNmrJson):
 
         return self
 
-    def _setPaths(self):
-        """Set redirection paths and return a list of (identifier, path) tuples
-        optionally (depending on expandData flag) expand $DATA to home directory if not defined
-        """
-        self.dataPath = getDataPath() #PathRedirections().dataPath #
-        self.insidePath = PathRedirections().insidePath
-        self.alongsidePath = PathRedirections().alongsidePath
-
-        result = [ (INSIDE_INDENTIFIER, self.insidePath),
-                   (ALONGSIDE_INDENTIFIER, self.alongsidePath),
-                   (DATA_INDENTIFIER, self.dataPath)
-                 ]
-        return result
+    def _getPathRedirections(self):
+        "Get the redirection paths; return list of items of the pathRedirection dict"
+        self.pathRedirections = dict( PathRedirections().getPaths() )
+        return [itm for itm in self.pathRedirections.items()]
 
     @property
     def aPath(self):
@@ -247,7 +304,7 @@ class DataStore(CcpNmrJson):
 
         # decode the $DATA, $INSIDE $ALONGSIDE
         _path = Path(self._path)
-        for d, p in self._setPaths():
+        for d, p in self._getPathRedirections():
             if str(self._path).startswith(d):
                 _path = p / Path._from_parts(_path.parts[1:])
                 break
@@ -259,7 +316,7 @@ class DataStore(CcpNmrJson):
         return Path instance
         """
         _path = Path(path)
-        for d, p in self._setPaths():
+        for d, p in self._getPathRedirections():
             if str(path).startswith(str(p)):
                 _path = Path(d) / _path.relative_to(p)
                 break

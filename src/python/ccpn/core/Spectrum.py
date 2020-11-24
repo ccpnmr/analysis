@@ -246,12 +246,12 @@ class Spectrum(AbstractWrapperObject):
         self._intensities = None
         self._positions = None
 
-        # Reference to DataStore instance for filePath manipulation
-        # with apiNotificationBlanking():
-        #     # Upon restore, the DataStore creation for old spectra triggers a call to the the ccpnInternalData
-        #     # with trigger the api 'change' notifier, which triggers _finaliseAction which crashes
-        #     # the initialision process; hence apiNotification blanking
-        self._dataStore = DataStore(spectrum=self)
+        # Reference to DataStore instance for filePath manipulation;
+        # it may alreeady have been defined (e.g. in _newSpectrum)
+        if not hasattr(self, '_dataStore'):
+            self._dataStore = None
+        if self._dataStore is None:
+            self._dataStore = DataStore(spectrum=self)
 
         # Reference to dataSource object corresponding to (binary) data file
         self._dataSource = None

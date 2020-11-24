@@ -170,6 +170,9 @@ class Path(_Path_):
     def asString(self):
         return str(self)
 
+    def __len__(self):
+        return len(self.asString())
+
     def __eq__(self, other):
         return (str(self).strip() == str(other).strip())
 

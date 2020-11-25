@@ -30,8 +30,7 @@ from collections import OrderedDict
 from PyQt5 import QtWidgets, QtGui
 
 from ccpn.core.lib import Util as ccpnUtil
-from ccpn.core.lib.DataStore import DATA_INDENTIFIER, INSIDE_INDENTIFIER, ALONGSIDE_INDENTIFIER, DataStore, \
-                                    PathRedirections
+from ccpn.core.lib.DataStore import DataRedirection, DataStore, PathRedirections
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger
 
@@ -97,7 +96,7 @@ class PathRowABC(object):
 
     LABELWIDGET_MIN_WIDTH = 200
 
-    def __init__(self, topWidget, labelText, obj, enabled=True, callback=None):
+    def __init__(self, labelText, obj, enabled=True, callback=None):
         """
         :param parent:
         :param labelText:
@@ -108,7 +107,6 @@ class PathRowABC(object):
         if self.validatorClass is None:
             raise NotImplementedError('Define %s.validatorClass' % self.__class__.__name__)
 
-        self.topWidget = topWidget
         self.labelText = labelText
         self.obj = obj
         self.enabled = enabled
@@ -166,10 +164,6 @@ class PathRowABC(object):
         self._setDataInWidget(self.initialValue)
         self.setEnabled(self.enabled)
 
-        # self.labelWidget.setEnabled(self.enabled)
-        # self.dataWidget.setEnabled(self.enabled)
-        # self.buttonWidget.setVisible(self.enabled)
-
         return self
 
     def _getDialog(self):
@@ -178,7 +172,7 @@ class PathRowABC(object):
         dialog = FileDialog(parent=self.buttonWidget, text='Select path', directory=str(dialogPath),
                             fileMode=self.dialogFileMode, acceptMode=0)
         choices = dialog.selectedFiles()
-        if len(choices) > 0:
+        if choices is not None and len(choices) > 0:
             newPath = choices[0]
             self.setPath(newPath)
             self._setDataInWidget(newPath)
@@ -421,7 +415,7 @@ class ValidateSpectraPopup(CcpnDialog):
         # populate the widget with a list of spectrum buttons and filepath buttons
         scrollRow = 0
         for idx, redirect in enumerate(PathRedirections()):
-            _row = RedirectPathRow(topWidget=self, obj=redirect,
+            _row = RedirectPathRow(obj=redirect,
                                    labelText=redirect.identifier, enabled=(idx==0),
                                    callback=self._dataRowCallback).addRow(
                                                         widget=self.dataUrlScrollAreaWidgetContents, row=scrollRow)
@@ -474,7 +468,7 @@ class ValidateSpectraPopup(CcpnDialog):
         # populate the widget with a list of spectrum buttons and filepath buttons
         scrollRow = 0
         for sp in self.project.spectra:
-            _row = SpectrumPathRow(topWidget=self, labelText=sp.pid, obj=sp, enabled=True, callback=self._spectrumRowCallback).addRow(
+            _row = SpectrumPathRow(labelText=sp.pid, obj=sp, enabled=True, callback=self._spectrumRowCallback).addRow(
                                    widget=self.spectrumScrollAreaWidgetContents, row=scrollRow)
             scrollRow += 1
             self.spectrumData[sp] = _row
@@ -510,14 +504,6 @@ class ValidateSpectraPopup(CcpnDialog):
         self.setMinimumWidth(800)
         # self.setFixedWidth(self.sizeHint().width()+24)
 
-    # def _findDataUrl(self, storeType):
-    #     dataUrl = self.project._apiNmrProject.root.findFirstDataLocationStore(
-    #             name='standard').findFirstDataUrl(name=storeType)
-    #     if dataUrl:
-    #         return (dataUrl,)
-    #     else:
-    #         return ()
-
     def _radiobuttonsCallback(self):
         """Toggle rows on or off depending on their state and the settings of the radio buttons
         Callback for the radio buttons
@@ -550,7 +536,7 @@ class ValidateSpectraPopup(CcpnDialog):
         """
 
         # Special case: set WARNING colour of the rows starting with $DATA if not correct
-        if row.text.startswith(DATA_INDENTIFIER) \
+        if row.text.startswith(DataRedirection().identifier) \
             and self.dataRow is not None and self.dataRow.isNotValid \
             and row.isNotValid:
                 row.setColour(WARNING_ROWCOLOUR)

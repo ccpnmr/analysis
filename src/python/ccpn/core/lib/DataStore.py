@@ -1,8 +1,13 @@
 """
-This wraps the silly dataStore and dataUrl data structures
 
-A project has stores (i.e. insideData, remoteData, alongSideData), that contain dataStores
-with individual spectrum files
+Code to:
+    - implement path redirections $DATA, $ALONGSIDE, $INSIDE
+    - implement a DataStore object to handle Spectrum file paths properly
+    - thereby wraps the silly dataStore and dataUrl data structures
+
+Replaced:
+    - core.lib.util.expandDollarFilePath
+    - cor.lib.util._fetchDataUrl
 
 """
 #=========================================================================================
@@ -41,26 +46,21 @@ from ccpn.util.decorators import singleton
 
 from ccpn.framework.Application import getApplication
 
-
-# Data path URL's (not yet used everywhere; i.e. there are still hardcoded instances to track)
-INSIDE_DATAURL_NAME = 'insideData'
-INSIDE_INDENTIFIER = '$INSIDE'
-
-ALONGSIDE_DATAURL_NAME = 'alongsideData'
-ALONGSIDE_INDENTIFIER = '$ALONGSIDE'
-
-DATA_DATAURL_NAME = 'remoteData'
-DATA_INDENTIFIER = '$DATA'
-
+#=========================================================================================
+# Redirections
+#=========================================================================================
 
 class RedirectionABC(CcpNmrJson):
+    """
+    Base class for mainting a single redirection
+    """
 
     apiName = None  # to be subclassed
     identifier = None # to be subclassed
     expand = False
 
     _application = Any(default_value=None, allow_none=True)
-    _path = CPath(default_value=None, allow_none=True).tag(apiName=DATA_DATAURL_NAME, identifier=DATA_INDENTIFIER)
+    _path = CPath(default_value=None, allow_none=True)
 
     def __init__(self):
         super().__init__()
@@ -87,6 +87,7 @@ class RedirectionABC(CcpNmrJson):
     __repr__ = __str__
 
 
+@singleton
 class DataRedirection(RedirectionABC):
 
     identifier = '$DATA'
@@ -105,6 +106,7 @@ class DataRedirection(RedirectionABC):
         self._application.preferences.general.dataPath = str(self._path)
 
 
+@singleton
 class InsideRedirection(RedirectionABC):
 
     identifier = '$INSIDE'
@@ -117,6 +119,7 @@ class InsideRedirection(RedirectionABC):
         return super().path
 
 
+@singleton
 class AlongsideRedirection(RedirectionABC):
 
     identifier = '$ALONGSIDE'
@@ -127,7 +130,6 @@ class AlongsideRedirection(RedirectionABC):
     def path(self):
         self._path = aPath(self._application.project.path).parent
         return super().path
-
 
 
 @singleton
@@ -184,6 +186,9 @@ class PathRedirections(list):
         path = dataUrl.url.dataLocation
         return path
 
+#=========================================================================================
+# DataStores
+#=========================================================================================
 
 # def getDataStores(project):
 #     """
@@ -269,7 +274,7 @@ class DataStore(CcpNmrJson):
         """
         if self.spectrum is None:
             raise RuntimeError('%s._saveInternal: spectrum not defined' % self.__class__.__name__)
-        
+
         jsonData = self.toJson()
         self.spectrum._setInternalParameter(self._INTERNAL_PARAMETER_NAME, jsonData)
 
@@ -377,29 +382,3 @@ class DataStore(CcpNmrJson):
 
     __repr__ = __str__
 
-
-# def getDataPath(expandDataPath=False):
-#     """Return the path corresponding to $DATA
-#     Optionally expand to user home directory if it None or has len==0
-#     returns aPath instance
-#     """
-#     path = _getPathFromApiStore(DATA_DATAURL_NAME)
-#     if (path is None or len(path) == 0) and expandDataPath:
-#         path = Path.home()
-#     return aPath(path)
-#
-#
-# def getInsidePath():
-#     """Return the path corresponding to $INSIDE
-#     returns aPath instance
-#     """
-#     # path = _getPathFromApiStore(INSIDE_DATAURL_NAME) Incorrect GWV??
-#     path = getApplication().project.path
-#     return aPath(path)
-#
-#
-# def getAlongsidePath():
-#     """Return the path corresponding to $ALONGSIDE
-#     returns aPath instance
-#     """
-#     return getInsidePath().parent

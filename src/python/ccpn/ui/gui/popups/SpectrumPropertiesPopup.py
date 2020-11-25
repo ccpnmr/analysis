@@ -279,7 +279,7 @@ class GeneralTab(Widget):
         self.nameData.textChanged.connect(self._queueSpectrumNameChange)  # ejb - was editingFinished
         row += 1
 
-        self.spectrumRow = SpectrumPathRow(topWidget=self, labelText='Path', obj=self.spectrum, enabled=True).addRow(
+        self.spectrumRow = SpectrumPathRow(labelText='Path', obj=self.spectrum, enabled=True).addRow(
                 widget=self, row=row
         )
         row += 1

@@ -52,12 +52,6 @@ ALONGSIDE_INDENTIFIER = '$ALONGSIDE'
 DATA_DATAURL_NAME = 'remoteData'
 DATA_INDENTIFIER = '$DATA'
 
-# Covenience
-dataUrlsDict = {
-    INSIDE_DATAURL_NAME:INSIDE_INDENTIFIER,
-    ALONGSIDE_DATAURL_NAME:ALONGSIDE_INDENTIFIER,
-    DATA_DATAURL_NAME:DATA_INDENTIFIER,
-}
 
 class RedirectionABC(CcpNmrJson):
 
@@ -85,13 +79,18 @@ class RedirectionABC(CcpNmrJson):
             self._path = Path.home()
         elif self._path == '.':
             self._path = Path.cwd()
-        return self._path()
+        return self._path
+
+    def __str__(self):
+        return '<%s: %s>' % (self.__class__.__name__, self.identifier)
+
+    __repr__ = __str__
 
 
 class DataRedirection(RedirectionABC):
 
-    apiName = DATA_DATAURL_NAME
-    identifier = DATA_INDENTIFIER
+    identifier = '$DATA'
+    apiName = 'remoteData'
     expand = True
 
     @property
@@ -108,9 +107,9 @@ class DataRedirection(RedirectionABC):
 
 class InsideRedirection(RedirectionABC):
 
-    apiName = INSIDE_DATAURL_NAME
-    identifier = INSIDE_INDENTIFIER
-    expand = True
+    identifier = '$INSIDE'
+    apiName = 'insideData'
+    expand = False
 
     @property
     def path(self):
@@ -118,58 +117,72 @@ class InsideRedirection(RedirectionABC):
         return super().path
 
 
+class AlongsideRedirection(RedirectionABC):
+
+    identifier = '$ALONGSIDE'
+    apiName = 'alongsideData'
+    expand = False
+
+    @property
+    def path(self):
+        self._path = aPath(self._application.project.path).parent
+        return super().path
+
+
+
 @singleton
-class PathRedirections(CcpNmrJson):
+class PathRedirections(list):
     """
     Class to maintain the path redirections $DATA, $ALONGSIDE, $INSIDE
     """
 
-    _application = Any(default_value=None, allow_none=True)
-    _expandData = Bool(default_value=False).tag(saveToJson=False)
-
-    _dataPath = CPath(default_value=None, allow_none=True).tag(apiName=DATA_DATAURL_NAME, identifier=DATA_INDENTIFIER)
-    _insidePath = CPath(default_value=None, allow_none=True).tag(apiName=INSIDE_DATAURL_NAME, identifier=INSIDE_INDENTIFIER)
-    _alongsidePath = CPath(default_value=None, allow_none=True).tag(apiName=ALONGSIDE_DATAURL_NAME, identifier=ALONGSIDE_INDENTIFIER)
-
-
     def __init__(self):
         super().__init__()
-        self._application = getApplication()
-        self._expandData = True  # default behavior
+        self.append(DataRedirection())
+        self.append(AlongsideRedirection())
+        self.append(InsideRedirection())
 
     @property
     def dataPath(self):
-        if self._dataPath is None:
-            self._dataPath = aPath(self._application.preferences.general.dataPath)
-        if self._expandData:
-            if self._dataPath is None or len(self._dataPath) == 0:
-                self._dataPath = Path.home()
-            elif self._dataPath == '.':
-                self._dataPath = Path.cwd()
-        return self._dataPath
+        return self[0].path
 
     @dataPath.setter
     def dataPath(self, path):
-        self._dataPath = aPath(path)
-        self._application.preferences.general.dataPath = str(self._dataPath)
-
-    @property
-    def insidePath(self):
-        self._insidePath = aPath(self._application.project.path)
-        return self._insidePath
+        self[0].path = path
 
     @property
     def alongsidePath(self):
-        self._alongsidePath = aPath(self._application.project.path).parent
-        return self._alongsidePath
+        return self[1].path
+
+    @property
+    def insidePath(self):
+        return self[2].path
 
     def getPaths(self):
         "Return a list of (identifier, path) tuples"
-        return [ (INSIDE_INDENTIFIER, self.insidePath),
-                 (ALONGSIDE_INDENTIFIER, self.alongsidePath),
-                 (DATA_INDENTIFIER, self.dataPath)
-               ]
+        paths = [(r.identifier, r.path) for r in self]
+        return paths
 
+    def getApiMappings(self):
+        "Return a list with (apiName, indentifier) tuples"
+        pairs = [(r.apiName, r.identifier) for r in self]
+        return pairs
+
+    def _getPathFromApiStore(self, storeName):
+        """Return path associated with api storeName; for backward compatibility purposes
+        """
+        apiNames = [r.apiName for r in self]
+        if storeName not in apiNames:
+            raise ValueError('_getPathFromApiStore: invalid storeName "%s"' % storeName)
+
+        project = getApplication().project
+        if project is None:
+            raise RuntimeError('_getPathFromApiStore: undefined project')
+
+        dataUrl = project._apiNmrProject.root.findFirstDataLocationStore(
+                    name='standard').findFirstDataUrl(name=storeName)
+        path = dataUrl.url.dataLocation
+        return path
 
 
 # def getDataStores(project):
@@ -182,7 +195,6 @@ class PathRedirections(CcpNmrJson):
 #     # dataStores = [DataStore(s) for url in dataUrls for s in url.sortedDataStores()]
 #     dataStores = [DataStore.newFromSpectrum(s) for s in project.spectra]
 #     return dataStores
-
 
 
 class DataStore(CcpNmrJson):
@@ -207,7 +219,7 @@ class DataStore(CcpNmrJson):
     apiDataStoreDir = Unicode(allow_none=True, default_value=None).tag(saveToJson=True)
     apiDataStorePath = Unicode(allow_none=True, default_value=None).tag(saveToJson=True)
 
-    # Redirection paths
+    # Dict with edirection paths; for reference
     pathRedirections = Dict(default_value={}).tag(saveToJson=True)
 
     def __init__(self, spectrum=None, expandData=True, autoRedirect=False):
@@ -232,6 +244,8 @@ class DataStore(CcpNmrJson):
         instance.path = path
         return instance
 
+    _INTERNAL_PARAMETER_NAME = constants.CCPNMR_PREFIX + 'DataStore'
+
     def _importFromSpectrum(self, spectrum):
         """Restore state from spectrum, either from internal parameter store or from api-dataStores
         Returns self
@@ -239,7 +253,7 @@ class DataStore(CcpNmrJson):
         if spectrum is None:
             raise ValueError('Invalid spectrum "%s"' % spectrum)
 
-        if spectrum._hasInternalParameter(self.__class__.__name__):
+        if spectrum._hasInternalParameter(self._INTERNAL_PARAMETER_NAME):
             self.spectrum = spectrum
             self._restoreInternal()
         else:
@@ -255,8 +269,9 @@ class DataStore(CcpNmrJson):
         """
         if self.spectrum is None:
             raise RuntimeError('%s._saveInternal: spectrum not defined' % self.__class__.__name__)
+        
         jsonData = self.toJson()
-        self.spectrum._setInternalParameter(self.__class__.__name__, jsonData)
+        self.spectrum._setInternalParameter(self._INTERNAL_PARAMETER_NAME, jsonData)
 
     def _restoreInternal(self):
         """Restore from spectrum internal parameter store
@@ -264,7 +279,11 @@ class DataStore(CcpNmrJson):
         """
         if self.spectrum is None:
             raise RuntimeError('%s._restoreInternal: spectrum not defined' % self.__class__.__name__)
-        jsonData = self.spectrum._getInternalParameter(self.__class__.__name__)
+
+        jsonData = self.spectrum._getInternalParameter(self._INTERNAL_PARAMETER_NAME)
+        if jsonData is None or len(jsonData) == 0:
+            raise RuntimeError('DataStore._restoreInternal: json data appear to be corrupted')
+
         self.fromJson(jsonData)
 
     def _restoreFromApiSpectrum(self, apiSpectrum):
@@ -282,17 +301,21 @@ class DataStore(CcpNmrJson):
             self.apiDataStorePath = self.apiDataStore.path
 
             # Encode the different dataStores
-            if self.apiDataStoreName in dataUrlsDict:
-                self._path = os.path.join(dataUrlsDict[self.apiDataStoreName], self.apiDataStorePath)
+            pDict = dict(PathRedirections().getApiMappings())
+            if self.apiDataStoreName in pDict:
+                self._path = os.path.join(pDict[self.apiDataStoreName], self.apiDataStorePath)
             else:
                 self._path = os.path.join(self.apiDataStoreDir, self.apiDataStorePath)
 
         return self
 
     def _getPathRedirections(self):
-        "Get the redirection paths; return list of items of the pathRedirection dict"
-        self.pathRedirections = dict( PathRedirections().getPaths() )
-        return [itm for itm in self.pathRedirections.items()]
+        """Get the redirection paths; return list of items of the pathRedirection dict
+        """
+        redirections = PathRedirections().getPaths()
+        # Convert and store the redirections for future reference
+        self.pathRedirections = dict( [(r, str(p)) for r, p in redirections] )
+        return redirections
 
     @property
     def aPath(self):
@@ -355,34 +378,17 @@ class DataStore(CcpNmrJson):
     __repr__ = __str__
 
 
-def _getPathFromApiStore(storeName):
-    """Return path associated with storeName
-    """
-    if storeName not in dataUrlsDict.keys():
-        raise RuntimeError('_getPathFromApiStore: invalid storeName "%s"' %storeName)
-
-    project = getApplication().project
-    if project is None:
-        raise RuntimeError('_getPathFromApiStore: undefined project')
-
-    dataUrl = project._apiNmrProject.root.findFirstDataLocationStore(
-                name='standard').findFirstDataUrl(name=DATA_DATAURL_NAME)
-    path = dataUrl.url.dataLocation
-    return path
-
-
-
-def getDataPath(expandDataPath=False):
-    """Return the path corresponding to $DATA
-    Optionally expand to user home directory if it None or has len==0
-    returns aPath instance
-    """
-    path = _getPathFromApiStore(DATA_DATAURL_NAME)
-    if (path is None or len(path) == 0) and expandDataPath:
-        path = Path.home()
-    return aPath(path)
-
-
+# def getDataPath(expandDataPath=False):
+#     """Return the path corresponding to $DATA
+#     Optionally expand to user home directory if it None or has len==0
+#     returns aPath instance
+#     """
+#     path = _getPathFromApiStore(DATA_DATAURL_NAME)
+#     if (path is None or len(path) == 0) and expandDataPath:
+#         path = Path.home()
+#     return aPath(path)
+#
+#
 # def getInsidePath():
 #     """Return the path corresponding to $INSIDE
 #     returns aPath instance

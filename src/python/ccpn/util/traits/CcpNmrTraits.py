@@ -329,7 +329,7 @@ class CPath(TraitType, _Ordered):
     default_value = aPath('.')
     info_text = "'an Path object'"
 
-    def __init__(self, default_value={}, allow_none=False, read_only=None, **kwargs):
+    def __init__(self, default_value='', allow_none=False, read_only=None, **kwargs):
         TraitType.__init__(self, default_value=default_value, allow_none=allow_none, read_only=read_only, **kwargs)
         _Ordered.__init__(self)
         if default_value is not None:

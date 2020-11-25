@@ -89,7 +89,7 @@ from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.util.Path import Path, aPath
 from ccpn.util.Common import isIterable
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
-from ccpn.core.lib.DataStore import dataUrlsDict, DataStore
+from ccpn.core.lib.DataStore import DataStore
 from ccpn.core.lib.Notifiers import Notifier
 
 # 2019010:ED test new matching

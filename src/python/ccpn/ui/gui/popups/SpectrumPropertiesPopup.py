@@ -50,7 +50,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.isotopes import isotopeRecords
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock
-from ccpn.ui.gui.popups.ValidateSpectraPopup import SpectrumValidator
+from ccpn.ui.gui.popups.ValidateSpectraPopup import SpectrumValidator, SpectrumPathRow
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
@@ -254,6 +254,10 @@ class GeneralTab(Widget):
         self.application = self.mainWindow.application
         self.project = self.mainWindow.project
 
+        self.pythonConsole = mainWindow.pythonConsole
+        self.logger = getLogger()  # self.spectrum.project._logger
+
+
         self.item = item
         self.spectrum = spectrum
         self._changes = dict()
@@ -275,34 +279,19 @@ class GeneralTab(Widget):
         self.nameData.textChanged.connect(self._queueSpectrumNameChange)  # ejb - was editingFinished
         row += 1
 
-        Label(self, text="Path", vAlign='t', hAlign='l', grid=(row, 0))
-        self.pathData = LineEdit(self, textAlignment='left', vAlign='t', grid=(row, 1))
-        self.pathData.setValidator(SpectrumValidator(parent=self.pathData, spectrum=self.spectrum))
-        self.pathButton = Button(self, grid=(row, 2), callback=partial(self._getSpectrumFile, self.spectrum), icon='icons/directory')
+        self.spectrumRow = SpectrumPathRow(topWidget=self, labelText='Path', obj=self.spectrum, enabled=True).addRow(
+                widget=self, row=row
+        )
         row += 1
+        # Label(self, text="Path", vAlign='t', hAlign='l', grid=(row, 0))
+        # self.pathData = LineEdit(self, textAlignment='left', vAlign='t', grid=(row, 1))
+        # self.pathData.setValidator(SpectrumValidator(parent=self.pathData, obj=self.spectrum))
+        # self.pathButton = Button(self, grid=(row, 2), callback=partial(self._getSpectrumFile, self.spectrum), icon='icons/directory')
 
-        self.pythonConsole = mainWindow.pythonConsole
-        self.logger = getLogger()  # self.spectrum.project._logger
-
-        self.spectrumData = {}
-        self.spectrumData[spectrum] = (self.pathData, self.pathButton, Label)
-        self._setPathData(spectrum)
-        # apiDataStore = spectrum._apiDataSource.dataStore
-        # if not apiDataStore:
-        #     self.pathData.setText('<None>')
-        # elif apiDataStore.dataLocationStore.name == 'standard':
-        #     dataUrlName = apiDataStore.dataUrl.name
-        #     if dataUrlName == 'insideData':
-        #         self.pathData.setText('$INSIDE/%s' % apiDataStore.path)
-        #     elif dataUrlName == 'alongsideData':
-        #         self.pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
-        #     elif dataUrlName == 'remoteData':
-        #         self.pathData.setText('$DATA/%s' % apiDataStore.path)
-        #     else:
-        #         self.pathData.setText(apiDataStore.fullPath)
-        # else:
-        #     self.pathData.setText(apiDataStore.fullPath)
-        self.pathData.editingFinished.connect(partial(self._queueSetSpectrumPath, self.spectrum))
+        # self.spectrumData = {}
+        # self.spectrumData[spectrum] = (self.pathData, self.pathButton, Label)
+        # self._setPathData(spectrum)
+        # self.pathData.editingFinished.connect(partial(self._queueSetSpectrumPath, self.spectrum))
 
         try:
             index = spectrum.project.chemicalShiftLists.index(spectrum.chemicalShiftList)
@@ -415,7 +404,7 @@ class GeneralTab(Widget):
             self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
 
             self.spectrumType.currentIndexChanged.connect(self._queueSetSpectrumType)
-            self.spectrumType.setMinimumWidth(self.pathData.width() * 1.95)
+            # self.spectrumType.setMinimumWidth(self.pathData.width() * 1.95)
             self.spectrumType.setFixedHeight(25)
 
             spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', grid=(9, 0))
@@ -450,36 +439,40 @@ class GeneralTab(Widget):
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(12, 1), gridSpan=(1, 1))
 
-    def _setPathData(self, spectrum):
-        """Set the pathData widgets from the spectrum.
-        """
-        # from ValidateSpectraPopup...
-        if spectrum and spectrum in self.spectrumData:
-            pathData, pathButton, pathLabel = self.spectrumData[spectrum]
-
-            apiDataStore = spectrum._apiDataSource.dataStore
-            if not apiDataStore:
-                pathData.setText('<None>')
-            elif apiDataStore.dataLocationStore.name == 'standard':
-
-                # this fails on the first loading of V2 projects - ordering issue?
-                dataUrlName = apiDataStore.dataUrl.name
-                if dataUrlName == 'insideData':
-                    pathData.setText('$INSIDE/%s' % apiDataStore.path)
-                elif dataUrlName == 'alongsideData':
-                    pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
-                elif dataUrlName == 'remoteData':
-                    pathData.setText('$DATA/%s' % apiDataStore.path)
-            else:
-                pathData.setText(apiDataStore.fullPath)
-
-            pathData.validator().resetCheck()
+    # def _setPathData(self, spectrum):
+    #     """Set the pathData widgets from the spectrum.
+    #     """
+    #     # from ValidateSpectraPopup...
+    #     if spectrum and spectrum in self.spectrumData:
+    #         pathData, pathButton, pathLabel = self.spectrumData[spectrum]
+    #
+    #         apiDataStore = spectrum._apiDataSource.dataStore
+    #         if not apiDataStore:
+    #             pathData.setText('<None>')
+    #         elif apiDataStore.dataLocationStore.name == 'standard':
+    #
+    #             # this fails on the first loading of V2 projects - ordering issue?
+    #             dataUrlName = apiDataStore.dataUrl.name
+    #             if dataUrlName == 'insideData':
+    #                 pathData.setText('$INSIDE/%s' % apiDataStore.path)
+    #             elif dataUrlName == 'alongsideData':
+    #                 pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
+    #             elif dataUrlName == 'remoteData':
+    #                 pathData.setText('$DATA/%s' % apiDataStore.path)
+    #         else:
+    #             pathData.setText(apiDataStore.fullPath)
+    #
+    #         pathData.validator().resetCheck()
 
     def _repopulate(self):
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
-        self.nameData.setText(self.spectrum.name)
-        self.pathData.setValidator(SpectrumValidator(parent=self.pathData, spectrum=self.spectrum))
+        # self.nameData.setText(self.spectrum.name)
+        # self.pathData.setValidator(SpectrumValidator(parent=self.pathData, spectrum=self.spectrum))
+
+        self.spectrumRow.setLabel(self.spectrum.name)
+        self.spectrumRow.obj = self.spectrum
+        self.spectrumRow.setText(self.spectrumRow.getPath())
 
         try:
             index = self.spectrum.project.chemicalShiftLists.index(self.spectrum.chemicalShiftList)
@@ -598,94 +591,74 @@ class GeneralTab(Widget):
 
         # expType = self.experimentTypes[self.spectrum.dimensionCount].get(self.atomCodes).get(self.spectrumType.currentText())
         expType = self.spectrumType.getObject()
-        print(expType)
+        # print(expType)
         self.spectrum.experimentType = expType
         self.pythonConsole.writeConsoleCommand('spectrum.experimentType = experimentType', experimentType=expType, spectrum=self.spectrum)
         self._writeLoggingMessage("spectrum.experimentType = '%s'" % expType)
 
-    def _getSpectrumFile(self, spectrum):
-        """Get the path from the widget and call the open dialog.
-        """
-        if spectrum and spectrum in self.spectrumData:
-            pathData, pathButton, pathLabel = self.spectrumData[spectrum]
-            filePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
+    # def _getSpectrumFile(self, spectrum):
+    #     """Get the path from the widget and call the open dialog.
+    #     """
+    #     if spectrum and spectrum in self.spectrumData:
+    #         pathData, pathButton, pathLabel = self.spectrumData[spectrum]
+    #         filePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
+    #
+    #         dialog = FileDialog(self, text='Select Spectrum File', directory=filePath,
+    #                             fileMode=1, acceptMode=0,
+    #                             preferences=self.application.preferences.general)
+    #         directory = dialog.selectedFiles()
+    #         if len(directory) > 0:
+    #             newFilePath = directory[0]
+    #
+    #             if spectrum.filePath != newFilePath:
+    #
+    #                 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+    #
+    #                 dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
+    #                 if dataType == 'Spectrum':
+    #                     self._changes['spectrumFilePath'] = partial(self._setSpectrumFilePath, newFilePath)
+    #
+    #                 else:
+    #                     getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
+    #
+    #                 # set the widget text
+    #                 self._setPathData(spectrum)
 
-            dialog = FileDialog(self, text='Select Spectrum File', directory=filePath,
-                                fileMode=1, acceptMode=0,
-                                preferences=self.application.preferences.general)
-            directory = dialog.selectedFiles()
-            if len(directory) > 0:
-                newFilePath = directory[0]
+    # def _queueSetSpectrumPath(self, spectrum):
+    #     if spectrum and spectrum in self.spectrumData:
+    #         pathData, pathButton, pathLabel = self.spectrumData[spectrum]
+    #         newFilePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
+    #
+    #         if spectrum.filePath != newFilePath:
+    #
+    #             from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+    #
+    #             dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
+    #             if dataType == 'Spectrum':
+    #                 # spectrum.filePath = newFilePath
+    #                 self._changes['spectrumFilePath'] = partial(self._setSpectrumFilePath, newFilePath)
+    #             else:
+    #                 getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
+    #
+    #     # if self.pathData.isModified():
+    #     #     filePath = self.pathData.text()
+    #     #
+    #     #     # Convert from custom repository names to full names
+    #     #     filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, self.spectrum, filePath)
+    #     #
+    #     #     if os.path.exists(filePath):
+    #     #         self._changes['spectrumFilePath'] = partial(self._setSpectrumFilePath, filePath)
+    #     #     else:
+    #     #         self.logger.error('Cannot set spectrum path to %s. Path does not exist' % self.pathData.text())
 
-                if spectrum.filePath != newFilePath:
-
-                    from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
-
-                    dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
-                    if dataType == 'Spectrum':
-                        self._changes['spectrumFilePath'] = partial(self._setSpectrumFilePath, newFilePath)
-
-                    else:
-                        getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
-
-                    # set the widget text
-                    self._setPathData(spectrum)
-
-    def _queueSetSpectrumPath(self, spectrum):
-        if spectrum and spectrum in self.spectrumData:
-            pathData, pathButton, pathLabel = self.spectrumData[spectrum]
-            newFilePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
-
-            if spectrum.filePath != newFilePath:
-
-                from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
-
-                dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
-                if dataType == 'Spectrum':
-                    # spectrum.filePath = newFilePath
-                    self._changes['spectrumFilePath'] = partial(self._setSpectrumFilePath, newFilePath)
-                else:
-                    getLogger().warning('Not a spectrum file: %s - (%s, %s)' % (newFilePath, dataType, subType))
-
-        # if self.pathData.isModified():
-        #     filePath = self.pathData.text()
-        #
-        #     # Convert from custom repository names to full names
-        #     filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, self.spectrum, filePath)
-        #
-        #     if os.path.exists(filePath):
-        #         self._changes['spectrumFilePath'] = partial(self._setSpectrumFilePath, filePath)
-        #     else:
-        #         self.logger.error('Cannot set spectrum path to %s. Path does not exist' % self.pathData.text())
-
-    def _setSpectrumFilePath(self, filePath):
-        self.spectrum.filePath = filePath
-        self._writeLoggingMessage("spectrum.filePath = '%s'" % filePath)
-        self.pythonConsole.writeConsoleCommand("spectrum.filePath('%s')" % filePath,
-                                               spectrum=self.spectrum)
-
-        self.spectrum.filePath = filePath
-        self._setPathData(self.spectrum)
-
-        # # TODO: Find a way to convert to the shortened path without setting the value in the model,
-        # #       then move this back to _setSpectrumPath
-        # apiDataSource = self.spectrum._apiDataSource
-        # apiDataStore = apiDataSource.dataStore
-        #
-        # if not apiDataStore or apiDataStore.dataLocationStore.name != 'standard':
-        #     raise NotImplemented('Non-standard API data store locations are invalid.')
-        #
-        # dataUrlName = apiDataStore.dataUrl.name
-        # apiPathName = apiDataStore.path
-        # if dataUrlName == 'insideData':
-        #     shortenedPath = '$INSIDE/{}'.format(apiPathName)
-        # elif dataUrlName == 'alongsideData':
-        #     shortenedPath = '$ALONGSIDE/{}'.format(apiPathName)
-        # elif dataUrlName == 'remoteData':
-        #     shortenedPath = '$DATA/{}'.format(apiPathName)
-        # else:
-        #     shortenedPath = apiDataStore.fullPath
-        # self.pathData.setText(shortenedPath)
+    # def _setSpectrumFilePath(self, filePath):
+    #     self.spectrum.filePath = filePath
+    #     self._writeLoggingMessage("spectrum.filePath = '%s'" % filePath)
+    #     self.pythonConsole.writeConsoleCommand("spectrum.filePath('%s')" % filePath,
+    #                                            spectrum=self.spectrum)
+    #
+    #     self.spectrum.filePath = filePath
+    #     self._setPathData(self.spectrum)
 
     def _queueSetSpectrumColour(self, spectrum):
         dialog = ColourDialog(self)

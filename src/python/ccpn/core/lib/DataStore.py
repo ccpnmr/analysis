@@ -45,6 +45,8 @@ from ccpn.core.lib.ContextManagers import notificationBlanking
 from ccpn.util.decorators import singleton
 
 from ccpn.framework.Application import getApplication
+from ccpn.util.Logging import getLogger
+
 
 #=========================================================================================
 # Redirections
@@ -241,6 +243,25 @@ class DataStore(CcpNmrJson):
         if spectrum is not None:
             self._importFromSpectrum(spectrum)
 
+    @property
+    def path(self):
+        """Return a Path representation of self, optionally encoded with $DATA, $ALONGSIDE, $INSIDE redirections
+        """
+        if self._path is None:
+            return Path(constants.UNDEFINED_STRING)
+
+        return Path(self._path)
+
+    @path.setter
+    def path(self, value):
+        """Set path to value; None makes it undefined
+        """
+        if value is not None and self.autoRedirect:
+            value = self.redirectPath(value)
+        self._path = value
+        if self.spectrum is not None:
+            self._saveInternal()
+
     @classmethod
     def newFromPath(cls, path, expandData=True, autoRedirect=False):
         """Create and return a new instance from path
@@ -248,6 +269,55 @@ class DataStore(CcpNmrJson):
         instance = cls(expandData=expandData, autoRedirect=autoRedirect)
         instance.path = path
         return instance
+
+    def aPath(self):
+        """Return aPath instance of self, decoded for $DATA, $ALONGSIDE, $INSIDE redirections
+        optionally expand $DATA to home directory if not defined, depending on the self.expandData flag
+        """
+        if self._path is None:
+            return aPath(constants.UNDEFINED_STRING)
+
+        # decode the $DATA, $INSIDE $ALONGSIDE
+        _path = Path(self._path)
+        for d, p in self._getPathRedirections():
+            if str(self._path).startswith(d):
+                _path = p / Path._from_parts(_path.parts[1:])
+                break
+
+        return aPath(_path)
+
+    def redirectPath(self, path):
+        """Redefine path into $DATA, $ALONGSIDE, $INSIDE redirections
+        return Path instance
+        """
+        _path = Path(path)
+        for d, p in self._getPathRedirections():
+            if str(path).startswith(str(p)):
+                _path = Path(d) / _path.relative_to(p)
+                break
+        return _path
+
+    def exists(self):
+        """Return True if self.path exists
+        """
+        if self._path is None:
+            return False
+        else:
+            return self.aPath().exists()
+
+    def warningMessage(self):
+        """Error message displayed on logger
+        """
+        getLogger().warning(self._message())
+
+    def errorMessage(self):
+        """Error message displayed on logger
+        """
+        getLogger().warning(self._message())
+
+    #=========================================================================================
+    # Implementation
+    #=========================================================================================
 
     _INTERNAL_PARAMETER_NAME = constants.CCPNMR_PREFIX + 'DataStore'
 
@@ -322,60 +392,18 @@ class DataStore(CcpNmrJson):
         self.pathRedirections = dict( [(r, str(p)) for r, p in redirections] )
         return redirections
 
-    @property
-    def aPath(self):
-        """Return aPath instance of self, decoded for $DATA, $ALONGSIDE, $INSIDE redirections
-        optionally expand $DATA to home directory if not defined, depending on the self.expandData flag
+    def _message(self):
+        """return message to be displayed on logger
         """
-        if self._path is None:
-            return aPath(constants.UNDEFINED_STRING)
-
-        # decode the $DATA, $INSIDE $ALONGSIDE
-        _path = Path(self._path)
+        text = 'path "%s" is invalid ' % self.path
         for d, p in self._getPathRedirections():
-            if str(self._path).startswith(d):
-                _path = p / Path._from_parts(_path.parts[1:])
+            if self.path.startswith(d):
+                if p.exists():
+                    text += ' (check %s)' % d
+                else:
+                    text += ' (%s "%s" does not exist)' % (d, p)
                 break
-
-        return aPath(_path)
-
-    def redirectPath(self, path):
-        """Redefine path into $DATA, $ALONGSIDE, $INSIDE redirections
-        return Path instance
-        """
-        _path = Path(path)
-        for d, p in self._getPathRedirections():
-            if str(path).startswith(str(p)):
-                _path = Path(d) / _path.relative_to(p)
-                break
-        return _path
-
-    @property
-    def path(self):
-        """Return a Path representation of self, optionally encoded with $DATA, $ALONGSIDE, $INSIDE redirections
-        """
-        if self._path is None:
-            return Path(constants.UNDEFINED_STRING)
-
-        return Path(self._path)
-
-    @path.setter
-    def path(self, value):
-        """Set path to value; None makes it undefined
-        """
-        if value is not None and self.autoRedirect:
-            value = self.redirectPath(value)
-        self._path = value
-        if self.spectrum is not None:
-            self._saveInternal()
-
-    def exists(self):
-        """Return True if self.path exists
-        """
-        if self._path is None:
-            return False
-        else:
-            return self.aPath.exists()
+        return text
 
     def __eq__(self, other):
         return self._path == other._path

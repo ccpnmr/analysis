@@ -909,6 +909,26 @@ class AbstractWrapperObject(NotifierBase):
             objs.extend(children)
         return objs
 
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Restores object from apiObj; checks for _factoryFunction.
+        Returns obj
+        CCPNINTERNAL: subclassed in special cases
+        """
+        if apiObj is None:
+            raise ValueError('undefined apiObj')
+
+        factoryFunction = cls._factoryFunction
+        if factoryFunction is None:
+            obj = cls(project, apiObj)
+        else:
+            obj = factoryFunction(project, apiObj)
+
+        if obj is None:
+            raise RuntimeError('Error restoring object encoded by %s' % apiObj)
+
+        return obj
+
     def _initializeAll(self):
         """Initialize children, using existing objects in data model"""
 
@@ -920,11 +940,12 @@ class AbstractWrapperObject(NotifierBase):
             for apiObj in childClass._getAllWrappedData(self):
                 obj = data2Obj.get(apiObj)
                 if obj is None:
-                    factoryFunction = childClass._factoryFunction
-                    if factoryFunction is None:
-                        obj = childClass(project, apiObj)
-                    else:
-                        obj = factoryFunction(project, apiObj)
+                    obj = childClass._restoreObject(project, apiObj)
+                    # factoryFunction = childClass._factoryFunction
+                    # if factoryFunction is None:
+                    #     obj = childClass(project, apiObj)
+                    # else:
+                    #     obj = factoryFunction(project, apiObj)
                 try:
                     obj._initializeAll()
                 except Exception as er:
@@ -1126,8 +1147,14 @@ class AbstractWrapperObject(NotifierBase):
                     for notifier in tuple(dd):
                         notifier(self)
 
-    def _validateName(self, value: str, attribName: str = None, allowWhitespace: bool = False, allowEmpty: bool = False, allowNone: bool = False):
+    def _validateName(self, value: str, attribName: str = None, allowWhitespace: bool = False,
+                            allowEmpty: bool = False, allowNone: bool = False):
+        """GWV guesses: validate the name of any named core class object
+
+        :param attribName: used for reporting, defaults to className
+        """
         attrib = attribName if attribName else self.className
+
         if value is not None:
             if not isinstance(value, str):
                 raise TypeError("%s name must be a string" % attrib)

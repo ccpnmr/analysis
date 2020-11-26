@@ -896,7 +896,8 @@ def _storeDeleteObjectCurrent(self, thisAddUndoItem):
 
 def newObject(klass):
     """A decorator wrap a newObject method's of the various classes in an undo block and calls
-    result._finalise('create')
+    result._finalise('create').
+    Checks for appropriate klass; passes on None if that is the result of the decorated function call
     """
     from ccpn.core.lib import Undo
 
@@ -910,6 +911,9 @@ def newObject(klass):
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
                 result = func(*args, **kwds)
+                if result is None:
+                    return None
+
                 if not isinstance(result, klass):
                     raise RuntimeError('Expected an object of class %s, obtained %s' % (klass, result.__class__))
 
@@ -925,11 +929,6 @@ def newObject(klass):
                             )
 
                 _storeNewObjectCurrent(result, addUndoItem)
-                # if hasattr(result, CURRENT_ATTRIBUTE_NAME):
-                #     storeObj = _ObjectStore(result)
-                #     addUndoItem(undo=storeObj._storeCurrentSelectedObject,
-                #                 redo=storeObj._restoreCurrentSelectedObject,
-                #                 )
 
         result._finaliseAction('create')
         return result

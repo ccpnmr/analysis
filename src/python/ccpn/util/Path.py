@@ -168,7 +168,13 @@ class Path(_Path_):
         return (str(self.parent), str(self.name))
 
     def asString(self):
+        "Return self as a string"
         return str(self)
+
+    def startswith(self, prefix):
+        "Return True if self starts with prefix"
+        path = self.asString()
+        return path.startswith(prefix)
 
     def __len__(self):
         return len(self.asString())

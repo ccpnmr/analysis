@@ -678,21 +678,22 @@ def _recurseData(ii, dataList, startCondition, endCondition):
             _recurseData(ii + 1, newData, startCondition, endCondition)
 
 
-def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,
-                                  setPositiveContours=True, setNegativeContours=True,
-                                  useSameMultiplier=True):
-    """Calculate the noise level, base contour level and positive/negative multipliers for the given apiSpectrum
-    """
-
-    project = apiSpectrum.topObject
-
-    # the core objects should have been initialised at this point
-    if project and apiSpectrum in project._data2Obj:
-        spectrum = project._data2Obj[apiSpectrum]
-        if spectrum.dimensionCount == 1: return
-        setContourLevelsFromNoise(spectrum, setNoiseLevel=setNoiseLevel,
-                                  setPositiveContours=setPositiveContours, setNegativeContours=setNegativeContours,
-                                  useSameMultiplier=useSameMultiplier)
+# GWV 20201127 not in use (?)
+# def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,
+#                                   setPositiveContours=True, setNegativeContours=True,
+#                                   useSameMultiplier=True):
+#     """Calculate the noise level, base contour level and positive/negative multipliers for the given apiSpectrum
+#     """
+#
+#     project = apiSpectrum.topObject
+#
+#     # the core objects should have been initialised at this point
+#     if project and apiSpectrum in project._data2Obj:
+#         spectrum = project._data2Obj[apiSpectrum]
+#         if spectrum.dimensionCount == 1: return
+#         setContourLevelsFromNoise(spectrum, setNoiseLevel=setNoiseLevel,
+#                                   setPositiveContours=setPositiveContours, setNegativeContours=setNegativeContours,
+#                                   useSameMultiplier=useSameMultiplier)
 
 
 DEFAULTMULTIPLIER = 1.414214

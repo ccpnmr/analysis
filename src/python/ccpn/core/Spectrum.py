@@ -244,52 +244,35 @@ class Spectrum(AbstractWrapperObject):
 
     def __init__(self, project: Project, wrappedData: Nmr.DataSource):
 
-        # local import to prevent cycles
-        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getSpectrumDataSource
-
         super().__init__(project, wrappedData)
 
         self._intensities = None
         self._positions = None
 
         # References to DataStore / DataSource instances for filePath manipulation and data reading;
-        # it may already have been defined (e.g. in _newSpectrum)
-        if not hasattr(self, '_dataStore'):
-            self._dataStore = None
-        if not hasattr(self, '_dataSource'):
-            self._dataSource = None
-
-        if self._dataStore is None:
-            self._dataStore = DataStore(spectrum=self)
-
-        if not self._dataStore.exists():
-            getLogger().warning('path "%s" is not valid' % (self.filePath,))
-        else:
-            newDataSource = self._getDataSource(self._dataStore, self.dataFormat)
-            if newDataSource is None:
-                getLogger().warning('path "%s" is not of type "%s"' % (self.filePath, self.dataFormat))
-            self._dataSource = newDataSource
+        self._dataStore = None
+        self._dataSource = None
 
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
 
-#        self.setNotifier(self.project, [Notifier.CREATE], self.className, self._postInit)
 
-    # def _postInit(self):
-    #     """Silly bottom-up intitalisation; used with notifier on creation
-    #     """
-    #
-    #     pass
-    #     # Assure at least one peakList; due to the silly bottom-up intitalisation, this appears to
-    #     # result in duplicate peakLists
-    #     # if len(self.peakLists) == 0:
-    #     #     self.newPeakList()
-    #
-    # def _finaliseAction(self, action:str):
-    #     "Subclassed to allow for post inti actions on create"
-    #     super()._finaliseAction(action=action)
-    #     if action == 'create':
-    #         self._postInit()
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        "Subclassed to allow for initialisations on restore, not on creation vis newSpectrum"
+
+        spectrum = super()._restoreObject(project, apiObj)
+
+        spectrum._dataStore = DataStore(spectrum=spectrum)
+        if not spectrum._dataStore.exists():
+            spectrum._dataStore.warningMessage()
+        else:
+            newDataSource = spectrum._getDataSource(spectrum._dataStore, spectrum.dataFormat)
+            if newDataSource is None:
+                getLogger().warning('path "%s" is not of type "%s"' % (spectrum.filePath, spectrum.dataFormat))
+            spectrum._dataSource = newDataSource
+
+        return spectrum
 
     # CCPN properties
     @property
@@ -628,7 +611,7 @@ class Spectrum(AbstractWrapperObject):
             raise RuntimeError('dataStore not defined')
         if not dataStore.exists():
             return None
-        return getSpectrumDataSource(dataStore.aPath, format)
+        return getSpectrumDataSource(dataStore.aPath(), format)
 
     @property
     def filePath(self) -> Optional[str]:
@@ -646,7 +629,6 @@ class Spectrum(AbstractWrapperObject):
 
         if self._dataStore is None:
             raise RuntimeError('dataStore not defined')
-
         if value is None:
             self._dataStore.path = None
             self._dataSource = None
@@ -657,14 +639,18 @@ class Spectrum(AbstractWrapperObject):
         self._dataStore.path = value
         if not self._dataStore.exists():
             self._dataStore.path = oldPath
-            raise ValueError('Spectrum.filePath: path "%s" does not exists' % value)
+            self._dataStore.errorMessage()
+            raise ValueError('Setting Spectrum.filePath to "%s"' % value)
 
         newDataSource = self._getDataSource(self._dataStore, self.dataFormat)
         if newDataSource is None:
             self._dataStore.path = oldPath
-            raise ValueError('Spectrum.filePath: path "%s" is invalid for format "%s"' % (value, self.dataFormat))
+            raise ValueError('Spectrum.filePath: data format "%s" is incompatible with path "%s"' %
+                             (self.dataFormat, value))
 
         else:
+            # check some fundamental parameters
+
             self._dataSource = newDataSource
             self._dataStore._saveInternal()
             self._clearCache()
@@ -675,7 +661,7 @@ class Spectrum(AbstractWrapperObject):
         """
         if self._dataStore is None:
             raise RuntimeError('dataStore not defined')
-        return self._dataStore.aPath
+        return self._dataStore.aPath()
 
     @property
     def isValidPath(self) -> bool:
@@ -684,14 +670,7 @@ class Spectrum(AbstractWrapperObject):
         """
         # # Local  to prevent circular import
         # from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import isValidSpectrumPath
-        #
-        # if self._dataStore is None:
-        #     raise RuntimeError('dataStore not defined')
-        #
-        # if self._dataStore._path is None:
-        #     return False
-        #
-        # return isValidSpectrumPath(path=self._dataStore.aPath)
+
         return self._dataStore.exists()
 
     @property
@@ -1795,13 +1774,14 @@ class Spectrum(AbstractWrapperObject):
         return self._apiDataSource.automaticIntegration(spectralData)
 
     def estimateNoise(self):
-        "Estimate and set the noiseLevel"
-        try:
-            noiseLevel = self._apiDataSource.estimateNoise()  # This sometimes fails
-        except:
-            noiseLevel = 1.0
-        self.noiseLevel = noiseLevel
-        return noiseLevel
+        """Estimate and set the noiseLevel
+        """
+        if self._dataSource is not None:
+            self.noiseLevel = self._dataSource.estimateNoise()
+        else:
+            getLogger().warning('No valid access to spectral data, setting noiseLevel to 1e6')
+            self.noiseLevel = 1.0e6
+        return self.noiseLevel
 
     def _mapAxisCodes(self, axisCodes: Sequence[str]):
         """Map axisCodes on self.axisCodes
@@ -2544,15 +2524,19 @@ class Spectrum(AbstractWrapperObject):
         self.copyParameters(axisCodes=[axisCode], target=newSpectrum)
         return newSpectrum
 
-    @cached(_PLANEDATACACHE, maxItems=64, debug=False)
+    # @cached(_PLANEDATACACHE, maxItems=64, debug=False)
     def _getPlaneData(self, position, xDim: int, yDim: int):
         "Internal routine to improve caching: Calling routine set the positions of xDim, yDim to 1 "
         # Calls Nmr.DataSource.getPlaneData"
-        return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+        if self._dataSource is None:
+            data = self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+        else:
+            data = self._dataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+        return data
 
     @logCommand(get='self')
     def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2):
-        """Get a plane defined by by xDim and yDim, and a position vector ('1' based)
+        """Get a plane defined by by xDim and yDim ('1'-based), and a position vector ('1'-based)
         Dimensionality must be >= 2
 
         :param position: A list/tuple of positions (1-based)
@@ -2979,37 +2963,37 @@ class Spectrum(AbstractWrapperObject):
         string += 'dimensions = %s\n' % self.dimensionCount
         string += 'sizes = (%s)\n' % ' x '.join([str(d) for d in self.pointCounts])
         for attr in """
-scale 
-noiseLevel 
-experimentName
-""".split():
+                scale 
+                noiseLevel 
+                experimentName
+                """.split():
             value = getattr(self, attr)
             string += '%s = %s\n' % (attr, value)
 
         if includeDimensions:
             string += '\n'
             for attr in """
-dimensions
-axisCodes
-pointCounts
-isComplex
-dimensionTypes
-isotopeCodes
-measurementTypes
-spectralWidths
-spectralWidthsHz
-spectrometerFrequencies
-referencePoints
-referenceValues
-axisUnits
-foldingModes
-windowFunctions
-lorentzianBroadenings
-gaussianBroadenings
-phases0
-phases1
-assignmentTolerances
-""".split():
+                dimensions
+                axisCodes
+                pointCounts
+                isComplex
+                dimensionTypes
+                isotopeCodes
+                measurementTypes
+                spectralWidths
+                spectralWidthsHz
+                spectrometerFrequencies
+                referencePoints
+                referenceValues
+                axisUnits
+                foldingModes
+                windowFunctions
+                lorentzianBroadenings
+                gaussianBroadenings
+                phases0
+                phases1
+                assignmentTolerances
+                """.split():
                 values = getattr(self, attr)
                 string += '%-25s: %s\n' % (attr,
                                            ' '.join(['%-20s' % str(v) for v in values])
@@ -3025,6 +3009,14 @@ assignmentTolerances
 # New and empty spectra
 #=========================================================================================
 
+# Hack; remove the api notifier on create
+# _notifiers = [nf for nf in Project._apiNotifiers if nf[3] == '__init__' and 'cls' in nf[1] and nf[1]['cls'] == Spectrum]
+# if len(_notifiers) == 1:
+#     Project._apiNotifiers.remove(_notifiers[0])
+
+
+
+
 @newObject(Spectrum)
 def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
     """Creation of new Spectrum;
@@ -3036,7 +3028,12 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
 
     logger = getLogger()
 
-    _path = aPath(path)
+    dataStore = DataStore.newFromPath(path)
+    if not dataStore.exists():
+        dataStore.errorMessage()
+        return None
+
+    _path = dataStore.aPath()
     dir, base, ext = _path.split3()
 
     if name is None:
@@ -3049,6 +3046,7 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
         while '%s_%s' % (name, i) in names:
             i += 1
         name = '%s_%s' % (name, i)
+    self._validateName(name)
 
     # Try to determine data format from the path and intialise a dataSource instance with parsed parameters
     dataSource = checkPathForSpectrumFormats(path=_path)
@@ -3061,7 +3059,8 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
 #   spectrum.Spectrum.createBlockedMatrix
 #   Nmr.Expertiment.createDataSource
 #
-# First creating the api data structures with minimal parameters and once in place updating all values
+# First creating the api data structures with minimal parameters and once in place updating all values from a
+# SpectrumDataSource instance
 
     apiProject = self._wrappedData
     apiUrl = apiProject.root.fetchDataUrl(dir)
@@ -3111,20 +3110,44 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
         if expDimRef:
             freqDataDim.newDataDimRef(expDimRef=expDimRef)
 
-    spectrum = self._data2Obj[apiDataSource]
+    # Done with api generation; Create the Spectrum object
+    # Agggh, cannot do
+    #   spectrum = Spectrum(self, apiDataSource)
+    # as the object was magically already created
+    # This was done by Project_newApiObject, called from Nmr.DataSource.__init__ through an api notifier.
+    # This notifier is set in the AbstractWrapper class and is part of the machinery generation; i.e.
+    # _linkWrapperClasses (needs overhaul!!)
+    spectrum = self._data2Obj.get(apiDataSource)
+    if spectrum is None:
+        raise RuntimeError("something went wrong creating a new Spectrum instance")
     spectrum._apiExperiment = apiExperiment
     spectrum._apiDataStore = apiDataStore
 
-    # Update all values from the dataSource to the Spectrum instance; retain the dataSource instance
-    dataSource.exportToSpectrum(spectrum)
+    # Set the references between spectrum and dataStore
+    dataStore.spectrum = spectrum
+    dataStore._saveInternal()
+    spectrum._dataStore = dataStore
+
+    # Update all parameters from the dataSource to the Spectrum instance; retain the dataSource instance
+    dataSource.exportToSpectrum(spectrum, includePath=False)
     spectrum._dataSource = dataSource
 
-    # Link to default chemicalShiftList
+    # Link to default (i.e. first) chemicalShiftList
     spectrum.chemicalShiftList = self.chemicalShiftLists[0]
 
     # Assure at least one peakList
     if len(spectrum.peakLists) == 0:
         spectrum.newPeakList()
+
+    # Set noiseLevel, contourLevels, contourColours
+    from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise, getDefaultSpectrumColours
+
+    spectrum.noiseLevel = spectrum._dataSource.estimateNoise()
+    setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
+                                        setPositiveContours=True, setNegativeContours=True,
+                                        useSameMultiplier=True)
+    (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+    spectrum.sliceColour = spectrum.positiveContourColour
 
     return spectrum
 

@@ -121,14 +121,16 @@ class PathRowABC(object):
         self.dataWidget = None
         self.buttonWidget = None
 
+        self.initDone = False
+
     @property
     def text(self):
         "Return the text content of the dataWidget"
-        return self.dataWidget.text()
+        return self.getText()
 
     @text.setter
     def text(self, value):
-        self.dataWidget.setText(value)
+        self.setText(value)
 
     @property
     def hasChanged(self):
@@ -163,6 +165,7 @@ class PathRowABC(object):
         self.initialValue = self.getPath()
         self._setDataInWidget(self.initialValue)
         self.setEnabled(self.enabled)
+        self.initDone = True
 
         return self
 
@@ -197,6 +200,12 @@ class PathRowABC(object):
             raise RuntimeError('No row widgets defined')
         self.labelWidget.setText(text)
 
+    def getText(self):
+        "Get the textWidget text"
+        if self.dataWidget is None:
+            raise RuntimeError('No row widgets defined')
+        return self.dataWidget.text()
+
     def setText(self, text):
         "Set the textWidget to text"
         if self.dataWidget is None:
@@ -216,13 +225,17 @@ class PathRowABC(object):
         dirPath = Path.home()
         return str(dirPath)
 
+    def update(self):
+        "Call self.path with current value"
+        self.setPath(self.getText())
+
     def _validatorCallback(self, validator):
         """Callback for the validator instance; set path if valid
         Also call self.callback (if defined)
         """
         self.isValid = validator._isValid
-        if self.isValid and self.hasChanged:
-            self.setPath(self.text)
+        if self.isValid and self.initDone:     # This avoids setting on initialisation
+            self.update()
         self.colourRow()
 
         if self.callback:
@@ -288,13 +301,16 @@ class SpectrumPathRow(PathRowABC):
     validatorClass = SpectrumValidator
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def getPath(self):
-        return self.obj.filePath
+    def getPath(self) -> str:
+        "Get the filePath from spectrum"
+        return str(self.obj.filePath)
 
     def setPath(self, path):
+        "set the filePath of Spectrum"
+        # For speed reasons, we check if it any diffrent from before
         oldPath = self.getPath()
-        if oldPath != path:
-            self.obj.filePath = str(path)
+        if path != oldPath or self.obj._dataSource is None:
+            self.obj.filePath = path
 
     def getDialogPath(self) -> str:
         "Get the directory path to start the selection"
@@ -479,7 +495,7 @@ class ValidateSpectraPopup(CcpnDialog):
                grid=(scrollRow, 1), gridSpan=(1, 1))
 
         self._spectrumFrame.addSpacer(5,10, grid=(specRow,0))
-        specRow += 1
+        specRow  += 1
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -546,6 +562,9 @@ class ValidateSpectraPopup(CcpnDialog):
     def _dataRowCallback(self, dataRow):
         """Callback from $DATA url to validate all the spectrum rows as $DATA may have changed.
         """
+        # always update the dataRow
+        dataRow.update()
+
         for spectrum, row in self.spectrumData.items():
             if row == dataRow:
                 raise RuntimeError('row == dataRow: this should never happen!')

@@ -377,6 +377,12 @@ class DataStore(CcpNmrJson):
         else:
             return self.aPath.exists()
 
+    def __eq__(self, other):
+        return self._path == other._path
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def __str__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.path)
 

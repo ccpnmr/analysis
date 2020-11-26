@@ -70,24 +70,29 @@ import sys
 from typing import Sequence, Tuple, Optional, Union
 from functools import partial
 
-from ccpn.util import Constants, Common
+from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpnmodel.ccpncore.api.ccp.general import DataLocation
+# Dimensions
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FidDataDim as ApiFidDataDim
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FreqDataDim as ApiFreqDataDim
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SampledDataDim as ApiSampledDataDim
+
+from ccpnmodel.ccpncore.lib.Io import Formats
+
+
 from ccpn.framework import constants
+from ccpn.framework.constants import CCPNMR_PREFIX
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
-from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpnmodel.ccpncore.api.ccp.general import DataLocation
+
 from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
 from ccpn.core.lib.Cache import cached
 from ccpn.util.decorators import logCommand
-from ccpn.framework.constants import CCPNMR_PREFIX
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
     undoStackBlocking, renameObject, undoBlock, notificationBlanking, apiNotificationBlanking, \
     ccpNmrV3CoreSetter
-from ccpn.util.Common import getAxisCodeMatchIndices
-from ccpn.util.Path import Path, aPath
-from ccpn.util.Common import isIterable
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.core.lib.DataStore import DataStore
 from ccpn.core.lib.Notifiers import Notifier
@@ -95,15 +100,13 @@ from ccpn.core.lib.Notifiers import Notifier
 # 2019010:ED test new matching
 # from ccpn.util.Common import axisCodeMapping
 from ccpn.util.Common import getAxisCodeMatch as axisCodeMapping
-
+from ccpn.util import Constants, Common
 from ccpn.util.Logging import getLogger
+from ccpn.util.Common import getAxisCodeMatchIndices
+from ccpn.util.Path import Path, aPath
+from ccpn.util.Common import isIterable
 
-from ccpnmodel.ccpncore.lib.Io import Formats
 
-# Dimensions
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FidDataDim as ApiFidDataDim
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FreqDataDim as ApiFreqDataDim
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SampledDataDim as ApiSampledDataDim
 
 DIMENSIONFID = 'Fid'
 DIMENSIONFREQUENCY = 'Frequency'
@@ -239,22 +242,33 @@ class Spectrum(AbstractWrapperObject):
     _REGIONDATACACHE = '_regionDataCache'  # Attribute name for the regionData cache
     _dataCaches = [_PLANEDATACACHE, _SLICEDATACACHE, _SLICE1DDATACACHE, _REGIONDATACACHE]
 
-    def __init__(self, project: Project, wrappedData: Nmr.ShiftList):
+    def __init__(self, project: Project, wrappedData: Nmr.DataSource):
+
+        # local import to prevent cycles
+        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getSpectrumDataSource
 
         super().__init__(project, wrappedData)
 
         self._intensities = None
         self._positions = None
 
-        # Reference to DataStore instance for filePath manipulation;
-        # it may alreeady have been defined (e.g. in _newSpectrum)
+        # References to DataStore / DataSource instances for filePath manipulation and data reading;
+        # it may already have been defined (e.g. in _newSpectrum)
         if not hasattr(self, '_dataStore'):
             self._dataStore = None
+        if not hasattr(self, '_dataSource'):
+            self._dataSource = None
+
         if self._dataStore is None:
             self._dataStore = DataStore(spectrum=self)
 
-        # Reference to dataSource object corresponding to (binary) data file
-        self._dataSource = None
+        if not self._dataStore.exists():
+            getLogger().warning('path "%s" is not valid' % (self.filePath,))
+        else:
+            newDataSource = self._getDataSource(self._dataStore, self.dataFormat)
+            if newDataSource is None:
+                getLogger().warning('path "%s" is not of type "%s"' % (self.filePath, self.dataFormat))
+            self._dataSource = newDataSource
 
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
@@ -603,6 +617,19 @@ class Spectrum(AbstractWrapperObject):
         #           which is not wrapped with quotes, so defaults to an int if it can?
         self._wrappedData.experiment.name = str(value)
 
+    def _getDataSource(self, dataStore, format):
+        """Check the validity of the file defined by dataStore;
+        returns DataSource instance or None when filePath or dataFormat are incorrect
+        Used to avoid overheads of calling isValidFile and then parsing the binairy file again
+        """
+        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getSpectrumDataSource
+
+        if dataStore is None:
+            raise RuntimeError('dataStore not defined')
+        if not dataStore.exists():
+            return None
+        return getSpectrumDataSource(dataStore.aPath, format)
+
     @property
     def filePath(self) -> Optional[str]:
         """Path to NMR data file
@@ -614,22 +641,33 @@ class Spectrum(AbstractWrapperObject):
     @filePath.setter
     def filePath(self, value: str):
 
-        # apiDataStore = self._wrappedData.dataStore
-        # if apiDataStore is None:
-        #
-        #     pass
-        #
-        # elif not value:
-        #     raise ValueError("Spectrum file path cannot be set to None")
-        #
-        # else:
-        #     dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-        #     apiDataStore.repointToDataUrl(dataUrl)
-        #     apiDataStore.path = value[len(dataUrl.url.path) + 1:]
-        #     self._clearCache()
+        # local to prevent circular import
+        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getSpectrumDataSource
+
         if self._dataStore is None:
             raise RuntimeError('dataStore not defined')
+
+        if value is None:
+            self._dataStore.path = None
+            self._dataSource = None
+            self._clearCache()
+            return
+
+        oldPath = self._dataStore.path
         self._dataStore.path = value
+        if not self._dataStore.exists():
+            self._dataStore.path = oldPath
+            raise ValueError('Spectrum.filePath: path "%s" does not exists' % value)
+
+        newDataSource = self._getDataSource(self._dataStore, self.dataFormat)
+        if newDataSource is None:
+            self._dataStore.path = oldPath
+            raise ValueError('Spectrum.filePath: path "%s" is invalid for format "%s"' % (value, self.dataFormat))
+
+        else:
+            self._dataSource = newDataSource
+            self._dataStore._saveInternal()
+            self._clearCache()
 
     @property
     def path(self):
@@ -663,6 +701,10 @@ class Spectrum(AbstractWrapperObject):
         if self._wrappedData is None or self._wrappedData.dataStore is None:
             return None
         return self._wrappedData.dataStore.fileType
+
+    @dataFormat.setter
+    def dataFormat(self, value):
+        self._wrappedData.dataStore.fileType = value
 
     @property
     def headerSize(self) -> Optional[int]:
@@ -2977,8 +3019,10 @@ assignmentTolerances
     def print(self, includeDimensions=True):
         "Print the info string"
         print(self._infoString(includeDimensions))
+
+
 #=========================================================================================
-# Connections to parents:
+# New and empty spectra
 #=========================================================================================
 
 @newObject(Spectrum)
@@ -2989,8 +3033,6 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
 
     # Local  to prevent circular import
     from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
-
-    #raise NotImplementedError("Not implemented. Use loadSpectrum instead")
 
     logger = getLogger()
 

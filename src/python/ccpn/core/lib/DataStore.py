@@ -39,7 +39,7 @@ import os, sys
 from ccpn.util.Path import aPath, Path
 from ccpn.framework import constants
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
-from ccpn.util.traits.CcpNmrTraits import Unicode, Any, CPath, Bool, Dict
+from ccpn.util.traits.CcpNmrTraits import Unicode, Any, CPath, Bool, Dict, CString
 
 from ccpn.core.lib.ContextManagers import notificationBlanking
 from ccpn.util.decorators import singleton
@@ -216,6 +216,8 @@ class DataStore(CcpNmrJson):
     version = 1.0
 
     _path = CPath(allow_none=True, default_value=None).tag(saveToJson=True)
+    dataFormat = CString(allow_none=True, default_value=None).tag(saveToJson=True)
+
     spectrum = Any(allow_none=True, default_value=None).tag(saveToJson=False)
     expandData = Bool(default_value=True).tag(saveToJson=False)
     autoRedirect = Bool(default_value=False).tag(saveToJson=False)
@@ -382,6 +384,12 @@ class DataStore(CcpNmrJson):
             else:
                 self._path = os.path.join(self.apiDataStoreDir, self.apiDataStorePath)
 
+            self.dataFormat = self.apiDataStore.fileType
+
+        else:
+            self._path = None
+            self.dataFormat = 'Empty'
+
         return self
 
     def _getPathRedirections(self):
@@ -412,7 +420,7 @@ class DataStore(CcpNmrJson):
         return not self.__eq__(other)
 
     def __str__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.path)
+        return '<%s: %s (%s)>' % (self.__class__.__name__, self.path, self.dataFormat)
 
     __repr__ = __str__
 

@@ -264,13 +264,7 @@ class Spectrum(AbstractWrapperObject):
         spectrum = super()._restoreObject(project, apiObj)
 
         spectrum._dataStore = DataStore(spectrum=spectrum)
-        if not spectrum._dataStore.exists():
-            spectrum._dataStore.warningMessage()
-        else:
-            newDataSource = spectrum._getDataSource(spectrum._dataStore, spectrum.dataFormat)
-            if newDataSource is None:
-                getLogger().warning('path "%s" is not of type "%s"' % (spectrum.filePath, spectrum.dataFormat))
-            spectrum._dataSource = newDataSource
+        spectrum._dataSource = spectrum._getDataSource(spectrum._dataStore, reportWarnings=True)
 
         return spectrum
 
@@ -600,32 +594,40 @@ class Spectrum(AbstractWrapperObject):
         #           which is not wrapped with quotes, so defaults to an int if it can?
         self._wrappedData.experiment.name = str(value)
 
-    def _getDataSource(self, dataStore, format):
+    def _getDataSource(self, dataStore, reportWarnings=False):
         """Check the validity of the file defined by dataStore;
         returns DataSource instance or None when filePath or dataFormat are incorrect
+        Optionally report warnings
         Used to avoid overheads of calling isValidFile and then parsing the binairy file again
         """
         from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getSpectrumDataSource
 
         if dataStore is None:
             raise RuntimeError('dataStore not defined')
+
         if not dataStore.exists():
+            if reportWarnings:
+                dataStore.warningMessage()
             return None
-        return getSpectrumDataSource(dataStore.aPath(), format)
+
+        dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
+        if dataSource is None and reportWarnings:
+            getLogger().warning('data format "%s" is incompatible with path "%s"' %
+                                (dataStore.dataFormat, dataStore.path))
+
+        return dataSource
 
     @property
     def filePath(self) -> Optional[str]:
-        """Path to NMR data file
+        """Path to NMR data file; can contain redirections (e.g. $DATA)
         """
         if self._dataStore is None:
             raise RuntimeError('dataStore not defined')
         return str(self._dataStore.path)
 
     @filePath.setter
+    @ccpNmrV3CoreSetter()
     def filePath(self, value: str):
-
-        # local to prevent circular import
-        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getSpectrumDataSource
 
         if self._dataStore is None:
             raise RuntimeError('dataStore not defined')
@@ -638,22 +640,30 @@ class Spectrum(AbstractWrapperObject):
         oldPath = self._dataStore.path
         self._dataStore.path = value
         if not self._dataStore.exists():
-            self._dataStore.path = oldPath
             self._dataStore.errorMessage()
+            self._dataStore.path = oldPath
             raise ValueError('Setting Spectrum.filePath to "%s"' % value)
 
-        newDataSource = self._getDataSource(self._dataStore, self.dataFormat)
+        newDataSource = self._getDataSource(self._dataStore, reportWarnings=True)
         if newDataSource is None:
             self._dataStore.path = oldPath
-            raise ValueError('Spectrum.filePath: data format "%s" is incompatible with path "%s"' %
-                             (self.dataFormat, value))
+            raise ValueError('Spectrum.filePath: incompatible "%s"' % value)
 
         else:
             # check some fundamental parameters
+            if self.dimensionCount != newDataSource.dimensionCount:
+                self._dataStore.path = oldPath
+                raise ValueError('Spectrum.filePath: incompatible dimensionCount = %s of "%s"' %
+                                 (newDataSource.dimensionCount,value))
+            for idx, np in enumerate(self.pointCounts):
+                if newDataSource.pointCounts[idx] != np:
+                    self._dataStore.path = oldPath
+                    raise ValueError('Spectrum.filePath: incompatible pointsCount[%s] = %s of "%s"' %
+                                     (idx, newDataSource.pointCounts[idx], value))
 
-            self._dataSource = newDataSource
-            self._dataStore._saveInternal()
-            self._clearCache()
+        self._dataSource = newDataSource
+        self._dataStore._saveInternal()
+        self._clearCache()
 
     @property
     def path(self):
@@ -685,36 +695,36 @@ class Spectrum(AbstractWrapperObject):
     def dataFormat(self, value):
         self._wrappedData.dataStore.fileType = value
 
-    @property
-    def headerSize(self) -> Optional[int]:
-        """File header size in bytes."""
-        xx = self._wrappedData.dataStore
-        if xx:
-            return xx.headerSize
-        else:
-            return None
-
-    @property
-    def numberType(self) -> Optional[str]:
-        """Data type of numbers stored in data matrix ('int' or 'float')."""
-        xx = self._wrappedData.dataStore
-        if xx:
-            return xx.numberType
-        else:
-            return None
-
-    # NBNB TBD Should this be made modifiable? Would be a bit of work ...
-
-    @property
-    def complexStoredBy(self) -> str:
-        """Hypercomplex numbers are stored by ('timepoint', 'quadrant', or 'dimension')."""
-        xx = self._wrappedData.dataStore
-        if xx:
-            return xx.complexStoredBy
-        else:
-            return None
-
-    # NBNB TBD Should this be made modifiable? Would be a bit of work ...
+    # @property
+    # def headerSize(self) -> Optional[int]:
+    #     """File header size in bytes."""
+    #     xx = self._wrappedData.dataStore
+    #     if xx:
+    #         return xx.headerSize
+    #     else:
+    #         return None
+    #
+    # @property
+    # def numberType(self) -> Optional[str]:
+    #     """Data type of numbers stored in data matrix ('int' or 'float')."""
+    #     xx = self._wrappedData.dataStore
+    #     if xx:
+    #         return xx.numberType
+    #     else:
+    #         return None
+    #
+    # # NBNB TBD Should this be made modifiable? Would be a bit of work ...
+    #
+    # @property
+    # def complexStoredBy(self) -> str:
+    #     """Hypercomplex numbers are stored by ('timepoint', 'quadrant', or 'dimension')."""
+    #     xx = self._wrappedData.dataStore
+    #     if xx:
+    #         return xx.complexStoredBy
+    #     else:
+    #         return None
+    #
+    # # NBNB TBD Should this be made modifiable? Would be a bit of work ...
 
     # Attributes belonging to AbstractDataDim
 
@@ -2365,7 +2375,12 @@ class Spectrum(AbstractWrapperObject):
         if not (sliceDim == xDim or sliceDim == yDim):
             raise RuntimeError('sliceDim (%s) not in plane (%s,%s)' % (sliceDim, xDim, yDim))
 
-        data = self.getPlaneData(position, xDim, yDim)
+        # Improve caching,
+        position[xDim-1] = 1
+        position[yDim-1] = 1
+
+        data = self._getPlaneData(position, xDim, yDim)
+
         if sliceDim == xDim:
             slice = position[yDim - 1] - 1  # position amd dimensions are 1-based
             return data[slice, 0:]
@@ -3057,6 +3072,7 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
     if dataSource is None:
         logger.warning('Invalid spectrum path "%s"' % path) # report the argument given
         return None
+    dataStore.dataFormat = dataSource.dataFormat
 
 # Consolidating previous API calls:
 #   NmrProject.createExperiment
@@ -3067,14 +3083,13 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
 # SpectrumDataSource instance
 
     apiProject = self._wrappedData
-    apiUrl = apiProject.root.fetchDataUrl(dir)
-
-    urlPath = aPath(apiUrl.url.path)
-    relPath = _path.relative_to(urlPath)
-
     apiExperiment = apiProject.newExperiment(name=name,
                                              numDim=dataSource.dimensionCount,
                                             )
+
+    apiUrl = apiProject.root.fetchDataUrl(dir)
+    urlPath = aPath(apiUrl.url.path)
+    relPath = _path.relative_to(urlPath)
 
     apiDataStore =  apiUrl.dataLocationStore.newBlockedBinaryMatrix(
                                dataUrl=apiUrl,

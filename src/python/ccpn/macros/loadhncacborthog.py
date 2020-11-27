@@ -3,6 +3,8 @@ create two spectrum display modules with this spectrum inside."""
 
 # load in the HNCACB spectrum using the loadData() method
 # of the project object
+#
+#
 spectrumPath = '/Users/simon1/nmrdata/spectra/hncacb.spc'
 project.loadData(spectrumPath)
 

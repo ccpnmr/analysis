@@ -29,7 +29,7 @@ import sys
 import pyqtgraph as pg
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph.Point import Point
-from ccpn.util import Common as commonUtil
+# from ccpn.util import Common as commonUtil
 
 from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.widgets.Menu import Menu

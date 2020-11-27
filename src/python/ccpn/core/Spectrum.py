@@ -2351,7 +2351,11 @@ class Spectrum(AbstractWrapperObject):
     def _get1DSliceData(self, position, sliceDim: int):
         """Internal routine to get 1D sliceData;
         """
-        return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
+        if self._dataSource is None:
+            data = self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
+        else:
+            data = self._dataSource.getSliceData(position=position, sliceDim=sliceDim)
+        return data
 
     @cached(_SLICEDATACACHE, maxItems=1024, debug=False)
     def _getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int):
@@ -2360,6 +2364,7 @@ class Spectrum(AbstractWrapperObject):
         """
         if not (sliceDim == xDim or sliceDim == yDim):
             raise RuntimeError('sliceDim (%s) not in plane (%s,%s)' % (sliceDim, xDim, yDim))
+
         data = self.getPlaneData(position, xDim, yDim)
         if sliceDim == xDim:
             slice = position[yDim - 1] - 1  # position amd dimensions are 1-based
@@ -3046,7 +3051,6 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
         while '%s_%s' % (name, i) in names:
             i += 1
         name = '%s_%s' % (name, i)
-    self._validateName(name)
 
     # Try to determine data format from the path and intialise a dataSource instance with parsed parameters
     dataSource = checkPathForSpectrumFormats(path=_path)

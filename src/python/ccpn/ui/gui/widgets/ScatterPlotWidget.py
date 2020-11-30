@@ -35,8 +35,9 @@ from functools import partial
 from collections import OrderedDict as od
 import ccpn.ui.gui.guiSettings as gs
 import ccpn.ui.gui.lib.mouseEvents as me
+import ccpn.ui.gui.lib.GuiStripContextMenus as cm
 from PyQt5 import QtCore, QtGui, QtWidgets
-from ccpn.util.Colour import hexToRgb, rgbaRatioToHex
+from ccpn.util.Colour import hexToRgb, rgbaRatioToHex, darkDefaultSpectrumColours
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
@@ -46,8 +47,11 @@ from ccpn.ui.gui.widgets.Frame import Frame
 # from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.util.Logging import getLogger
+from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.Notifiers import Notifier
-
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
+from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONTNAME, DEFAULTFONTSIZE, getFontHeight, getFont
+from ccpn.util.Common import _getObjectsByPids
 
 # colours
 BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
@@ -56,6 +60,47 @@ SelectedPoint = pg.functions.mkPen(rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDG
 ROIline = rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_SELECTAREA])
 DefaultRoi = [[0, 0], [10, 10]]  #
 
+SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_HIGHLIGHT]), width=4)
+c =rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_LABELLING])
+GridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
+GridFont = getFont()
+DefaultSpotSize = 15
+DefaultSpotColour = '#FF0000' # red
+DefaultSymbol = 'o'
+
+_SELECTORNAME = 'selectorName'
+_VALUEHEADER = 'headerValueName'
+_PIDHEADER = 'headerPidName'
+_TOOLTIP = 'tooltip'
+_HEXCOLOURHEADER = 'headerHexColour'
+_OBJCOLOURPROPERTY = 'objColourProperty'
+_SYMBOL = 'symbol'
+_CALLBACK = 'callback'
+_SPOTSIZE = 'spotSize'
+_HEXCOLOUR = 'hexColour'
+
+class _ItemBC(object):
+    ''' '''
+
+    def __init__(self, headerValueName, **kwargs):
+        '''
+        Used to set the spots/axis in the plot
+        :param kwargs:
+
+        '''
+        self.kwargs = {
+                       _SELECTORNAME      : headerValueName,
+                       _VALUEHEADER       : headerValueName,
+                       _PIDHEADER         : None,
+                       _HEXCOLOURHEADER   : None,
+                       _OBJCOLOURPROPERTY : None, # the obj property where to grab the colour. E.g for spectrum: sliceColour
+                       _SYMBOL            : DefaultSymbol,
+                       _SPOTSIZE          : DefaultSpotSize,
+                       _HEXCOLOUR         : DefaultSpotColour,
+                       }
+        self.kwargs.update(kwargs)
+        for k, v in self.kwargs.items():
+            setattr(self, k, v)
 
 class ScatterPlot(Widget):
     def __init__(self,
@@ -70,15 +115,19 @@ class ScatterPlot(Widget):
         super().__init__(setLayout=True, **kwds)
 
         self.application = application
+        self.project = None
+        if self.application:
+            self.project = self.application.project
         self._dataFrame = dataFrame
         self._roiData = DefaultRoi
-        self._axesDefs = axesDefinitions
+        self.axesDefinitions = axesDefinitions
+        self.setAxesDefinitions(self.axesDefinitions, updateWidgets=False)
         self._scatterView = pg.GraphicsLayoutWidget()
         self._scatterView.setBackground(BackgroundColour)
         self._plotItem = self._scatterView.addPlot()
         self._scatterViewbox = self._plotItem.vb
         self._addScatterSelectionBox()
-        self._scatterViewbox.mouseClickEvent = self._scatterViewboxMouseClickEvent
+        self._scatterViewbox.mouseClickEvent = self._scatterViewboxMouseClickEvent # click on the background canvas
         self._scatterViewbox.mouseDragEvent = self._scatterMouseDragEvent
         self._scatterViewbox.scene().sigMouseMoved.connect(self.mouseMoved) #use this if you need the mouse Posit
         self._plotItem.setMenuEnabled(False)
@@ -87,7 +136,7 @@ class ScatterPlot(Widget):
         # self.scatterPlot.sigClicked.connect(self._plotClicked)
         self.scatterPlot.mouseClickEvent = self._scatterMouseClickEvent
         self.scatterPlot.mouseDoubleClickEvent = self._scatterMouseDoubleClickEvent
-
+        setWidgetFont(self)
         ## adjustable ROI box
         self.roiItem = pg.ROI(*DefaultRoi, pen=ROIline)
         self._setROIhandles()
@@ -95,7 +144,8 @@ class ScatterPlot(Widget):
         self._plotItem.addItem(self.roiItem)
         self.xLine = pg.InfiniteLine(angle=90, pos=0, pen=OriginAxes)
         self.yLine = pg.InfiniteLine(angle=0, pos=0, pen=OriginAxes)
-
+        self.spotSelectionCallback = spotSelectionCallback # single click
+        self.spotActionCallback = spotActionCallback # double click
         self._plotItem.addItem(self.scatterPlot)
         self._plotItem.addItem(self.xLine)
         self._plotItem.addItem(self.yLine)
@@ -108,9 +158,13 @@ class ScatterPlot(Widget):
                                                   callback=self._axisSelectionCallback, grid=(0, 1))#,  hAlign='l',)
         self.xAxisSelector = self._xSelCW.pulldownList
         self.yAxisSelector = self._ySelCW.pulldownList
-        self.setAxesWidgets()
+
         # coordinates
         self.coordinatesLabel = Label(self.axisSelectionFrame, text='', grid=(0,2))
+        # context menu
+        self.contextMenu = Menu('', None, isFloatWidget=True)
+        self._setPlotItemFonts()
+        self.setAxesWidgets()
 
     @property
     def dataFrame(self):
@@ -130,41 +184,36 @@ class ScatterPlot(Widget):
 
     @roiData.setter
     def roiData(self, data):
-        '''
+        """
         :param data: list of 4 elements: [xMin, xMax, yMin, yMax]
-        :return: None, sets the ROI on the plot.
-        '''
+        :return: None, set the roiData and update its plotItem.
+        """
         if len(data) != 4:
             getLogger().warn('ROI Data must be a list of 4 elements: [xMin, xMax, yMin, yMax]')
             return
         self._roiData = data
         self._setROI(*data)
 
-    def setAxesDefinitions(self, defs:od):
+    def setAxesDefinitions(self, defs:od, updateWidgets=True):
         '''
         :param defs: orderedDict key: visible label to appear in the pulldown, value: the dataframe column header name.
         if None, they will be used the  header names as they appear in the original dataframe.
         '''
         if isinstance(defs, dict):
-            # filter-out definitions that are not present in the df headers
-            defs = od([k,v] for k,v in defs.items() if v in self.dataFrame.columns)
-            self._axesDefs = defs
+            self.axesDefinitions = defs
         if defs is None:
-            self._axesDefs = None
-        self.setAxesWidgets()
+            self.axesDefinitions = od([k, _ItemBC(k)] for k in self.dataFrame.columns)
+        if updateWidgets:
+            self.setAxesWidgets()
 
     def setAxesWidgets(self):
         '''
-        Set from the _axesDefs. If None, uses the dataFrame column names.
+        Set from the axesDefinitions. If None, uses the dataFrame column names.
         '''
-        if isinstance(self._axesDefs, dict):
-            pulldownTexts = self._axesDefs.keys()
-            pulldownObjs = self._axesDefs.values()
-        else:
-            pulldownTexts = self.dataFrame.columns
-            pulldownObjs = self.dataFrame.columns
-        self.xAxisSelector.setData(list(pulldownTexts), objects=list(pulldownObjs))
-        self.yAxisSelector.setData(list(pulldownTexts), objects=list(pulldownObjs))
+
+        pulldownTexts = list(self.axesDefinitions.keys())
+        self.xAxisSelector.setData(list(pulldownTexts))
+        self.yAxisSelector.setData(list(pulldownTexts))
 
     def selectAxes(self, xHeader=None, yHeader=None):
         '''
@@ -177,76 +226,154 @@ class ScatterPlot(Widget):
         if yHeader:
             self.yAxisSelector.select(yHeader)
 
+    def addPoints(self, x=None, y=None, spots=None, **kwargs):
+
+        """
+        used to add points to the scatterPlot.
+        If only x,y is given, all the other parameters are set as default.
+        To set each property use spots or define the kwargs.
+        X,Y can also be define in spots or kwargs constructs as "pos", see below.
+        In that case is not necessary to set x,y as individual args, and can be left as None.
+
+        :param x:  1D arrays of x,y values
+        :param y:  1D arrays of x,y values
+        :param spots:  Optional list of dicts. Each dict specifies parameters for a single spot:
+                        {'pos': (x,y), 'size', 'pen', 'brush', 'symbol'}. This is just an alternative method
+        :param kwargs:
+                x,y                    1D arrays of x,y values.
+                pos                    2D structure of x,y pairs (such as Nx2 array or list of tuples)
+                symbol                 can be one (or a list) of:
+                                       * 'o'  circle (default)
+                                       * 's'  square
+                                       * 't'  triangle
+                                       * 'd'  diamond
+                                       * '+'  plus
+                pen                    The pen (or list of pens) to use for drawing spot outlines.
+                brush                  The brush (or list of brushes) to use for filling spots.
+                size                   The size (or list of sizes) of spots.
+                data                   a list of python objects used to uniquely identify each spot.
+                name                   The name of this item. Names are used for automatically
+                                       generating LegendItem entries and by some exporters.
+        """
+        self.scatterPlot.clear()
+        args = []
+        if spots is not None:
+            args = [spots]
+        if x is not None and y is not None:
+            args = [x, y]
+        if not kwargs.get(_SYMBOL) in ['o', 's', 't', 'd', '+']:
+            getLogger().warning('Symbol not available. Used the default instead')
+            kwargs.update({_SYMBOL:'o'})
+        self.scatterPlot.addPoints(*args, **kwargs)
+
+    def setupContextMenu(self):
+        """
+        :return: Subclass this to insert/remove items in bespoke plots.
+        """
+        items = []
+        items += self._getDefaultMenuItems()
+        items += self._getExportMenuItems()
+        menu = cm._createMenu(self, items)
+
     def _axisSelectionCallback(self, *args):
+        """
+        Callback from pulldown selectors. Adds Points to the plot based on the dataframe columns.
+        Objects are set from pids if defined in the dataframe and definitions
+        Colours are set from objs if they have the in their class property or if specified in the
+        :param args:
+        :return:
+        """
         self.scatterPlot.clear()
         self._setPlotItemLabels()
-        xDf = self.dataFrame.get(self.xAxisSelector.currentObject())
-        yDf = self.dataFrame.get(self.yAxisSelector.currentObject())
-        xValues = []
-        yValues = []
-        if xDf is not None:
-            xValues = xDf.values
-        if yDf is not None:
-            yValues = yDf.values
-        # todo check/replace np.nan or wrong input (str)
-        if len(xValues) == len(yValues):
-            self.scatterPlot.addPoints(x=xValues, y=yValues)
+
+        _xItem = self.axesDefinitions.get(self.yAxisSelector.getText())
+        _yItem = self.axesDefinitions.get(self.yAxisSelector.getText())
+        if not all([_xItem, _yItem]): return
+
+        x_ValueHeader = getattr(_xItem, _VALUEHEADER)
+        y_ValueHeader = getattr(_yItem, _VALUEHEADER)
+        pidHeader = getattr(_xItem, _PIDHEADER)
+        objColourProperty = getattr(_xItem, _OBJCOLOURPROPERTY)
+        hexHeader = getattr(_xItem, _HEXCOLOURHEADER)
+        symbol = getattr(_xItem, _SYMBOL)
+        size = getattr(_xItem, _SPOTSIZE)
+        defaultHex = getattr(_xItem, _HEXCOLOUR)
+        hexs = [defaultHex] * len(self.dataFrame.index)
+
+        if objColourProperty is not None: # use the obj for getting the colour info (if defined)
+            pidDf = self.dataFrame.get(pidHeader)
+            if pidDf is not None and self.project:
+                ccpnObjs = _getObjectsByPids(self.project, pidDf.values)
+                hexs = [getattr(o, objColourProperty)  for o in ccpnObjs]
         else:
-            Widgets.MessageDialog.showWarning('Error displaying data',
-                                    'Values lenght mismatch')
+            if hexHeader is not None: # use the dedicated colour Header for getting the colour info (if defined)
+                hexDf = self.dataFrame.get(hexHeader)
+                if hexDf is not None:
+                    hexs = hexDf.values
+        brushes = [pg.functions.mkBrush(hexToRgb(hx)) for hx in hexs]
+        series = [serie for ix, serie in self.dataFrame.iterrows()]
+
+        xDf = self.dataFrame.get(x_ValueHeader)
+        yDf = self.dataFrame.get(y_ValueHeader)
+        if xDf is not None and yDf is not None:
+            xValues = xDf.values
+            yValues = yDf.values
+            if len(xValues) == len(yValues):
+                self.addPoints(x=xValues, y=yValues, size=size, symbol=symbol, brush=brushes, data=series)
+            else:
+                Widgets.MessageDialog.showWarning('Error displaying data',
+                                        'Values lenght mismatch')
 
     def _setPlotItemLabels(self):
+
         self._plotItem.setLabel('bottom', self.xAxisSelector.getText())
         self._plotItem.setLabel('left', self.yAxisSelector.getText())
+    
+    def _setPlotItemFonts(self):
+        if self.application:
+            self._plotItem.getAxis('bottom').setPen(GridPen)
+            self._plotItem.getAxis('left').setPen(GridPen)
+            self._plotItem.getAxis('bottom').tickFont = GridFont
+            self._plotItem.getAxis('left').tickFont = GridFont
 
-    def _addScatterSelectionBox(self):
-        self._scatterSelectionBox = QtWidgets.QGraphicsRectItem(0, 0, 1, 1)
-        self._scatterSelectionBox.setPen(pg.functions.mkPen((255, 0, 255), width=1))
-        self._scatterSelectionBox.setBrush(pg.functions.mkBrush(255, 100, 255, 100))
-        self._scatterSelectionBox.setZValue(1e9)
-        self._scatterViewbox.addItem(self._scatterSelectionBox, ignoreBounds=True)
-        self._scatterSelectionBox.hide()
+    ###### Context menu setups ######
 
-    def _scatterViewboxMouseClickEvent(self, event):
-        """ click on scatter viewBox. The parent of scatterPlot. Opens the context menu at any point. """
-        if event.button() == QtCore.Qt.RightButton:
-            event.accept()
-            self._raiseScatterContextMenu(event)
+    def _getDefaultMenuItems(self):
+        """
+        Creates default context menu items.
+        """
+        items = [
+                cm._SCMitem(name='Reset Zoom',
+                         typeItem=cm.ItemTypes.get(cm.ITEM), icon='icons/zoom-full',
+                         toolTip='Reset the plot to default limits',
+                         callback=self._plotItem.autoRange),
+                cm._SCMitem(name='ROI',
+                        typeItem=cm.ItemTypes.get(cm.ITEM), icon='icons/roi',
+                        toolTip='Toggle ROI',
+                        checkable = True,
+                        callback=self.toggleROI),
+                cm._separator(),
+                ]
+        items = [itm for itm in items if itm is not None]
+        return items
 
-
+    def _getExportMenuItems(self):
+        """
+        Creates default Export context menu items.
+        """
+        items = [
+                cm._SCMitem(name='Export image...',
+                        typeItem=cm.ItemTypes.get(cm.ITEM), icon=None,
+                        toolTip='Export image to file.',
+                        callback=partial(self._showExportDialog, self._scatterViewbox)),
+                ]
+        items = [itm for itm in items if itm is not None]
+        return items
 
     def _raiseScatterContextMenu(self, ev):
         """ Creates all the menu items for the scatter context menu. """
-
-        self._scatterContextMenu = Menu('', None, isFloatWidget=True)
-        # self._scatterContextMenu.addAction('Reset View', self._plotItem.autoRange)
-        # self._scatterContextMenu.addSeparator()
-        #
-        # # Selection
-        # self.resetSelectionAction = QtGui.QAction("Clear selection", self,
-        #                                           triggered=self._clearScatterSelection)
-        # self._scatterContextMenu.addAction(self.resetSelectionAction)
-        #
-        # self.invertSelectionAction = QtGui.QAction("Invert selection", self,
-        #                                            triggered=self._invertScatterSelection)
-        # self._scatterContextMenu.addAction(self.invertSelectionAction)
-        #
-        # self.groupSelectionAction = QtGui.QAction("Create Group from selection", self,
-        #                                           triggered=self._createGroupSelection)
-        #
-        # self._scatterContextMenu.addAction(self.groupSelectionAction)
-        # self._openSelectedAction = QtGui.QAction("Open selected", self,
-        #                                          triggered=self._openSelectedPoint)
-        #
-        # self._scatterContextMenu.addAction(self._openSelectedAction)
-        # self._scatterContextMenu.addSeparator()
-
-        self._scatterContextMenu.addSeparator()
-        self.exportAction = QtGui.QAction("Export image...", self, triggered=partial(self._showExportDialog, self._scatterViewbox))
-        self._scatterContextMenu.addAction(self.exportAction)
-        # self._toggleSelectionOptions()
-
-        self._scatterContextMenu.exec_(ev.screenPos().toPoint())
+        self.setupContextMenu()
+        self.contextMenu.exec_(ev.screenPos().toPoint())
 
     def _showExportDialog(self, viewBox):
         """
@@ -259,11 +386,27 @@ class ScatterPlot(Widget):
 
     ###########  scatter Mouse Events ############
 
-    def _scatterMouseDoubleClickEvent(self, event):
+    def _scatterViewboxMouseClickEvent(self, event):
+        """ click on scatter viewBox (the background canvas).
+        The parent of scatterPlot. Opens the context menu at any point. """
+        if event.button() == QtCore.Qt.RightButton:
+            event.accept()
+            self._raiseScatterContextMenu(event)
+
+    def _scatterMouseDoubleClickEvent(self, ev):
         """
-        e-implementation of scatter double click event
+        re-implementation of scatter double click even
         """
-        self._openSelectedPoint()
+        plot = self.scatterPlot
+        pts = plot.pointsAt(ev.pos())
+        if len(pts) > 0:
+            data = self._setCallbackData(pts, trigger=CallBack.DOUBLECLICK)
+            if self.spotActionCallback is not None:
+                self.spotActionCallback(data)
+            ev.accept()
+        else:
+            # "no spots, needs to clear selection"
+            ev.accept()
 
     def _scatterMouseClickEvent(self, ev):
         """
@@ -271,33 +414,27 @@ class ScatterPlot(Widget):
         """
         plot = self.scatterPlot
         pts = plot.pointsAt(ev.pos())
-        obj = None
+        self._selectedObjs = []
         if len(pts) > 0:
-            point = pts[0]
-            obj = point.data()
-
-        if me.leftMouse(ev):
-            if obj:
-                self._selectedObjs = [obj]
-                if self.current:
-                    self.current.pcaComponents = self._selectedObjs
+            data = self._setCallbackData(pts, trigger=CallBack.CLICK)
+            if me.leftMouse(ev):
+                if self.spotSelectionCallback is not None:
+                    self.spotSelectionCallback(data)
+                print('DATA selection', data)
+                ev.accept()
+            elif me.controlLeftMouse(ev):
+                # Control-left-click;  add to selection
+                # self._selectedObjs.extend([obj])
+                if self.spotSelectionCallback is not None:
+                    self.spotSelectionCallback(data)
+                print('DATA extension', data)
                 ev.accept()
             else:
-                # "no spots, clear selection"
-                self._selectedObjs = []
-                if self.current:
-                    self.current.pcaComponents = self._selectedObjs
-                ev.accept()
-
-        elif me.controlLeftMouse(ev):
-            # Control-left-click;  add to selection
-            self._selectedObjs.extend([obj])
-            if self.current:
-                self.current.pcaComponents = self._selectedObjs
-            ev.accept()
-
+                ev.ignore()
         else:
-            ev.ignore()
+            #need to clear selection
+            # self._selectedObjs = []
+            ev.accept()
 
     def mouseMoved(self, event):
         """
@@ -305,7 +442,6 @@ class ScatterPlot(Widget):
         :param event:
         :return:
         """
-
         position = event
         if self._scatterViewbox.sceneBoundingRect().contains(position):
             mousePoint = self._scatterViewbox.mapSceneToView(position)
@@ -341,6 +477,37 @@ class ScatterPlot(Widget):
         else:
             self._resetSelectionBox()
             event.ignore()
+
+    def toggleROI(self):
+        """
+        show/hide ROI from the plot
+        """
+        self.roiItem.setVisible(not self.roiItem.isVisible())
+
+    def _addScatterSelectionBox(self):
+        self._scatterSelectionBox = QtWidgets.QGraphicsRectItem(0, 0, 1, 1)
+        self._scatterSelectionBox.setPen(pg.functions.mkPen((255, 0, 255), width=1))
+        self._scatterSelectionBox.setBrush(pg.functions.mkBrush(255, 100, 255, 100))
+        self._scatterSelectionBox.setZValue(1e9)
+        self._scatterViewbox.addItem(self._scatterSelectionBox, ignoreBounds=True)
+        self._scatterSelectionBox.hide()
+
+    def _setCallbackData(self, items, trigger=None):
+        """
+        :param items:  list of pg.SpotItem type
+        :param trigger: Any of CallBack _callbackwords:(CLICK, DOUBLECLICK, CURRENT)
+        :return: CallBack instance (ordered dict type)
+        """
+        data = []
+        for item in items:
+            if item is not None:
+                data.append(CallBack(value=[item.pos().x(), item.pos().y()],
+                                theObject=item,
+                                object=item.data(),
+                                targetName=None,
+                                trigger=trigger,
+                                ))
+        return data
 
     ########### ROI box for scatter Plot ############
 
@@ -506,41 +673,58 @@ if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
     from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-    n = 300
+    n = 5
 
     data = pd.DataFrame({
-        'Values1': np.random.rand(n),
-        'Values2': np.random.rand(n),
-        'Values3': np.random.rand(n),
-        'Values4': np.random.rand(n),
-                        })
-    data = pd.DataFrame({
-        'Values0': np.arange(1, 21),
-        'Values1': np.arange(100, 120),
-        'Values2': np.arange(200, 220),
-        'Values3': np.arange(300, 320),
-        'Values4': np.arange(400, 420),
-                        })
-    data = pd.DataFrame({
-        'Values0': np.arange(1, 6),
-        'Values1': np.array([0.5, np.nan, 1.3, 2.4, 1.22]),
-        'Values2': np.array(['Dog', 'Bee', 'Ant', 'Bird', 'Cat']),
-                        })
+        'entryValues': np.arange(1, n+1),
+        'lengthValues': np.random.rand(n)*33,
+        'diameterValues': np.random.rand(n)/10,
+        'heightValues': np.random.rand(n)*7.5,
+        'buggingScoreValues': np.random.rand(n),
+        'SpectraPidsValues': np.array(['SP:LadyBug', 'SP:Lice', 'SP:BedBug', 'SP:Flea', 'SP:Mite']),
+        'HexColoursValues': np.array(list(darkDefaultSpectrumColours.keys())[:n]),
+    })
 
     defs = od([
-               ['#', 'Values0'],
-               ['noos', 'Values1'],
-               ['boos', 'Values2'],
-    ])
+                ( '#', _ItemBC(
+                        selectorName = '#',
+                        headerValueName = 'entryValues',
+                        headerPidName = 'SpectraPids',
+                        headerHexColour = 'HexColoursValues',
+                        objColourProperty = None,
+                        spotSize = DefaultSpotSize,
+                        symbol = DefaultSymbol
+                        )),
+                ('Length', _ItemBC(
+                    selectorName='Length',
+                    headerValueName='lengthValues',
+                    headerPidName='SpectraPids',
+                    headerHexColour='HexColoursValues',
+                    objColourProperty=None,
+                    spotSize=DefaultSpotSize,
+                    symbol=DefaultSymbol
+                    )),
+                ('Score', _ItemBC(
+                    selectorName='Score',
+                    headerValueName='buggingScoreValues',
+                    headerPidName='SpectraPids',
+                    headerHexColour='HexColoursValues',
+                    objColourProperty = None,
+                    spotSize=DefaultSpotSize,
+                    symbol=DefaultSymbol
+                    )),
+                ])
+
+
     app = TestApplication()
     win = QtWidgets.QMainWindow()
 
     moduleArea = CcpnModuleArea(mainWindow=None)
     module = CcpnModule(mainWindow=None, name='Testing Module')
     moduleArea.addModule(module)
-    scatterPlot = ScatterPlot(parent=module.mainWidget, application=None, dataFrame=data, grid=(0,0))
-    scatterPlot.setAxesDefinitions(defs)
-    scatterPlot.selectAxes(xHeader='#', yHeader='noos')
+    scatterPlot = ScatterPlot(parent=module.mainWidget, application=None, dataFrame=data, axesDefinitions=defs, grid=(0,0))
+    # scatterPlot.setAxesDefinitions(defs)
+    scatterPlot.selectAxes(xHeader='#', yHeader='Length')
     scatterPlot.roiData = [0,1,0,10]
 
 
@@ -551,3 +735,46 @@ if __name__ == '__main__':
 
     app.start()
     win.close()
+
+false = False
+if false: # this should never be called from here ###  only run on ipythonConsole
+    from collections import OrderedDict as od
+    from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+    from ccpn.ui.gui.widgets.ScatterPlotWidget import ScatterPlot, _ItemBC
+    import numpy as np
+    import pandas as pd
+    n = 5
+
+    data = pd.DataFrame({
+                        'Values0': np.arange(1, n + 1),
+                        'Values1': np.random.rand(n),
+                        'Values2': np.random.rand(n),
+                        'SpectraPids': [sp.pid for sp in project.spectra[:5]]
+                        })
+
+    defs = od([
+                ('#', _ItemBC(
+                    selectorName='#',
+                    headerValueName='Values0',
+                    headerPidName='SpectraPids',
+                    objColourProperty='positiveContourColour',
+                )),
+                ('Length', _ItemBC(
+                    selectorName='Length',
+                    headerValueName='Values1',
+                    headerPidName='SpectraPids',
+                    objColourProperty='positiveContourColour',
+                )),
+                ('Score', _ItemBC(
+                    selectorName='Score',
+                    headerValueName='Values2',
+                    headerPidName='SpectraPids',
+                    objColourProperty='positiveContourColour',
+                )),
+                ])
+
+    module = CcpnModule(mainWindow=mainWindow, name='Testing Module')
+    scatterPlot = ScatterPlot(parent=module.mainWidget, application=application, dataFrame=data, grid=(0,0))
+    scatterPlot.setAxesDefinitions(defs)
+    scatterPlot.selectAxes(xHeader='#', yHeader='Length')
+    mainWindow.moduleArea.addModule(module)

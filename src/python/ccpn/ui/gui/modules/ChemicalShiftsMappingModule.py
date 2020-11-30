@@ -139,7 +139,7 @@ from ccpn.core.Peak import Peak
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
-from ccpn.ui.gui.widgets.Font import Font
+from ccpn.ui.gui.widgets.Font import Font, getFont
 
 # Default values on init
 DefaultConcentration = 0.0
@@ -171,8 +171,9 @@ FittingLine = pg.functions.mkPen(hexToRgb(getColours()[DIVIDER]), width=0.5, sty
 SelectedPoint = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
 SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
 c =rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
-GridPen = pg.functions.mkPen(c, width=2, style=QtCore.Qt.SolidLine)
-GridFont = Font('Helvetica', 16, bold=True)
+GridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
+# GridFont = Font('Helvetica', 16, bold=True)
+GridFont = getFont()
 
 DEFAULTSPACING = (5, 5)
 TABMARGINS = (1, 10, 10, 1)  # l, t, r, b

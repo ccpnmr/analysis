@@ -96,7 +96,7 @@ class PathRowABC(object):
 
     LABELWIDGET_MIN_WIDTH = 200
 
-    def __init__(self, labelText, obj, enabled=True, callback=None):
+    def __init__(self, parentWidget, row, labelText, obj, enabled=True, callback=None):
         """
         :param parent:
         :param labelText:
@@ -122,6 +122,8 @@ class PathRowABC(object):
         self.buttonWidget = None
 
         self.initDone = False
+        self._addRow(widget=parentWidget, row=row)
+        self.initDone = True
 
     @property
     def text(self):
@@ -141,7 +143,7 @@ class PathRowABC(object):
     def isNotValid(self):
         return not self.isValid
 
-    def addRow(self, widget, row):
+    def _addRow(self, widget, row):
         """Add the row to widget
         returns self
         """
@@ -165,7 +167,6 @@ class PathRowABC(object):
         self.initialValue = self.getPath()
         self._setDataInWidget(self.initialValue)
         self.setEnabled(self.enabled)
-        self.initDone = True
 
         return self
 
@@ -431,10 +432,10 @@ class ValidateSpectraPopup(CcpnDialog):
         # populate the widget with a list of spectrum buttons and filepath buttons
         scrollRow = 0
         for idx, redirect in enumerate(PathRedirections()):
-            _row = RedirectPathRow(obj=redirect,
+            _row = RedirectPathRow(parentWidget=self.dataUrlScrollAreaWidgetContents, row=scrollRow,
+                                   obj=redirect,
                                    labelText=redirect.identifier, enabled=(idx==0),
-                                   callback=self._dataRowCallback).addRow(
-                                                        widget=self.dataUrlScrollAreaWidgetContents, row=scrollRow)
+                                   callback=self._dataRowCallback)
             if idx == 0: self.dataRow = _row  # remember the row for $DATA
             self.redirectData[redirect] = _row
             scrollRow += 1
@@ -485,9 +486,9 @@ class ValidateSpectraPopup(CcpnDialog):
         scrollRow = 0
         for sp in self.project.spectra:
             enabled = (not sp.isEmptySpectrum())
-            _row = SpectrumPathRow(labelText=sp.pid, obj=sp, enabled=enabled,
-                                   callback=self._spectrumRowCallback).addRow(
-                                   widget=self.spectrumScrollAreaWidgetContents, row=scrollRow)
+            _row = SpectrumPathRow(parentWidget=self.spectrumScrollAreaWidgetContents, row=scrollRow,
+                                   labelText=sp.pid, obj=sp, enabled=enabled,
+                                   callback=self._spectrumRowCallback)
             scrollRow += 1
             self.spectrumData[sp] = _row
 

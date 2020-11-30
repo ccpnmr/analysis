@@ -477,7 +477,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         QtWidgets.QApplication.setActiveWindow(project._mainWindow)
 
         # if the new project contains invalid spectra then open the popup to see them
-        badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.isValidPath]
+        badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
         if badSpectra:
             from ccpn.ui.gui.widgets.MessageDialog import showWarning
 

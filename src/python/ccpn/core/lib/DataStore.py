@@ -321,8 +321,6 @@ class DataStore(CcpNmrJson):
     # Implementation
     #=========================================================================================
 
-    _INTERNAL_PARAMETER_NAME = constants.CCPNMR_PREFIX + 'DataStore'
-
     def _importFromSpectrum(self, spectrum):
         """Restore state from spectrum, either from internal parameter store or from api-dataStores
         Returns self
@@ -330,7 +328,7 @@ class DataStore(CcpNmrJson):
         if spectrum is None:
             raise ValueError('Invalid spectrum "%s"' % spectrum)
 
-        if spectrum._hasInternalParameter(self._INTERNAL_PARAMETER_NAME):
+        if spectrum._hasInternalParameter(spectrum._DATASTORE_KEY):
             self.spectrum = spectrum
             self._restoreInternal()
         else:
@@ -348,7 +346,7 @@ class DataStore(CcpNmrJson):
             raise RuntimeError('%s._saveInternal: spectrum not defined' % self.__class__.__name__)
 
         jsonData = self.toJson()
-        self.spectrum._setInternalParameter(self._INTERNAL_PARAMETER_NAME, jsonData)
+        self.spectrum._setInternalParameter(self.spectrum._DATASTORE_KEY, jsonData)
 
     def _restoreInternal(self):
         """Restore from spectrum internal parameter store
@@ -357,7 +355,7 @@ class DataStore(CcpNmrJson):
         if self.spectrum is None:
             raise RuntimeError('%s._restoreInternal: spectrum not defined' % self.__class__.__name__)
 
-        jsonData = self.spectrum._getInternalParameter(self._INTERNAL_PARAMETER_NAME)
+        jsonData = self.spectrum._getInternalParameter(self.spectrum._DATASTORE_KEY)
         if jsonData is None or len(jsonData) == 0:
             raise RuntimeError('DataStore._restoreInternal: json data appear to be corrupted')
 
@@ -387,8 +385,10 @@ class DataStore(CcpNmrJson):
             self.dataFormat = self.apiDataStore.fileType
 
         else:
+            # This happens for dummy spectra
+            from sandbox.Geerten.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
             self._path = None
-            self.dataFormat = 'Empty'
+            self.dataFormat = EmptySpectrumDataSource.dataFormat
 
         return self
 

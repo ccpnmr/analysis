@@ -242,6 +242,9 @@ class Spectrum(AbstractWrapperObject):
     _REGIONDATACACHE = '_regionDataCache'  # Attribute name for the regionData cache
     _dataCaches = [_PLANEDATACACHE, _SLICEDATACACHE, _SLICE1DDATACACHE, _REGIONDATACACHE]
 
+    _DATASTORE_KEY = '_dataStore'    # Key for storing the dataStore info in the Ccpn internal parameter store of the
+                                    # Spectrum instance
+
     def __init__(self, project: Project, wrappedData: Nmr.DataSource):
 
         super().__init__(project, wrappedData)
@@ -596,21 +599,26 @@ class Spectrum(AbstractWrapperObject):
 
     def _getDataSource(self, dataStore, reportWarnings=False):
         """Check the validity of the file defined by dataStore;
-        returns DataSource instance or None when filePath or dataFormat are incorrect
+        returns DataSource instance or None when filePath and/or dataFormat of the dataStore instance are incorrect
         Optionally report warnings
-        Used to avoid overheads of calling isValidFile and then parsing the binairy file again
         """
         from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getSpectrumDataSource
+        from sandbox.Geerten.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 
         if dataStore is None:
             raise RuntimeError('dataStore not defined')
 
-        if not dataStore.exists():
-            if reportWarnings:
-                dataStore.warningMessage()
-            return None
+        if dataStore.dataFormat == EmptySpectrumDataSource.dataFormat:
+            # Special case, empty spectrum
+            dataSource = EmptySpectrumDataSource(spectrum=self)
 
-        dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
+        else:
+            if not dataStore.exists():
+                if reportWarnings:
+                    dataStore.warningMessage()
+                return None
+            dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
+
         if dataSource is None and reportWarnings:
             getLogger().warning('data format "%s" is incompatible with path "%s"' %
                                 (dataStore.dataFormat, dataStore.path))
@@ -651,10 +659,16 @@ class Spectrum(AbstractWrapperObject):
 
         else:
             # check some fundamental parameters
+            # check dataFormat
+            if newDataSource.dataFormat != self.dataFormat:
+                raise ValueError('Spectrum.filePath: incompatible dataFormat (%s) of "%s"' %
+                                 (newDataSource.dataFormat,value))
+
             if self.dimensionCount != newDataSource.dimensionCount:
                 self._dataStore.path = oldPath
                 raise ValueError('Spectrum.filePath: incompatible dimensionCount = %s of "%s"' %
                                  (newDataSource.dimensionCount,value))
+
             for idx, np in enumerate(self.pointCounts):
                 if newDataSource.pointCounts[idx] != np:
                     self._dataStore.path = oldPath
@@ -673,27 +687,36 @@ class Spectrum(AbstractWrapperObject):
             raise RuntimeError('dataStore not defined')
         return self._dataStore.aPath()
 
-    @property
-    def isValidPath(self) -> bool:
-        """Return true if the spectrum currently points to an existent file.
-        (contents of the file are not checked)
+    def hasValidPath(self) -> bool:
+        """Return true if the spectrum currently points to an valid dataSource object.
         """
-        # # Local  to prevent circular import
-        # from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import isValidSpectrumPath
+        return (self._dataSource is not None)
 
-        return self._dataStore.exists()
+    def isEmptySpectrum(self):
+        """Return True if instance refers to an empty spectrum; i.e. as in without actual spectral data"
+        """
+        # local import to avoid cycles
+        from sandbox.Geerten.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+        if self._dataStore is None:
+            raise RuntimeError('dataStore not defined')
+        return self._dataStore.dataFormat == EmptySpectrumDataSource.dataFormat
 
     @property
     def dataFormat(self):
-        """Return the spectrum data-format identifier (e.g. HDF5, NMRPIPE) or None if not defined
+        """Return the spectrum data-format identifier (e.g. HDF5, NMRPipe)
         """
-        if self._wrappedData is None or self._wrappedData.dataStore is None:
-            return None
-        return self._wrappedData.dataStore.fileType
+        if self._dataStore is None:
+            raise RuntimeError('dataStore not defined')
 
-    @dataFormat.setter
-    def dataFormat(self, value):
-        self._wrappedData.dataStore.fileType = value
+        return self._dataStore.dataFormat
+
+        # if self._wrappedData is None or self._wrappedData.dataStore is None:
+        #     return None
+        # return self._wrappedData.dataStore.fileType
+
+    # @dataFormat.setter
+    # def dataFormat(self, value):
+    #     self._wrappedData.dataStore.fileType = value
 
     # @property
     # def headerSize(self) -> Optional[int]:
@@ -1877,7 +1900,7 @@ class Spectrum(AbstractWrapperObject):
         :param axisDict: dict of axis limits
         :return: tuple of regions
         """
-        if not self.isValidPath:
+        if not self.hasValidPath():
             return
 
         startPoint = []

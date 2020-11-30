@@ -484,7 +484,9 @@ class ValidateSpectraPopup(CcpnDialog):
         # populate the widget with a list of spectrum buttons and filepath buttons
         scrollRow = 0
         for sp in self.project.spectra:
-            _row = SpectrumPathRow(labelText=sp.pid, obj=sp, enabled=True, callback=self._spectrumRowCallback).addRow(
+            enabled = (not sp.isEmptySpectrum())
+            _row = SpectrumPathRow(labelText=sp.pid, obj=sp, enabled=enabled,
+                                   callback=self._spectrumRowCallback).addRow(
                                    widget=self.spectrumScrollAreaWidgetContents, row=scrollRow)
             scrollRow += 1
             self.spectrumData[sp] = _row
@@ -519,6 +521,14 @@ class ValidateSpectraPopup(CcpnDialog):
         self.setMinimumHeight(500)
         self.setMinimumWidth(800)
         # self.setFixedWidth(self.sizeHint().width()+24)
+
+    # def exec_(self):
+    #     "catch errors"
+    #     try:
+    #         super().exec_()
+    #     except Exception as es:
+    #         showWarning('An error occured', str(es), parent=self)
+    #         raise es
 
     def _radiobuttonsCallback(self):
         """Toggle rows on or off depending on their state and the settings of the radio buttons

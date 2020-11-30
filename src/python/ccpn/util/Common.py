@@ -1351,3 +1351,9 @@ def zipCycle(*iterables, emptyDefault=None):
     cycles = [cycle(i) for i in iterables]
     for _ in zip_longest(*iterables):
         yield tuple(next(i, emptyDefault) for i in cycles)
+
+def _getObjectsByPids(project, pids):
+    return list(filter(None, map(lambda x: project.getByPid(x), pids)))
+
+def _getPidsFromObjects(objs):
+    return list(filter(None, map(lambda x: x.pid, objs)))

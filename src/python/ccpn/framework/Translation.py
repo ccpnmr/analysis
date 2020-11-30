@@ -99,7 +99,9 @@ class Translation:
 
     def translate(self, text):
         """ Translate a specific text into the previously specified language. """
-        if not text:
+        if text is None:
+            return
+        if not isinstance(text, str):
             return
         if len(text) == 0:
             return text

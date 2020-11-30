@@ -66,7 +66,7 @@ GridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
 GridFont = getFont()
 DefaultSpotSize = 15
 DefaultSpotColour = '#FF0000' # red
-DefaultSymbol = 'o'
+DefaultSymbol = 's'
 
 _SELECTORNAME = 'selectorName'
 _VALUEHEADER = 'headerValueName'
@@ -165,6 +165,7 @@ class ScatterPlot(Widget):
         self.contextMenu = Menu('', None, isFloatWidget=True)
         self._setPlotItemFonts()
         self.setAxesWidgets()
+        self._selectedData = []
 
     @property
     def dataFrame(self):
@@ -225,6 +226,9 @@ class ScatterPlot(Widget):
             self.xAxisSelector.select(xHeader)
         if yHeader:
             self.yAxisSelector.select(yHeader)
+
+    def updatePlot(self):
+        self.scatterPlot.updateSpots()
 
     def addPoints(self, x=None, y=None, spots=None, **kwargs):
 
@@ -311,7 +315,9 @@ class ScatterPlot(Widget):
                 if hexDf is not None:
                     hexs = hexDf.values
         brushes = [pg.functions.mkBrush(hexToRgb(hx)) for hx in hexs]
-        series = [serie for ix, serie in self.dataFrame.iterrows()]
+        indices, series = map(list,zip(*self.dataFrame.iterrows()))
+        # this is used for creating a selection pattern around the scatter item
+        pens = [SelectedPoint if i in [j.name for j in self._selectedData] else None for i in indices]
 
         xDf = self.dataFrame.get(x_ValueHeader)
         yDf = self.dataFrame.get(y_ValueHeader)
@@ -319,7 +325,7 @@ class ScatterPlot(Widget):
             xValues = xDf.values
             yValues = yDf.values
             if len(xValues) == len(yValues):
-                self.addPoints(x=xValues, y=yValues, size=size, symbol=symbol, brush=brushes, data=series)
+                self.addPoints(x=xValues, y=yValues, size=size, symbol=symbol, brush=brushes, data=series, pen=pens)
             else:
                 Widgets.MessageDialog.showWarning('Error displaying data',
                                         'Values lenght mismatch')
@@ -393,6 +399,23 @@ class ScatterPlot(Widget):
             event.accept()
             self._raiseScatterContextMenu(event)
 
+    def _setCallbackData(self, items, trigger=None):
+        """
+        :param items:  list of pg.SpotItem type
+        :param trigger: Any of CallBack _callbackwords:(CLICK, DOUBLECLICK, CURRENT)
+        :return: CallBack instance (ordered dict type)
+        """
+        data = []
+        for item in items:
+            if item is not None:
+                data.append(CallBack(value=[item.pos().x(), item.pos().y()],
+                                theObject=item,
+                                object=item.data(),
+                                targetName=None,
+                                trigger=trigger,
+                                ))
+        return data
+
     def _scatterMouseDoubleClickEvent(self, ev):
         """
         re-implementation of scatter double click even
@@ -400,9 +423,9 @@ class ScatterPlot(Widget):
         plot = self.scatterPlot
         pts = plot.pointsAt(ev.pos())
         if len(pts) > 0:
-            data = self._setCallbackData(pts, trigger=CallBack.DOUBLECLICK)
+            callbackData = self._setCallbackData(pts, trigger=CallBack.DOUBLECLICK)
             if self.spotActionCallback is not None:
-                self.spotActionCallback(data)
+                self.spotActionCallback(callbackData)
             ev.accept()
         else:
             # "no spots, needs to clear selection"
@@ -414,26 +437,29 @@ class ScatterPlot(Widget):
         """
         plot = self.scatterPlot
         pts = plot.pointsAt(ev.pos())
-        self._selectedObjs = []
+        _data = [pt.data() for pt in pts]
         if len(pts) > 0:
-            data = self._setCallbackData(pts, trigger=CallBack.CLICK)
+            callbackData = self._setCallbackData(pts, trigger=CallBack.CLICK)
             if me.leftMouse(ev):
                 if self.spotSelectionCallback is not None:
-                    self.spotSelectionCallback(data)
-                print('DATA selection', data)
+                    self.spotSelectionCallback(callbackData)
+                self._selectedData = _data
+                self.scatterPlot.setPen([None] * len(self.dataFrame.index)) # clear first
+                setPens = [pt.setPen(SelectedPoint) for pt in pts]
                 ev.accept()
             elif me.controlLeftMouse(ev):
                 # Control-left-click;  add to selection
-                # self._selectedObjs.extend([obj])
                 if self.spotSelectionCallback is not None:
-                    self.spotSelectionCallback(data)
-                print('DATA extension', data)
+                    self.spotSelectionCallback(callbackData)
+                self._selectedData += _data
+                setPens = [pt.setPen(SelectedPoint) for pt in pts]
                 ev.accept()
             else:
                 ev.ignore()
         else:
             #need to clear selection
-            # self._selectedObjs = []
+            self._selectedData = []
+            self.scatterPlot.setPen([None]*len(self.dataFrame.index))
             ev.accept()
 
     def mouseMoved(self, event):
@@ -492,22 +518,6 @@ class ScatterPlot(Widget):
         self._scatterViewbox.addItem(self._scatterSelectionBox, ignoreBounds=True)
         self._scatterSelectionBox.hide()
 
-    def _setCallbackData(self, items, trigger=None):
-        """
-        :param items:  list of pg.SpotItem type
-        :param trigger: Any of CallBack _callbackwords:(CLICK, DOUBLECLICK, CURRENT)
-        :return: CallBack instance (ordered dict type)
-        """
-        data = []
-        for item in items:
-            if item is not None:
-                data.append(CallBack(value=[item.pos().x(), item.pos().y()],
-                                theObject=item,
-                                object=item.data(),
-                                targetName=None,
-                                trigger=trigger,
-                                ))
-        return data
 
     ########### ROI box for scatter Plot ############
 
@@ -673,7 +683,7 @@ if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
     from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-    n = 5
+    n = 500
 
     data = pd.DataFrame({
         'entryValues': np.arange(1, n+1),
@@ -681,8 +691,8 @@ if __name__ == '__main__':
         'diameterValues': np.random.rand(n)/10,
         'heightValues': np.random.rand(n)*7.5,
         'buggingScoreValues': np.random.rand(n),
-        'SpectraPidsValues': np.array(['SP:LadyBug', 'SP:Lice', 'SP:BedBug', 'SP:Flea', 'SP:Mite']),
-        'HexColoursValues': np.array(list(darkDefaultSpectrumColours.keys())[:n]),
+        # 'SpectraPidsValues': np.array(['SP:LadyBug', 'SP:Lice', 'SP:BedBug', 'SP:Flea', 'SP:Mite']),
+        # 'HexColoursValues': np.array(list(darkDefaultSpectrumColours.keys())[:n]),
     })
 
     defs = od([

@@ -54,7 +54,8 @@ from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 # from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
+                                          notificationEchoBlocking
 from ccpn.util.Logging import getLogger
 
 
@@ -213,12 +214,14 @@ class Project(AbstractWrapperObject):
         self._resetUndo()
 
         with undoStackBlocking(self.application):
-            # 20190520:ED routines that use core objects, not sure whether the correct place
-            self._setContourColours()
-            self._setNoiseLevels()
+            with notificationBlanking(self.application):
+                with notificationEchoBlocking(self.application):
+                    # 20190520:ED routines that use core objects, not sure whether the correct place
+                    self._setContourColours()
+                    self._setNoiseLevels()
 
-            if len(self.chemicalShiftLists) == 0:
-                self.newChemicalShiftList(name='default')
+                    if len(self.chemicalShiftLists) == 0:
+                        self.newChemicalShiftList(name='default')
 
     def _close(self):
         self.close()
@@ -1001,6 +1004,7 @@ class Project(AbstractWrapperObject):
 
         return validList
 
+    @logCommand('project.')
     def loadData(self, path: str) -> typing.Optional[typing.List]:
         """
         Load data from path, determining type first.
@@ -1040,11 +1044,20 @@ class Project(AbstractWrapperObject):
         # First usage of new SpectrumdataSource routines
 
         from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
+        from ccpn.core.lib.DataStore import DataStore
 
-        if checkPathForSpectrumFormats(path) is not None:
+        getLogger().debug('Project.loadData: loading "%s"' % path)
 
-            spectrum = self.newSpectrum(path)
-            return [spectrum]
+        # Expand and check any redirections
+        dataStore = DataStore.checkPath(path, silent=True)
+        if dataStore is None:
+            raise FileNotFoundError('Path "%s" not found' % path)
+
+        # check for a spectrum
+        if checkPathForSpectrumFormats( dataStore.aPath().asString() ) is not None:
+
+            newSpectrum  = self.newSpectrum(path=path)
+            return [newSpectrum]
 
         else:
 

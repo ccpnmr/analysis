@@ -1634,8 +1634,6 @@ class Framework(NotifierBase):
 
         if paths is None:
             #TODO:LIST-AS-ISSUE: This fails for native file dialogs on OSX when trying to select a project (i.e. a directory)
-            # NBNB TBD I assume here that path is either a string or a list lf string paths.
-            # NBNB #FIXME if incorrect
             dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
                                 acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
                                 filter=filter)

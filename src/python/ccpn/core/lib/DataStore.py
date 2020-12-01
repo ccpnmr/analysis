@@ -231,7 +231,7 @@ class DataStore(CcpNmrJson):
     # Dict with edirection paths; for reference
     pathRedirections = Dict(default_value={}).tag(saveToJson=True)
 
-    def __init__(self, spectrum=None, expandData=True, autoRedirect=False):
+    def __init__(self, spectrum=None, expandData=False, autoRedirect=False):
         """expandData: optionally expand $DATA to home directory if not defined
         autoRedirect: optionally try to redefine path into $DATA, $ALONGSIDE, $INSIDE redirections
         """
@@ -265,11 +265,24 @@ class DataStore(CcpNmrJson):
             self._saveInternal()
 
     @classmethod
-    def newFromPath(cls, path, expandData=True, autoRedirect=False):
+    def newFromPath(cls, path, expandData=False, autoRedirect=False):
         """Create and return a new instance from path
         """
         instance = cls(expandData=expandData, autoRedirect=autoRedirect)
         instance.path = path
+        return instance
+
+    @classmethod
+    def checkPath(cls, path, silent=True):
+        """Check if expanded path exists and return an instance or None otherwise
+        Optionally report depending on silent
+        """
+        instance = cls()
+        instance.path = path
+        if not instance.exists():
+            if not silent:
+                instance.errorMessage()
+            return None
         return instance
 
     def aPath(self):

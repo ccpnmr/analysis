@@ -3085,74 +3085,26 @@ class Spectrum(AbstractWrapperObject):
 #     Project._apiNotifiers.remove(_notifiers[0])
 
 
-
-
-@newObject(Spectrum)
-def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
-    """Creation of new Spectrum;
-    :return: Spectrum instance or None on error
+def _newSpectrumFromDataSource(project, dataStore, dataSource, name):
+    """Create a new Spectrum instance using the data in dataStore and dataSource
+    Returns Spectrum instance or None on error
     """
 
-    # Local  to prevent circular import
-    from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
-
-    logger = getLogger()
-    application = self.application
-
-    dataStore = DataStore.newFromPath(path)
-    if not dataStore.exists():
-        dataStore.errorMessage()
-        return None
-
-    _path = dataStore.aPath()
-    dir, base, ext = _path.split3()
-
-    if name is None:
-        name = base
-
     # assure unique name
-    names = [sp.name for sp in self.spectra]
+    names = [sp.name for sp in project.spectra]
     if name in names:
         i = 1
         while '%s_%s' % (name, i) in names:
             i += 1
         name = '%s_%s' % (name, i)
 
-    # Try to determine data format from the path and intialise a dataSource instance with parsed parameters
-    dataSource = checkPathForSpectrumFormats(path=_path)
-    if dataSource is None:
-        logger.warning('Invalid spectrum path "%s"' % path) # report the argument given
-        return None
-    dataStore.dataFormat = dataSource.dataFormat
-
-# Consolidating previous API calls:
-#   NmrProject.createExperiment
-#   spectrum.Spectrum.createBlockedMatrix
-#   Nmr.Expertiment.createDataSource
-#
-# First creating the api data structures with minimal parameters and once in place updating all values from a
-# SpectrumDataSource instance
-
-    apiProject = self._wrappedData
+    apiProject = project._wrappedData
     apiExperiment = apiProject.newExperiment(name=name,
                                              numDim=dataSource.dimensionCount,
                                             )
 
-    # apiUrl = apiProject.root.fetchDataUrl(dir)
-    # urlPath = aPath(apiUrl.url.path)
-    # relPath = _path.relative_to(urlPath)
-
-    # apiDataStore =  apiUrl.dataLocationStore.newBlockedBinaryMatrix(
-    #                            dataUrl=apiUrl,
-    #                            path=str(relPath),
-    #                            numPoints=dataSource.pointCounts,
-    #                            isComplex=dataSource.isComplex,
-    #                            blockSizes=dataSource.blockSizes,
-    #                            fileType=dataSource.dataFormat,
-    #                           )
-
     apiDataSource = apiExperiment.newDataSource(name=name,
-                                                dataStore=None,  #apiDataStore,
+                                                dataStore=None,
                                                 numDim=dataSource.dimensionCount,
                                                 dataType='processed'
                                                 )
@@ -3189,13 +3141,13 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
     # This notifier is set in the AbstractWrapper class and is part of the machinery generation; i.e.
     # _linkWrapperClasses (needs overhaul!!)
 
-    spectrum = self._data2Obj.get(apiDataSource)
+    spectrum = project._data2Obj.get(apiDataSource)
     if spectrum is None:
         raise RuntimeError("something went wrong creating a new Spectrum instance")
     spectrum._apiExperiment = apiExperiment
-    # spectrum._apiDataStore = apiDataStore
 
     # Set the references between spectrum and dataStore
+    dataStore.dataFormat = dataSource.dataFormat
     dataStore.spectrum = spectrum
     dataStore._saveInternal()
     spectrum._dataStore = dataStore
@@ -3205,7 +3157,7 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
     spectrum._dataSource = dataSource
 
     # Link to default (i.e. first) chemicalShiftList
-    spectrum.chemicalShiftList = self.chemicalShiftLists[0]
+    spectrum.chemicalShiftList = project.chemicalShiftLists[0]
 
     # # Assure at least one peakList
     if len(spectrum.peakLists) == 0:
@@ -3221,6 +3173,145 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
     spectrum.sliceColour = spectrum.positiveContourColour
 
     return spectrum
+
+
+@newObject(Spectrum)
+def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
+    """Creation of new Spectrum;
+    :return: Spectrum instance or None on error
+    """
+
+    # Local  to prevent circular import
+    from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
+
+    logger = getLogger()
+
+    dataStore = DataStore.newFromPath(path)
+    if not dataStore.exists():
+        dataStore.errorMessage()
+        return None
+
+    _path = dataStore.aPath()
+
+    # Try to determine data format from the path and intialise a dataSource instance with parsed parameters
+    dataSource = checkPathForSpectrumFormats(path=_path)
+    if dataSource is None:
+        logger.warning('Invalid spectrum path "%s"' % path) # report the argument given
+        return None
+
+    if name is None:
+        dir, base, ext = _path.split3()
+        name = base
+
+    return _newSpectrumFromDataSource(self, dataStore, dataSource, name)
+
+#     # assure unique name
+#     names = [sp.name for sp in self.spectra]
+#     if name in names:
+#         i = 1
+#         while '%s_%s' % (name, i) in names:
+#             i += 1
+#         name = '%s_%s' % (name, i)
+#
+#     dataStore.dataFormat = dataSource.dataFormat
+#
+# # Consolidating previous API calls:
+# #   NmrProject.createExperiment
+# #   spectrum.Spectrum.createBlockedMatrix
+# #   Nmr.Expertiment.createDataSource
+# #
+# # First creating the api data structures with minimal parameters and once in place updating all values from a
+# # SpectrumDataSource instance; no longer create a BlockedMatrix as this is handled by the (V3) dataStore and dataSource
+# # objects.
+#
+#     apiProject = self._wrappedData
+#     apiExperiment = apiProject.newExperiment(name=name,
+#                                              numDim=dataSource.dimensionCount,
+#                                             )
+#
+#     # apiUrl = apiProject.root.fetchDataUrl(dir)
+#     # urlPath = aPath(apiUrl.url.path)
+#     # relPath = _path.relative_to(urlPath)
+#
+#     # apiDataStore =  apiUrl.dataLocationStore.newBlockedBinaryMatrix(
+#     #                            dataUrl=apiUrl,
+#     #                            path=str(relPath),
+#     #                            numPoints=dataSource.pointCounts,
+#     #                            isComplex=dataSource.isComplex,
+#     #                            blockSizes=dataSource.blockSizes,
+#     #                            fileType=dataSource.dataFormat,
+#     #                           )
+#
+#     apiDataSource = apiExperiment.newDataSource(name=name,
+#                                                 dataStore=None,  #apiDataStore,
+#                                                 numDim=dataSource.dimensionCount,
+#                                                 dataType='processed'
+#                                                 )
+#
+#     # Intialise the freq/time dimensions; This seems a very complicated datastructure! (GWV)
+#     # dataDim classnames are FidDataDim, FreqDataDim, SampledDataDim
+#     for n, expDim in enumerate(apiExperiment.sortedExpDims()):
+#         expDim.isAcquisition = False  #(dataSource.aquisitionAxisCode == dataSource.axisCodes[n]),
+#         expDimRef = expDim.newExpDimRef(
+#                             isotopeCodes=(dataSource.isotopeCodes[n],),
+#                             axisCode=dataSource.axisCodes[n],
+#                             sf=dataSource.spectrometerFrequencies[n],
+#                             unit='ppm'
+#                            )
+#
+#         _nPoints = dataSource.pointCounts[n]
+#         freqDataDim = apiDataSource.newFreqDataDim(dim=n+1, expDim=expDim,
+#                                                    numPoints=_nPoints,
+#                                                    numPointsOrig=_nPoints,
+#                                                    pointOffset=0,
+#                                                    isComplex=dataSource.isComplex[n],
+#                                                    valuePerPoint=dataSource.spectralWidthsHz[n]/float(_nPoints)
+#                                                    )
+#         # expDimRef = (expDim.findFirstExpDimRef(measurementType='Shift') or expDim.findFirstExpDimRef())
+#         if expDimRef:
+#             freqDataDim.newDataDimRef(expDimRef=expDimRef)
+#
+#     # Done with api generation; Create the Spectrum object
+#
+#     # Agggh, cannot do
+#     #   spectrum = Spectrum(self, apiDataSource)
+#     # as the object was magically already created
+#     # This was done by Project_newApiObject, called from Nmr.DataSource.__init__ through an api notifier.
+#     # This notifier is set in the AbstractWrapper class and is part of the machinery generation; i.e.
+#     # _linkWrapperClasses (needs overhaul!!)
+#
+#     spectrum = self._data2Obj.get(apiDataSource)
+#     if spectrum is None:
+#         raise RuntimeError("something went wrong creating a new Spectrum instance")
+#     spectrum._apiExperiment = apiExperiment
+#     # spectrum._apiDataStore = apiDataStore
+#
+#     # Set the references between spectrum and dataStore
+#     dataStore.spectrum = spectrum
+#     dataStore._saveInternal()
+#     spectrum._dataStore = dataStore
+#
+#     # Update all parameters from the dataSource to the Spectrum instance; retain the dataSource instance
+#     dataSource.exportToSpectrum(spectrum, includePath=False)
+#     spectrum._dataSource = dataSource
+#
+#     # Link to default (i.e. first) chemicalShiftList
+#     spectrum.chemicalShiftList = self.chemicalShiftLists[0]
+#
+#     # # Assure at least one peakList
+#     if len(spectrum.peakLists) == 0:
+#         spectrum.newPeakList()
+#
+#     # Set noiseLevel, contourLevels, contourColours
+#     spectrum.noiseLevel = spectrum._dataSource.estimateNoise()
+#     # this crashes (sometimes), deep in the bowles of the v2-code
+#     # setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
+#     #                                     setPositiveContours=True, setNegativeContours=True,
+#     #                                     useSameMultiplier=True)
+#     spectrum._setContourDefaultValues()
+#     spectrum.sliceColour = spectrum.positiveContourColour
+#
+#     return spectrum
 
 
 @newObject(Spectrum)

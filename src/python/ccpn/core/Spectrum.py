@@ -237,7 +237,7 @@ class Spectrum(AbstractWrapperObject):
     _referenceSpectrumHit = None
     _snr = None
 
-    MAXDIM = 4  # Maximum dimensionality
+    MAXDIM = 8  # Maximum dimensionality
 
     _PLANEDATACACHE = '_planeDataCache'  # Attribute name for the planeData cache
     _SLICEDATACACHE = '_sliceDataCache'  # Attribute name for the slicedata cache
@@ -263,6 +263,12 @@ class Spectrum(AbstractWrapperObject):
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
 
+        # GWV: This does not work (yet!?), as de __init__ is called by callbacks from the api before the children are
+        #      restored, resulting in multiplication
+        # with notificationBlanking():
+        #     # Assure at least one peakList
+        #     if len(self.peakLists) == 0:
+        #         self.newPeakList()
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
@@ -3201,7 +3207,7 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
     # Link to default (i.e. first) chemicalShiftList
     spectrum.chemicalShiftList = self.chemicalShiftLists[0]
 
-    # Assure at least one peakList
+    # # Assure at least one peakList
     if len(spectrum.peakLists) == 0:
         spectrum.newPeakList()
 
@@ -3212,13 +3218,6 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
     #                                     setPositiveContours=True, setNegativeContours=True,
     #                                     useSameMultiplier=True)
     spectrum._setContourDefaultValues()
-    # spectrum.positiveContourBase = spectrum.noiseLevel * 1.5
-    # spectrum.positiveContourFactor = 1.3
-    # spectrum.positiveContourCount = 10
-    # spectrum.negativeContourBase = -1.0 * spectrum.noiseLevel * 1.5
-    # spectrum.negativeContourFactor = 1.3
-    # spectrum.negativeContourCount = 10
-    # (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
     spectrum.sliceColour = spectrum.positiveContourColour
 
     return spectrum

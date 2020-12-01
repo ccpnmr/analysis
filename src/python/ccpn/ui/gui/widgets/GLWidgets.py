@@ -168,7 +168,8 @@ class GuiNdWidget(CcpnGLWidget):
         # make the list of ordered spectrumViews
         self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
 
-        self._ordering = [specView for specView in self._ordering if specView.spectrum.hasValidPath()]
+        # GWV: removed as new data reader returns zeros; blank spectra can be displayed
+        # self._ordering = [specView for specView in self._ordering if specView.spectrum.hasValidPath()]
 
         for specView in tuple(self._spectrumSettings.keys()):
             if specView not in self._ordering:

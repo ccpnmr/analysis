@@ -70,6 +70,9 @@ import sys
 from typing import Sequence, Tuple, Optional, Union
 from functools import partial
 
+import numpy
+
+
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.api.ccp.general import DataLocation
 # Dimensions
@@ -87,13 +90,13 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 
 from ccpn.core.lib import Pid
-from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
+from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection, \
+                                      setContourLevelsFromNoise, getDefaultSpectrumColours
 from ccpn.core.lib.Cache import cached
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
-    undoStackBlocking, renameObject, undoBlock, notificationBlanking, apiNotificationBlanking, \
-    ccpNmrV3CoreSetter
-from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+                                          undoStackBlocking, renameObject, undoBlock, notificationBlanking, \
+                                          apiNotificationBlanking, ccpNmrV3CoreSetter, notificationEchoBlocking
 from ccpn.core.lib.DataStore import DataStore
 from ccpn.core.lib.Notifiers import Notifier
 
@@ -249,6 +252,7 @@ class Spectrum(AbstractWrapperObject):
 
         super().__init__(project, wrappedData)
 
+        # 1D data references
         self._intensities = None
         self._positions = None
 
@@ -461,6 +465,19 @@ class Spectrum(AbstractWrapperObject):
         tempCcpn[INCLUDENEGATIVECONTOURS] = value
         self._ccpnInternalData = tempCcpn
 
+    def _setContourDefaultValues(self, base=None, multiplier=1.3, count=10):
+        """Set some default values and colours for contours
+        """
+        if base is None:
+            base = self.noiseLevel *1.5
+        self.positiveContourBase = base
+        self.positiveContourFactor = 1.3
+        self.positiveContourCount = 10
+        self.negativeContourBase = -1.0 * base
+        self.negativeContourFactor = 1.3
+        self.negativeContourCount = 10
+        (self.positiveContourColour, self.negativeContourColour) = getDefaultSpectrumColours(self)
+
     @property
     @_includeInCopy
     def sliceColour(self) -> str:
@@ -570,12 +587,12 @@ class Spectrum(AbstractWrapperObject):
         """
         return self._wrappedData.serial
 
-    @property
-    def _numDim(self):
-        """Return the _wrappedData numDim
-        CCPN Internal
-        """
-        return self._wrappedData.numDim
+    # @property
+    # def _numDim(self):
+    #     """Return the _wrappedData numDim
+    #     CCPN Internal
+    #     """
+    #     return self._wrappedData.numDim
 
     @property
     def experiment(self):
@@ -877,16 +894,16 @@ class Spectrum(AbstractWrapperObject):
             raise ValueError("totalPointCount value must have length %s, was %s" %
                              (apiDataSource.numDim, value))
 
-    @property
-    @_includeInDimensionalCopy
-    def pointOffsets(self) -> Tuple[int, ...]:
-        """index of first active point relative to total points, per dimension"""
-        return tuple(x.pointOffset if x.className != 'SampledDataDim' else None
-                     for x in self._wrappedData.sortedDataDims())
-
-    @pointOffsets.setter
-    def pointOffsets(self, value: Sequence):
-        self._setStdDataDimValue('pointOffset', value)
+    # @property
+    # @_includeInDimensionalCopy
+    # def pointOffsets(self) -> Tuple[int, ...]:
+    #     """index of first active point relative to total points, per dimension"""
+    #     return tuple(x.pointOffset if x.className != 'SampledDataDim' else None
+    #                  for x in self._wrappedData.sortedDataDims())
+    #
+    # @pointOffsets.setter
+    # def pointOffsets(self, value: Sequence):
+    #     self._setStdDataDimValue('pointOffset', value)
 
     @property
     @_includeInDimensionalCopy
@@ -2385,7 +2402,9 @@ class Spectrum(AbstractWrapperObject):
         """Internal routine to get 1D sliceData;
         """
         if self._dataSource is None:
-            data = self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
+            # data = self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
+            getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
+            data = numpy.zeros( (self.pointCounts[sliceDim-1], ), dtype=numpy.float32)
         else:
             data = self._dataSource.getSliceData(position=position, sliceDim=sliceDim)
         return data
@@ -2572,7 +2591,9 @@ class Spectrum(AbstractWrapperObject):
         "Internal routine to improve caching: Calling routine set the positions of xDim, yDim to 1 "
         # Calls Nmr.DataSource.getPlaneData"
         if self._dataSource is None:
-            data = self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+            # data = self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+            getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
+            data = numpy.zeros( (self.pointCounts[yDim-1], self.pointCounts[xDim-1]), dtype=numpy.float32)
         else:
             data = self._dataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
         return data
@@ -3070,6 +3091,7 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
     from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
 
     logger = getLogger()
+    application = self.application
 
     dataStore = DataStore.newFromPath(path)
     if not dataStore.exists():
@@ -3110,21 +3132,21 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
                                              numDim=dataSource.dimensionCount,
                                             )
 
-    apiUrl = apiProject.root.fetchDataUrl(dir)
-    urlPath = aPath(apiUrl.url.path)
-    relPath = _path.relative_to(urlPath)
+    # apiUrl = apiProject.root.fetchDataUrl(dir)
+    # urlPath = aPath(apiUrl.url.path)
+    # relPath = _path.relative_to(urlPath)
 
-    apiDataStore =  apiUrl.dataLocationStore.newBlockedBinaryMatrix(
-                               dataUrl=apiUrl,
-                               path=str(relPath),
-                               numPoints=dataSource.pointCounts,
-                               isComplex=dataSource.isComplex,
-                               blockSizes=dataSource.blockSizes,
-                               fileType=dataSource.dataFormat,
-                              )
+    # apiDataStore =  apiUrl.dataLocationStore.newBlockedBinaryMatrix(
+    #                            dataUrl=apiUrl,
+    #                            path=str(relPath),
+    #                            numPoints=dataSource.pointCounts,
+    #                            isComplex=dataSource.isComplex,
+    #                            blockSizes=dataSource.blockSizes,
+    #                            fileType=dataSource.dataFormat,
+    #                           )
 
     apiDataSource = apiExperiment.newDataSource(name=name,
-                                                dataStore=apiDataStore,
+                                                dataStore=None,  #apiDataStore,
                                                 numDim=dataSource.dimensionCount,
                                                 dataType='processed'
                                                 )
@@ -3153,17 +3175,19 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
             freqDataDim.newDataDimRef(expDimRef=expDimRef)
 
     # Done with api generation; Create the Spectrum object
+
     # Agggh, cannot do
     #   spectrum = Spectrum(self, apiDataSource)
     # as the object was magically already created
     # This was done by Project_newApiObject, called from Nmr.DataSource.__init__ through an api notifier.
     # This notifier is set in the AbstractWrapper class and is part of the machinery generation; i.e.
     # _linkWrapperClasses (needs overhaul!!)
+
     spectrum = self._data2Obj.get(apiDataSource)
     if spectrum is None:
         raise RuntimeError("something went wrong creating a new Spectrum instance")
     spectrum._apiExperiment = apiExperiment
-    spectrum._apiDataStore = apiDataStore
+    # spectrum._apiDataStore = apiDataStore
 
     # Set the references between spectrum and dataStore
     dataStore.spectrum = spectrum
@@ -3182,13 +3206,19 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
         spectrum.newPeakList()
 
     # Set noiseLevel, contourLevels, contourColours
-    from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise, getDefaultSpectrumColours
-
     spectrum.noiseLevel = spectrum._dataSource.estimateNoise()
-    setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-                                        setPositiveContours=True, setNegativeContours=True,
-                                        useSameMultiplier=True)
-    (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+    # this crashes (sometimes), deep in the bowles of the v2-code
+    # setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
+    #                                     setPositiveContours=True, setNegativeContours=True,
+    #                                     useSameMultiplier=True)
+    spectrum._setContourDefaultValues()
+    # spectrum.positiveContourBase = spectrum.noiseLevel * 1.5
+    # spectrum.positiveContourFactor = 1.3
+    # spectrum.positiveContourCount = 10
+    # spectrum.negativeContourBase = -1.0 * spectrum.noiseLevel * 1.5
+    # spectrum.negativeContourFactor = 1.3
+    # spectrum.negativeContourCount = 10
+    # (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
     spectrum.sliceColour = spectrum.positiveContourColour
 
     return spectrum

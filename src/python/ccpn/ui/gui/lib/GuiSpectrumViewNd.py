@@ -884,7 +884,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         """ Construct the contours for this spectrum using an OpenGL display list
             The way this is done here, any change in contour level needs to call this function.
         """
-
         xDataDim, yDataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[:2]
 
         if (doRefresh or xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev

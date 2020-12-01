@@ -3280,8 +3280,9 @@ def _createDummySpectrum(self: Project, axisCodes: Sequence[str], name=None,
 # Additional Notifiers:
 Project._apiNotifiers.extend(
         (
-            ('_finaliseApiRename', {}, Nmr.DataSource._metaclass.qualifiedName(), 'setName'),
-
+# GWV: not needed?
+            # ('_finaliseApiRename', {}, Nmr.DataSource._metaclass.qualifiedName(), 'setName'),
+            #
             ('_notifyRelatedApiObject', {'pathToObject': 'dataSources', 'action': 'change'},
                                          Nmr.Experiment._metaclass.qualifiedName(), ''),
 

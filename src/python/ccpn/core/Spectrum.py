@@ -476,12 +476,14 @@ class Spectrum(AbstractWrapperObject):
         """
         if base is None:
             base = self.noiseLevel *1.5
+        base = max(base, 1.0)  # Contour bases have to be > 0.0
+
         self.positiveContourBase = base
-        self.positiveContourFactor = 1.3
-        self.positiveContourCount = 10
+        self.positiveContourFactor = multiplier
+        self.positiveContourCount = count
         self.negativeContourBase = -1.0 * base
-        self.negativeContourFactor = 1.3
-        self.negativeContourCount = 10
+        self.negativeContourFactor = multiplier
+        self.negativeContourCount = count
         (self.positiveContourColour, self.negativeContourColour) = getDefaultSpectrumColours(self)
 
     @property
@@ -2415,7 +2417,7 @@ class Spectrum(AbstractWrapperObject):
             data = self._dataSource.getSliceData(position=position, sliceDim=sliceDim)
         return data
 
-    @cached(_SLICEDATACACHE, maxItems=1024, debug=False)
+    # @cached(_SLICEDATACACHE, maxItems=1024, debug=False)
     def _getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int):
         """Internal routine to get sliceData; optimised to use (buffered) getPlaneData
         CCPNINTERNAL: used in CcpnOpenGL
@@ -2423,18 +2425,19 @@ class Spectrum(AbstractWrapperObject):
         if not (sliceDim == xDim or sliceDim == yDim):
             raise RuntimeError('sliceDim (%s) not in plane (%s,%s)' % (sliceDim, xDim, yDim))
 
+        slice = position[yDim - 1] - 1 if sliceDim == xDim else position[xDim - 1] - 1  # position amd dimensions are 1-based
+
         # Improve caching,
         position[xDim-1] = 1
         position[yDim-1] = 1
-
-        data = self._getPlaneData(position, xDim, yDim)
+        planeData = self._getPlaneData(position, xDim, yDim)
 
         if sliceDim == xDim:
-            slice = position[yDim - 1] - 1  # position amd dimensions are 1-based
-            return data[slice, 0:]
+            data = planeData[slice, 0:]
         elif sliceDim == yDim:
-            slice = position[xDim - 1] - 1  # position amd dimensions are 1-based
-            return data[0:, slice]
+            data = planeData[0:, slice]
+
+        return data
 
     @logCommand(get='self')
     def getSliceData(self, position=None, sliceDim: int = 1):
@@ -3176,6 +3179,33 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name):
 
 
 @newObject(Spectrum)
+def _newEmptySpectrum(self: Project, isotopeCodes:Sequence[str], name: str='empty') -> Spectrum:
+    """Creation of new Empty Spectrum;
+    :return: Spectrum instance or None on error
+    """
+
+    # Local  to prevent circular import
+    from sandbox.Geerten.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+
+    if not isIterable(isotopeCodes) or len(isotopeCodes) == 0:
+        raise ValueError('invalid isotopeCodes "%s"' % isotopeCodes)
+
+    dataStore = DataStore()
+
+    # Intialise a dataSource instance
+    dataSource = EmptySpectrumDataSource()
+    if dataSource is None:
+        raise RuntimeError('Error creating empty DataSource')
+    # Fill in some of the parameters
+    dataSource.dimensionCount = len(isotopeCodes)
+    dataSource.isotopeCodes = isotopeCodes
+    dataSource._setSpectralParametersFromIsotopeCodes()
+    dataSource._assureProperDimensionality()
+
+    return _newSpectrumFromDataSource(self, dataStore, dataSource, name)
+
+
+@newObject(Spectrum)
 def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
     """Creation of new Spectrum;
     :return: Spectrum instance or None on error
@@ -3205,113 +3235,7 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
 
     return _newSpectrumFromDataSource(self, dataStore, dataSource, name)
 
-#     # assure unique name
-#     names = [sp.name for sp in self.spectra]
-#     if name in names:
-#         i = 1
-#         while '%s_%s' % (name, i) in names:
-#             i += 1
-#         name = '%s_%s' % (name, i)
-#
-#     dataStore.dataFormat = dataSource.dataFormat
-#
-# # Consolidating previous API calls:
-# #   NmrProject.createExperiment
-# #   spectrum.Spectrum.createBlockedMatrix
-# #   Nmr.Expertiment.createDataSource
-# #
-# # First creating the api data structures with minimal parameters and once in place updating all values from a
-# # SpectrumDataSource instance; no longer create a BlockedMatrix as this is handled by the (V3) dataStore and dataSource
-# # objects.
-#
-#     apiProject = self._wrappedData
-#     apiExperiment = apiProject.newExperiment(name=name,
-#                                              numDim=dataSource.dimensionCount,
-#                                             )
-#
-#     # apiUrl = apiProject.root.fetchDataUrl(dir)
-#     # urlPath = aPath(apiUrl.url.path)
-#     # relPath = _path.relative_to(urlPath)
-#
-#     # apiDataStore =  apiUrl.dataLocationStore.newBlockedBinaryMatrix(
-#     #                            dataUrl=apiUrl,
-#     #                            path=str(relPath),
-#     #                            numPoints=dataSource.pointCounts,
-#     #                            isComplex=dataSource.isComplex,
-#     #                            blockSizes=dataSource.blockSizes,
-#     #                            fileType=dataSource.dataFormat,
-#     #                           )
-#
-#     apiDataSource = apiExperiment.newDataSource(name=name,
-#                                                 dataStore=None,  #apiDataStore,
-#                                                 numDim=dataSource.dimensionCount,
-#                                                 dataType='processed'
-#                                                 )
-#
-#     # Intialise the freq/time dimensions; This seems a very complicated datastructure! (GWV)
-#     # dataDim classnames are FidDataDim, FreqDataDim, SampledDataDim
-#     for n, expDim in enumerate(apiExperiment.sortedExpDims()):
-#         expDim.isAcquisition = False  #(dataSource.aquisitionAxisCode == dataSource.axisCodes[n]),
-#         expDimRef = expDim.newExpDimRef(
-#                             isotopeCodes=(dataSource.isotopeCodes[n],),
-#                             axisCode=dataSource.axisCodes[n],
-#                             sf=dataSource.spectrometerFrequencies[n],
-#                             unit='ppm'
-#                            )
-#
-#         _nPoints = dataSource.pointCounts[n]
-#         freqDataDim = apiDataSource.newFreqDataDim(dim=n+1, expDim=expDim,
-#                                                    numPoints=_nPoints,
-#                                                    numPointsOrig=_nPoints,
-#                                                    pointOffset=0,
-#                                                    isComplex=dataSource.isComplex[n],
-#                                                    valuePerPoint=dataSource.spectralWidthsHz[n]/float(_nPoints)
-#                                                    )
-#         # expDimRef = (expDim.findFirstExpDimRef(measurementType='Shift') or expDim.findFirstExpDimRef())
-#         if expDimRef:
-#             freqDataDim.newDataDimRef(expDimRef=expDimRef)
-#
-#     # Done with api generation; Create the Spectrum object
-#
-#     # Agggh, cannot do
-#     #   spectrum = Spectrum(self, apiDataSource)
-#     # as the object was magically already created
-#     # This was done by Project_newApiObject, called from Nmr.DataSource.__init__ through an api notifier.
-#     # This notifier is set in the AbstractWrapper class and is part of the machinery generation; i.e.
-#     # _linkWrapperClasses (needs overhaul!!)
-#
-#     spectrum = self._data2Obj.get(apiDataSource)
-#     if spectrum is None:
-#         raise RuntimeError("something went wrong creating a new Spectrum instance")
-#     spectrum._apiExperiment = apiExperiment
-#     # spectrum._apiDataStore = apiDataStore
-#
-#     # Set the references between spectrum and dataStore
-#     dataStore.spectrum = spectrum
-#     dataStore._saveInternal()
-#     spectrum._dataStore = dataStore
-#
-#     # Update all parameters from the dataSource to the Spectrum instance; retain the dataSource instance
-#     dataSource.exportToSpectrum(spectrum, includePath=False)
-#     spectrum._dataSource = dataSource
-#
-#     # Link to default (i.e. first) chemicalShiftList
-#     spectrum.chemicalShiftList = self.chemicalShiftLists[0]
-#
-#     # # Assure at least one peakList
-#     if len(spectrum.peakLists) == 0:
-#         spectrum.newPeakList()
-#
-#     # Set noiseLevel, contourLevels, contourColours
-#     spectrum.noiseLevel = spectrum._dataSource.estimateNoise()
-#     # this crashes (sometimes), deep in the bowles of the v2-code
-#     # setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-#     #                                     setPositiveContours=True, setNegativeContours=True,
-#     #                                     useSameMultiplier=True)
-#     spectrum._setContourDefaultValues()
-#     spectrum.sliceColour = spectrum.positiveContourColour
-#
-#     return spectrum
+
 
 
 @newObject(Spectrum)
@@ -3394,81 +3318,3 @@ Project._apiNotifiers.extend(
         )
 )
 
-
-# Experiment:
-# dataDict['applicationData'] = list()
-# dataDict['details'] = None
-# dataDict['endDate'] = None
-# dataDict['isLocked'] = None
-# dataDict['lastEditedDate'] = None
-# dataDict['name'] = None
-# dataDict['serial'] = None
-# dataDict['startDate'] = None
-# dataDict['status'] = None
-# dataDict['access'] = None
-# dataDict['annotations'] = set()
-# dataDict['blueprintStatuss'] = set()
-# dataDict['creator'] = None
-# dataDict['expBlueprint'] = None
-# dataDict['experimentGroup'] = None
-# dataDict['experimentType'] = None
-# dataDict['group'] = None
-# dataDict['instrument'] = None
-# dataDict['lastEditor'] = None
-# dataDict['method'] = None
-# dataDict['next'] = set()
-# dataDict['outputSamples'] = {}
-# dataDict['parameters'] = {}
-# dataDict['previous'] = set()
-# dataDict['protocol'] = None
-# dataDict['sampleIos'] = {}
-
-# apiExperiment = apiProject.createExperiment(name=name,
-#                                             numDim=dataSource.dimensionCount,
-#                                             sf=dataSource.spectrometerFrequencies,
-#                                             isotopeCodes=dataSource.isotopeCodes
-#                                             )
-
-# BlockedBinaryMatrix
-# dataDict['_ID'] = None
-# dataDict['applicationData'] = list()
-# dataDict['blockHeaderSize'] = 0
-# dataDict['blockSizes'] = list()
-# dataDict['ccpnInternalData'] = None
-# dataDict['complexStoredBy'] = 'dimension'
-# dataDict['details'] = None
-# dataDict['fileType'] = None
-# dataDict['hasBlockPadding'] = True
-# dataDict['headerSize'] = 0
-# dataDict['isBigEndian'] = True
-# dataDict['isComplex'] = list()
-# dataDict['nByte'] = 4
-# dataDict['numPoints'] = list()
-# dataDict['numRecords'] = 1
-# dataDict['numberType'] = 'float'
-# dataDict['path'] = None
-# dataDict['scaleFactor'] = 1.0
-# dataDict['serial'] = None
-# dataDict['dataUrl'] = None
-# dataDict['nmrDataSources'] = set()
-#     dataStore =  createBlockedMatrix(
-#                                dataUrl=apiUrl,
-#                                path=path,
-#                                numPoints=dataSource.pointCounts,
-#                                blockSizes=dataSource.blockSizes,
-#                                fileType=dataSource.dataFormat,
-#                               isComplex=[False]*dataSource.dimensionCount,
-#                               complexStoredBy=['timepoint']*dataSource.dimensionCount
-#                               )
-
-# apiDataSource = apiExperiment.createDataSource(
-#                                                name=name,
-#                                                dataStore = apiDataStore,
-#                                                numPoints=dataSource.pointCounts,
-#                                                sw=dataSource.spectralWidthsHz,
-#                                                refppm=dataSource.referenceValues,
-#                                                refpt=dataSource.referencePoints,
-#                                                sampledValues=dataSource.sampledValues,
-#                                                sampledErrors=dataSource.sampledSigmas,
-#                                                # notOverRide=False, # prevent callback to create Spectrum instance
-#                                                )

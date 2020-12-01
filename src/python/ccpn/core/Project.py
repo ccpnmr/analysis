@@ -1459,6 +1459,18 @@ class Project(AbstractWrapperObject):
                                     chemicalShiftList=chemicalShiftList)
 
     @logCommand('project.')
+    def newEmptySpectrum(self, isotopeCodes: Sequence[str], name='empty'):
+        """
+        Make new Empty spectrum from isotopeCodes list - without data and with default parameters.
+
+        :param isotopeCodes:
+        :param name:
+        :return: a new Spectrum instance.
+        """
+        from ccpn.core.Spectrum import _newEmptySpectrum
+        return _newEmptySpectrum(self, isotopeCodes=isotopeCodes, name=name)
+
+    @logCommand('project.')
     def newNmrChain(self, shortName: str = None, isConnected: bool = False, label: str = '?',
                     comment: str = None):
         """Create new NmrChain. Setting isConnected=True produces a connected NmrChain.

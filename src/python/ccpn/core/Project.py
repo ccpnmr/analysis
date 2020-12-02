@@ -217,8 +217,10 @@ class Project(AbstractWrapperObject):
             with notificationBlanking(self.application):
                 with notificationEchoBlocking(self.application):
                     # 20190520:ED routines that use core objects, not sure whether the correct place
-                    self._setContourColours()
-                    self._setNoiseLevels()
+                    # GWV: it is not; the Spectrum instances need to assure they are ok after
+                    # (re-)initialisation
+                    # self._setContourColours()
+                    # self._setNoiseLevels()
 
                     if len(self.chemicalShiftLists) == 0:
                         self.newChemicalShiftList(name='default')
@@ -1343,31 +1345,33 @@ class Project(AbstractWrapperObject):
         #
         return result
 
-    def _setContourColours(self):
-        """Set new contour colours for spectra that have not been defined
-        """
-        # 20190520:ED new code to set colours and update contour levels
-        from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
-
-        for spectrum in self.spectra:
-            if not spectrum.positiveContourColour or not spectrum.negativeContourColour:
-                # set contour colours for every spectrum
-                (spectrum.positiveContourColour,
-                 spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-            if not spectrum.sliceColour:
-                spectrum.sliceColour = spectrum.positiveContourColour
-
-    def _setNoiseLevels(self):
-        """Set noise levels for spectra that have not been defined
-        """
-        # 20190520:ED new code to set colours and update contour levels
-        from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
-
-        for spectrum in self.spectra:
-            if not spectrum.noiseLevel:
-                setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-                                          setPositiveContours=True, setNegativeContours=True,
-                                          useSameMultiplier=True)
+    # GWV: This is now handled in Spectrum_restoreObject
+    #
+    # def _setContourColours(self):
+    #     """Set new contour colours for spectra that have not been defined
+    #     """
+    #     # 20190520:ED new code to set colours and update contour levels
+    #     from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
+    #
+    #     for spectrum in self.spectra:
+    #         if not spectrum.positiveContourColour or not spectrum.negativeContourColour:
+    #             # set contour colours for every spectrum
+    #             (spectrum.positiveContourColour,
+    #              spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+    #         if not spectrum.sliceColour:
+    #             spectrum.sliceColour = spectrum.positiveContourColour
+    #
+    # def _setNoiseLevels(self):
+    #     """Set noise levels for spectra that have not been defined
+    #     """
+    #     # 20190520:ED new code to set colours and update contour levels
+    #     from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
+    #
+    #     for spectrum in self.spectra:
+    #         if not spectrum.noiseLevel:
+    #             setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
+    #                                       setPositiveContours=True, setNegativeContours=True,
+    #                                       useSameMultiplier=True)
 
     #===========================================================================================
     # new'Object' and other methods

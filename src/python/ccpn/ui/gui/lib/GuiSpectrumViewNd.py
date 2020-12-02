@@ -45,7 +45,7 @@ from ccpnc.contour import Contourer2d
 #from ccpn.ui.gui.modules import SpectrumDisplayNd
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
+# from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
 
 
 ###from ccpn.ui.gui.widgets.ToolButton import ToolButton
@@ -688,11 +688,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         ##self.drawContoursCounter += 1
         ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
 
-        if not self.spectrum.noiseLevel and firstShow:
-            getLogger().info("estimating noise level for spectrum %s" % str(self.spectrum.pid))
-            setContourLevelsFromNoise(self.spectrum, setNoiseLevel=True,
-                                      setPositiveContours=True, setNegativeContours=True,
-                                      useSameMultiplier=True)
+        # GWV 02122020: Should always have been set on newObject or restored object
+
+        # if not self.spectrum.noiseLevel and firstShow:
+        #     getLogger().info("estimating noise level for spectrum %s" % str(self.spectrum.pid))
+        #     setContourLevelsFromNoise(self.spectrum, setNoiseLevel=True,
+        #                               setPositiveContours=True, setNegativeContours=True,
+        #                               useSameMultiplier=True)
 
         if self.spectrum.positiveContourBase is None or self.spectrum.positiveContourBase == 0.0:
             raise RuntimeError('Positive Contour Base is not defined')

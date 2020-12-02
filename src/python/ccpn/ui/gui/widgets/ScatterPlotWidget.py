@@ -548,6 +548,10 @@ class ScatterPlot(Widget):
                         toolTip='Toggle ROI',
                         checkable = True,
                         callback=self.toggleROI),
+                cm._SCMitem(name='Select within ROI',
+                            typeItem=cm.ItemTypes.get(cm.ITEM), icon='icons/roi_selection',
+                            toolTip='Select items locatate inside the ROI limits',
+                            callback=self.selectFromROI),
                 cm._separator(),
                 ]
         items = [itm for itm in items if itm is not None]
@@ -705,6 +709,9 @@ class ScatterPlot(Widget):
         show/hide ROI from the plot
         """
         self.roiItem.setVisible(value)
+
+    def selectFromROI(self):
+        self.selectedData = self.roiItem.getInnerData()
 
     def _addScatterSelectionBox(self):
         self._scatterSelectionBox = QtWidgets.QGraphicsRectItem(0, 0, 1, 1)

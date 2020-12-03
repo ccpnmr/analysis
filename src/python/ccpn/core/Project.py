@@ -844,32 +844,34 @@ class Project(AbstractWrapperObject):
         pathToObject is a navigation path (may contain dots) and must yield an API object
         or an iterable of API objects"""
 
-        getDataObj = self._data2Obj.get
+        if self._apiNotificationBlanking == 0:
+            getDataObj = self._data2Obj.get
 
-        target = operator.attrgetter(pathToObject)(wrappedData)
+            target = operator.attrgetter(pathToObject)(wrappedData)
 
-        # GWV: a bit too much for now; should be the highest debug level only
-        #self._project._logger.debug('%s: %s.%s = %s'
-        #                            % (action, wrappedData, pathToObject, target))
+            # GWV: a bit too much for now; should be the highest debug level only
+            #self._project._logger.debug('%s: %s.%s = %s'
+            #                            % (action, wrappedData, pathToObject, target))
 
-        if not target:
-            pass
-        elif hasattr(target, '_metaclass'):
-            if not target.isDeleted:
-                # Hack. This is an API object - only if exists
-                getDataObj(target)._finaliseAction(action)
-        else:
-            # This must be an iterable
-            for obj in target:
-                if not obj.isDeleted:
-                    getDataObj(obj)._finaliseAction(action)
+            if not target:
+                pass
+            elif hasattr(target, '_metaclass'):
+                if not target.isDeleted:
+                    # Hack. This is an API object - only if exists
+                    getDataObj(target)._finaliseAction(action)
+            else:
+                # This must be an iterable
+                for obj in target:
+                    if not obj.isDeleted:
+                        getDataObj(obj)._finaliseAction(action)
 
     def _finaliseApiRename(self, wrappedData):
         """Reset Finalise rename - called from APi object (for API notifiers)
         """
 
-        obj = self._data2Obj.get(wrappedData)
-        obj._finaliseAction('rename')
+        if self._apiNotificationBlanking == 0:
+            obj = self._data2Obj.get(wrappedData)
+            obj._finaliseAction('rename')
 
     def _modifiedLink(self, dummy, classNames: typing.Tuple[str, str]):
         """ call link-has-changed notifiers

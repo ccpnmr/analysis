@@ -325,7 +325,9 @@ class AbstractWrapperObject(NotifierBase):
         result = self._wrappedData.ccpnInternalData
         if result is None:
             result = {}
-            self._wrappedData.ccpnInternalData = result
+            with notificationBlanking():
+                with apiNotificationBlanking():
+                    self._wrappedData.ccpnInternalData = result
         return result
 
     @_ccpnInternalData.setter
@@ -979,6 +981,7 @@ class AbstractWrapperObject(NotifierBase):
         data2Obj = project._data2Obj
 
         for childClass in self._childClasses:
+            # print('>>> childClass', childClass)
             # recursively create children
             for apiObj in childClass._getAllWrappedData(self):
                 obj = data2Obj.get(apiObj)
@@ -991,8 +994,10 @@ class AbstractWrapperObject(NotifierBase):
                     #     obj = factoryFunction(project, apiObj)
                 try:
                     obj._initializeAll()
+
                 except Exception as er:
                     getLogger().warning('Error initialising object %s. %s1' % (obj, er))
+                    raise er
                 # getLogger().info(str(obj))   # ejb - temp
 
     def _unwrapAll(self):

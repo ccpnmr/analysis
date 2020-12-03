@@ -2852,8 +2852,12 @@ class Spectrum(AbstractWrapperObject):
 
         spectrum = super()._restoreObject(project, apiObj)
 
-        spectrum._dataStore = DataStore(spectrum=spectrum)
-        spectrum._dataSource = spectrum._getDataSource(spectrum._dataStore, reportWarnings=True)
+        try:
+            spectrum._dataStore = DataStore(spectrum=spectrum)
+            spectrum._dataSource = spectrum._getDataSource(spectrum._dataStore, reportWarnings=True)
+
+        except Exception as es:
+            getLogger().warning('Error restoring valid data source for % s (es)' % (spectrum, es))
 
         # Assure a setting of crucial attributes
         if spectrum.noiseLevel is None:

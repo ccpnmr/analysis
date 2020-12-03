@@ -53,7 +53,7 @@ from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
 from ccpn.util.UserPreferences import UserPreferences
 from ccpn.util.Common import ZPlaneNavigationModes
 from ccpn.ui.gui.lib.GuiPath import PathEdit
-from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
+# from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, USERAUXILIARYPATH, \
@@ -641,7 +641,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.userDataPathText.setText(self.preferences.general.dataPath)
 
         # populate ValidateFrame
-        self._validateFrame._populate()
+        # self._validateFrame._populate()
 
         self.regionPaddingData.setValue(float('%.1f' % (100 * self.preferences.general.stripRegionPadding)))
         self.dropFactorData.setValue(float('%.1f' % (100 * self.preferences.general.peakDropFactor)))
@@ -757,17 +757,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.userDataPathButton = Button(parent, grid=(row, 2), callback=self._getUserDataPath, icon='icons/directory',
                                          hPolicy='fixed')
 
-        # add validate frame
-        row += 1
-        self._validateFrame = ValidateSpectraForPreferences(parent, mainWindow=self.mainWindow, spectra=self.project.spectra,
-                                                            setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
-
-        self._validateFrame._filePathCallback = self._queueSetValidateFilePath
-        self._validateFrame._dataUrlCallback = self._queueSetValidateDataUrl
-        self._validateFrame._matchDataUrlWidths = parent
-        self._validateFrame._matchFilePathWidths = parent
-
-        self._validateFrame.setVisible(False)
+        # # add validate frame
+        # row += 1
+        # self._validateFrame = ValidateSpectraForPreferences(parent, mainWindow=self.mainWindow, spectra=self.project.spectra,
+        #                                                     setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
+        #
+        # self._validateFrame._filePathCallback = self._queueSetValidateFilePath
+        # self._validateFrame._dataUrlCallback = self._queueSetValidateDataUrl
+        # self._validateFrame._matchDataUrlWidths = parent
+        # self._validateFrame._matchFilePathWidths = parent
+        #
+        # self._validateFrame.setVisible(False)
 
         # row += 1
         # self._dataUrlData = {}
@@ -1367,33 +1367,33 @@ class PreferencesPopup(CcpnDialogMainWidget):
             # self._setAuxiliaryFilesPath()
             # self.preferences.general.auxiliaryFilesPath = directory[0]
 
-    @queueStateChange(_verifyPopupApply)
-    def _queueSetValidateDataUrl(self, dataUrl, newUrl, urlValid, dim):
-        """Set the new url in the dataUrl
-        dim is required by the decorator to give a unique id for dataUrl row
-        """
-        if newUrl != dataUrl.url.path:
-            return partial(self._validatePreferencesDataUrl, dataUrl, newUrl, urlValid, dim)
+    # @queueStateChange(_verifyPopupApply)
+    # def _queueSetValidateDataUrl(self, dataUrl, newUrl, urlValid, dim):
+    #     """Set the new url in the dataUrl
+    #     dim is required by the decorator to give a unique id for dataUrl row
+    #     """
+    #     if newUrl != dataUrl.url.path:
+    #         return partial(self._validatePreferencesDataUrl, dataUrl, newUrl, urlValid, dim)
+    #
+    # def _validatePreferencesDataUrl(self, dataUrl, newUrl, urlValid, dim):
+    #     """Put the new dataUrl into the dataUrl and the preferences.general.dataPath
+    #     Extra step incase urlValid needs to be checked
+    #     """
+    #     if dim == 0:
+    #         # must be the first dataUrl for the preferences
+    #         # self.preferences.general.dataPath = newUrl
+    #         pass
+    #
+    #     # if urlValid:
+    #     # self._validateFrame.dataUrlFunc(dataUrl, newUrl)
 
-    def _validatePreferencesDataUrl(self, dataUrl, newUrl, urlValid, dim):
-        """Put the new dataUrl into the dataUrl and the preferences.general.dataPath
-        Extra step incase urlValid needs to be checked
-        """
-        if dim == 0:
-            # must be the first dataUrl for the preferences
-            # self.preferences.general.dataPath = newUrl
-            pass
-
-        # if urlValid:
-        self._validateFrame.dataUrlFunc(dataUrl, newUrl)
-
-    @queueStateChange(_verifyPopupApply)
-    def _queueSetValidateFilePath(self, spectrum, filePath, dim):
-        """Set the new filePath for the spectrum
-        dim is required by the decorator to give a unique id for filePath row
-        """
-        if filePath != spectrum.filePath:
-            return partial(self._validateFrame.filePathFunc, spectrum, filePath)
+    # @queueStateChange(_verifyPopupApply)
+    # def _queueSetValidateFilePath(self, spectrum, filePath, dim):
+    #     """Set the new filePath for the spectrum
+    #     dim is required by the decorator to give a unique id for filePath row
+    #     """
+    #     if filePath != spectrum.filePath:
+    #         return partial(self._validateFrame.filePathFunc, spectrum, filePath)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetuserLayoutsPath(self):

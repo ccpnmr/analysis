@@ -1567,8 +1567,11 @@ class Framework(NotifierBase):
                 setInitialPath(initialPath=Path.Path(path).parent,
                                pathID=USERWORKINGPATH)
 
-            if project and project._undo:
-                project._undo.clear()
+            # if project and project._undo:
+            #     project._undo.clear()
+
+            self.project = project
+
             return project
 
         # elif dataType == 'NefFile' and subType in (ioFormats.NEF):

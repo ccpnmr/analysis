@@ -60,7 +60,6 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply, _
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise
 from ccpn.core.lib.ContextManagers import queueStateChange
-from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForSpectrumPopup
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.ui.gui.widgets.Frame import Frame

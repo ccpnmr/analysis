@@ -536,31 +536,48 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     def _loadProjectSingleTry(self, projectDir):
         """Load/Reload project after load dialog.
         """
-        project = self.application.loadProject(projectDir)
-        if project is None:
-            raise ValueError('Error loading project "%s"' % projectDir)
+        from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
-        project._mainWindow.sideBar.buildTree(project)
-        project._mainWindow.show()
-        QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+        try:
+            project = self.application.loadProject(projectDir)
 
-        # if the new project contains invalid spectra then open the popup to see them
-        badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
-        if badSpectra:
-            from ccpn.ui.gui.widgets.MessageDialog import showWarning
+            if project:
+                project._mainWindow.sideBar.buildTree(project)
+                project._mainWindow.show()
+                QtWidgets.QApplication.setActiveWindow(project._mainWindow)
 
-            text = 'Detected invalid Spectrum file path(s) for:\n\n'
-            for sp in badSpectra:
-                text += '\t%s\n' % sp
-            text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
-            showWarning('Spectrum file paths', text)
+                # if the new project contains invalid spectra then open the popup to see them
+                badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
+                # badSpectra = []
+                # for spectrum in project.spectra:
+                #     valid = False
+                #     try:
+                #         valid = spectrum.hasValidPath()  # can raise error if None
+                #     except:
+                #         pass
+                #     finally:
+                #         if not valid:
+                #             badSpectra.append(str(spectrum))
 
-        #TODO: this needs fixing; Project instance should deal with this
-        undo = self._project._undo
-        if undo is not None:
-            undo.markClean()
+                if badSpectra:
+                    text = 'Detected invalid Spectrum file path(s) for:\n\n'
+                    for sp in badSpectra:
+                        text += '\t%s\n' % sp
+                    text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
+                    showWarning('Spectrum file paths', text)
 
-        return project
+                # # TODO: there should be no need for this; check
+                # undo = self._project._undo
+                # if undo is not None:
+                #     undo.markClean()
+
+                return project
+
+            else:
+                showWarning('Load Project', 'Error loading project')
+
+        except Exception as es:
+            raise ValueError("Error loading project: %s" % str(es))
 
     def _loadProjectLastValid(self, projectDir):
         """Try and load a new project, if error try and load the last valid project.
@@ -646,9 +663,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 #         MessageDialog.showError('loadProject', 'Fatal error loading previous project:\n%s' % str(lastValidProject))
                 #         Logging.getLogger().warning('Fatal error loading previous project: %s' % str(lastValidProject))
 
-        undo = self._project._undo
-        if undo is not None:
-            undo.markClean()
+        # undo = self._project._undo
+        # if undo is not None:
+        #     undo.markClean()
+
         return project
 
     def _fillRecentProjectsMenu(self):

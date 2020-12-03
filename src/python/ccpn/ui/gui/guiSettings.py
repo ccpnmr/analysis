@@ -383,7 +383,7 @@ def getColourScheme():
         application = getattr(app, '_ccpnApplication')
         colourScheme = application.colourScheme
         if colourScheme not in COLOUR_SCHEMES:
-            raise RuntimeError('Undefined colour scheme')
+            getLogger().warning('Undefined colour scheme')
             return DEFAULT
         return colourScheme
     # for now to make the tests run

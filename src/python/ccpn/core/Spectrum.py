@@ -1924,6 +1924,8 @@ class Spectrum(AbstractWrapperObject):
         :param axisDict: dict of axis limits
         :return: tuple of regions
         """
+        raise NotImplementedError('replace by getRegion')
+
         if not self.hasValidPath():
             return
 
@@ -2771,7 +2773,8 @@ class Spectrum(AbstractWrapperObject):
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
-        "Subclassed to allow for initialisations on restore, not on creation vis newSpectrum"
+        """Subclassed to allow for initialisations on restore, not on creation via newSpectrum
+        """
 
         spectrum = super()._restoreObject(project, apiObj)
 
@@ -2781,6 +2784,9 @@ class Spectrum(AbstractWrapperObject):
         # Assure a setting of crucial attributes
         if spectrum.noiseLevel is None:
             spectrum.estimateNoise()
+
+        if spectrum.scale is None:
+            spectrum.scale = 1.0
 
         if not spectrum.positiveContourBase or not spectrum.negativeContourBase:
             spectrum._setDefaultContourValues()

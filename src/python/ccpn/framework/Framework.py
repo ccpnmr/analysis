@@ -474,7 +474,7 @@ class Framework(NotifierBase):
 
         self.project = project
         if hasattr(self, '_mainWindow'):
-            Logging.getLogger().debug('>>>framework._initialiseProject')
+            Logging.getLogger().debug('Framework._initialiseProject>>>')
 
             project._blockSideBar = True
             self.ui.initialize(self._mainWindow)

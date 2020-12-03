@@ -6,7 +6,7 @@ spectrumPath = '/Users/simon1/nmrdata/spectra/hsqc.spc' # specifies path to proc
 project.loadData(spectrumPath)
 
 # Use the getByPid() method of the project class to get hold of the spectrum object
-hsqcSpectrum = project.getByPid('SP:hsqc')
+hsqcSpectrum = get('SP:hsqc')
 
 # use the createSpectrumDisplay() method of ui.mainWindow to display the spectrum
-ui.mainWindow.createSpectrumDisplay(hsqcSpectrum)
+mainWindow.createSpectrumDisplay(hsqcSpectrum)

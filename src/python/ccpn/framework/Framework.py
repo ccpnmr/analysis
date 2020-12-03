@@ -41,6 +41,7 @@ import subprocess
 from PyQt5 import QtWidgets
 from distutils.dir_util import copy_tree
 from functools import partial
+
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
@@ -49,6 +50,8 @@ from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo, CcpnSparkyIo
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.Pid import Pid
+
+from ccpn.framework.Application import getApplication
 from ccpn.framework import Version
 from ccpn.framework.Current import Current
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
@@ -64,6 +67,9 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, \
     USERACHIVESPATH, USERDATAPATH, USERNMRSTARPATH, USERSPECTRUMPATH, \
     USERLAYOUTSPATH, USERMACROSPATH, USERNEFPATH, USERSAVEPROJECTPATH, setInitialPath
 from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView
+from ccpn.ui.gui.widgets.MessageDialog import showError
+
+
 from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
@@ -105,7 +111,19 @@ MacrosDirName = 'macros'
 
 def _ccpnExceptionhook(type, value, tback):
     '''This because PyQT raises and catches exceptions,
-    but doesn't pass them along instead makes the program crashing miserably.'''
+    but doesn't pass them along instead makes the program crashing miserably.
+    '''
+    application = getApplication()
+    if application._isInDebugMode:
+        sys.stderr.write('_ccpnExceptionhook: type = %s\n' % type)
+        sys.stderr.write('_ccpnExceptionhook: value = %s\n' % value)
+        sys.stderr.write('_ccpnExceptionhook: tback = %s\n' % tback)
+
+    if application.hasGui:
+        title = str(type)[8:-2] + ':'
+        text = str(value)
+        showError(title=title, message=text)
+
     sys.__excepthook__(type, value, tback)
 
 
@@ -478,7 +496,7 @@ class Framework(NotifierBase):
 
         self.project = project
         if hasattr(self, '_mainWindow'):
-            Logging.getLogger().debug('>>>framework._initialiseProject')
+            Logging.getLogger().debug('Framework._initialiseProject>>>')
 
             project._blockSideBar = True
             self.ui.initialize(self._mainWindow)
@@ -1759,8 +1777,6 @@ class Framework(NotifierBase):
 
         if paths is None:
             #TODO:LIST-AS-ISSUE: This fails for native file dialogs on OSX when trying to select a project (i.e. a directory)
-            # NBNB TBD I assume here that path is either a string or a list lf string paths.
-            # NBNB #FIXME if incorrect
             dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
                                 acceptMode=FileDialog.AcceptOpen,
                                 filter=filter,
@@ -2451,9 +2467,14 @@ class Framework(NotifierBase):
             MessageDialog.showWarning('Validate Spectrum Paths Selection', 'Project has no Spectra.')
         else:
             from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
-
             popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
             popup.exec_()
+
+            # try:
+            #     popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
+            #     popup.exec_()
+            # except Exception as es:
+            #     raise es
 
     def showPeakPick1DPopup(self):
         """

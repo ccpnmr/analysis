@@ -54,7 +54,8 @@ from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 # from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
+                                          notificationEchoBlocking
 from ccpn.util.Logging import getLogger
 
 
@@ -105,11 +106,11 @@ class Project(AbstractWrapperObject):
     _className2Class = {}
 
     # List of CCPN pre-registered api notifiers
-    # Format is (wrapperFuncName, parameterDict, apiClassName, apiFuncName
-    # The function self.wrapperFuncName(**parameterDict) will be registered
-    # in the CCPN api notifier system
-    # api notifiers are set automatically,
-    # and are cleared by self._clearAllApiNotifiers and by self.delete()
+    # Format is (wrapperFuncName, parameterDict, apiClassName, apiFuncName)
+    #
+    # The function self.wrapperFuncName(**parameterDict) will be registered in the CCPN api notifier system
+    # api notifiers are set automatically, and are cleared by self._clearAllApiNotifiers and by self.delete()
+    #
     # RESTRICTED. Direct access in core classes ONLY
     _apiNotifiers = []
 
@@ -168,6 +169,14 @@ class Project(AbstractWrapperObject):
         # Notification blanking level - to allow for nested notification disabling
         self._notificationBlanking = 0
 
+        # api 'change' notification blanking level - to allow for api 'change' call to be
+        # disabled in the _modifiedApiObject method.
+        # To be used with the apiNotificationBlanking contact manager; e.g.
+        # with apiNotificationBlanking():
+        #   do something
+        #
+        self._apiNotificationBlanking = 0
+
         # Wrapper level notifier tracking.  APPLICATION ONLY
         # {(className,action):OrderedDict(notifier:onceOnly)}
         self._context2Notifiers = {}
@@ -202,9 +211,19 @@ class Project(AbstractWrapperObject):
         # initialise, creating the wrapped objects
         self._initializeAll()
 
-        # 20190520:ED routines that use core objects, not sure whether the correct place
-        self._setContourColours()
-        self._setNoiseLevels()
+        self._resetUndo()
+
+        with undoStackBlocking(self.application):
+            with notificationBlanking(self.application):
+                with notificationEchoBlocking(self.application):
+                    # 20190520:ED routines that use core objects, not sure whether the correct place
+                    # GWV: it is not; the Spectrum instances need to assure they are ok after
+                    # (re-)initialisation
+                    # self._setContourColours()
+                    # self._setNoiseLevels()
+
+                    if len(self.chemicalShiftLists) == 0:
+                        self.newChemicalShiftList(name='default')
 
     def _close(self):
         self.close()
@@ -766,8 +785,9 @@ class Project(AbstractWrapperObject):
     def _modifiedApiObject(self, wrappedData):
         """ call object-has-changed notifiers
         """
-        obj = self._data2Obj[wrappedData]
-        obj._finaliseAction('change')
+        if self._apiNotificationBlanking == 0:
+            obj = self._data2Obj[wrappedData]
+            obj._finaliseAction('change')
 
     def _finaliseApiDelete(self, wrappedData):
         """Clean up after object deletion
@@ -1166,6 +1186,7 @@ class Project(AbstractWrapperObject):
 
         return validList
 
+    @logCommand('project.')
     def loadData(self, path: str) -> typing.Optional[typing.List]:
         """
         Load data from path, determining type first.
@@ -1201,77 +1222,98 @@ class Project(AbstractWrapperObject):
         # scan the folder for valid data
         # validList = self.recurseAnalyseUrl(path)
 
-        dataType, subType, usePath = ioFormats.analyseUrl(path)
+        # GWV 30/11/2020
+        # First usage of new SpectrumdataSource routines
 
-        #TODO:RASMUS: Replace prints by logger calls
-        #TODO:RASMUS: Fix all return types; define properly first
-        if dataType is None:
-            # print("Skipping: file data type not recognised for %s" % usePath)
-            getLogger().warning("Skipping: file data type not recognised for %s" % usePath)
-            # raise ValueError("Skipping: file data type not recognised for %s" % usePath)
-            return None
+        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
+        from ccpn.core.lib.DataStore import DataStore
 
-        elif dataType == 'Dirs':
-            # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
-            paths = usePath
-            #TODO:RASMUS: Undefined return type
-            _loadedData = []
-            for path in paths:
-                _loadedData += self.loadData(path)
-            return _loadedData
+        getLogger().debug('Project.loadData: loading "%s"' % path)
 
-        elif not os.path.exists(usePath):
-            # print("Skipping: no file found at %s" % usePath)
-            getLogger().warning("Skipping: no file found at %s" % usePath)
-            # raise ValueError("Skipping: no file found at %s" % usePath)
-            return []
+        # Expand and check any redirections
+        dataStore = DataStore.checkPath(path, silent=True)
+        if dataStore is None:
+            raise FileNotFoundError('Path "%s" not found' % path)
 
-        elif dataType == 'Text':
-            # Special case - you return the text instead of a list of Pids
-            # GWV: Can't do this!! -> have to return a list of tuples: [(dataType, pid or data)]
-            # need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!
-            #TODO:RASMUS: return type is not a list
+        # check for a spectrum
+        if checkPathForSpectrumFormats( dataStore.aPath().asString() ) is not None:
 
-            return open(usePath).read()
-
-        elif dataType == 'Macro' and subType == ioFormats.PYTHON:
-            # GWV: Can't do this: have to call the routine with a flag: autoExecute=True
-            # with suspendSideBarNotifications(self, 'runMacro', usePath, quiet=False):
-            self._appBase.runMacro(usePath)
-
-        elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
-            # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-            projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
-            project = self.loadProject(projectPath, ioFormats.CCPN)
-            #TODO:RASMUS: use python tmpdir or V3 class
-            # NBNB _unpackCcpnTarfile *does* use the Python tempfile module
-            project._wrappedData.root._temporaryDirectory = temporaryDirectory
-            return [project]
+            newSpectrum  = self.newSpectrum(path=path)
+            return [newSpectrum]
 
         else:
-            # No idea what is going on here
-            #TODO: use a dictionary to define
-            funcname = '_load' + dataType
-            if funcname == '_loadProject':
-                # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-                thisProj = [self.loadProject(usePath, subType)]
-                return thisProj
 
-            elif funcname == '_loadSpectrum':
-                # NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore
-                # (NB referred to elsewhere
-                # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-                with undoBlock():
-                    thisSpec = self.loadSpectrum(usePath, subType)
-                return thisSpec
+            dataType, subType, usePath = ioFormats.analyseUrl(path)
 
-            elif hasattr(self, funcname):
-                with undoBlock():
-                    pids = getattr(self, funcname)(usePath, subType)
-                return pids
+            #TODO:RASMUS: Replace prints by logger calls
+            #TODO:RASMUS: Fix all return types; define properly first
+            if dataType is None:
+                # print("Skipping: file data type not recognised for %s" % usePath)
+                getLogger().warning("Skipping: file data type not recognised for %s" % usePath)
+                # raise ValueError("Skipping: file data type not recognised for %s" % usePath)
+                return None
+
+            elif dataType == 'Dirs':
+                # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
+                paths = usePath
+                #TODO:RASMUS: Undefined return type
+                _loadedData = []
+                for path in paths:
+                    _loadedData += self.loadData(path)
+                return _loadedData
+
+            elif not os.path.exists(usePath):
+                # print("Skipping: no file found at %s" % usePath)
+                getLogger().warning("Skipping: no file found at %s" % usePath)
+                # raise ValueError("Skipping: no file found at %s" % usePath)
+                return []
+
+            elif dataType == 'Text':
+                # Special case - you return the text instead of a list of Pids
+                # GWV: Can't do this!! -> have to return a list of tuples: [(dataType, pid or data)]
+                # need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!
+                #TODO:RASMUS: return type is not a list
+
+                return open(usePath).read()
+
+            elif dataType == 'Macro' and subType == ioFormats.PYTHON:
+                # GWV: Can't do this: have to call the routine with a flag: autoExecute=True
+                # with suspendSideBarNotifications(self, 'runMacro', usePath, quiet=False):
+                self._appBase.runMacro(usePath)
+
+            elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
+                # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
+                projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
+                project = self.loadProject(projectPath, ioFormats.CCPN)
+                #TODO:RASMUS: use python tmpdir or V3 class
+                # NBNB _unpackCcpnTarfile *does* use the Python tempfile module
+                project._wrappedData.root._temporaryDirectory = temporaryDirectory
+                return [project]
+
             else:
-                # print("Skipping: project has no function %s" % funcname)
-                getLogger().warning("Skipping: project has no function %s" % funcname)
+                # No idea what is going on here
+                #TODO: use a dictionary to define
+                funcname = '_load' + dataType
+                if funcname == '_loadProject':
+                    # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
+                    thisProj = [self.loadProject(usePath, subType)]
+                    return thisProj
+
+                # elif funcname == '_loadSpectrum':
+                #     # NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore
+                #     # (NB referred to elsewhere
+                #     # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
+                #     with undoBlock():
+                #         thisSpec = self.loadSpectrum(usePath, subType)
+                #     return thisSpec
+
+                elif hasattr(self, funcname):
+                    with undoBlock():
+                        pids = getattr(self, funcname)(usePath, subType)
+                    return pids
+                else:
+                    # print("Skipping: project has no function %s" % funcname)
+                    getLogger().warning("Skipping: project has no function %s" % funcname)
 
         return []
 
@@ -1362,55 +1404,50 @@ class Project(AbstractWrapperObject):
         else:
             raise ValueError("Project file type %s is not recognised" % subType)
 
-    @logCommand('project')
-    def loadSpectrum(self, path: str, subType: str, name=None):
-        """Load spectrum defined by path into application
-        """
-        return self._loadSpectrum(path, subType, name)
+    # @logCommand('project')
+    # def loadSpectrum(self, path: str, subType: str, name=None) -> list:
+    #     """Load spectrum defined by path into application
+    #     """
+    #     from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
+    #
+    #     # #TODO:RASMUS FIXME check for rename
+    #
+    #     try:
+    #         apiDataSource = self._wrappedData.loadDataSource(
+    #                         filePath=path, dataFileFormat=subType, name=name
+    #         )
+    #     except Exception as es:
+    #         getLogger().warning(es)
+    #         raise es
+    #
+    #     if apiDataSource is None:
+    #         return []
+    #     else:
+    #         spectrum = self._data2Obj[apiDataSource]
+    #         spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
+    #
+    #         # estimate new base contour levels
+    #         if self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:
+    #             getLogger().info("estimating noise level for spectrum %s" % str(spectrum.pid))
+    #
+    #             setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
+    #                                       setPositiveContours=True, setNegativeContours=True,
+    #                                       useSameMultiplier=True)
+    #
+    #         # set the positive/negative/slice colours
+    #         from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
+    #
+    #         (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+    #         spectrum.sliceColour = spectrum.positiveContourColour
+    #
+    #         # set the initial axis ordering
+    #         spectrum.getDefaultOrdering(None)
+    #
+    #         # if there are no peakLists then create a new one - taken from Spectrum _spectrumMakeFirstPeakList notifier
+    #         if not spectrum.peakLists:
+    #             spectrum.newPeakList()
 
-    def _loadSpectrum(self, path, subType, name=None) -> list:
-        from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
-
-        # #TODO:RASMUS FIXME check for rename
-
-        try:
-            apiDataSource = self._wrappedData.loadDataSource(
-                    filePath=path, dataFileFormat=subType, name=name
-                    )
-        except Exception as es:
-            getLogger().warning(es)
-            traceback.print_exc()
-            # raise es # why do we need this? This can be called in a loop, keep the program rolling!
-            return []
-
-        if apiDataSource is None:
-            return []
-        else:
-            spectrum = self._data2Obj[apiDataSource]
-            spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
-
-            # estimate new base contour levels
-            if self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:
-                getLogger().info("estimating noise level for spectrum %s" % str(spectrum.pid))
-
-                setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-                                          setPositiveContours=True, setNegativeContours=True,
-                                          useSameMultiplier=True)
-
-            # set the positive/negative/slice colours
-            from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
-
-            (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-            spectrum.sliceColour = spectrum.positiveContourColour
-
-            # set the initial axis ordering
-            spectrum.getDefaultOrdering(None)
-
-            # if there are no peakLists then create a new one - taken from Spectrum _spectrumMakeFirstPeakList notifier
-            if not spectrum.peakLists:
-                spectrum.newPeakList()
-
-            return [spectrum]
+    #         return [spectrum]
 
     def _loadLayout(self, path: str, subType: str):
         # this is a GUI only function call. Please move to the appropriate location on 3.1
@@ -1488,35 +1525,33 @@ class Project(AbstractWrapperObject):
         #
         return result
 
-    def _setContourColours(self):
-        """Set new contour colours for spectra that have not been defined
-        """
-        # 20190520:ED new code to set colours and update contour levels
-        from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
-
-        for spectrum in self.spectra:
-            if not spectrum.positiveContourColour or not spectrum.negativeContourColour:
-                # set contour colours for every spectrum
-                (spectrum.positiveContourColour,
-                 spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-            if not spectrum.sliceColour:
-                spectrum.sliceColour = spectrum.positiveContourColour
-
-    def _setNoiseLevels(self):
-        """Set noise levels for spectra that have not been defined
-        """
-        # 20190520:ED new code to set colours and update contour levels
-        from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
-
-        for spectrum in self.spectra:
-            if not spectrum.noiseLevel:
-
-                try:
-                    setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-                                              setPositiveContours=True, setNegativeContours=True,
-                                              useSameMultiplier=True)
-                except Exception as es:
-                    getLogger().warning('Cannot set noise levels for spectrum {}'.format(spectrum.pid))
+    # GWV: This is now handled in Spectrum_restoreObject
+    #
+    # def _setContourColours(self):
+    #     """Set new contour colours for spectra that have not been defined
+    #     """
+    #     # 20190520:ED new code to set colours and update contour levels
+    #     from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
+    #
+    #     for spectrum in self.spectra:
+    #         if not spectrum.positiveContourColour or not spectrum.negativeContourColour:
+    #             # set contour colours for every spectrum
+    #             (spectrum.positiveContourColour,
+    #              spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+    #         if not spectrum.sliceColour:
+    #             spectrum.sliceColour = spectrum.positiveContourColour
+    #
+    # def _setNoiseLevels(self):
+    #     """Set noise levels for spectra that have not been defined
+    #     """
+    #     # 20190520:ED new code to set colours and update contour levels
+    #     from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
+    #
+    #     for spectrum in self.spectra:
+    #         if not spectrum.noiseLevel:
+    #             setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
+    #                                       setPositiveContours=True, setNegativeContours=True,
+    #                                       useSameMultiplier=True)
 
     #===========================================================================================
     # new'Object' and other methods
@@ -1568,13 +1603,11 @@ class Project(AbstractWrapperObject):
     #     pass
 
     @logCommand('project.')
-    def newSpectrum(self, name: str):
-        """Creation of new Spectrum NOT IMPLEMENTED.
-        Use Project.loadData or Project.createDummySpectrum instead.
+    def newSpectrum(self, path:str, name: str = None):
+        """Creation of new Spectrum defined by path; optionally set name.
         """
         from ccpn.core.Spectrum import _newSpectrum
-
-        return _newSpectrum(self, name=name)
+        return _newSpectrum(self, path=path, name=name)
 
     @logCommand('project.')
     def createDummySpectrum(self, axisCodes: Sequence[str], name=None,
@@ -1592,6 +1625,18 @@ class Project(AbstractWrapperObject):
 
         return _createDummySpectrum(self, axisCodes=axisCodes, name=name,
                                     chemicalShiftList=chemicalShiftList)
+
+    @logCommand('project.')
+    def newEmptySpectrum(self, isotopeCodes: Sequence[str], name='empty'):
+        """
+        Make new Empty spectrum from isotopeCodes list - without data and with default parameters.
+
+        :param isotopeCodes:
+        :param name:
+        :return: a new Spectrum instance.
+        """
+        from ccpn.core.Spectrum import _newEmptySpectrum
+        return _newEmptySpectrum(self, isotopeCodes=isotopeCodes, name=name)
 
     @logCommand('project.')
     def newNmrChain(self, shortName: str = None, isConnected: bool = False, label: str = '?',

@@ -35,6 +35,9 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayPropertiesPopupNd
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+
+from ccpn.util.decorators import logCommand
+
 from ccpn.util.Logging import getLogger
 
 
@@ -319,6 +322,14 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
                     getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
                     getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
                     getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
+                # mainWindow = self.mainWindow
+                # mainWindow.pythonConsole.writeConsoleCommand(
+                #         "spectrum.positiveContourCount = %s" % spectrum.positiveContourCount, spectrum=spectrum)
+                # mainWindow.pythonConsole.writeConsoleCommand(
+                #         "spectrum.negativeContourCount = %s" % spectrum.negativeContourCount, spectrum=spectrum)
+                # getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
+                # getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
+                # getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
 
             # self._rebuildContours()
 

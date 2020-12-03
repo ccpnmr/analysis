@@ -703,7 +703,7 @@ def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,
                                   useSameMultiplier=True):
     """Calculate the noise level, base contour level and positive/negative multipliers for the given apiSpectrum
     """
-    # NOTE:ED - method doesn't seem to be used?
+
     project = apiSpectrum.topObject
 
     # the core objects should have been initialised at this point

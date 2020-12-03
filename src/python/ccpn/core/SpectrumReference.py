@@ -63,6 +63,9 @@ class SpectrumReference(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.DataDimRef._metaclass.qualifiedName()
 
+    def __init__(self, project, wrappedData):
+        super().__init__(project, wrappedData)
+
     # CCPN properties
     @property
     def _apiSpectrumReference(self) -> Nmr.DataDimRef:

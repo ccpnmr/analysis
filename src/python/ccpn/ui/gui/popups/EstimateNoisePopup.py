@@ -351,51 +351,80 @@ class NoiseTab(Widget):
                           [self.strip._CcpnGLWidget.axisB, self.strip._CcpnGLWidget.axisT]]
         for n in self.strip.orderedAxes[2:]:
             selectedRegion.append((n.region[0], n.region[1]))
-        sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
+        sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]  # GWV: Not sure why this is needed?
 
-        # get indexing for spectrum onto strip.axisCodes
-        indices = getAxisCodeMatchIndices(self.spectrum.axisCodes, self.strip.axisCodes)
+        indices = self.spectrum.getByAxisCodes('indices', self.strip.axisCodes)
 
-        if None in indices:
-            return
+        regionDict = {}
+        for idx, ac, region in zip(indices, self.strip.axisCodes, sortedSelectedRegion):
+            regionDict[ac] = tuple(region)
 
-        # map the spectrum selectedRegions to the strip
-        axisCodeDict = OrderedDict((code, sortedSelectedRegion[indices[ii]])
-                                   for ii, code in enumerate(self.spectrum.axisCodes) if indices[ii] is not None)
+        # get the data
+        dataArray = self.spectrum.getRegion(**regionDict)
 
-        # add an exclusion buffer to ensure that getRegionData always returns a region,
-        # otherwise region may be 1 plain thick which will contradict error trapping for peak fitting
-        # (which requires at least 3 points in each dimension)
-        # exclusionBuffer = [1] * self.spectrum.dimensionCount
-        # however, this shouldn't be needed of the range is > valuePrePoint in each dimension
+        # calculate the noise values
+        flatData = dataArray.flatten()
 
-        foundRegions = self.spectrum.getRegionData(minimumDimensionSize=1, **axisCodeDict)
-
-        if foundRegions:
-
-            # just use the first region
-            for region in foundRegions[:1]:
-                dataArray, intRegion, *rest = region
-
-                if dataArray.size:
-                    # calculate the noise values
-                    flatData = dataArray.flatten()
-
-                    self.SD = np.std(flatData)
-                    self.max = np.max(flatData)
-                    self.min = np.min(flatData)
-                    self.mean = np.mean(flatData)
-                    self.noiseLevel = abs(self.mean) + 3.0 * self.SD
+        self.SD = np.std(flatData)
+        self.max = np.max(flatData)
+        self.min = np.min(flatData)
+        self.mean = np.mean(flatData)
+        self.noiseLevel = abs(self.mean) + 3.0 * self.SD
 
                     # populate the widgets
                     for ii, ind in enumerate(indices):
-                        self.axisCodeLabels[ii].setText('(' + ','.join(['%.3f' % rr for rr in sortedSelectedRegion[ind]]) + ')')
+                        self.axisCodeLabels[ii].setText('(' + ','.join(['%6.2f' % rr for rr in sortedSelectedRegion[ind]]) + ')')
 
                     self._setLabels(self.mean, self.SD, self.min, self.max, self.noiseLevel)
 
-        else:
-            # no regions so just put the current noise level back into the spinBox
-            self.noiseLevelSpinBox.setValue(self.spectrum.noiseLevel)
+
+        # # get indexing for spectrum onto strip.axisCodes
+        # indices = getAxisCodeMatchIndices(self.spectrum.axisCodes, self.strip.axisCodes)
+        #
+        # if None in indices:
+        #     return
+        #
+        # # map the spectrum selectedRegions to the strip
+        # axisCodeDict = OrderedDict((code, sortedSelectedRegion[indices[ii]])
+        #                            for ii, code in enumerate(self.spectrum.axisCodes) if indices[ii] is not None)
+        #
+        # # add an exclusion buffer to ensure that getRegionData always returns a region,
+        # # otherwise region may be 1 plain thick which will contradict error trapping for peak fitting
+        # # (which requires at least 3 points in each dimension)
+        # # exclusionBuffer = [1] * self.spectrum.dimensionCount
+        # # however, this shouldn't be needed of the range is > valuePrePoint in each dimension
+        #
+        # foundRegions = self.spectrum.getRegionData(minimumDimensionSize=1, **axisCodeDict)
+        #
+        # if foundRegions:
+        #
+        #     # just use the first region
+        #     for region in foundRegions[:1]:
+        #         dataArray, intRegion, *rest = region
+        #
+        #         if dataArray.size:
+        #             # calculate the noise values
+        #             flatData = dataArray.flatten()
+        #
+        #             self.SD = np.std(flatData)
+        #             self.max = np.max(flatData)
+        #             self.min = np.min(flatData)
+        #             self.mean = np.mean(flatData)
+        #             self.noiseLevel = abs(self.mean) + 3.0 * self.SD
+        #
+        #             # populate the widgets
+        #             for ii, ind in enumerate(indices):
+        #                 self.axisCodes[ii].setText('(' + ','.join(['%.3f' % rr for rr in sortedSelectedRegion[ind]]) + ')')
+        #
+        #             self.meanLabel.setText(str(self.mean))
+        #             self.SDLabel.setText(str(self.SD))
+        #             self.maxLabel.setText(str(self.max))
+        #             self.minLabel.setText(str(self.min))
+        #             self.noiseLevelSpinBox.setValue(self.noiseLevel)
+        #
+        # else:
+        #     # no regions so just put the current noise level back into the spinBox
+        #     self.noiseLevelSpinBox.setValue(self.spectrum.noiseLevel)
 
     def _estimateFromRandomSamples(self):
         # populate the widgets
@@ -409,10 +438,10 @@ class NoiseTab(Widget):
 
     def _setLabels(self, mean, std, min, max, noiseLevel):
         # fill the labels with the new values
-        self.meanLabel.setText(f'{mean:.3f}')
-        self.SDLabel.setText(f'{std:.3f}')
-        self.maxLabel.setText(f'{max:.3f}')
-        self.minLabel.setText(f'{min:.3f}')
+        self.meanLabel.setText(f'{mean:8.1e}')
+        self.SDLabel.setText(f'{std:8.1e}')
+        self.maxLabel.setText(f'{max:8.1e}')
+        self.minLabel.setText(f'{min:8.1e}')
         self.noiseLevelSpinBox.setValue(noiseLevel)
 
     def _setNoiseLevel(self):

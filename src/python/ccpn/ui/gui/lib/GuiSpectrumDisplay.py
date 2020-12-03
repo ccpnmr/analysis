@@ -213,7 +213,7 @@ class GuiSpectrumDisplay(CcpnModule):
                               So for now add option below to have it turned off (False) or on (True).
         """
 
-        getLogger().debug('GuiSpectrumDisplay>> mainWindow, name: %s %s' % (mainWindow, name))
+        getLogger().debug('GuiSpectrumDisplay.__init__>> mainWindow, name: %s %s' % (mainWindow, name))
         super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=name,
                                                  size=(1100, 1300), autoOrientation=False
                                                  )

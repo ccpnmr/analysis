@@ -69,7 +69,8 @@ class Path(_Path_):
 
     @property
     def basename(self):
-        """the name of self without any suffixes"""
+        """the name of self without any suffixes
+        """
         return self.name.split('.')[0]
 
     def addTimeStamp(self):
@@ -111,12 +112,17 @@ class Path(_Path_):
             fp = super().open(*args, **kwds)
         except FileNotFoundError:
             if len(self.asString()) > 256:
-                raise FileNotFoundError('file "%s" not found; potentially path length (%d) is too large. Consider moving the file'
+                raise FileNotFoundError('Error opening file "%s"; potentially path length (%d) is too large. Consider moving the file'
                                         % (self, len(self.asString()))
                                         )
             else:
-                raise FileNotFoundError('file "%s" not found' % self)
+                raise FileNotFoundError('Error opening file "%s"' % self)
         return fp
+
+    def globList(self, pattern='*'):
+        """Return a list rather then a generator
+        """
+        return [p for p in self.glob(pattern=pattern)]
 
     def removeDir(self):
         """Recursively remove content of self and sub-directories
@@ -163,7 +169,16 @@ class Path(_Path_):
         return (str(self.parent), str(self.name))
 
     def asString(self):
+        "Return self as a string"
         return str(self)
+
+    def startswith(self, prefix):
+        "Return True if self starts with prefix"
+        path = self.asString()
+        return path.startswith(prefix)
+
+    def __len__(self):
+        return len(self.asString())
 
     def __eq__(self, other):
         return (str(self).strip() == str(other).strip())

@@ -31,6 +31,7 @@ from contextlib import contextmanager
 from collections import Iterable
 from functools import partial
 from ccpn.core.lib import Util as coreUtil
+from inspect import signature, Parameter
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
 from ccpn.util.Common import makeIterableList
@@ -39,6 +40,9 @@ import traceback
 @contextmanager
 def echoCommand(obj, funcName, *params, values=None, defaults=None,
                 parName=None, propertySetter=False, **objectParameters):
+
+    from ccpn.core.lib import Util as coreUtil
+
     try:
         project = obj._project
     except:
@@ -608,6 +612,30 @@ def notificationBlanking(application=None):
 
 
 @contextmanager
+def apiNotificationBlanking(application=None):
+    """
+    Block api 'change' notifier, re-enable at the end of the function block.
+    """
+
+    # get the application
+    if not application:
+        application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
+
+    application.project._apiNotificationBlanking += 1
+    try:
+        # transfer control to the calling function
+        yield
+
+    except AttributeError as es:
+        raise es
+
+    finally:
+        # clean up after blocking notifications
+        application.project._apiNotificationBlanking -= 1
+
+@contextmanager
 def notificationEchoBlocking(application=None):
     """
     Disable echoing of commands to the terminal, re-enable at the end of the function block.
@@ -873,7 +901,8 @@ def _storeDeleteObjectCurrent(self, thisAddUndoItem):
 
 def newObject(klass):
     """A decorator wrap a newObject method's of the various classes in an undo block and calls
-    result._finalise('create')
+    result._finalise('create').
+    Checks for appropriate klass; passes on None if that is the result of the decorated function call
     """
     from ccpn.core.lib import Undo
 
@@ -887,6 +916,9 @@ def newObject(klass):
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
                 result = func(*args, **kwds)
+                if result is None:
+                    return None
+
                 if not isinstance(result, klass):
                     raise RuntimeError('Expected an object of class %s, obtained %s' % (klass, result.__class__))
 
@@ -902,11 +934,6 @@ def newObject(klass):
                             )
 
                 _storeNewObjectCurrent(result, addUndoItem)
-                # if hasattr(result, CURRENT_ATTRIBUTE_NAME):
-                #     storeObj = _ObjectStore(result)
-                #     addUndoItem(undo=storeObj._storeCurrentSelectedObject,
-                #                 redo=storeObj._restoreCurrentSelectedObject,
-                #                 )
 
         result._finaliseAction('create')
         return result

@@ -36,8 +36,8 @@ from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import deleteObject
-from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, apiNotificationBlanking
+from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 
 
 @functools.total_ordering
@@ -324,16 +324,17 @@ class AbstractWrapperObject(NotifierBase):
         trampling by other code"""
         result = self._wrappedData.ccpnInternalData
         if result is None:
-            # with notificationBlanking():
-            #     result = self._wrappedData.ccpnInternalData = {}
             result = {}
+            self._wrappedData.ccpnInternalData = result
         return result
 
     @_ccpnInternalData.setter
     def _ccpnInternalData(self, value):
         if not (isinstance(value, dict)):
             raise ValueError("_ccpnInternalData must be a dictionary, was %s" % value)
-        self._wrappedData.ccpnInternalData = value
+        with notificationBlanking():
+            with apiNotificationBlanking():
+                self._wrappedData.ccpnInternalData = value
 
     @property
     def comment(self) -> str:
@@ -951,6 +952,26 @@ class AbstractWrapperObject(NotifierBase):
             objs.extend(children)
         return objs
 
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Restores object from apiObj; checks for _factoryFunction.
+        Returns obj
+        CCPNINTERNAL: subclassed in special cases
+        """
+        if apiObj is None:
+            raise ValueError('undefined apiObj')
+
+        factoryFunction = cls._factoryFunction
+        if factoryFunction is None:
+            obj = cls(project, apiObj)
+        else:
+            obj = factoryFunction(project, apiObj)
+
+        if obj is None:
+            raise RuntimeError('Error restoring object encoded by %s' % apiObj)
+
+        return obj
+
     def _initializeAll(self):
         """Initialize children, using existing objects in data model"""
 
@@ -962,11 +983,12 @@ class AbstractWrapperObject(NotifierBase):
             for apiObj in childClass._getAllWrappedData(self):
                 obj = data2Obj.get(apiObj)
                 if obj is None:
-                    factoryFunction = childClass._factoryFunction
-                    if factoryFunction is None:
-                        obj = childClass(project, apiObj)
-                    else:
-                        obj = factoryFunction(project, apiObj)
+                    obj = childClass._restoreObject(project, apiObj)
+                    # factoryFunction = childClass._factoryFunction
+                    # if factoryFunction is None:
+                    #     obj = childClass(project, apiObj)
+                    # else:
+                    #     obj = factoryFunction(project, apiObj)
                 try:
                     obj._initializeAll()
                 except Exception as er:
@@ -1167,6 +1189,33 @@ class AbstractWrapperObject(NotifierBase):
                 for dd in iterator:
                     for notifier in tuple(dd):
                         notifier(self)
+
+    def _validateName(self, value: str, attribName: str = None, allowWhitespace: bool = False,
+                            allowEmpty: bool = False, allowNone: bool = False):
+        """GWV guesses: validate the name of any named core class object
+
+        :param attribName: used for reporting, defaults to className
+        """
+        attrib = attribName if attribName else self.className
+
+        if value is not None:
+            if not isinstance(value, str):
+                raise TypeError("%s name must be a string" % attrib)
+            if not value and not allowEmpty:
+                raise ValueError("%s name must be set" % attrib)
+            if Pid.altCharacter in value:
+                raise ValueError("Character %s not allowed in %s name" % (Pid.altCharacter, attrib))
+            if not allowWhitespace and commonUtil.contains_whitespace(value):
+                raise ValueError("whitespace not allowed in %s name" % attrib)
+        elif not allowNone:
+            raise ValueError("None not allowed in %s name" % attrib)
+
+        previous = self.getByRelativeId(value)
+        if previous not in (None, self):
+            raise ValueError("%s already exists" % previous.longPid)
+
+        # will only get here if all the tests pass
+        return True
 
     def resetSerial(self, newSerial: int):
         """ADVANCED Reset serial of object to newSerial, resetting parent link

@@ -65,6 +65,7 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 from ccpn.util.Common import uniquify, camelCaseToString
 from ccpn.util import Logging
 from ccpn.util import Path
+from ccpn.util.Path import aPath
 from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
@@ -535,49 +536,31 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     def _loadProjectSingleTry(self, projectDir):
         """Load/Reload project after load dialog.
         """
-        from ccpn.ui.gui.widgets.MessageDialog import showWarning
+        project = self.application.loadProject(projectDir)
+        if project is None:
+            raise ValueError('Error loading project "%s"' % projectDir)
 
-        try:
-            project = self.application.loadProject(projectDir)
+        project._mainWindow.sideBar.buildTree(project)
+        project._mainWindow.show()
+        QtWidgets.QApplication.setActiveWindow(project._mainWindow)
 
-            if project:
-                project._mainWindow.sideBar.buildTree(project)
-                project._mainWindow.show()
-                QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+        # if the new project contains invalid spectra then open the popup to see them
+        badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
+        if badSpectra:
+            from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
-                # if the new project contains invalid spectra then open the popup to see them
-                # badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.isValidPath]
-                badSpectra = []
-                for spectrum in project.spectra:
-                    valid = False
-                    try:
-                        valid = spectrum.isValidPath  # can raise error if None
-                    except:
-                        pass
-                    finally:
-                        if not valid:
-                            badSpectra.append(str(spectrum))
+            text = 'Detected invalid Spectrum file path(s) for:\n\n'
+            for sp in badSpectra:
+                text += '\t%s\n' % sp
+            text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
+            showWarning('Spectrum file paths', text)
 
-                if badSpectra:
-                    showWarning('Spectrum file paths',
-                                '''Detected invalid Spectrum file path(s) for: 
-                                \n\t%s
-                                
-                                Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.join(badSpectra)
-                                )
-                    # project.application.showValidateSpectraPopup(defaultSelected='invalid')
-                    # project.save(createFallback=False, overwriteExisting=True)
+        #TODO: this needs fixing; Project instance should deal with this
+        undo = self._project._undo
+        if undo is not None:
+            undo.markClean()
 
-                undo = self._project._undo
-                if undo is not None:
-                    undo.markClean()
-                return project
-
-            else:
-                showWarning('Load Project', 'Error loading project')
-
-        except Exception as es:
-            raise ValueError("Error loading project: %s" % str(es))
+        return project
 
     def _loadProjectLastValid(self, projectDir):
         """Try and load a new project, if error try and load the last valid project.
@@ -1388,6 +1371,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                             objs.extend(data)
 
                 except Exception as es:
-                    MessageDialog.showError('Load Data', 'loadData Error: %s' % str(es))
+                    MessageDialog.showError('Load Data', 'Loading "%s" encountered error: %s' % (url,str(es)))
                     getLogger().warning('loadData Error: %s' % str(es))
         return objs

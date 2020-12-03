@@ -47,8 +47,10 @@ from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, 
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
+from ccpn.util.isotopes import isotopeRecords
 from ccpn.util.OrderedSet import OrderedSet
+from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock
+from ccpn.ui.gui.popups.ValidateSpectraPopup import SpectrumValidator, SpectrumPathRow
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
@@ -472,6 +474,10 @@ class GeneralTab(Widget):
         self.application = self.mainWindow.application
         self.project = self.mainWindow.project
 
+        self.pythonConsole = mainWindow.pythonConsole
+        self.logger = getLogger()  # self.spectrum.project._logger
+
+
         self.item = item
         self.spectrum = spectrum
         self._changes = ChangeDict()
@@ -503,32 +509,20 @@ class GeneralTab(Widget):
         self.commentData.textChanged.connect(partial(self._queueSpectrumCommentChange, spectrum))  # ejb - was editingFinished
         row += 1
 
-        # add validate frame
-        self._validateFrame = ValidateSpectraForSpectrumPopup(self, mainWindow=self.mainWindow, spectra=(spectrum,),
-                                                              setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
-
-        self._validateFrame._filePathCallback = self._queueSetValidateFilePath
-        self._validateFrame._dataUrlCallback = self._queueSetValidateDataUrl
-        self._validateFrame._matchFilePathWidths = self
+        self.spectrumRow = SpectrumPathRow(parentWidget=self, row=row, labelText='Path',
+                                           obj=self.spectrum,
+                                           enabled=(not self.spectrum.isEmptySpectrum())
+                                           )
         row += 1
-
-        # self.pathLabel = Label(self, text="Path", vAlign='t', hAlign='l', grid=(row, 0))
+        # Label(self, text="Path", vAlign='t', hAlign='l', grid=(row, 0))
         # self.pathData = LineEdit(self, textAlignment='left', vAlign='t', grid=(row, 1))
-        # self.pathData.setValidator(SpectrumValidator(parent=self.pathData, spectrum=spectrum))
-        # self.pathButton = Button(self, grid=(row, 2), callback=partial(self._getSpectrumFile, spectrum, option='_HELP_'), icon='icons/directory')
-        # row += 1
+        # self.pathData.setValidator(SpectrumValidator(parent=self.pathData, obj=self.spectrum))
+        # self.pathButton = Button(self, grid=(row, 2), callback=partial(self._getSpectrumFile, self.spectrum), icon='icons/directory')
 
-        # self.pathLabel.setVisible(False)
-        # self.pathData.setVisible(False)
-        # self.pathButton.setVisible(False)
-
-        self.pythonConsole = mainWindow.pythonConsole
-        self.logger = getLogger()  # self.spectrum.project._logger
-
-        # self.spectrumData = OrderedDict()
+        # self.spectrumData = {}
         # self.spectrumData[spectrum] = (self.pathData, self.pathButton, Label)
         # self._setPathData(spectrum)
-        # self.pathData.textEdited.connect(partial(self._queueSetSpectrumPath, spectrum, option='_HELP_'))
+        # self.pathData.editingFinished.connect(partial(self._queueSetSpectrumPath, self.spectrum))
 
         # try:
         #     index = spectrum.project.chemicalShiftLists.index(spectrum.chemicalShiftList)
@@ -651,6 +645,9 @@ class GeneralTab(Widget):
             # text = priorityNameRemapping.get(text, text)
             # self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
 
+            self.spectrumType.currentIndexChanged.connect(self._queueSetSpectrumType)
+            # self.spectrumType.setMinimumWidth(self.pathData.width() * 1.95)
+            self.spectrumType.setFixedHeight(25)
             self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
             # self.spectrumType.setMinimumWidth(self.pathData.width() * 1.95)
             # self.spectrumType.setFixedHeight(25)
@@ -666,6 +663,14 @@ class GeneralTab(Widget):
             self.temperatureData.valueChanged.connect(partial(self._queueTemperatureChange, spectrum, self.temperatureData.textFromValue))
             row += 1
 
+            # if spectrum.noiseLevel is None:
+            #     try:
+            #         noise = spectrum.estimateNoise()  # This sometimes fails
+            #     except:
+            #         noise = 1.0
+            #     self.noiseLevelData.setValue(noise)
+            # else:
+            self.noiseLevelData.setValue(spectrum.noiseLevel)
             spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', grid=(row, 0))
             self.spectrumScalingData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0.1, max=100.0)
             # self.spectrumScalingData.setValue(spectrum.scale)
@@ -685,48 +690,6 @@ class GeneralTab(Widget):
 
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(row, 1), gridSpan=(1, 1))
-
-    # def _setPathDataFromUrl(self, spectrum, newFilePath):
-    #     """Set the pathData widgets from the filePath
-    #     Creates a temporary dataUrl to get the required data location
-    #     """
-    #     # from ValidateSpectraPopup...
-    #     if spectrum and spectrum in self.spectrumData:
-    #         pathData, pathButton, pathLabel = self.spectrumData[spectrum]
-    #
-    #         dataUrl = spectrum.project._wrappedData.root.fetchDataUrl(newFilePath)
-    #
-    #         # apiDataStore = spectrum._apiDataSource.dataStore
-    #
-    #         # Different methods for accessing the apiUrls
-    #         # standardStore = spectrum.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
-    #         # stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls()
-    #         #           for url in store.sortedDataStores() if url == dataUrl.url]
-    #         # urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
-    #
-    #         # get the list of dataUrls
-    #         apiDataStores = [store for store in dataUrl.sortedDataStores() if store.fullPath == newFilePath]
-    #         if not apiDataStores:
-    #             return
-    #
-    #         apiDataStore = apiDataStores[0]
-    #
-    #         if not apiDataStore:
-    #             pathData.setText('<None>')
-    #         elif apiDataStore.dataLocationStore.name == 'standard':
-    #
-    #             # this fails on the first loading of V2 projects - ordering issue?
-    #             dataUrlName = apiDataStore.dataUrl.name
-    #             if dataUrlName == 'insideData':
-    #                 pathData.setText('$INSIDE/%s' % apiDataStore.path)
-    #             elif dataUrlName == 'alongsideData':
-    #                 pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
-    #             elif dataUrlName == 'remoteData':
-    #                 pathData.setText('$DATA/%s' % apiDataStore.path)
-    #         else:
-    #             pathData.setText(apiDataStore.fullPath)
-    #
-    #         pathData.validator().resetCheck()
 
     # def _setPathData(self, spectrum):
     #     """Set the pathData widgets from the spectrum.
@@ -763,6 +726,12 @@ class GeneralTab(Widget):
         """
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
+        # self.nameData.setText(self.spectrum.name)
+        # self.pathData.setValidator(SpectrumValidator(parent=self.pathData, spectrum=self.spectrum))
+
+        self.spectrumRow.setLabel(self.spectrum.name)
+        self.spectrumRow.obj = self.spectrum
+        self.spectrumRow.setText(self.spectrumRow.getPath())
         # clear all changes
         self._changes.clear()
 
@@ -999,14 +968,25 @@ class GeneralTab(Widget):
     #             if dataType == 'Spectrum':
     #                 return partial(self._setSpectrumFilePath, spectrum, newFilePath)
 
-    # def _setSpectrumFilePath(self, spectrum, filePath):
-    #     spectrum.filePath = filePath
-    #     self._writeLoggingMessage("spectrum.filePath = '%s'" % filePath)
-    #     self.pythonConsole.writeConsoleCommand("spectrum.filePath('%s')" % filePath,
-    #                                            spectrum=spectrum)
-    #
-    #     spectrum.filePath = filePath
-    #     self._setPathData(spectrum)
+        # # TODO: Find a way to convert to the shortened path without setting the value in the model,
+        # #       then move this back to _setSpectrumPath
+        # apiDataSource = self.spectrum._apiDataSource
+        # apiDataStore = apiDataSource.dataStore
+        #
+        # if not apiDataStore or apiDataStore.dataLocationStore.name != 'standard':
+        #     raise NotImplemented('Non-standard API data store locations are invalid.')
+        #
+        # dataUrlName = apiDataStore.dataUrl.name
+        # apiPathName = apiDataStore.path
+        # if dataUrlName == 'insideData':
+        #     shortenedPath = '$INSIDE/{}'.format(apiPathName)
+        # elif dataUrlName == 'alongsideData':
+        #     shortenedPath = '$ALONGSIDE/{}'.format(apiPathName)
+        # elif dataUrlName == 'remoteData':
+        #     shortenedPath = '$DATA/{}'.format(apiPathName)
+        # else:
+        #     shortenedPath = apiDataStore.fullPath
+        # self.pathData.setText(shortenedPath)
 
     # spectrum sliceColour button and pulldown
     def _queueSetSpectrumColour(self, spectrum):
@@ -1147,7 +1127,7 @@ class DimensionsTab(Widget):
         row += 1
         Label(self, text="Minimum displayed aliasing ", grid=(row, 0), hAlign='l')
 
-        self._isotopeList = [code for code in DEFAULT_ISOTOPE_DICT.values() if code]
+        self._isotopeList = [r.isotopeCode for r in isotopeRecords.values() if r.spin > 0]  # All isotopes with a spin
 
         for i in range(dimensions):
             row = 2

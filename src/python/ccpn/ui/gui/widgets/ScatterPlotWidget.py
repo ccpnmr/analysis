@@ -67,10 +67,10 @@ SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWI
 c =rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_LABELLING])
 GridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
 GridFont = getFont()
-DefaultPointSize = 10
+DefaultPointSize = 15
 DefaultPointColour = '#FF0000' # red
 DefaultInnerPointColour = '#7080EE'
-DefaultSymbol = 'd'
+DefaultSymbol = 'o'
 AllowedSymbols = ['o', 's', 't', 'd', '+']
 
 _SELECTORNAME = 'selectorName'
@@ -229,6 +229,7 @@ class ScatterPlot(Widget):
         self._scatterViewbox.mouseDragEvent = self._scatterMouseDragEvent
         self._scatterViewbox.scene().sigMouseMoved.connect(self.mouseMoved) #use this if you need the mouse Posit
         self._plotItem.setMenuEnabled(False)
+        # self._scatterViewbox.hoverEvent = self.hoverEvent
         self._exportDialog = None
         self.scatterPlot = pg.ScatterPlotItem(size=10, pen=pg.mkPen(None), brush=pg.mkBrush(255, 0, 0))
         # self.scatterPlot.sigClicked.connect(self._plotClicked)
@@ -240,6 +241,10 @@ class ScatterPlot(Widget):
         self.roiItem.sigRegionChangeFinished.connect(self._roiChangedCallback)
         self._plotItem.addItem(self.roiItem)
         self.showROI(roiVisible)
+        self.tipText = pg.TextItem(anchor=(-0.3, 0.1), angle=0, border='w', fill=(0, 0, 255, 100))
+        self.tipText.hide()
+        self._tipTextIsEnabled = True
+        self._plotItem.addItem(self.tipText)
         # self.roiItem.sigRegionChangeFinished.connect(self._roiChangedCallback)
         self.xLine = pg.InfiniteLine(angle=90, pos=0, pen=OriginAxes)
         self.yLine = pg.InfiniteLine(angle=0, pos=0, pen=OriginAxes)
@@ -266,13 +271,14 @@ class ScatterPlot(Widget):
         self.setAxesWidgets()
         self._selectedData = []
 
+
     @property
     def dataFrame(self):
         return self._dataFrame
 
     @dataFrame.setter
     def dataFrame(self, dataFrame):
-        self.dataFrame = dataFrame
+        self._dataFrame = dataFrame
 
     @property
     def roiLimits(self) -> list:
@@ -424,6 +430,7 @@ class ScatterPlot(Widget):
             getLogger().warning('Symbol not available. Used the default instead')
             kwargs.update({_SYMBOL:'o'})
         self.scatterPlot.addPoints(*args, **kwargs)
+        self.setPlotLimits()
 
     def setupContextMenu(self):
         """
@@ -448,6 +455,16 @@ class ScatterPlot(Widget):
             values = filteredDf.values
         return values
 
+    def setPlotLimits(self, **kwargs):
+
+        xValues, yValues = self.scatterPlot.getData()
+        self._scatterViewbox.setLimits(
+                                    xMin=min(xValues) / 2,
+                                    xMax=max(xValues) + (max(xValues) * 0.5),
+                                    yMin=min(yValues) / 2,
+                                    yMax=max(yValues) + (max(yValues) * 0.5),
+                                    )
+
     def getPointBrushes(self, itemDef=None):
         """
         Two way of defining the point colours:
@@ -471,6 +488,7 @@ class ScatterPlot(Widget):
         :return: list of brushes for painting the scatterPlot points
         """
         innerData = self.roiItem.getInnerData()
+        if len(self.dataFrame) == 0: return []
         ixs, series = zip(*self.dataFrame.iterrows())
         hexs = [self.innerRoiPointColour if i in [j.name for j in innerData] else self.hexPointColour for i in ixs]
 
@@ -496,6 +514,7 @@ class ScatterPlot(Widget):
         """
         :return: list of pens. Used to draw a selection pattern. [Pen, None] None if no Pen.
         """
+        if len(self.dataFrame) == 0: return []
         indices, series = zip(*self.dataFrame.iterrows())
         pens = [SelectedPointPen if i in [j.name for j in self._selectedData] else None for i in indices]
         return pens
@@ -508,6 +527,7 @@ class ScatterPlot(Widget):
         :param args:
         :return:
         """
+        if len(self.dataFrame) == 0: return
         self.scatterPlot.clear()
         self._setPlotItemLabels()
         brushes = self.getPointBrushes(self.axesDefinitions.get(self.xAxisSelector.getText()))
@@ -552,6 +572,10 @@ class ScatterPlot(Widget):
                             typeItem=cm.ItemTypes.get(cm.ITEM), icon='icons/roi_selection',
                             toolTip='Select items locatate inside the ROI limits',
                             callback=self.selectFromROI),
+                cm._SCMitem(name='Toggle Mouse Text',
+                        typeItem=cm.ItemTypes.get(cm.ITEM), icon=None,
+                        toolTip='Show/hide the mouse coordinates from plot',
+                        callback=self.toggleTipText),
                 cm._separator(),
                 ]
         items = [itm for itm in items if itm is not None]
@@ -666,11 +690,29 @@ class ScatterPlot(Widget):
         :return:
         """
         position = event
-        if self._scatterViewbox.sceneBoundingRect().contains(position):
-            mousePoint = self._scatterViewbox.mapSceneToView(position)
-            x = mousePoint.x()
-            y =  mousePoint.y()
-            self.coordinatesLabel.setText("x=%0.2f, y=%0.2f" % (x, y))
+        if self._tipTextIsEnabled:
+            if self._scatterViewbox.sceneBoundingRect().contains(position):
+                mousePoint = self._scatterViewbox.mapSceneToView(position)
+                x = mousePoint.x()
+                y =  mousePoint.y()
+                self._showTipTextForPosition(x,y)
+            else:
+                self.tipText.hide()
+
+    def _showTipTextForPosition(self, x, y, pid=True):
+        labelPos = "x=%0.2f, y=%0.2f" % (x, y)
+        pts = self.scatterPlot.pointsAt(pg.Point(x, y))
+        if len(pts)>0:
+            pids = self.getPidsFromPoints(pts)
+            pidsLabels = '\n'.join(map(str, pids))
+            labelPos += '\n'
+            labelPos += pidsLabels
+        self.tipText.setText(labelPos)
+        self.tipText.setPos(x, y)
+        self.tipText.show()
+
+    # def hoverEvent(self, event):
+    #     pass #not needed
 
     def _getDataForPoints(self, points):
         return list(map(lambda s: s.data(), points))
@@ -697,6 +739,10 @@ class ScatterPlot(Widget):
         else:
             self._resetSelectionBox()
             event.ignore()
+
+    def toggleTipText(self):
+        self._tipTextIsEnabled = not self.tipText.isVisible()
+        self.tipText.setVisible(not self.tipText.isVisible())
 
     def toggleROI(self):
         """
@@ -782,16 +828,22 @@ class ScatterPlot(Widget):
         pass
         #todo
 
-
-    def getPidsFromPoints(self, points=None):
-        pass
+    def getPidsFromPoints(self, points):
+        pids = []
+        if len(self.axesDefinitions)>0:
+            itemDef = list(self.axesDefinitions.values())[0]
+            pidHeader = getattr(itemDef, _PIDHEADER)
+            for point in points:
+                pid = point.data().get(pidHeader)
+                pids.append(pid)
+        return pids
 
 if __name__ == '__main__':
     from PyQt5 import QtGui, QtWidgets
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
     from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-    n = 500
+    n = 5
 
     data = pd.DataFrame({
         'entryValues': np.arange(1, n+1),
@@ -799,27 +851,27 @@ if __name__ == '__main__':
         'diameterValues': np.random.rand(n)/10,
         'heightValues': np.random.rand(n)*7.5,
         'buggingScoreValues': np.random.rand(n),
-        # 'SpectraPidsValues': np.array(['SP:LadyBug', 'SP:Lice', 'SP:BedBug', 'SP:Flea', 'SP:Mite']),
-        # 'HexColoursValues': np.array([list(darkDefaultSpectrumColours.keys())[10]]*n),
+        'SpectraPidsValues': np.array(['SP:LadyBug', 'SP:Lice', 'SP:BedBug', 'SP:Flea', 'SP:Mite']),
+        'HexColoursValues': np.array([list(darkDefaultSpectrumColours.keys())[10]]*n),
     })
 
     defs = od([
                 ( '#', _ItemBC(
                         selectorName = '#',
                         headerValueName = 'entryValues',
-                        headerPidName = 'SpectraPids',
+                        headerPidName = 'SpectraPidsValues',
                         headerHexColour = 'HexColoursValues',
                         )),
                 ('Length', _ItemBC(
                     selectorName='Length',
                     headerValueName='lengthValues',
-                    headerPidName='SpectraPids',
+                    headerPidName='SpectraPidsValues',
                     headerHexColour='HexColoursValues',
                     )),
                 ('Score', _ItemBC(
                     selectorName='Score',
                     headerValueName='buggingScoreValues',
-                    headerPidName='SpectraPids',
+                    headerPidName='SpectraPidsValues',
                     headerHexColour='HexColoursValues',
                     )),
                 ])

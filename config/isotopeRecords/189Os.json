@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/189Os.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.1615
+    ],
+    [
+        "elementNumber",
+        76
+    ],
+    [
+        "gFactor",
+        0.439956
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "189Os"
+    ],
+    [
+        "massNumber",
+        189
+    ],
+    [
+        "name",
+        "Osmium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.86
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Os"
+    ]
+]

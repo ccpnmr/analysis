@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/140Ce.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.8845
+    ],
+    [
+        "elementNumber",
+        58
+    ],
+    [
+        "gFactor",
+        0.0
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "140Ce"
+    ],
+    [
+        "massNumber",
+        140
+    ],
+    [
+        "name",
+        "Cerium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.0
+    ],
+    [
+        "spin",
+        0.0
+    ],
+    [
+        "symbol",
+        "Ce"
+    ]
+]

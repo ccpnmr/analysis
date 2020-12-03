@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/19F.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        1.0
+    ],
+    [
+        "elementNumber",
+        9
+    ],
+    [
+        "gFactor",
+        5.25774
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "19F"
+    ],
+    [
+        "massNumber",
+        19
+    ],
+    [
+        "name",
+        "Fluorine"
+    ],
+    [
+        "quadrupoleMoment",
+        0.0
+    ],
+    [
+        "spin",
+        0.5
+    ],
+    [
+        "symbol",
+        "F"
+    ]
+]

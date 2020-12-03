@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/60Co.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        27
+    ],
+    [
+        "gFactor",
+        0.7598
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "60Co"
+    ],
+    [
+        "massNumber",
+        60
+    ],
+    [
+        "name",
+        "Cobalt"
+    ],
+    [
+        "quadrupoleMoment",
+        0.46
+    ],
+    [
+        "spin",
+        5.0
+    ],
+    [
+        "symbol",
+        "Co"
+    ]
+]

@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/163Dy.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.249
+    ],
+    [
+        "elementNumber",
+        66
+    ],
+    [
+        "gFactor",
+        0.269
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "163Dy"
+    ],
+    [
+        "massNumber",
+        163
+    ],
+    [
+        "name",
+        "Dysprosium"
+    ],
+    [
+        "quadrupoleMoment",
+        2.65
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Dy"
+    ]
+]

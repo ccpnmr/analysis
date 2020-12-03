@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/139La.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.9991
+    ],
+    [
+        "elementNumber",
+        57
+    ],
+    [
+        "gFactor",
+        0.795156
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "139La"
+    ],
+    [
+        "massNumber",
+        139
+    ],
+    [
+        "name",
+        "Lanthanum"
+    ],
+    [
+        "quadrupoleMoment",
+        0.2
+    ],
+    [
+        "spin",
+        3.5
+    ],
+    [
+        "symbol",
+        "La"
+    ]
+]

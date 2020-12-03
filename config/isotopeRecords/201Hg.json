@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/201Hg.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.1318
+    ],
+    [
+        "elementNumber",
+        80
+    ],
+    [
+        "gFactor",
+        -0.373484
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "201Hg"
+    ],
+    [
+        "massNumber",
+        201
+    ],
+    [
+        "name",
+        "Mercury"
+    ],
+    [
+        "quadrupoleMoment",
+        0.387
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Hg"
+    ]
+]

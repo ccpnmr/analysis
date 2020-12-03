@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/145Nd.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.083
+    ],
+    [
+        "elementNumber",
+        60
+    ],
+    [
+        "gFactor",
+        -0.187
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "145Nd"
+    ],
+    [
+        "massNumber",
+        145
+    ],
+    [
+        "name",
+        "Neodymium"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.314
+    ],
+    [
+        "spin",
+        3.5
+    ],
+    [
+        "symbol",
+        "Nd"
+    ]
+]

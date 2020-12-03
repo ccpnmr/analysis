@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/116Cd.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0749
+    ],
+    [
+        "elementNumber",
+        48
+    ],
+    [
+        "gFactor",
+        0.0
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "116Cd"
+    ],
+    [
+        "massNumber",
+        116
+    ],
+    [
+        "name",
+        "Cadmium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.0
+    ],
+    [
+        "spin",
+        0.0
+    ],
+    [
+        "symbol",
+        "Cd"
+    ]
+]

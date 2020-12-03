@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/227Ac.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        89
+    ],
+    [
+        "gFactor",
+        0.73
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "227Ac"
+    ],
+    [
+        "massNumber",
+        227
+    ],
+    [
+        "name",
+        "Actinium"
+    ],
+    [
+        "quadrupoleMoment",
+        1.7
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Ac"
+    ]
+]

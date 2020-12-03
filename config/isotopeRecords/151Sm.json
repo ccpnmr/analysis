@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/151Sm.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        62
+    ],
+    [
+        "gFactor",
+        0.1444
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "151Sm"
+    ],
+    [
+        "massNumber",
+        151
+    ],
+    [
+        "name",
+        "Samarium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.71
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Sm"
+    ]
+]

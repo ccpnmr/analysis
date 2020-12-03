@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/168Er.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.2678
+    ],
+    [
+        "elementNumber",
+        68
+    ],
+    [
+        "gFactor",
+        0.0
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "168Er"
+    ],
+    [
+        "massNumber",
+        168
+    ],
+    [
+        "name",
+        "Erbium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.0
+    ],
+    [
+        "spin",
+        0.0
+    ],
+    [
+        "symbol",
+        "Er"
+    ]
+]

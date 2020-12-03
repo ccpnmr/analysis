@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/173Lu.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        71
+    ],
+    [
+        "gFactor",
+        0.6517
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "173Lu"
+    ],
+    [
+        "massNumber",
+        173
+    ],
+    [
+        "name",
+        "Lutetium"
+    ],
+    [
+        "quadrupoleMoment",
+        3.53
+    ],
+    [
+        "spin",
+        3.5
+    ],
+    [
+        "symbol",
+        "Lu"
+    ]
+]

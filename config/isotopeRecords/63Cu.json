@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/63Cu.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.6917
+    ],
+    [
+        "elementNumber",
+        29
+    ],
+    [
+        "gFactor",
+        1.4824
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "63Cu"
+    ],
+    [
+        "massNumber",
+        63
+    ],
+    [
+        "name",
+        "Copper"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.22
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Cu"
+    ]
+]

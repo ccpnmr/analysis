@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/204Tl.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        81
+    ],
+    [
+        "gFactor",
+        0.045
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "204Tl"
+    ],
+    [
+        "massNumber",
+        204
+    ],
+    [
+        "name",
+        "Thallium"
+    ],
+    [
+        "quadrupoleMoment",
+        null
+    ],
+    [
+        "spin",
+        2.0
+    ],
+    [
+        "symbol",
+        "Tl"
+    ]
+]

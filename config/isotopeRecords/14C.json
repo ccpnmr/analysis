@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/14C.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        6
+    ],
+    [
+        "gFactor",
+        0.273
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "14C"
+    ],
+    [
+        "massNumber",
+        14
+    ],
+    [
+        "name",
+        "Carbon"
+    ],
+    [
+        "quadrupoleMoment",
+        null
+    ],
+    [
+        "spin",
+        3.0
+    ],
+    [
+        "symbol",
+        "C"
+    ]
+]

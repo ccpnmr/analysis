@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/3He.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        1.37e-06
+    ],
+    [
+        "elementNumber",
+        2
+    ],
+    [
+        "gFactor",
+        -4.255
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "3He"
+    ],
+    [
+        "massNumber",
+        3
+    ],
+    [
+        "name",
+        "Helium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.0
+    ],
+    [
+        "spin",
+        0.5
+    ],
+    [
+        "symbol",
+        "He"
+    ]
+]

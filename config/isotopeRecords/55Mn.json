@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/55Mn.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        1.0
+    ],
+    [
+        "elementNumber",
+        25
+    ],
+    [
+        "gFactor",
+        1.3813
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "55Mn"
+    ],
+    [
+        "massNumber",
+        55
+    ],
+    [
+        "name",
+        "Manganese"
+    ],
+    [
+        "quadrupoleMoment",
+        0.33
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Mn"
+    ]
+]

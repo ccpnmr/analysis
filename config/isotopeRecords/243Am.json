@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/243Am.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        95
+    ],
+    [
+        "gFactor",
+        0.6
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "243Am"
+    ],
+    [
+        "massNumber",
+        243
+    ],
+    [
+        "name",
+        "Americium"
+    ],
+    [
+        "quadrupoleMoment",
+        2.86
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Am"
+    ]
+]

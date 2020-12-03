@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/39Ar.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        18
+    ],
+    [
+        "gFactor",
+        -0.4537
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "39Ar"
+    ],
+    [
+        "massNumber",
+        39
+    ],
+    [
+        "name",
+        "Argon"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.12
+    ],
+    [
+        "spin",
+        3.5
+    ],
+    [
+        "symbol",
+        "Ar"
+    ]
+]

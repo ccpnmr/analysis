@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/33S.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0076
+    ],
+    [
+        "elementNumber",
+        16
+    ],
+    [
+        "gFactor",
+        0.429214
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "33S"
+    ],
+    [
+        "massNumber",
+        33
+    ],
+    [
+        "name",
+        "Sulfur"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.0678
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "S"
+    ]
+]

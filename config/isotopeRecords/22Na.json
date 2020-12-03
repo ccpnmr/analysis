@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/22Na.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        11
+    ],
+    [
+        "gFactor",
+        0.582
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "22Na"
+    ],
+    [
+        "massNumber",
+        22
+    ],
+    [
+        "name",
+        "Sodium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.18
+    ],
+    [
+        "spin",
+        3.0
+    ],
+    [
+        "symbol",
+        "Na"
+    ]
+]

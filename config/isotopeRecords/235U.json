@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/235U.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0072
+    ],
+    [
+        "elementNumber",
+        92
+    ],
+    [
+        "gFactor",
+        -0.109
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "235U"
+    ],
+    [
+        "massNumber",
+        235
+    ],
+    [
+        "name",
+        "Uranium"
+    ],
+    [
+        "quadrupoleMoment",
+        4.936
+    ],
+    [
+        "spin",
+        3.5
+    ],
+    [
+        "symbol",
+        "U"
+    ]
+]

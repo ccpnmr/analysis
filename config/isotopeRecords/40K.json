@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/40K.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.000117
+    ],
+    [
+        "elementNumber",
+        19
+    ],
+    [
+        "gFactor",
+        -0.324525
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "40K"
+    ],
+    [
+        "massNumber",
+        40
+    ],
+    [
+        "name",
+        "Potassium"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.073
+    ],
+    [
+        "spin",
+        4.0
+    ],
+    [
+        "symbol",
+        "K"
+    ]
+]

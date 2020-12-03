@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/185Re.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.374
+    ],
+    [
+        "elementNumber",
+        75
+    ],
+    [
+        "gFactor",
+        1.2748
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "185Re"
+    ],
+    [
+        "massNumber",
+        185
+    ],
+    [
+        "name",
+        "Rhenium"
+    ],
+    [
+        "quadrupoleMoment",
+        2.18
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Re"
+    ]
+]

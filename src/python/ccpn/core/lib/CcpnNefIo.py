@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-23 17:36:45 +0000 (Mon, November 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-03 10:01:41 +0000 (Thu, December 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1206,7 +1206,8 @@ class CcpnNefWriter:
         loopName = 'nef_spectrum_dimension'
         loop = result[loopName]
         data = OD()
-        for neftag, attrstring in nef2CcpnMap[loopName].items():
+        _mapping = nef2CcpnMap.get(loopName) or {}
+        for neftag, attrstring in _mapping.items():
             if attrstring is None:
                 # to fill in later
                 data[neftag] = [None] * spectrum.dimensionCount
@@ -1232,7 +1233,8 @@ class CcpnNefWriter:
         loopName = 'ccpn_spectrum_dimension'
         loop = result[loopName]
         data = OD()
-        for neftag, attrstring in nef2CcpnMap[loopName].items():
+        _mapping = nef2CcpnMap.get(loopName) or {}
+        for neftag, attrstring in _mapping.items():
             if attrstring is None:
                 # to fill in later
                 data[neftag] = [None] * spectrum.dimensionCount
@@ -1612,7 +1614,7 @@ class CcpnNefWriter:
         substanceType = substance.substanceType
         result['substance_type'] = substanceType
         if substanceType == 'Molecule':
-            apiMolecule = substance._wrappedData.molecule
+            apiMolecule = substance._molecule
             if apiMolecule is not None:
                 result['sequence_string'] = substance.sequenceString
                 result['start_number'] = apiMolecule.sortedMolResidues()[0].seqCode
@@ -1677,9 +1679,8 @@ class CcpnNefWriter:
             for note in sorted(notes):
                 row = loop.newRow(self._loopRowData(loopName, note))
                 row['serial'] = note.serial
-                row['created'] = note._wrappedData.created.strftime(Constants.isoTimeFormat)
-                row['last_modified'] = note._wrappedData.lastModified.strftime(
-                        Constants.isoTimeFormat)
+                row['created'] = note.created
+                row['last_modified'] = note.lastModified
         else:
             result = None
         #
@@ -1736,7 +1737,8 @@ class CcpnNefWriter:
         Unmapped data to be added afterwards"""
 
         rowdata = {}
-        for neftag, attrstring in nef2CcpnMap[loopName].items():
+        _mapping = nef2CcpnMap.get(loopName) or {}
+        for neftag, attrstring in _mapping.items():
             if attrstring is not None:
 
                 val = attrgetter(attrstring)(wrapperObj)
@@ -1765,7 +1767,7 @@ class CcpnNefWriter:
 
         if wrapperObj is not None:
             # Add data
-            frameMap = nef2CcpnMap[category]
+            frameMap = nef2CcpnMap.get(category) or {}
             for tag, itemvalue in frameMap.items():
                 if itemvalue is None:
                     result.addItem(tag, None)
@@ -1775,14 +1777,14 @@ class CcpnNefWriter:
                     except AttributeError:
                         # You can get this error if a) the mapping is incorrect
                         # The dotted navigation expression can not always be followed
-                        # as is the case e.g. for (PeakList.)spectrum._wrappedData.dataStore.headerSize'
+                        # as is the case e.g. for (PeakList.)spectrum._apiDataStore.headerSize'
                         # where the dataStore is sometimes None
                         self.project._logger.debug("Could not get %s from %s\n" % (itemvalue, wrapperObj))
                 else:
                     # This is a loop
                     assert itemvalue == _isALoop, "Invalid item specifier in Nef2CcpnMap: %s" % (itemvalue,)
                     if includeLoops:
-                        result.newLoop(tag, nef2CcpnMap[tag])
+                        result.newLoop(tag, nef2CcpnMap.get(tag) or {})
         #
         return result
 
@@ -1793,7 +1795,7 @@ class CcpnNefWriter:
         """
         if wrapperObj is not None:
             # Add data
-            frameMap = nef2CcpnMap[category]
+            frameMap = nef2CcpnMap.get(category) or {}
             for tag, itemvalue in frameMap.items():
                 if itemvalue is None:
                     saveFrame.addItem(tag, None)
@@ -1803,14 +1805,14 @@ class CcpnNefWriter:
                     except AttributeError:
                         # You can get this error if a) the mapping is incorrect
                         # The dotted navigation expression can not always be followed
-                        # as is the case e.g. for (PeakList.)spectrum._wrappedData.dataStore.headerSize'
+                        # as is the case e.g. for (PeakList.)spectrum._apiDataStore.headerSize'
                         # where the dataStore is sometimes None
                         self.project._logger.debug("Could not get %s from %s\n" % (itemvalue, wrapperObj))
                 else:
                     # This is a loop
                     assert itemvalue == _isALoop, "Invalid item specifier in Nef2CcpnMap: %s" % (itemvalue,)
                     if includeLoops:
-                        saveFrame.newLoop(tag, nef2CcpnMap[tag])
+                        saveFrame.newLoop(tag, nef2CcpnMap.get(tag) or {})
 
     def _appendCategoryLoops(self, wrapperObj: Optional[AbstractWrapperObject],
                              category: str, saveFrame: StarIo.NmrSaveFrame):
@@ -1818,7 +1820,7 @@ class CcpnNefWriter:
         """
         if wrapperObj is not None:
             # Add data
-            frameMap = nef2CcpnMap[category]
+            frameMap = nef2CcpnMap.get(category) or {}
             for tag, itemvalue in frameMap.items():
                 if itemvalue is None:
                     pass
@@ -1827,7 +1829,7 @@ class CcpnNefWriter:
                 else:
                     # This is a loop
                     assert itemvalue == _isALoop, "Invalid item specifier in Nef2CcpnMap: %s" % (itemvalue,)
-                    saveFrame.newLoop(tag, nef2CcpnMap[tag])
+                    saveFrame.newLoop(tag, nef2CcpnMap.get(tag) or {})
 
     ####################################################################################
     #
@@ -2096,7 +2098,7 @@ class CcpnNefReader(CcpnNefContent):
             return
 
         # search loops as well - will still search for all loops even in ignored saveFrames
-        mapping = nef2CcpnMap[saveFrame.category]
+        mapping = nef2CcpnMap.get(saveFrame.category) or {}
         for tag, ccpnTag in mapping.items():
             if ccpnTag == _isALoop:
                 loop = saveFrame.get(tag)
@@ -2215,7 +2217,7 @@ class CcpnNefReader(CcpnNefContent):
             return
 
         # search loops as well - will still search for all loops even in ignored saveFrames
-        mapping = nef2CcpnMap[saveFrame.category]
+        mapping = nef2CcpnMap.get(saveFrame.category) or {}
         for tag, ccpnTag in mapping.items():
             if ccpnTag == _isALoop:
                 loop = saveFrame.get(tag)
@@ -2239,7 +2241,7 @@ class CcpnNefReader(CcpnNefContent):
         framecode = saveFrame['sf_framecode']
 
         # search loops as well - will still search for all loops even in ignored saveFrames
-        mapping = nef2CcpnMap[saveFrame.category]
+        mapping = nef2CcpnMap.get(saveFrame.category) or {}
         for tag, ccpnTag in mapping.items():
             if ccpnTag == _isALoop:
                 loop = saveFrame.get(tag)
@@ -2510,7 +2512,7 @@ class CcpnNefReader(CcpnNefContent):
 
                     # Handle unmapped elements
                     extraTags = [x for x in saveFrame
-                                 if x not in nef2CcpnMap[sf_category]
+                                 if x not in (nef2CcpnMap.get(sf_category) or {})
                                  and x not in ('sf_category', 'sf_framecode')]
                     if extraTags:
                         print("WARNING - unused tags in saveframe %s: %s" % (saveFrameName, extraTags))
@@ -2591,7 +2593,7 @@ class CcpnNefReader(CcpnNefContent):
 
                     # Handle unmapped elements
                     extraTags = [x for x in saveFrame
-                                 if x not in nef2CcpnMap[sf_category]
+                                 if x not in (nef2CcpnMap.get(sf_category) or {})
                                  and x not in ('sf_category', 'sf_framecode')]
                     if extraTags:
                         print("WARNING - unused tags in saveframe %s: %s" % (saveFrameName, extraTags))
@@ -2611,7 +2613,7 @@ class CcpnNefReader(CcpnNefContent):
                      excludeList=(), **kwds):
         """Iterate over the loops in a saveFrame, and verify contents
         """
-        mapping = nef2CcpnMap[saveFrame.category]
+        mapping = nef2CcpnMap.get(saveFrame.category) or {}
 
         if not hasattr(saveFrame, '_rowErrors'):
             saveFrame._rowErrors = {}
@@ -2641,7 +2643,7 @@ class CcpnNefReader(CcpnNefContent):
     def _getLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, excludeList=(), **kwds):
         """Iterate over the loops in a saveFrame, and add to a list"""
         result = ()
-        mapping = nef2CcpnMap[saveFrame.category]
+        mapping = nef2CcpnMap.get(saveFrame.category) or {}
         for tag, ccpnTag in mapping.items():
             if tag not in excludeList and ccpnTag == _isALoop:
                 loop = saveFrame.get(tag)
@@ -2715,7 +2717,7 @@ class CcpnNefReader(CcpnNefContent):
     def load_nef_molecular_system(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """load nef_molecular_system saveFrame"""
 
-        mapping = nef2CcpnMap['nef_molecular_system']
+        mapping = nef2CcpnMap.get('nef_molecular_system') or {}
         for tag, ccpnTag in mapping.items():
             if ccpnTag == _isALoop:
                 loop = saveFrame.get(tag)
@@ -2798,7 +2800,8 @@ class CcpnNefReader(CcpnNefContent):
 
                     if variantCode:
 
-                        atomNamesRemoved, atomNamesAdded = residue._wrappedData.getAtomNameDifferences()
+                        # keep so I can find the place again
+                        # atomNamesRemoved, atomNamesAdded = residue._wrappedData.getAtomNameDifferences()
 
                         for code in variantCode.split(','):
                             code = code.strip()  # Should not be necessary but costs nothing to catch those errors
@@ -3053,7 +3056,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
         parameters['name'] = framecode[len(category) + 1:]
@@ -3367,7 +3370,7 @@ class CcpnNefReader(CcpnNefContent):
         tempResidueDict = {}
         _highestSequenceCount = 0
 
-        mapping = nef2CcpnMap[nmrResidueLoopName]
+        mapping = nef2CcpnMap.get(nmrResidueLoopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in saveFrame[nmrResidueLoopName].data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -3398,7 +3401,7 @@ class CcpnNefReader(CcpnNefContent):
                                                    attributeSearchList=replaceList,
                                                    loopSearchList=loopList, rowSearchList=replaceList)
 
-        mapping = nef2CcpnMap[nmrAtomLoopName]
+        mapping = nef2CcpnMap.get(nmrAtomLoopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in saveFrame[nmrAtomLoopName].data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -3794,7 +3797,7 @@ class CcpnNefReader(CcpnNefContent):
 
         creatorFunc = parent.newChemicalShift
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -3836,7 +3839,7 @@ class CcpnNefReader(CcpnNefContent):
             self.error('Undefined chemicalShiftList', loop, None)
             return
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -3862,7 +3865,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
@@ -3949,7 +3952,7 @@ class CcpnNefReader(CcpnNefContent):
 
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
@@ -4014,7 +4017,7 @@ class CcpnNefReader(CcpnNefContent):
         if not itemLength:
             itemLength = coreConstants.constraintListType2ItemLength.get(restraintList.restraintType)
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         contributionTags = sorted(map2.values())
         restraints = {}
@@ -4102,7 +4105,7 @@ class CcpnNefReader(CcpnNefContent):
         # if not itemLength:
         #     itemLength = coreConstants.constraintListType2ItemLength.get(restraintList.restraintType)
         #
-        # mapping = nef2CcpnMap[loop.name]
+        # mapping = nef2CcpnMap.get(loop.name) or {}
         # map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         # contributionTags = sorted(map2.values())
         # restraints = {}
@@ -4138,10 +4141,10 @@ class CcpnNefReader(CcpnNefContent):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
 
         # separate the peak list attributes for clarity
-        mappingNoPeakList = nef2CcpnMap['ccpn_no_peak_list']
+        mappingNoPeakList = nef2CcpnMap.get('ccpn_no_peak_list') or {}
 
         # Get peakList parameters
         # peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mapping)
@@ -4199,13 +4202,9 @@ class CcpnNefReader(CcpnNefContent):
             # Make data storage object
             filePath = saveFrame.get('ccpn_spectrum_file_path')
             if filePath:
-                storageParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping,
-                                                                             # ccpnPrefix='spectrum._wrappedData.dataStore'
-                                                                             # NOTE:ED - testing; removed 'spectrum.' prefix
-                                                                             ccpnPrefix='_wrappedData.dataStore'
-                                                                             )
+                storageParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping, ccpnPrefix='_apiDataStore')
                 storageParameters['numPoints'] = spectrum.pointCounts
-                spectrum._wrappedData.addDataStore(filePath, **storageParameters)
+                spectrum._addDataStore(filePath, **storageParameters)
 
             # Load CCPN dimensions before peaks
             loopName = 'ccpn_spectrum_dimension'
@@ -4250,8 +4249,8 @@ class CcpnNefReader(CcpnNefContent):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
-        mappingNoPeakList = nef2CcpnMap['ccpn_no_peak_list']
+        mapping = nef2CcpnMap.get(category) or {}
+        mappingNoPeakList = nef2CcpnMap.get('ccpn_no_peak_list') or {}
 
         # Get peakList parameters and make peakList
         # peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mapping)
@@ -4321,7 +4320,7 @@ class CcpnNefReader(CcpnNefContent):
         result = []
 
         if loop:
-            apiExperiment = spectrum._wrappedData.experiment
+            apiExperiment = spectrum.experiment
 
             data = loop.data
             # Remove invalid data rows
@@ -4345,7 +4344,7 @@ class CcpnNefReader(CcpnNefContent):
                                                 dataLists: Sequence[Sequence]):
         # Store expTransfers in API as we can not be sure we will get a refExperiment
 
-        apiExperiment = spectrum._wrappedData.experiment
+        apiExperiment = spectrum.experiment
 
         for ll in dataLists:
             expDimRefs = []
@@ -4367,7 +4366,7 @@ class CcpnNefReader(CcpnNefContent):
 
         params = {}
         extras = {}
-        nefTag2ccpnTag = nef2CcpnMap['ccpn_spectrum_dimension']
+        nefTag2ccpnTag = nef2CcpnMap.get('ccpn_spectrum_dimension') or {}
 
         if not loop.data:
             raise ValueError("ccpn_spectrum_dimension is empty")
@@ -4408,10 +4407,10 @@ class CcpnNefReader(CcpnNefContent):
         # set storage attributes
         value = extras.get('dimension_is_complex')
         if value:
-            spectrum._wrappedData.dataStore.isComplex = value
+            spectrum._apiDataStore.isComplex = value
         value = extras.get('dimension_block_size')
         if value:
-            spectrum._wrappedData.dataStore.blockSizes = value
+            spectrum._apiDataStore.blockSizes = value
 
         # set aliasingLimits
         defaultLimits = spectrum.dimensionCount * [None]
@@ -4448,7 +4447,7 @@ class CcpnNefReader(CcpnNefContent):
         # NB we are not using absolute_peak_positions - if false what could we do?
 
         result = {}
-        nefTag2ccpnTag = nef2CcpnMap['nef_spectrum_dimension']
+        nefTag2ccpnTag = nef2CcpnMap.get('nef_spectrum_dimension') or {}
 
         rows = sorted(loop.data, key=itemgetter('dimension_id'))
         # rows = [(row['dimension_id'], row) for row in loop.data]
@@ -4475,7 +4474,7 @@ class CcpnNefReader(CcpnNefContent):
 
         result = []
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         creatorFunc = spectrum.newPeakList
         for row in loop.data:
@@ -4503,7 +4502,7 @@ class CcpnNefReader(CcpnNefContent):
         _serialErrors = parentFrame._rowErrors[_serialName] = OrderedSet()
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         creatorFunc = spectrum.getPeakList
         for row in loop.data:
@@ -4523,7 +4522,7 @@ class CcpnNefReader(CcpnNefContent):
 
         result = []
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         creatorFunc = spectrum.newIntegralList
         for row in loop.data:
@@ -4550,7 +4549,7 @@ class CcpnNefReader(CcpnNefContent):
         _serialErrors = parentFrame._rowErrors[_serialName] = OrderedSet()
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         creatorFunc = spectrum.getIntegralList
         for row in loop.data:
@@ -4570,7 +4569,7 @@ class CcpnNefReader(CcpnNefContent):
 
         result = []
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         creatorFunc = spectrum.newMultipletList
         for row in loop.data:
@@ -4597,7 +4596,7 @@ class CcpnNefReader(CcpnNefContent):
         _serialErrors = parentFrame._rowErrors[_serialName] = OrderedSet()
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         creatorFunc = spectrum.getMultipletList
         for row in loop.data:
@@ -4627,7 +4626,7 @@ class CcpnNefReader(CcpnNefContent):
 
         serial2creatorFunc = dict((x.serial, x.newIntegral) for x in spectrum.integralLists)
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -4673,7 +4672,7 @@ class CcpnNefReader(CcpnNefContent):
 
         serial2creatorFunc = dict((x.serial, x.getIntegral) for x in spectrum.integralLists)
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -4703,7 +4702,7 @@ class CcpnNefReader(CcpnNefContent):
         max = spectrum.dimensionCount + 1
         serial2creatorFunc = dict((x.serial, x.newMultiplet) for x in spectrum.multipletLists)
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -4734,7 +4733,7 @@ class CcpnNefReader(CcpnNefContent):
 
         serial2creatorFunc = dict((x.serial, x.getMultiplet) for x in spectrum.multipletLists)
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -4764,7 +4763,7 @@ class CcpnNefReader(CcpnNefContent):
         # max = spectrum.dimensionCount + 1
         # serial2creatorFunc = dict((x.serial, x.newMultiplet) for x in spectrum.multipletLists)
 
-        # mapping = nef2CcpnMap[loop.name]
+        # mapping = nef2CcpnMap.get(loop.name) or {}
         # map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
 
@@ -4794,7 +4793,7 @@ class CcpnNefReader(CcpnNefContent):
         """verify ccpn_multiplet_peaks loop"""
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -4819,7 +4818,7 @@ class CcpnNefReader(CcpnNefContent):
         creatorFunc = project.newPeakCluster
 
         result = []
-        mapping = nef2CcpnMap[loopName]
+        mapping = nef2CcpnMap.get(loopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -4830,10 +4829,6 @@ class CcpnNefReader(CcpnNefContent):
                 continue
 
             obj = creatorFunc(**parameters)
-
-            # load time stamps and serial = must bypass the API, as they are frozen
-            apiPeakCluster = obj._wrappedData
-            # obj.resetSerial(row['serial'])
             result.append(obj)
 
         # load ccpn_peak_cluster
@@ -4877,7 +4872,7 @@ class CcpnNefReader(CcpnNefContent):
         _serialErrors = parentFrame._rowErrors[_serialName] = OrderedSet()
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         creatorFunc = project.getPeakCluster
         for row in loop.data:
@@ -4897,7 +4892,7 @@ class CcpnNefReader(CcpnNefContent):
         _ID = 'ccpn_peak_cluster_peaks'
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -4931,7 +4926,7 @@ class CcpnNefReader(CcpnNefContent):
         # dimensionCount = peakList.spectrum.dimensionCount
         dimensionCount = spectrum.dimensionCount
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
 
         # Get name map for per-dimension attributes
@@ -5036,7 +5031,7 @@ class CcpnNefReader(CcpnNefContent):
         _ID = 'nef_peak'
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
 
         for row in loop.data:
@@ -5091,7 +5086,7 @@ class CcpnNefReader(CcpnNefContent):
     def load_nef_peak_restraint_links(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """load nef_peak_restraint_links saveFrame"""
 
-        mapping = nef2CcpnMap['nef_peak_restraint_links']
+        mapping = nef2CcpnMap.get('nef_peak_restraint_links') or {}
         for tag, ccpnTag in mapping.items():
             if ccpnTag == _isALoop:
                 loop = saveFrame.get(tag)
@@ -5217,7 +5212,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
@@ -5240,7 +5235,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
         name = framecode[len(category) + 1:]  #parameters['name']
 
@@ -5290,7 +5285,7 @@ class CcpnNefReader(CcpnNefContent):
 
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
@@ -5313,7 +5308,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
         name = framecode[len(category) + 1:]  #parameters['name']
 
@@ -5366,7 +5361,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
@@ -5389,7 +5384,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        # mapping = nef2CcpnMap[category]
+        # mapping = nef2CcpnMap.get(category) or {}
         name = framecode[len(category) + 1:]
 
         # parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
@@ -5411,7 +5406,7 @@ class CcpnNefReader(CcpnNefContent):
 
         creatorFunc = parent.newSampleComponent
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -5431,7 +5426,7 @@ class CcpnNefReader(CcpnNefContent):
             self.error('Undefined sampleName', loop, None)
             return None
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -5449,7 +5444,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
         name = parameters.pop('name')
@@ -5484,7 +5479,7 @@ class CcpnNefReader(CcpnNefContent):
                 # set the sequenceString, if any, to the same as previous
                 sequenceString = previous[0].sequenceString
                 if sequenceString is not None:
-                    result._wrappedData.seqString = sequenceString
+                    result.sequenceString = sequenceString
 
         # Whether substance was pre-existing or not
         # overwrite the missing substance-specific parameters
@@ -5505,7 +5500,7 @@ class CcpnNefReader(CcpnNefContent):
 
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
         name = parameters.pop('name')
@@ -5558,7 +5553,7 @@ class CcpnNefReader(CcpnNefContent):
         # project.blankNotification()
 
         # read nmr_chain loop
-        mapping = nef2CcpnMap[nmrChainLoopName]
+        mapping = nef2CcpnMap.get(nmrChainLoopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         creatorFunc = project.newNmrChain
         for row in saveFrame[nmrChainLoopName].data:
@@ -5582,7 +5577,7 @@ class CcpnNefReader(CcpnNefContent):
         # project.unblankNotification()
 
         # read nmr_residue loop
-        mapping = nef2CcpnMap[nmrResidueLoopName]
+        mapping = nef2CcpnMap.get(nmrResidueLoopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
 
         # reorder the residues so that i-1 residues are after the corresponding i residue
@@ -5633,7 +5628,7 @@ class CcpnNefReader(CcpnNefContent):
             nmrResidues[(chainCode, parameters['sequenceCode'])] = nmrResidue
 
         # read nmr_atom loop
-        mapping = nef2CcpnMap[nmrAtomLoopName]
+        mapping = nef2CcpnMap.get(nmrAtomLoopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in saveFrame[nmrAtomLoopName].data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -5670,7 +5665,7 @@ class CcpnNefReader(CcpnNefContent):
         _nmrAtomErrors = saveFrame._rowErrors[nmrAtomLoopName] = OrderedSet()
 
         # read nmr_chain loop
-        mapping = nef2CcpnMap[nmrChainLoopName]
+        mapping = nef2CcpnMap.get(nmrChainLoopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         creatorFunc = project.getNmrChain
         loop = saveFrame[nmrChainLoopName]
@@ -5745,7 +5740,7 @@ class CcpnNefReader(CcpnNefContent):
                             break
 
         # read nmr_atom loop
-        mapping = nef2CcpnMap[nmrAtomLoopName]
+        mapping = nef2CcpnMap.get(nmrAtomLoopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         loop = saveFrame[nmrAtomLoopName]
         for row in loop.data:
@@ -5792,22 +5787,20 @@ class CcpnNefReader(CcpnNefContent):
         creatorFunc = project.newNote
 
         result = []
-        mapping = nef2CcpnMap[loopName]
+        mapping = nef2CcpnMap.get(loopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
             obj = creatorFunc(**parameters)
             result.append(obj)
 
-            # load time stamps and serial = must bypass the API, as they are frozen
-            apiNote = obj._wrappedData
+            # load time stamps and serial
             created = row.get('created')
             if created:
-                apiNote.__dict__['created'] = datetime.strptime(created, Constants.isoTimeFormat)
+                obj.created = created
             lastModified = row.get('last_modified')
             if lastModified:
-                apiNote.__dict__['lastModified'] = datetime.strptime(lastModified,
-                                                                     Constants.isoTimeFormat)
+                obj.lastModified = lastModified
             serial = row.get('serial')
             if serial is not None:
                 try:
@@ -5828,7 +5821,7 @@ class CcpnNefReader(CcpnNefContent):
         creatorFunc = project.getNote
 
         result = []
-        mapping = nef2CcpnMap[loopName]
+        mapping = nef2CcpnMap.get(loopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -5885,7 +5878,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
 
     importers['ccpn_dataset'] = load_ccpn_dataset
 
@@ -6026,7 +6019,7 @@ class CcpnNefReader(CcpnNefContent):
                         previous = nmrChain.fetchNmrResidue(sequenceCode)
                         if not previous.residueType:
                             result = previous
-                            result._wrappedData.residueType = residueType
+                            result.residueType = residueType
                             # return result
                     except ValueError:
                         # Deal with it below
@@ -6125,13 +6118,17 @@ class CcpnNefReader(CcpnNefContent):
         # dataSet = self.fetchDataSet(self.mainDataSetSerial)
         self.mainDataSetSerial = None
 
+    def _defaultName(self, cls, serial):
+        # Get the next class name using serial, this may already exist
+        return self.project._defaultNameFromSerial(cls, serial)
+
     def fetchDataSet(self, serial: int = None):
         """Fetch DataSet with given serial.
-    If input is None, use self.defaultDataSetSerial
-    If that too is None, create a new DataSet and use its serial as the default
+        If input is None, use self.defaultDataSetSerial
+        If that too is None, create a new DataSet and use its serial as the default
 
-    NB when reading, all DataSets with known serials should be instantiated BEFORE calling
-    with input None"""
+        NB when reading, all DataSets with known serials should be instantiated BEFORE calling
+        with input None"""
 
         if serial is None:
             serial = self.defaultDataSetSerial
@@ -6139,26 +6136,14 @@ class CcpnNefReader(CcpnNefContent):
         if serial is None:
             # default not set - create one
             dataSet = self.project.newDataSet()
-            serial = dataSet.serial
-            dataSet.title = 'DataSet_%s' % serial
-            self.defaultDataSetSerial = serial
-            self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
-
+            self.defaultDataSetSerial = dataSet.serial
         else:
             # take or create dataSet matching serial
-            # dataSet = self.project.getDataSet(str(serial))
-            dataSet = self.project.getDataSet('DataSet_%s' % serial)
+            dataSet = self.getDataSet(serial)
             if dataSet is None:
                 dataSet = self.project.newDataSet(serial=serial)
-                # dataSet.resetSerial(serial)
-                # NB former call was BROKEN!
-                # modelUtil.resetSerial(dataSet._wrappedData, serial, 'nmrConstraintStores')
-
-                # dataSet._finaliseAction('rename')
-                dataSet.title = 'DataSet_%s' % serial
-
-                self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
         #
+        self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
         return dataSet
 
     def getDataSet(self, serial: int = None):
@@ -6171,7 +6156,8 @@ class CcpnNefReader(CcpnNefContent):
 
         if serial is None:
             serial = self.defaultDataSetSerial or 1
-        return self.project.getDataSet('DataSet_{}'.format(serial))
+        _name = self._defaultName(DataSet, serial)
+        return self.project.getDataSet(_name)
 
 
 def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict,
@@ -6250,8 +6236,7 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
 
             # Delete autocreated peaklist  and reset - we want any read-in peakList to be the first
             # If necessary an empty PeakList is added downstream
-            spectrum.peakLists[0].delete()
-            spectrum._wrappedData.__dict__['_serialDict']['peakLists'] = 0
+            spectrum._resetPeakLists()
 
         # (Re)set all spectrum attributes
 

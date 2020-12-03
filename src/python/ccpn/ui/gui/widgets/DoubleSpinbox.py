@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-27 09:43:02 +0000 (Tue, October 27, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-03 10:01:42 +0000 (Thu, December 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -241,6 +241,12 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
     def keyReleaseEvent(self, event):
         self._keyPressed = None
         super().keyReleaseEvent(event)
+
+    def setMinimumCharacters(self, value):
+        from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont
+
+        _, maxDim = getTextDimensionsFromFont(textList=['_' * value])
+        self.setMinimumWidth(maxDim.width())
 
 
 # Regular expression to find floats. Match groups are the whole string, the

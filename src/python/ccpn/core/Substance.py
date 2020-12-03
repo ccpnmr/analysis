@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-03 10:01:40 +0000 (Thu, December 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -238,6 +238,10 @@ class Substance(AbstractWrapperObject):
         for other molecules to a comma-separated tuple of three-letter codes"""
         apiRefComponent = self._wrappedData
         return apiRefComponent.seqString if hasattr(apiRefComponent, 'seqString') else None
+
+    @sequenceString.setter
+    def sequenceString(self, value):
+        self._wrappedData.seqString = value
 
     @property
     def molecularMass(self) -> typing.Optional[float]:
@@ -547,6 +551,12 @@ class Substance(AbstractWrapperObject):
         for spectrum in value:
             if isinstance(spectrum, Spectrum):
                 spectrum._apiDataSource.experiment.refComponentName = name
+
+    @property
+    def _molecule(self):
+        """Get the attached molecule
+        """
+        return self._wrappedData.molecule
 
     #=========================================================================================
     # Implementation functions

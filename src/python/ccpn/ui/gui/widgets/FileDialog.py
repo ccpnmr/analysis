@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-04 18:12:43 +0100 (Mon, May 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-03 10:01:42 +0000 (Thu, December 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -457,6 +457,9 @@ class NefFileDialog(QtWidgets.QFileDialog):
                 self.result = self.result[0]
         else:
             self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
+            if self._selectFile is not None:  # ejb - populates fileDialog with a suggested filename
+                self.selectFile(self._selectFile)
+
             self.result = self.exec_()
 
         if self.selectedFiles():

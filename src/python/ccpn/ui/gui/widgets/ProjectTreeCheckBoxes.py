@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-23 17:36:45 +0000 (Mon, November 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-03 10:01:42 +0000 (Thu, December 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -588,7 +588,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                       addLoopAttribs=None, excludeList=(), **kwds):
         """Iterate over the loops in a saveFrame, and add to results"""
         result = {}
-        mapping = nef2CcpnMap[saveFrame.category]
+        mapping = nef2CcpnMap.get(saveFrame.category) or {}
         for tag, ccpnTag in mapping.items():
             if tag not in excludeList and ccpnTag == _isALoop:
                 loop = saveFrame.get(tag)

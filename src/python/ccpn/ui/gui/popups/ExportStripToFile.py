@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-03 10:01:42 +0000 (Thu, December 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -72,6 +72,8 @@ EXPORTTYPES = OD(((EXPORTPDF, {EXPORTEXT   : EXPORTPDFEXTENSION,
                                EXPORTFILTER: EXPORTSVGFILTER}),
                   (EXPORTPNG, {EXPORTEXT   : EXPORTPNGEXTENSION,
                                EXPORTFILTER: EXPORTPNGFILTER}),
+                  (EXPORTPS, {EXPORTEXT   : EXPORTPSEXTENSION,
+                              EXPORTFILTER: EXPORTPSFILTER}),
                   ))
 EXPORTFILTERS = EXPORTPDFFILTER
 PAGEPORTRAIT = 'portrait'
@@ -457,8 +459,8 @@ class ExportStripToFilePopup(ExportDialog):
                           GLCURSORS           : QtCore.Qt.Unchecked,
                           GLGRIDLINES         : QtCore.Qt.Checked if self.strip.gridVisible else QtCore.Qt.Unchecked,
                           GLDIAGONALLINE      : QtCore.Qt.Checked if self.strip._CcpnGLWidget._matchingIsotopeCodes else QtCore.Qt.Unchecked,
-                          GLDIAGONALSIDEBANDS : QtCore.Qt.Checked if (self.strip._CcpnGLWidget._sideBandsVisible and self.strip._CcpnGLWidget._matchingIsotopeCodes)
-                                                                      else QtCore.Qt.Unchecked,
+                          GLDIAGONALSIDEBANDS : (QtCore.Qt.Checked if (self.strip._CcpnGLWidget._sideBandsVisible and self.strip._CcpnGLWidget._matchingIsotopeCodes)
+                                                 else QtCore.Qt.Unchecked),
                           GLSHOWSPECTRAONPHASE: QtCore.Qt.Checked if self.strip._CcpnGLWidget._showSpectraOnPhasing else QtCore.Qt.Unchecked
                           }
         self.printList = []
@@ -602,6 +604,10 @@ class ExportStripToFilePopup(ExportDialog):
                 pngExport = glWidget.exportToPNG(filename, params)
                 if pngExport:
                     pngExport.writePNGFile()
+            elif prType == EXPORTPS:
+                pngExport = glWidget.exportToPS(filename, params)
+                if pngExport:
+                    pngExport.writePSFile()
 
     def actionButtons(self):
         self.buttonFrame.addSpacer(0, 10, grid=(0, 1))
@@ -624,6 +630,12 @@ class ExportStripToFilePopup(ExportDialog):
         elif selected == EXPORTSVG:
             if not lastPath.endswith(EXPORTSVGEXTENSION):
                 lastPath += EXPORTSVGEXTENSION
+        elif selected == EXPORTPNG:
+            if not lastPath.endswith(EXPORTPNGEXTENSION):
+                lastPath += EXPORTPNGEXTENSION
+        elif selected == EXPORTPS:
+            if not lastPath.endswith(EXPORTPSEXTENSION):
+                lastPath += EXPORTPSEXTENSION
 
         self.saveText.setText(lastPath)
         self.exitFilename = lastPath
@@ -657,6 +669,12 @@ class ExportStripToFilePopup(ExportDialog):
         elif selected == EXPORTSVG:
             if not lastPath.endswith(EXPORTSVGEXTENSION):
                 lastPath += EXPORTSVGEXTENSION
+        elif selected == EXPORTPNG:
+            if not lastPath.endswith(EXPORTPNGEXTENSION):
+                lastPath += EXPORTPNGEXTENSION
+        elif selected == EXPORTPS:
+            if not lastPath.endswith(EXPORTPSEXTENSION):
+                lastPath += EXPORTPSEXTENSION
 
         self.saveText.setText(lastPath)
         self.exitFilename = lastPath

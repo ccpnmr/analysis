@@ -43,7 +43,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-23 17:36:46 +0000 (Mon, November 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-03 10:01:42 +0000 (Thu, December 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -1225,7 +1225,7 @@ class CcpnNefReader:
     #   # Get ccpn-to-nef mappping for saveframe
     #   category = saveFrame['sf_category']
     #   framecode = saveFrame['sf_framecode']
-    #   mapping = nef2CcpnMap[category]
+    #   mapping = nef2CcpnMap.get(category) or {}
     #
     #   parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
     #
@@ -1254,7 +1254,7 @@ class CcpnNefReader:
     #
     #   creatorFunc = parent.newSampleComponent
     #
-    #   mapping = nef2CcpnMap[loop.name]
+    #   mapping = nef2CcpnMap.get(loop.name) or {}
     #   map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
     #   for row in loop.data:
     #     parameters = self._parametersFromLoopRow(row, map2)
@@ -1273,7 +1273,7 @@ class CcpnNefReader:
     #   # Get ccpn-to-nef mappping for saveframe
     #   category = saveFrame['sf_category']
     #   framecode = saveFrame['sf_framecode']
-    #   mapping = nef2CcpnMap[category]
+    #   mapping = nef2CcpnMap.get(category) or {}
     #   parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
     #
     #   name = parameters.pop('name')

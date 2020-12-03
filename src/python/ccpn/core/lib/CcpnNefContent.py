@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-23 17:36:45 +0000 (Mon, November 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-03 10:01:41 +0000 (Thu, December 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -53,7 +53,7 @@ class CcpnNefContent:
                       excludeList=(), **kwds):
         """Iterate over the loops in a saveFrame, and add to results"""
         result = {}
-        mapping = nef2CcpnMap[saveFrame.category]
+        mapping = nef2CcpnMap.get(saveFrame.category) or {}
         for tag, ccpnTag in mapping.items():
             if tag not in excludeList and ccpnTag == _isALoop:
                 loop = saveFrame.get(tag)
@@ -90,7 +90,8 @@ class CcpnNefContent:
         nmrAtomCodes = OrderedSet()
 
         # read nmr_chain loop - add the details to nmrChain list
-        mapping = nef2CcpnMap[nmrChainLoopName]
+        mapping = nef2CcpnMap.get(nmrChainLoopName) or {}
+
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in saveFrame[nmrChainLoopName].data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -99,7 +100,7 @@ class CcpnNefContent:
 
         # read nmr_residue loop - add the details to nmrChain/nmrResidue/nmrAtom lists
         tempResidueDict = {}
-        mapping = nef2CcpnMap[nmrResidueLoopName]
+        mapping = nef2CcpnMap.get(nmrResidueLoopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in saveFrame[nmrResidueLoopName].data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -115,7 +116,7 @@ class CcpnNefContent:
 
         # read nmr_residue loop - add the details to nmrChain/nmrResidue/nmrAtom lists
         tempResidueDict = {}
-        mapping = nef2CcpnMap[nmrAtomLoopName]
+        mapping = nef2CcpnMap.get(nmrAtomLoopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in saveFrame[nmrAtomLoopName].data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -144,7 +145,7 @@ class CcpnNefContent:
         """Get the contents of ccpn_complex saveFrame"""
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
         name = framecode[len(category) + 1:]  #parameters['name']
@@ -170,7 +171,7 @@ class CcpnNefContent:
         # ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        # mapping = nef2CcpnMap[category]
+        # mapping = nef2CcpnMap.get(category) or {}
 
         name = framecode[len(category) + 1:]
         # parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
@@ -191,7 +192,7 @@ class CcpnNefContent:
             self.error('Undefined sampleName', loop, None)
             return None
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -212,7 +213,7 @@ class CcpnNefContent:
         """Get the contents of ccpn_substance saveFrame"""
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
         substanceId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (parameters['name'], parameters.get('labelling')))
@@ -230,7 +231,7 @@ class CcpnNefContent:
         saveFrameName = saveFrame['sf_category']
 
         loop = saveFrame[loopName]
-        mapping = nef2CcpnMap[loopName]
+        mapping = nef2CcpnMap.get(loopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -248,7 +249,7 @@ class CcpnNefContent:
                               name=None, itemLength=None):
         integrals = OrderedSet()
 
-        # mapping = nef2CcpnMap[loop.name]
+        # mapping = nef2CcpnMap.get(loop.name) or {}
         # map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             # parameters = _parametersFromLoopRow(row, map2)
@@ -266,7 +267,7 @@ class CcpnNefContent:
                                name=None, itemLength=None):
         multiplets = OrderedSet()
 
-        # mapping = nef2CcpnMap[loop.name]
+        # mapping = nef2CcpnMap.get(loop.name) or {}
         # map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             # parameters = _parametersFromLoopRow(row, map2)
@@ -284,7 +285,7 @@ class CcpnNefContent:
         """Get the contents of ccpn_multiplet_peaks loop"""
         multipletPeaks = OrderedSet()
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -318,7 +319,7 @@ class CcpnNefContent:
         _serialName = 'ccpn_peak_cluster_serial'
         # _serialErrors = parentFrame._contents[_serialName] = OrderedSet()
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -335,7 +336,7 @@ class CcpnNefContent:
         """Get the contents of ccpn_peak_cluster_peaks loop"""
         clusterPeaks = OrderedSet()
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -363,7 +364,7 @@ class CcpnNefContent:
                                    name=None, itemLength=None):
         integralLists = OrderedSet()
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -379,7 +380,7 @@ class CcpnNefContent:
                                     name=None, itemLength=None):
         multipletLists = OrderedSet()
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -395,7 +396,7 @@ class CcpnNefContent:
                                name=None, itemLength=None):
         peakLists = OrderedSet()
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -411,7 +412,7 @@ class CcpnNefContent:
         """Get the contents of ccpn_spectrum_group saveFrame"""
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
         name = framecode[len(category) + 1:]  #parameters['name']
 
@@ -426,7 +427,7 @@ class CcpnNefContent:
         """Get the contents of nef_chemical_shift loop"""
         nmrAtoms = OrderedSet()
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -477,7 +478,7 @@ class CcpnNefContent:
         results = {chainCode   : OrderedSet(),
                    compoundName: OrderedSet()}
 
-        mapping = nef2CcpnMap[nefSequence]
+        mapping = nef2CcpnMap.get(nefSequence) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         _sequence = saveFrame.get(nefSequence)
         data = _sequence.data if _sequence and hasattr(_sequence, 'data') else []
@@ -495,7 +496,7 @@ class CcpnNefContent:
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap[category]
+        mapping = nef2CcpnMap.get(category) or {}
 
         # Get peakList parameters and make peakList
         peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mapping)
@@ -535,7 +536,7 @@ class CcpnNefContent:
         _parentSerial = _stripSpectrumSerial(_parentName)
 
         # get the list of peaks
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             # parameters = _parametersFromLoopRow(row, map2)
@@ -582,7 +583,7 @@ class CcpnNefContent:
         _parentSerial = _stripSpectrumSerial(_parentName)
 
         # get the list of peaks
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
@@ -608,7 +609,7 @@ class CcpnNefContent:
             return None
 
         # get the list of assigned nmrAtoms
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         max = itemLength + 1
         multipleAttributes = OD((
             ('chainCodes', tuple('chain_code_%s' % ii for ii in range(1, max))),
@@ -649,7 +650,7 @@ class CcpnNefContent:
             self.error('Undefined restraint item length', loop, None)
             return None
 
-        mapping = nef2CcpnMap[loop.name]
+        mapping = nef2CcpnMap.get(loop.name) or {}
         max = itemLength + 1
         multipleAttributes = OD((
             ('chainCodes', tuple('chain_code_%s' % ii for ii in range(1, max))),

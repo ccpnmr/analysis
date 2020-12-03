@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-03 10:01:41 +0000 (Thu, December 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -299,6 +299,13 @@ class AbstractWrapperObject(NotifierBase):
         names = [d._wrappedData.name for d in _cls]
         while name in names:
             name = commonUtil.incrementName(name)
+
+        return name
+
+    @staticmethod
+    def _defaultNameFromSerial(cls, serial):
+        # Get the next default name using serial, this may already exist
+        name = 'my%s_%s' % (cls.className, serial)
 
         return name
 

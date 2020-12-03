@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-04 15:35:10 +0100 (Thu, June 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-03 10:01:41 +0000 (Thu, December 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -24,20 +24,19 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-# import typing
 import collections
-
+import random
+import numpy as np
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
-from ccpnmodel.ccpncore.lib.Io import Formats
-
-import numpy as np
 from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple',
                                                     ['dimension1', 'dimension2', 'transferType', 'isIndirect']
                                                     )
+NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', ['mean', 'std', 'min', 'max', 'noiseLevel'])
 
 
 def getExperimentClassifications(project: Project) -> dict:
@@ -79,6 +78,7 @@ def _calibrateX1D(spectrum, currentPosition, newPosition):
     shift = newPosition - currentPosition
     spectrum.referenceValues = [spectrum.referenceValues[0] + shift]
     spectrum.positions = spectrum.positions + shift
+
 
 def _calibrateY1D(spectrum, currentPosition, newPosition):
     shift = newPosition - currentPosition
@@ -579,17 +579,16 @@ def nmrGlueBaselineCorrector(data, wd=20):
 from typing import Tuple
 
 
-def _getDefaultApiSpectrumColours(apiSpectrum: 'DataSource') -> Tuple[str, str]:
+def _getDefaultApiSpectrumColours(spectrum: 'Spectrum') -> Tuple[str, str]:
     """Get the default colours from the core spectrum class
     """
     # from ccpn.util.Colour import spectrumHexColours
-    from ccpn.ui.gui.guiSettings import getColours, SPECTRUM_HEXCOLOURS, \
-        SPECTRUM_HEXDEFAULTCOLOURS, CCPNGLWIDGET_BACKGROUND
-    from ccpn.util.Colour import gray, hexToRgb, findNearestHex, invertRGBHue, rgbToHex
+    from ccpn.ui.gui.guiSettings import getColours, SPECTRUM_HEXCOLOURS, SPECTRUM_HEXDEFAULTCOLOURS
+    from ccpn.util.Colour import hexToRgb, findNearestHex, invertRGBHue, rgbToHex
 
-    dimensionCount = apiSpectrum.numDim
-    serial = apiSpectrum.serial
-    expSerial = apiSpectrum.experiment.serial
+    dimensionCount = spectrum.dimensionCount
+    serial = spectrum._serial
+    expSerial = spectrum.experiment.serial
 
     spectrumHexColours = getColours().get(SPECTRUM_HEXCOLOURS)
     spectrumHexDefaultColours = getColours().get(SPECTRUM_HEXDEFAULTCOLOURS)
@@ -643,9 +642,7 @@ def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
     (calculated by hashing spectrum properties to avoid always getting the same colours
     Currently matches getDefaultColours in dataSource that is set through the api
     """
-
-    apiSpectrum = self._wrappedData
-    return _getDefaultApiSpectrumColours(apiSpectrum)
+    return _getDefaultApiSpectrumColours(self)
 
 
 def get1DdataInRange(x, y, xRange):
@@ -683,7 +680,6 @@ def _recurseData(ii, dataList, startCondition, endCondition):
         mn = np.mean(flatData)
         noiseLevel = mn + 3.0 * SD
 
-        # print('>>>iterate', ii, data.shape, SD, max, min, mn, noiseLevel, '*' if noiseLevel > max else '-')
         if not startCondition:
             startCondition[:] = [ii, data.shape, SD, max, min, mn, noiseLevel]
             endCondition[:] = startCondition[:]
@@ -707,7 +703,7 @@ def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,
                                   useSameMultiplier=True):
     """Calculate the noise level, base contour level and positive/negative multipliers for the given apiSpectrum
     """
-
+    # NOTE:ED - method doesn't seem to be used?
     project = apiSpectrum.topObject
 
     # the core objects should have been initialised at this point
@@ -733,7 +729,7 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
     """
 
     # parameter error checking
-    if not isinstance(setNegativeContours, bool):
+    if not isinstance(setNoiseLevel, bool):
         raise TypeError('setNoiseLevel is not boolean.')
     if not isinstance(setPositiveContours, bool):
         raise TypeError('setPositiveContours is not boolean.')
@@ -763,7 +759,7 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
         return
 
     if any(x != 'Frequency' for x in spectrum.dimensionTypes):
-        raise NotImplementedError("setContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes,))
+        raise NotImplementedError("setContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
 
     # get specLimits for all dimensions
     specLimits = list(spectrum.spectrumLimits)
@@ -810,8 +806,8 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
 
                     # calculate the base levels
                     if setNoiseLevel:
-                        # put the new values into the spectrum
-                        base = abs(endCondition[5] + 3.0 * endCondition[6])  # abs(mean) + (3 * noiseLevel)
+                        # put the new value into the spectrum
+                        base = endCondition[6]
                         spectrum.noiseLevel = base
                     else:
                         # get the noise from the spectrum
@@ -867,7 +863,7 @@ def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
     """
 
     # parameter error checking
-    if not isinstance(setNegativeContours, bool):
+    if not isinstance(setNoiseLevel, bool):
         raise TypeError('setNoiseLevel is not boolean.')
     if not isinstance(setPositiveContours, bool):
         raise TypeError('setPositiveContours is not boolean.')
@@ -897,7 +893,7 @@ def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
     #     return [None] * 5
 
     if any(x != 'Frequency' for x in spectrum.dimensionTypes):
-        raise NotImplementedError("getContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes,))
+        raise NotImplementedError("getContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
 
     # get specLimits for all dimensions
     specLimits = list(spectrum.spectrumLimits)
@@ -944,8 +940,8 @@ def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
 
                     # calculate the base levels
                     if setNoiseLevel:
-                        # put the new values into the spectrum
-                        posBase = abs(endCondition[5] + 3.0 * endCondition[6])  # abs(mean) + (3 * noiseLevel)
+                        # put the new value into the spectrum
+                        posBase = endCondition[6]
                         # spectrum.noiseLevel = base
                     else:
                         # get the noise from the spectrum
@@ -975,3 +971,135 @@ def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
                 return posBase, negBase, posMult, negMult, posLevels, negLevels
 
     return [None] * 6
+
+
+def getSpectrumNoise(spectrum):
+    """
+    Get the noise level for a spectrum. If the noise level is not already set it will
+    be set at an estimated value.
+
+    .. describe:: Input
+
+    spectrum
+
+    .. describe:: Output
+
+    Float
+    """
+    # apiDataSource = spectrum._apiDataSource
+    noise = spectrum.noiseLevel
+    if noise is None:
+        noise = getNoiseEstimate(spectrum)
+        spectrum.noiseLevel = noise.noiseLevel
+
+    return noise
+
+
+def getNoiseEstimate(spectrum):
+    """Get an estimate of the noiseLevel from the spectrum
+
+    noiseLevel is calculated as abs(mean) + 3.0 * SD
+
+    Calculated from a random subset of the spectrum
+    """
+    # NOTE:ED more detail needed
+
+    FRACTPERAXIS = 0.04
+    SUBSETFRACT = 0.25
+    FRACT = 0.1
+    MAXSAMPLES = 10000
+
+    npts = spectrum.pointCounts
+
+    # take % of points in each axis
+    fract = (FRACTPERAXIS ** len(npts))
+    nsamples = min(int(np.prod(npts) * fract), MAXSAMPLES)
+
+    nsubsets = max(1, int(nsamples * SUBSETFRACT))
+    fraction = FRACT
+
+    with notificationEchoBlocking():
+        return _getNoiseEstimate(spectrum, nsamples, nsubsets, fraction)
+
+
+def _noiseFunc(value):
+    # take the 'value' NoiseEstimateTuple and add the noiseLevel
+    return NoiseEstimateTuple(mean=value.mean,
+                               std=value.std,
+                               min=value.min, max=value.max,
+                               noiseLevel=abs(value.mean) + 3.0 * value.std)
+
+
+def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
+    """
+    Estimate the noise level for a spectrum.
+
+    'nsamples' random samples are taken from the spectrum
+    'nsubsets' is the number of random permutations of data taken from the
+    and finding subsets with the lowest standard deviation
+
+    A tuple (mean, SD, min, max noiseLevel) is returned from the subset with the lowest standard deviation.
+    mean is the mean of the minimum random subset, SD is the standard deviation, min/max are the minimum/maximum values,
+    and noiseLevel is the estimated noiseLevel caluated as abs(mean) + 3.0 * SD
+
+    :param spectrum: input spectrum
+    :param nsamples: number reandom samples
+    :param nsubsets: number of subsets
+    :param fraction: subset fraction
+    :return: tuple(mean, SD, min, max, noiseLevel)
+    """
+
+    npts = spectrum.pointCounts
+    if not isinstance(nsamples, int):
+        raise TypeError('nsamples must be an int')
+    if not (0 < nsamples <= np.prod(npts)):
+        raise ValueError(f'nsamples must be in range [1, {np.prod(npts)}]')
+    if not isinstance(nsubsets, int):
+        raise TypeError('nsubsets must be an int')
+    if not (0 < nsubsets <= nsamples):
+        # not strictly necessary but stops huge values
+        raise ValueError(f'nsubsets must be in range [1, {nsamples}]')
+    if not isinstance(fraction, float):
+        raise TypeError('fraction must be a float')
+    if not (0 < fraction <= 1.0):
+        raise ValueError('fraction must be i the range (0, 1]')
+
+    # create a list of random points in the spectrum, get only points that are not nan/inf
+    # getPositionValue is the slow bit
+    allPts = [[min(n - 2, int(n * random.random())) for n in npts] for i in range(nsamples)]
+    data = list(filter(lambda d: d - d == 0, [spectrum.getPositionValue(pt) for pt in allPts]))
+    fails = nsamples - len(data)
+
+    if fails:
+        raise RuntimeError(f'Attempt to access {fails} non-existent data points in spectrum {spectrum}')
+
+    # check whether there are too many bad numbers in the data
+    good = nsamples - fails
+    if good == 0:
+        return NoiseEstimateTuple(mean=None, std=None, min=None, max=None, noiseLevel=1.0)
+    elif good < 10: # arbitrary number of bad points
+        maxValue = max([abs(x) for x in data])
+        if maxValue > 0:
+            return NoiseEstimateTuple(mean=None, std=None, min=None, max=None, noiseLevel=0.1 * maxValue)
+        else:
+            return NoiseEstimateTuple(mean=None, std=None, min=None, max=None, noiseLevel=1.0)
+
+    m = max(1, int(nsamples * fraction))
+
+    def meanStd():
+        # take m random values from data, and return mean/SD
+        y = np.random.choice(data, m)
+        return NoiseEstimateTuple(mean=np.mean(y), std=np.std(y), min=np.min(y), max=np.max(y), noiseLevel=None)
+
+    # generate 'nsubsets' noiseEstimates and take the one with the minimum standard deviation
+    value = min((meanStd() for i in range(nsubsets)), key=lambda mSD: mSD.std)
+    value = NoiseEstimateTuple(mean=value.mean,
+                               std=value.std * 1.1 if value.std != 0 else 1.0,
+                               min=value.min, max=value.max,
+                               noiseLevel=None)
+
+    value = _noiseFunc(value)
+
+    # minStd *= apiDataSource.scale?
+
+    return value

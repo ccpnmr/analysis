@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-04 13:35:46 +0000 (Wed, November 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-03 10:01:41 +0000 (Thu, December 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -403,15 +403,15 @@ nef2CcpnMap = {
         ('ccpn_spectrum_comment', 'comment'),
         ('ccpn_spectrum_file_path', None),
         ('ccpn_sample', None),
-        ('ccpn_file_header_size', '_wrappedData.dataStore.headerSize'),
-        ('ccpn_file_number_type', '_wrappedData.dataStore.numberType'),
-        ('ccpn_file_complex_stored_by', '_wrappedData.dataStore.complexStoredBy'),
-        ('ccpn_file_scale_factor', '_wrappedData.dataStore.scaleFactor'),
-        ('ccpn_file_is_big_endian', '_wrappedData.dataStore.isBigEndian'),
-        ('ccpn_file_byte_number', '_wrappedData.dataStore.nByte'),
-        ('ccpn_file_has_block_padding', '_wrappedData.dataStore.hasBlockPadding'),
-        ('ccpn_file_block_header_size', '_wrappedData.dataStore.blockHeaderSize'),
-        ('ccpn_file_type', '_wrappedData.dataStore.fileType'),
+        ('ccpn_file_header_size', '_apiDataStore.headerSize'),
+        ('ccpn_file_number_type', '_apiDataStore.numberType'),
+        ('ccpn_file_complex_stored_by', '_apiDataStore.complexStoredBy'),
+        ('ccpn_file_scale_factor', '_apiDataStore.scaleFactor'),
+        ('ccpn_file_is_big_endian', '_apiDataStore.isBigEndian'),
+        ('ccpn_file_byte_number', '_apiDataStore.nByte'),
+        ('ccpn_file_has_block_padding', '_apiDataStore.hasBlockPadding'),
+        ('ccpn_file_block_header_size', '_apiDataStore.blockHeaderSize'),
+        ('ccpn_file_type', '_apiDataStore.fileType'),
 
         # NOTE:ED - testing again
         # ('ccpn_peaklist_serial', 'serial'),
@@ -465,8 +465,8 @@ nef2CcpnMap = {
         ('lorentzian_broadening', 'lorentzianBroadenings'),
         ('gaussian_broadening', 'gaussianBroadenings'),
         ('sine_window_shift', 'sineWindowShifts'),
-        ('dimension_is_complex', '_wrappedData.dataStore.isComplex'),
-        ('dimension_block_size', '_wrappedData.dataStore.blockSizes'),
+        ('dimension_is_complex', '_apiDataStore.isComplex'),
+        ('dimension_block_size', '_apiDataStore.blockSizes'),
         )),
 
     'nef_spectrum_dimension_transfer': OD((

@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-23 17:36:45 +0000 (Mon, November 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-03 10:01:40 +0000 (Thu, December 03, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -298,7 +298,7 @@ assignmentTolerances
     # CCPN properties
     @property
     def _apiDataSource(self) -> Nmr.DataSource:
-        """ CCPN DataSource matching Spectrum"""
+        """CCPN DataSource matching Spectrum"""
         return self._wrappedData
 
     @property
@@ -311,6 +311,11 @@ assignmentTolerances
         """Local sorting key, in context of parent."""
         dataSource = self._wrappedData
         return (dataSource.experiment.serial, dataSource.serial)
+
+    @property
+    def _apiDataStore(self):
+        """DataStore attached to the spectrum"""
+        return self._wrappedData.dataStore
 
     @property
     def name(self) -> str:
@@ -668,40 +673,6 @@ assignmentTolerances
             apiDataStore.repointToDataUrl(dataUrl)
             apiDataStore.path = value[len(dataUrl.url.path) + 1:]
             self._clearCache()
-            return
-
-            # oldName = apiDataStore.dataUrl.name
-            # newName = incrementName(oldName)
-            #
-            # oldDataUrl = apiDataStore.dataUrl
-            # dataUrl = self._project._wrappedData.root.fetchDataUrl(value, name=newName)
-            # print('>>>~~~')
-            # print('>>>1   APICHANGE value {}'.format(value))
-            # print('>>>1   APICHANGE url   {}'.format(apiDataStore.dataUrl.url.path))
-            # print('>>>1   APICHANGE path  {}'.format(apiDataStore.path))
-            # print('>>>1   APICHANGE path  {}\n'.format(apiDataStore.dataUrl.url.path+'/'+apiDataStore.path))
-            # apiDataStore.repointToDataUrl(dataUrl)
-            # print('>>>2   APICHANGE url   {}'.format(apiDataStore.dataUrl.url.path))
-            # print('>>>2   APICHANGE path  {}'.format(apiDataStore.path))
-            # print('>>>2   APICHANGE path  {}\n'.format(apiDataStore.dataUrl.url.path+'/'+apiDataStore.path))
-            # if oldDataUrl == dataUrl:
-            #     oldLen = len(dataUrl.url.path) + 1
-            #     apiDataStore.path = value[oldLen:]
-            #     print('>>>3   same')
-            # elif value.startswith(dataUrl.url.path):
-            #     oldLen = len(dataUrl.url.path) + 1
-            #     apiDataStore.path = value[oldLen:]
-            #     print('>>>3   prefix')
-            # else:
-            #     oldLen = len(oldDataUrl.url.path) + 1
-            #     apiDataStore.path = value[oldLen:]
-            #     print('>>>3   different')
-            # print('>>>    APICHANGE url  {}'.format(apiDataStore.dataUrl.url.path))
-            # print('>>>    APICHANGE path {}'.format(apiDataStore.path))
-            # print('>>>    APICHANGE path {}\n'.format(apiDataStore.dataUrl.url.path+'/'+apiDataStore.path))
-            # print('>>>~~~')
-            #
-            # self._clearCache()
 
     @property
     def path(self):
@@ -2804,6 +2775,11 @@ assignmentTolerances
         self.copyParameters(axisCodes=axisCodes, target=newSpectrum)
         return newSpectrum
 
+    def _addDataStore(self, filePath, **kwds):
+        """Add a new dataStore to the spectrum
+        """
+        self._wrappedData.addDataStore(filePath, **kwds)
+
     # GWV 20190731: not used
     # def get1dSpectrumData(self):
     #     """Get position,scaledData numpy array for 1D spectrum.
@@ -2912,6 +2888,13 @@ assignmentTolerances
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
+
+    def _resetPeakLists(self):
+        """Delete autocreated peaklists and reset
+        """
+        for peakList in list(self.peakLists):
+            peakList.delete()
+        self._wrappedData.__dict__['_serialDict']['peakLists'] = 0
 
     #===========================================================================================
     # new'Object' and other methods

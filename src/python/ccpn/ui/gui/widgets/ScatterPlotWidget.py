@@ -52,7 +52,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONTNAME, DEFAULTFONTSIZE, getFontHeight, getFont
 from ccpn.util.Common import _getObjectsByPids, splitDataFrameWithinRange
-
+from ccpn.util.OrderedSet import OrderedSet
 
 # colours
 BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
@@ -191,6 +191,9 @@ class ScatterROI(pg.ROI):
         return pd.DataFrame(innerSeries)
 
 class ScatterPlot(Widget):
+
+    dataSelectedSignal = QtCore.Signal(object)
+
     def __init__(self,
                  application,
                  dataFrame,
@@ -320,7 +323,10 @@ class ScatterPlot(Widget):
         NB. it use selectedData rather item because an Item can get deleted while redrawing/changing axis.
         """
         self._selectedData = data
+        # self._selectedData = list(OrderedSet(data))
         self._setPointPens(self._getPointPens())
+        print('data...')
+        self.dataSelectedSignal.emit(data)
 
     def setAxesDefinitions(self, defs:od, updateWidgets=True):
         '''
@@ -699,7 +705,7 @@ class ScatterPlot(Widget):
             else:
                 self.tipText.hide()
 
-    def _showTipTextForPosition(self, x, y, pid=True):
+    def _showTipTextForPosition(self, x, y):
         labelPos = "x=%0.2f, y=%0.2f" % (x, y)
         pts = self.scatterPlot.pointsAt(pg.Point(x, y))
         if len(pts)>0:
@@ -827,6 +833,21 @@ class ScatterPlot(Widget):
     def _invertScatterSelection(self):
         pass
         #todo
+
+    def selectByPids(self, pids):
+
+        if len(self.axesDefinitions)>0:
+            dataToSelect = []
+            itemDef = list(self.axesDefinitions.values())[0]
+            pidHeader = getattr(itemDef, _PIDHEADER)
+            for pid in pids:
+                for point in self.scatterPlot.points():
+                    pidPoint = point.data().get(pidHeader)
+                    if pid == pidPoint:
+                        dataToSelect.append(point.data())
+            self.blockSignals(True)
+            self.selectedData = dataToSelect
+            self.blockSignals(False)
 
     def getPidsFromPoints(self, points):
         pids = []

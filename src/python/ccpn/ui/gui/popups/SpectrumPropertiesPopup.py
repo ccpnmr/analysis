@@ -662,6 +662,9 @@ class GeneralTab(Widget):
             self.temperatureData.valueChanged.connect(partial(self._queueTemperatureChange, spectrum, self.temperatureData.textFromValue))
             row += 1
 
+            Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(row, 0))
+            self.noiseLevelData = ScientificDoubleSpinBox(self, vAlign='t', hAlign='l', grid=(row, 1))
+            self.noiseLevelData.valueChanged.connect(partial(self._queueNoiseLevelDataChange, spectrum, self.noiseLevelData.textFromValue))
             # if spectrum.noiseLevel is None:
             #     try:
             #         noise = spectrum.estimateNoise()  # This sometimes fails
@@ -670,6 +673,8 @@ class GeneralTab(Widget):
             #     self.noiseLevelData.setValue(noise)
             # else:
             self.noiseLevelData.setValue(spectrum.noiseLevel)
+            row += 1
+
             spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', grid=(row, 0))
             self.spectrumScalingData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0.1, max=100.0)
             # self.spectrumScalingData.setValue(spectrum.scale)
@@ -735,7 +740,7 @@ class GeneralTab(Widget):
         self._changes.clear()
 
         with self._changes.blockChanges():
-            self._validateFrame._populate()
+            # self._validateFrame._populate()
 
             self.spectrumPidLabel.setText(self.spectrum.pid)
             self.nameData.setText(self.spectrum.name)

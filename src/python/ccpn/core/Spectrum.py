@@ -12,10 +12,12 @@ b recognised even if the axes are reordered in display). The axisCodes reflect t
 on the relevant axis, and match the dimension identifiers in the reference experiment templates,
 linking a dimension to the correct reference experiment dimension. They are also used to map
 automatically spectrum axes to display axes and to other spectra. By default the axis name
-is the name of the atom being measured. Axes that are linked by a onebond
-magnetisation transfer are given a lower-case suffix to show the nucleus bound to.
-Duplicate axis names are distinguished by a
-numerical suffix. The rules are best shown by example:
+is the name of the atom being measured.
+Axes that are linked by a onebond magnetisation transfer could be given a lower-case suffix
+to show the nucleus bound to.
+Duplicate axis names are distinguished by a numerical suffix.
+
+The rules are best shown by example:
 
 Experiment                 axisCodes
 
@@ -37,8 +39,6 @@ HNCO                       Hn, Nh, CO     *(CO is treated as a separate type)*
 HCACO                      Hca, CAh, CO    *(CA is treated as a separate type)*
 
 """
-# TODO double check axis codes for HCACO, HNCO, and use of Hcn axiscodes
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -116,13 +116,15 @@ INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
 INCLUDENEGATIVECONTOURS = 'includeNegativeContours'
 SPECTRUMAXES = 'spectrumAxesOrdering'
 SPECTRUMPREFERREDAXISORDERING = 'spectrumPreferredAxisOrdering'
+
 SPECTRUMALIASING = 'spectrumAliasing'
 VISIBLEALIASINGRANGE = 'visibleAliasingRange'
 ALIASINGRANGE = 'aliasingRange'
 UPDATEALIASINGRANGEFLAG = '_updateAliasingRangeFlag'
 EXTENDALIASINGRANGEFLAG = 'extendAliasingRangeFlag'
-DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
 MAXALIASINGRANGE = 3
+
+DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
 SPECTRUMSERIES = 'spectrumSeries'
 SPECTRUMSERIESITEMS = 'spectrumSeriesItems'
 

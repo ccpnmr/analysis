@@ -61,7 +61,7 @@ SelectedPointPen = pg.functions.mkPen(rgbaRatioToHex(*gs.getColours()[gs.CCPNGLW
 ROIline = rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_SELECTAREA])
 ROIPen = pg.functions.mkPen(ROIline, width=3, style=QtCore.Qt.SolidLine)
 HandlePen = pg.functions.mkPen(hexToRgb(gs.getColours()[gs.GUISTRIP_PIVOT]), width=5, style=QtCore.Qt.SolidLine)
-DefaultRoiLimits = [[0, 100], [0, 0]]  #
+DefaultRoiLimits = [[0, 0], [0, 0]]  #
 
 SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_HIGHLIGHT]), width=4)
 c =rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_LABELLING])
@@ -230,9 +230,10 @@ class ScatterPlot(Widget):
         self._addScatterSelectionBox()
         self._scatterViewbox.mouseClickEvent = self._scatterViewboxMouseClickEvent # click on the background canvas
         self._scatterViewbox.mouseDragEvent = self._scatterMouseDragEvent
+        # self._scatterViewbox.hoverEvent = self._scatterHoverEvent
         self._scatterViewbox.scene().sigMouseMoved.connect(self.mouseMoved) #use this if you need the mouse Posit
+        # self._scatterViewbox.setLimits(**{'xMin':0, 'xMax':1, 'yMin':0, 'yMax':1})
         self._plotItem.setMenuEnabled(False)
-        # self._scatterViewbox.hoverEvent = self.hoverEvent
         self._exportDialog = None
         self.scatterPlot = pg.ScatterPlotItem(size=10, pen=pg.mkPen(None), brush=pg.mkBrush(255, 0, 0))
         # self.scatterPlot.sigClicked.connect(self._plotClicked)
@@ -244,18 +245,18 @@ class ScatterPlot(Widget):
         self.roiItem.sigRegionChangeFinished.connect(self._roiChangedCallback)
         self._plotItem.addItem(self.roiItem)
         self.showROI(roiVisible)
-        self.tipText = pg.TextItem(anchor=(-0.3, 0.1), angle=0, border='w', fill=(0, 0, 255, 100))
-        self.tipText.hide()
-        self._tipTextIsEnabled = True
+        self.tipText = pg.TextItem(anchor=(-0.1, -0.6), angle=0, border='w', fill=(0, 0, 255, 100))
+        # self.tipText.hide()
+        self.tipText.setFont(GridFont)
         self._plotItem.addItem(self.tipText)
-        # self.roiItem.sigRegionChangeFinished.connect(self._roiChangedCallback)
-        self.xLine = pg.InfiniteLine(angle=90, pos=0, pen=OriginAxes)
-        self.yLine = pg.InfiniteLine(angle=0, pos=0, pen=OriginAxes)
+        self._plotItem.autoRange()
+        self.xOriginLine = pg.InfiniteLine(angle=90, pos=0, pen=OriginAxes)
+        self.yOriginLine = pg.InfiniteLine(angle=0, pos=0, pen=OriginAxes)
         self.pointSelectionCallback = pointSelectionCallback # single click
         self.pointActionCallback = pointActionCallback # double click
         self._plotItem.addItem(self.scatterPlot)
-        self._plotItem.addItem(self.xLine)
-        self._plotItem.addItem(self.yLine)
+        self._plotItem.addItem(self.xOriginLine)
+        self._plotItem.addItem(self.yOriginLine)
         self.getLayout().addWidget(self._scatterView)
 
         self.axisSelectionFrame = Frame(self, setLayout=True, grid=(1, 0))
@@ -273,6 +274,7 @@ class ScatterPlot(Widget):
         self._setPlotItemFonts()
         self.setAxesWidgets()
         self._selectedData = []
+        self._tipTextIsEnabled = True
 
 
     @property
@@ -321,11 +323,11 @@ class ScatterPlot(Widget):
         :param data: list of series (retrieved from spotItem.data())
         set the data as selected and draws the pattern around the spotItem
         NB. it use selectedData rather item because an Item can get deleted while redrawing/changing axis.
+        By adding data, it fires a signal (dataSelectedSignal) that can be used for external callbacks.
         """
         self._selectedData = data
         # self._selectedData = list(OrderedSet(data))
         self._setPointPens(self._getPointPens())
-        print('data...')
         self.dataSelectedSignal.emit(data)
 
     def setAxesDefinitions(self, defs:od, updateWidgets=True):
@@ -344,7 +346,6 @@ class ScatterPlot(Widget):
         '''
         Set from the axesDefinitions. If None, uses the dataFrame column names.
         '''
-
         pulldownTexts = list(self.axesDefinitions.keys())
         self.xAxisSelector.setData(list(pulldownTexts))
         self.yAxisSelector.setData(list(pulldownTexts))
@@ -395,7 +396,8 @@ class ScatterPlot(Widget):
                 self.scatterPlot.setSymbol(self.pointSymbol)
 
     def _setPointPens(self, pens):
-        self.scatterPlot.setPen(pens)
+        if len(self.dataFrame.index) == pens:
+            self.scatterPlot.setPen(pens)
 
     def addPoints(self, x=None, y=None, points=None, **kwargs):
 
@@ -462,13 +464,25 @@ class ScatterPlot(Widget):
         return values
 
     def setPlotLimits(self, **kwargs):
-
+        from ccpn.util.Common import percentage
+        addPercent = 20
         xValues, yValues = self.scatterPlot.getData()
+        xMin, xMax = np.min(xValues), np.max(xValues)
+        yMin, yMax = np.min(yValues), np.max(yValues)
+        deltaX = xMax - xMin
+        deltaY = yMax - yMin
+        deltaX += percentage(addPercent, deltaX)
+        deltaY += percentage(addPercent, deltaY)
         self._scatterViewbox.setLimits(
-                                    xMin=min(xValues) / 2,
-                                    xMax=max(xValues) + (max(xValues) * 0.5),
-                                    yMin=min(yValues) / 2,
-                                    yMax=max(yValues) + (max(yValues) * 0.5),
+                                    xMin = xMin - deltaX,
+                                    xMax = xMax + deltaX,
+                                    yMin = yMin - deltaY,
+                                    yMax = yMax + deltaY,
+                                    minXRange = 0.01,
+                                    maxXRange = max(xValues)*10,
+                                    minYRange = 0.01,
+                                    maxYRange = max(yValues)*10,
+
                                     )
 
     def getPointBrushes(self, itemDef=None):
@@ -705,14 +719,27 @@ class ScatterPlot(Widget):
             else:
                 self.tipText.hide()
 
+    # def _scatterHoverEvent(self, event):
+    #     position = event.pos()
+    #     if self._tipTextIsEnabled:
+    #         if self._scatterViewbox.sceneBoundingRect().contains(position):
+    #             mousePoint = self._scatterViewbox.mapToView(event.pos())
+    #             x = mousePoint.x()
+    #             y =  mousePoint.y()
+    #             print(x, y, 'Mouse moved')
+    #             self._showTipTextForPosition(x,y)
+    #         else:
+    #             self.tipText.hide()
+
     def _showTipTextForPosition(self, x, y):
         labelPos = "x=%0.2f, y=%0.2f" % (x, y)
         pts = self.scatterPlot.pointsAt(pg.Point(x, y))
         if len(pts)>0:
             pids = self.getPidsFromPoints(pts)
-            pidsLabels = '\n'.join(map(str, pids))
-            labelPos += '\n'
-            labelPos += pidsLabels
+            if any(pids):
+                pidsLabels = '\n'.join(map(str, pids))
+                labelPos += '\n'
+                labelPos += pidsLabels
         self.tipText.setText(labelPos)
         self.tipText.setPos(x, y)
         self.tipText.show()
@@ -864,7 +891,7 @@ if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
     from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-    n = 5
+    n = 50
 
     data = pd.DataFrame({
         'entryValues': np.arange(1, n+1),
@@ -872,8 +899,8 @@ if __name__ == '__main__':
         'diameterValues': np.random.rand(n)/10,
         'heightValues': np.random.rand(n)*7.5,
         'buggingScoreValues': np.random.rand(n),
-        'SpectraPidsValues': np.array(['SP:LadyBug', 'SP:Lice', 'SP:BedBug', 'SP:Flea', 'SP:Mite']),
-        'HexColoursValues': np.array([list(darkDefaultSpectrumColours.keys())[10]]*n),
+        # 'SpectraPidsValues': np.array(['SP:LadyBug', 'SP:Lice', 'SP:BedBug', 'SP:Flea', 'SP:Mite']),
+        # 'HexColoursValues': np.array([list(darkDefaultSpectrumColours.keys())[10]]*n),
     })
 
     defs = od([

@@ -87,7 +87,8 @@ def hexToRgba(hx):
     hx = hx.lstrip('#')
     lv = len(hx)
     cols = [int(hx[i:i + lv // 3], 16) for i in range(0, lv, lv // 3)]
-    return tuple(cols.append(1.0))
+    cols.append(1.0)
+    return tuple(cols)
 
 
 # sRGB luminance(Y) values

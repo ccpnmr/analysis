@@ -164,8 +164,8 @@ class ScatterROI(pg.ROI):
         :return:  set the ROI box
         """
         state = {'pos': [], 'size': [], 'angle': 0}
-        xSize = abs(xMin) + xMax
-        ySize = abs(yMin) + yMax
+        xSize = abs(xMax) - abs(xMin)
+        ySize = abs(yMax) - abs(yMin)
         state['pos'] = [xMin, yMin]
         state['size'] = [xSize, ySize]
         self.setState(state)
@@ -801,7 +801,9 @@ class ScatterPlot(Widget):
         self._scatterSelectionBox.hide()
 
     def _roiChangedCallback(self):
-        self.scatterPlot.setBrush(self.getPointBrushes())
+        brushes = self.getPointBrushes()
+        if len(brushes) == len(self.scatterPlot.points()):
+            self.scatterPlot.setBrush(brushes)
 
     def presetROI(self, func=np.std, factor=3):
         """
@@ -935,7 +937,7 @@ if __name__ == '__main__':
                               dataFrame=data, axesDefinitions=defs, roiEnabled=True, grid=(0,0))
     # scatterPlot.setAxesDefinitions(defs)
     scatterPlot.selectAxes(xHeader='#', yHeader='Length')
-    # scatterPlot.roiLimits = [0, 100, 0, 100]
+    scatterPlot.roiLimits = [1, 1, 1, 1]
     scatterPlot.setInnerPointColour('#008000') # green
     scatterPlot.setPointSymbol(AllowedSymbols[2])
 

@@ -37,7 +37,7 @@ import ccpn.ui.gui.guiSettings as gs
 import ccpn.ui.gui.lib.mouseEvents as me
 import ccpn.ui.gui.lib.GuiStripContextMenus as cm
 from PyQt5 import QtCore, QtGui, QtWidgets
-from ccpn.util.Colour import hexToRgb, rgbaRatioToHex, darkDefaultSpectrumColours
+from ccpn.util.Colour import hexToRgb, hexToRgba, rgbaRatioToHex, darkDefaultSpectrumColours, hexToRgbaArray
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
@@ -53,6 +53,7 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONTNAME, DEFAULTFONTSIZE, getFontHeight, getFont
 from ccpn.util.Common import _getObjectsByPids, splitDataFrameWithinRange
 from ccpn.util.OrderedSet import OrderedSet
+from ccpn.ui.gui.widgets.Icon import Icon
 
 # colours
 BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
@@ -67,7 +68,7 @@ SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWI
 c =rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_LABELLING])
 GridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
 GridFont = getFont()
-DefaultPointSize = 15
+DefaultPointSize = 10
 DefaultPointColour = '#FF0000' # red
 DefaultInnerPointColour = '#7080EE'
 DefaultSymbol = 'o'
@@ -85,6 +86,13 @@ _POINTSIZE = 'pointSize'
 _HEXCOLOUR = 'hexColour'
 _INNERHEXCOLOUR = 'innerHexColour'
 
+ScatterSymbolsDict = od([
+                        ['circle',   {'symbol':'o', 'icon': 'icons/scatter_o'}],
+                        ['square',   {'symbol':'s', 'icon': 'icons/scatter_s'}],
+                        ['triangle', {'symbol':'t', 'icon': 'icons/scatter_t'}],
+                        ['diamond',  {'symbol':'d', 'icon': 'icons/scatter_d'}],
+                        ['plus',     {'symbol':'+', 'icon': 'icons/scatter_+'}],
+                        ])
 
 def _getPointsWithinLimits(points, limits):
     xMin, xMax, yMin, yMax = limits
@@ -125,7 +133,7 @@ class ScatterROI(pg.ROI):
 
         pg.ROI.__init__(self,  *args, **kwargs)
         self.parentWidget = parentWidget
-        self.handleSize = 10
+        self.handleSize = 8
         self.translatable = False # keep False otherwise it doesn't allow normal pan/selection of the plotItems within the ROI region.
         self._setROIhandles()
         # self._isEnabled = True
@@ -182,6 +190,12 @@ class ScatterROI(pg.ROI):
         :return: List of Pandas series. The linked data for points within the ROI limits.
         """
         return list(map(lambda s: s.data(), self.getInnerPoints()))
+
+    def _getInnerIxNames(self):
+        """
+        :return: List of Pandas series. The linked data for points within the ROI limits.
+        """
+        return list(map(lambda s: s.data().name(), self.getInnerPoints()))
 
     def getInnerDataFrame(self):
         """
@@ -327,6 +341,7 @@ class ScatterPlot(Widget):
         """
         self._selectedData = data
         # self._selectedData = list(OrderedSet(data))
+        print('@@@', self._getPointPens())
         self._setPointPens(self._getPointPens())
         self.dataSelectedSignal.emit(data)
 
@@ -395,8 +410,13 @@ class ScatterPlot(Widget):
             if updatePlot:
                 self.scatterPlot.setSymbol(self.pointSymbol)
 
+    def setPointSize(self, size=10, updatePlot=True):
+        self.pointSize = size
+        if updatePlot:
+            self.scatterPlot.setSize(self.pointSize)
+
     def _setPointPens(self, pens):
-        if len(self.dataFrame.index) == pens:
+        if len(pens) == len(self.scatterPlot.points()):
             self.scatterPlot.setPen(pens)
 
     def addPoints(self, x=None, y=None, points=None, **kwargs):
@@ -488,7 +508,7 @@ class ScatterPlot(Widget):
     def getPointBrushes(self, itemDef=None):
         """
         Two way of defining the point colours:
-        - Global: a unique colour for all point. One for point that are within the ROI limits, one for the outers.
+        - Global: a unique colour for all point.
                 global colours are set on init or using the setters.
         - Single: one colour for each point.
                 this option can to be defined in two ways:
@@ -502,15 +522,15 @@ class ScatterPlot(Widget):
                     also define the object Property  and the pidHeader name to use in the _ItemBC definitions:
                        _PIDHEADER         : 'SpectraColumn',
                        _OBJCOLOURPROPERTY : 'sliceColour',
-                # NB inner colour not yet enabled for single coloured items as it might be confusing.
-                # What colour should actually be? a shade of the same colour? the complimentary or extra defined in the ItemBC.
+        If points are outside the ROI, then they are a more transparent shade of colour.
 
         :return: list of brushes for painting the scatterPlot points
         """
         innerData = self.roiItem.getInnerData()
         if len(self.dataFrame) == 0: return []
         ixs, series = zip(*self.dataFrame.iterrows())
-        hexs = [self.innerRoiPointColour if i in [j.name for j in innerData] else self.hexPointColour for i in ixs]
+        # hexs = [self.innerRoiPointColour if i in [j.name for j in innerData] else self.hexPointColour for i in ixs]
+        hexs = [self.hexPointColour for i in ixs]
 
         if isinstance(itemDef, _ItemBC):
             pidHeader = getattr(itemDef, _PIDHEADER)
@@ -527,7 +547,14 @@ class ScatterPlot(Widget):
                 if hexDf is not None:
                     hexs = hexDf.values
 
-        brushes = [pg.functions.mkBrush(hexToRgb(hx)) for hx in hexs]
+        innerNames = np.array([x.name for x in innerData])
+        _tempColours = hexToRgbaArray(hexs, 100)
+        innerIndices = np.where(np.in1d(ixs, innerNames))[0]
+        brushes = []
+        for i, colour in enumerate(list(_tempColours)):
+            if i in innerIndices:
+                colour = colour[:-1]
+            brushes.append(pg.functions.mkBrush(list(colour)))
         return brushes
 
     def _getPointPens(self):
@@ -550,14 +577,15 @@ class ScatterPlot(Widget):
         if len(self.dataFrame) == 0: return
         self.scatterPlot.clear()
         self._setPlotItemLabels()
-        brushes = self.getPointBrushes(self.axesDefinitions.get(self.xAxisSelector.getText()))
+        # brushes = self.getPointBrushes(self.axesDefinitions.get(self.xAxisSelector.getText()))
         pens = self._getPointPens()
         indices, series = zip(*self.dataFrame.iterrows())
         xValues = self._getValuesFromDefition(self.xAxisSelector.getText(), _VALUEHEADER)
         yValues = self._getValuesFromDefition(self.yAxisSelector.getText(), _VALUEHEADER)
         if len(xValues) == len(yValues):
             self.addPoints(x=xValues, y=yValues,  size=self.pointSize, symbol=self.pointSymbol,
-                           brush=brushes, data=series, pen=pens)
+                            data=series, pen=pens)
+            self._updateBrushes() #update colours
         else:
             Widgets.MessageDialog.showWarning('Error displaying data', 'Values lenght mismatch')
 
@@ -801,6 +829,9 @@ class ScatterPlot(Widget):
         self._scatterSelectionBox.hide()
 
     def _roiChangedCallback(self):
+        self._updateBrushes()
+
+    def _updateBrushes(self):
         brushes = self.getPointBrushes()
         if len(brushes) == len(self.scatterPlot.points()):
             self.scatterPlot.setBrush(brushes)
@@ -937,9 +968,9 @@ if __name__ == '__main__':
                               dataFrame=data, axesDefinitions=defs, roiEnabled=True, grid=(0,0))
     # scatterPlot.setAxesDefinitions(defs)
     scatterPlot.selectAxes(xHeader='#', yHeader='Length')
-    scatterPlot.roiLimits = [1, 1, 1, 1]
+    scatterPlot.roiLimits = [0, 1, 0, 1]
     scatterPlot.setInnerPointColour('#008000') # green
-    scatterPlot.setPointSymbol(AllowedSymbols[2])
+    scatterPlot.setPointSymbol(AllowedSymbols[4])
 
     win.setCentralWidget(moduleArea)
     win.resize(1000, 500)

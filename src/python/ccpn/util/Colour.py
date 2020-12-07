@@ -80,15 +80,22 @@ def hexToRgbRatio(hx):
     return tuple(float(int(hx[i:i + lv // 3], 16)) / 255 for i in range(0, lv, lv // 3))
 
 
-def hexToRgba(hx):
-    if not hx:
+def hexToRgba(hx, transparency=1.0):
+    if hx is None:
         pass
 
     hx = hx.lstrip('#')
     lv = len(hx)
     cols = [int(hx[i:i + lv // 3], 16) for i in range(0, lv, lv // 3)]
-    cols.append(1.0)
+    cols.append(transparency)
     return tuple(cols)
+
+def hexToRgbaArray(array, transparency=1.0):
+    cc = []
+    for hx in array:
+        cc.append(hexToRgba(hx, transparency))
+    return np.array(cc)
+
 
 
 # sRGB luminance(Y) values

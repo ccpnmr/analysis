@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-04 17:16:40 +0000 (Wed, November 04, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-08 17:27:38 +0000 (Tue, December 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,8 @@ from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo, CcpnSparkyIo
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.Pid import Pid
+
+from ccpn.framework.Application import getApplication
 from ccpn.framework import Version
 from ccpn.framework.Current import Current
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
@@ -64,6 +66,7 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, \
     USERACHIVESPATH, USERDATAPATH, USERNMRSTARPATH, USERSPECTRUMPATH, \
     USERLAYOUTSPATH, USERMACROSPATH, USERNEFPATH, USERSAVEPROJECTPATH, setInitialPath
 from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView
+
 from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
@@ -104,8 +107,20 @@ MacrosDirName = 'macros'
 
 
 def _ccpnExceptionhook(type, value, tback):
-    '''This because PyQT raises and catches exceptions,
-    but doesn't pass them along instead makes the program crashing miserably.'''
+    """This because PyQT raises and catches exceptions,
+    but doesn't pass them along instead makes the program crashing miserably.
+    """
+    application = getApplication()
+    if application._isInDebugMode:
+        sys.stderr.write('_ccpnExceptionhook: type = %s\n' % type)
+        sys.stderr.write('_ccpnExceptionhook: value = %s\n' % value)
+        sys.stderr.write('_ccpnExceptionhook: tback = %s\n' % tback)
+
+    if application.hasGui:
+        title = str(type)[8:-2] + ':'
+        text = str(value)
+        MessageDialog.showError(title=title, message=text)
+
     sys.__excepthook__(type, value, tback)
 
 

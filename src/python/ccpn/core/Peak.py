@@ -781,24 +781,39 @@ class Peak(AbstractWrapperObject):
     #     peaks = [self.project.getByPid(pid) for pid in pids if pid is not None]
     #     return peaks
 
-    def _getSNRatio(self, ratio=2.5):
-        from ccpn.core.PeakList import estimateSNR_1D
-
+    def _getSNRatio(self, factor=2.5):
+        """
+        Estimate the Signal to Noise ratio based on the spectrum Positive and Negative noise values.
+        If Noise thresholds are not defined in the spectrum, then they are estimated as well.
+        If only the positive noise threshold is defined, the negative noise threshold will be the inverse of the positive.
+            SNratio = |factor*(height/|NoiseMax-NoiseMin|)|
+                    height is the peak height
+                    NoiseMax is the spectrum positive noise threshold
+                    NoiseMin is the spectrum negative noise threshold
+        :param factor: float, multiplication factor.
+        :return: float, SignalToNoise Ratio value for the peak
+        """
         spectrum = self._parent.spectrum
-        noiseLevel = spectrum.noiseLevel
-        negativeNoiseLevel = spectrum.negativeNoiseLevel
-        if noiseLevel is None:
-            m = 'Spectrum noise level not defined for %s' % spectrum.pid
-            getLogger().debug1(m)
-            return None
-        if negativeNoiseLevel is None:
-            getLogger().debug1('Spectrum negative noise level not defined %s' % spectrum.pid)
-            return None
+        from ccpn.core.PeakList import estimateSNR_1D, estimateNoiseLevel1D
+        noiseLevel, negativeNoiseLevel = spectrum.noiseLevel, spectrum.negativeNoiseLevel
+        if negativeNoiseLevel is None and noiseLevel is not None:
+            negativeNoiseLevel = - noiseLevel if noiseLevel >0 else noiseLevel*2
+            spectrum.negativeNoiseLevel = negativeNoiseLevel
+            getLogger().warning('Spectrum Negative noise not defined for %s. Estimated default' % spectrum.pid)
+        if noiseLevel is None: # estimate it
+            if spectrum.dimensionCount == 1:
+                noiseLevel, negativeNoiseLevel = estimateNoiseLevel1D(spectrum.intensities)
+                spectrum.noiseLevel, spectrum.negativeNoiseLevel = noiseLevel, negativeNoiseLevel
+                getLogger().warning('Spectrum noise level(s) not defined for %s. Estimated default' % spectrum.pid)
+            else:
+                getLogger().warning('Not implemented yet')
+                return None
         if self.height is None:
-            # print('Peak height not defined %s' % self.pid)
+            getLogger().warning('Peak height not defined for peak %s.' % self.pid)
             return None
-        snr = estimateSNR_1D(noiseLevels=[noiseLevel, negativeNoiseLevel], signalPoints=[self.height], ratio=ratio)
+        snr = estimateSNR_1D(noiseLevels=[noiseLevel, negativeNoiseLevel], signalPoints=[self.height], factor=factor)
         return snr[0]
+
 
     @logCommand(get='self')
     def estimateVolume(self, volumeIntegralLimit=2.0):

@@ -129,22 +129,21 @@ def estimateSignalRegion(y, nlMax=None, nlMin=None):
             return s
 
 
-def estimateSNR_1D(noiseLevels, signalPoints, ratio=2.5):
+def estimateSNR_1D(noiseLevels, signalPoints, factor=2.5):
     """
-
+    SNratio = factor*(height/|NoiseMax-NoiseMin|)
     :param noiseLevels: (max, min) floats
     :param signalPoints: iterable of floats estimated to be signal or peak heights
-    :param ratio: default 2.5
+    :param factor: default 2.5
     :return: array of snr for each point compared to the delta noise level
     """
-    maxNL = max(noiseLevels)
-    minNL = min(noiseLevels)
+    maxNL = np.max(noiseLevels)
+    minNL = np.min(noiseLevels)
     dd = abs(maxNL - minNL)
     pp = np.array([s for s in signalPoints])
     if dd != 0 and dd is not None:
-        snRatios = (ratio * pp) / dd
-        return snRatios
-    print('Failed to estimate SNR')
+        snRatios = (factor * pp) / dd
+        return abs(snRatios)
     return [None] * len(signalPoints)
 
 
@@ -606,7 +605,7 @@ class PeakList(PMIListABC):
         if recalculateSNR: # TODO remove this
             spectrum._snr = np.mean(snr_ratios)
             if math.isnan(spectrum._snr):  #estimate from the std of all y points
-                print("SNR from Peaks is None. Using the STD of spectrum intensities" )
+                # print("SNR from Peaks is None. Using the STD of spectrum intensities" )
                 spectrum._snr = _estimate1DSpectrumSNR(spectrum)
         return peaks
 

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-03 10:01:41 +0000 (Thu, December 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-08 17:20:08 +0000 (Tue, December 08, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -33,10 +33,8 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 
 
-MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple',
-                                                    ['dimension1', 'dimension2', 'transferType', 'isIndirect']
-                                                    )
-NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', ['mean', 'std', 'min', 'max', 'noiseLevel'])
+MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
+NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
 
 
 def getExperimentClassifications(project: Project) -> dict:
@@ -1067,17 +1065,20 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     # create a list of random points in the spectrum, get only points that are not nan/inf
     # getPositionValue is the slow bit
     allPts = [[min(n - 2, int(n * random.random())) for n in npts] for i in range(nsamples)]
-    data = list(filter(lambda d: d - d == 0, [spectrum.getPositionValue(pt) for pt in allPts]))
+    _list = np.array([spectrum.getPositionValue(pt) for pt in allPts], dtype=np.float32)
+    data = _list[np.isfinite(_list)]
     fails = nsamples - len(data)
 
     if fails:
-        raise RuntimeError(f'Attempt to access {fails} non-existent data points in spectrum {spectrum}')
+        getLogger().warning(f'Attempt to access {fails} non-existent data points in spectrum {spectrum}')
 
     # check whether there are too many bad numbers in the data
     good = nsamples - fails
     if good == 0:
+        getLogger().warning(f'Spectrum {spectrum} contains all bad points')
         return NoiseEstimateTuple(mean=None, std=None, min=None, max=None, noiseLevel=1.0)
     elif good < 10: # arbitrary number of bad points
+        getLogger().warning(f'Spectrum {spectrum} contains minimal data')
         maxValue = max([abs(x) for x in data])
         if maxValue > 0:
             return NoiseEstimateTuple(mean=None, std=None, min=None, max=None, noiseLevel=0.1 * maxValue)

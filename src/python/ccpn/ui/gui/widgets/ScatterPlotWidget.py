@@ -485,7 +485,7 @@ class ScatterPlot(Widget):
 
     def setPlotLimits(self, **kwargs):
         from ccpn.util.Common import percentage
-        addPercent = 20
+        addPercent = 200
         xValues, yValues = self.scatterPlot.getData()
         xMin, xMax = np.min(xValues), np.max(xValues)
         yMin, yMax = np.min(yValues), np.max(yValues)
@@ -586,6 +586,7 @@ class ScatterPlot(Widget):
             self.addPoints(x=xValues, y=yValues,  size=self.pointSize, symbol=self.pointSymbol,
                             data=series, pen=pens)
             self._updateBrushes() #update colours
+            self._plotItem.autoRange()
         else:
             Widgets.MessageDialog.showWarning('Error displaying data', 'Values lenght mismatch')
 
@@ -696,7 +697,6 @@ class ScatterPlot(Widget):
         else:
             # "no points, needs to clear selection"
             ev.accept()
-
 
     def _scatterMouseClickEvent(self, ev):
         """
@@ -918,6 +918,21 @@ class ScatterPlot(Widget):
                 pid = point.data().get(pidHeader)
                 pids.append(pid)
         return pids
+
+    def constrainPlot(self, abool):
+        if not abool:
+            self._scatterViewbox.setLimits(
+                                        xMin = None,
+                                        xMax = None,
+                                        yMin = None,
+                                        yMax = None,
+                                        minXRange = None,
+                                        maxXRange = None,
+                                        minYRange = None,
+                                        maxYRange = None,
+                                        )
+        else:
+            self.setPlotLimits()
 
 if __name__ == '__main__':
     from PyQt5 import QtGui, QtWidgets

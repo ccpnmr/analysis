@@ -53,7 +53,7 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONTNAME, DEFAULTFONTSIZE, getFontHeight, getFont
 from ccpn.util.Common import _getObjectsByPids, splitDataFrameWithinRange
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.Icon import Icon, ICON_DIR
 
 # colours
 BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
@@ -271,8 +271,11 @@ class ScatterPlot(Widget):
         self._plotItem.addItem(self.scatterPlot)
         self._plotItem.addItem(self.xOriginLine)
         self._plotItem.addItem(self.yOriginLine)
+        autoBtnFile = os.path.join(ICON_DIR, 'icons/zoom-full.png')
+        self.autoBtn = self._plotItem.autoBtn = pg.ButtonItem(imageFile=autoBtnFile, width=30, parentItem=self._plotItem)
+        self._plotItem.updateButtons = lambda : None # just to remove the odd PyQtGraph default behaviour
+        self.autoBtn.clicked.connect(self._setZoomFull)
         self.getLayout().addWidget(self._scatterView)
-
         self.axisSelectionFrame = Frame(self, setLayout=True, grid=(1, 0))
         self._xSelCW = PulldownListCompoundWidget(self.axisSelectionFrame, labelText='Select X-axis',
                                         callback=self._axisSelectionCallback, grid=(0, 0))#,  hAlign='l',)
@@ -378,6 +381,9 @@ class ScatterPlot(Widget):
 
     def updatePlot(self):
         self.scatterPlot.updatePoints()
+
+    def _setZoomFull(self, *args):
+        self._plotItem.autoRange()
 
     def setEnabledROI(self, enable=True):
         return

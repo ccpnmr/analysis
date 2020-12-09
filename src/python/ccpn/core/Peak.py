@@ -34,7 +34,7 @@ from ccpn.core.Project import Project
 from ccpn.core.PeakList import PeakList, PARABOLICMETHOD
 from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpn.core.lib.peakUtils import snapToExtremum as peakUtilsSnapToExtremum
+from ccpn.core.lib.peakUtils import _getPeakSNRatio, snapToExtremum as peakUtilsSnapToExtremum
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, \
     ccpNmrV3CoreSetter, ccpNmrV3CoreUndoBlock, undoBlock
@@ -785,8 +785,11 @@ class Peak(AbstractWrapperObject):
     def signalToNoiseRatio(self):
         """
         :return: float. Estimated  Signal to Noise ratio based on the spectrum noiseLevel values.
+        SNratio = |factor*(height/DeltaNoise)|
+                height: peak height
+                DeltaNoise: spectrum noise levels
+                factor: multiplication factor. Default: 2.5
         """
-        from ccpn.core.lib.peakUtils import _getPeakSNRatio
         return _getPeakSNRatio(self)
 
     @logCommand(get='self')

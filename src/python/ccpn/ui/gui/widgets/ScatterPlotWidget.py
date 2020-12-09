@@ -344,7 +344,6 @@ class ScatterPlot(Widget):
         """
         self._selectedData = data
         # self._selectedData = list(OrderedSet(data))
-        print('@@@', self._getPointPens())
         self._setPointPens(self._getPointPens())
         self.dataSelectedSignal.emit(data)
 

@@ -32,8 +32,7 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpi
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_GENERIC
-from ccpn.core.PeakList import _filterROI1Darray, estimateNoiseLevel1D
-
+from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D, _filterROI1Darray
 
 ########################################################################################################################
 ###   Attributes:

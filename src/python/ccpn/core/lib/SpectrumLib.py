@@ -25,9 +25,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import collections
+import math
 import random
 import numpy as np
 from ccpn.core.Project import Project
+from ccpn.util.Common import percentage
 from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
@@ -182,15 +184,14 @@ def _estimate1DSpectrumSNR(spectrum, engine='max'):
     :rtype:
     '''
     engines = {'max': np.max, 'mean': np.mean, 'std': np.std}
-    from ccpn.core.PeakList import estimateSNR_1D
 
     if engine in engines:
         func = engines.get(engine)
     else:
         func = np.max
         print('Engine not recognised. Using Default')
-    _snr = estimateSNR_1D(noiseLevels=[spectrum.noiseLevel, spectrum.negativeNoiseLevel],
-                          signalPoints=[func(spectrum.intensities)])
+    _snr = estimateSNR(noiseLevels=[spectrum.noiseLevel, spectrum.negativeNoiseLevel],
+                       signalPoints=[func(spectrum.intensities)])
 
     return _snr[0]
 
@@ -1104,3 +1105,107 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     # minStd *= apiDataSource.scale?
 
     return value
+
+
+def _signalToNoiseFunc(noise, signal):
+    snr = math.log10(abs(np.mean(signal) ** 2 / np.mean(noise) ** 2))
+    return snr
+
+
+def estimateSignalRegion(y, nlMax=None, nlMin=None):
+    if y is None: return 0
+    if nlMax is None or nlMin is None:
+        nlMax, nlMin = estimateNoiseLevel1D(y)
+    eS = np.where(y >= nlMax)
+    eSN = np.where(y <= nlMin)
+    eN = np.where((y < nlMax) & (y > nlMin))
+    estimatedSignalRegionPos = y[eS]
+    estimatedSignalRegionNeg = y[eSN]
+    estimatedSignalRegion = np.concatenate((estimatedSignalRegionPos, estimatedSignalRegionNeg))
+    estimatedNoiseRegion = y[eN]
+    lenghtESR = len(estimatedSignalRegion)
+    lenghtENR = len(estimatedNoiseRegion)
+    if lenghtESR > lenghtENR:
+        l = lenghtENR
+    else:
+        l = lenghtESR
+    if l == 0:
+        return np.array([])
+    else:
+        noise = estimatedNoiseRegion[:l - 1]
+        signalAndNoise = estimatedSignalRegion[:l - 1]
+        signal = abs(signalAndNoise - noise)
+        signal[::-1].sort()  # descending
+        noise[::1].sort()
+        if hasattr(signal, 'compressed') and hasattr(noise, 'compressed'):
+            signal = signal.compressed()  # remove the mask
+            noise = noise.compressed()  # remove the mask
+        s = signal[:int(l / 2)]
+        n = noise[:int(l / 2)]
+        if len(signal) == 0:
+            return np.array([])
+        else:
+            return s
+
+
+def estimateSNR(noiseLevels, signalPoints, factor=2.5):
+    """
+    SNratio = factor*(height/|NoiseMax-NoiseMin|)
+    :param noiseLevels: (max, min) floats
+    :param signalPoints: iterable of floats estimated to be signal or peak heights
+    :param factor: default 2.5
+    :return: array of snr for each point compared to the delta noise level
+    """
+    maxNL = np.max(noiseLevels)
+    minNL = np.min(noiseLevels)
+    dd = abs(maxNL - minNL)
+    pp = np.array([s for s in signalPoints])
+    if dd != 0 and dd is not None:
+        snRatios = (factor * pp) / dd
+        return abs(snRatios)
+    return [None] * len(signalPoints)
+
+
+def estimateNoiseLevel1D(y, f=10, stdFactor=0.5):
+    """
+
+    :param y: the y region of the spectrum.
+    :param f: percentage of the spectrum to use. If given a portion known to be just noise, set it to 100.
+    :param increaseBySTD: increase the estimated by the STD for the y region
+    :param stdFactor: 0 to don't adjust the initial guess.
+    :return:   (float, float) of estimated noise threshold  as max and min
+    """
+
+    eMax, eMin = 0, 0
+    if stdFactor == 0:
+        stdFactor = 0.01
+        getLogger().warning('stdFactor of value zero is not allowed.')
+    if y is None:
+        return eMax, eMin
+    percent = percentage(f, int(len(y)))
+    fy = y[:int(percent)]
+
+    stdValue = np.std(fy) * stdFactor
+
+    eMax = np.max(fy) + stdValue
+    eMin = np.min(fy) - stdValue
+    return eMax, eMin
+
+
+def _filterROI1Darray(x, y, roi):
+    """ Return region included in the ROI ppm position"""
+    mask = (x > max(roi)) | (x > min(roi))
+    return x[mask], y[mask]
+
+
+def _filtered1DArray(data, ignoredRegions):
+    # returns an array without ignoredRegions. Used for automatic 1d peak picking
+    ppmValues = data[0]
+    masks = []
+    ignoredRegions = [sorted(pair, reverse=True) for pair in ignoredRegions]
+    for region in ignoredRegions:
+        mask = (ppmValues > region[0]) | (ppmValues < region[1])
+        masks.append(mask)
+    fullmask = [all(mask) for mask in zip(*masks)]
+    newArray = (np.ma.MaskedArray(data, mask=np.logical_not((fullmask, fullmask))))
+    return newArray

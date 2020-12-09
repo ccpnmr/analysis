@@ -31,7 +31,7 @@ import numpy as np
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
+from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D, estimateNoiseLevel1D, _filterROI1Darray
 from ccpn.util.Common import percentage
 from ccpn.core.PMIListABC import PMIListABC
 from scipy import signal
@@ -146,7 +146,6 @@ class IntegralList(PMIListABC):
     #=========================================================================================
 
     def findLimits(self, f=20, stdFactor=0.001):
-        from ccpn.core.PeakList import  estimateNoiseLevel1D
         spectrum = self.spectrum
         x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
 
@@ -167,7 +166,7 @@ class IntegralList(PMIListABC):
         # TODO: add excludeRegions option. Calculate Negative peak integral.
         # self._project.suspendNotification()
         from ccpn.core.lib.peakUtils import simple1DPeakPicker
-        from ccpn.core.PeakList import _filterROI1Darray, estimateNoiseLevel1D
+        from ccpn.core.PeakList import estimateNoiseLevel1D
 
         try:
             spectrum = self.spectrum

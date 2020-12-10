@@ -43,7 +43,6 @@ from functools import partial
 from collections.abc import Iterable
 from collections import OrderedDict
 from string import whitespace
-from ccpn.core.lib import Pid
 from ccpn.util.LabelledEnum import LabelledEnum
 from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
 from ccpn.util.FrozenDict import FrozenDict
@@ -1229,6 +1228,8 @@ def _validateName(project, cls, value: str, attribName: str = 'name', allowWhite
                   checkExisting: bool = True):
     """Check that the attribName is valid
     """
+    from ccpn.core.lib import Pid # avoids circular imports
+
     if value is not None:
         if not isinstance(value, str):
             raise TypeError('{}.{} must be a string'.format(cls.className, attribName))

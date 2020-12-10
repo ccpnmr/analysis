@@ -69,7 +69,7 @@ c =rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_LABELLING])
 GridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
 GridFont = getFont()
 DefaultPointSize = 10
-DefaultPointColour = '#FF0000' # red
+DefaultPointColour = '#000000' # black
 DefaultInnerPointColour = '#7080EE'
 DefaultSymbol = 'o'
 AllowedSymbols = ['o', 's', 't', 'd', '+']
@@ -397,11 +397,12 @@ class ScatterPlot(Widget):
             self.roiItem.sigRegionChangeFinished.connect(self._roiChangedCallback)
             self.roiItem._isEnabled = True
 
-    def setPointColour(self, hex, updatePlot=True):
+    def setPointColour(self, hex, updatePlot=True, overrideItemDef=False):
         self.hexPointColour = hex
         if updatePlot:
-            brushes = self.getPointBrushes()
-            self.scatterPlot.setBrush(brushes)
+            brushes = self.getPointBrushes(overrideItemDef=overrideItemDef)
+            if len(brushes) == len(self.scatterPlot.points()):
+                self.scatterPlot.setBrush(brushes)
 
     def setInnerPointColour(self, hex, updatePlot=True):
         self.innerRoiPointColour = hex
@@ -467,12 +468,13 @@ class ScatterPlot(Widget):
 
     def setupContextMenu(self):
         """
-        :return: Subclass this to insert/remove items in bespoke plots.
+        :return: list of items for creating the context Menu.
+        Subclass this to insert/remove items in bespoke plots.
         """
         items = []
         items += self._getDefaultMenuItems()
         items += self._getExportMenuItems()
-        menu = cm._createMenu(self, items)
+        return items
 
     def _getValuesFromDefition(self, definitionName, definitionValueHeader):
         """
@@ -510,7 +512,7 @@ class ScatterPlot(Widget):
 
                                     )
 
-    def getPointBrushes(self, itemDef=None):
+    def getPointBrushes(self, itemDef=None, overrideItemDef=False):
         """
         Two way of defining the point colours:
         - Global: a unique colour for all point.
@@ -531,26 +533,31 @@ class ScatterPlot(Widget):
 
         :return: list of brushes for painting the scatterPlot points
         """
+        if itemDef is None:
+            if len(self.axesDefinitions.values())>0:
+                itemDef = list(self.axesDefinitions.values())[0]
+
         innerData = self.roiItem.getInnerData()
         if len(self.dataFrame) == 0: return []
         ixs, series = zip(*self.dataFrame.iterrows())
-        # hexs = [self.innerRoiPointColour if i in [j.name for j in innerData] else self.hexPointColour for i in ixs]
         hexs = [self.hexPointColour for i in ixs]
 
-        if isinstance(itemDef, _ItemBC):
-            pidHeader = getattr(itemDef, _PIDHEADER)
-            objColourProperty = getattr(itemDef, _OBJCOLOURPROPERTY)
-            hexHeader = getattr(itemDef, _HEXCOLOURHEADER)
-            if objColourProperty is not None: # use the obj for getting the colour info (if defined)
-                pidDf = self.dataFrame.get(pidHeader)
-                if pidDf is not None and self.project:
-                    ccpnObjs = _getObjectsByPids(self.project, pidDf.values)
-                    hexs = [getattr(o, objColourProperty) for o in ccpnObjs]
+        if not overrideItemDef:
+            if isinstance(itemDef, _ItemBC):
+                pidHeader = getattr(itemDef, _PIDHEADER)
+                objColourProperty = getattr(itemDef, _OBJCOLOURPROPERTY)
+                hexHeader = getattr(itemDef, _HEXCOLOURHEADER)
+                if objColourProperty is not None: # use the obj for getting the colour info (if defined)
+                    pidDf = self.dataFrame.get(pidHeader)
+                    if pidDf is not None and self.project:
+                        ccpnObjs = _getObjectsByPids(self.project, pidDf.values)
+                        hexs = [getattr(o, objColourProperty) for o in ccpnObjs]
 
-            if hexHeader is not None: # use the dedicated colour Header for getting the colour info (if defined)
-                hexDf = self.dataFrame.get(hexHeader)
-                if hexDf is not None:
-                    hexs = hexDf.values
+                if hexHeader is not None: # use the dedicated colour Header for getting the colour info (if defined)
+                    hexDf = self.dataFrame.get(hexHeader)
+                    if hexDf is not None:
+                        hexDf.fillna(self.hexPointColour, inplace=True)
+                        hexs = hexDf.values
 
         innerNames = np.array([x.name for x in innerData])
         _tempColours = hexToRgbaArray(hexs, 100)
@@ -648,9 +655,16 @@ class ScatterPlot(Widget):
         items = [itm for itm in items if itm is not None]
         return items
 
+    def _addSubMenus(self, mainMenu):
+        """
+        subclass this to add subMenus
+        """
+        pass
+
     def _raiseScatterContextMenu(self, ev):
         """ Creates all the menu items for the scatter context menu. """
-        self.setupContextMenu()
+        mainMenu = cm._createMenu(self, self.setupContextMenu())
+        self._addSubMenus(mainMenu)
         self.contextMenu.exec_(ev.screenPos().toPoint())
 
     def _showExportDialog(self, viewBox):

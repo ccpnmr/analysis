@@ -379,7 +379,25 @@ class ScatterPlot(Widget):
             self.yAxisSelector.select(yHeader)
 
     def updatePlot(self):
-        self.scatterPlot.updatePoints()
+        """
+        Redraws all points based on selected axes.
+        """
+        if len(self.dataFrame) == 0: return
+        self.scatterPlot.clear()
+        self._setPlotItemLabels()
+        # brushes = self.getPointBrushes(self.axesDefinitions.get(self.xAxisSelector.getText()))
+        pens = self._getPointPens()
+        indices, series = zip(*self.dataFrame.iterrows())
+        xValues = self._getValuesFromDefition(self.xAxisSelector.getText(), _VALUEHEADER)
+        yValues = self._getValuesFromDefition(self.yAxisSelector.getText(), _VALUEHEADER)
+        if len(xValues) == len(yValues):
+            self.addPoints(x=xValues, y=yValues, size=self.pointSize, symbol=self.pointSymbol,
+                           data=series, pen=pens)
+            self._updateBrushes()  # update colours
+            self._plotItem.autoRange()
+        else:
+            Widgets.MessageDialog.showWarning('Error displaying data', 'Values length mismatch')
+        # self.scatterPlot.updatePoints()
 
     def _setZoomFull(self, *args):
         self._plotItem.autoRange()
@@ -580,26 +598,8 @@ class ScatterPlot(Widget):
     def _axisSelectionCallback(self, *args):
         """
         Callback from pulldown selectors. Adds Points to the plot based on the dataframe columns.
-        Objects are set from pids if defined in the dataframe and definitions
-        Colours are set from objs if they have the in their class property or if specified in the
-        :param args:
-        :return:
         """
-        if len(self.dataFrame) == 0: return
-        self.scatterPlot.clear()
-        self._setPlotItemLabels()
-        # brushes = self.getPointBrushes(self.axesDefinitions.get(self.xAxisSelector.getText()))
-        pens = self._getPointPens()
-        indices, series = zip(*self.dataFrame.iterrows())
-        xValues = self._getValuesFromDefition(self.xAxisSelector.getText(), _VALUEHEADER)
-        yValues = self._getValuesFromDefition(self.yAxisSelector.getText(), _VALUEHEADER)
-        if len(xValues) == len(yValues):
-            self.addPoints(x=xValues, y=yValues,  size=self.pointSize, symbol=self.pointSymbol,
-                            data=series, pen=pens)
-            self._updateBrushes() #update colours
-            self._plotItem.autoRange()
-        else:
-            Widgets.MessageDialog.showWarning('Error displaying data', 'Values lenght mismatch')
+        self.updatePlot()
 
     def _setPlotItemLabels(self):
         self._plotItem.setLabel('bottom', self.xAxisSelector.getText())

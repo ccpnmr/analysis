@@ -509,7 +509,6 @@ class ScatterPlot(Widget):
                                     maxXRange = max(xValues)*10,
                                     minYRange = 0.01,
                                     maxYRange = max(yValues)*10,
-
                                     )
 
     def getPointBrushes(self, itemDef=None, overrideItemDef=False):

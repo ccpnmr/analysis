@@ -60,6 +60,7 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply, _
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise
 from ccpn.core.lib.ContextManagers import queueStateChange
+# from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForSpectrumPopup
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -252,6 +253,11 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
 
         super().__init__(parent=parent, mainWindow=mainWindow,
                          spectrum=spectrum, title=title, **kwds)
+
+        # define first, as calling routines are dependant on existance of attributes
+        self._generalTab = None
+        self._dimensionsTab = None
+        self._contoursTab = None
 
         if spectrum.dimensionCount == 1:
             self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
@@ -473,8 +479,8 @@ class GeneralTab(Widget):
         self.application = self.mainWindow.application
         self.project = self.mainWindow.project
 
-        self.pythonConsole = mainWindow.pythonConsole
-        self.logger = getLogger()  # self.spectrum.project._logger
+        # self.pythonConsole = mainWindow.pythonConsole
+        # self.logger = getLogger()  # self.spectrum.project._logger
 
 
         self.item = item
@@ -644,9 +650,6 @@ class GeneralTab(Widget):
             # text = priorityNameRemapping.get(text, text)
             # self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
 
-            self.spectrumType.currentIndexChanged.connect(self._queueSetSpectrumType)
-            # self.spectrumType.setMinimumWidth(self.pathData.width() * 1.95)
-            self.spectrumType.setFixedHeight(25)
             self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
             # self.spectrumType.setMinimumWidth(self.pathData.width() * 1.95)
             # self.spectrumType.setFixedHeight(25)
@@ -660,19 +663,6 @@ class GeneralTab(Widget):
             Label(self, text="Temperature", grid=(row, 0), hAlign='l')
             self.temperatureData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0, max=1000.0)
             self.temperatureData.valueChanged.connect(partial(self._queueTemperatureChange, spectrum, self.temperatureData.textFromValue))
-            row += 1
-
-            Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(row, 0))
-            self.noiseLevelData = ScientificDoubleSpinBox(self, vAlign='t', hAlign='l', grid=(row, 1))
-            self.noiseLevelData.valueChanged.connect(partial(self._queueNoiseLevelDataChange, spectrum, self.noiseLevelData.textFromValue))
-            # if spectrum.noiseLevel is None:
-            #     try:
-            #         noise = spectrum.estimateNoise()  # This sometimes fails
-            #     except:
-            #         noise = 1.0
-            #     self.noiseLevelData.setValue(noise)
-            # else:
-            self.noiseLevelData.setValue(spectrum.noiseLevel)
             row += 1
 
             spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', grid=(row, 0))
@@ -730,12 +720,6 @@ class GeneralTab(Widget):
         """
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
-        # self.nameData.setText(self.spectrum.name)
-        # self.pathData.setValidator(SpectrumValidator(parent=self.pathData, spectrum=self.spectrum))
-
-        self.spectrumRow.setLabel(self.spectrum.name)
-        self.spectrumRow.obj = self.spectrum
-        self.spectrumRow.setText(self.spectrumRow.getPath())
         # clear all changes
         self._changes.clear()
 

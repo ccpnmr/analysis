@@ -562,7 +562,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 if badSpectra:
                     text = 'Detected invalid Spectrum file path(s) for:\n\n'
                     for sp in badSpectra:
-                        text += '        %s\n' % sp
+                        text += '%s\n' % str(sp)
                     text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
                     showWarning('Spectrum file paths', text)
 

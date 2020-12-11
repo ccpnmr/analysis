@@ -181,18 +181,23 @@ class Undo(deque):
     def markSave(self):
         if len(self) > 0:
             lastItem = self.nextIndex - 1
-            self._itemAtLastSave = self[lastItem]
+            try:
+                self._itemAtLastSave = self[lastItem]
+            except IndexError as ie:
+                getLogger().debug('Error on markSave %s' %ie)
         self._lastEventMarkClean = True
         self.undoChanged.call(lambda x: x(UndoEvents.UNDO_MARK_SAVE))
 
     def isDirty(self):
         result = False
         lastItem = self.nextIndex - 1
-
-        if len(self) > 0 and (self._itemAtLastSave == None):
-            result = True
-        elif len(self) > 0 and lastItem > 0 and (self[lastItem] != self._itemAtLastSave):
-            result = True
+        try:
+            if len(self) > 0 and (self._itemAtLastSave == None):
+                result = True
+            elif len(self) > 0 and lastItem > 0 and (self[lastItem] != self._itemAtLastSave):
+                result = True
+        except IndexError as ie:
+            getLogger().debug('Error checking isDirty %s' % ie)
         return result
 
     def markClean(self):

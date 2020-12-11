@@ -5432,7 +5432,7 @@ class CcpnNefReader(CcpnNefContent):
             parameters = _parametersFromLoopRow(row, map2)
 
             # NOTE:ED - need to check if 'labelling' removed from pid (which is should be)
-            result = creatorFunc('.'.join([sampleName, parameters['name'], parameters['labelling']]))
+            result = creatorFunc('.'.join([sampleName, parameters.get('name') or '']))
             if result is not None:
                 self.error('ccpn_sample_component - SampleComponent {} already exists'.format(result), loop, (result,))
                 _rowErrors.add(loop.data.index(row))

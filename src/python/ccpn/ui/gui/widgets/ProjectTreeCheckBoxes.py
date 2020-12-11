@@ -100,12 +100,12 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         ]
 
     lockedItems = {
-        Sample._pluralLinkName       : QtCore.Qt.Checked,
-        Substance._pluralLinkName    : QtCore.Qt.Checked,
-        DataSet._pluralLinkName      : QtCore.Qt.Checked,
-        Complex._pluralLinkName      : QtCore.Qt.Checked,
-        SpectrumGroup._pluralLinkName: QtCore.Qt.Checked,
-        Note._pluralLinkName         : QtCore.Qt.Checked
+        # Sample._pluralLinkName       : QtCore.Qt.Checked,
+        # Substance._pluralLinkName    : QtCore.Qt.Checked,
+        # DataSet._pluralLinkName      : QtCore.Qt.Checked,
+        # Complex._pluralLinkName      : QtCore.Qt.Checked,
+        # SpectrumGroup._pluralLinkName: QtCore.Qt.Checked,
+        # Note._pluralLinkName         : QtCore.Qt.Checked
         }
 
     def __init__(self, parent=None, project=None, maxSize=(250, 300),

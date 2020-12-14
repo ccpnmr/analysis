@@ -292,12 +292,14 @@ class NoiseTab(Widget):
 
         self._parent = parent
         self.mainWindow = mainWindow
+        self.current = self.mainWindow.current
         self.spectrum = spectrum
         self.strip = strip
         self.noiseLevel = None
 
         # create the list of widgets and set the callbacks for each
         self._setWidgets()
+        self._setFromCurrentCursor()
 
     def _setWidgets(self):
         # set up the common widgets
@@ -336,6 +338,13 @@ class NoiseTab(Widget):
         # populate the widgets, but don't perform any calculations
         if self.spectrum.noiseLevel is not None:
             self.currentNoiseLabel.setText(f'{self.spectrum.noiseLevel:.3f}')
+
+    def _setFromCurrentCursor(self):
+        "Add the initial spinbox value  from  the current cursor position. Implemented only for 1D."
+        if self.mainWindow.current is not None:
+            if self.spectrum.dimensionCount == 1:
+                if self.current.cursorPosition:
+                    self.noiseLevelSpinBox.set(float(self.current.cursorPosition[-1]))
 
     def _estimateNoise(self):
         # get the current mode and call the relevant estimate routine
@@ -418,7 +427,9 @@ class NoiseTab(Widget):
     def _setNoiseLevel(self):
         """Apply the current noiseLevel to the spectrum
         """
-        self.spectrum.noiseLevel = float(self.noiseLevelSpinBox.value())
+        value =  float(self.noiseLevelSpinBox.value())
+        self.spectrum.noiseLevel = value
+        self.spectrum.negativeNoiseLevel = -value if value > 0 else value*2
         self._populate()
 
     def _storeWidgetState(self):

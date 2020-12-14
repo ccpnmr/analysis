@@ -1031,9 +1031,14 @@ def snap1DPeaksToExtrema(peaks, maximumLimit=0.1):
     with undoBlockWithoutSideBar():
         with notificationEchoBlocking():
             if len(peaks) > 0:
+                heights, positions  =  [], []
                 for peak in peaks:  # peaks can be from diff peakLists
                     if peak is not None:
-                        _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit)
+                        position, height = _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit)
+                        positions.append(position)
+                        heights.append(height)
+                print('##',  positions, heights)
+
 
 
 
@@ -1092,16 +1097,17 @@ def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True):
         nearestHeight = heights[positions == nearestPosition]
         if a == nearestPosition or b == nearestPosition: # avoid snapping to an existing peak, as it might be a wrong snap.
             peak.height = peak.peakList.spectrum.getIntensity(peak.position)
-        elif abs(nearestPosition) > abs(peak.position[0] + maximumLimit):  # avoid snapping on the noise if not maximum found
-            peak.height = peak.peakList.spectrum.getIntensity(peak.position)
+        # elif abs(nearestPosition) > abs(peak.position[0] + maximumLimit):  # avoid snapping on the noise if not maximum found
+        #     peak.height = peak.peakList.spectrum.getIntensity(peak.position)
         else:
             peak.position = [nearestPosition,]
             peak.height = nearestHeight[0]
 
     else:
         peak.height = peak.peakList.spectrum.getIntensity(peak.position)
-        getLogger().info('No maxima found within tolerances for %s. Kept original positions %s' %(peak.pid, str(round(peak.position[0],3))))
-
+        mesg = 'No "signal-like" maxima found within tolerances for %s. Try reducing the spectrum noise level. Kept original position(s) %s' \
+               %(peak.pid, str(round(peak.position[0],3)))
+        getLogger().info(mesg)
 
 def getSpectralPeakHeights(spectra, peakListIndexes:list=None) -> pd.DataFrame:
     return _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, peakListIndexes=peakListIndexes)

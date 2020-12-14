@@ -1560,7 +1560,7 @@ class Framework(NotifierBase):
                 project = self._loadSparkyProject(path, makeNewProject=True)  # RHF - new by default
                 project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
 
-            project._validateDataUrlAndFilePaths()
+            # project._validateDataUrlAndFilePaths()
 
             if self.preferences.general.useProjectPath:
                 getLogger().debug2('application - setting current path %s' % Path.Path(path).parent)

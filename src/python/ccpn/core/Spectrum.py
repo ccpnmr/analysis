@@ -254,8 +254,6 @@ class Spectrum(AbstractWrapperObject):
         """Parent (containing) object."""
         return self._project
 
-    # Attributes of DataSource and Experiment:
-
     @property
     def dimensionCount(self) -> int:
         """Number of dimensions in spectrum"""
@@ -263,17 +261,30 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def dimensions(self) -> tuple:
-        """tuple of length dimensionCount with dimesnion integers; ie. (1,2,3,..).
-        Useful for mapping axisCodes: eg: self.getByAxisCodes('dimensions', ['N','C','H']
+        """Convenience: tuple of length dimensionCount with dimension integers; ie. (1,2,3,..).
+        Useful for mapping axisCodes: eg: self.getByAxisCodes('dimensions', ['N','C','H'])
         """
         return tuple(range(1, self.dimensionCount + 1))
 
     @property
     def indices(self) -> tuple:
-        """tuple of length dimensionCount with indices integers; ie. (0,1,2,3).
-        Useful for mapping axisCodes: eg: self.getByAxisCodes('indices', ['N','C','H']
+        """Convenience: tuple of length dimensionCount with indices integers; ie. (0,1,2,3).
+        Useful for mapping axisCodes: eg: self.getByAxisCodes('indices', ['N','C','H'])
         """
         return tuple(range(0, self.dimensionCount))
+
+    @property
+    def axisTriples(self) -> tuple:
+        """Convenience: return a list of triples (index, axisCode, dimension) for each dimension
+        Useful for iterating over axis codes; eg in an H-N-CO ordered spectrum
+            for idx, axisCode, dimension in self.getByAxisCodes('axisTriples', ('N','C','H'), exactMatch=False)
+
+            would yield:
+                (1, 'N', 2)
+                (2, 'CO', 3)
+                (0, 'H', 1)
+        """
+        return [z for z in zip(self.indices, self.axisCodes, self.dimensions)]
 
     @property
     def comment(self) -> str:
@@ -428,8 +439,16 @@ class Spectrum(AbstractWrapperObject):
     @_includeInCopy
     def scale(self) -> float:
         """Scaling factor for intensities and volumes.
-        Intensities and volumes should be *multiplied* by scale before comparison."""
-        return self._wrappedData.scale
+        Intensities and volumes should be *multiplied* by scale before comparison
+        """
+        value = self._wrappedData.scale
+        if value is None:
+            getLogger().warning('Scaling {} changed from None to 1.0'.format(self))
+            value = 1.0
+        if -SCALETOLERANCE < value < SCALETOLERANCE:
+            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        return value
 
     @scale.setter
     @logCommand(get='self', isProperty=True)
@@ -452,8 +471,8 @@ class Spectrum(AbstractWrapperObject):
         else:
             self._wrappedData.scale = float(value)
 
-        if self.dimensionCount == 1:
-            # update the intensities as the scale has changed
+        if self.dimensionCount == 1 and self._intensities is not None:
+            # some 1D data were read before; update the intensities as the scale has changed
             self._intensities = self.getSliceData()
 
     @property
@@ -2203,17 +2222,17 @@ class Spectrum(AbstractWrapperObject):
             return height
 
     @logCommand(get='self')
-    def getHeight(self, ppmPositions):
+    def getHeight(self, ppmPosition):
         """Returns the interpolated height at the ppm position
         """
-        if len(ppmPositions) != self.dimensionCount:
-            raise ValueError('Length of %s does not match number of dimensions.' % str(ppmPositions))
-        if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPositions):
-            raise ValueError('ppmPositions values must be floats.')
+        if len(ppmPosition) != self.dimensionCount:
+            raise ValueError('Length of %s does not match number of dimensions' % str(ppmPosition))
+        if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPosition):
+            raise ValueError('ppmPositions values must be floats')
 
         # ref = self.mainSpectrumReferences
         # pointPosition = tuple(ref[dim].valueToPoint(ppm) for dim, ppm in enumerate(ppmPositions))
-        pointPosition = [self.value2point()]
+        pointPosition = [self.ppm2point(p, dimension=idx+1) for idx, p in enumerate(ppmPosition)]
         return self.getPointvalue(pointPosition)
 
     @logCommand(get='self')
@@ -2230,22 +2249,17 @@ class Spectrum(AbstractWrapperObject):
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zero' % self)
             return 0.0
 
-        pointPosition = self._dataSource.getPointValue(pointPosition)
-        return pointPosition * scale
+        value = self._dataSource.getPointValue(pointPosition)
+        return value * self.scale
 
-    @cached(_SLICE1DDATACACHE, maxItems=1, debug=False)
-    def _get1DSliceData(self, position, sliceDim: int):
+    @cached(_SLICE1DDATACACHE, maxItems=1, debug=False, doSignatureExpansion=False)
+    def _get1DSliceData(self):
         """Internal routine to get 1D sliceData;
         """
-        if self._dataSource is None:
-            # data = self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
-            getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
-            data = numpy.zeros( (self.pointCounts[sliceDim-1], ), dtype=numpy.float32)
-        else:
-            data = self._dataSource.getSliceData(position=position, sliceDim=sliceDim)
+        data = self._dataSource.getSliceData(position=[1], sliceDim=1)
         return data
 
-    @cached(_SLICEDATACACHE, maxItems=1024, debug=False)
+    @cached(_SLICEDATACACHE, maxItems=1024, debug=False, doSignatureExpansion=False)
     def _getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int):
         """Internal routine to get sliceData; optimised to use (buffered) getPlaneData
         CCPNINTERNAL: used in CcpnOpenGL
@@ -2274,43 +2288,38 @@ class Spectrum(AbstractWrapperObject):
         :param position: An optional list/tuple of point positions (1-based);
                          defaults to [1,1,1,1]
         :param sliceDim: Dimension of the slice (1-based)
-        :return: numpy data array
+        :return: numpy 1D data array
         """
         if position is None:
             position = [1] * self.dimensionCount
-        else:
-            position = list(position)
 
         if not isIterable(position) or len(position) < self.dimensionCount:
-            raise ValueError('sliceDim should be a iterable with length %d; got "%s"' %
+            raise ValueError('position should be a iterable with length %d; got "%s"' %
                              (self.dimensionCount, position)
                              )
 
         if isIterable(sliceDim) or sliceDim < 1 or sliceDim > self.dimensionCount:
-            raise ValueError('sliceDim should be a scalar in range [1-%d]; got "%s"' %
+            raise ValueError('sliceDim should be a integer in range [1,%d]; got "%s"' %
                              (self.dimensionCount, sliceDim)
                              )
 
-        result = None
-        scale = self.scale if self.scale is not None else 1.0
-        if -SCALETOLERANCE < scale < SCALETOLERANCE:
-            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
 
-        if self.dimensionCount == 1:
+        result = None
+        if self._dataSource is None:
+            getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
+            result = numpy.zeros( (self.pointCounts[sliceDim-1], ), dtype=numpy.float32)
+
+        elif self.dimensionCount == 1:
             # 1D data
-            result = self._get1DSliceData(position=position, sliceDim=sliceDim)
+            result = self._get1DSliceData()
             # Make a copy in order to preserve the original data and apply scaling
-            if result is not None:
-                result = result.copy(order='K') * scale
+            result = result.copy(order='K') * self.scale
+
         else:
             # nD data; get slice via appropriate plane
             position[sliceDim - 1] = 1  # To improve caching; position, dimensions are 1-based
-            if sliceDim > 1:
-                result = self._getSliceDataFromPlane(position=position, xDim=1, yDim=sliceDim,
-                                                     sliceDim=sliceDim)
-            else:
-                result = self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim + 1,
-                                                     sliceDim=sliceDim)
+            xDim, yDim = (1, sliceDim) if sliceDim > 1 else (1, 2)
+            result = self._getSliceDataFromPlane(position=position, xDim=xDim, yDim=yDim, sliceDim=sliceDim)
 
             # Make a copy in order to preserve the original data; do not apply scaling, as this was already done
             # by the _getSliceDataFromPlane routine which calls getPlaneData
@@ -2329,7 +2338,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self')
     def getSlice(self, axisCode, position, exactMatch=True):
         """Get 1D slice along axisCode through position; sets the intensities attribute
-        :return: 1D NumPy data array
+        :return: 1D Numpy 1D data array
         """
         sliceDim = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)
         return self.getSliceData(position=position, sliceDim=sliceDim[0])
@@ -2436,13 +2445,9 @@ class Spectrum(AbstractWrapperObject):
         position[xDim - 1] = 1  # position is 1-based
         position[yDim - 1] = 1
 
-        scale = self.scale if self.scale is not None else 1.0
-        if -SCALETOLERANCE < scale < SCALETOLERANCE:
-            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
-
         result = self._getPlaneData(position=position, xDim=xDim, yDim=yDim)
         # Make a copy in order to preserve the original data and apply scaling
-        result = result.copy(order='K') * scale
+        result = result.copy(order='K') * self.scale
 
         # check if we have something valid to return
         if result is None:

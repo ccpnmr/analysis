@@ -435,8 +435,13 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSimple()
     def scale(self, value: Union[float, int, None]):
-        if not isinstance(value, (float, int, type(None))):
-            raise TypeError('Spectrum.scale {} must be a float, integer or None'.format(self))
+        if value is None:
+            getLogger().warning('Scaling {} changed from None to 1.0'.format(self))
+            value = 1.0
+
+        if not isinstance(value, (float, int)):
+            raise TypeError('Spectrum.scale {} must be a float or integer'.format(self))
+
         if value is not None and -SCALETOLERANCE < value < SCALETOLERANCE:
             # Display a warning, but allow to be set
             getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
@@ -1810,21 +1815,39 @@ class Spectrum(AbstractWrapperObject):
     # Library functions
     #=========================================================================================
 
-    def ppm2point(self, axisCode, value):
-        "Convert ppm value to point for axis corresponding to axisCode"
-        dimIdx = self.getByAxisCodes('indices', [axisCode], exactMatch=False)[0]
-        if dimIdx is None or dimIdx < 0 or dimIdx >= self.dimensionCount:
-            raise RuntimeError('Invalid dimIdx (%s) for axisCode "%s"' % (dimIdx, axisCode))
+    def ppm2point(self, value, axisCode=None, dimension=None):
+        """Convert ppm value to point value for axis corresponding to either axisCode or
+        dimension (1-based)
+        """
+        if dimension is None and axisCode is None:
+            raise ValueError('Spectrum.ppm2point: either axisCode or dimension needs to be defined')
+        if dimension is not None and axisCode is not None:
+            raise ValueError('Spectrum.ppm2point: axisCode and dimension cannot be both defined')
 
-        return self.mainSpectrumReferences[dimIdx].valueToPoint(value)
+        if axisCode is not None:
+            dimension = self.getByAxisCodes('dimensions', [axisCode], exactMatch=False)[0]
 
-    def point2ppm(self, axisCode, value):
-        "Convert pointValue to ppm for axis corresponding to axisCode"
-        dimIdx = self.getByAxisCodes('indices', [axisCode], exactMatch=False)[0]
-        if dimIdx is None or dimIdx < 0 or dimIdx >= self.dimensionCount:
-            raise RuntimeError('Invalid dimIdx (%s) for axisCode "%s"' % (dimIdx, axisCode))
+        if dimension is None or dimension < 1 or dimension > self.dimensionCount:
+            raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
-        return self.mainSpectrumReferences[dimIdx].pointToValue(value)
+        return self.mainSpectrumReferences[dimension-1].valueToPoint(value)
+
+    def point2ppm(self, value, axisCode=None, dimension=None):
+        """Convert point value to ppm for axis corresponding to to either axisCode or
+        dimension (1-based)
+        """
+        if dimension is None and axisCode is None:
+            raise ValueError('Spectrum.point2ppm: either axisCode or dimension needs to be defined')
+        if dimension is not None and axisCode is not None:
+            raise ValueError('Spectrum.point2ppm: axisCode and dimension cannot be both defined')
+
+        if axisCode is not None:
+            dimension = self.getByAxisCodes('dimensions', [axisCode], exactMatch=False)[0]
+
+        if dimension is None or dimension < 1 or dimension > self.dimensionCount:
+            raise RuntimeError('Invalid dimension (%s)' % (dimension,))
+
+        return self.mainSpectrumReferences[dimension-1].pointToValue(value)
 
     def getDefaultOrdering(self, axisOrder):
         if not axisOrder:
@@ -2183,31 +2206,32 @@ class Spectrum(AbstractWrapperObject):
     def getHeight(self, ppmPositions):
         """Returns the interpolated height at the ppm position
         """
-        ref = self.mainSpectrumReferences
-
         if len(ppmPositions) != self.dimensionCount:
             raise ValueError('Length of %s does not match number of dimensions.' % str(ppmPositions))
         if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPositions):
             raise ValueError('ppmPositions values must be floats.')
 
-        pointPosition = tuple(ref[dim].valueToPoint(ppm) for dim, ppm in enumerate(ppmPositions))
-        return self.getPositionValue(pointPosition)
+        # ref = self.mainSpectrumReferences
+        # pointPosition = tuple(ref[dim].valueToPoint(ppm) for dim, ppm in enumerate(ppmPositions))
+        pointPosition = [self.value2point()]
+        return self.getPointvalue(pointPosition)
 
     @logCommand(get='self')
-    def getPositionValue(self, pointPosition):
-        """Return the value nearest to the position given in points.
+    def getPointvalue(self, pointPosition):
+        """Return the value interpolated at the position given in points (1-based, float values).
         """
         if len(pointPosition) != self.dimensionCount:
             raise ValueError('Length of %s does not match number of dimensions.' % str(pointPosition))
         if not all(isinstance(dimVal, (int, float)) for dimVal in pointPosition):
             raise ValueError('position values must be floats.')
 
-        scale = self.scale if self.scale is not None else 1.0
-        if -SCALETOLERANCE < scale < SCALETOLERANCE:
-            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+        if self._dataSource is None:
+            # data = self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
+            getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zero' % self)
+            return 0.0
 
-        pointPosition = self._apiDataSource.getPositionValue(pointPosition)
-        return pointPosition * scale if pointPosition else None
+        pointPosition = self._dataSource.getPointValue(pointPosition)
+        return pointPosition * scale
 
     @cached(_SLICE1DDATACACHE, maxItems=1, debug=False)
     def _get1DSliceData(self, position, sliceDim: int):
@@ -2587,8 +2611,8 @@ class Spectrum(AbstractWrapperObject):
         for idx, ac in zip(indices, axisCodes):
             stop, start = axisDict.get(ac)  # to be converted to points; ppm scale runs backwards
 
-            start = max(int(self.ppm2point(ac,start) + 0.5), 1)
-            stop = min(int(self.ppm2point(ac,stop) + 0.5), self.pointCounts[idx])
+            start = max(int(self.ppm2point(start, axisCode=ac) + 0.5), 1)
+            stop = min(int(self.ppm2point(stop, axisCode=ac) + 0.5), self.pointCounts[idx])
 
             sliceTuples[idx] = (start,stop)
 

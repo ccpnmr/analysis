@@ -1067,7 +1067,7 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     # create a list of random points in the spectrum, get only points that are not nan/inf
     # getPositionValue is the slow bit
     allPts = [[min(n - 2, int(n * random.random())) for n in npts] for i in range(nsamples)]
-    data = list(filter(lambda d: d - d == 0, [spectrum.getPositionValue(pt) for pt in allPts]))
+    data = list(filter(lambda d: d - d == 0, [spectrum.getPointvalue(pt) for pt in allPts]))
     fails = nsamples - len(data)
 
     if fails:

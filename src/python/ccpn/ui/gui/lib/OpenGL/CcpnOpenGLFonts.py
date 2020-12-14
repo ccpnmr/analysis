@@ -202,9 +202,16 @@ class CcpnGLFont():
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.textureId)
 
         if fontTransparency:
-            for fontI in self.fontPNG:
-                for fontJ in fontI:
-                    fontJ[3] = int(fontJ[3] * fontTransparency)
+            # for fontI in self.fontPNG:
+            #     for fontJ in fontI:
+            #         fontJ[3] = int(fontJ[3] * fontTransparency)
+
+            # GWV: this did not make it noticably faster, booh
+            for fontI in range(self.fontPNG.shape[0]):
+                for fontJ in range(self.fontPNG.shape[1]):
+                    val = self.fontPNG[fontI][fontJ][3]
+                    val = int(val * fontTransparency)
+                    self.fontPNG[fontI][fontJ][3] = val
 
         GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA,
                         self.fontPNG.shape[1], self.fontPNG.shape[0],

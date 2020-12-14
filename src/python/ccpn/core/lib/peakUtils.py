@@ -1037,10 +1037,22 @@ def snap1DPeaksToExtrema(peaks, maximumLimit=0.1):
                         position, height = _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit)
                         positions.append(position)
                         heights.append(height)
-                print('##',  positions, heights)
 
-
-
+# def add(x,y):
+#     if y > 0:
+#         return add(x, y-1) + 1
+#     elif y < 0:
+#         return add(x, y+1) - 1
+#     else:
+#         return x
+#
+# def sub(x,y):
+#     if y > 0:
+#         return sub(x, y-1) - 1
+#     elif y < 0:
+#         return sub(x, y+1) + 1
+#     else:
+#         return x
 
 def _getAdjacentPeakPositions1D(peak):
     positions = [p.position[0] for p in peak.peakList.peaks]
@@ -1060,6 +1072,36 @@ def _getAdjacentPeakPositions1D(peak):
         nextPeakPosition = positions[positions.index(queryPos) + 1]
     return previousPeakPosition, nextPeakPosition
 
+# def _snap1DPeaksToBestFitExtrema(peaks, maximumLimit=0.1, doNeg=True):
+#     UNDER implementation
+#     from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
+#     from ccpn.util.Logging import getLogger
+#     if not peaks: return
+#     peak = peaks[-1]
+#     if len(peaks) == 1:
+#         _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit, doNeg=doNeg)
+#         return
+#     spectrum = peak.peakList.spectrum
+#     if not all([peak.peakList.spectrum == spectrum for peak in peaks]):
+#         getLogger().info('All peaks must be from same spectrum')
+#         return
+#     x = spectrum.positions
+#     y = spectrum.intensities
+#
+#     #adjaciant peaks to first and last in group
+#     a1, b1 = _getAdjacentPeakPositions1D(peaks[0])
+#     a2, b2 = _getAdjacentPeakPositions1D(peaks[-1])
+#     print(a1, b1, a2,b2, 'ADJUST')
+#
+#     if not a1:
+#         a =  sub(peak.position[0], maximumLimit)
+#     if not b2:
+#         b = add(peak.position[0], maximumLimit)
+#
+#     noiseLevel, minNoiseLevel = spectrum.noiseLevel, spectrum.negativeNoiseLevel
+#     if not noiseLevel: #estimate as you can from the spectrum
+#         spectrum.noiseLevel, spectrum.negativeNoiseLevel =  noiseLevel, minNoiseLevel = estimateNoiseLevel1D(y)
+#
 
 def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True):
     '''
@@ -1071,9 +1113,9 @@ def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True):
     '''
     from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
     from ccpn.util.Logging import getLogger
-
-    x = peak.peakList.spectrum.positions
-    y = peak.peakList.spectrum.intensities
+    spectrum = peak.peakList.spectrum
+    x = spectrum.positions
+    y = spectrum.intensities
     a,b = _getAdjacentPeakPositions1D(peak)
     if not a:
         a = peak.position[0] - maximumLimit
@@ -1081,10 +1123,12 @@ def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True):
         b = peak.position[0] + maximumLimit
 
     # refind maxima
-    noiseLevel = peak.peakList.spectrum.noiseLevel
-    minNoiseLevel = peak.peakList.spectrum.negativeNoiseLevel
+    noiseLevel = spectrum.noiseLevel
+    minNoiseLevel = spectrum.negativeNoiseLevel
     if not noiseLevel: #estimate as you can from the spectrum
         noiseLevel, minNoiseLevel = estimateNoiseLevel1D(y)
+        spectrum.noiseLevel, spectrum.negativeNoiseLevel =  noiseLevel, minNoiseLevel = estimateNoiseLevel1D(y)
+
     x_filtered, y_filtered = _1DregionsFromLimits(x,y, [a,b])
     maxValues, minValues = simple1DPeakPicker(y_filtered, x_filtered, noiseLevel, negDelta=minNoiseLevel, negative=doNeg)
     allValues = maxValues + minValues

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 23:02:32 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,8 +26,8 @@ __date__ = "$Date: 2020-12-11 17:51:39 +0000 (Fri, December 11, 2020) $"
 #=========================================================================================
 
 import numpy as np
-from Colour import getAutoColourRgbRatio
-from Logging import getLogger
+from ccpn.util.Colour import getAutoColourRgbRatio
+from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_MULTIPLETLINK
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import DEFAULTLINECOLOUR, GLLabelling, GL1dLabelling
@@ -42,6 +42,31 @@ class GLmultipletListMethods():
     LENSQ2 = GLDefs.LENSQ2MULT
     LENSQ4 = GLDefs.LENSQ4MULT
     POINTCOLOURS = GLDefs.POINTCOLOURSMULT
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Predefined indices/vertex lists
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    _circleVertices = np.array((7, 9, 9, 10, 10, 6, 6, 11, 11, 12, 12, 8,
+                                8, 13, 13, 14, 14, 5, 5, 15, 15, 16, 16, 7), dtype=np.uint32)
+
+    _squareMultSymbol = ((np.append(np.array((0, 1, 2, 3), dtype=np.uint32), _circleVertices),
+                          np.append(np.array((0, 1, 2, 3, 0, 2, 2, 1, 0, 3, 3, 1), dtype=np.uint32), _circleVertices)),
+                         (np.append(np.array((0, 4, 4, 3, 3, 0), dtype=np.uint32), _circleVertices),
+                          np.append(np.array((0, 4, 4, 3, 3, 0, 0, 2, 2, 1, 3, 1), dtype=np.uint32), _circleVertices)),
+                         (np.append(np.array((2, 4, 4, 1, 1, 2), dtype=np.uint32), _circleVertices),
+                          np.append(np.array((2, 4, 4, 1, 1, 2, 0, 2, 0, 3, 3, 1), dtype=np.uint32), _circleVertices)))
+
+    _squareMultSymbolLen = tuple(tuple(len(sq) for sq in squareList) for squareList in _squareMultSymbol)
+
+    _plusMultSymbol = ((np.append(np.array((5, 6, 7, 8), dtype=np.uint32), _circleVertices),
+                        np.append(np.array((5, 6, 7, 8, 0, 2, 2, 1, 0, 3, 3, 1), dtype=np.uint32), _circleVertices)),
+                       (np.append(np.array((6, 4, 4, 5, 4, 8), dtype=np.uint32), _circleVertices),
+                        np.append(np.array((6, 4, 4, 5, 4, 8, 0, 2, 2, 1, 3, 1, 0, 3), dtype=np.uint32), _circleVertices)),
+                       (np.append(np.array((6, 4, 4, 5, 4, 7), dtype=np.uint32), _circleVertices),
+                        np.append(np.array((6, 4, 4, 5, 4, 7, 0, 2, 2, 1, 3, 1, 0, 3), dtype=np.uint32), _circleVertices)))
+
+    _plusMultSymbolLen = tuple(tuple(len(pl) for pl in plusList) for plusList in _plusMultSymbol)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # List handlers
@@ -92,12 +117,12 @@ class GLmultipletListMethods():
         Returns the number of unique indices NOT the length of the appended list
         """
         if not multiplet.peaks:
-            return 0
+            return 0, 0
 
         insertNum = len(multiplet.peaks)
         drawList.indices = np.append(drawList.indices, np.array(tuple(val for ii in range(insertNum)
                                                                       for val in (index, 1 + index + ii)), dtype=np.uint32))
-        return insertNum + 1
+        return 2 * insertNum, insertNum + 1
 
     def insertExtraIndices(self, drawList, indexPtr, index, multiplet):
         """insert extra indices into the index list
@@ -113,17 +138,6 @@ class GLmultipletListMethods():
                                                                     for val in (index, 1 + index + ii))
         return 2 * insertNum, insertNum + 1
 
-    _circleVertices = np.array((7, 9, 9, 10, 10, 6, 6, 11, 11, 12, 12, 8,
-                                8, 13, 13, 14, 14, 5, 5, 15, 15, 16, 16, 7), dtype=np.uint32)
-
-    _squareMultSymbol = ((np.append(np.array((0, 1, 2, 3), dtype=np.uint32), _circleVertices),
-                          np.append(np.array((0, 1, 2, 3, 0, 2, 2, 1, 0, 3, 3, 1), dtype=np.uint32), _circleVertices)),
-                         (np.append(np.array((0, 4, 4, 3, 3, 0), dtype=np.uint32), _circleVertices),
-                          np.append(np.array((0, 4, 4, 3, 3, 0, 0, 2, 2, 1, 3, 1), dtype=np.uint32), _circleVertices)),
-                         (np.append(np.array((2, 4, 4, 1, 1, 2), dtype=np.uint32), _circleVertices),
-                          np.append(np.array((2, 4, 4, 1, 1, 2, 0, 2, 0, 3, 3, 1), dtype=np.uint32), _circleVertices)))
-    _squareMultSymbolLen = tuple(tuple(len(sq) for sq in squareList) for squareList in _squareMultSymbol)
-
     def _getSquareSymbolCount(self, planeIndex, obj):
         """returns the number of indices required for the symbol based on the planeIndex
         type of planeIndex - currently 0/1/2 indicating whether normal, infront or behind
@@ -135,9 +149,9 @@ class GLmultipletListMethods():
         """Make a new square symbol based on the planeIndex type.
         """
         _selected = self._isSelected(obj)
-        _insert = self._squareMultSymbol[planeIndex % 3][_selected]
-        iCount = len(_insert)
-        drawList.indices[indexEnd:indexEnd + iCount] = _insert + vertexStart
+        _indices = self._squareMultSymbol[planeIndex % 3][_selected] + vertexStart
+        iCount = len(_indices)
+        drawList.indices[indexEnd:indexEnd + iCount] = _indices
 
         return iCount, _selected
 
@@ -145,16 +159,11 @@ class GLmultipletListMethods():
         """Append a new square symbol based on the planeIndex type.
         """
         _selected = self._isSelected(obj)
-        drawList.indices = np.append(drawList.indices, self._squareMultSymbol[planeIndex % 3][_selected] + vertexStart)
-        return _selected
+        _indices = self._squareMultSymbol[planeIndex % 3][_selected] + vertexStart
+        iCount = len(_indices)
+        drawList.indices = np.append(drawList.indices, _indices)
 
-    _plusMultSymbol = ((np.append(np.array((5, 6, 7, 8), dtype=np.uint32), _circleVertices),
-                        np.append(np.array((5, 6, 7, 8, 0, 2, 2, 1, 0, 3, 3, 1), dtype=np.uint32), _circleVertices)),
-                       (np.append(np.array((6, 4, 4, 5, 4, 8), dtype=np.uint32), _circleVertices),
-                        np.append(np.array((6, 4, 4, 5, 4, 8, 0, 2, 2, 1, 3, 1, 0, 3), dtype=np.uint32), _circleVertices)),
-                       (np.append(np.array((6, 4, 4, 5, 4, 7), dtype=np.uint32), _circleVertices),
-                        np.append(np.array((6, 4, 4, 5, 4, 7, 0, 2, 2, 1, 3, 1, 0, 3), dtype=np.uint32), _circleVertices)))
-    _plusMultSymbolLen = tuple(tuple(len(pl) for pl in plusList) for plusList in _plusMultSymbol)
+        return iCount, _selected
 
     def _getPlusSymbolCount(self, planeIndex, obj):
         """returns the number of indices required for the symbol based on the planeIndex
@@ -167,9 +176,9 @@ class GLmultipletListMethods():
         """Make a new plus symbol based on the planeIndex type.
         """
         _selected = self._isSelected(obj)
-        _insert = self._plusMultSymbol[planeIndex % 3][_selected]
-        iCount = len(_insert)
-        drawList.indices[indexEnd:indexEnd + iCount] = _insert + vertexStart
+        _indices = self._plusMultSymbol[planeIndex % 3][_selected] + vertexStart
+        iCount = len(_indices)
+        drawList.indices[indexEnd:indexEnd + iCount] = _indices
 
         return iCount, _selected
 
@@ -177,8 +186,11 @@ class GLmultipletListMethods():
         """Append a new plus symbol based on the planeIndex type.
         """
         _selected = self._isSelected(obj)
-        drawList.indices = np.append(drawList.indices, self._plusMultSymbol[planeIndex % 3][_selected] + vertexStart)
-        return _selected
+        _indices = self._plusMultSymbol[planeIndex % 3][_selected] + vertexStart
+        iCount = len(_indices)
+        drawList.indices = np.append(drawList.indices, _indices)
+
+        return iCount, _selected
 
     def _rescaleSymbolOffsets(self, r, w):
         return np.array([-r, -w, +r, +w, +r, -w, -r, +w, 0, 0, 0, -w, 0, +w, +r, 0, -r, 0,
@@ -208,7 +220,6 @@ class GLmultipletListMethods():
         if not multiplet.peaks:
             return 0
 
-        # cols = getColours()[CCPNGLWIDGET_MULTIPLETLINK][:3]
         col = multiplet.multipletList.lineColour
         cols = getAutoColourRgbRatio(col or DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
@@ -217,17 +228,16 @@ class GLmultipletListMethods():
 
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
-
             pp = peak.position
             p1 = (pp[pIndex[0]], pp[pIndex[1]])
 
             if None in p1:
                 getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))
-                continue  # need to add point in here if error
+                posList += p0
+            else:
+                posList += p1
 
-            posList += p1
-
-        numVertices = len(multiplet.peaks) + 1  # len(posList)
+        numVertices = len(multiplet.peaks) + 1
         drawList.vertices = np.append(drawList.vertices, np.array(posList, dtype=np.float32))
         drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * numVertices, dtype=np.float32))
         drawList.attribs = np.append(drawList.attribs, np.array(p0 * numVertices, dtype=np.float32))
@@ -241,7 +251,6 @@ class GLmultipletListMethods():
         if not multiplet.peaks:
             return 0
 
-        # cols = getColours()[CCPNGLWIDGET_MULTIPLETLINK][:3]
         col = multiplet.multipletList.lineColour
         cols = getAutoColourRgbRatio(col or DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
@@ -250,21 +259,16 @@ class GLmultipletListMethods():
 
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
-
             pp = peak.position
             p1 = (pp[pIndex[0]], pp[pIndex[1]])
 
             if None in p1:
                 getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))
-                continue
-
-            posList += p1
+                posList += p0
+            else:
+                posList += p1
 
         numVertices = len(multiplet.peaks) + 1
-        # drawList.vertices = np.append(drawList.vertices, posList)
-        # drawList.colors = np.append(drawList.colors, (*cols, fade) * numVertices)
-        # drawList.attribs = np.append(drawList.attribs, p0 * numVertices)
-
         drawList.vertices[vertexPtr:vertexPtr + 2 * numVertices] = posList
         drawList.colors[2 * vertexPtr:2 * vertexPtr + 4 * numVertices] = (*cols, fade) * numVertices
         drawList.attribs[vertexPtr:vertexPtr + 2 * numVertices] = p0 * numVertices
@@ -275,7 +279,6 @@ class GLmultipletListMethods():
     def _insertSymbolItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount, indexing, obj,
                                   objNum, p0, pIndex, planeIndex, r, vertexPtr, w):
 
-        extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexing.end + iCount, indexing.start + self.LENSQ, obj)
         drawList.vertices[vertexPtr:vertexPtr + self.LENSQ2] = (p0[0] - r, p0[1] - w,
                                                                 p0[0] + r, p0[1] + w,
                                                                 p0[0] + r, p0[1] - w,
@@ -297,33 +300,31 @@ class GLmultipletListMethods():
         drawList.colors[2 * vertexPtr:2 * vertexPtr + self.LENSQ4] = (*cols, fade) * self.LENSQ
         drawList.attribs[vertexPtr:vertexPtr + self.LENSQ2] = (p0[0], p0[1]) * self.LENSQ
         # drawList.offsets[vertexPtr:vertexPtr + self.LENSQ2] = (p0[0]+r, p0[1]+w) * self.LENSQ
+
+        # add extra indices
+        extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexing.end + iCount, indexing.start + self.LENSQ, obj)
         # add extra vertices for the multiplet
         extraVertices = self.insertExtraVertices(drawList, vertexPtr + self.LENSQ2, pIndex, obj, p0, (*cols, fade), fade)
         try:
             # keep a pointer to the obj
             drawList.pids[objNum:objNum + GLDefs.LENPID] = (obj, drawList.numVertices, (self.LENSQ + extraVertices),
                                                             _isInPlane, _isInFlankingPlane, _selected,
-                                                            indexing.end, len(drawList.indices), planeIndex, 0, 0, 0)
+                                                            indexing.end, indexing.end + iCount + extraIndices,
+                                                            planeIndex, 0, 0, 0)
         except Exception as es:
+            # NOTE:ED - check and remove this error trap
             pass
-        # times.append(('_pids:', time.time()))
-        # indexList[0] += (self.LENSQ + extraIndexCount)
-        # indexList[1] += (iCount + extraIndices)  # len(drawList.indices)
-        # drawList.numVertices += (self.LENSQ + extraVertices)
-        # buildIndex[0] += GLDefs.LENPID
-        # buildIndex[1] += (2 * (self.LENSQ + extraVertices))
 
         indexing.start += (self.LENSQ + extraIndexCount)
-        indexing.end += (iCount + extraIndices)  # len(drawList.indices)
+        indexing.end += (iCount + extraIndices)
         drawList.numVertices += (self.LENSQ + extraVertices)
         indexing.objNum += GLDefs.LENPID
         indexing.vertexPtr += (2 * (self.LENSQ + extraVertices))
         indexing.vertexStart += (self.LENSQ + extraVertices)
 
-    def _appendSymbolItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, indexing, obj, p0, pIndex,
+    def _appendSymbolItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount, indexing, obj, p0, pIndex,
                                   planeIndex, r, w):
-        # add extra indices
-        extraIndices = self.appendExtraIndices(drawList, indexing.vertexStart + self.LENSQ, obj)
+
         drawList.vertices = np.append(drawList.vertices, np.array((p0[0] - r, p0[1] - w,
                                                                    p0[0] + r, p0[1] + w,
                                                                    p0[0] + r, p0[1] - w,
@@ -345,20 +346,21 @@ class GLmultipletListMethods():
         drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * self.LENSQ, dtype=np.float32))
         drawList.attribs = np.append(drawList.attribs, np.array((p0[0], p0[1]) * self.LENSQ, dtype=np.float32))
         # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * self.LENSQ)
+
+        # add extra indices
+        _indexCount, extraIndices = self.appendExtraIndices(drawList, indexing.vertexStart + self.LENSQ, obj)
         # add extra vertices for the multiplet
         extraVertices = self.appendExtraVertices(drawList, pIndex, obj, p0, (*cols, fade), fade)
         # keep a pointer to the obj
         drawList.pids = np.append(drawList.pids, (obj, drawList.numVertices, (self.LENSQ + extraVertices),
                                                   _isInPlane, _isInFlankingPlane, _selected,
-                                                  indexing.end, len(drawList.indices), planeIndex, 0, 0, 0))
-        # indexPtr = len(drawList.indices)
-        # indexList[0] += (self.LENSQ + extraIndices)
-        # indexList[1] = len(drawList.indices)
-        # drawList.numVertices += (self.LENSQ + extraVertices)
+                                                  indexing.end, indexing.end + iCount + _indexCount,
+                                                  planeIndex, 0, 0, 0))
 
         indexing.start += (self.LENSQ + extraIndices)
-        indexing.end = len(drawList.indices)
+        indexing.end += (iCount + _indexCount)
         drawList.numVertices += (self.LENSQ + extraVertices)
+        indexing.vertexStart += (self.LENSQ + extraVertices)
 
 
 class GLmultipletNdLabelling(GLmultipletListMethods, GLLabelling):  #, GLpeakNdLabelling):
@@ -486,7 +488,6 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
         if not multiplet.peaks:
             return 0
 
-        # cols = getColours()[CCPNGLWIDGET_MULTIPLETLINK][:3]
         col = multiplet.multipletList.lineColour
         cols = getAutoColourRgbRatio(col if col else DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
@@ -494,14 +495,13 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
         posList = p0
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
-
             p1 = (peak.position[pIndex[0]], peak.height)
 
             if None in p1:
                 getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))
-                continue
-
-            posList += p1
+                posList += p0
+            else:
+                posList += p1
 
         numVertices = len(multiplet.peaks) + 1
         drawList.vertices = np.append(drawList.vertices, np.array(posList, dtype=np.float32))
@@ -517,7 +517,6 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
         if not multiplet.peaks:
             return 0
 
-        # cols = getColours()[CCPNGLWIDGET_MULTIPLETLINK][:3]
         col = multiplet.multipletList.lineColour
         cols = getAutoColourRgbRatio(col or DEFAULTLINECOLOUR, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
@@ -526,20 +525,15 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
 
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
-
             p1 = (peak.position[pIndex], peak.height)
 
             if None in p1:
                 getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))
-                continue
-
-            posList += p1
+                posList += p0
+            else:
+                posList += p1
 
         numVertices = len(multiplet.peaks) + 1
-        # drawList.vertices = np.append(drawList.vertices, posList)
-        # drawList.colors = np.append(drawList.colors, (*cols, fade) * numVertices)
-        # drawList.attribs = np.append(drawList.attribs, p0 * numVertices)
-
         drawList.vertices[vertexPtr:vertexPtr + 2 * numVertices] = posList
         drawList.colors[2 * vertexPtr:2 * vertexPtr + 4 * numVertices] = (*cols, fade) * numVertices
         drawList.attribs[vertexPtr:vertexPtr + 2 * numVertices] = p0 * numVertices

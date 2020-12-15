@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 23:02:32 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -104,7 +104,7 @@ class GLpeakListMethods():
     def appendExtraIndices(self, drawList, index, obj):
         """Add extra indices to the index list
         """
-        return 0
+        return 0, 0
 
     def extraVerticesCount(self, obj):
         """Calculate how many vertices to add

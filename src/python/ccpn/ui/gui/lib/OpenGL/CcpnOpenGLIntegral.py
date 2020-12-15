@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 23:02:32 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,8 +25,8 @@ __date__ = "$Date: 2020-12-11 17:47:59 +0000 (Fri, December 11, 2020) $"
 # Start of code
 #=========================================================================================
 
-from Colour import getAutoColourRgbRatio
-from Logging import getLogger
+from ccpn.util.Colour import getAutoColourRgbRatio
+from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_INTEGRALSHADE
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_REBUILD, GLRENDERMODE_DRAW, GLRENDERMODE_RESCALE
@@ -85,7 +85,7 @@ class GLintegralListMethods():
     def appendExtraIndices(self, *args):
         """Add extra indices to the index list
         """
-        return 0
+        return 0, 0
 
     def extraVerticesCount(self, integral):
         """Calculate how many vertices to add
@@ -234,9 +234,6 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
             drawList._clearRegions()
 
             ils = integralListView.integralList
-            # listCol = getAutoColourRgbRatio(ils.symbolColour, ils.spectrum, self.autoColour,
-            #                                 getColours()[CCPNGLWIDGET_FOREGROUND])
-
             listCol = getAutoColourRgbRatio(integralListView.symbolColour or GLDefs.DEFAULTCOLOUR, ils.spectrum, self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
             meritCol = getAutoColourRgbRatio(integralListView.meritColour or GLDefs.DEFAULTCOLOUR, ils.spectrum, self.autoColour,
@@ -278,11 +275,8 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         for ils in self._GLSymbols.values():
 
             if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.integralList:
-                ilv = ils.integralListView
-                # listCol = getAutoColourRgbRatio(il.symbolColour,
-                #                                 il.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
-                #                                 getColours()[CCPNGLWIDGET_FOREGROUND])
 
+                ilv = ils.integralListView
                 listCol = getAutoColourRgbRatio(ilv.symbolColour or GLDefs.DEFAULTCOLOUR,
                                                 ilv.integralList.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
                                                 getColours()[CCPNGLWIDGET_FOREGROUND])
@@ -359,9 +353,6 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         if self._isSelected(obj):
             cols = self._GLParent.highlightColour[:3]
         else:
-            # listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum,
-            #                                 self.autoColour,
-            #                                 getColours()[CCPNGLWIDGET_FOREGROUND])
 
             listCol = getAutoColourRgbRatio(objListView.textColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])

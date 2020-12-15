@@ -1,0 +1,41 @@
+[General]
+borderBottom=1
+borderLeft=1
+borderRight=1
+borderTop=1
+charList=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?-+\\/():;%&`'*#$=[]@^{}_~\"><\x2013\x2014\xab\xbb\x201c\x201d|\xa9\xa7\xb1\xa3\n\t"
+distanceField=false
+encoding=UNICODE
+heuristic=1
+imageInXML=false
+kerning=true
+merge=true
+mergeBF=true
+outDir=/Users/ejb66/PycharmProjects/Git/AnalysisV3/src/python/ccpn/ui/gui/widgets/fonts/Fonts
+outFile=glAllFonts
+outFormat=0
+sortOrder=2
+textureH=512
+textureW=1024
+transparent=true
+trim=true
+
+[fonts]
+1\font="Open Sans, 10 pt smooth"
+10\font="Open Sans, 24 pt smooth"
+11\font="Open Sans, 26 pt smooth"
+12\font="Open Sans, 28 pt smooth"
+13\font="Open Sans, 32 pt smooth"
+14\font="Open Sans, 36 pt smooth"
+15\font="Open Sans, 40 pt smooth"
+16\font="Open Sans, 44 pt smooth"
+17\font="Open Sans, 48 pt smooth"
+2\font="Open Sans, 11 pt smooth"
+3\font="Open Sans, 12 pt smooth"
+4\font="Open Sans, 13 pt smooth"
+5\font="Open Sans, 14 pt smooth"
+6\font="Open Sans, 16 pt smooth"
+7\font="Open Sans, 18 pt smooth"
+8\font="Open Sans, 20 pt smooth"
+9\font="Open Sans, 22 pt smooth"
+size=17

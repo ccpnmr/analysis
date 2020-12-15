@@ -1031,12 +1031,12 @@ def snap1DPeaksToExtrema(peaks, maximumLimit=0.1):
     with undoBlockWithoutSideBar():
         with notificationEchoBlocking():
             if len(peaks) > 0:
-                heights, positions  =  [], []
+                # heights, positions  =  [], []
                 for peak in peaks:  # peaks can be from diff peakLists
                     if peak is not None:
-                        position, height = _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit)
-                        positions.append(position)
-                        heights.append(height)
+                        _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit)
+                        # positions.append(position)
+                        # heights.append(height)
 
 # def add(x,y):
 #     if y > 0:
@@ -1126,8 +1126,8 @@ def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True):
     noiseLevel = spectrum.noiseLevel
     minNoiseLevel = spectrum.negativeNoiseLevel
     if not noiseLevel: #estimate as you can from the spectrum
-        noiseLevel, minNoiseLevel = estimateNoiseLevel1D(y)
-        spectrum.noiseLevel, spectrum.negativeNoiseLevel =  noiseLevel, minNoiseLevel = estimateNoiseLevel1D(y)
+        # noiseLevel, minNoiseLevel = estimateNoiseLevel1D(y)
+        spectrum.noiseLevel, spectrum.negativeNoiseLevel = noiseLevel, minNoiseLevel = estimateNoiseLevel1D(y)
 
     x_filtered, y_filtered = _1DregionsFromLimits(x,y, [a,b])
     maxValues, minValues = simple1DPeakPicker(y_filtered, x_filtered, noiseLevel, negDelta=minNoiseLevel, negative=doNeg)

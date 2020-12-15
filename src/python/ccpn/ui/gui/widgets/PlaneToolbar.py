@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 16:09:00 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -268,7 +268,7 @@ class PlaneSelectorWidget(Frame):
         # self.previousPlaneButton.setFixedWidth(_size)
         # self.previousPlaneButton.setFixedHeight(height)
 
-        self.spinBox = DoubleSpinbox(parent=self._mainWidget, showButtons=False, grid=(0, 1),
+        self.spinBox = DoubleSpinbox(parent=self._mainWidget, showButtons=False, grid=(0, 1), decimals=3,
                                      callback=self._spinBoxChanged, objectName='PlaneSelectorWidget_planeDepth')
         self.spinBox.setFixedWidth(_size * 5)
         # self.spinBox.setFixedHeight(height)
@@ -282,7 +282,7 @@ class PlaneSelectorWidget(Frame):
         self.planeCountSpinBox = Spinbox(parent=self._mainWidget, showButtons=False, grid=(0, 3), min=1, max=1000,
                                          objectName='PlaneSelectorWidget_planeCount'
                                          )
-        self.planeCountSpinBox.setFixedWidth(_size * 2)
+        self.planeCountSpinBox.setFixedWidth(_size * 2.5)
         # self.planeCountSpinBox.setFixedHeight(height)
         self.planeCountSpinBox.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
@@ -323,7 +323,7 @@ class PlaneSelectorWidget(Frame):
         """
         Increases axis ppm position by one plane
         """
-        # self.project._buildWithProfile = True
+        self.project._buildWithProfile = False
         if self.strip:
             self._callbacks[2](*args)
 
@@ -770,6 +770,7 @@ class ZPlaneToolbar(Frame):
     """
     Class to contain the widgets for zPlane navigation
     """
+
     def __init__(self, qtParent, mainWindow, strip, showHeader=False, showLabels=False, **kwds):
 
         super().__init__(parent=qtParent, setLayout=True, **kwds)
@@ -801,8 +802,8 @@ class ZPlaneToolbar(Frame):
         """
         if not isinstance(value, (tuple, list)):
             raise TypeError('{} must be tuple/list'.format(value))
-        if len(value) != len(self._strip.axisCodes)-2:
-            raise TypeError('{} must be tuple/list of length {}'.format(value, len(self._strip)-2))
+        if len(value) != len(self._strip.axisCodes) - 2:
+            raise TypeError('{} must be tuple/list of length {}'.format(value, len(self._strip) - 2))
         if not all(isinstance(val, str) for val in value):
             raise TypeError('{} must be tuple/list of strings'.format(value))
 

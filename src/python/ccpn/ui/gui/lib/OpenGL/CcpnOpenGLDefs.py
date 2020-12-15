@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-20 16:05:25 +0100 (Mon, April 20, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -74,6 +74,7 @@ GLLINE_STYLES_ARRAY = {
     'dotted': [1, 1]
     }
 
+GLDEFAULTLINETHICKNESS = 1.0
 GLLINETYPE = 'line'
 GLREGIONTYPE = 'region'
 
@@ -286,5 +287,5 @@ class AxisModes(LabelledEnum):
 
 class CursorFrameCounterModes(LabelledEnum):
     CURSOR_DEFAULT = 0, 'Default'
-    CURSOR_DRAWLAST= 1, 'DrawLast'
+    CURSOR_DRAWLAST = 1, 'DrawLast'
     CURSOR_DRAWNEXT = 2, 'DrawNext'

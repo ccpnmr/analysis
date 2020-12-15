@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-06 19:17:39 +0000 (Fri, November 06, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -118,9 +118,9 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_DRAW, \
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLExternalRegion, \
     GLRegion, REGION_COLOURS, GLInfiniteLine
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLpeakNdLabelling, GLpeak1dLabelling, \
-    GLintegral1dLabelling, GLintegralNdLabelling, \
-    GLmultiplet1dLabelling, GLmultipletNdLabelling
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLMultiplet import GLmultipletNdLabelling, GLmultiplet1dLabelling
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLPeak import GLpeakNdLabelling, GLpeak1dLabelling
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLIntegral import GLintegralNdLabelling, GLintegral1dLabelling
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 from ccpn.util.Common import getAxisCodeMatchIndices
@@ -182,6 +182,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self.glReady = False
 
         super().__init__(strip)
+        # trying to get VAOs to work on MacOS - might just give up :|
+        # GLUT.glutInitContextVersion(3, 0)
+        # GLUT.glutInitContextProfile(GLUT.GLUT_CORE_PROFILE)
 
         # GST add antiAliasing, no perceptible speed impact on my mac (intel iris graphics!)
         # samples = 4 is good enough but 8 also works well in terms of speed...
@@ -459,6 +462,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._firstVisible = None
         self.visiblePlaneList = {}
         self.visiblePlaneListPointValues = {}
+        self.visiblePlaneDimIndices = {}
         self._visibleSpectrumViewsChange = False
         self._matchingIsotopeCodes = False
 
@@ -510,7 +514,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # set projection to axis coordinates
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                         self.axisT, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        currentShader.setPMatrix(self._uPMatrix)
 
         # needs to be offset from (0,0) for mouse scaling
         if self._drawRightAxis and self._drawBottomAxis:
@@ -562,7 +566,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.symbolX = abs(self._symbolSize * self.pixelX)
         self.symbolY = abs(self._symbolSize * self.pixelY)
 
-        currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
+        currentShader.setMVMatrix(self._IMatrix)
 
         # map mouse coordinates to world coordinates - only needs to change on resize, move soon
         currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
@@ -580,11 +584,11 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        currentShader.setPTexMatrix(self._uPMatrix)
 
         self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
 
-        currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
+        currentShader.setAxisScale(self._axisScale)
         # currentShader.setGLUniform4fv('viewport', 1, self._view)
 
         if rescaleOverlayText:
@@ -870,11 +874,11 @@ class CcpnGLWidget(QOpenGLWidget):
         # control for changing screens has now been moved to mainWindow so only one signal is needed
         # GST this most probably ought to be deferred until the drag completes...
         # possibly via an event...
-        newPixelRatio = self.devicePixelRatio()
+        newPixelRatio = self.devicePixelRatioF()
         if newPixelRatio != self.lastPixelRatio:
             self.lastPixelRatio = newPixelRatio
             if hasattr(self, GLDefs.VIEWPORTSATTRIB):
-                self.viewports._devicePixelRatio = newPixelRatio
+                self.viewports.devicePixelRatio = newPixelRatio
 
             self.buildOverlayStrings()
             for spectrumView in self._ordering:
@@ -909,7 +913,7 @@ class CcpnGLWidget(QOpenGLWidget):
             return 1.0
 
     def resizeGL(self, w, h):
-        # must be set here to catch the change of screen
+        # must be set here to catch the change of screen - possibly when unplugging a monitor
         self.refreshDevicePixelRatio()
         self._resizeGL(w, h)
 
@@ -1169,10 +1173,10 @@ class CcpnGLWidget(QOpenGLWidget):
         """
         tilePos = self.strip.tilePosition if self.strip else self.tilePosition
         self.GLSignals._emitAllAxesChanged(source=None if allStrips else self,
-                                         strip=None, spectrumDisplay=self.spectrumDisplay,
-                                         axisB=self.axisB, axisT=self.axisT,
-                                         axisL=self.axisL, axisR=self.axisR,
-                                         row=tilePos[0], column=tilePos[1])
+                                           strip=None, spectrumDisplay=self.spectrumDisplay,
+                                           axisB=self.axisB, axisT=self.axisT,
+                                           axisL=self.axisL, axisR=self.axisR,
+                                           row=tilePos[0], column=tilePos[1])
 
     def emitYAxisChanged(self, allStrips=False):
         """Signal all strips in the spectrumDisplay to refresh
@@ -1828,7 +1832,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # self._GLVersion = GLversionFunctions.glGetString(GL.GL_VERSION)
 
         # initialise a common to all OpenGL windows
-        self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow, strip=self.strip)
+        self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow)
         self._glClientIndex = self.globalGL.getNextClientIndex()
 
         # initialise the arrays for the grid and axes
@@ -1936,6 +1940,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.setBackgroundColour(self.background, silent=True)
         self.globalGL._shaderProgramTex.setBlendEnabled(0)
+        self.globalGL._shaderProgramTex.setAlpha(1.0)
 
         if self.strip:
             self.updateVisibleSpectrumViews()
@@ -2078,16 +2083,19 @@ class CcpnGLWidget(QOpenGLWidget):
         self.stripIDString = GLString(text='', font=smallFont, x=0, y=0, GLContext=self, obj=None)
 
     def getSmallFont(self, transparent=False):
-        # GST tried this, it wrong sometimes, also sometimes its a float?
-        # scale =  int(self.viewports._devicePixelRatio)
-        scale = self.devicePixelRatio()
-
-        fontName = self.globalGL.glSmallTransparentFont if transparent else self.globalGL.glSmallFont
-
+        """Get the current active font
+        """
+        scale = self.viewports.devicePixelRatio
         size = self.globalGL.glSmallFontSize
-        font = '%s-%i' % (fontName, size)
 
-        return self.globalGL.fonts[font, scale]
+        # get the correct font depending on the scaling and set the scaled height/width
+        _font = list(self.globalGL.fonts.values())[0].closestFont(size * scale)
+
+        if not (0.9999 < scale < 1.0001):
+            _font.charHeight = _font.height / scale
+            _font.charWidth = _font.width / scale
+
+        return _font
 
     def _setColourScheme(self):
         """Update colours from colourScheme
@@ -2118,15 +2126,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self._preferences = self.application.preferences.general
 
         self._setColourScheme()
-
-        # change the colour of the selected 'Lock' string
-        self._lockedStringTrue = GLString(text=GLDefs.LOCKEDSTRING, font=self.getSmallFont(), x=0, y=0,
-                                          colour=self.highlightColour, GLContext=self)
-
-        # change the colour of the selected 'Fixed' string
-        self._fixedStringTrue = GLString(text=GLDefs.FIXEDSTRING, font=self.getSmallFont(), x=0, y=0,
-                                         colour=self.highlightColour, GLContext=self)
-
         # set the new limits
         self._applyXLimit = self._preferences.zoomXLimitApply
         self._applyYLimit = self._preferences.zoomYLimitApply
@@ -2134,6 +2133,25 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # set the flag to update the background in the paint event
         self._updateBackgroundColour = True
+
+        self.stripIDString.renderMode = GLRENDERMODE_REBUILD
+
+        # rebuild all the strings if the fontSize has changed
+        _size = self.application.preferences.appearance.spectrumDisplayFontSize
+        if _size != self.globalGL.glSmallFontSize:
+            self.globalGL.glSmallFontSize = _size
+            self.refreshDevicePixelRatio()
+
+        # get the updated font
+        smallFont = self.getSmallFont()
+
+        # change the colour of the selected 'Lock' string
+        self._lockedStringTrue = GLString(text=GLDefs.LOCKEDSTRING, font=smallFont, x=0, y=0,
+                                          colour=self.highlightColour, GLContext=self)
+
+        # change the colour of the selected 'Fixed' string
+        self._fixedStringTrue = GLString(text=GLDefs.FIXEDSTRING, font=smallFont, x=0, y=0,
+                                         colour=self.highlightColour, GLContext=self)
 
     def setBackgroundColour(self, col, silent=False):
         """
@@ -2211,10 +2229,12 @@ class CcpnGLWidget(QOpenGLWidget):
     def mousePressInLabel(self, mx, my, ty):
         """Check if the mouse has been pressed in the stripIDlabel
         """
-        buttons = (((GLDefs.TITLEXOFFSET + 0.5 * len(self.stripIDLabel)) * self.getSmallFont().width,
-                    ty - ((GLDefs.TITLEYOFFSET - 0.5) * self.getSmallFont().height),
-                    0.5 * len(self.stripIDLabel) * self.getSmallFont().width,
-                    0.4 * self.getSmallFont().height),)
+        smallFont = self.getSmallFont()
+
+        buttons = (((GLDefs.TITLEXOFFSET + 0.5 * len(self.stripIDLabel)) * smallFont.charWidth,
+                    ty - ((GLDefs.TITLEYOFFSET - 0.5) * smallFont.charHeight),
+                    0.5 * len(self.stripIDLabel) * smallFont.charWidth,
+                    0.4 * smallFont.charHeight),)
 
         for button in buttons:
             minDiff = abs(mx - button[0])
@@ -2610,60 +2630,15 @@ class CcpnGLWidget(QOpenGLWidget):
         # reset on the first mouseMove - frees the locked/default axis
         setattr(self.strip.spectrumDisplay, '_useFirstDefault', False)
 
-        currentPos = self.mapFromGlobal(QtGui.QCursor.pos())
         keyModifiers = QApplication.keyboardModifiers()
 
+        currentPos = self.mapFromGlobal(QtGui.QCursor.pos())
         dx = currentPos.x() - self.lastPos.x()
         dy = currentPos.y() - self.lastPos.y()
         self.lastPos = currentPos
         cursorCoordinate = self.getCurrentCursorCoordinate()
 
-        try:
-            mouseMovedDict = self.current.mouseMovedDict
-        except:
-            # initialise a new mouse moved dict
-            mouseMovedDict = {MOUSEDICTSTRIP          : self.strip,
-                              AXIS_MATCHATOMTYPE      : {},
-                              AXIS_FULLATOMNAME       : {},
-                              AXIS_ACTIVEAXES         : (),
-                              DOUBLEAXIS_MATCHATOMTYPE: {},
-                              DOUBLEAXIS_FULLATOMNAME : {},
-                              DOUBLEAXIS_ACTIVEAXES   : ()
-                              }
-
-        xPos = yPos = 0
-        activeOther = []
-        activeX = activeY = '<None>'
-
-        for n, axisCode in enumerate(self._axisCodes):
-            if n == 0:
-                xPos = pos = cursorCoordinate[0]
-                activeX = axisCode  #[0]
-
-                # double cursor
-                dPos = cursorCoordinate[1]
-            elif n == 1:
-                yPos = pos = cursorCoordinate[1]
-                activeY = axisCode  #[0]
-
-                # double cursor
-                dPos = cursorCoordinate[0]
-
-            else:
-                dPos = pos = self._orderedAxes[n].position  # if n in self._orderedAxes else 0
-                activeOther.append(axisCode)  #[0])
-
-            # populate the mouse moved dict
-            mouseMovedDict[AXIS_MATCHATOMTYPE][axisCode[0]] = pos
-            mouseMovedDict[AXIS_FULLATOMNAME][axisCode] = pos
-            mouseMovedDict[DOUBLEAXIS_MATCHATOMTYPE][axisCode[0]] = dPos
-            mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axisCode] = dPos
-
-        mouseMovedDict[AXIS_ACTIVEAXES] = (activeX, activeY) + tuple(activeOther)  # changed to full axisCodes
-        mouseMovedDict[DOUBLEAXIS_ACTIVEAXES] = (activeY, activeX) + tuple(activeOther)
-
-        self.current.cursorPosition = (xPos, yPos)
-        self.current.mouseMovedDict = mouseMovedDict
+        mouseMovedDict = self._updateMouseDict(cursorCoordinate)
 
         if int(event.buttons() & (Qt.LeftButton | Qt.RightButton)):
             # do the complicated keypresses first
@@ -2780,47 +2755,85 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.update()
 
+    def _updateMouseDict(self, cursorCoordinate):
+        try:
+            mouseMovedDict = self.current.mouseMovedDict
+        except:
+            # initialise a new mouse moved dict
+            mouseMovedDict = {MOUSEDICTSTRIP          : self.strip,
+                              AXIS_MATCHATOMTYPE      : {},
+                              AXIS_FULLATOMNAME       : {},
+                              AXIS_ACTIVEAXES         : (),
+                              DOUBLEAXIS_MATCHATOMTYPE: {},
+                              DOUBLEAXIS_FULLATOMNAME : {},
+                              DOUBLEAXIS_ACTIVEAXES   : ()
+                              }
+
+        xPos = yPos = 0
+        activeOther = []
+        activeX = activeY = '<None>'
+        for n, axisCode in enumerate(self._axisCodes):
+            if n == 0:
+                xPos = pos = cursorCoordinate[0]
+                activeX = axisCode  #[0]
+
+                # double cursor
+                dPos = cursorCoordinate[1]
+            elif n == 1:
+                yPos = pos = cursorCoordinate[1]
+                activeY = axisCode  #[0]
+
+                # double cursor
+                dPos = cursorCoordinate[0]
+
+            else:
+                dPos = pos = self._orderedAxes[n].position  # if n in self._orderedAxes else 0
+                activeOther.append(axisCode)  #[0])
+
+            # populate the mouse moved dict
+            mouseMovedDict[AXIS_MATCHATOMTYPE][axisCode[0]] = pos
+            mouseMovedDict[AXIS_FULLATOMNAME][axisCode] = pos
+            mouseMovedDict[DOUBLEAXIS_MATCHATOMTYPE][axisCode[0]] = dPos
+            mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axisCode] = dPos
+
+        mouseMovedDict[AXIS_ACTIVEAXES] = (activeX, activeY) + tuple(activeOther)  # changed to full axisCodes
+        mouseMovedDict[DOUBLEAXIS_ACTIVEAXES] = (activeY, activeX) + tuple(activeOther)
+        self.current.cursorPosition = (xPos, yPos)
+        self.current.mouseMovedDict = mouseMovedDict
+
+        return mouseMovedDict
+
     def sign(self, x):
         return 1.0 if x >= 0 else -1.0
 
     def _rescaleOverlayText(self):
         if self.stripIDString:
-            vertices = self.stripIDString.numVertices
-
             smallFont = self.getSmallFont()
-            offsets = [GLDefs.TITLEXOFFSET * smallFont.width * self.deltaX,
-                       1.0 - (GLDefs.TITLEYOFFSET * smallFont.height * self.deltaY)]
+            offsets = [GLDefs.TITLEXOFFSET * smallFont.charWidth * self.deltaX,
+                       1.0 - (GLDefs.TITLEYOFFSET * smallFont.charHeight * self.deltaY)]
 
-            for pp in range(0, 2 * vertices, 2):
-                self.stripIDString.attribs[pp:pp + 2] = offsets
-
-            self.stripIDString.updateTextArrayVBOAttribs(enableVBO=True)
+            self.stripIDString.attribs[:] = offsets * self.stripIDString.numVertices
+            self.stripIDString.updateTextArrayVBOAttribs()
 
         if self._lockedStringTrue:
             dy = STRINGOFFSET * self.deltaY
             offsets = [0, dy]
-            vertices = self._lockedStringTrue.numVertices
-            for pp in range(0, 2 * vertices, 2):
-                self._lockedStringTrue.attribs[pp:pp + 2] = offsets
-            self._lockedStringTrue.updateTextArrayVBOAttribs(enableVBO=True)
+            self._lockedStringTrue.attribs[:] = offsets * self._lockedStringTrue.numVertices
+            self._lockedStringTrue.updateTextArrayVBOAttribs()
+
             if self._lockedStringTrue:
-                vertices = self._lockedStringFalse.numVertices
-                for pp in range(0, 2 * vertices, 2):
-                    self._lockedStringFalse.attribs[pp:pp + 2] = offsets
-                self._lockedStringFalse.updateTextArrayVBOAttribs(enableVBO=True)
+                self._lockedStringFalse.attribs[:] = offsets * self._lockedStringFalse.numVertices
+                self._lockedStringFalse.updateTextArrayVBOAttribs()
             dx = self._lockedStringTrue.width * self.deltaX
 
             offsets = [dx, dy]
             if self._fixedStringFalse:
-                vertices = self._fixedStringFalse.numVertices
-                for pp in range(0, 2 * vertices, 2):
-                    self._fixedStringFalse.attribs[pp:pp + 2] = offsets
-                self._fixedStringFalse.updateTextArrayVBOAttribs(enableVBO=True)
+                self._fixedStringFalse.attribs[:] = offsets * self._fixedStringFalse.numVertices
+                self._fixedStringFalse.updateTextArrayVBOAttribs()
+
             if self._fixedStringTrue:
-                vertices = self._fixedStringTrue.numVertices
-                for pp in range(0, 2 * vertices, 2):
-                    self._fixedStringTrue.attribs[pp:pp + 2] = offsets
-                self._fixedStringTrue.updateTextArrayVBOAttribs(enableVBO=True)
+                self._fixedStringTrue.attribs[:] = offsets * self._fixedStringTrue.numVertices
+                self._fixedStringTrue.updateTextArrayVBOAttribs()
 
     def _updateHighlightedIntegrals(self, spectrumView, integralListView):
         drawList = self._GLIntegralLists[integralListView]
@@ -2890,9 +2903,9 @@ class CcpnGLWidget(QOpenGLWidget):
     def _setViewPortFontScale(self):
         # set the scale for drawing the overlay text correctly
         self._axisScale[0:4] = [self.deltaX, self.deltaY, 1.0, 1.0]
-        self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+        self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
         self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0, 1.0, -1.0, 1.0)
-        self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        self.globalGL._shaderProgramTex.setPTexMatrix(self._uPMatrix)
 
     def updateVisibleSpectrumViews(self):
         self._visibleSpectrumViewsChange = True
@@ -3038,14 +3051,14 @@ class CcpnGLWidget(QOpenGLWidget):
         # self._paintMode = PaintModes.PAINT_ALL
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
-        currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
+        currentShader.setMVMatrix(self._IMatrix)
 
         # draw the spectra, need to reset the viewport
         self.viewports.setViewport(self._currentView)
 
         with self._disableGLAliasing():
             currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-            currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+            currentShader.setPMatrix(self._uPMatrix)
 
             GL.glEnable(GL.GL_COLOR_LOGIC_OP)
             GL.glLogicOp(GL.GL_INVERT)
@@ -3075,7 +3088,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
         currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        currentShader.setPMatrix(self._uPMatrix)
 
         with self._disableGLAliasing():
             # draw the grid components
@@ -3085,8 +3098,8 @@ class CcpnGLWidget(QOpenGLWidget):
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                         self.axisT, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
-        currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
+        currentShader.setPMatrix(self._uPMatrix)
+        currentShader.setMVMatrix(self._IMatrix)
 
         # draw the spectra, need to reset the viewport
         self.viewports.setViewport(self._currentView)
@@ -3110,18 +3123,18 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        currentShader.setPTexMatrix(self._uPMatrix)
 
         self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
-        currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
-        currentShader.setGLUniform2fv('stackOffset', 1, np.array((0.0, 0.0), dtype=np.float32))
+        currentShader.setAxisScale(self._axisScale)
+        currentShader.setStackOffset(np.array((0.0, 0.0), dtype=np.float32))
 
         # draw the text to the screen
         self.enableTexture()
         self.enableTextClientState()
         self._GLPeaks.drawLabels(self._spectrumSettings, shader=currentShader, stackingMode=self._stackingMode)
         self._GLMultiplets.drawLabels(self._spectrumSettings, shader=currentShader, stackingMode=self._stackingMode)
-        currentShader.setGLUniform2fv('stackOffset', 1, np.array((0.0, 0.0), dtype=np.float32))
+        currentShader.setStackOffset(np.array((0.0, 0.0), dtype=np.float32))
 
         if not self._stackingMode:
             if not (self.is1D and self.strip._isPhasingOn):
@@ -3143,13 +3156,13 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
         self.drawTraces()
-        currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
+        currentShader.setMVMatrix(self._IMatrix)
 
         with self._disableGLAliasing():
             self.drawInfiniteLines()
 
             currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-            currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+            currentShader.setPMatrix(self._uPMatrix)
 
             self.drawSelectionBox()
             self.drawMouseMoveLine()
@@ -3190,9 +3203,9 @@ class CcpnGLWidget(QOpenGLWidget):
         # GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallFont.textureId)
 
         GL.glActiveTexture(GL.GL_TEXTURE0)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont().textureId)
-        GL.glActiveTexture(GL.GL_TEXTURE1)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont(transparent=True).textureId)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont()._parent.textureId)
+        # GL.glActiveTexture(GL.GL_TEXTURE1)
+        # GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont(transparent=True).textureId)
 
     def disableTexture(self):
         GL.glDisable(GL.GL_BLEND)
@@ -3245,7 +3258,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 rebuildFlag = True
 
                 # define the VBOs to pass to the graphics card
-                self._contourList[spectrumView].defineIndexVBO(enableVBO=True)
+                self._contourList[spectrumView].defineIndexVBO()
 
         # rebuild the traces as the spectrum/plane may have changed
         if rebuildFlag:
@@ -3271,8 +3284,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # self.buildSpectra()
 
-        # use the _devicePixelRatio for retina displays
-        GL.glLineWidth(self.strip._contourThickness * self.viewports._devicePixelRatio)
+        GL.glLineWidth(self.strip._contourThickness * self.viewports.devicePixelRatio)
         GL.glDisable(GL.GL_BLEND)
 
         for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
@@ -3331,19 +3343,16 @@ class CcpnGLWidget(QOpenGLWidget):
                                     # flipping in the same GL region -  xScale = -xScale
                                     #                                   offset = fx0-dxAF
                                     # circular -    offset = fx0 + dxAF*alias, alias = min->max
-                                    currentShader.setGLUniformMatrix4fv('mvMatrix',
-                                                                        1, GL.GL_FALSE, specMatrix)
+                                    currentShader.setMVMatrix(specMatrix)
 
-                                    self._contourList[spectrumView].drawIndexVBO(enableVBO=True)
+                                    self._contourList[spectrumView].drawIndexVBO()
 
                         else:
                             # set the scaling/offset for a single spectrum GL contour
-                            currentShader.setGLUniformMatrix4fv('mvMatrix',
-                                                                1, GL.GL_FALSE,
-                                                                self._spectrumSettings[spectrumView][
-                                                                    GLDefs.SPECTRUM_MATRIX])
+                            currentShader.setMVMatrix(self._spectrumSettings[spectrumView][
+                                                          GLDefs.SPECTRUM_MATRIX])
 
-                            self._contourList[spectrumView].drawIndexVBO(enableVBO=True)
+                            self._contourList[spectrumView].drawIndexVBO()
                 else:
 
                     # only draw the traces for the spectra that are visible
@@ -3354,12 +3363,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         if self._stackingMode:
                             # use the stacking matrix to offset the 1D spectra
-                            currentShader.setGLUniformMatrix4fv('mvMatrix',
-                                                                1, GL.GL_FALSE,
-                                                                self._spectrumSettings[spectrumView][
-                                                                    GLDefs.SPECTRUM_STACKEDMATRIX])
+                            currentShader.setMVMatrix(self._spectrumSettings[spectrumView][
+                                                          GLDefs.SPECTRUM_STACKEDMATRIX])
                         # draw contours
-                        self._contourList[spectrumView].drawVertexColorVBO(enableVBO=True)
+                        self._contourList[spectrumView].drawVertexColorVBO()
                     else:
                         pass
 
@@ -3369,7 +3376,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 #   self._makeSpectrumArray(spectrumView, self._testSpectrum)
 
         # reset lineWidth
-        GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
+        GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
 
     def buildBoundingBoxes(self):
         # NOTE:ED - routine below should be split into build/draw
@@ -3382,7 +3389,7 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader = self.globalGL._shaderProgram1
 
         # set transform to identity - ensures only the pMatrix is applied
-        currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
+        currentShader.setMVMatrix(self._IMatrix)
 
         # build the bounding boxes
         index = 0
@@ -3417,18 +3424,18 @@ class CcpnGLWidget(QOpenGLWidget):
                     drawList.numVertices += 4
                     index += 4
 
-            drawList.defineIndexVBO(enableVBO=True)
+            drawList.defineIndexVBO()
 
         with self._disableGLAliasing():
             GL.glEnable(GL.GL_BLEND)
 
-            # use the _devicePixelRatio for retina displays
-            GL.glLineWidth(self.strip._contourThickness * self.viewports._devicePixelRatio)
+            # use the viewports.devicePixelRatio for retina displays
+            GL.glLineWidth(self.strip._contourThickness * self.viewports.devicePixelRatio)
 
-            drawList.drawIndexVBO(enableVBO=True)
+            drawList.drawIndexVBO()
 
             # reset lineWidth
-            GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
+            GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
 
     def buildGrid(self):
         """Build the grids for the mainGrid and the bottom/right axes
@@ -3463,22 +3470,22 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # buffer the lists to VBOs
             for gr in self.gridList:
-                gr.defineIndexVBO(enableVBO=True)
+                gr.defineIndexVBO()
 
             # # buffer the diagonal GL line
-            # self.diagonalGLList.defineIndexVBO(enableVBO=True)
+            # self.diagonalGLList.defineIndexVBO()
 
     def drawGrid(self):
         # set to the mainView and draw the grid
         # self.buildGrid()
 
         GL.glEnable(GL.GL_BLEND)
-        GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
+        GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
 
         # draw the main grid
         if self._gridVisible:
             self.viewports.setViewport(self._currentView)
-            self.gridList[0].drawIndexVBO(enableVBO=True)
+            self.gridList[0].drawIndexVBO()
 
         # draw the diagonal line - independent of viewing the grid
         if self._matchingIsotopeCodes:  # and self.diagonalGLList:
@@ -3486,21 +3493,21 @@ class CcpnGLWidget(QOpenGLWidget):
             if not self._gridVisible:
                 self.viewports.setViewport(self._currentView)
             if self.diagonalGLList:
-                self.diagonalGLList.drawIndexVBO(enableVBO=True)
+                self.diagonalGLList.drawIndexVBO()
             if self.diagonalSideBandsGLList and self._sideBandsVisible:
-                self.diagonalSideBandsGLList.drawIndexVBO(enableVBO=True)
+                self.diagonalSideBandsGLList.drawIndexVBO()
 
         # draw the axes tick marks (effectively the same grid in smaller viewport)
         if self._axesVisible:
             if self._drawRightAxis:
                 # draw the grid marks for the right axis
                 self.viewports.setViewport(self._currentRightAxisView)
-                self.gridList[1].drawIndexVBO(enableVBO=True)
+                self.gridList[1].drawIndexVBO()
 
             if self._drawBottomAxis:
                 # draw the grid marks for the bottom axis
                 self.viewports.setViewport(self._currentBottomAxisView)
-                self.gridList[2].drawIndexVBO(enableVBO=True)
+                self.gridList[2].drawIndexVBO()
 
         # CODE TAKEN FROM V2 :)
 
@@ -3669,8 +3676,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     elif xaxisType == 'Shift' and yaxisType == 'MQShift':
                         self._addDiagonalLine(drawListSideBands, 2 * x0, 2 * x1, y0, y1, col)
 
-        drawList.defineIndexVBO(enableVBO=True)
-        drawListSideBands.defineIndexVBO(enableVBO=True)
+        drawList.defineIndexVBO()
+        drawListSideBands.defineIndexVBO()
 
     def _floatFormat(self, f=0.0, prec=3):
         """return a float string, remove trailing zeros after decimal
@@ -3717,7 +3724,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 labelColour = self.foreground
 
             smallFont = self.getSmallFont()
-            fScale = smallFont.scale
 
             if self._drawBottomAxis:
                 # create the X axis labelling
@@ -3725,14 +3731,13 @@ class CcpnGLWidget(QOpenGLWidget):
                     axisX = axLabel[2]
                     axisXLabel = axLabel[3]
 
-                    # axisXText = str(int(axisXLabel)) if axLabel[4] >= 1 else str(axisXLabel)
                     axisXText = self._intFormat(axisXLabel) if axLabel[4] >= 1 else self.XMode(axisXLabel)
 
                     self._axisXLabelling.append(GLString(text=axisXText,
                                                          font=smallFont,
-                                                         x=axisX - (0.4 * smallFont.width * self.deltaX * len(
-                                                                 axisXText) / fScale),
-                                                         y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height / fScale,
+                                                         x=axisX - (0.4 * smallFont.charWidth * self.deltaX * len(
+                                                                 axisXText)),
+                                                         y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.charHeight,
 
                                                          colour=labelColour, GLContext=self,
                                                          obj=None))
@@ -3741,15 +3746,15 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._axisXLabelling.append(GLString(text=self.axisCodes[0],
                                                      font=smallFont,
                                                      x=GLDefs.AXISTEXTXOFFSET * self.deltaX,
-                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height / fScale,
+                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.charHeight,
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
                 xUnitsLabels = self.XAXES[self._xUnits]
                 self._axisXLabelling.append(GLString(text=xUnitsLabels,
                                                      font=smallFont,
-                                                     x=1.0 - (self.deltaX * len(xUnitsLabels) * smallFont.width / fScale),
-                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height / fScale,
+                                                     x=1.0 - (self.deltaX * len(xUnitsLabels) * smallFont.charWidth),
+                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.charHeight,
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
 
@@ -3764,7 +3769,6 @@ class CcpnGLWidget(QOpenGLWidget):
                     if self.YAXISUSEEFORMAT:
                         axisYText = self.YMode(axisYLabel)
                     else:
-                        # axisYText = str(int(axisYLabel)) if ayLabel[4] >= 1 else str(axisYLabel)
                         axisYText = self._intFormat(axisYLabel) if ayLabel[4] >= 1 else self.YMode(axisYLabel)
 
                     self._axisYLabelling.append(GLString(text=axisYText,
@@ -3778,7 +3782,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._axisYLabelling.append(GLString(text=self.axisCodes[1],
                                                      font=smallFont,
                                                      x=self.AXIS_OFFSET,
-                                                     y=1.0 - (GLDefs.TITLEYOFFSET * smallFont.height * self.deltaY / fScale),
+                                                     y=1.0 - (GLDefs.TITLEYOFFSET * smallFont.charHeight * self.deltaY),
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
@@ -3802,13 +3806,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 self._axisScale[0:4] = [self.deltaX, 1.0, 1.0, 1.0]
 
-                self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+                self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
                 self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0,
                                                                   self.AXIS_MARGINBOTTOM, -1.0, 1.0)
-                self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+                self.globalGL._shaderProgramTex.setPTexMatrix(self._uPMatrix)
 
                 for lb in self._axisXLabelling:
-                    lb.drawTextArrayVBO(enableVBO=True)
+                    lb.drawTextArrayVBO()
 
             if self._drawRightAxis:
                 # put the axis labels into the right bar
@@ -3816,13 +3820,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 self._axisScale[0:4] = [1.0, self.deltaY, 1.0, 1.0]
 
-                self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+                self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
                 self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT,
                                                                   0.0, 1.0, -1.0, 1.0)
-                self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+                self.globalGL._shaderProgramTex.setPTexMatrix(self._uPMatrix)
 
                 for lb in self._axisYLabelling:
-                    lb.drawTextArrayVBO(enableVBO=True)
+                    lb.drawTextArrayVBO()
 
     def removeInfiniteLine(self, line):
         if line in self._infiniteLines:
@@ -3972,13 +3976,13 @@ class CcpnGLWidget(QOpenGLWidget):
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
             drawList._rebuild()
 
-            drawList.defineIndexVBO(enableVBO=True)
+            drawList.defineIndexVBO()
 
         elif drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
             drawList._resize()
 
-            drawList.defineIndexVBO(enableVBO=True)
+            drawList.defineIndexVBO()
 
     def buildMarksRulers(self):
         drawList = self._marksList
@@ -4049,24 +4053,24 @@ class CcpnGLWidget(QOpenGLWidget):
                         index += 2
                         drawList.numVertices += 2
 
-            drawList.defineIndexVBO(enableVBO=True)
+            drawList.defineIndexVBO()
 
         elif drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
 
-            drawList.defineIndexVBO(enableVBO=True)
+            drawList.defineIndexVBO()
 
     def drawMarksRulers(self):
         if self.strip.isDeleted:
             return
 
-        self._marksList.drawIndexVBO(enableVBO=True)
+        self._marksList.drawIndexVBO()
 
     def drawRegions(self):
         if self.strip.isDeleted:
             return
 
-        self._externalRegions.drawIndexVBO(enableVBO=True)
+        self._externalRegions.drawIndexVBO()
 
     def drawMarksAxisCodes(self):
         if self.strip.isDeleted:
@@ -4074,7 +4078,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # strings are generated when the marksRulers are modified
         for mark in self._marksAxisCodes:
-            mark.drawTextArrayVBO(enableVBO=True)
+            mark.drawTextArrayVBO()
 
     def _scaleAxisToRatio(self, values):
         return [((values[0] - self.axisL) / (self.axisR - self.axisL)) if values[0] is not None else None,
@@ -4152,21 +4156,21 @@ class CcpnGLWidget(QOpenGLWidget):
             drawList.colors = np.array(col * drawList.numVertices, dtype=np.float32)
 
             # build and draw the VBO
-            drawList.defineIndexVBO(enableVBO=True)
+            drawList.defineIndexVBO()
 
     def drawLastCursors(self):
         """Draw the cursors/doubleCursors
         """
         cursor = self._glCursorQueue[self._glCursorTail]
         if cursor.indices.size:
-            cursor.drawIndexVBO(enableVBO=True)
+            cursor.drawIndexVBO()
 
     def drawCursors(self):
         """Draw the cursors/doubleCursors
         """
         cursor = self._glCursorQueue[self._glCursorHead]
         if cursor.indices.size:
-            cursor.drawIndexVBO(enableVBO=True)
+            cursor.drawIndexVBO()
 
     def getCurrentCursorCoordinate(self):
 
@@ -4242,7 +4246,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 GL.glColor4f(*infLine.brush)
                 GL.glLineStipple(1, GLDefs.GLLINE_STYLES[infLine.lineStyle])
 
-                GL.glLineWidth(infLine.lineWidth * self.viewports._devicePixelRatio)
+                GL.glLineWidth(infLine.lineWidth * self.viewports.devicePixelRatio)
                 GL.glBegin(GL.GL_LINES)
                 if infLine.orientation == 'h':
                     GL.glVertex2d(self.axisL, infLine.values)
@@ -4254,7 +4258,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 GL.glEnd()
 
         GL.glDisable(GL.GL_LINE_STIPPLE)
-        GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
+        GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
 
     def setStripID(self, name):
         self.stripIDLabel = name
@@ -4276,8 +4280,8 @@ class CcpnGLWidget(QOpenGLWidget):
             smallFont = self.getSmallFont()
             self.stripIDString = GLString(text=self.stripIDLabel,
                                           font=smallFont,
-                                          x=GLDefs.TITLEXOFFSET * smallFont.width * self.deltaX,
-                                          y=1.0 - (GLDefs.TITLEYOFFSET * smallFont.height * self.deltaY),
+                                          x=GLDefs.TITLEXOFFSET * smallFont.charWidth * self.deltaX,
+                                          y=1.0 - (GLDefs.TITLEYOFFSET * smallFont.charHeight * self.deltaY),
                                           colour=colour, GLContext=self,
                                           obj=None, blendMode=False)
 
@@ -4285,19 +4289,19 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # Don't draw for the minute, but keep for print strip
         # # draw the strip ID to the screen
-        # self.stripIDString.drawTextArrayVBO(enableVBO=True)
+        # self.stripIDString.drawTextArrayVBO()
 
         # only display buttons in the first strip (not required in others)
         if self.AXISLOCKEDBUTTON and (self.AXISLOCKEDBUTTONALLSTRIPS or self.strip == self.strip.spectrumDisplay.strips[0]):
             if self._aspectRatioMode == 2:
-                self._fixedStringTrue.drawTextArrayVBO(enableVBO=True)
+                self._fixedStringTrue.drawTextArrayVBO()
             else:
-                self._fixedStringFalse.drawTextArrayVBO(enableVBO=True)
+                self._fixedStringFalse.drawTextArrayVBO()
 
             if self._aspectRatioMode == 1:
-                self._lockedStringTrue.drawTextArrayVBO(enableVBO=True)
+                self._lockedStringTrue.drawTextArrayVBO()
             else:
-                self._lockedStringFalse.drawTextArrayVBO(enableVBO=True)
+                self._lockedStringFalse.drawTextArrayVBO()
 
     def _rescaleRegions(self):
         self._externalRegions._rescale()
@@ -4318,7 +4322,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                self.axisR, axisPosition]
                 self._marksList.vertices[pp:pp + 4] = offsets
 
-            self._marksList.defineIndexVBO(enableVBO=True)
+            self._marksList.defineIndexVBO()
 
     def _rescaleMarksAxisCode(self, mark):
         vertices = mark.numVertices
@@ -4337,7 +4341,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 mark.attribs[pp:pp + 2] = offsets
 
             # redefine the mark's VBOs
-            mark.updateTextArrayVBOAttribs(enableVBO=True)
+            mark.updateTextArrayVBOAttribs()
 
     def rescaleMarksRulers(self):
         """rescale the marks
@@ -4605,7 +4609,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if self._drawDeltaOffset:
                 newCoords += '\n d%s: %s\n d%s: %s' % (self._axisOrder[0], self.XMode(cursorX - startX),
                                                        self._axisOrder[1], self.YMode(cursorY - startY))
-                deltaOffset = smallFont.height * 2.0 * self.pixelY
+                deltaOffset = smallFont.charHeight * 2.0 * self.pixelY
 
             mx, my = cursorCoordinate[0], cursorCoordinate[1] - deltaOffset
             self.mouseString = GLString(text=newCoords,
@@ -4628,7 +4632,7 @@ class CcpnGLWidget(QOpenGLWidget):
             oy = -min(max(_mouseOffsetT - 1.0, 0.0), _mouseOffsetB)
 
             self.mouseString.setStringOffset((ox, oy))
-            self.mouseString.updateTextArrayVBOAttribs(enableVBO=True)
+            self.mouseString.updateTextArrayVBOAttribs()
 
     def drawMouseCoords(self):
         if self.underMouse():  # and self.mouseString:
@@ -4636,7 +4640,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if self.mouseString is not None:
                 # draw the mouse coordinates to the screen
-                self.mouseString.drawTextArrayVBO(enableVBO=True)
+                self.mouseString.drawTextArrayVBO()
 
     def drawSelectionBox(self):
         # should really use the proper VBOs for this
@@ -5120,7 +5124,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         hTrace.vertices[1::2] = y
 
                     # build the VBOs here
-                    hTrace.defineVertexColorVBO(enableVBO=True)
+                    hTrace.defineVertexColorVBO()
 
             for dd in deleteHList:
                 self._staticHTraces.remove(dd)
@@ -5148,7 +5152,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     vTrace.vertices[::2] = x
 
                     # build the VBOs here
-                    vTrace.defineVertexColorVBO(enableVBO=True)
+                    vTrace.defineVertexColorVBO()
 
             for dd in deleteVList:
                 self._staticVTraces.remove(dd)
@@ -5165,11 +5169,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if self._stackingMode:
                         # use the stacking matrix to offset the 1D spectra
-                        self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
-                                                                            1, GL.GL_FALSE,
-                                                                            self._spectrumSettings[hTrace.spectrumView][
-                                                                                GLDefs.SPECTRUM_STACKEDMATRIX])
-                    hTrace.drawVertexColorVBO(enableVBO=True)
+                        self.globalGL._shaderProgram1.setMVMatrix(self._spectrumSettings[hTrace.spectrumView][
+                                                                      GLDefs.SPECTRUM_STACKEDMATRIX])
+                    hTrace.drawVertexColorVBO()
 
             for vTrace in self._staticVTraces:
                 if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isVisible():
@@ -5177,11 +5179,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if self._stackingMode:
                         # use the stacking matrix to offset the 1D spectra
-                        self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
-                                                                            1, GL.GL_FALSE,
-                                                                            self._spectrumSettings[vTrace.spectrumView][
-                                                                                GLDefs.SPECTRUM_STACKEDMATRIX])
-                    vTrace.drawVertexColorVBO(enableVBO=True)
+                        self.globalGL._shaderProgram1.setMVMatrix(self._spectrumSettings[vTrace.spectrumView][
+                                                                      GLDefs.SPECTRUM_STACKEDMATRIX])
+                    vTrace.drawVertexColorVBO()
 
         # only paint if mouse is in the window, or menu has been raised in this strip
         if self.underMouse() or self._menuActive:
@@ -5196,7 +5196,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if hTrace and not hTrace.isDeleted and hTrace.isVisible():
                         # trace.drawVertexColor()
-                        trace.drawVertexColorVBO(enableVBO=False)
+                        trace.defineVertexColorVBO()
+                        trace.drawVertexColorVBO()
 
             for dd in deleteHList:
                 del self._hTraces[dd]
@@ -5211,7 +5212,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if vTrace and not vTrace.isDeleted and vTrace.isVisible():
                         # trace.drawVertexColor()
-                        trace.drawVertexColorVBO(enableVBO=False)
+                        trace.defineVertexColorVBO()
+                        trace.drawVertexColorVBO()
 
             for dd in deleteVList:
                 del self._vTraces[dd]
@@ -6011,10 +6013,10 @@ class CcpnGLWidget(QOpenGLWidget):
             drawList.colors = np.array(col * drawList.numVertices, dtype=np.float32)
 
             # build and draw the VBO
-            drawList.defineIndexVBO(enableVBO=True)
+            drawList.defineIndexVBO()
 
             # GL.glDrawBuffer(GL.GL_FRONT)
-            drawList.drawIndexVBO(enableVBO=True)
+            drawList.drawIndexVBO()
 
         self.doneCurrent()
 

@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2018-12-20 14:08:00 +0000 (Thu, December 20, 2018) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2020-12-15 16:10:54 +0000 (Tue, December 15, 2020) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,11 +30,8 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal
 from ccpn.util.Logging import getLogger
 import numpy as np
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
-    GLRENDERMODE_DRAW
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_REBUILD, GLRENDERMODE_DRAW, GLVertexArray
 from ccpn.core.Integral import Integral
-# spawn a redraw of the GL windows
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLREGIONTYPE, GLLINETYPE
 
@@ -104,7 +101,8 @@ class GLRegion(QtWidgets.QWidget):
 
     @values.setter
     def values(self, values):
-        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar,notificationBlanking
+        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar, notificationBlanking
+
         # with notificationBlanking():
         self._values = tuple(values)
         try:
@@ -280,7 +278,8 @@ class GLRegion(QtWidgets.QWidget):
 
                 intArea.colors = np.array(solidColour * intArea.numVertices, dtype=np.float32)
 
-                intArea.defineVertexColorVBO(enableVBO=True)
+                intArea.defineVertexColorVBO()
+
 
 class GLInfiniteLine(GLRegion):
     valuesChanged = pyqtSignal(float)
@@ -346,15 +345,15 @@ class GLExternalRegion(GLVertexArray):
         self.fillMode = GL.GL_FILL
         super().drawIndexArray()
 
-    def defineIndexVBO(self, enableVBO=False):
-        super().defineIndexVBO(enableVBO=enableVBO)
+    def defineIndexVBO(self):
+        super().defineIndexVBO()
 
-    def drawIndexVBO(self, enableVBO=False):
+    def drawIndexVBO(self):
         # draw twice to highlight the outline
         self.fillMode = GL.GL_LINE
-        super().drawIndexVBO(enableVBO=enableVBO)
+        super().drawIndexVBO()
         self.fillMode = GL.GL_FILL
-        super().drawIndexVBO(enableVBO=enableVBO)
+        super().drawIndexVBO()
 
     def _clearRegions(self):
         self._regions = []
@@ -405,16 +404,16 @@ class GLExternalRegion(GLVertexArray):
                 orientation = 'v'
 
         newRegion = GLRegion(self._parent, self,
-                                      values=values,
-                                      axisCode=axisCode,
-                                      orientation=orientation,
-                                      brush=brush,
-                                      colour=colour,
-                                      movable=movable,
-                                      visible=visible,
-                                      bounds=bounds,
-                                      obj=obj,
-                                      objectView=objectView)
+                             values=values,
+                             axisCode=axisCode,
+                             orientation=orientation,
+                             brush=brush,
+                             colour=colour,
+                             movable=movable,
+                             visible=visible,
+                             bounds=bounds,
+                             obj=obj,
+                             objectView=objectView)
         self._regions.append(newRegion)
 
         axisIndex = 0
@@ -455,10 +454,10 @@ class GLExternalRegion(GLVertexArray):
             self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
         else:
             self.indices = np.array((index, index + 1, index + 2, index + 3,
-                                                    index, index + 1, index, index + 1,
-                                                    index + 1, index + 2, index + 1, index + 2,
-                                                    index + 2, index + 3, index + 2, index + 3,
-                                                    index, index + 3, index, index + 3), dtype=np.uint32)
+                                     index, index + 1, index, index + 1,
+                                     index + 1, index + 2, index + 1, index + 2,
+                                     index + 2, index + 3, index + 2, index + 3,
+                                     index, index + 3, index, index + 3), dtype=np.uint32)
             self.vertices = np.array((x0, y0, x0, y1, x1, y1, x1, y0), dtype=np.float32)
             self.colors = np.array(colour * 4, dtype=np.float32)
             self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
@@ -502,7 +501,7 @@ class GLExternalRegion(GLVertexArray):
 
                 self.vertices[pp:pp + 8] = offsets
 
-        self.defineIndexVBO(enableVBO=True)
+        self.defineIndexVBO()
 
     def _resize(self):
         axisT = self._parent.axisT
@@ -542,7 +541,7 @@ class GLExternalRegion(GLVertexArray):
             self.attribs[pp + 7] = axis1
             pp += 8
 
-        self.defineIndexVBO(enableVBO=True)
+        self.defineIndexVBO()
 
     def _rebuild(self, checkBuild=False):
         axisT = self._parent.axisT
@@ -603,6 +602,7 @@ class GLExternalRegion(GLVertexArray):
             index += 4
             self.numVertices += 4
 
+
 class GLIntegralRegion(GLExternalRegion):
     def __init__(self, project=None, GLContext=None, spectrumView=None, integralListView=None):
         super().__init__(project=project, GLContext=GLContext,
@@ -646,16 +646,16 @@ class GLIntegralRegion(GLExternalRegion):
 
         # get the new added region
         newRegion = GLRegion(self._parent, self,
-                                      values=values,
-                                      axisCode=axisCode,
-                                      orientation=orientation,
-                                      brush=brush,
-                                      colour=colour,
-                                      movable=movable,
-                                      visible=visible,
-                                      bounds=bounds,
-                                      obj=obj,
-                                      objectView=objectView)
+                             values=values,
+                             axisCode=axisCode,
+                             orientation=orientation,
+                             brush=brush,
+                             colour=colour,
+                             movable=movable,
+                             visible=visible,
+                             bounds=bounds,
+                             obj=obj,
+                             objectView=objectView)
         self._regions.append(newRegion)
 
         axisIndex = 0
@@ -722,7 +722,7 @@ class GLIntegralRegion(GLExternalRegion):
             newRegion.visible = False
             newRegion._pp = None
 
-        self.defineIndexVBO(enableVBO=True)
+        self.defineIndexVBO()
         newRegion._rebuildIntegral()
 
         return newRegion
@@ -770,7 +770,7 @@ class GLIntegralRegion(GLExternalRegion):
             self.attribs[pp + 5] = axis0
             self.attribs[pp + 7] = axis1
 
-        self.defineIndexVBO(enableVBO=True)
+        self.defineIndexVBO()
 
     def _rebuild(self, checkBuild=False):
         axisT = self._parent.axisT
@@ -797,16 +797,16 @@ class GLIntegralRegion(GLExternalRegion):
             # TODO:ED check axis units - assume 'ppm' for the minute
             if axisIndex == 0:
                 # vertical ruler
-                pos0 = x0 = lims[0]                # reg.values[0]
-                pos1 = x1 = lims[1]                # reg.values[1]
-                reg._values = (pos0, pos1)                          # not nice, but feed back in to current _values
+                pos0 = x0 = lims[0]  # reg.values[0]
+                pos1 = x1 = lims[1]  # reg.values[1]
+                reg._values = (pos0, pos1)  # not nice, but feed back in to current _values
                 y0 = axisT + pixelY
                 y1 = axisB - pixelY
             else:
                 # horizontal ruler
-                pos0 = y0 = lims[0]                # reg.values[0]
-                pos1 = y1 = lims[1]                # reg.values[1]
-                reg._values = (pos0, pos1)                          # not nice, but feed back in to current _values
+                pos0 = y0 = lims[0]  # reg.values[0]
+                pos1 = y1 = lims[1]  # reg.values[1]
+                reg._values = (pos0, pos1)  # not nice, but feed back in to current _values
                 x0 = axisL - pixelX
                 x1 = axisR + pixelX
 
@@ -817,10 +817,10 @@ class GLIntegralRegion(GLExternalRegion):
                 index = self.numVertices
                 if self.indices.size:
                     self.indices = np.append(self.indices, np.array((index, index + 1, index + 2, index + 3,
-                                                            index, index + 1, index, index + 1,
-                                                            index + 1, index + 2, index + 1, index + 2,
-                                                            index + 2, index + 3, index + 2, index + 3,
-                                                            index, index + 3, index, index + 3), dtype=np.uint32))
+                                                                     index, index + 1, index, index + 1,
+                                                                     index + 1, index + 2, index + 1, index + 2,
+                                                                     index + 2, index + 3, index + 2, index + 3,
+                                                                     index, index + 3, index, index + 3), dtype=np.uint32))
                     self.vertices = np.append(self.vertices, np.array((x0, y0, x0, y1, x1, y1, x1, y0), dtype=np.float32))
                     self.colors = np.append(self.colors, np.array(solidColour * 4, dtype=np.float32))
                     self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
@@ -851,7 +851,7 @@ class GLIntegralRegion(GLExternalRegion):
                     reg._rebuildIntegral()
 
             # rebuild VBO for the integral shape
-            # reg._integralArea.defineVertexColorVBO(enableVBO=True)
+            # reg._integralArea.defineVertexColorVBO()
 
         # redefined VBO for the highlighting
-        self.defineIndexVBO(enableVBO=True)
+        self.defineIndexVBO()

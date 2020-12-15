@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-23 09:34:54 +0100 (Wed, September 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -50,24 +50,54 @@ def _calculateCenterOfMass(multiplet):
              if you consider the multiplet as a single peak
     """
 
-    if len(multiplet.peaks) > 0:
-        position = ()
-        dim = multiplet.multipletList.spectrum.dimensionCount
-        if dim > 1:
-            for d in range(dim):
-                peakPositions = [peak.position[d] for peak in multiplet.peaks]
-                # peakIntensities = [peak.height or 1 for peak in multiplet.peaks]
-                # numerator = []
-                # for p, i in zip(peakPositions, peakIntensities):
-                #     numerator.append(p * i)
-                # centerOfMass = sum(numerator) / sum(peakIntensities)
-                # position += (centerOfMass,)
+    try:
+        _peaks = multiplet.peaks
+        _lenPeaks = len(_peaks)
+        if _lenPeaks > 0:
+            position = ()
+            dim = multiplet.multipletList.spectrum.dimensionCount
+            if dim > 1:
+                for d in range(dim):
+                    peakPositions = [peak.position[d] for peak in _peaks]
+                    # peakIntensities = [peak.height or 1 for peak in peaks]
+                    # numerator = []
+                    # for p, i in zip(peakPositions, peakIntensities):
+                    #     numerator.append(p * i)
+                    # centerOfMass = sum(numerator) / sum(peakIntensities)
+                    # position += (centerOfMass,)
 
-                position += (sum(peakPositions) / len(multiplet.peaks),)
-        else:
-            position = (sum([peak.position[0] for peak in multiplet.peaks]) / len(multiplet.peaks),
-                        sum([peak.height for peak in multiplet.peaks]) / len(multiplet.peaks))
-        return position
+                    position += (sum(peakPositions) / _lenPeaks,)
+            else:
+                position = (sum([peak.position[0] for peak in _peaks]) / _lenPeaks,
+                            sum([peak.height for peak in _peaks]) / _lenPeaks)
+            return position
+    except:
+        return None
+
+
+def _calculateCenterOfMassPoints(multiplet):
+    """Calculate the centre of mass of the multiplet peaks (in points)
+    :param multiplet: multiplet obj containing peaks.
+    :return: the center of mass of the multiplet that can be used as peak position
+             if you consider the multiplet as a single peak
+    """
+
+    try:
+        _peaks = multiplet.peaks
+        _lenPeaks = len(_peaks)
+        if _lenPeaks > 0:
+            position = ()
+            dim = multiplet.multipletList.spectrum.dimensionCount
+            if dim > 1:
+                for d in range(dim):
+                    peakPositions = [peak.pointPosition[d] for peak in _peaks]
+                    position += (sum(peakPositions) / _lenPeaks,)
+            else:
+                position = (sum([peak.position[0] for peak in _peaks]) / _lenPeaks,
+                            sum([peak.height for peak in _peaks]) / _lenPeaks)
+            return position
+    except:
+        return None
 
 
 def _getMultipletHeight(multiplet):
@@ -335,18 +365,9 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def position(self) -> Optional[Tuple[float, ...]]:
-        """Peak position in ppm (or other relevant unit) in dimension order calculated as Center Of Mass."""
-        result = None
-        try:
-            pks = self.peaks
-            # pksPos = [pp.position for pp in pks]
-            if pks:
-                # self._position = tuple(sum(item) for item in zip(*pksPos))
-                self._position = _calculateCenterOfMass(self)
-                result = self._position
-
-        finally:
-            return result
+        """Multiplet position in ppm (or other relevant unit) in dimension order calculated as Center Of Mass.
+        """
+        return _calculateCenterOfMass(self)
 
     ppmPositions = position
 
@@ -368,8 +389,14 @@ class Multiplet(AbstractWrapperObject):
     @property
     def positionError(self) -> Tuple[Optional[float], ...]:
         """Peak position error in ppm (or other relevant unit)."""
-        # TODO:LUCA calulate this :)
+        # TODO:LUCA calculate this :)
         return tuple()  # tuple(x.valueError for x in self._wrappedData.sortedPeaks())
+
+    @property
+    def pointPosition(self) -> Optional[Tuple[float, ...]]:
+        """Multiplet position in points (or other relevant unit) in dimension order calculated as Center Of Mass.
+        """
+        return _calculateCenterOfMassPoints(self)
 
     @property
     def boxWidths(self) -> Tuple[Optional[float], ...]:

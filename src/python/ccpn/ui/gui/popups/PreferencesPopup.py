@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 16:10:54 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -62,7 +62,7 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, USERAUXI
 from ccpn.framework.lib.pipeline.PipesLoader import _fetchUserPipesPath
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLFONT_SIZES, GLFONT_DEFAULTSIZE
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLFONT_DEFAULTSIZE, _OLDGLFONT_SIZES
 
 
 PEAKFITTINGDEFAULTS = [PARABOLICMETHOD, GAUSSIANMETHOD]
@@ -547,7 +547,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.glFontSizeLabel = Label(parent, text="SpectrumDisplay Font Size", grid=(row, 0))
         self.glFontSizeData = PulldownList(parent, grid=(row, 1), hAlign='l')
         self.glFontSizeData.setMinimumWidth(PulldownListsMinimumWidth)
-        self.glFontSizeData.addItems([str(val) for val in GLFONT_SIZES])
+        # self.glFontSizeData.addItems([str(val) for val in _OLDGLFONT_SIZES])
         self.glFontSizeData.currentIndexChanged.connect(self._queueChangeGLFontSize)
 
         row += 1
@@ -568,6 +568,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             _fontAttr = getattr(self, FONTDATAFORMAT.format(fontNum))
             self.setFontText(_fontAttr, value)
 
+        self.glFontSizeData.addItems([str(val) for val in _OLDGLFONT_SIZES])
         self.glFontSizeData.setCurrentIndex(self.glFontSizeData.findText(str(self.preferences.appearance.spectrumDisplayFontSize)))
 
     def _populate(self):
@@ -588,7 +589,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """
         try:
             fontList = fontString.split(',')
-            if len (fontList) == 10:
+            if len(fontList) == 10:
                 name, size, _, _, _, _, _, _, _, _ = fontList
                 type = None
             elif len(fontList) == 11:
@@ -598,7 +599,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         except:
             name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
 
-        fontName = '{}, {}pt, {}'.format(name, size, type) if type else '{}, {}pt'.format(name, size,)
+        fontName = '{}, {}pt, {}'.format(name, size, type) if type else '{}, {}pt'.format(name, size, )
         widget._fontString = fontString
         widget.setText(fontName)
 
@@ -2199,4 +2200,3 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _changeGLFontSize(self, value):
         self.preferences.appearance.spectrumDisplayFontSize = value
-

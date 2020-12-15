@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import numpy
 import numpy as np
 from OpenGL import GL
 from PyQt5 import QtCore, QtWidgets
@@ -48,7 +47,7 @@ def _getLevels(count: int, base: float, factor: float) -> list:
     if count > 0:
         levels = [base]
         for n in range(count - 1):
-            levels.append(numpy.float32(factor * levels[-1]))
+            levels.append(np.float32(factor * levels[-1]))
     return levels
 
 
@@ -499,12 +498,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         # do the contouring and store results in display list
         if doPosLevels:
-            posLevelsArray = numpy.array(posLevels, numpy.float32)
+            posLevelsArray = np.array(posLevels, np.float32)
             # print(posLevelsArray)
             # self._createDisplayLists(posLevelsArray, self.posDisplayLists)
 
         if doNegLevels:
-            negLevelsArray = numpy.array(negLevels, numpy.float32)
+            negLevelsArray = np.array(negLevels, np.float32)
             # self._createDisplayLists(negLevelsArray, self.negDisplayLists)
 
         self.posLevelsPrev = list(posLevels)
@@ -907,81 +906,79 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
 
         if dimensionCount <= 2:
-            return None, None
+            return None, None, []
 
-        else:
+        planeList = ()
+        planePointValues = ()
 
-            planeList = ()
-            planePointValues = ()
+        for dim in range(2, dimensionCount):
 
-            for dim in range(2, dimensionCount):
+            # make sure there is always a spectrumView to base visibility on
+            # useFirstVisible = firstVisible if firstVisible else self
+            zPosition = orderedAxes[dim].position
 
-                # make sure there is always a spectrumView to base visibility on
-                # useFirstVisible = firstVisible if firstVisible else self
-                zPosition = orderedAxes[dim].position
+            # check as there could be more dimensions
+            # planeCount = self.strip.planeToolbar.planeCounts[dim - 2].value()
+            planeCount = self.strip.planeAxisBars[dim - 2].planeCount  #   .planeToolbar.planeCounts[dim - 2].value()
 
-                # check as there could be more dimensions
-                # planeCount = self.strip.planeToolbar.planeCounts[dim - 2].value()
-                planeCount = self.strip.planeAxisBars[dim - 2].planeCount  #   .planeToolbar.planeCounts[dim - 2].value()
+            # valuePerPoint, _, _, _, _ = useFirstVisible._getSpectrumViewParams(2)
+            # zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)
 
-                # valuePerPoint, _, _, _, _ = useFirstVisible._getSpectrumViewParams(2)
-                # zRegionValue = (zPosition + 0.5 * (planeCount+2) * valuePerPoint, zPosition - 0.5 * (planeCount+2) * valuePerPoint)  # Note + and - (axis backwards)
+            # now get the z bounds for this spectrum
+            valuePerPoint, _, _, _, _, zDataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(dim)
 
-                # now get the z bounds for this spectrum
-                valuePerPoint, _, _, _, _, zDataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(dim)
+            # pass in a smaller valuePerPoint - if there are differences in the z-resolution, otherwise just use local valuePerPoint
+            minZWidth = 3 * valuePerPoint
+            zWidth = (planeCount + 2) * minimumValuePerPoint[dim - 2] if minimumValuePerPoint else (planeCount + 2) * valuePerPoint
 
-                # pass in a smaller valuePerPoint - if there are differences in the z-resolution, otherwise just use local valuePerPoint
-                minZWidth = 3 * valuePerPoint
-                zWidth = (planeCount + 2) * minimumValuePerPoint[dim - 2] if minimumValuePerPoint else (planeCount + 2) * valuePerPoint
+            zWidth = max(zWidth, minZWidth)
 
-                zWidth = max(zWidth, minZWidth)
+            zRegionValue = (zPosition + 0.5 * zWidth, zPosition - 0.5 * zWidth)  # Note + and - (axis backwards)
+            if not (minSpectrumFrequency <= zPosition <= maxSpectrumFrequency):
+                getLogger().debug('skipping plane depth out-of-range test')
+                # return
 
-                zRegionValue = (zPosition + 0.5 * zWidth, zPosition - 0.5 * zWidth)  # Note + and - (axis backwards)
-                if not (minSpectrumFrequency <= zPosition <= maxSpectrumFrequency):
-                    getLogger().debug('skipping plane depth out-of-range test')
-                    # return
+            if hasattr(zDataDim, 'primaryDataDimRef'):
+                ddr = zDataDim.primaryDataDimRef
+                valueToPoint = ddr and ddr.valueToPoint
+                pointToValue = ddr and ddr.pointToValue
+            else:
+                valueToPoint = zDataDim.valueToPoint
+                pointToValue = zDataDim.pointToValue
 
-                if hasattr(zDataDim, 'primaryDataDimRef'):
-                    ddr = zDataDim.primaryDataDimRef
-                    valueToPoint = ddr and ddr.valueToPoint
-                    pointToValue = ddr and ddr.pointToValue
+            # -1 below because points start at 1 in data model
+            zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
+            zPointFloat1 = valueToPoint(zRegionValue[1]) - 1
+
+            zPoint0, zPoint1 = (int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),  # this gives first and 1+last integer in range
+                                int(zPointFloat1 + (1 if zPointFloat1 >= 0 else 0)))  # and take into account negative valueToPoint
+            if zPoint0 == zPoint1:
+                if zPointFloat0 - (zPoint0 - 1) < zPoint1 - zPointFloat1:  # which is closest to an integer
+                    zPoint0 -= 1
                 else:
-                    valueToPoint = zDataDim.valueToPoint
-                    pointToValue = zDataDim.pointToValue
+                    zPoint1 += 1
 
-                # -1 below because points start at 1 in data model
-                zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
-                zPointFloat1 = valueToPoint(zRegionValue[1]) - 1
+            # ensures that the plane valueToPoint is always positive - but conflicts with aliasing in the zPlane
+            # if (zPoint1 - zPoint0) >= zTotalPointCount:
+            #     # set to the full range
+            #     zPoint0 = 0
+            #     zPoint1 = zTotalPointCount
+            # else:
+            #     zPoint0 %= zTotalPointCount
+            #     zPoint1 %= zTotalPointCount
+            #     if zPoint1 < zPoint0:
+            #         zPoint1 += zTotalPointCount
 
-                zPoint0, zPoint1 = (int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),  # this gives first and 1+last integer in range
-                                    int(zPointFloat1 + (1 if zPointFloat1 >= 0 else 0)))  # and take into account negative valueToPoint
-                if zPoint0 == zPoint1:
-                    if zPointFloat0 - (zPoint0 - 1) < zPoint1 - zPointFloat1:  # which is closest to an integer
-                        zPoint0 -= 1
-                    else:
-                        zPoint1 += 1
+            zPointOffset = zDataDim.pointOffset if hasattr(zDataDim, "pointOffset") else 0
+            zPointCount = zDataDim.numPoints
 
-                # ensures that the plane valueToPoint is always positive - but conflicts with aliasing in the zPlane
-                # if (zPoint1 - zPoint0) >= zTotalPointCount:
-                #     # set to the full range
-                #     zPoint0 = 0
-                #     zPoint1 = zTotalPointCount
-                # else:
-                #     zPoint0 %= zTotalPointCount
-                #     zPoint1 %= zTotalPointCount
-                #     if zPoint1 < zPoint0:
-                #         zPoint1 += zTotalPointCount
+            planeList = planeList + ((tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount),)
 
-                zPointOffset = zDataDim.pointOffset if hasattr(zDataDim, "pointOffset") else 0
-                zPointCount = zDataDim.numPoints
+            # need to add 0.5 for the indexing in the api
+            planePointValues = planePointValues + ((tuple(pointToValue(zz + 0.5) for zz in range(zPoint0, zPoint1 + 1)), zPointOffset, zPointCount),)
 
-                planeList = planeList + ((tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount),)
-
-                # need to add 0.5 for the indexing in the api
-                planePointValues = planePointValues + ((tuple(pointToValue(zz + 0.5) for zz in range(zPoint0, zPoint1 + 1)), zPointOffset, zPointCount),)
-
-            # return (tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount)
-            return planeList, planePointValues
+        # return (tuple(zz for zz in range(zPoint0, zPoint1)), zPointOffset, zPointCount)
+        return planeList, planePointValues, dimIndices
 
     def _getValues(self, dimensionCount=None):
         # ejb - get some spectrum information for scaling the display
@@ -998,4 +995,3 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         GLSignals = GLNotifier(parent=self)
         GLSignals.emitPaintEvent()
-

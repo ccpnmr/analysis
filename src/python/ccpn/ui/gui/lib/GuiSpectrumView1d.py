@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-09 18:03:57 +0100 (Wed, September 09, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -26,19 +26,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
-
-from PyQt5 import QtCore
-
 import pyqtgraph as pg
-
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
-
 from ccpn.util.Colour import spectrumColours, colorSchemeTable
-from ccpn.util import Phasing
 
 
 class GuiSpectrumView1d(GuiSpectrumView):
-
     hPhaseTrace = None
     buildContours = True
     buildContoursOnly = False
@@ -72,7 +65,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
         self.buildContours = True
         self.buildContoursOnly = False
 
-    def _getValues(self, dimensionCount = None):
+    def _getValues(self, dimensionCount=None):
         return [self._getSpectrumViewParams(0)]
 
     def _turnOnPhasing(self):
@@ -187,5 +180,9 @@ class GuiSpectrumView1d(GuiSpectrumView):
             pass
 
     def _paintContoursNoClip(self, plotHeight=0.0):
-        # EJB not sure how to handle this
+        # NOTE:ED - not sure how to handle this
         pass
+
+    def _getVisiblePlaneList(self, firstVisible=None, minimumValuePerPoint=None):
+        # No visible planes for 1d
+        return None, None, None

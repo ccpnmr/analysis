@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 19:00:46 +0100 (Fri, October 23, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 16:10:54 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.util.Colour import hexToRgbRatio, colorSchemeTable, ERRORCOLOUR
 from ccpn.util.Logging import getLogger
+
 
 try:
     # used to test whether all the arrays are defined correctly
@@ -74,7 +75,7 @@ class GLSimpleStrings():
 
             if spectrumView not in self.strings:
 
-                _posColours = (ERRORCOLOUR, )
+                _posColours = (ERRORCOLOUR,)
                 _posCol = spectrumView.spectrum.sliceColour
                 if _posCol and _posCol.startswith('#'):
                     _posColours = (_posCol,)
@@ -93,7 +94,7 @@ class GLSimpleStrings():
         # iterate over and draw all strings for visible spectrumViews
         for specView, string in self.strings.items():
             if specView in self._GLParent._visibleOrdering and string.stringObject and not string.stringObject.isDeleted:
-                string.drawTextArrayVBO(enableVBO=True)
+                string.drawTextArrayVBO()
 
     def objectText(self, obj):
         """return the string to be used for the label
@@ -130,7 +131,7 @@ class GLSimpleStrings():
 
         # create new label, should be ready to draw
         newLabel = GLString(text=self.objectText(obj),
-                            font=GLp.getSmallFont(),            #.globalGL.glSmallFont,
+                            font=GLp.getSmallFont(),  #.globalGL.glSmallFont,
                             x=textX,
                             y=textY,
                             colour=(*col, alpha),
@@ -267,14 +268,15 @@ class GLSimpleStrings():
             else:
                 return
 
-            for pp in range(0, 2 * vertices, 2):
-                obj.attribs[pp:pp + 2] = offsets
+            # for pp in range(0, 2 * vertices, 2):
+            #     obj.attribs[pp:pp + 2] = offsets
+            obj.attribs[:] = offsets * vertices
 
             # redefine the string's position VBOs
-            obj.updateTextArrayVBOAttribs(enableVBO=True)
+            obj.updateTextArrayVBOAttribs()
 
             try:
-                _posColours = (ERRORCOLOUR, )
+                _posColours = (ERRORCOLOUR,)
                 _posCol = obj.spectrumView.spectrum.sliceColour
                 if _posCol and _posCol.startswith('#'):
                     _posColours = (_posCol,)
@@ -285,7 +287,7 @@ class GLSimpleStrings():
                 obj.setStringHexColour(_posColours[0], alpha=1.0)
 
                 # redefine the string's colour VBOs
-                obj.updateTextArrayVBOColour(enableVBO=True)
+                obj.updateTextArrayVBOColour()
 
             except Exception as es:
                 getLogger().warning('error setting string colour')
@@ -301,6 +303,7 @@ class GLSimpleLegend(GLSimpleStrings):
     """
     Class to handle drawing the legend to the screen
     """
+
     def buildStrings(self):
         for spectrumView in self._GLParent._ordering:  # strip.spectrumViews:
 
@@ -309,7 +312,7 @@ class GLSimpleLegend(GLSimpleStrings):
 
             if spectrumView not in self.strings:
 
-                _posColours = (ERRORCOLOUR, )
+                _posColours = (ERRORCOLOUR,)
                 _posCol = spectrumView.spectrum.sliceColour
                 if _posCol and _posCol.startswith('#'):
                     _posColours = (_posCol,)
@@ -327,7 +330,7 @@ class GLSimpleLegend(GLSimpleStrings):
         # iterate over and draw all strings for visible spectrumViews
         for specView, string in self.strings.items():
             if specView in self._GLParent._visibleOrdering and string.stringObject and not string.stringObject.isDeleted:
-                string.drawTextArrayVBO(enableVBO=True)
+                string.drawTextArrayVBO()
 
     def objectText(self, obj):
         """return the string to be used for the label
@@ -360,7 +363,7 @@ class GLSimpleLegend(GLSimpleStrings):
 
         # create new label, should be ready to draw
         newLabel = GLString(text=self.objectText(obj),
-                            font=GLp.getSmallFont(),            #.globalGL.glSmallFont,
+                            font=GLp.getSmallFont(),  #.globalGL.glSmallFont,
                             x=textX,
                             y=textY,
                             colour=(*col, alpha),
@@ -395,14 +398,15 @@ class GLSimpleLegend(GLSimpleStrings):
             offsets = [GLp.axisL + position[0] * GLp.pixelX,
                        GLp.axisB + position[1] * GLp.pixelY]
 
-            for pp in range(0, 2 * vertices, 2):
-                stringObj.attribs[pp:pp + 2] = offsets
+            # for pp in range(0, 2 * vertices, 2):
+            #     stringObj.attribs[pp:pp + 2] = offsets
+            stringObj.attribs[:] = offsets * vertices
 
             # redefine the string's position VBOs
-            stringObj.updateTextArrayVBOAttribs(enableVBO=True)
+            stringObj.updateTextArrayVBOAttribs()
 
             try:
-                _posColours = (ERRORCOLOUR, )
+                _posColours = (ERRORCOLOUR,)
                 _posCol = stringObj.stringObject.sliceColour
                 if _posCol and _posCol.startswith('#'):
                     _posColours = (_posCol,)
@@ -413,7 +417,7 @@ class GLSimpleLegend(GLSimpleStrings):
                 stringObj.setStringHexColour(_posColours[0], alpha=1.0)
 
                 # redefine the string's colour VBOs
-                stringObj.updateTextArrayVBOColour(enableVBO=True)
+                stringObj.updateTextArrayVBOColour()
 
             except Exception as es:
                 getLogger().warning('error setting legend string colour')

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:06:41 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 16:10:54 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -45,6 +45,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.peakUtils import movePeak
+
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -216,6 +217,7 @@ class GuiNdWidget(CcpnGLWidget):
             0].isDeleted else None
         self.visiblePlaneList = {}
         self.visiblePlaneListPointValues = {}
+        self.visiblePlaneDimIndices = {}
 
         minList = [self._spectrumSettings[sp][SPECTRUM_VALUEPERPOINT] if SPECTRUM_VALUEPERPOINT in self._spectrumSettings[sp] else None
                    for sp in self._ordering if sp in self._spectrumSettings]
@@ -233,9 +235,13 @@ class GuiNdWidget(CcpnGLWidget):
                 minimumValuePerPoint = val
 
         for visibleSpecView in self._ordering:
-            self.visiblePlaneList[visibleSpecView], self.visiblePlaneListPointValues[visibleSpecView] = visibleSpecView._getVisiblePlaneList(
+            visValues = visibleSpecView._getVisiblePlaneList(
                     firstVisible=self._firstVisible,
                     minimumValuePerPoint=minimumValuePerPoint)
+
+            self.visiblePlaneList[visibleSpecView], \
+            self.visiblePlaneListPointValues[visibleSpecView], \
+            self.visiblePlaneDimIndices[visibleSpecView] = visValues
 
         # update the labelling lists
         self._GLPeaks.setListViews(self._ordering)
@@ -511,7 +517,7 @@ class Gui1dWidget(CcpnGLWidget):
                 rebuildFlag = True
 
                 # define the VBOs to pass to the graphics card
-                self._contourList[spectrumView].defineIndexVBO(enableVBO=True)
+                self._contourList[spectrumView].defineIndexVBO()
 
         # rebuild the traces as the spectrum/plane may have changed
         if rebuildFlag:
@@ -730,15 +736,16 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
     def getSmallFont(self, transparent=False):
         # GST tried this, it wrong sometimes, also sometimes its a float?
-        # scale =  int(self.viewports._devicePixelRatio)
-        scale = self.devicePixelRatio()
-
-        fontName = self.globalGL.glSmallTransparentFont if transparent else self.globalGL.glSmallFont
-
+        scale = self.viewports.devicePixelRatio
         size = self.globalGL.glSmallFontSize
-        font = '%s-%i' % (fontName, size)
 
-        return self.globalGL.fonts[font, scale]
+        _font = list(self.globalGL.fonts.values())[0].closestFont(size * scale)
+
+        if not (0.9999 < scale < 1.0001):
+            _font.charHeight = _font.height / scale
+            _font.charWidth = _font.width / scale
+
+        return _font
 
     def paintGL(self):
         """Handle the GL painting
@@ -849,7 +856,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         def getDigit(ll, order):
             ss = '{0:.1f}'.format(ll[3] / order)
             valLen = len(ss)
-            return ss[valLen-3]
+            return ss[valLen - 3]
 
         def getDigitLen(ll, order):
             ss = '{0:.1f}'.format(ll[3] / order)
@@ -1104,7 +1111,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 _maxChars = 1
                 for k, val in list(labelling['0'].items()):
                     _maxChars = max(_maxChars, getDigitLen(val, _minOrder[0]))
-                _width = self.w / (7.0*_maxChars)         # num of columns
+                _width = self.w / (7.0 * _maxChars)  # num of columns
                 restrictList = 0
                 ll = len(labelling['0'])
                 while ll > _width and restrictList < 3:
@@ -1115,7 +1122,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                         # remove the item
                         del labelling['0'][k]
 
-                _height = self.h / 15.0         # num of rows
+                _height = self.h / 15.0  # num of rows
                 restrictList = 0
                 ll = len(labelling['1'])
                 while ll > _height and restrictList < 3:
@@ -1157,26 +1164,26 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # buffer the lists to VBOs
         for gr in self.gridList[1:]:
-            gr.defineIndexVBO(enableVBO=True)
+            gr.defineIndexVBO()
 
     def drawGrid(self):
         # set to the mainView and draw the grid
         # self.buildGrid()
 
         GL.glEnable(GL.GL_BLEND)
-        GL.glLineWidth(1.0 * self.viewports._devicePixelRatio)
+        GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
 
         # draw the axes tick marks (effectively the same grid in smaller viewport)
         if self._axesVisible:
             if self._drawRightAxis and self._axisType == GLDefs.RIGHTAXIS:
                 # draw the grid marks for the right axis
                 self.viewports.setViewport(self._currentRightAxisView)
-                self.gridList[1].drawIndexVBO(enableVBO=True)
+                self.gridList[1].drawIndexVBO()
 
             if self._drawBottomAxis and self._axisType == GLDefs.BOTTOMAXIS:
                 # draw the grid marks for the bottom axis
                 self.viewports.setViewport(self._currentBottomAxisView)
-                self.gridList[2].drawIndexVBO(enableVBO=True)
+                self.gridList[2].drawIndexVBO()
 
     @contextmanager
     def _disableGLAliasing(self):
@@ -1404,7 +1411,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
         currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        currentShader.setPMatrix(self._uPMatrix)
 
         with self._disableGLAliasing():
             # draw the grid components
@@ -1413,7 +1420,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
         self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
-        currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
+        currentShader.setAxisScale(self._axisScale)
 
         # draw the text to the screen
         self.enableTexture()
@@ -1623,6 +1630,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._firstVisible = None
         self.visiblePlaneList = {}
         self.visiblePlaneListPointValues = {}
+        self.visiblePlaneDimIndices = {}
         self._visibleSpectrumViewsChange = False
         self._matchingIsotopeCodes = False
 
@@ -2024,7 +2032,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # self._GLVersion = GLversionFunctions.glGetString(GL.GL_VERSION)
 
         # initialise a common to all OpenGL windows
-        self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow, strip=None, spectrumDisplay=self.spectrumDisplay)
+        self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow)  #, strip=None, spectrumDisplay=self.spectrumDisplay)
         self._glClientIndex = self.globalGL.getNextClientIndex()
 
         # initialise the arrays for the grid and axes
@@ -2044,6 +2052,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
         self.setBackgroundColour(self.background, silent=True)
         self.globalGL._shaderProgramTex.setBlendEnabled(0)
+        self.globalGL._shaderProgramTex.setAlpha(1.0)
 
         self.updateVisibleSpectrumViews()
         self.initialiseAxes()
@@ -2227,11 +2236,11 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     def refreshDevicePixelRatio(self):
         """refresh the devicePixelRatio for the viewports
         """
-        newPixelRatio = self.devicePixelRatio()
+        newPixelRatio = self.devicePixelRatioF()
         if newPixelRatio != self.lastPixelRatio:
             self.lastPixelRatio = newPixelRatio
             if hasattr(self, GLDefs.VIEWPORTSATTRIB):
-                self.viewports._devicePixelRatio = newPixelRatio
+                self.viewports.devicePixelRatio = newPixelRatio
             self.update()
 
     def _preferencesUpdate(self):
@@ -2278,9 +2287,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     def _setViewPortFontScale(self):
         # set the scale for drawing the overlay text correctly
         self._axisScale[0:4] = [self.deltaX, self.deltaY, 1.0, 1.0]
-        self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+        self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
         self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0, 1.0, -1.0, 1.0)
-        self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        self.globalGL._shaderProgramTex.setPTexMatrix(self._uPMatrix)
 
     def buildAxisLabels(self, refresh=False):
         # build axes labelling
@@ -2295,7 +2304,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 labelColour = self.foreground
 
             smallFont = self.getSmallFont()
-            fScale = smallFont.scale
+            # fScale = self.devicePixelRatioF()
+            # fScale = smallFont.scale
 
             if self._drawBottomAxis and self._axisType == GLDefs.BOTTOMAXIS:
                 # create the X axis labelling
@@ -2308,9 +2318,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
                     self._axisXLabelling.append(GLString(text=axisXText,
                                                          font=smallFont,
-                                                         x=axisX - (0.4 * smallFont.width * self.deltaX * len(
-                                                                 axisXText) / fScale),
-                                                         y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height / fScale,
+                                                         x=axisX - (0.4 * smallFont.charWidth * self.deltaX * len(
+                                                                 axisXText)),  # / fScale),
+                                                         y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.charHeight,  # / fScale,
 
                                                          colour=labelColour, GLContext=self,
                                                          obj=None))
@@ -2319,15 +2329,15 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self._axisXLabelling.append(GLString(text=self.axisCodes[0],
                                                      font=smallFont,
                                                      x=GLDefs.AXISTEXTXOFFSET * self.deltaX,
-                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height / fScale,
+                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.charHeight,  # / fScale,
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
                 xUnitsLabels = self.XAXES[self._xUnits]
                 self._axisXLabelling.append(GLString(text=xUnitsLabels,
                                                      font=smallFont,
-                                                     x=1.0 - (self.deltaX * len(xUnitsLabels) * smallFont.width / fScale),
-                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.height / fScale,
+                                                     x=1.0 - (self.deltaX * len(xUnitsLabels) * smallFont.charWidth),  # / fScale),
+                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.charHeight,  # * fScale,
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
 
@@ -2356,7 +2366,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 self._axisYLabelling.append(GLString(text=self.axisCodes[1],
                                                      font=smallFont,
                                                      x=self.AXIS_OFFSET,
-                                                     y=1.0 - (GLDefs.TITLEYOFFSET * smallFont.height * self.deltaY / fScale),
+                                                     y=1.0 - (GLDefs.TITLEYOFFSET * smallFont.charHeight * self.deltaY),  # / fScale),
                                                      colour=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
@@ -2385,13 +2395,13 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 # self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
                 self._axisScale[0:4] = [self.deltaX, 1.0, 1.0, 1.0]
 
-                self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+                self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
                 self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0,
                                                                   self.AXIS_MARGINBOTTOM, -1.0, 1.0)
-                self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+                self.globalGL._shaderProgramTex.setPTexMatrix(self._uPMatrix)
 
                 for lb in self._axisXLabelling:
-                    lb.drawTextArrayVBO(enableVBO=True)
+                    lb.drawTextArrayVBO()
 
             if self._drawRightAxis and self._axisType == GLDefs.RIGHTAXIS:
                 # put the axis labels into the right bar
@@ -2400,13 +2410,13 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 # self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
                 self._axisScale[0:4] = [1.0, self.deltaY, 1.0, 1.0]
 
-                self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+                self.globalGL._shaderProgramTex.setAxisScale(self._axisScale)
                 self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT,
                                                                   0.0, 1.0, -1.0, 1.0)
-                self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+                self.globalGL._shaderProgramTex.setPTexMatrix(self._uPMatrix)
 
                 for lb in self._axisYLabelling:
-                    lb.drawTextArrayVBO(enableVBO=True)
+                    lb.drawTextArrayVBO()
 
     def enableTexture(self):
         GL.glEnable(GL.GL_BLEND)
@@ -2414,9 +2424,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # GL.glBindTexture(GL.GL_TEXTURE_2D, smallFont.textureId)
 
         GL.glActiveTexture(GL.GL_TEXTURE0)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont().textureId)
-        GL.glActiveTexture(GL.GL_TEXTURE1)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont(transparent=True).textureId)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont()._parent.textureId)
+        # GL.glActiveTexture(GL.GL_TEXTURE1)
+        # GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont(transparent=True).textureId)
 
         # # specific blend function for text overlay
         # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_DST_COLOR, GL.GL_ONE, GL.GL_ONE)
@@ -2631,7 +2641,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # add a 2-pixel tolerance to the click event - in case of a small wiggle on coordinates
         if not self._widthsChangedEnough(self._mouseStart, self._mouseEnd, tol=2):
-
             # perform click action
             self._mouseClickEvent(ev)
 
@@ -2931,7 +2940,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # set projection to axis coordinates
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                         self.axisT, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        currentShader.setPMatrix(self._uPMatrix)
 
         # needs to be offset from (0,0) for mouse scaling
         if self._drawRightAxis and self._drawBottomAxis:
@@ -2975,7 +2984,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         #                           0.2, 1.0, 0.4, 1.0,
         #                           0.3, 0.1, 1.0, 1.0]
         # currentShader.setGLUniformMatrix4fv('dataMatrix', 1, GL.GL_FALSE, self._dataMatrix)
-        currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
+        currentShader.setMVMatrix(self._IMatrix)
 
         # map mouse coordinates to world coordinates - only needs to change on resize, move soon
         currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
@@ -3002,14 +3011,14 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        currentShader.setPTexMatrix(self._uPMatrix)
 
         self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
         # self._view[0:4] = [w - self.AXIS_MARGINRIGHT, h - self.AXIS_MOUSEYOFFSET, 1.0, 1.0]
         # self._view[0:4] = [vpwidth, vpheight, 1.0, 1.0]
 
         # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
-        currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
+        currentShader.setAxisScale(self._axisScale)
         # currentShader.setGLUniform4fv('viewport', 1, self._view)
 
     def _updateVisibleSpectrumViews(self):

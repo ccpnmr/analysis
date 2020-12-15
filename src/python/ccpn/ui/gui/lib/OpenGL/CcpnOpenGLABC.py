@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:06:41 +0100 (Wed, October 07, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -67,63 +67,27 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 
 import sys
-import math
-import time
+import re
 # from threading import Thread
 # from queue import Queue
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
-from PyQt5.QtWidgets import QApplication, QOpenGLWidget
-from ccpn.util.Logging import getLogger
+from PyQt5.QtCore import QPoint, Qt, pyqtSlot
+from PyQt5.QtWidgets import QOpenGLWidget
 import numpy as np
-from pyqtgraph import functions as fn
-from ccpn.core.PeakList import PeakList
-# from ccpn.core.IntegralList import IntegralList
-from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
-from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, IntegralMenu, \
-    MultipletMenu, PhasingMenu
-
-from ccpn.core.lib.Cache import cached
-
-# from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
-    CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_INTEGRALSHADE, \
-    CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours, \
+    CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, \
+    CCPNGLWIDGET_LABELLING, \
     CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA, \
     CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, \
     CCPNGLWIDGET_HARDSHADE
-# from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation  # temp until I rewrite
-import ccpn.util.Phasing as Phasing
-from ccpn.ui.gui.lib.mouseEvents import \
-    leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
-    middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
-# from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDERMODE_DRAW, \
-    GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
-    GLREFRESHMODE_NEVER, GLREFRESHMODE_ALWAYS, \
-    GLREFRESHMODE_REBUILD, GLVertexArray, \
-    GLSymbolArray, GLLabelArray
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_REBUILD, GLVertexArray
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
-    GLRegion, REGION_COLOURS, GLInfiniteLine
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLpeakNdLabelling, GLpeak1dLabelling, \
-    GLintegral1dLabelling, GLintegralNdLabelling, \
-    GLmultiplet1dLabelling, GLmultipletNdLabelling
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLExternalRegion
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
-# from ccpn.util.Common import makeIterableList
-from typing import Tuple
-from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
-from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
-    STRIPHEADER_FOREGROUND, GUINMRRESIDUE
-
-import json
-from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
-import re
+from ccpn.ui.gui.guiSettings import getColours
 
 
 try:
@@ -342,11 +306,11 @@ class CcpnGLWidgetABC(QOpenGLWidget):
     def refreshDevicePixelRatio(self):
         """refresh the devicePixelRatio for the viewports
         """
-        newPixelRatio = self.devicePixelRatio()
+        newPixelRatio = self.devicePixelRatioF()
         if newPixelRatio != self.lastPixelRatio:
             self.lastPixelRatio = newPixelRatio
             if hasattr(self, GLDefs.VIEWPORTSATTRIB):
-                self.viewports._devicePixelRatio = newPixelRatio
+                self.viewports.devicePixelRatio = newPixelRatio
             self.update()
 
     def close(self):
@@ -455,7 +419,6 @@ class CcpnGLWidgetABC(QOpenGLWidget):
 
         self.viewports = GLViewports()
         self._screenChanged()
-        self.viewports.setDevicePixelRatio(self._devicePixelRatio)
 
         # define the main viewports
         self.viewports.addViewport(GLDefs.MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
@@ -509,6 +472,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
         self.setBackgroundColour(self.background)
         self.globalGL._shaderProgramTex.setBlendEnabled(0)
+        self.globalGL._shaderProgramTex.setAlpha(1.0)
 
         self.glReady = True
 
@@ -528,7 +492,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
 
         # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
         currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        currentShader.setPMatrix(self._uPMatrix)
 
         # draw the grid components
         # self.drawGrid()
@@ -536,7 +500,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                         self.axisT, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        currentShader.setPMatrix(self._uPMatrix)
 
         # draw the spectra, need to reset the viewport
         self.viewports.setViewport(self._currentView)
@@ -545,17 +509,17 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        currentShader.setPTexMatrix(self._uPMatrix)
 
         self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
-        currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
+        currentShader.setAxisScale(self._axisScale)
 
         self.enableTexture()
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
-        currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
+        currentShader.setMVMatrix(self._IMatrix)
 
         currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        currentShader.setPMatrix(self._uPMatrix)
 
         self.drawSelectionBox()
         self.drawCursors()
@@ -581,8 +545,8 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self.viewports.setViewport(self._currentView)
 
         # why are these labelled the other way round?
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uVMatrix)
-        currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
+        currentShader.setPMatrix(self._uVMatrix)
+        currentShader.setMVMatrix(self._IMatrix)
 
         # cheat for the moment to draw the axes (if visible)
         if self.highlighted:
@@ -630,9 +594,9 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         # GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallFont.textureId)
 
         GL.glActiveTexture(GL.GL_TEXTURE0)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont().textureId)
-        GL.glActiveTexture(GL.GL_TEXTURE1)
-        GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont(transparent=True).textureId)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont()._parent.textureId)
+        # GL.glActiveTexture(GL.GL_TEXTURE1)
+        # GL.glBindTexture(GL.GL_TEXTURE_2D, self.getSmallFont(transparent=True).textureId)
 
         # # specific blend function for text overlay
         # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_DST_COLOR, GL.GL_ONE, GL.GL_ONE)

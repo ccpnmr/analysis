@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-10 16:59:38 +0000 (Mon, February 10, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 16:10:54 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -27,8 +27,8 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 
 import sys
 from collections import namedtuple
-
 from PyQt5 import QtWidgets
+
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -38,7 +38,7 @@ except ImportError:
                                    "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 
-viewportDimensions = namedtuple('viewportDimensions', ('left', 'bottom', 'width', 'height'))
+viewportDimensions = namedtuple('viewportDimensions', 'left bottom width height')
 
 
 class GLViewports(object):
@@ -48,7 +48,15 @@ class GLViewports(object):
         self._views = {}
         self._devicePixelRatio = pixelRatio
 
-    def setDevicePixelRatio(self, pixelRatio):
+    @property
+    def devicePixelRatio(self):
+        return self._devicePixelRatio
+
+    @devicePixelRatio.setter
+    def devicePixelRatio(self, pixelRatio):
+        if not isinstance(pixelRatio, float):
+            raise TypeError('pixelValue must be a float')
+
         self._devicePixelRatio = pixelRatio
 
     def addViewport(self, name, parent, left, bottom, rightOffset, topOffset):

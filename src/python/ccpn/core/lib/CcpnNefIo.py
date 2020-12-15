@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-03 10:01:41 +0000 (Thu, December 03, 2020) $"
+__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
 __version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
@@ -5432,7 +5432,7 @@ class CcpnNefReader(CcpnNefContent):
             parameters = _parametersFromLoopRow(row, map2)
 
             # NOTE:ED - need to check if 'labelling' removed from pid (which is should be)
-            result = creatorFunc('.'.join([sampleName, parameters.get('name') or '']))
+            result = creatorFunc('.'.join([sampleName, parameters.get('name') or '', parameters.get('labelling') or '']))
             if result is not None:
                 self.error('ccpn_sample_component - SampleComponent {} already exists'.format(result), loop, (result,))
                 _rowErrors.add(loop.data.index(row))

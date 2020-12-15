@@ -265,11 +265,20 @@ class DataStore(CcpNmrJson):
             self._saveInternal()
 
     @classmethod
-    def newFromPath(cls, path, expandData=False, autoRedirect=False):
-        """Create and return a new instance from path
+    def newFromPath(cls, path, expandData=False, autoRedirect=False, appendToBasename=None, withSuffix=None):
+        """Create and return a new instance from path; optionally append to basename and set suffix
         """
+        _p = Path(path)
+
+        if appendToBasename is not None:
+            _p = _p.withoutSuffix() + appendToBasename
+
+        suffix = _p.suffix if withSuffix is None else withSuffix
+        if suffix:
+            _p = _p.withSuffix(suffix)
+
         instance = cls(expandData=expandData, autoRedirect=autoRedirect)
-        instance.path = path
+        instance.path = _p
         return instance
 
     @classmethod

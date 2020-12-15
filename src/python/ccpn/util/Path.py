@@ -158,6 +158,22 @@ class Path(_Path_):
         else:
             return self
 
+    def withoutSuffix(self):
+        """Return self without suffix
+        """
+        if len(self.suffixes) > 0:
+            return self.with_suffix('')
+        else:
+            return self
+
+    def withSuffix(self, suffix):
+        """Return self with suffix; inverse of withoutSuffix()
+        partially copies with_suffix, but does not allow for empty argument
+        """
+        if suffix is None or len(suffix) == 0:
+            raise ValueError('No suffix defined')
+        return self.with_suffix(suffix=suffix)
+
     def split3(self):
         """Return a tuple of (.parent, .stem, .suffix) strings
         """

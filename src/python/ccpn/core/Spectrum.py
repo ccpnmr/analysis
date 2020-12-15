@@ -2772,7 +2772,11 @@ class Spectrum(AbstractWrapperObject):
     def delete(self):
         """Delete Spectrum"""
         with undoBlock():
+
             self._clearCache()
+            if self._dataSource is not None:
+                self._dataSource.closeFile()
+
             # self.deleteAllNotifiers() TODO: no longer required?
 
             # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
@@ -3056,8 +3060,9 @@ class Spectrum(AbstractWrapperObject):
 #     Project._apiNotifiers.remove(_notifiers[0])
 
 
-def _newSpectrumFromDataSource(project, dataStore, dataSource, name):
-    """Create a new Spectrum instance using the data in dataStore and dataSource
+@newObject(Spectrum)
+def _newSpectrumFromDataSource(project, dataStore, dataSource, name) -> Spectrum:
+    """Create a new Spectrum instance with name using the data in dataStore and dataSource
     Returns Spectrum instance or None on error
     """
 
@@ -3069,10 +3074,13 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name):
             i += 1
         name = '%s_%s' % (name, i)
 
+    # check the dataSources for open file pointers to the same file
+    for ds in [sp._dataSource for sp in project.spectra if sp._dataSource is not None]:
+        if ds.path == dataSource.path and ds.hasOpenFile():
+            raise RuntimeError('Unable to create new Spectrum; project has existing open dataSource %s' % ds)
+
     apiProject = project._wrappedData
-    apiExperiment = apiProject.newExperiment(name=name,
-                                             numDim=dataSource.dimensionCount,
-                                            )
+    apiExperiment = apiProject.newExperiment(name=name, numDim=dataSource.dimensionCount)
 
     apiDataSource = apiExperiment.newDataSource(name=name,
                                                 dataStore=None,
@@ -3123,6 +3131,9 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name):
     dataStore._saveInternal()
     spectrum._dataStore = dataStore
 
+    # update dataSource with proper expanded path
+    dataSource.setPath(dataStore.aPath())
+
     # Update all parameters from the dataSource to the Spectrum instance; retain the dataSource instance
     dataSource.exportToSpectrum(spectrum, includePath=False)
     spectrum._dataSource = dataSource
@@ -3130,20 +3141,22 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name):
     # Link to default (i.e. first) chemicalShiftList
     spectrum.chemicalShiftList = project.chemicalShiftLists[0]
 
-    # # Assure at least one peakList
-    if len(spectrum.peakLists) == 0:
-        spectrum.newPeakList()
+    # Quietly set some values
+    with notificationBlanking():
+        with notificationEchoBlocking():
+            # # Assure at least one peakList
+            if len(spectrum.peakLists) == 0:
+                spectrum.newPeakList()
 
-    # Set noiseLevel, contourLevels, contourColours
-    spectrum.estimateNoise()
-    spectrum._setDefaultContourValues()
-    spectrum._setDefaultContourColours()
-    spectrum.sliceColour = spectrum.positiveContourColour
+            # Set noiseLevel, contourLevels, contourColours
+            spectrum.estimateNoise()
+            spectrum._setDefaultContourValues()
+            spectrum._setDefaultContourColours()
+            spectrum.sliceColour = spectrum.positiveContourColour
 
     return spectrum
 
 
-@newObject(Spectrum)
 def _newEmptySpectrum(self: Project, isotopeCodes:Sequence[str], name: str='empty') -> Spectrum:
     """Creation of new Empty Spectrum;
     :return: Spectrum instance or None on error
@@ -3170,7 +3183,6 @@ def _newEmptySpectrum(self: Project, isotopeCodes:Sequence[str], name: str='empt
     return _newSpectrumFromDataSource(self, dataStore, dataSource, name)
 
 
-@newObject(Spectrum)
 def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
     """Creation of new Spectrum;
     :return: Spectrum instance or None on error

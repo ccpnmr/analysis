@@ -3065,6 +3065,13 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name) -> Spectrum
     """Create a new Spectrum instance with name using the data in dataStore and dataSource
     Returns Spectrum instance or None on error
     """
+    if dataStore is None:
+        raise ValueError('dataStore cannot be None')
+
+    if dataSource is None:
+        raise ValueError('dataSource cannot be None')
+    if dataSource.dimensionCount == 0:
+        raise ValueError('dataSource.dimensionCount = 0')
 
     # assure unique name
     names = [sp.name for sp in project.spectra]
@@ -3212,7 +3219,53 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
 
     return _newSpectrumFromDataSource(self, dataStore, dataSource, name)
 
+def _extractRegionToFile(spectrum, dimensions, sliceTuples, name=None, path=None, dataFormat = 'Hdf5'):
+    """Extract a region of spectrum, defined by dimensions and sliceTuples to path
+    """
+    # local import to prevent cycles
+    from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
 
+    if spectrum is None or not isinstance(spectrum, Spectrum):
+        raise ValueError('invalid spectrum argument %r' % spectrum)
+
+    for dim in dimensions:
+        if dim < 1 or dim > spectrum.dimensionCount:
+            raise ValueError('invalid dimnsion %r in dimensions argument (%s)' % (dim, dimensions))
+    dimensions = list(dimensions)  # assure a list
+
+    if spectrum._dataSource is None:
+        raise RuntimeError('No proper (filePath, dataFormat) set for %s' % spectrum)
+
+    spectrum._dataSource.checkForValidRegion(sliceTuples, aliasingFlags=[0]*spectrum.dimensionCount)
+
+    if name is None:
+        name = spectrum.name + '_dims' + '_'.join(str(dim) for dim in dimensions)
+
+    klass = getDataFormats().get(dataFormat)
+    if klass is None:
+        raise ValueError('invalid dataFormat %r' % dataFormat)
+
+    # Do path-related stuff
+    suffix = klass.suffixes[0] if len(klass.suffixes)>0 else '.dat'
+    if path is None:
+        dataStore = DataStore.newFromPath(spectrum.filePath, appendToBasename='_region', withSuffix=suffix)
+    else:
+        dataStore = DataStore.newFromPath(path, withSuffix=suffix)
+
+    # Create a dataSource object
+    dataSource = klass(dimensionCount=spectrum.dimensionCount)
+
+    excludeDimensions = list(set(spectrum.dimensions) - set(dimensions))
+    # Copy (and map) the dimensional parameters onto the first N axes of dataSource;
+    dimensionMap = dict(zip(dimensions+excludeDimensions, dataSource.dimensions))
+    dataSource._copyAttributesFromSpectrum(spectrum, dimensionMap=dimensionMap)
+    # Now reduce dimensionality
+    dataSource.setDimensionCount(len(dimensions))
+    dataSource.printParameters()
+
+    newSpectrum = _newSpectrumFromDataSource(project=spectrum.project, dataStore=dataStore, dataSource=dataSource, name=name)
+    return newSpectrum
+    # return dataSource
 
 
 @newObject(Spectrum)

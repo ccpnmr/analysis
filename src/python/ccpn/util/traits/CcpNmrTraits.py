@@ -411,8 +411,17 @@ class CString(TraitType, _Ordered):
 
     # trait-specific json handler
     class jsonHandler(TraitJsonHandlerBase):
-        """json compatible; all handeled by TraitJsonHandlerBase
+        """json compatible;
         """
         pass
+        # def encode(self, obj, trait):
+        #     "returns a json serialisable object"
+        #     value = getattr(obj, trait)
+        #     return CString.asBytes(value)
+        #
+        # def decode(self, obj, trait, value):
+        #     "uses value to generate and set the new (or modified) obj"
+        #     value = CString.fromBytes
+        #     setattr(obj, trait, value)
 
 # end class

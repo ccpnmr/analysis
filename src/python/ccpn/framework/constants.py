@@ -33,5 +33,5 @@ CCPNMR_PREFIX = '_ccpNmrV3_'
 
 
 # General
-UNDEFINED_STRING = '<Undefined>'
-NONE_STRING = '<None>'
+UNDEFINED_STRING = '_Undefined_'
+NONE_STRING = '_None_'

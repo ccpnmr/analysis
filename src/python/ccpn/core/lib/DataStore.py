@@ -281,6 +281,11 @@ class DataStore(CcpNmrJson):
         instance.path = _p
         return instance
 
+    def hasPathDefined(self):
+        """Return True if path has been defined
+        """
+        return self._path is not None
+
     @classmethod
     def checkPath(cls, path, silent=True):
         """Check if expanded path exists and return an instance or None otherwise

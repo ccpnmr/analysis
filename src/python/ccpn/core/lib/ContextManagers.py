@@ -659,6 +659,36 @@ def notificationEchoBlocking(application=None):
         # clean up after disabling echo blocking
         application._decreaseNotificationBlocking()
 
+@contextmanager
+def inactivity(application=None):
+    """
+    Block all notifiers, apiNotifiers, undo and echo-ing
+    re-enable at the end of the function block.
+    """
+
+    # get the application
+    if not application:
+        application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
+
+    application.project.blankNotification()
+    application._increaseNotificationBlocking()
+    application.project._apiNotificationBlanking += 1
+
+    try:
+        with undoStackBlocking(application=application):
+            # transfer control to the calling function
+            yield
+
+    except AttributeError as es:
+        raise es
+
+    finally:
+        # clean up after blocking notifications
+        application.project.unblankNotification()
+        application._decreaseNotificationBlocking()
+        application.project._apiNotificationBlanking -= 1
 
 @contextmanager
 def notificationUnblanking():

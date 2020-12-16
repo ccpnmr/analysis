@@ -94,7 +94,8 @@ from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
 from ccpn.core.lib.Cache import cached
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSimple, \
                                           undoStackBlocking, renameObject, undoBlock, notificationBlanking, \
-                                          apiNotificationBlanking, ccpNmrV3CoreSetter, notificationEchoBlocking
+                                          apiNotificationBlanking, ccpNmrV3CoreSetter, notificationEchoBlocking, \
+                                          inactivity
 from ccpn.core.lib.DataStore import DataStore
 from ccpn.core.lib.Notifiers import Notifier
 
@@ -488,13 +489,15 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def noiseLevel(self) -> float:
-        """Estimated noise level for the spectrum,
-        defined as the estimated standard deviation of the points from the baseplane/baseline
+        """Noise level for the spectrum
         """
         noise = self._wrappedData.noiseLevel
-        if noise is None:
-            noise = self.estimateNoise()
-            self._wrappedData.noiseLevel = noise
+        # if noise is None:
+        #     noise = self.estimateNoise()
+        #     if noise is None:
+        #         getLogger().warning('Failed to estimate the noise; arbitrarily setting to 1e6')
+        #         noise = 1.0e6
+        #     self._wrappedData.noiseLevel = noise
         return noise
 
     @noiseLevel.setter
@@ -2062,14 +2065,14 @@ class Spectrum(AbstractWrapperObject):
                                  (attributeName, self, values)
                                  )
 
-    def getByDimensions(self, attributeName: str, dimensions: Sequence[int] = None):
-        """Return values defined by attributeName in order defined by dimensions (1..dimensionCount).
+    def getByDimensions(self, parameterName: str, dimensions: Sequence[int] = None):
+        """Return values of parameterName in order defined by dimensions (1..dimensionCount).
            (default order if None)
            NB: Use getByAxisCodes for axisCode based access
         """
-        if not hasattr(self, attributeName):
-            raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
-        values = getattr(self, attributeName)
+        if not hasattr(self, parameterName):
+            raise AttributeError('Spectrum object does not have attribute "%s"' % parameterName)
+        values = getattr(self, parameterName)
 
         if dimensions is None:
             return values
@@ -2082,25 +2085,35 @@ class Spectrum(AbstractWrapperObject):
                 newValues.append(values[dim - 1])
         return newValues
 
-    def setByDimensions(self, attributeName: str, values: Sequence, dimensions: Sequence[int] = None):
-        """Set attributeName to values in order defined by dimensions (1..dimensionCount).
+    def setByDimensions(self, parameterName: str, values: Sequence, dimensions: Sequence[int] = None):
+        """Set parameterName to values as defined by dimensions (1..dimensionCount).
            (default order if None)
            NB: Use setByAxisCodes for axisCode based access
         """
-        if not hasattr(self, attributeName):
-            raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
+        if not hasattr(self, parameterName):
+            raise AttributeError('Spectrum object does not have attribute "%s"' % parameterName)
+
+        if not isIterable(values):
+            raise ValueError('values "%s" is not iterable' % (values))
 
         if dimensions is None:
-            setattr(self, attributeName, values)
-            return
+            dimensions = self.dimensions
 
-        newValues = []
-        for dim in dimensions:
+        if not isIterable(dimensions):
+            raise ValueError('dimensions "%s" is not iterable' % (dimensions))
+
+        newValues = getattr(self, parameterName)
+        for idx, dim in enumerate(dimensions):
             if not (1 <= dim <= self.dimensionCount):
                 raise ValueError('Invalid dimension "%d"; should be one of %s' % (dim, self.dimensions))
             else:
-                newValues.append(values[dim - 1])
-        setattr(self, attributeName, newValues)
+                newValues[dim-1] = values[idx]
+        try:
+            setattr(self, parameterName, newValues)
+        except AttributeError:
+            raise AttributeError('Unable to set attribute "%s" of object %s to "%s"' %
+                                 (parameterName, self, values)
+                                 )
 
     def searchAxisCodePermutations(self, checkCodes: Tuple[str, ...]) -> Optional[Tuple[int]]:
         """Generate the permutations of the current axisCodes
@@ -2541,14 +2554,13 @@ class Spectrum(AbstractWrapperObject):
         return newSpectrum
 
     def estimateNoise(self):
-        """Estimate and set the noiseLevel
+        """Estimate and return the noise level
         """
         if self._dataSource is not None:
-            self.noiseLevel = self._dataSource.estimateNoise()
+            noise = self._dataSource.estimateNoise()
         else:
-            getLogger().warning('No valid access to spectral data')
-            self.noiseLevel = None
-        return self.noiseLevel
+            noise = None
+        return noise
 
     def _clone1D(self):
         'Clone 1D spectrum to a new spectrum.'
@@ -2683,20 +2695,27 @@ class Spectrum(AbstractWrapperObject):
             getLogger().warning('Error restoring valid data source for % s (es)' % (spectrum, es))
 
         # Assure a setting of crucial attributes
-        if spectrum.noiseLevel is None:
-            spectrum.estimateNoise()
+        getLogger().debug('Updating %s parameters' % spectrum)
 
-        if spectrum.scale is None:
-            spectrum.scale = 1.0
+        # Quietly set some values
+        with notificationBlanking():
+            with notificationEchoBlocking():
 
-        if not spectrum.positiveContourBase or not spectrum.negativeContourBase:
-            spectrum._setDefaultContourValues()
+                # getting the noiseLevel will call estimateNoise() if not defined
+                if spectrum.noiseLevel is None:
+                    spectrum.noiseLevel = spectrum.estimateNoise()
 
-        if not spectrum.positiveContourColour or not spectrum.negativeContourColour:
-            spectrum._setDefaultContourColours()
+                if spectrum.scale is None:
+                    spectrum.scale = 1.0
 
-        if not spectrum.sliceColour:
-            spectrum.sliceColour = spectrum.positiveContourColour
+                if not spectrum.positiveContourBase or not spectrum.negativeContourBase:
+                    spectrum._setDefaultContourValues()
+
+                if not spectrum.positiveContourColour or not spectrum.negativeContourColour:
+                    spectrum._setDefaultContourColours()
+
+                if not spectrum.sliceColour:
+                    spectrum.sliceColour = spectrum.positiveContourColour
 
         return spectrum
 
@@ -3145,21 +3164,13 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name) -> Spectrum
     dataSource.exportToSpectrum(spectrum, includePath=False)
     spectrum._dataSource = dataSource
 
-    # Link to default (i.e. first) chemicalShiftList
-    spectrum.chemicalShiftList = project.chemicalShiftLists[0]
-
-    # Quietly set some values
-    with notificationBlanking():
-        with notificationEchoBlocking():
-            # # Assure at least one peakList
-            if len(spectrum.peakLists) == 0:
-                spectrum.newPeakList()
-
-            # Set noiseLevel, contourLevels, contourColours
-            spectrum.estimateNoise()
-            spectrum._setDefaultContourValues()
-            spectrum._setDefaultContourColours()
-            spectrum.sliceColour = spectrum.positiveContourColour
+    # Quietly update some essentials
+    with inactivity():
+        # Link to default (i.e. first) chemicalShiftList
+        spectrum.chemicalShiftList = project.chemicalShiftLists[0]
+        # Assure at least one peakList
+        if len(spectrum.peakLists) == 0:
+            spectrum.newPeakList()
 
     return spectrum
 
@@ -3187,8 +3198,15 @@ def _newEmptySpectrum(self: Project, isotopeCodes:Sequence[str], name: str='empt
     dataSource._setSpectralParametersFromIsotopeCodes()
     dataSource._assureProperDimensionality()
 
-    return _newSpectrumFromDataSource(self, dataStore, dataSource, name)
+    spectrum = _newSpectrumFromDataSource(self, dataStore, dataSource, name)
+    # Quietly set some values
+    with inactivity():
+        # Set contourLevels, contourColours, this also estimates the noise
+        spectrum._setDefaultContourValues()
+        spectrum._setDefaultContourColours()
+        spectrum.sliceColour = spectrum.positiveContourColour
 
+    return spectrum
 
 def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
     """Creation of new Spectrum;
@@ -3217,7 +3235,15 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
         dir, base, ext = _path.split3()
         name = base
 
-    return _newSpectrumFromDataSource(self, dataStore, dataSource, name)
+    spectrum = _newSpectrumFromDataSource(self, dataStore, dataSource, name)
+    # Quietly set some values
+    with inactivity():
+        # Set contourLevels, contourColours, this also estimates the noise
+        spectrum._setDefaultContourValues()
+        spectrum._setDefaultContourColours()
+        spectrum.sliceColour = spectrum.positiveContourColour
+
+    return spectrum
 
 def _extractRegionToFile(spectrum, dimensions, sliceTuples, name=None, path=None, dataFormat = 'Hdf5'):
     """Extract a region of spectrum, defined by dimensions and sliceTuples to path

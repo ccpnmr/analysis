@@ -102,6 +102,8 @@ from ccpn.ui.gui.lib.MenuActions import _openItemNoteTable, _openItemChemicalShi
     _openItemSpectrumInGroupDisplay
 
 from ccpn.util.OrderedSet import OrderedSet
+from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, \
+    undoBlockWithoutSideBar, undoStackBlocking
 
 
 ALL_NOTIFIERS = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE]
@@ -1311,15 +1313,17 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         if text is not None:
             objFromPid = self.project.getByPid(text)
             strip = self.application.current.strip
-            if strip:
-                strip._clear()
-                if isinstance(objFromPid, Spectrum):
-                    strip._displaySpectrum(objFromPid, useUndoBlock=False)
-                if isinstance(objFromPid, Sample):
-                    strip.setStackingMode(False)
-                    _openItemSampleDisplay._openSampleSpectraOnDisplay(objFromPid, strip.spectrumDisplay)
-                    v = strip._getInitialOffset()
-                    strip.setStackingMode(True)
+            with undoBlockWithoutSideBar():
+                with notificationEchoBlocking():
+                    if strip:
+                        strip._clear()
+                        if isinstance(objFromPid, Spectrum):
+                            strip._displaySpectrum(objFromPid, useUndoBlock=False)
+                        if isinstance(objFromPid, Sample):
+                            strip.setStackingMode(False)
+                            _openItemSampleDisplay._openSampleSpectraOnDisplay(objFromPid, strip.spectrumDisplay)
+                            v = strip._getInitialOffset()
+                            strip.setStackingMode(True)
 
     def keyPressEvent(self, e):
         """

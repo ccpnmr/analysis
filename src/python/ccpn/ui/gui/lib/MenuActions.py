@@ -557,18 +557,20 @@ class _openItemSampleDisplay(OpenItemABC):
 
     @staticmethod
     def _openSampleSpectraOnDisplay(sample, spectrumDisplay, autoRange=False):
-        if len(sample.spectra) > 0:
-            if len(spectrumDisplay.strips)>0:
-                strip = spectrumDisplay.strips[0]
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                if len(sample.spectra) > 0:
+                    if len(spectrumDisplay.strips)>0:
+                        strip = spectrumDisplay.strips[0]
 
-                for sampleComponent in sample.sampleComponents:
-                    if sampleComponent.substance is not None:
-                        for spectrum in sampleComponent.substance.referenceSpectra:
+                        for sampleComponent in sample.sampleComponents:
+                            if sampleComponent.substance is not None:
+                                for spectrum in sampleComponent.substance.referenceSpectra:
+                                    strip._displaySpectrum(spectrum, useUndoBlock = False)
+                        for spectrum in sample.spectra:
                             strip._displaySpectrum(spectrum, useUndoBlock = False)
-                for spectrum in sample.spectra:
-                    strip._displaySpectrum(spectrum, useUndoBlock = False)
-                if autoRange:
-                    spectrumDisplay.autoRange()
+                        if autoRange:
+                            spectrumDisplay.autoRange()
 
     def _openSampleSpectra(self, sample, position=None, relativeTo=None):
         """Add spectra linked to sample and sampleComponent. Particularly used for screening

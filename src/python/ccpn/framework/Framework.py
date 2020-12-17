@@ -752,12 +752,15 @@ class Framework(NotifierBase):
         project = self.project
 
         # 20191113:ED Initial insertion of spectrumDisplays into the moduleArea
-        insertPoint = self.ui.mainWindow.moduleArea
-        for spectrumDisplay in project.spectrumDisplays:
-            self.ui.mainWindow.moduleArea.addModule(spectrumDisplay,
-                                                    position='right',
-                                                    relativeTo=insertPoint)
-            insertPoint = spectrumDisplay
+        try:
+            insertPoint = self.ui.mainWindow.moduleArea
+            for spectrumDisplay in project.spectrumDisplays:
+                self.ui.mainWindow.moduleArea.addModule(spectrumDisplay,
+                                                        position='right',
+                                                        relativeTo=insertPoint)
+                insertPoint = spectrumDisplay
+        except Exception as e:
+            getLogger().warning('Impossible to restore SpectrumDisplays')
 
         try:
             if self.preferences.general.restoreLayoutOnOpening:
@@ -767,12 +770,15 @@ class Framework(NotifierBase):
         except Exception as e:
             getLogger().warning('Impossible to restore Layout %s' % e)
 
-        # Initialise displays
-        for spectrumDisplay in project.windows[0].spectrumDisplays:  # there is exactly one window
-            pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
+        try:
+            # Initialise displays
+            for spectrumDisplay in project.windows[0].spectrumDisplays:  # there is exactly one window
+                pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
+            # initialise any colour changes before generating gui strips
+            self.correctColours()
+        except Exception as e:
+            getLogger().warning('Impossible to restore SpectrumDisplays')
 
-        # initialise any colour changes before generating gui strips
-        self.correctColours()
 
         # Initialise strips
         try:
@@ -859,6 +865,13 @@ class Framework(NotifierBase):
                                          minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
         except Exception as e:
             getLogger().warning('Impossible to restore spectrumDisplay(s) %s' % e)
+
+        try:
+            if self.current.strip is None:
+                if len(self.project.strips) > 0:
+                    self.current.strip = self.project.strips[0]
+        except Exception as e:
+            getLogger().warning('Impossible to restore spectrumDisplay(s) %s' % e)
         #~~~~~~~~~~~~~~~~
         #
         # # Initialise SpectrumDisplays, SpectrumViews
@@ -888,9 +901,6 @@ class Framework(NotifierBase):
         #
         #~~~~~~~~~~~~~~~~
 
-        if self.current.strip is None:
-            if len(self.project.strips) > 0:
-                self.current.strip = self.project.strips[0]
 
     def get(self, identifier):
         """General method to obtain object (either gui or data) from identifier (pid, gid, obj-string)

@@ -951,6 +951,14 @@ class AbstractWrapperObject(NotifierBase):
             objs.extend(children)
         return objs
 
+    def _initAllNoUIchildren(self):
+        """Initialise NoUI children: spectra, peaks..."""
+        pass
+
+    def _initAllUIchildren(self):
+        """Initialise UI children: spectrumDisplays"""
+        pass
+
     def _initializeAll(self):
         """Initialize children, using existing objects in data model"""
 
@@ -958,20 +966,32 @@ class AbstractWrapperObject(NotifierBase):
         data2Obj = project._data2Obj
 
         for childClass in self._childClasses:
-            # recursively create children
-            for apiObj in childClass._getAllWrappedData(self):
-                obj = data2Obj.get(apiObj)
-                if obj is None:
-                    factoryFunction = childClass._factoryFunction
-                    if factoryFunction is None:
-                        obj = childClass(project, apiObj)
-                    else:
-                        obj = factoryFunction(project, apiObj)
+            if not childClass._isGuiClass:
                 try:
-                    obj._initializeAll()
+                    self._initChildClass(childClass, data2Obj, project)
                 except Exception as er:
-                    getLogger().warning('Error initialising object %s. %s1' % (obj, er))
-                # getLogger().info(str(obj))   # ejb - temp
+                    getLogger().warning('Error initialising Object %s. %s1' % (childClass, er))
+            else:
+                try:
+                    self._initChildClass(childClass, data2Obj, project)
+                except Exception as er:
+                    getLogger().warning('Error initialising Gui Object %s. %s1' % (childClass, er))
+
+    def _initChildClass(self, childClass, data2Obj, project):
+        # recursively create children
+        for apiObj in childClass._getAllWrappedData(self):
+            obj = data2Obj.get(apiObj)
+            if obj is None:
+                factoryFunction = childClass._factoryFunction
+                if factoryFunction is None:
+                    obj = childClass(project, apiObj)
+                else:
+                    obj = factoryFunction(project, apiObj)
+            try:
+                obj._initializeAll()
+            except Exception as er:
+                getLogger().warning('Error initialising object %s. %s1' % (obj, er))
+            # getLogger().info(str(obj))   # ejb - temp
 
     def _unwrapAll(self):
         """remove wrapper from object and child objects

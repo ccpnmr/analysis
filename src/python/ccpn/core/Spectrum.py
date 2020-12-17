@@ -3239,14 +3239,9 @@ def _newEmptySpectrum(self: Project, isotopeCodes:Sequence[str], name: str='empt
 
     spectrum = _newSpectrumFromDataSource(self, dataStore, dataSource, name)
     spectrum._updateParameterValues()
-    # # Quietly set some values
-    # with inactivity():
-    #     # Set contourLevels, contourColours, this also estimates the noise
-    #     spectrum._setDefaultContourValues()
-    #     spectrum._setDefaultContourColours()
-    #     spectrum.sliceColour = spectrum.positiveContourColour
 
     return spectrum
+
 
 def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
     """Creation of new Spectrum;
@@ -3277,20 +3272,14 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
 
     spectrum = _newSpectrumFromDataSource(self, dataStore, dataSource, name)
     spectrum._updateParameterValues()
-    # # Quietly set some values
-    # with inactivity():
-    #     # Set contourLevels, contourColours, this also estimates the noise
-    #     spectrum._setDefaultContourValues()
-    #     spectrum._setDefaultContourColours()
-    #     spectrum.sliceColour = spectrum.positiveContourColour
 
     return spectrum
+
 
 def _extractRegionToFile(spectrum, dimensions, sliceTuples, name=None, path=None, dataFormat = 'Hdf5'):
     """Extract a region of spectrum, defined by dimensions and sliceTuples to path
 
-    :param dimensions:  [dim_a, dim_b, ...]
-        defining dimensions to be extracted
+    :param dimensions:  [dim_a, dim_b, ...];  defining dimensions to be extracted
     :param sliceTuples: [(start_1,stop_1), (start_2,stop_2), ...],
         defining regions to include for each dimension of spectrum; tuples for dimensions are set to the
         full range (i.e. all points along dimension axes are included
@@ -3363,11 +3352,10 @@ def _extractRegionToFile(spectrum, dimensions, sliceTuples, name=None, path=None
 
                 # map the input position to the output position and write the data
                 outPosition = [position[inverseIndexMap[p]] for p in output.indices]
-                print('>>>', position, outPosition)
+                # print('>>>', position, outPosition)
                 output.setSliceData(data, outPosition, writeSliceDim)
-    # set some more parameters now that we have data (e.g. noiseLevel)
-    newSpectrum.scale = spectrum.scale
-    newSpectrum.noiseLevel = spectrum.noiseLevel
+    # set some more parameters (e.g. noiseLevel)
+    spectrum._copyNonDimensionalParameters(newSpectrum)
     newSpectrum._updateParameterValues()
 
     return newSpectrum

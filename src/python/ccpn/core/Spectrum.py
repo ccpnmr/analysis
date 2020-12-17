@@ -3141,7 +3141,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name) -> Spectrum
 
     # check the dataSources for open file pointers to the same file
     for ds in [sp._dataSource for sp in project.spectra if sp._dataSource is not None]:
-        if ds.path == dataSource.path and ds.hasOpenFile():
+        if ds.path == dataStore.aPath and ds.hasOpenFile():
             raise RuntimeError('Unable to create new Spectrum; project has existing open dataSource %s' % ds)
 
     apiProject = project._wrappedData

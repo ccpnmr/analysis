@@ -185,7 +185,9 @@ def _includeInDimensionalCopy(func):
 
 class Spectrum(AbstractWrapperObject):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
-    path to the stored NMR data file."""
+    path to the stored NMR data file
+    """
+    #=========================================================================================
 
     #: Short class name, for PID.
     shortClassName = 'SP'
@@ -208,8 +210,28 @@ class Spectrum(AbstractWrapperObject):
 
     _referenceSpectrumHit = None
     _snr = None
+    #=========================================================================================
 
     MAXDIM = 8  # Maximum dimensionality
+    X_INDEX = 0
+    Y_INDEX = 1
+    Z_INDEX = 2
+    A_INDEX = 3
+    B_INDEX = 4
+    C_INDEX = 5
+    D_INDEX = 6
+    E_INDEX = 7
+
+    X_DIM = 1
+    Y_DIM = 2
+    Z_DIM = 3
+    A_DIM = 4
+    B_DIM = 5
+    C_DIM = 6
+    D_DIM = 7
+    E_DIM = 8
+
+    #=========================================================================================
 
     _PLANEDATACACHE = '_planeDataCache'  # Attribute name for the planeData cache
     _SLICEDATACACHE = '_sliceDataCache'  # Attribute name for the slicedata cache
@@ -219,6 +241,7 @@ class Spectrum(AbstractWrapperObject):
 
     _DATASTORE_KEY = '_dataStore'    # Key for storing the dataStore info in the Ccpn internal parameter store of the
                                     # Spectrum instance
+    #=========================================================================================
 
     def __init__(self, project: Project, wrappedData: Nmr.DataSource):
 
@@ -2554,7 +2577,7 @@ class Spectrum(AbstractWrapperObject):
         return newSpectrum
 
     def estimateNoise(self):
-        """Estimate and return the noise level
+        """Estimate and return the noise level, or None if it cannot be
         """
         if self._dataSource is not None:
             noise = self._dataSource.estimateNoise()
@@ -2680,11 +2703,28 @@ class Spectrum(AbstractWrapperObject):
     # Implementation functions
     #=========================================================================================
 
+    def _updateParameterValues(self):
+        """This method check, and if needed updates specific parameter values
+        """
+        # Quietly set some values
+        getLogger().debug('Updating %s parameters' % self)
+        with inactivity():
+            # getting the noiseLevel by calling estimateNoise() if not defined
+            if self.noiseLevel is None:
+                self.noiseLevel = self.estimateNoise()
+
+            # Set contourLevels, contourColours, this also estimates the noise
+            if not self.positiveContourBase or not self.negativeContourBase:
+                self._setDefaultContourValues()
+            if not self.positiveContourColour or not self.negativeContourColour:
+                self._setDefaultContourColours()
+            if not self.sliceColour:
+                self.sliceColour = self.positiveContourColour
+
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Subclassed to allow for initialisations on restore, not on creation via newSpectrum
         """
-
         spectrum = super()._restoreObject(project, apiObj)
 
         try:
@@ -2695,27 +2735,26 @@ class Spectrum(AbstractWrapperObject):
             getLogger().warning('Error restoring valid data source for % s (es)' % (spectrum, es))
 
         # Assure a setting of crucial attributes
-        getLogger().debug('Updating %s parameters' % spectrum)
-
-        # Quietly set some values
-        with notificationBlanking():
-            with notificationEchoBlocking():
-
-                # getting the noiseLevel will call estimateNoise() if not defined
-                if spectrum.noiseLevel is None:
-                    spectrum.noiseLevel = spectrum.estimateNoise()
-
-                if spectrum.scale is None:
-                    spectrum.scale = 1.0
-
-                if not spectrum.positiveContourBase or not spectrum.negativeContourBase:
-                    spectrum._setDefaultContourValues()
-
-                if not spectrum.positiveContourColour or not spectrum.negativeContourColour:
-                    spectrum._setDefaultContourColours()
-
-                if not spectrum.sliceColour:
-                    spectrum.sliceColour = spectrum.positiveContourColour
+        spectrum._updateParameterValues()
+        # # Quietly set some values
+        # with notificationBlanking():
+        #     with notificationEchoBlocking():
+        #
+        #         # getting the noiseLevel by calling estimateNoise() if not defined
+        #         if spectrum.noiseLevel is None:
+        #             spectrum.noiseLevel = spectrum.estimateNoise()
+        #
+        #         if spectrum.scale is None:
+        #             spectrum.scale = 1.0
+        #
+        #         if not spectrum.positiveContourBase or not spectrum.negativeContourBase:
+        #             spectrum._setDefaultContourValues()
+        #
+        #         if not spectrum.positiveContourColour or not spectrum.negativeContourColour:
+        #             spectrum._setDefaultContourColours()
+        #
+        #         if not spectrum.sliceColour:
+        #             spectrum.sliceColour = spectrum.positiveContourColour
 
         return spectrum
 
@@ -3199,12 +3238,13 @@ def _newEmptySpectrum(self: Project, isotopeCodes:Sequence[str], name: str='empt
     dataSource._assureProperDimensionality()
 
     spectrum = _newSpectrumFromDataSource(self, dataStore, dataSource, name)
-    # Quietly set some values
-    with inactivity():
-        # Set contourLevels, contourColours, this also estimates the noise
-        spectrum._setDefaultContourValues()
-        spectrum._setDefaultContourColours()
-        spectrum.sliceColour = spectrum.positiveContourColour
+    spectrum._updateParameterValues()
+    # # Quietly set some values
+    # with inactivity():
+    #     # Set contourLevels, contourColours, this also estimates the noise
+    #     spectrum._setDefaultContourValues()
+    #     spectrum._setDefaultContourColours()
+    #     spectrum.sliceColour = spectrum.positiveContourColour
 
     return spectrum
 
@@ -3236,17 +3276,26 @@ def _newSpectrum(self: Project, path: str, name: str) -> Spectrum:
         name = base
 
     spectrum = _newSpectrumFromDataSource(self, dataStore, dataSource, name)
-    # Quietly set some values
-    with inactivity():
-        # Set contourLevels, contourColours, this also estimates the noise
-        spectrum._setDefaultContourValues()
-        spectrum._setDefaultContourColours()
-        spectrum.sliceColour = spectrum.positiveContourColour
+    spectrum._updateParameterValues()
+    # # Quietly set some values
+    # with inactivity():
+    #     # Set contourLevels, contourColours, this also estimates the noise
+    #     spectrum._setDefaultContourValues()
+    #     spectrum._setDefaultContourColours()
+    #     spectrum.sliceColour = spectrum.positiveContourColour
 
     return spectrum
 
 def _extractRegionToFile(spectrum, dimensions, sliceTuples, name=None, path=None, dataFormat = 'Hdf5'):
     """Extract a region of spectrum, defined by dimensions and sliceTuples to path
+
+    :param dimensions:  [dim_a, dim_b, ...]
+        defining dimensions to be extracted
+    :param sliceTuples: [(start_1,stop_1), (start_2,stop_2), ...],
+        defining regions to include for each dimension of spectrum; tuples for dimensions are set to the
+        full range (i.e. all points along dimension axes are included
+        sliceTuples are 1-based; sliceTuple stop values are inclusive (i.e. different
+        from the python slice object)
     """
     # local import to prevent cycles
     from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
@@ -3262,10 +3311,15 @@ def _extractRegionToFile(spectrum, dimensions, sliceTuples, name=None, path=None
     if spectrum._dataSource is None:
         raise RuntimeError('No proper (filePath, dataFormat) set for %s' % spectrum)
 
+    # assure full range for axes defined by dimensions list
+    for dim in dimensions:
+        idx = dim-1
+        sliceTuples[idx] = (1, spectrum.pointCounts[idx])
     spectrum._dataSource.checkForValidRegion(sliceTuples, aliasingFlags=[0]*spectrum.dimensionCount)
 
+    dimString = '_' + '_'.join(spectrum.getByDimensions('axisCodes',dimensions))
     if name is None:
-        name = spectrum.name + '_dims' + '_'.join(str(dim) for dim in dimensions)
+        name = spectrum.name + dimString
 
     klass = getDataFormats().get(dataFormat)
     if klass is None:
@@ -3274,24 +3328,49 @@ def _extractRegionToFile(spectrum, dimensions, sliceTuples, name=None, path=None
     # Do path-related stuff
     suffix = klass.suffixes[0] if len(klass.suffixes)>0 else '.dat'
     if path is None:
-        dataStore = DataStore.newFromPath(spectrum.filePath, appendToBasename='_region', withSuffix=suffix)
+        dataStore = DataStore.newFromPath(spectrum.filePath, appendToBasename=dimString, withSuffix=suffix)
     else:
         dataStore = DataStore.newFromPath(path, withSuffix=suffix)
 
     # Create a dataSource object
-    dataSource = klass(dimensionCount=spectrum.dimensionCount)
+    dataSource = klass(spectrum=spectrum)
 
-    excludeDimensions = list(set(spectrum.dimensions) - set(dimensions))
-    # Copy (and map) the dimensional parameters onto the first N axes of dataSource;
-    dimensionMap = dict(zip(dimensions+excludeDimensions, dataSource.dimensions))
-    dataSource._copyAttributesFromSpectrum(spectrum, dimensionMap=dimensionMap)
-    # Now reduce dimensionality
+    disgardedDimensions = list(set(spectrum.dimensions) - set(dimensions))
+    # The dimensional parameters of spectrum were copied on initialisation
+    # remap the N-axes (as defined by the N items in the dimensions argument) onto the first N axes of dataSource;
+    dimensionsMap = dict(zip(dimensions+disgardedDimensions, dataSource.dimensions))
+    dataSource._mapDimensionalParameters(dimensionsMap=dimensionsMap)
+    # Now reduce the dimensionality to the length of dimensions
     dataSource.setDimensionCount(len(dimensions))
-    dataSource.printParameters()
+    # dataSource.printParameters()
 
-    newSpectrum = _newSpectrumFromDataSource(project=spectrum.project, dataStore=dataStore, dataSource=dataSource, name=name)
+    # create the new spectrum from the dataSource
+    newSpectrum = _newSpectrumFromDataSource(project=spectrum.project, dataStore=dataStore, dataSource=dataSource,
+                                             name=name)
+    # copy the data
+    indexMap = dict((k-1,v-1) for k,v in dimensionsMap.items())  # source -> destination
+    inverseIndexMap = dict((v-1, k-1) for k,v, in dimensionsMap.items())  # destination -> source
+
+    readSliceDim = dimensions[0]  # first retained dimension from the original data
+    writeSliceDim = 1             # which was mapped to the first dimension of the new data
+
+    with spectrum._dataSource.openExistingFile() as input:
+        with newSpectrum._dataSource.openNewFile() as output:
+            # loop over all requested slices
+            for position, aliased in input._selectedPointsIterator(sliceTuples=sliceTuples,
+                                                                   excludeDimensions=[readSliceDim]):
+                data = input.getSliceData(position, readSliceDim)
+
+                # map the input position to the output position and write the data
+                outPosition = [position[inverseIndexMap[p]] for p in output.indices]
+                print('>>>', position, outPosition)
+                output.setSliceData(data, outPosition, writeSliceDim)
+    # set some more parameters now that we have data (e.g. noiseLevel)
+    newSpectrum.scale = spectrum.scale
+    newSpectrum.noiseLevel = spectrum.noiseLevel
+    newSpectrum._updateParameterValues()
+
     return newSpectrum
-    # return dataSource
 
 
 @newObject(Spectrum)

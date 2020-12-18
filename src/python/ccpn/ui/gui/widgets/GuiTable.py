@@ -595,6 +595,13 @@ GuiTable::item::selected {
         obj.comment = value if value else None
         # NmrResidueTable._project.unblankNotification()
 
+    @staticmethod
+    def _setAnnotation(obj, value):
+        """
+        CCPN-INTERNAL: Insert a comment into GuiTable
+        """
+        obj.annotation = value if value else None
+
     def _sortChanged(self, col, sortOrder: QtCore.Qt.SortOrder):
         # sort the _dataFrame to match
         # need to read the sorted state when repopulating table

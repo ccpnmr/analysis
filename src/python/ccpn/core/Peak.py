@@ -847,13 +847,50 @@ class Peak(AbstractWrapperObject):
         # do I need to set the volume error?
         # self.volumeError = 1e-8
 
-    def fit(self):
+    def fit(self, fitMethod = None, halfBoxSearchWidth = 2, keepPosition=False, iterations=10):
         """
-        :return: Fit the peak using the fitting method defined in the general preferences.
-        """
+        Fit the peak to recalculate position and lineWidths.
+        Use peak.estimateVolume to recalculate the volume.
 
-        fitMethod = self._project.application.preferences.general.peakFittingMethod
-        self._parent.fitExistingPeaks([self], fitMethod=fitMethod, singularMode=True)
+        :param fitMethod: str, one of ['gaussian', 'lorentzian', 'parabolic']
+               Default: the fitting method defined in the general preferences.
+               If not given or not included in the available options, it uses the default.
+        :param halfBoxSearchWidth: int. Default: 2.
+               Used to increase the searching area limits from the initial position.
+        :param keepPosition: bool. Default: False.
+               if True, reset to the original position after applying the fitting method.
+               Height is calculated using spectrum.getHeight()
+        :param iterations: int. Default: 3.
+               How many times the fitting method will run before it converges.
+        :return: None.
+        """
+        from ccpn.core.PeakList import PICKINGMETHODS
+        from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
+
+        if not fitMethod in PICKINGMETHODS:
+            fitMethod = self._project.application.preferences.general.peakFittingMethod
+        peak = self
+        peakList = peak.peakList
+        originalPosition = peak.position
+        lastLWsFound = []
+        consecutiveSameLWsCount = 0
+        maxSameLWsCount = 3 # if the same values are found in the last x iterations, then it breaks the loop.
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                while iterations > 0 and consecutiveSameLWsCount <= maxSameLWsCount:
+                    peakList.fitExistingPeaks([peak], fitMethod=fitMethod,
+                                              halfBoxSearchWidth=halfBoxSearchWidth, singularMode=True)
+                    if keepPosition:
+                        peak.position = originalPosition
+                        peak.height = peakList.spectrum.getHeight(peak.ppmPositions)
+                    if np.array_equal(lastLWsFound, peak.lineWidths):
+                        consecutiveSameLWsCount += 1
+                    else:
+                        consecutiveSameLWsCount = 0
+                    lastLWsFound = peak.lineWidths
+                    iterations -= 1
+        getLogger().info('Peak fit completed for %s' %peak)
+        return
 
     def _checkAliasing(self):
         """Recalculate the aliasing range for all peaks in the parent spectrum

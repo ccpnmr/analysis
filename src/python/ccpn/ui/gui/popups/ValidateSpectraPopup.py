@@ -288,7 +288,7 @@ class SpectrumValidator(ValidatorABC):
 
     def isValid(self, value):
         "return True is value is valid"
-        ds = DataStore.newFromPath(value, expandData=False, autoRedirect=False)
+        ds = DataStore.newFromPath(value, autoRedirect=False)
         return ds.exists()
 # end class
 

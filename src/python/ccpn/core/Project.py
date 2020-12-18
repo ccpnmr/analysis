@@ -127,6 +127,49 @@ class Project(AbstractWrapperObject):
     # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
     _isNew = None
 
+    #-----------------------------------------------------------------------------------------
+    # Attributes of the data structure (incomplete)
+    #-----------------------------------------------------------------------------------------
+
+    @property
+    def spectra(self):
+        "place-holder; hotfixed later"
+        return None
+
+    @property
+    def peakLists(self):
+        "place-holder; hotfixed later"
+        return None
+
+    @property
+    def multipletLists(self):
+        "place-holder; hotfixed later"
+        return None
+
+    @property
+    def integralLists(self):
+        "place-holder; hotfixed later"
+        return None
+
+    @property
+    def spectrumViews(self):
+        "place-holder; hotfixed later"
+        return None
+
+    @property
+    def chemicalShiftLists(self):
+        "place-holder; hotfixed later"
+        return None
+
+    # Inherited from AbtractWrapperObject
+
+    # @property
+    # def project(self) -> 'Project':
+    #     """The Project (root)containing the object."""
+    #     return self._project
+
+    #-----------------------------------------------------------------------------------------
+
     # Implementation methods
     def __init__(self, wrappedData: ApiNmrProject):
         """ Special init for root (Project) object
@@ -1233,8 +1276,8 @@ class Project(AbstractWrapperObject):
         getLogger().debug('Project.loadData: loading "%s"' % path)
 
         # Expand and check any redirections
-        dataStore = DataStore.checkPath(path, silent=True)
-        if dataStore is None:
+        dataStore = DataStore.newFromPath(path)
+        if not dataStore.exists():
             raise FileNotFoundError('Path "%s" not found' % path)
 
         # check for a spectrum

@@ -74,12 +74,16 @@ class Path(_Path_):
         return self.name.split('.')[0]
 
     def addTimeStamp(self):
-        """Return a Path instance with path.timeStamp.suffix profile"""
+        """Return a Path instance with path.timeStamp.suffix profile
+        """
         now = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
         return self.parent / (self.stem + '.' + str(now) + self.suffix)
 
     @property
     def version(self):
+        """Parse self to yield a version integer, presumably generated with the incrementVersion method
+        Return 0 if not found
+        """
         suffixes = self.suffixes
         version = 0
         if len(suffixes) > 0:
@@ -90,7 +94,8 @@ class Path(_Path_):
         return version
 
     def incrementVersion(self):
-        """Return a Path instance with path.version.suffix profile"""
+        """Return a Path instance with path.version.suffix profile
+        """
         suffixes = self.suffixes
         version = 0
         if len(suffixes) > 0:
@@ -104,10 +109,13 @@ class Path(_Path_):
         return self.parent / (self.basename + ''.join(suffixes))
 
     def normalise(self):
+        """Return normalised path
+        """
         return Path(os.path.normpath(self.asString()))  # python <= 3.4; strings only
 
     def open(self, *args, **kwds):
-        """Subclassing to catch any long file name errors that allegedly can occur on windows"""
+        """Subclassing to catch any long file name errors that allegedly can occur on windows
+        """
         try:
             fp = super().open(*args, **kwds)
         except FileNotFoundError:
@@ -132,7 +140,7 @@ class Path(_Path_):
         _rmdirs(str(self))
 
     def fetchDir(self, dirName):
-        """Return and if needed create dirName in self
+        """Return and (if needed) create dirName relative to self
         :return: Path instance of self / dirName
         """
         if not self.is_dir():

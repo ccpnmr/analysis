@@ -54,12 +54,12 @@ from ccpn.util.Logging import getLogger
 
 class RedirectionABC(CcpNmrJson):
     """
-    Base class for mainting a single redirection
+    Base class for maintaining a single redirection
     """
 
     apiName = None  # to be subclassed
     identifier = None # to be subclassed
-    expand = False
+    expand = False # expand to handle None, zero-length and '.'
 
     _application = Any(default_value=None, allow_none=True)
     _path = CPath(default_value=None, allow_none=True)
@@ -76,7 +76,7 @@ class RedirectionABC(CcpNmrJson):
             return self._path
 
     def expandPath(self):
-        "expand path to conteract"
+        "expand path to handle None, zero-length and '.'"
         if self._path is None or len(self._path) == 0:
             self._path = Path.home()
         elif self._path == '.':
@@ -192,26 +192,16 @@ class PathRedirections(list):
 # DataStores
 #=========================================================================================
 
-# def getDataStores(project):
-#     """
-#     Return a list of DataStore objects corresponding to the various spectrum files in project
-#
-#     """
-#     # dataUrls = [url for store in project._wrappedData.root.sortedDataLocationStores()
-#     #                     for url in store.sortedDataUrls()]
-#     # dataStores = [DataStore(s) for url in dataUrls for s in url.sortedDataStores()]
-#     dataStores = [DataStore.newFromSpectrum(s) for s in project.spectra]
-#     return dataStores
-
-
 class DataStore(CcpNmrJson):
     """
     This class wraps the inplementation of $DATA, $ALONGSIDE, $INSIDE redirections
-    For old S[ectrum instances, its parses the api insideData, remoteData, alongSideData etc. api dataStores
-
-    It stores the path and other relevenant info as json-encoded string in the spectrum instance internal
-    parameter storage
     """
+
+    # For old Spectrum instances, its parses the api insideData, remoteData, alongSideData etc.
+    # api dataStores
+    #
+    # Once linked to a Spectrum, it stores the path and other relevant info as json-encoded string
+    # in the spectrum instance internal parameter storage
 
     version = 1.0
 
@@ -219,7 +209,7 @@ class DataStore(CcpNmrJson):
     dataFormat = CString(allow_none=True, default_value=None).tag(saveToJson=True)
 
     spectrum = Any(allow_none=True, default_value=None).tag(saveToJson=False)
-    expandData = Bool(default_value=True).tag(saveToJson=False)
+    autoVersioning = Bool(default_value=True).tag(saveToJson=False)
     autoRedirect = Bool(default_value=False).tag(saveToJson=False)
 
     # api dataStore
@@ -231,14 +221,15 @@ class DataStore(CcpNmrJson):
     # Dict with edirection paths; for reference
     pathRedirections = Dict(default_value={}).tag(saveToJson=True)
 
-    def __init__(self, spectrum=None, expandData=False, autoRedirect=False):
-        """expandData: optionally expand $DATA to home directory if not defined
+    def __init__(self, spectrum=None, autoRedirect=False, autoVersioning=False):
+        """
         autoRedirect: optionally try to redefine path into $DATA, $ALONGSIDE, $INSIDE redirections
+        autoVersioning: optionally add a versioning identifier (e.g. for new spectra)
         """
         super().__init__()
         self.spectrum = spectrum
-        self.expandData = expandData
         self.autoRedirect = autoRedirect
+        self.autoVersioning = autoVersioning
 
         self._getPathRedirections()
         
@@ -256,28 +247,34 @@ class DataStore(CcpNmrJson):
 
     @path.setter
     def path(self, value):
-        """Set path to value; None makes it undefined
+        """Set path to value; optionally auto versioning or redirecting
+        None makes it undefined
         """
-        if value is not None and self.autoRedirect:
-            value = self.redirectPath(value)
         self._path = value
+        while self._path is not None and self.autoVersioning and self.exists():
+            self._path = self.path.incrementVersion().asString()
+
+        if self._path is not None and self.autoRedirect:
+            self._path = self.redirectPath(self._path)
+
         if self.spectrum is not None:
             self._saveInternal()
 
     @classmethod
-    def newFromPath(cls, path, expandData=False, autoRedirect=False, appendToBasename=None, withSuffix=None):
-        """Create and return a new instance from path; optionally append to basename and set suffix
+    def newFromPath(cls, path, autoRedirect=False, autoVersioning=False,
+                         appendToName=None, withSuffix=None):
+        """Create and return a new instance from path; optionally append to name and set suffix
         """
         _p = Path(path)
 
-        if appendToBasename is not None:
-            _p = _p.withoutSuffix() + appendToBasename
-
         suffix = _p.suffix if withSuffix is None else withSuffix
-        if suffix:
-            _p = _p.withSuffix(suffix)
 
-        instance = cls(expandData=expandData, autoRedirect=autoRedirect)
+        if appendToName is not None:
+            _p = _p.parent / _p.basename + appendToName
+
+        _p = _p.withSuffix(suffix)
+
+        instance = cls(autoRedirect=autoRedirect, autoVersioning=autoVersioning)
         instance.path = _p
         return instance
 
@@ -286,48 +283,48 @@ class DataStore(CcpNmrJson):
         """
         return self._path is not None
 
-    @classmethod
-    def checkPath(cls, path, silent=True):
-        """Check if expanded path exists and return an instance or None otherwise
-        Optionally report depending on silent
+    def expandPath(self, path=None):
+        """return path decoded for $DATA, $ALONGSIDE, $INSIDE redirections
+        returns Path instance
         """
-        instance = cls()
-        instance.path = path
-        if not instance.exists():
-            if not silent:
-                instance.errorMessage()
-            return None
-        return instance
+        if path is None:
+            _path = Path(self._path)
+        else:
+            _path = Path(path)
 
-    def aPath(self):
-        """Return aPath instance of self, decoded for $DATA, $ALONGSIDE, $INSIDE redirections
-        optionally expand $DATA to home directory if not defined, depending on the self.expandData flag
-        """
-        if self._path is None:
-            return aPath(constants.UNDEFINED_STRING)
-
-        # decode the $DATA, $INSIDE $ALONGSIDE
-        _path = Path(self._path)
         for d, p in self._getPathRedirections():
-            if str(self._path).startswith(d):
-                _path = p / Path._from_parts(_path.parts[1:])
+            if _path.startswith(d):
+                _path = p / Path._from_parts(_path.parts[1:])  # Using undocumented private method!
                 break
+        return _path
 
-        return aPath(_path)
-
-    def redirectPath(self, path):
+    def redirectPath(self, path=None):
         """Redefine path into $DATA, $ALONGSIDE, $INSIDE redirections
         return Path instance
         """
-        _path = Path(path)
-        for d, p in self._getPathRedirections():
+        if path is None:
+            _path = Path(self._path)
+        else:
+            _path = Path(path)
+
+        # check in reverse order, prioritising $INSIDE, then $ALONGSIDE, then $DATA
+        for d, p in self._getPathRedirections()[::-1]:
             if str(path).startswith(str(p)):
                 _path = Path(d) / _path.relative_to(p)
                 break
         return _path
 
+    def aPath(self):
+        """Return aPath instance of self, decoded for $DATA, $ALONGSIDE, $INSIDE redirections
+        """
+        if self._path is None:
+            return aPath(constants.UNDEFINED_STRING)
+        # expand any $DATA, $INSIDE $ALONGSIDE
+        _path = self.expandPath(self._path)
+        return aPath(_path)
+
     def exists(self):
-        """Return True if self.path exists
+        """Return True if self.aPath() (i.e. expanded) exists
         """
         if self._path is None:
             return False

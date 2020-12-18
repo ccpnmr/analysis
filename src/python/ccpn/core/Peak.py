@@ -847,6 +847,14 @@ class Peak(AbstractWrapperObject):
         # do I need to set the volume error?
         # self.volumeError = 1e-8
 
+    def fit(self):
+        """
+        :return: Fit the peak using the fitting method defined in the general preferences.
+        """
+
+        fitMethod = self._project.application.preferences.general.peakFittingMethod
+        self._parent.fitExistingPeaks([self], fitMethod=fitMethod, singularMode=True)
+
     def _checkAliasing(self):
         """Recalculate the aliasing range for all peaks in the parent spectrum
         """

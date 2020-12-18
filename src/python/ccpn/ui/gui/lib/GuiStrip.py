@@ -432,6 +432,19 @@ class GuiStrip(Frame):
         popup._selectPeaks(peaks)
         popup.exec_()
 
+    def _showPeakOnPLTable(self):
+
+        current = self.application.current
+        peaks = current.peaks
+        clickedPeaks = self._lastClickedObjects
+
+        if not (peaks or clickedPeaks):
+            return
+        if len(peaks) == 1:
+            peak = peaks[-1]
+            peakTableModule = self.application.showPeakTable(peakList=peak.peakList)
+
+
     def _updateStripLabel(self, callbackDict):
         """Update the striplabel if it represented a NmrResidue that has changed its id.
         """

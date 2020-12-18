@@ -314,7 +314,8 @@ class PeakListTableWidget(GuiTable):
         )
         # annotation column
         annotationTipText = 'Any other peak label (excluded assignments)'
-        columnDefs.append(('Annotation', lambda pk: pk.annotation, annotationTipText, None, None))
+        columnDefs.append(('Annotation', lambda pk: pk.annotation, annotationTipText,
+                           lambda pk, value: self._setAnnotation(pk, value), None))
 
         # comment column
         commentsTipText = 'Textual notes about the peak'

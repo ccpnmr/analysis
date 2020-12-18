@@ -234,11 +234,11 @@ class Spectrum(AbstractWrapperObject):
 
     #-----------------------------------------------------------------------------------------
 
-    _PLANEDATACACHE = '_planeDataCache'  # Attribute name for the planeData cache
-    _SLICEDATACACHE = '_sliceDataCache'  # Attribute name for the slicedata cache
-    _SLICE1DDATACACHE = '_slice1DDataCache'  # Attribute name for the 1D slicedata cache
-    _REGIONDATACACHE = '_regionDataCache'  # Attribute name for the regionData cache
-    _dataCaches = [_PLANEDATACACHE, _SLICEDATACACHE, _SLICE1DDATACACHE, _REGIONDATACACHE]
+    # _PLANEDATACACHE = '_planeDataCache'  # Attribute name for the planeData cache
+    # _SLICEDATACACHE = '_sliceDataCache'  # Attribute name for the slicedata cache
+    # _SLICE1DDATACACHE = '_slice1DDataCache'  # Attribute name for the 1D slicedata cache
+    # _REGIONDATACACHE = '_regionDataCache'  # Attribute name for the regionData cache
+    # _dataCaches = [_PLANEDATACACHE, _SLICEDATACACHE, _SLICE1DDATACACHE, _REGIONDATACACHE]
 
     _DATASTORE_KEY = '_dataStore'    # Key for storing the dataStore info in the Ccpn internal parameter store of the
                                     # Spectrum instance
@@ -249,30 +249,30 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def peakLists(self):
-        "place-holder; hotfixed later"
-        return None
+        "STUB: hot-fixed later"
+        return ()
 
     @property
     def multipletLists(self):
-        "place-holder; hotfixed later"
-        return None
+        "STUB: hot-fixed later"
+        return ()
 
     @property
     def integralLists(self):
-        "place-holder; hotfixed later"
-        return None
+        "STUB: hot-fixed later"
+        return ()
 
     @property
     def spectrumViews(self):
-        "place-holder; hotfixed later"
-        return None
+        "STUB: hot-fixed later"
+        return ()
 
     @property
     def chemicalShiftList(self):
-        "place-holder; hotfixed later"
+        "STUB: hot-fixed later"
         return None
 
-    # Inherited from AbtractWrapperObject
+    # Inherited from AbstractWrapperObject
 
     # @property
     # def project(self) -> 'Project':
@@ -1969,59 +1969,9 @@ class Spectrum(AbstractWrapperObject):
                                  (axisCode, newAxisCodeOrder, self.axisCodes))
         return newValues
 
-    @cached(_REGIONDATACACHE, maxItems=16, debug=False)
+    # @cached(_REGIONDATACACHE, maxItems=16, debug=False)
     def getRegionData(self, exclusionBuffer: Optional[Sequence] = None, minimumDimensionSize: int = 3, **axisDict):
         """Return the region of the spectrum data defined by the axis limits.
-
-        Axis limits are passed in as a dict containing the axis codes and the required limits.
-        Each limit is defined as a key, value pair: (str, tuple),
-        with the tuple supplied as (min,max) axis limits in ppm.
-
-        For axisCodes that are not included, the limits will by taken from the aliasingLimits of the spectrum.
-
-        Illegal axisCodes will raise an error.
-
-        Example dict:
-            {'Hn': (7.0, 9.0),
-             'Nh': (110, 130)
-             }
-
-        Example calling function:
-            regionData = spectrum.getRegionData(**limitsDict)
-            regionData = spectrum.getRegionData(Hn=(7.0, 9.0), Nh=(110, 130))
-
-            and
-
-            regionData = spectrum.getRegionData()           to get all the data, this may be very large!
-
-        exclusionBuffer: defines the size to extend the region by in index units, e.g. [1, 1, 1] for a 3d array,
-                            extends the region by 1 index point in all axes.
-                            Default is 1 in all axis directions.
-                            Must be the correct length for the number of dimensions
-
-        minimumDimensionSize:   defines the minimum number of elements in each dimension that are needed
-                                for the region to be valid.
-
-                                default is 3, as mostly used for parabolic curve fitting which
-                                requires 3 points in any given dimension
-
-        The returned regionData is a tuple of regions, each of the form:
-
-                single region = (dataArray,                 numpy array containing the data
-                                intRegion,
-                                startPoints,
-                                endPoints,
-                                startPointBufferActual,
-                                endPointBufferActual,
-                                startPointIntActual,
-                                numPointInt,
-                                startPointBuffer,
-                                endPointBuffer)
-
-        :param exclusionBuffer: array of int
-        :param minimumDimensionSize: int
-        :param axisDict: dict of axis limits
-        :return: tuple of regions
         """
         raise NotImplementedError('replace by getRegion')
 
@@ -2273,41 +2223,40 @@ class Spectrum(AbstractWrapperObject):
             raise ValueError('position values must be floats.')
 
         if self._dataSource is None:
-            # data = self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zero' % self)
             return 0.0
 
         value = self._dataSource.getPointValue(pointPosition)
         return value * self.scale
 
-    @cached(_SLICE1DDATACACHE, maxItems=1, debug=False, doSignatureExpansion=False)
-    def _get1DSliceData(self):
-        """Internal routine to get 1D sliceData;
-        """
-        data = self._dataSource.getSliceData(position=[1], sliceDim=1)
-        return data
+    # @cached(_SLICE1DDATACACHE, maxItems=1, debug=False, doSignatureExpansion=False)
+    # def _get1DSliceData(self):
+    #     """Internal routine to get 1D sliceData;
+    #     """
+    #     data = self._dataSource.getSliceData(position=[1], sliceDim=1)
+    #     return data
 
-    @cached(_SLICEDATACACHE, maxItems=1024, debug=False, doSignatureExpansion=False)
-    def _getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int):
-        """Internal routine to get sliceData; optimised to use (buffered) getPlaneData
-        CCPNINTERNAL: used in CcpnOpenGL
-        """
-        if not (sliceDim == xDim or sliceDim == yDim):
-            raise RuntimeError('sliceDim (%s) not in plane (%s,%s)' % (sliceDim, xDim, yDim))
-
-        slice = position[yDim - 1] - 1 if sliceDim == xDim else position[xDim - 1] - 1  # position amd dimensions are 1-based
-
-        # Improve caching,
-        position[xDim-1] = 1
-        position[yDim-1] = 1
-        planeData = self._getPlaneData(position, xDim, yDim)
-
-        if sliceDim == xDim:
-            data = planeData[slice, 0:]
-        elif sliceDim == yDim:
-            data = planeData[0:, slice]
-
-        return data
+    # @cached(_SLICEDATACACHE, maxItems=1024, debug=False, doSignatureExpansion=False)
+    # def _getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int):
+    #     """Internal routine to get sliceData; optimised to use (buffered) getPlaneData
+    #     CCPNINTERNAL: used in CcpnOpenGL
+    #     """
+    #     if not (sliceDim == xDim or sliceDim == yDim):
+    #         raise RuntimeError('sliceDim (%s) not in plane (%s,%s)' % (sliceDim, xDim, yDim))
+    #
+    #     slice = position[yDim - 1] - 1 if sliceDim == xDim else position[xDim - 1] - 1  # position amd dimensions are 1-based
+    #
+    #     # Improve caching,
+    #     position[xDim-1] = 1
+    #     position[yDim-1] = 1
+    #     planeData = self._getPlaneData(position, xDim, yDim)
+    #
+    #     if sliceDim == xDim:
+    #         data = planeData[slice, 0:]
+    #     elif sliceDim == yDim:
+    #         data = planeData[0:, slice]
+    #
+    #     return data
 
     @logCommand(get='self')
     def getSliceData(self, position=None, sliceDim: int = 1):
@@ -2318,50 +2267,64 @@ class Spectrum(AbstractWrapperObject):
         :param sliceDim: Dimension of the slice (1-based)
         :return: numpy 1D data array
         """
-        if position is None:
-            position = [1] * self.dimensionCount
-
-        if not isIterable(position) or len(position) < self.dimensionCount:
-            raise ValueError('position should be a iterable with length %d; got "%s"' %
-                             (self.dimensionCount, position)
-                             )
-
-        if isIterable(sliceDim) or sliceDim < 1 or sliceDim > self.dimensionCount:
-            raise ValueError('sliceDim should be a integer in range [1,%d]; got "%s"' %
-                             (self.dimensionCount, sliceDim)
-                             )
-
-
-        result = None
         if self._dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
-            result = numpy.zeros( (self.pointCounts[sliceDim-1], ), dtype=numpy.float32)
-
-        elif self.dimensionCount == 1:
-            # 1D data
-            result = self._get1DSliceData()
-            # Make a copy in order to preserve the original data and apply scaling
-            result = result.copy(order='K') * self.scale
+            data = numpy.zeros( (self.pointCounts[sliceDim-1], ), dtype=numpy.float32)
 
         else:
-            # nD data; get slice via appropriate plane
-            position[sliceDim - 1] = 1  # To improve caching; position, dimensions are 1-based
-            xDim, yDim = (1, sliceDim) if sliceDim > 1 else (1, 2)
-            result = self._getSliceDataFromPlane(position=position, xDim=xDim, yDim=yDim, sliceDim=sliceDim)
+            try:
+                position = self._dataSource.checkForValidSlice(position, sliceDim)
+            except (RuntimeError, ValueError) as es:
+                getLogger().error('Spectrum.getSliceData: invalid arguments: %s' % es)
+                raise es
 
-            # Make a copy in order to preserve the original data; do not apply scaling, as this was already done
-            # by the _getSliceDataFromPlane routine which calls getPlaneData
-            if result is not None:
-                result = result.copy(order='K')
+            data = self._dataSource.getSliceData(position=position, sliceDim=sliceDim)
+            data = data.copy(order='K') * self.scale
 
-        # check if we have something valid to return
-        if result is None:
-            getLogger().warning('Failed to get slice data along dimension "%s" at position %s' %
-                                (sliceDim, position))
+        # if position is None:
+        #     position = [1] * self.dimensionCount
+        #
+        # if not isIterable(position) or len(position) < self.dimensionCount:
+        #     raise ValueError('position should be a iterable with length %d; got "%s"' %
+        #                      (self.dimensionCount, position)
+        #                      )
+        #
+        # if isIterable(sliceDim) or sliceDim < 1 or sliceDim > self.dimensionCount:
+        #     raise ValueError('sliceDim should be a integer in range [1,%d]; got "%s"' %
+        #                      (self.dimensionCount, sliceDim)
+        #                      )
+        #
+        #
+        # result = None
+        # if self._dataSource is None:
+        #     getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
+        #     result = numpy.zeros( (self.pointCounts[sliceDim-1], ), dtype=numpy.float32)
+        #
+        # elif self.dimensionCount == 1:
+        #     # 1D data
+        #     result = self._get1DSliceData()
+        #     # Make a copy in order to preserve the original data and apply scaling
+        #     result = result.copy(order='K') * self.scale
+        #
+        # else:
+        #     # nD data; get slice via appropriate plane
+        #     position[sliceDim - 1] = 1  # To improve caching; position, dimensions are 1-based
+        #     xDim, yDim = (1, sliceDim) if sliceDim > 1 else (1, 2)
+        #     result = self._getSliceDataFromPlane(position=position, xDim=xDim, yDim=yDim, sliceDim=sliceDim)
+        #
+        #     # Make a copy in order to preserve the original data; do not apply scaling, as this was already done
+        #     # by the _getSliceDataFromPlane routine which calls getPlaneData
+        #     if result is not None:
+        #         result = result.copy(order='K')
+        #
+        # # check if we have something valid to return
+        # if result is None:
+        #     getLogger().warning('Failed to get slice data along dimension "%s" at position %s' %
+        #                         (sliceDim, position))
 
-        # For 1D, save as intensities attribute
-        self._intensities = result
-        return result
+        # For 1D, save as intensities attribute; TODO: remove
+        self._intensities = data
+        return data
 
     @logCommand(get='self')
     def getSlice(self, axisCode, position, exactMatch=True):
@@ -2463,39 +2426,6 @@ class Spectrum(AbstractWrapperObject):
             data = self._dataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
             # Make a copy in order to preserve the original data and apply scaling
             data = data.copy(order='K') * self.scale
-
-        # if self.dimensionCount < 2:
-        #     raise ValueError('Spectrum.getPlaneData; dimensionCount must be >= 2')
-        # if xDim == yDim:
-        #     raise ValueError('Spectrum.getPlaneData; must have xDim != yDim')
-        # dims = self.dimensions
-        # if xDim not in dims:
-        #     raise ValueError('Spectrum.getPlaneData; invalid xDim "%s"; must one of %s' %
-        #                      (xDim, dims))
-        # if yDim not in dims:
-        #     raise ValueError('Spectrum.getPlaneData; invalid yDim "%s"; must one of %s' %
-        #                      (yDim, dims))
-        # if position is None:
-        #     position = [1] * self.dimensionCount
-        #
-        # for idx, p in enumerate(position):
-        #     if not (1 <= p <= self.pointCounts[idx]):
-        #         raise ValueError('Spectrum.getPlaneData; invalid position[%d] "%d"; should be in range (%d,%d)' %
-        #                          (idx, p, 1, self.pointCounts[idx]))
-        #
-        # position = list(position)  # assure we have a list so we can assign below
-        # # set the points of xDim, yDim to 1 as these do not matter (to improve caching)
-        # position[xDim - 1] = 1  # position is 1-based
-        # position[yDim - 1] = 1
-        #
-        # result = self._getPlaneData(position=position, xDim=xDim, yDim=yDim)
-        # Make a copy in order to preserve the original data and apply scaling
-        # result = result.copy(order='K') * self.scale
-        #
-        # # check if we have something valid to return
-        # if result is None:
-        #     raise RuntimeError('%s: Failed to get plane data along dimensions (%s,%s) at position %s' %
-        #                        (self, xDim, yDim, position))
 
         return data
 
@@ -2615,11 +2545,11 @@ class Spectrum(AbstractWrapperObject):
                 pass
         return newSpectrum
 
-    @cached(_REGIONDATACACHE, maxItems=16, debug=False)
+    # @cached(_REGIONDATACACHE, maxItems=16, debug=False)
     def getRegion(self, **axisDict):
         """
         Return the region of the spectrum data defined by the axis limits in ppm as numpy array
-        of the same dimensionalty as defined by the Spectrum instance.
+        of the same dimensionality as defined by the Spectrum instance.
 
         Axis limits  are passed in as a dict of (axisCode, tupleLimit) key, value pairs
         with the tupleLimit supplied as (start,stop) axis limits in ppm (lower ppm value first).
@@ -2644,7 +2574,8 @@ class Spectrum(AbstractWrapperObject):
         if not self.hasValidPath():
             raise RuntimeError('No valid spectral datasource defined')
 
-        if None in self._mapAxisCodes(axisDict.keys()):
+        axisCodes = [ac for ac in axisDict.keys()]
+        if None in self._mapAxisCodes(axisCodes):
             raise ValueError('Illegal axisCode in axisDict')
 
         # augment axisDict with any missing axisCodes
@@ -2663,7 +2594,7 @@ class Spectrum(AbstractWrapperObject):
 
             sliceTuples[idx] = (start,stop)
 
-        getLogger().debug('Spectrum.getRegion: axisDict = %s; sliceTuples = %s' % (axisDict,sliceTuples))
+        getLogger().debug('Spectrum.getRegion: axisDict = %s; sliceTuples = %s' % (axisDict, sliceTuples))
 
         return self._dataSource.getRegionData(sliceTuples)
 
@@ -2798,14 +2729,15 @@ class Spectrum(AbstractWrapperObject):
             # GLSignals = GLNotifier(parent=self)
             # GLSignals.emitPaintEvent()
 
-    @cached.clear(_PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
-    @cached.clear(_SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
-    @cached.clear(_SLICE1DDATACACHE)  # Check if there was a slice1ddata cache, and if so, clear it
-    @cached.clear(_REGIONDATACACHE)  # Check if there was a regiondata cache, and if so, clear it
+    # @cached.clear(_PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
+    # @cached.clear(_SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
+    # @cached.clear(_SLICE1DDATACACHE)  # Check if there was a slice1ddata cache, and if so, clear it
+    # @cached.clear(_REGIONDATACACHE)  # Check if there was a regiondata cache, and if so, clear it
     def _clearCache(self):
-        """Convenience to clear the cache; all action done by the decorators
+        """Clear the cache
         """
-        pass
+        if self._dataSource is not None:
+            self._dataSource.clearCache()
 
     @deleteObject()
     def _delete(self):
@@ -3077,9 +3009,6 @@ class Spectrum(AbstractWrapperObject):
         string = '================= %s =================\n' % self
         string += 'path = %s\n' % self.filePath
         string += 'dataFormat = %s\n' % self.dataFormat
-        for cache in self._dataCaches:
-            if hasattr(self, cache):
-                string += str(getattr(self, cache)) + '\n'
         string += 'dimensions = %s\n' % self.dimensionCount
         string += 'sizes = (%s)\n' % ' x '.join([str(d) for d in self.pointCounts])
         for attr in """

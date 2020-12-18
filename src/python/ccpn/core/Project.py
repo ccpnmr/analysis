@@ -133,35 +133,35 @@ class Project(AbstractWrapperObject):
 
     @property
     def spectra(self):
-        "place-holder; hotfixed later"
-        return None
+        "STUB: hot-fixed later"
+        return ()
 
     @property
     def peakLists(self):
-        "place-holder; hotfixed later"
-        return None
+        "STUB: hot-fixed later"
+        return ()
 
     @property
     def multipletLists(self):
-        "place-holder; hotfixed later"
-        return None
+        "STUB: hot-fixed later"
+        return ()
 
     @property
     def integralLists(self):
-        "place-holder; hotfixed later"
-        return None
+        "STUB: hot-fixed later"
+        return ()
 
     @property
     def spectrumViews(self):
-        "place-holder; hotfixed later"
-        return None
+        "STUB: hot-fixed later"
+        return ()
 
     @property
     def chemicalShiftLists(self):
-        "place-holder; hotfixed later"
+        "STUB: hot-fixed later"
         return None
 
-    # Inherited from AbtractWrapperObject
+    # Inherited from AbstractWrapperObject
 
     # @property
     # def project(self) -> 'Project':

@@ -4711,8 +4711,8 @@ class CcpnGLWidget(QOpenGLWidget):
             # GWV: why copy again into numpy array? the routine already returns this
             # data = np.array(spectrumView.spectrum._getSliceDataFromPlane(position=pointInt,
             #                                                              xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim))
-            data = spectrumView.spectrum._getSliceDataFromPlane(position=pointInt,
-                                                                xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim)
+            # GWV reverted to getSliceData
+            data = spectrumView.spectrum.getSliceData(position=pointInt, sliceDim=sliceDim)
         return data
 
     def _newStaticHTraceData(self, spectrumView, tracesDict,

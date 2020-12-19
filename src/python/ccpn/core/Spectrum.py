@@ -235,7 +235,7 @@ class Spectrum(AbstractWrapperObject):
     #-----------------------------------------------------------------------------------------
 
     _DATASTORE_KEY = '_dataStore'    # Key for storing the dataStore info in the Ccpn internal parameter store of the
-                                    # Spectrum instance
+    # Spectrum instance
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure
@@ -290,10 +290,6 @@ class Spectrum(AbstractWrapperObject):
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
         self._scaleChanged = False
-
-        # Hack to trigger initialisation of contours
-        self.positiveContourCount = 0
-        self.negativeContourCount = 0
 
     #-----------------------------------------------------------------------------------------
     # Spectrum properties
@@ -641,34 +637,6 @@ class Spectrum(AbstractWrapperObject):
         # because: reading from .nef files extracts the name from the end of the experiment_type in nef reader
         #           which is not wrapped with quotes, so defaults to an int if it can?
         self._wrappedData.experiment.name = str(value)
-
-    def _getDataSource(self, dataStore, reportWarnings=False):
-        """Check the validity of the file defined by dataStore;
-        returns DataSource instance or None when filePath and/or dataFormat of the dataStore instance are incorrect
-        Optionally report warnings
-        """
-        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getSpectrumDataSource
-        from sandbox.Geerten.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
-
-        if dataStore is None:
-            raise RuntimeError('dataStore not defined')
-
-        if dataStore.dataFormat == EmptySpectrumDataSource.dataFormat:
-            # Special case, empty spectrum
-            dataSource = EmptySpectrumDataSource(spectrum=self)
-
-        else:
-            if not dataStore.exists():
-                if reportWarnings:
-                    dataStore.warningMessage()
-                return None
-            dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
-
-        if dataSource is None and reportWarnings:
-            getLogger().warning('data format "%s" is incompatible with path "%s"' %
-                                (dataStore.dataFormat, dataStore.path))
-
-        return dataSource
 
     @property
     def filePath(self) -> Optional[str]:
@@ -1439,7 +1407,7 @@ class Spectrum(AbstractWrapperObject):
                     raise ValueError(
                             "Attempt to set incorrect magnetisationTransfer value %s in spectrum %s"
                             % (tt, self.pid)
-                            )
+                    )
                 apiExperiment.newExpTransfer(expDimRefs=expDimRefs, transferType=transferType,
                                              isDirect=(not isIndirect))
         else:
@@ -2106,9 +2074,10 @@ class Spectrum(AbstractWrapperObject):
         self.negativeContourCount = count
 
     def _setDefaultContourColours(self):
-        """Set default contour values and colours for contours
+        """Set default contour colours
         """
         (self.positiveContourColour, self.negativeContourColour) = getDefaultSpectrumColours(self)
+        self.sliceColour = self.positiveContourColour
 
     def _getAliasingRange(self):
         """Return the min/max aliasing range for the peakLists in the spectrum, if there are no peakLists with peaks, return None
@@ -2157,6 +2126,15 @@ class Spectrum(AbstractWrapperObject):
         self._copyNonDimensionalParameters(target)
         self._copyDimensionalParameters(axisCodes, target)
 
+    def estimateNoise(self):
+        """Estimate and return the noise level, or None if it cannot be
+        """
+        if self._dataSource is not None:
+            noise = self._dataSource.estimateNoise()
+        else:
+            noise = None
+        return noise
+
     #-----------------------------------------------------------------------------------------
     # data access functions
     #-----------------------------------------------------------------------------------------
@@ -2203,12 +2181,15 @@ class Spectrum(AbstractWrapperObject):
 
     @logCommand(get='self')
     def getSliceData(self, position=None, sliceDim: int = 1):
-        """
-        Get a slice through position along sliceDim from the Spectrum
+        """Get a slice defined by sliceDim and a position vector
+
         :param position: An optional list/tuple of point positions (1-based);
                          defaults to [1,1,1,1]
-        :param sliceDim: Dimension of the slice (1-based)
+        :param sliceDim: Dimension of the slice axis (1-based)
+
         :return: numpy 1D data array
+
+        NB: use getSlice() method for axisCode based access
         """
         if self._dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
@@ -2217,39 +2198,43 @@ class Spectrum(AbstractWrapperObject):
         else:
             try:
                 position = self._dataSource.checkForValidSlice(position, sliceDim)
-            except (RuntimeError, ValueError) as es:
-                getLogger().error('Spectrum.getSliceData: invalid arguments: %s' % es)
-                raise es
+                data = self._dataSource.getSliceData(position=position, sliceDim=sliceDim)
+                data = data.copy(order='K') * self.scale
 
-            data = self._dataSource.getSliceData(position=position, sliceDim=sliceDim)
-            data = data.copy(order='K') * self.scale
+            except (RuntimeError, ValueError) as es:
+                getLogger().error('Spectrum.getSliceData: %s' % es)
+                raise es
 
         # For 1D, save as intensities attribute; TODO: remove
         self._intensities = data
         return data
 
     @logCommand(get='self')
-    def getSlice(self, axisCode, position, exactMatch=True) -> numpy.array:
-        """Get 1D slice along axisCode through position; sets the intensities attribute
-        :return: 1D Numpy 1D data array
+    def getSlice(self, axisCode, position) -> numpy.array:
+        """Get a slice defined by axisCode and a position vector
+
+        :param axisCode: valid axisCode of the slice axis
+        :param position: An optional list/tuple of point positions (1-based);
+                         defaults to [1,1,1,1]
+
+        :return: numpy 1D data array
+
+        NB: use getSliceData() method for dimension based access
         """
         dimensions = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)
         return self.getSliceData(position=position, sliceDim=dimensions[0])
 
     @logCommand(get='self')
     def extractSliceToFile(self, axisCode, position, path=None, dataFormat='Hdf5'):
-        """Extract 1d slice from self as new Spectrum; saved to path
-        (auto-generated if not given)
+        """Extract 1D slice from self as new Spectrum; saved to path
         if 1D it effectively yields a copy of self
 
         :param axisCode: axiscode of slice to extract
         :param position: position vector (1-based)
         :param path: optional path; if None, constructed from current filePath
+
         :return: Spectrum instance
         """
-        # local import to prevent cycles
-        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-
         if self._dataSource is None:
             text = 'No proper (filePath, dataFormat) set for %s; unable to extract slice' % self
             getLogger().error(text)
@@ -2258,31 +2243,16 @@ class Spectrum(AbstractWrapperObject):
         if axisCode is None or axisCode not in self.axisCodes:
             raise ValueError('Invalid axisCode %r, should be one of %s' % (axisCode, self.axisCodes))
 
-        dimensions = self.getByAxisCodes('dimensions', [axisCode])
         try:
-            position = self._dataSource.checkForValidSlice(position=position, sliceDim=dimensions[0])
+            dimensions = self.getByAxisCodes('dimensions', [axisCode])
+            self._dataSource.checkForValidSlice(position=position, sliceDim=dimensions[0])
+            newSpectrum = self._extractToFile(axisCodes=[axisCode], position=position, path=path, dataFormat=dataFormat,
+                                              tag='slice')
+
         except (ValueError, RuntimeError) as es:
-            text = 'Spectrum.extractSliceToFile: Invalid arguments: %s' % es
+            text = 'Spectrum.extractSliceToFile: %s' % es
             raise ValueError(es)
 
-        dataFormats = getDataFormats()
-        validFormats = [k.dataFormat for k in dataFormats.values() if k.hasWritingAbility]
-        klass = dataFormats.get(dataFormat)
-        if klass is None:
-            raise ValueError('Invalid dataFormat %r; must be one of %s' % (dataFormat, validFormats))
-        if not klass.hasWritingAbility:
-            raise ValueError('Unable to write to dataFormat %r; must be one of %s' % (dataFormat, validFormats))
-        suffix = klass.suffixes[0] if len(klass.suffixes) > 0 else '.dat'
-
-        sliceName = '_slice_%s' % axisCode
-        if path is None:
-            appendName = sliceName + '_' + '_'.join((str(p) for p in position))
-            dataStore = DataStore.newFromPath(path=self.filePath, appendToName=appendName, autoVersioning=True, withSuffix=suffix)
-        else:
-            dataStore = DataStore.newFromPath(path=path, autoVersioning=True, withSuffix=suffix)
-
-        newSpectrum = _extractRegionToFile(self, dimensions=dimensions, position=position,
-                                           name=sliceName, dataStore=dataStore, dataFormat=dataFormat)
         return newSpectrum
 
     @logCommand(get='self')
@@ -2296,7 +2266,7 @@ class Spectrum(AbstractWrapperObject):
 
         :return: 2D float32 NumPy array in order (yDim, xDim)
 
-        NB: use getPlane method for axisCode based access
+        NB: use getPlane() method for axisCode based access
         """
         if self._dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
@@ -2316,7 +2286,7 @@ class Spectrum(AbstractWrapperObject):
         return data
 
     @logCommand(get='self')
-    def getPlane(self, axisCodes, position=None, exactMatch=True):
+    def getPlane(self, axisCodes, position=None):
         """Get a plane defined by axisCodes and position
         Dimensionality must be >= 2
 
@@ -2333,129 +2303,92 @@ class Spectrum(AbstractWrapperObject):
         xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=exactMatch)
         return self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
-    def _getDefaultPlanePath(self, axisCodes, position):
-        "Construct a default path for plane"
-        planeStr = '_plane_' + '_'.join(axisCodes) + '_' + '_'.join([str(p) for p in position])
-        _p = aPath(self.filePath)
-        return os.path.join(str(_p.parent), _p.basename) + planeStr + '.dat'
-
-    def _savePlaneToNmrPipe(self, planeData, xDim, yDim, path):
-        "Save planeData as xDim,yDim) as NmrPipe path file"
-        from ccpnmodel.ccpncore.lib.spectrum.formats.NmrPipe import _makeNmrPipe2DHeader
-        with open(path, 'wb') as fp:
-            #TODO: remove dependency on filestorage on apiLayer
-            header = _makeNmrPipe2DHeader(self._wrappedData, xDim, yDim)
-            header.tofile(fp)
-            planeData.tofile(fp)
-
     @logCommand(get='self')
     def extractPlaneToFile(self, axisCodes: (tuple, list), position=None, path=None, dataFormat='Hdf5'):
-        """Save a plane defined by axisCodes and position to path
+        """Save a plane, defined by axisCodes and position, to path using dataFormat
         Dimensionality must be >= 2
 
-        :param axisCodes: tuple/list of two axisCodes; expand if exactMatch=False
+        :param axisCodes: tuple/list of two axisCodes
         :param position: a list/tuple of point-positions (1-based)
         :param path: path of the resulting file; auto-generated if None
         :param dataFormat: a data format valid for writing
 
         :returns plane as Spectrum instance
         """
-        # local import to prevent cycles
-        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-
         if self._dataSource is None:
-            text = 'No proper (filePath, dataFormat) set for %s; unable to extract slice' % self
+            text = 'No proper (filePath, dataFormat) set for %s; unable to extract plane' % self
             getLogger().error(text)
             raise RuntimeError(text)
 
         if axisCodes is None or len(axisCodes) != 2:
             raise ValueError('Invalid parameter axisCodes "%s", should be two of %s' % (axisCodes, self.axisCodes))
 
-        dimensions = self.getByAxisCodes('dimensions', axisCodes)
         try:
-            position = self._dataSource.checkForValidPlane(position=position, xDim=dimensions[0], yDim=dimensions[1])
+            dimensions = self.getByAxisCodes('dimensions', axisCodes)
+            self._dataSource.checkForValidPlane(position=position, xDim=dimensions[0], yDim=dimensions[1])
+            newSpectrum = self._extractToFile(axisCodes=axisCodes, position=position, path=path, dataFormat=dataFormat,
+                                              tag='plane')
+
         except (ValueError, RuntimeError) as es:
-            text = 'Spectrum.extractPlaneToFile: Invalid arguments: %s' % es
-            raise ValueError(es)
+            text = 'Spectrum.extractPlaneToFile: %s' % es
+            raise ValueError(text)
 
-        dataFormats = getDataFormats()
-        validFormats = [k.dataFormat for k in dataFormats.values() if k.hasWritingAbility]
-        klass = dataFormats.get(dataFormat)
-        if klass is None:
-            raise ValueError('Invalid dataFormat %r; must be one of %s' % (dataFormat, validFormats))
-        if not klass.hasWritingAbility:
-            raise ValueError('Unable to write to dataFormat %r; must be one of %s' % (dataFormat, validFormats))
-        suffix = klass.suffixes[0] if len(klass.suffixes) > 0 else '.dat'
-
-        planeName = '_plane_%s' % '_'.join(axisCodes)
-        if path is None:
-            appendName = planeName + '_' + '_'.join((str(p) for p in position))
-            dataStore = DataStore.newFromPath(path=self.filePath, appendToName=appendName, autoVersioning=True, withSuffix=suffix)
-        else:
-            dataStore = DataStore.newFromPath(path=path, autoVersioning=True, withSuffix=suffix)
-
-        newSpectrum = _extractRegionToFile(self, dimensions=dimensions, position=position,
-                                           name=planeName, dataStore=dataStore, dataFormat=dataFormat)
         return newSpectrum
 
-        # if self.dimensionCount < 2:
-        #     raise RuntimeError('Cannot extract plane from 1D data (%s)' % self)
-        #
-        # if position is None:
-        #     position = [1] * self.dimensionCount
-        #
-        # if path is None:
-        #     path = self._getDefaultPlanePath(axisCodes, position)
-        #
-        # xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
-        # planeData = self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
-        # self._savePlaneToNmrPipe(planeData, xDim=xDim, yDim=yDim, path=path)
-        #
-        # newSpectrum = self.project.loadSpectrum(path, subType=Formats.NMRPIPE)[0]
-        # newSpectrum.axisCodes = axisCodes  # to override the loadSpectrum routine
-        # self.copyParameters(axisCodes=axisCodes, target=newSpectrum)
-        # return newSpectrum
-
     @logCommand(get='self')
-    def getProjection(self, axisCodes: tuple, method: str = 'max', threshold=None):
-        """Get projected plane defined by a tuple of two axisCodes, using method and an optional threshold
-        return projected spectrum data as NumPy data array
+    def getProjection(self, axisCodes: (tuple, list), method: str = 'max', threshold=None):
+        """Get projected plane defined by two axisCodes, using method and an optional threshold
+
+        :param axisCodes: tuple/list of two axisCodes; expand if exactMatch=False
+        :param method: 'max', 'max above threshold', 'min', 'min below threshold',
+                       'sum', 'sum above threshold', 'sum below threshold'
+        :param threshold: threshold value for relevant method
+
+        :return: projected spectrum data as 2D float32 NumPy array in order (yDim, xDim)
         """
         projectedData = _getProjection(self, axisCodes=axisCodes, method=method, threshold=threshold)
         return projectedData
 
-    def _getDefaultProjectionPath(self, axisCodes):
-        "Construct a default path for projection"
-        planeStr = '_projection_' + '_'.join(axisCodes)
-        _p = aPath(self.filePath)
-        return os.path.join(str(_p.parent), _p.basename) + planeStr + '.dat'
-
     @logCommand(get='self')
-    def extractProjectionToFile(self, axisCodes: tuple, method: str = 'max', threshold=None, path=None):
-        """Save projected plane defined by a tuple of two axisCodes, using method and an optional threshold
-        to file. Save to path (auto-generated if None) using format
-        return projected spectrum as Spectrum instance
+    def extractProjectionToFile(self, axisCodes: (tuple, list), method: str = 'max', threshold=None,
+                                path=None, dataFormat='Hdf5'):
+        """Save a projected plane, defined by axisCodes and position, using method and an optional threshold,
+        to path using dataFormat
+        Dimensionality must be >= 2
+
+        :param axisCodes: tuple/list of two axisCodes
+        :param method: 'max', 'max above threshold', 'min', 'min below threshold',
+                       'sum', 'sum above threshold', 'sum below threshold'
+        :param threshold: threshold value for relevant method
+        :param path: path of the resulting file; auto-generated if None
+        :param dataFormat: a data format valid for writing
+
+        :returns projected plane as Spectrum instance
         """
-        if path is None:
-            path = self._getDefaultProjectionPath(axisCodes)
+        if self._dataSource is None:
+            text = 'No proper (filePath, dataFormat) set for %s; unable to extract plane' % self
+            getLogger().error(text)
+            raise RuntimeError(text)
 
-        projectedData = self.getProjection(axisCodes=axisCodes, method=method, threshold=threshold)
-        xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
-        self._savePlaneToNmrPipe(projectedData, xDim=xDim, yDim=yDim, path=path)
+        if axisCodes is None or len(axisCodes) != 2:
+            raise ValueError('Invalid parameter axisCodes "%s", should be two of %s' % (axisCodes, self.axisCodes))
 
-        newSpectrum = self.project.loadSpectrum(path, subType=Formats.NMRPIPE)[0]
-        newSpectrum.axisCodes = axisCodes  # to override the loadSpectrum routine
-        self.copyParameters(axisCodes=axisCodes, target=newSpectrum)
+        try:
+            xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)
+            position = [1]*self.dimensionCount
+            self._dataSource.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
+            newSpectrum = self._extractToFile(axisCodes=axisCodes, position=position, path=path, dataFormat=dataFormat,
+                                              tag='projection')
+            projectionData = self.getProjection(axisCodes=axisCodes, method=method, threshold=threshold)
+            # For writing, we need to remap the axisCodes onto the newSpectrum
+            xDim2, yDim2 = newSpectrum.getByAxisCodes('dimensions', axisCodes)
+            newSpectrum._dataSource.setPlaneData(data=projectionData, position=position, xDim=xDim2, yDim=yDim2)
+
+        except (ValueError, RuntimeError) as es:
+            text = 'Spectrum.extractProjectionToFile: %s' % es
+            raise ValueError(text)
+
         return newSpectrum
-
-    def estimateNoise(self):
-        """Estimate and return the noise level, or None if it cannot be
-        """
-        if self._dataSource is not None:
-            noise = self._dataSource.estimateNoise()
-        else:
-            noise = None
-        return noise
 
     def _clone1D(self):
         'Clone 1D spectrum to a new spectrum.'
@@ -2480,7 +2413,6 @@ class Spectrum(AbstractWrapperObject):
                 pass
         return newSpectrum
 
-    # @cached(_REGIONDATACACHE, maxItems=16, debug=False)
     def getRegion(self, **axisDict):
         """
         Return the region of the spectrum data defined by the axis limits in ppm as numpy array
@@ -2533,18 +2465,53 @@ class Spectrum(AbstractWrapperObject):
 
         return self._dataSource.getRegionData(sliceTuples)
 
-
     def getRegionData(self, exclusionBuffer: Optional[Sequence] = None, minimumDimensionSize: int = 3, **axisDict):
         """Return the region of the spectrum data defined by the axis limits.
         GWV: Old routine replaced by getRegion
         """
         raise NotImplementedError('replace by getRegion')
 
-    # GWV 20190731: not used
-    # def get1dSpectrumData(self):
-    #     """Get position,scaledData numpy array for 1D spectrum.
-    #     Yields first 1D slice for nD"""
-    #     return self._apiDataSource.get1dSpectrumData()
+    def _extractToFile(self, axisCodes, position, path, dataFormat, tag):
+        """Local routine to prevent code duplication across extractSliceToFile, extractPlaneToFile,
+        extractProjectionToFile.
+        Return new spectrum instance
+        """
+        # local import to prevent cycles
+        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+
+        dimensions = self.getByAxisCodes('dimensions', axisCodes)
+
+        dataFormats = getDataFormats()
+        validFormats = [k.dataFormat for k in dataFormats.values() if k.hasWritingAbility]
+        klass = dataFormats.get(dataFormat)
+        if klass is None:
+            raise ValueError('Invalid dataFormat %r; must be one of %s' % (dataFormat, validFormats))
+        if not klass.hasWritingAbility:
+            raise ValueError('Unable to write to dataFormat %r; must be one of %s' % (dataFormat, validFormats))
+        suffix = klass.suffixes[0] if len(klass.suffixes) > 0 else '.dat'
+
+        tagStr = '%s_%s' % (tag, '_'.join(axisCodes))
+        spectrumName = '%s_%s' % (self.name, tagStr)
+        appendToFilename = '_%s_%s' % (tagStr, '_'.join([str(p) for p in position]))
+
+        if path is None:
+            dataStore = DataStore.newFromPath(path=self.filePath, appendToName=appendToFilename,
+                                              autoVersioning=True, withSuffix=suffix)
+        else:
+            dataStore = DataStore.newFromPath(path=path, autoVersioning=True, withSuffix=suffix)
+
+        newSpectrum = _extractRegionToFile(self, dimensions=dimensions, position=position,
+                                           name=spectrumName, dataStore=dataStore, dataFormat=dataFormat)
+        # add some comment as to the origin of the data
+        comment = newSpectrum.comment
+        if comment is None:
+            comment = ''
+        if len(comment) > 0:
+            comment += '; '
+        comment += '%s at (%s) from %s' % (tagStr, ','.join([str(p) for p in position]), self)
+        newSpectrum.comment = comment
+
+        return newSpectrum
 
     #-----------------------------------------------------------------------------------------
     # Iterators
@@ -2581,6 +2548,34 @@ class Spectrum(AbstractWrapperObject):
     #-----------------------------------------------------------------------------------------
     # Implementation functions
     #-----------------------------------------------------------------------------------------
+
+    def _getDataSource(self, dataStore, reportWarnings=False):
+        """Check the validity of the file defined by dataStore;
+        returns DataSource instance or None when filePath and/or dataFormat of the dataStore instance are incorrect
+        Optionally report warnings
+        """
+        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getSpectrumDataSource
+        from sandbox.Geerten.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+
+        if dataStore is None:
+            raise RuntimeError('dataStore not defined')
+
+        if dataStore.dataFormat == EmptySpectrumDataSource.dataFormat:
+            # Special case, empty spectrum
+            dataSource = EmptySpectrumDataSource(spectrum=self)
+
+        else:
+            if not dataStore.exists():
+                if reportWarnings:
+                    dataStore.warningMessage()
+                return None
+            dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
+
+        if dataSource is None and reportWarnings:
+            getLogger().warning('data format "%s" is incompatible with path "%s"' %
+                                (dataStore.dataFormat, dataStore.path))
+
+        return dataSource
 
     def _updateParameterValues(self):
         """This method check, and if needed updates specific parameter values
@@ -2940,7 +2935,7 @@ class Spectrum(AbstractWrapperObject):
     #-----------------------------------------------------------------------------------------
 
     def __str__(self):
-        return '<%s (%s)>' % (self.longPid, ','.join(self.axisCodes))
+        return '<%s (%s)>' % (self.pid, ','.join(self.axisCodes))
 
     def _infoString(self, includeDimensions=False):
         """Return info string about self, optionally including dimensional
@@ -3157,6 +3152,9 @@ def _newSpectrum(project: Project, path: str, name: str) -> (Spectrum, None):
         name = base
 
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
+    # Hack to trigger initialisation of contours
+    spectrum.positiveContourCount = 0
+    spectrum.negativeContourCount = 0
     spectrum._updateParameterValues()
 
     return spectrum

@@ -2229,65 +2229,60 @@ class Spectrum(AbstractWrapperObject):
         return data
 
     @logCommand(get='self')
-    def getSlice(self, axisCode, position, exactMatch=True):
+    def getSlice(self, axisCode, position, exactMatch=True) -> numpy.array:
         """Get 1D slice along axisCode through position; sets the intensities attribute
         :return: 1D Numpy 1D data array
         """
-        sliceDim = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)
-        return self.getSliceData(position=position, sliceDim=sliceDim[0])
-
-    def _getDefaultSlicePath(self, axisCode, position):
-        "Return a default path for slice"
-        from ccpn.util.Hdf5 import HDF5_EXTENSION
-
-        slice = self.name + '_slice_%s_' % axisCode + '_'.join((str(p) for p in position))
-        _p = aPath(self.filePath)
-        return str(_p.parent / slice + HDF5_EXTENSION)
+        dimensions = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)
+        return self.getSliceData(position=position, sliceDim=dimensions[0])
 
     @logCommand(get='self')
-    def extractSliceToFile(self, axisCode, position, path=None):
+    def extractSliceToFile(self, axisCode, position, path=None, dataFormat='Hdf5'):
         """Extract 1d slice from self as new Spectrum; saved to path
         (auto-generated if not given)
         if 1D it effectively yields a copy of self
 
         :param axisCode: axiscode of slice to extract
         :param position: position vector (1-based)
-        :param path: optional path; constructed from current filePath and name of instance
+        :param path: optional path; if None, constructed from current filePath
         :return: Spectrum instance
         """
+        # local import to prevent cycles
+        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
 
-        if axisCode not in self.axisCodes:
-            raise ValueError('Invalid axisCode "%s"' % axisCode)
-        if len(position) != self.dimensionCount:
-            raise ValueError('Invalid position "%s"' % position)
+        if self._dataSource is None:
+            text = 'No proper (filePath, dataFormat) set for %s; unable to extract slice' % self
+            getLogger().error(text)
+            raise RuntimeError(text)
 
+        if axisCode is None or axisCode not in self.axisCodes:
+            raise ValueError('Invalid axisCode %r, should be one of %s' % (axisCode, self.axisCodes))
+
+        dimensions = self.getByAxisCodes('dimensions', [axisCode])
+        try:
+            position = self._dataSource.checkForValidSlice(position=position, sliceDim=dimensions[0])
+        except (ValueError, RuntimeError) as es:
+            text = 'Spectrum.extractSliceToFile: Invalid arguments: %s' % es
+            raise ValueError(es)
+
+        dataFormats = getDataFormats()
+        validFormats = [k.dataFormat for k in dataFormats.values() if k.hasWritingAbility]
+        klass = dataFormats.get(dataFormat)
+        if klass is None:
+            raise ValueError('Invalid dataFormat %r; must be one of %s' % (dataFormat, validFormats))
+        if not klass.hasWritingAbility:
+            raise ValueError('Unable to write to dataFormat %r; must be one of %s' % (dataFormat, validFormats))
+        suffix = klass.suffixes[0] if len(klass.suffixes) > 0 else '.dat'
+
+        sliceName = '_slice_%s' % axisCode
         if path is None:
-            path = self._getDefaultSlicePath(axisCode, position)
+            appendName = sliceName + '_' + '_'.join((str(p) for p in position))
+            dataStore = DataStore.newFromPath(path=self.filePath, appendToName=appendName, autoVersioning=True, withSuffix=suffix)
+        else:
+            dataStore = DataStore.newFromPath(path=path, autoVersioning=True, withSuffix=suffix)
 
-        # Due to implementation limitations, we have to hack this:
-        # first create a dummy spectrum; read the data and store with dummy
-        # Save the data into hdf5 and reload to create a new Spectrum instance.
-        # To alleviate: we would need a newSpectrum() method, without the need for an actual
-        # spectrum, but with the option to set path, sizes etc in the model (which
-        # createDummy does not do
-        _dummy = self.project.createDummySpectrum(axisCodes=[axisCode], name='_dummy')
-        _dummy._intensities = self.getSlice(axisCode, position, exactMatch=True)
-        # copy relevant attributes
-        self.copyParameters(axisCodes=[axisCode], target=_dummy)
-
-        # save as hdf5 file
-        from ccpn.util.Hdf5 import convertDataToHdf5
-
-        convertDataToHdf5(_dummy, path)
-
-        # create the api storage by destroying _dummy and re-loading the data
-        from ccpnmodel.ccpncore.lib.spectrum.formats.Hdf5 import FILE_TYPE as HDF5_TYPE
-
-        self.project.deleteObjects(_dummy)
-        newSpectrum = self.project.loadSpectrum(path=path, subType=HDF5_TYPE)[0]  # load yields a list
-        newSpectrum.axisCodes = [axisCode]  # to overRide the loadData
-        # Copy relevant attributes again
-        self.copyParameters(axisCodes=[axisCode], target=newSpectrum)
+        newSpectrum = _extractRegionToFile(self, dimensions=dimensions, position=position,
+                                           name=sliceName, dataStore=dataStore, dataFormat=dataFormat)
         return newSpectrum
 
     @logCommand(get='self')
@@ -2298,6 +2293,7 @@ class Spectrum(AbstractWrapperObject):
         :param position: A list/tuple of point-positions (1-based)
         :param xDim: Dimension of the first axis (1-based)
         :param yDim: Dimension of the second axis (1-based)
+
         :return: 2D float32 NumPy array in order (yDim, xDim)
 
         NB: use getPlane method for axisCode based access
@@ -2320,10 +2316,15 @@ class Spectrum(AbstractWrapperObject):
         return data
 
     @logCommand(get='self')
-    def getPlane(self, axisCodes: tuple, position=None, exactMatch=True):
-        """Get a plane defined by a tuple of two axisCodes, and a position vector ('1' based, defaults to first point)
-        Expand axisCodes if exactMatch=False
-        returns np-data array
+    def getPlane(self, axisCodes, position=None, exactMatch=True):
+        """Get a plane defined by axisCodes and position
+        Dimensionality must be >= 2
+
+        :param axisCodes: tuple/list of two axisCodes; expand if exactMatch=False
+        :param position: A list/tuple of point-positions (1-based)
+
+        :return: 2D float32 NumPy array in order (yDim, xDim)
+
         NB: use getPlaneData method for dimension based access
         """
         if len(axisCodes) != 2:
@@ -2348,29 +2349,72 @@ class Spectrum(AbstractWrapperObject):
             planeData.tofile(fp)
 
     @logCommand(get='self')
-    def extractPlaneToFile(self, axisCodes: tuple, position=None, path=None):
-        """Save plane defined by a tuple of two axisCodes and position
-        to file. Save to path (auto-generated if None).
+    def extractPlaneToFile(self, axisCodes: (tuple, list), position=None, path=None, dataFormat='Hdf5'):
+        """Save a plane defined by axisCodes and position to path
+        Dimensionality must be >= 2
+
+        :param axisCodes: tuple/list of two axisCodes; expand if exactMatch=False
+        :param position: a list/tuple of point-positions (1-based)
+        :param path: path of the resulting file; auto-generated if None
+        :param dataFormat: a data format valid for writing
 
         :returns plane as Spectrum instance
         """
-        if self.dimensionCount < 2:
-            raise RuntimeError('Cannot extract plane from 1D data (%s)' % self)
+        # local import to prevent cycles
+        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
 
-        if position is None:
-            position = [1] * self.dimensionCount
+        if self._dataSource is None:
+            text = 'No proper (filePath, dataFormat) set for %s; unable to extract slice' % self
+            getLogger().error(text)
+            raise RuntimeError(text)
 
+        if axisCodes is None or len(axisCodes) != 2:
+            raise ValueError('Invalid parameter axisCodes "%s", should be two of %s' % (axisCodes, self.axisCodes))
+
+        dimensions = self.getByAxisCodes('dimensions', axisCodes)
+        try:
+            position = self._dataSource.checkForValidPlane(position=position, xDim=dimensions[0], yDim=dimensions[1])
+        except (ValueError, RuntimeError) as es:
+            text = 'Spectrum.extractPlaneToFile: Invalid arguments: %s' % es
+            raise ValueError(es)
+
+        dataFormats = getDataFormats()
+        validFormats = [k.dataFormat for k in dataFormats.values() if k.hasWritingAbility]
+        klass = dataFormats.get(dataFormat)
+        if klass is None:
+            raise ValueError('Invalid dataFormat %r; must be one of %s' % (dataFormat, validFormats))
+        if not klass.hasWritingAbility:
+            raise ValueError('Unable to write to dataFormat %r; must be one of %s' % (dataFormat, validFormats))
+        suffix = klass.suffixes[0] if len(klass.suffixes) > 0 else '.dat'
+
+        planeName = '_plane_%s' % '_'.join(axisCodes)
         if path is None:
-            path = self._getDefaultPlanePath(axisCodes, position)
+            appendName = planeName + '_' + '_'.join((str(p) for p in position))
+            dataStore = DataStore.newFromPath(path=self.filePath, appendToName=appendName, autoVersioning=True, withSuffix=suffix)
+        else:
+            dataStore = DataStore.newFromPath(path=path, autoVersioning=True, withSuffix=suffix)
 
-        xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
-        planeData = self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
-        self._savePlaneToNmrPipe(planeData, xDim=xDim, yDim=yDim, path=path)
-
-        newSpectrum = self.project.loadSpectrum(path, subType=Formats.NMRPIPE)[0]
-        newSpectrum.axisCodes = axisCodes  # to override the loadSpectrum routine
-        self.copyParameters(axisCodes=axisCodes, target=newSpectrum)
+        newSpectrum = _extractRegionToFile(self, dimensions=dimensions, position=position,
+                                           name=planeName, dataStore=dataStore, dataFormat=dataFormat)
         return newSpectrum
+
+        # if self.dimensionCount < 2:
+        #     raise RuntimeError('Cannot extract plane from 1D data (%s)' % self)
+        #
+        # if position is None:
+        #     position = [1] * self.dimensionCount
+        #
+        # if path is None:
+        #     path = self._getDefaultPlanePath(axisCodes, position)
+        #
+        # xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
+        # planeData = self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+        # self._savePlaneToNmrPipe(planeData, xDim=xDim, yDim=yDim, path=path)
+        #
+        # newSpectrum = self.project.loadSpectrum(path, subType=Formats.NMRPIPE)[0]
+        # newSpectrum.axisCodes = axisCodes  # to override the loadSpectrum routine
+        # self.copyParameters(axisCodes=axisCodes, target=newSpectrum)
+        # return newSpectrum
 
     @logCommand(get='self')
     def getProjection(self, axisCodes: tuple, method: str = 'max', threshold=None):
@@ -2895,6 +2939,9 @@ class Spectrum(AbstractWrapperObject):
     # Output, printing, etc
     #-----------------------------------------------------------------------------------------
 
+    def __str__(self):
+        return '<%s (%s)>' % (self.longPid, ','.join(self.axisCodes))
+
     def _infoString(self, includeDimensions=False):
         """Return info string about self, optionally including dimensional
         parameters
@@ -3115,17 +3162,18 @@ def _newSpectrum(project: Project, path: str, name: str) -> (Spectrum, None):
     return spectrum
 
 
-def _extractRegionToFile(spectrum, dimensions, position, name=None, path=None, dataFormat = 'Hdf5') -> Spectrum:
-    """Extract a region of spectrum, defined by dimensions, position to path
+def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=None, dataFormat = 'Hdf5') -> Spectrum:
+    """Extract a region of spectrum, defined by dimensions, position to path defined by dataStore (optionally
+    auto-generated from spectrum.path)
 
     :param dimensions:  [dim_a, dim_b, ...];  defining dimensions to be extracted (1-based)
-    :param position, N-dimensional position, 1-based
+    :param position, spectrum position-vector of length spectrum.dimensionCount (list, tuple; 1-based)
     """
     # local import to prevent cycles
     from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
 
-    getLogger().debug('Extracting from %s, dimensions=%r, position=%r, path=%r, dataFormat %r' %
-                      (spectrum, dimensions, position, path, dataFormat))
+    getLogger().debug('Extracting from %s, dimensions=%r, position=%r, dataStore=%s, dataFormat %r' %
+                      (spectrum, dimensions, position, dataStore, dataFormat))
 
     if spectrum is None or not isinstance(spectrum, Spectrum):
         raise ValueError('invalid spectrum argument %r' % spectrum)
@@ -3149,11 +3197,9 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, path=None, d
 
     # Do path-related stuff
     suffix = klass.suffixes[0] if len(klass.suffixes)>0 else '.dat'
-    if path is None:
+    if dataStore is None:
         dataStore = DataStore.newFromPath(spectrum.filePath, appendToName=dimString,
                                           withSuffix=suffix, autoVersioning=True)
-    else:
-        dataStore = DataStore.newFromPath(path, withSuffix=suffix, autoVersioning=True)
 
     # Create a dataSource object
     dataSource = klass(spectrum=spectrum)

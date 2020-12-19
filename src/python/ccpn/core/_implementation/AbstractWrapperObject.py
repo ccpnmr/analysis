@@ -216,7 +216,7 @@ class AbstractWrapperObject(NotifierBase):
     def __repr__(self):
         """Object string representation; compatible with application.get()
         """
-        return "<%s>" % (self.longPid)
+        return "<%s>" % self.pid
 
     def __str__(self):
         """Readable string representation; potentially subclassed

@@ -22,29 +22,45 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-def ppm2pnt(ppm, npoints, sf, sw, refppm, refpt):
+def _ppm2pnt(ppm, npoints, sf, sw, refppm, refpt):
   t = - npoints * sf /   float(sw)
   pnt = t*(ppm - refppm) + refpt
   return pnt
+
+def _ppm2hz(ppm, npoints, sf, sw, refppm, refpt):
+    pnt = _ppm2pnt(ppm, npoints, sf, sw, refppm, refpt)
+    hz = _pnt2hz(pnt, npoints, sf, sw, refppm, refpt)
+    return hz
 
 def _pnt2ppm(pnt, npoints, sf, sw, refppm, refpt):
   t = - npoints * sf / float(sw)
   ppm = (pnt - refpt)/t + refppm
   return ppm
 
-def _hz2pnt(hz, npoints, sf, sw, refppm, refpt):
-  t = - npoints / float(sw)
-  pnt = t*(hz - sf*refppm) + refpt
-  return pnt
-
 def _pnt2hz(pnt, npoints, sf, sw, refppm, refpt):
   t = - npoints / float(sw)
   hz = (pnt - refpt)/t + sf*refppm
   return hz
 
-def _genc(spectrum):
+def _hz2pnt(hz, npoints, sf, sw, refppm, refpt):
+  t = - npoints / float(sw)
+  pnt = t*(hz - sf*refppm) + refpt
+  return pnt
+
+def _hz2ppm(hz, npoints, sf, sw, refppm, refpt):
+    pnt = _hz2pnt(hz, npoints, sf, sw, refppm, refpt)
+    ppm = _pnt2ppm(pnt, npoints, sf, sw, refppm, refpt)
+    return ppm
+
+def _getSpUnitConversionArguments(spectrum):
+    """
+    :param spectrum:
+    :return: tuple of tuples containing the spectrum properties needed for unit conversions
+
+    """
     npoints = spectrum.totalPointCounts
-    sw = spectrum.spectralWidthsHz
     sf = spectrum.spectrometerFrequencies
-    refpt = spectrum.referencePoints
+    sw = spectrum.spectralWidthsHz
     refppm = spectrum.referenceValues
+    refpt = spectrum.referencePoints
+    return npoints, sf, sw, refppm, refpt

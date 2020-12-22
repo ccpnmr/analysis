@@ -819,7 +819,7 @@ class GeneralTab(Widget):
 
     def _changeSpectrumName(self, spectrum, name):
         spectrum.rename(name)
-        self._writeLoggingMessage("spectrum.rename('%s')" % str(name))
+        # self._writeLoggingMessage("spectrum.rename('%s')" % str(name))
 
     @queueStateChange(_verifyPopupApply)
     def _queueSpectrumCommentChange(self, spectrum, value):
@@ -828,7 +828,7 @@ class GeneralTab(Widget):
 
     def _changeSpectrumComment(self, spectrum, comment):
         spectrum.comment = comment
-        self._writeLoggingMessage("spectrum.comment = '%s'" % str(comment))
+        # self._writeLoggingMessage("spectrum.comment = '%s'" % str(comment))
 
     @queueStateChange(_verifyPopupApply)
     def _queueSpectrumScaleChange(self, spectrum, textFromValue, value):
@@ -838,8 +838,8 @@ class GeneralTab(Widget):
 
     def _setSpectrumScale(self, spectrum, scale):
         spectrum.scale = float(scale)
-        self._writeLoggingMessage("spectrum.scale = %s" % str(scale))
-        self.pythonConsole.writeConsoleCommand("spectrum.scale = %s" % scale, spectrum=spectrum)
+        # self._writeLoggingMessage("spectrum.scale = %s" % str(scale))
+        # self.pythonConsole.writeConsoleCommand("spectrum.scale = %s" % scale, spectrum=spectrum)
 
     @queueStateChange(_verifyPopupApply)
     def _queueNoiseLevelDataChange(self, spectrum, textFromValue, value):
@@ -849,7 +849,7 @@ class GeneralTab(Widget):
 
     def _setNoiseLevelData(self, spectrum, noise):
         spectrum.noiseLevel = float(noise)
-        self._writeLoggingMessage("spectrum.noiseLevel = %s" % str(noise))
+        # self._writeLoggingMessage("spectrum.noiseLevel = %s" % str(noise))
 
     @queueStateChange(_verifyPopupApply)
     def _queueChemicalShiftListChange(self, spectrum, item):
@@ -875,17 +875,17 @@ class GeneralTab(Widget):
         self.chemicalShiftListPulldown.setData(self.chemicalShiftListPulldown.texts)
         self.chemicalShiftListPulldown.setCurrentIndex(insertionIndex)
         self.spectrum.chemicalShiftList = newChemicalShiftList
-        self._writeLoggingMessage("""newChemicalShiftList = project.newChemicalShiftList()
-                                spectrum.chemicalShiftList = newChemicalShiftList""")
-        self.pythonConsole.writeConsoleCommand('spectrum.chemicalShiftList = chemicalShiftList', chemicalShiftList=newChemicalShiftList, spectrum=spectrum)
-        self.logger.info('spectrum.chemicalShiftList = chemicalShiftList')
+        # self._writeLoggingMessage("""newChemicalShiftList = project.newChemicalShiftList()
+        #                         spectrum.chemicalShiftList = newChemicalShiftList""")
+        # self.pythonConsole.writeConsoleCommand('spectrum.chemicalShiftList = chemicalShiftList', chemicalShiftList=newChemicalShiftList, spectrum=spectrum)
+        # self.logger.info('spectrum.chemicalShiftList = chemicalShiftList')
 
     def _setChemicalShiftList(self, spectrum, item):
         self.spectrum.chemicalShiftList = spectrum.project.getByPid(item)
-        self.pythonConsole.writeConsoleCommand('spectrum.newChemicalShiftList = chemicalShiftList', chemicalShiftList=spectrum.chemicalShiftList,
-                                               spectrum=spectrum)
-        self._writeLoggingMessage("""chemicalShiftList = project.getByPid('%s')
-                                  spectrum.chemicalShiftList = chemicalShiftList""" % spectrum.chemicalShiftList.pid)
+        # self.pythonConsole.writeConsoleCommand('spectrum.newChemicalShiftList = chemicalShiftList', chemicalShiftList=spectrum.chemicalShiftList,
+        #                                        spectrum=spectrum)
+        # self._writeLoggingMessage("""chemicalShiftList = project.getByPid('%s')
+        #                           spectrum.chemicalShiftList = chemicalShiftList""" % spectrum.chemicalShiftList.pid)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSampleChange(self, spectrum, value):
@@ -909,8 +909,8 @@ class GeneralTab(Widget):
         # expType = self.experimentTypes[self.spectrum.dimensionCount].get(self.atomCodes).get(self.spectrumType.currentText())
         # expType = self.spectrumType.getObject()
         spectrum.experimentType = expType
-        self.pythonConsole.writeConsoleCommand('spectrum.experimentType = experimentType', experimentType=expType, spectrum=self.spectrum)
-        self._writeLoggingMessage("spectrum.experimentType = '%s'" % expType)
+        # self.pythonConsole.writeConsoleCommand('spectrum.experimentType = experimentType', experimentType=expType, spectrum=self.spectrum)
+        # self._writeLoggingMessage("spectrum.experimentType = '%s'" % expType)
 
     # @queueStateChange(_verifyApply)
     # def _getSpectrumFile(self, spectrum, option):
@@ -1006,8 +1006,8 @@ class GeneralTab(Widget):
         # newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.colourBox.currentText()))]
         if newColour:
             spectrum.sliceColour = newColour
-            self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour)
-            self.pythonConsole.writeConsoleCommand("spectrum.sliceColour '%s'" % newColour, spectrum=spectrum)
+            # self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour)
+            # self.pythonConsole.writeConsoleCommand("spectrum.sliceColour '%s'" % newColour, spectrum=spectrum)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSpinningRateChange(self, spectrum, textFromValue, value):
@@ -1017,8 +1017,8 @@ class GeneralTab(Widget):
 
     def _setSpinningRate(self, spectrum, value):
         spectrum.spinningRate = float(value)
-        self._writeLoggingMessage("spectrum.spinningRate = %s" % str(value))
-        self.pythonConsole.writeConsoleCommand("spectrum.spinningRate = %s" % value, spectrum=spectrum)
+        # self._writeLoggingMessage("spectrum.spinningRate = %s" % str(value))
+        # self.pythonConsole.writeConsoleCommand("spectrum.spinningRate = %s" % value, spectrum=spectrum)
 
     @queueStateChange(_verifyPopupApply)
     def _queueTemperatureChange(self, spectrum, textFromValue, value):
@@ -1028,8 +1028,8 @@ class GeneralTab(Widget):
 
     def _setTemperature(self, spectrum, value):
         spectrum.temperature = float(value)
-        self._writeLoggingMessage("spectrum.temperature = %s" % str(value))
-        self.pythonConsole.writeConsoleCommand("spectrum.temperature = %s" % value, spectrum=spectrum)
+        # self._writeLoggingMessage("spectrum.temperature = %s" % str(value))
+        # self.pythonConsole.writeConsoleCommand("spectrum.temperature = %s" % value, spectrum=spectrum)
 
 
 class DimensionsTab(Widget):

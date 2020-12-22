@@ -644,9 +644,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                         setInitialPath(initialPath=Path.Path(projectDir).parent,
                                        pathID=USERWORKINGPATH)
 
-                except Exception as es:
+                except (ValueError, RuntimeError) as es:
                     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s' % str(projectDir))
                     Logging.getLogger().warning('Fatal error loading project: %s' % str(projectDir))
+                    raise es
 
                 # try:
                 #     project = self._loadProject(projectDir)

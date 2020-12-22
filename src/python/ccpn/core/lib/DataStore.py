@@ -272,7 +272,8 @@ class DataStore(CcpNmrJson):
         if appendToName is not None:
             _p = _p.parent / _p.basename + appendToName
 
-        _p = _p.withSuffix(suffix)
+        if len(suffix) > 0:
+            _p = _p.withSuffix(suffix)
 
         instance = cls(autoRedirect=autoRedirect, autoVersioning=autoVersioning)
         instance.path = _p

@@ -2221,7 +2221,7 @@ class Spectrum(AbstractWrapperObject):
 
         NB: use getSliceData() method for dimension based access
         """
-        dimensions = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)
+        dimensions = self.getByAxisCodes('dimensions', [axisCode], exactMatch=True)
         return self.getSliceData(position=position, sliceDim=dimensions[0])
 
     @logCommand(get='self')
@@ -2300,7 +2300,7 @@ class Spectrum(AbstractWrapperObject):
         if len(axisCodes) != 2:
             raise ValueError('Invalid axisCodes %s, len should be 2' % axisCodes)
 
-        xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=exactMatch)
+        xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=True)
         return self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
     @logCommand(get='self')

@@ -22,10 +22,12 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
+
 def _ppm2pnt(ppm, npoints, sf, sw, refppm, refpt):
-  t = - npoints * sf /   float(sw)
-  pnt = t*(ppm - refppm) + refpt
-  return pnt
+    t = - npoints * sf / float(sw)
+    pnt = t*(ppm - refppm) + refpt
+    return pnt
 
 def _ppm2hz(ppm, npoints, sf, sw, refppm, refpt):
     pnt = _ppm2pnt(ppm, npoints, sf, sw, refppm, refpt)
@@ -33,30 +35,73 @@ def _ppm2hz(ppm, npoints, sf, sw, refppm, refpt):
     return hz
 
 def _pnt2ppm(pnt, npoints, sf, sw, refppm, refpt):
-  t = - npoints * sf / float(sw)
-  ppm = (pnt - refpt)/t + refppm
-  return ppm
+    t = - npoints * sf / float(sw)
+    ppm = (pnt - refpt)/t + refppm
+    return ppm
 
 def _pnt2hz(pnt, npoints, sf, sw, refppm, refpt):
-  t = - npoints / float(sw)
-  hz = (pnt - refpt)/t + sf*refppm
-  return hz
+    t = - npoints / float(sw)
+    hz = (pnt - refpt)/t + sf*refppm
+    return hz
 
 def _hz2pnt(hz, npoints, sf, sw, refppm, refpt):
-  t = - npoints / float(sw)
-  pnt = t*(hz - sf*refppm) + refpt
-  return pnt
+    t = - npoints / float(sw)
+    pnt = t*(hz - sf*refppm) + refpt
+    return pnt
 
 def _hz2ppm(hz, npoints, sf, sw, refppm, refpt):
     pnt = _hz2pnt(hz, npoints, sf, sw, refppm, refpt)
     ppm = _pnt2ppm(pnt, npoints, sf, sw, refppm, refpt)
     return ppm
 
+## time conversions
+
+def _sec2pts(sec, sw):
+    return sec * sw
+
+def _pts2sec(pts, sw):
+    return pts * 1. / sw
+
+def _ms2pts(ms, sw):
+    return ms * sw / 1.e3
+
+def _pts2ms(pts, sw):
+    return pts * 1.e3 / sw
+
+def _us2pts(us, sw):
+    return us * sw / 1.e6
+
+def _pts2us(pts, sw):
+    return pts * 1.e6 / sw
+
+## scales
+
+def ppmScale(ppmLimits, npoints):
+    """
+    :param ppmLimits: spectrum ppm limits
+    :param npoints: total number of points
+    :return: an array in ppm scale ("backwards")
+    """
+    x0, x1 = max(ppmLimits), min(ppmLimits)
+    return np.linspace(x0, x1, npoints)
+
+def hzScale():
+    pass
+
+def secScale():
+    pass
+
+def msScale():
+    pass
+
+def usScale():
+    pass
+
+
 def _getSpUnitConversionArguments(spectrum):
     """
     :param spectrum:
     :return: tuple of tuples containing the spectrum properties needed for unit conversions
-
     """
     npoints = spectrum.totalPointCounts
     sf = spectrum.spectrometerFrequencies

@@ -174,12 +174,14 @@ class PathRowABC(object):
 
         dialogPath = self.getDialogPath()
         dialog = FileDialog(parent=self.buttonWidget, text='Select path', directory=str(dialogPath),
-                            fileMode=self.dialogFileMode, acceptMode=0)
+                            fileMode=self.dialogFileMode) #, acceptMode=0)
         choices = dialog.selectedFiles()
-        if choices is not None and len(choices) > 0:
+        if choices is not None and len(choices) > 0 and len(choices[0]) > 0:
             newPath = choices[0]
-            self.setPath(newPath)
-            self._setDataInWidget(newPath)
+            # We sometimes get silly results back; just checking here
+            if aPath(newPath).exists():
+                self.setPath(newPath)
+                self._setDataInWidget(newPath)
 
     def _setDataInWidget(self, path):
         "Populate the dataWidget and validate"

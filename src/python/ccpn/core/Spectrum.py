@@ -214,14 +214,20 @@ class Spectrum(AbstractWrapperObject):
     #-----------------------------------------------------------------------------------------
 
     MAXDIM = 8  # Maximum dimensionality
-    X_INDEX = 0
-    Y_INDEX = 1
-    Z_INDEX = 2
-    A_INDEX = 3
-    B_INDEX = 4
-    C_INDEX = 5
-    D_INDEX = 6
-    E_INDEX = 7
+
+    X_AXIS = 0
+    Y_AXIS = 1
+    Z_AXIS = 2
+    A_AXIS = 3
+    B_AXIS = 4
+    C_AXIS = 5
+    D_AXIS = 6
+    E_AXIS = 7
+    UNDEFINED_AXIS = 8
+    axisNames = {X_AXIS:"x-axis", Y_AXIS:"y-axis", Z_AXIS:"z-axis", A_AXIS:"a-axis",
+                 B_AXIS:"b-axis", C_AXIS:"c-axis", D_AXIS:"d-axis", E_AXIS:"e-axis",
+                 UNDEFINED_AXIS:"undefined"
+                }
 
     X_DIM = 1
     Y_DIM = 2

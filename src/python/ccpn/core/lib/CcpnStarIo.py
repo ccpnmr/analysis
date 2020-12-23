@@ -307,8 +307,8 @@ def makeCSLfromDF(project, df):
             except Exception as e:
                 getLogger().warn('Error creating a new ChemicalShift: %s' %e)
             nmrChains.add(nmrChain)
-        for nmrChain in nmrChains:
-            nmrChain._connectNmrResidues()
+        # for nmrChain in nmrChains:
+        #     nmrChain._connectNmrResidues()
 
     return chemicalShiftList
 

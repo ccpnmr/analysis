@@ -11,6 +11,20 @@
 <div class="headerBar">Using Analysis with NMRbox</div>
 <div class="tutorial">
 <iframe width="80%" height="315" src="https://www.youtube.com/embed/HOgUN4F9bdc" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
+<h2>Using CcpNmr Analysis with NMRbox</h2>
+    <p>If you don't want to or are unable to install CcpNmr Analysis on your computer directly, you can use it via NMRbox instead. <a href="https://nmrbox.org">NMRbox</a> is a US-based scheme which allows you to run lots of different NMR software packages remotely via a virtual machine. Anyone with an academic or non-governmental institutional e-mail account can sign up: simply go to <a href="https://nmrbox.org">https://nmrbox.org</a> and click on <span class="action">Sign Up</span> to register. Note that it may take a couple of days for your account to be validated, as this is done manually. You will then receive an e-mail with your username and DNS addresses (usually these have the format <span class="action">username.nmrbox.org</span>).</p>
+    <h3>RealVNC Viewer Installation</h3>
+    <p>In order to access and view your NMRbox virtual machine, you will need the <a href="https://www.realvnc.com/">RealVNC Viewer</a> which you can <a href="https://www.realvnc.com/en/connect/download/viewer/">download here</a>. It is available for many operating systems and should be fairly straight forward to install. Once you have installed the RealVNCViewer, open it and enter your NMRbox DNS address in the top bar. Confirm that you want to connect and enter you username and password.</p>
+    <h3>Moving data into your virtual machine</h3>
+    <p>There are several ways to do this. You can use <span class="action">scp</span> (secure copy) on the command line, an ftp program such as <a href="https://filezilla-project.org/">Filezilla</a> or <a href="https://cyberduck.io/">CyberDuck</a>. Alternatively, you can use the VNC Viewer directly: move the mouse to the top of the window to see a little drop-down menu and click on the Double Arrow <span class="action">Transfer files</span> icon.</p>
+    <h3>Opening CcpNmr Analysis</h3>
+    <p>Open a terminal using the <span class="action">Terminal icon</span> at the bottom of the screen. Then type <span class="action">assign</span> to open CcpNmr AnalysisAssign. You can open AnalysisScreen with <span class="action">screen</span> and AnalysisMetabolomics with <span class="action">metabolomics</span>.</p>
+    <p>Remember that the NMRbox virtual machine is a Linux machine, so even if you are accessing it from a Mac, you will have to use the <span class="action">Ctrl</span> rather than the <span class="action">Cmd</span> button for shortcuts or to modify the mouse behaviour.</p>
+    <h3>Trouble-shooting and logging out</h3>
+    <p>If your colours and rendering look strange, then this is usually a sign that there is a problem with the VNCViewer connection. NMRbox recommends logging out (click on your <span class="action">username</span> in the top-right hand corner and then on <span class="action">Log Out...</span> and <span class="action">Log Out</span>. This will end your session. You can now reconnect from VNRViewer.</p>
+    <p>An alternative way to end your NMRbox session is to move the mouse to the top of the VNC Viewer window to bring up the drop-down menu. Click on the <span class="action">End session</span> blue cross. This will break your VNC connection, but without logging you out of the NMRbox virtual machine. This way you can leave something to run on your NMRbox virtual machine without being connected. However, if you are having trouble with the rendering, this will not be sufficient and you will need to log out fully in order to restore correct rendering. </p>
+    <h3>Using NMRbox as part of a CCPN Workshop</h3>
+    <p>If you are using NMRbox as part of a CCPN workshop, then please make sure you register for the workshop on the <a href="https://nmrbox.org./community/events">NMRbox events</a> page. This will ensure that you automatically have access to all the tutorial data which you will need for the workshop.</p>
+</div>
 </body>
 </html>

@@ -1300,7 +1300,7 @@ class Framework(NotifierBase):
         ms.append(('Molecules', [
             ("Chain from FASTA...", lambda: self._loadDataFromMenu(text='Load FASTA')),
             (),
-            ("Generate Chain...", self.showCreateChainPopup),
+            ("New Chain...", self.showCreateChainPopup),
             ("Inspect...", self.inspectMolecule, [('enabled', False)]),
             (),
             ("Residue Information", self.showResidueInformation, [('shortcut', 'ri')]),

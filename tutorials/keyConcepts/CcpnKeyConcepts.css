@@ -59,3 +59,30 @@ p {
 	color: #803594;
 	text-decoration: underline;
 }
+
+.navarrows {
+	font-size: 32pt;
+	background-color: #f1f1f1;
+	border-radius: 50%;
+	text-decoration: none;
+	display: inline-block;
+	padding: 3px 28px 8px 28px;
+}
+
+.navarrows a {
+	text-decoration: none;
+	display: inline-block;
+	padding: 6px 16px;
+}
+
+.previous {
+	position: absolute;
+	top: 45%;
+	left: 30px;
+}
+
+.next {
+	position: absolute;
+	top: 45%;
+	right: 30px;
+}

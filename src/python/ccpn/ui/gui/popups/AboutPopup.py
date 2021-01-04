@@ -37,10 +37,11 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 # This text is being copied on the clipboard only. Is not the source of the image in the popup.
 # The image is in ccpn.ui.gui.widgets
 
-TEXT = ''' Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - 2019
+TEXT = ''' Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - 2021
 | 
-            **Developed by:**
-            Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister
+            **Active Developers:**
+            Ed Brooksbank, Luca Mureddu, Victoria A Higman, Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister
+
 
             **This program uses:**
             The CCPN data model: J Biomol NMR (2006) 36:147–155, DOI 10.1007/s10858-006-9076-z 
@@ -59,7 +60,7 @@ class AboutPopup(CcpnDialog):
   def __init__(self, parent=None, title='About CcpNmr', **kwds):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
-    pathPNG = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'About_CcpNmr2020.png')
+    pathPNG = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'AboutCcpNmr.png')
     self.label = Label(self, grid=(0, 0))
     self.label.setPixmap(QtGui.QPixmap(pathPNG))
 

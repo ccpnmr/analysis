@@ -2594,7 +2594,7 @@ class Spectrum(AbstractWrapperObject):
                 self.noiseLevel = self.estimateNoise()
 
             # Check  contourLevels, contourColours
-            if self.positiveContourCount == 0 or not self.negativeContourCount == 0:
+            if self.positiveContourCount == 0 or self.negativeContourCount == 0:
                 self._setDefaultContourValues()
             if not self.positiveContourColour or not self.negativeContourColour:
                 self._setDefaultContourColours()

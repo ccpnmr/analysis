@@ -34,14 +34,13 @@ __date__ = "$Date: 2017-04-07 10:28:48 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import os, sys
+import os
 
 from ccpn.util.Path import aPath, Path
 from ccpn.framework import constants
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 from ccpn.util.traits.CcpNmrTraits import Unicode, Any, CPath, Bool, Dict, CString
 
-from ccpn.core.lib.ContextManagers import notificationBlanking
 from ccpn.util.decorators import singleton
 
 from ccpn.framework.Application import getApplication
@@ -411,7 +410,7 @@ class DataStore(CcpNmrJson):
 
         else:
             # This happens for dummy spectra
-            from sandbox.Geerten.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+            from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
             self._path = None
             self.dataFormat = EmptySpectrumDataSource.dataFormat
 

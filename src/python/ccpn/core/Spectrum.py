@@ -64,12 +64,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
-import os
 import sys
 from typing import Sequence, Tuple, Optional, Union
 from functools import partial
 import numpy
-import decorator
 
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.api.ccp.general import DataLocation
@@ -79,31 +77,19 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FidDataDim as ApiFidDataDim
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FreqDataDim as ApiFreqDataDim
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SampledDataDim as ApiSampledDataDim
 
-from ccpnmodel.ccpncore.lib.spectrum.Spectrum import createBlockedMatrix
-from ccpnmodel.ccpncore.lib.Io import Formats
-
-
-from ccpn.framework import constants
-from ccpn.framework.constants import CCPNMR_PREFIX
-
-
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection, \
-                                      setContourLevelsFromNoise, getDefaultSpectrumColours
-from ccpn.core.lib.Cache import cached
+    getDefaultSpectrumColours
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSimple, \
                                           undoStackBlocking, renameObject, undoBlock, notificationBlanking, \
-                                          apiNotificationBlanking, ccpNmrV3CoreSetter, notificationEchoBlocking, \
-                                          inactivity
+    ccpNmrV3CoreSetter, inactivity
 from ccpn.core.lib.DataStore import DataStore
-from ccpn.core.lib.Notifiers import Notifier
 
-from ccpn.util import Constants, Common
+from ccpn.util import Constants
 from ccpn.util.Constants import SCALETOLERANCE
-from ccpn.util.Path import Path, aPath
-from ccpn.util.Common import isIterable, incrementName, getAxisCodeMatchIndices, _validateName
+from ccpn.util.Common import isIterable, _validateName
 # 2019010:ED test new matching
 # from ccpn.util.Common import axisCodeMapping
 from ccpn.util.Common import getAxisCodeMatch as axisCodeMapping
@@ -715,7 +701,7 @@ class Spectrum(AbstractWrapperObject):
         """Return True if instance refers to an empty spectrum; i.e. as in without actual spectral data"
         """
         # local import to avoid cycles
-        from sandbox.Geerten.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+        from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
         if self._dataStore is None:
             raise RuntimeError('dataStore not defined')
         return self._dataStore.dataFormat == EmptySpectrumDataSource.dataFormat
@@ -2483,7 +2469,7 @@ class Spectrum(AbstractWrapperObject):
         Return new spectrum instance
         """
         # local import to prevent cycles
-        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
 
         dimensions = self.getByAxisCodes('dimensions', axisCodes)
 
@@ -2560,8 +2546,8 @@ class Spectrum(AbstractWrapperObject):
         returns DataSource instance or None when filePath and/or dataFormat of the dataStore instance are incorrect
         Optionally report warnings
         """
-        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getSpectrumDataSource
-        from sandbox.Geerten.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getSpectrumDataSource
+        from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 
         if dataStore is None:
             raise RuntimeError('dataStore not defined')
@@ -3107,7 +3093,7 @@ def _newEmptySpectrum(project: Project, isotopeCodes:Sequence[str], name: str='e
     """
 
     # Local  to prevent circular import
-    from sandbox.Geerten.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+    from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 
     if not isIterable(isotopeCodes) or len(isotopeCodes) == 0:
         raise ValueError('invalid isotopeCodes "%s"' % isotopeCodes)
@@ -3136,7 +3122,7 @@ def _newSpectrum(project: Project, path: str, name: str) -> (Spectrum, None):
     """
 
     # Local  to prevent circular import
-    from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
+    from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
 
     logger = getLogger()
 
@@ -3174,7 +3160,7 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
     :param position, spectrum position-vector of length spectrum.dimensionCount (list, tuple; 1-based)
     """
     # local import to prevent cycles
-    from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+    from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
 
     getLogger().debug('Extracting from %s, dimensions=%r, position=%r, dataStore=%s, dataFormat %r' %
                       (spectrum, dimensions, position, dataStore, dataFormat))

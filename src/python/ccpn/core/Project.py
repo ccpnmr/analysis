@@ -28,13 +28,10 @@ import functools
 import os
 import typing
 import operator
-import numpy as np
-from tqdm import tqdm
-from typing import Sequence, Tuple, Union, Optional
+from typing import Sequence, Union, Optional
 from collections import OrderedDict
 from time import time
 from datetime import datetime
-import traceback
 from ccpn.util.Common import isValidPath, isValidFileNameLength
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
@@ -47,11 +44,9 @@ from ccpnmodel.ccpncore.memops import Notifiers
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
 from ccpnmodel.ccpncore.lib.molecule import MoleculeQuery
 from ccpnmodel.ccpncore.lib.spectrum import NmrExpPrototype
-from ccpnmodel.ccpncore.lib import Constants
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
-from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 # from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
@@ -1270,7 +1265,7 @@ class Project(AbstractWrapperObject):
         # GWV 30/11/2020
         # First usage of new SpectrumdataSource routines
 
-        from sandbox.Geerten.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
+        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
         from ccpn.core.lib.DataStore import DataStore
 
         getLogger().debug('Project.loadData: loading "%s"' % path)
@@ -1415,7 +1410,6 @@ class Project(AbstractWrapperObject):
         Load a Nef file into an existing project
         """
         # ejb - 24/6/17
-        from ccpn.core.lib import CcpnNefIo
 
         if subType in (ioFormats.NEF):
 

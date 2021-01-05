@@ -1856,6 +1856,24 @@ class Spectrum(AbstractWrapperObject):
 
         return self.mainSpectrumReferences[dimension-1].pointToValue(value)
 
+    def getPpmArray(self, axisCode=None, dimension=None):
+        """Return a numpy array with ppm values of the grid points along axisCode or dimension
+        """
+        if dimension is None and axisCode is None:
+            raise ValueError('Spectrum.getPpmArray: either axisCode or dimension needs to be defined')
+        if dimension is not None and axisCode is not None:
+            raise ValueError('Spectrum.getPpmArray: axisCode and dimension cannot be both defined')
+
+        if axisCode is not None:
+            dimension = self.getByAxisCodes('dimensions', [axisCode], exactMatch=False)[0]
+
+        if dimension is None or dimension < 1 or dimension > self.dimensionCount:
+            raise RuntimeError('Invalid dimension (%s)' % (dimension,))
+
+        result = numpy.linspace(self.spectrumLimits[dimension-1][0], self.spectrumLimits[dimension-1][1],
+                                self.pointCounts[dimension-1])
+        return result
+
     def getDefaultOrdering(self, axisOrder):
         if not axisOrder:
             axisOption = self.project.application.preferences.general.axisOrderingOptions

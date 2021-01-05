@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import sys
 import os
 from PyQt5 import QtWidgets, QtCore
-from ccpn.util.Path import aPath
+from ccpn.util.Path import aPath, Path
 from ccpn.util.Common import makeIterableList
 from ccpn.util.AttrDict import AttrDict
 
@@ -104,7 +104,7 @@ class FileDialog(QtWidgets.QFileDialog):
         self._pathID = pathID
         self._updatePathOnReject = updatePathOnReject
 
-        QtWidgets.QFileDialog.__init__(self, parent, caption=text, directory=directory, **kwds)
+        QtWidgets.QFileDialog.__init__(self, parent, caption=text, directory=str(dir), **kwds)
 
         self.staticFunctionDict = {
             (0, 0)                               : 'getOpenFileName',
@@ -256,7 +256,7 @@ class FileDialog(QtWidgets.QFileDialog):
 
     # overrides Qt function, which does not pay any attention to whether Cancel button selected
     def selectedFiles(self):
-        """Get the list of selected files
+        """Return the list of selected files
         """
         if self.useNative:
             # get the selected files from the native dialog
@@ -267,6 +267,8 @@ class FileDialog(QtWidgets.QFileDialog):
         else:
             # use our ccpn dialog
             files = super(FileDialog, self).selectedFiles()
+            if files is None:
+                files = []
             return files
 
     def selectedFile(self):

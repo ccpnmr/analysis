@@ -29,6 +29,8 @@ import re
 
 from collections import namedtuple
 from collections import OrderedDict
+from ccpn.util.isotopes import isotopeRecords  # NB also import from here in ccpnmodel/ccpncore/lib/spectrum/NmrExpProtoType.py
+                                               # and ccpnmodel/ccpncore/api/ccp/nmr/ExpPrototype.py. TODO remove these dependencies
 
 
 ERRORSTRING = 'BADVALUE'
@@ -563,16 +565,12 @@ PSEUDO_ATOM_NAME = 'Q'
 PSEUDO_ATOM_NAMES = {PSEUDO_ATOM_NAME: '1H'}
 PSEUDO_ATOMS = ['QA', 'QB', 'QD', 'QE', 'QG', 'QH', 'QH1', 'QH2', 'QR', 'QZ']
 
+# GWV: now handled by EmptySpectrumDataSource class
 # default isotopes and nucleus codes
 for isotopCode in isotopeRecords:
-
-    # # Add lower-case versions of single-letter codes
-    # if val and len(tag) == 1:
-    #   DEFAULT_ISOTOPE_DICT[tag.lower()] = val
-
-    # Without additional info, set other isotopes (including 15N) to match carbon 13
     if isotopCode not in DEFAULT_SPECTRUM_PARAMETERS:
         DEFAULT_SPECTRUM_PARAMETERS[isotopCode] = DEFAULT_SPECTRUM_PARAMETERS['13C']
+
 
 if __name__ == '__main__':
     for iso, record in isotopeRecords.items():

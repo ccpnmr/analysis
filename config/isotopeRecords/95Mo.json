@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/95Mo.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.1592
+    ],
+    [
+        "elementNumber",
+        42
+    ],
+    [
+        "gFactor",
+        -0.3657
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "95Mo"
+    ],
+    [
+        "massNumber",
+        95
+    ],
+    [
+        "name",
+        "Molybdenum"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.022
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Mo"
+    ]
+]

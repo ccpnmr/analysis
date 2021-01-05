@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/193Ir.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.627
+    ],
+    [
+        "elementNumber",
+        77
+    ],
+    [
+        "gFactor",
+        0.1091
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "193Ir"
+    ],
+    [
+        "massNumber",
+        193
+    ],
+    [
+        "name",
+        "Iridium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.751
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Ir"
+    ]
+]

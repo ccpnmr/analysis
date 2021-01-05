@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/101Ru.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.1706
+    ],
+    [
+        "elementNumber",
+        44
+    ],
+    [
+        "gFactor",
+        -0.288
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "101Ru"
+    ],
+    [
+        "massNumber",
+        101
+    ],
+    [
+        "name",
+        "Ruthenium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.46
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Ru"
+    ]
+]

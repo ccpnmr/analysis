@@ -49,6 +49,9 @@ from ccpn.util.FrozenDict import FrozenDict
 from ccpn.util import Constants
 from ccpn.util.Logging import getLogger
 
+from ccpn.util import Constants
+from ccpn.util.isotopes import isotopeRecords
+
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt = 2000000000
 
@@ -241,6 +244,24 @@ def uniquify(sequence):
     return [x for x in sequence if x not in seen and not seen_add(x)]
 
 
+#from typing import Iterable
+from collections import Iterable                            # < py38
+
+def flatten(items):
+    """Yield items from any nested iterable; see Reference.
+    Here is a general approach that applies to numbers, strings, nested lists and mixed containers.
+    From: https://stackoverflow.com/questions/952914/how-to-make-a-flat-list-out-of-list-of-lists/952952#952952
+    ref: This solution is modified from a recipe in Beazley, D. and B. Jones. Recipe 4.14, Python Cookbook 3rd
+         Ed., O'Reilly Media Inc. Sebastopol, CA: 2013.
+    """
+    for x in items:
+        if isinstance(x, Iterable) and not isinstance(x, (str, bytes)):
+            for sub_x in flatten(x):
+                yield sub_x
+        else:
+            yield x
+
+
 def isClose(a, b, relTolerance=1e-05, absTolerance=1e-08):
     """Are a and b identical within reasonable floating point tolerance?
     Uses sum of relative (relTolerance) and absolute (absTolerance) difference
@@ -282,7 +303,7 @@ def name2IsotopeCode(name=None):
     if result is None:
         if name[0].isdigit():
             ss = name.title()
-            for key in Constants.isotopeRecords:
+            for key in isotopeRecords:
                 if ss.startswith(key):
                     if name[:len(key)].isupper():
                         result = key
@@ -297,7 +318,7 @@ def isotopeCode2Nucleus(isotopeCode=None):
     if not isotopeCode:
         return None
 
-    record = Constants.isotopeRecords.get(isotopeCode)
+    record = isotopeRecords.get(isotopeCode)
     if record is None:
         return None
     else:
@@ -326,7 +347,7 @@ def name2ElementSymbol(name):
         return name[:2]
     elif name[0].isdigit():
         ss = name.title()
-        for key, record in Constants.isotopeRecords.items():
+        for key, record in isotopeRecords.items():
             if ss.startswith(key):
                 if name[:len(key)].isupper():
                     return record.symbol.upper()
@@ -342,16 +363,16 @@ def checkIsotope(text):
     axisCodes or atom names, hence the difference to name2ElementSymbol.
     """
     defaultIsotope = '1H'
-    name = text.strip().upper()
 
-    if not name:
+    if not text:
         return defaultIsotope
 
-    if name in Constants.isotopeRecords:
+    name = text.strip().upper()
+    if name in isotopeRecords:
         # Superfluous but should speed things up
         return name
 
-    for isotopeCode in Constants.isotopeRecords:
+    for isotopeCode in isotopeRecords:
         # NB checking this first means that e.g. 'H13C' returns '13C' rather than '1H'
         if isotopeCode.upper() in name:
             return isotopeCode

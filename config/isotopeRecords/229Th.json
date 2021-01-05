@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/229Th.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        90
+    ],
+    [
+        "gFactor",
+        0.18
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "229Th"
+    ],
+    [
+        "massNumber",
+        229
+    ],
+    [
+        "name",
+        "Thorium"
+    ],
+    [
+        "quadrupoleMoment",
+        4.3
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Th"
+    ]
+]

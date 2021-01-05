@@ -629,9 +629,13 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                                                             dimensionOrdering=dimensionOrdering)
 
     try:
-        display.strips[0]._CcpnGLWidget.initialiseAxes(strip=display.strips[0])
-    except:
-        getLogger().debugGL('OpenGL widget not instantiated')
+        strip = display.strips[0]
+        strip._CcpnGLWidget.initialiseAxes(strip=strip)
+
+    except Exception as es:
+        logger = getLogger()
+        logger.debugGL('OpenGL widget not instantiated')
+        logger.warning('OpenGL widget not instantiated')
 
     return display
 

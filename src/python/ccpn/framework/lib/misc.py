@@ -143,7 +143,7 @@ def _check(key=None, doDecode=True):
 
     from ccpn.util.Time import Time, now, year
 
-    if ldict[_l1] == 'developer':
+    if True:  #    if ldict[_l1] == 'developer':
         sys.stderr.write(message4 % (ldict[_l1], now() + year))
         return True
 

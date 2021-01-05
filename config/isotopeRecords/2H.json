@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/2H.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.000115
+    ],
+    [
+        "elementNumber",
+        1
+    ],
+    [
+        "gFactor",
+        0.857438
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "2H"
+    ],
+    [
+        "massNumber",
+        2
+    ],
+    [
+        "name",
+        "Hydrogen"
+    ],
+    [
+        "quadrupoleMoment",
+        0.00286
+    ],
+    [
+        "spin",
+        1.0
+    ],
+    [
+        "symbol",
+        "H"
+    ]
+]

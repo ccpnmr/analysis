@@ -435,10 +435,10 @@ def _newSpectrumView(display, spectrumName: str = None,
 
 # Spectrum.spectrumViews property
 def getter(spectrum: Spectrum):
-    return tuple(spectrum._project._data2Obj.get(y)
+    specViews = [spectrum._project._data2Obj.get(y)
                  for x in spectrum._wrappedData.sortedSpectrumViews()
-                 for y in x.sortedStripSpectrumViews())
-
+                 for y in x.sortedStripSpectrumViews()]
+    return tuple(specViews)
 
 Spectrum.spectrumViews = property(getter, None, None,
                                   "SpectrumViews showing Spectrum")

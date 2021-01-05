@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/117Sn.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0768
+    ],
+    [
+        "elementNumber",
+        50
+    ],
+    [
+        "gFactor",
+        -2.00208
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "117Sn"
+    ],
+    [
+        "massNumber",
+        117
+    ],
+    [
+        "name",
+        "Tin"
+    ],
+    [
+        "quadrupoleMoment",
+        0.0
+    ],
+    [
+        "spin",
+        0.5
+    ],
+    [
+        "symbol",
+        "Sn"
+    ]
+]

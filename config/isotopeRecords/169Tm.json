@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/169Tm.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        1.0
+    ],
+    [
+        "elementNumber",
+        69
+    ],
+    [
+        "gFactor",
+        -0.462
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "169Tm"
+    ],
+    [
+        "massNumber",
+        169
+    ],
+    [
+        "name",
+        "Thulium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.0
+    ],
+    [
+        "spin",
+        0.5
+    ],
+    [
+        "symbol",
+        "Tm"
+    ]
+]

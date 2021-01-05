@@ -69,16 +69,21 @@ class Path(_Path_):
 
     @property
     def basename(self):
-        """the name of self without any suffixes"""
+        """the name of self without any suffixes
+        """
         return self.name.split('.')[0]
 
     def addTimeStamp(self):
-        """Return a Path instance with path.timeStamp.suffix profile"""
+        """Return a Path instance with path.timeStamp.suffix profile
+        """
         now = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
         return self.parent / (self.stem + '.' + str(now) + self.suffix)
 
     @property
     def version(self):
+        """Parse self to yield a version integer, presumably generated with the incrementVersion method
+        Return 0 if not found
+        """
         suffixes = self.suffixes
         version = 0
         if len(suffixes) > 0:
@@ -89,7 +94,8 @@ class Path(_Path_):
         return version
 
     def incrementVersion(self):
-        """Return a Path instance with path.version.suffix profile"""
+        """Return a Path instance with path.version.suffix profile
+        """
         suffixes = self.suffixes
         version = 0
         if len(suffixes) > 0:
@@ -103,20 +109,28 @@ class Path(_Path_):
         return self.parent / (self.basename + ''.join(suffixes))
 
     def normalise(self):
+        """Return normalised path
+        """
         return Path(os.path.normpath(self.asString()))  # python <= 3.4; strings only
 
     def open(self, *args, **kwds):
-        """Subclassing to catch any long file name errors that allegedly can occur on windows"""
+        """Subclassing to catch any long file name errors that allegedly can occur on windows
+        """
         try:
             fp = super().open(*args, **kwds)
         except FileNotFoundError:
             if len(self.asString()) > 256:
-                raise FileNotFoundError('file "%s" not found; potentially path length (%d) is too large. Consider moving the file'
+                raise FileNotFoundError('Error opening file "%s"; potentially path length (%d) is too large. Consider moving the file'
                                         % (self, len(self.asString()))
                                         )
             else:
-                raise FileNotFoundError('file "%s" not found' % self)
+                raise FileNotFoundError('Error opening file "%s"' % self)
         return fp
+
+    def globList(self, pattern='*'):
+        """Return a list rather then a generator
+        """
+        return [p for p in self.glob(pattern=pattern)]
 
     def removeDir(self):
         """Recursively remove content of self and sub-directories
@@ -126,7 +140,7 @@ class Path(_Path_):
         _rmdirs(str(self))
 
     def fetchDir(self, dirName):
-        """Return and if needed create dirName in self
+        """Return and (if needed) create dirName relative to self
         :return: Path instance of self / dirName
         """
         if not self.is_dir():
@@ -152,6 +166,22 @@ class Path(_Path_):
         else:
             return self
 
+    def withoutSuffix(self):
+        """Return self without suffix
+        """
+        if len(self.suffixes) > 0:
+            return self.with_suffix('')
+        else:
+            return self
+
+    def withSuffix(self, suffix):
+        """Return self with suffix; inverse of withoutSuffix()
+        partially copies with_suffix, but does not allow for empty argument
+        """
+        if suffix is None or len(suffix) == 0:
+            raise ValueError('No suffix defined')
+        return self.with_suffix(suffix=suffix)
+
     def split3(self):
         """Return a tuple of (.parent, .stem, .suffix) strings
         """
@@ -163,7 +193,16 @@ class Path(_Path_):
         return (str(self.parent), str(self.name))
 
     def asString(self):
+        "Return self as a string"
         return str(self)
+
+    def startswith(self, prefix):
+        "Return True if self starts with prefix"
+        path = self.asString()
+        return path.startswith(prefix)
+
+    def __len__(self):
+        return len(self.asString())
 
     def __eq__(self, other):
         return (str(self).strip() == str(other).strip())

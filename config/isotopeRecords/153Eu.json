@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/153Eu.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.5219
+    ],
+    [
+        "elementNumber",
+        63
+    ],
+    [
+        "gFactor",
+        0.6134
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "153Eu"
+    ],
+    [
+        "massNumber",
+        153
+    ],
+    [
+        "name",
+        "Europium"
+    ],
+    [
+        "quadrupoleMoment",
+        2.41
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Eu"
+    ]
+]

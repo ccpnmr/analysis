@@ -56,7 +56,7 @@ default_icons = (Information, Question, Warning, Critical)
 if _isDarwin():
     Question = Warning
 
-LINELENGTH = 80
+LINELENGTH = 120
 WRAPBORDER = 5
 WRAPSCALE = 1.01
 

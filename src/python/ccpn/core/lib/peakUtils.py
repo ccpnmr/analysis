@@ -701,7 +701,7 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     boxWidths = np.array(boxWidths, dtype=np.int32)
 
     # get the height - remember not to use (position-1) because function does that
-    height = dataSource.getPositionValue([peakDim.position for peakDim in peakDims])
+    height = dataSource.getPointvalue([peakDim.position for peakDim in peakDims])
 
     # generate a np array with the position of the peak in points rounded to integers
     position = [peakDim.position - 1 for peakDim in peakDims]  # API position starts at 1

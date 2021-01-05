@@ -41,6 +41,7 @@ import subprocess
 from PyQt5 import QtWidgets
 from distutils.dir_util import copy_tree
 from functools import partial
+
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
@@ -66,6 +67,9 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, \
     USERACHIVESPATH, USERDATAPATH, USERNMRSTARPATH, USERSPECTRUMPATH, \
     USERLAYOUTSPATH, USERMACROSPATH, USERNEFPATH, USERSAVEPROJECTPATH, setInitialPath
 from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView
+
+from ccpn.ui.gui.widgets.MessageDialog import showError
+
 
 from ccpn.util import Logging
 from ccpn.util import Path
@@ -493,7 +497,7 @@ class Framework(NotifierBase):
 
         self.project = project
         if hasattr(self, '_mainWindow'):
-            Logging.getLogger().debug('>>>framework._initialiseProject')
+            Logging.getLogger().debug('Framework._initialiseProject>>>')
 
             project._blockSideBar = True
             self.ui.initialize(self._mainWindow)
@@ -901,6 +905,9 @@ class Framework(NotifierBase):
         #
         #~~~~~~~~~~~~~~~~
 
+        if self.current.strip is None:
+            if len(self.project.strips) > 0:
+                self.current.strip = self.project.strips[0]
 
     def get(self, identifier):
         """General method to obtain object (either gui or data) from identifier (pid, gid, obj-string)
@@ -1567,15 +1574,18 @@ class Framework(NotifierBase):
                 project = self._loadSparkyProject(path, makeNewProject=True)  # RHF - new by default
                 project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
 
-            project._validateDataUrlAndFilePaths()
+            # project._validateDataUrlAndFilePaths()
 
             if self.preferences.general.useProjectPath:
                 getLogger().debug2('application - setting current path %s' % Path.Path(path).parent)
                 setInitialPath(initialPath=Path.Path(path).parent,
                                pathID=USERWORKINGPATH)
 
-            if project and project._undo:
-                project._undo.clear()
+            # if project and project._undo:
+            #     project._undo.clear()
+
+            self.project = project
+
             return project
 
         # elif dataType == 'NefFile' and subType in (ioFormats.NEF):
@@ -1784,8 +1794,6 @@ class Framework(NotifierBase):
 
         if paths is None:
             #TODO:LIST-AS-ISSUE: This fails for native file dialogs on OSX when trying to select a project (i.e. a directory)
-            # NBNB TBD I assume here that path is either a string or a list lf string paths.
-            # NBNB #FIXME if incorrect
             dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
                                 acceptMode=FileDialog.AcceptOpen,
                                 filter=filter,
@@ -2476,7 +2484,6 @@ class Framework(NotifierBase):
             MessageDialog.showWarning('Validate Spectrum Paths Selection', 'Project has no Spectra.')
         else:
             from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
-
             popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
             popup.exec_()
 

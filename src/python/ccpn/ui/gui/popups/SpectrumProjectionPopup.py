@@ -50,28 +50,27 @@ class SpectrumProjectionPopup(CcpnDialog):
         self.application = self.mainWindow.application
 
         # spectrum selection
-        spectrumLabel = Label(self, 'Spectrum to project', grid=(0, 0))
+        self.spectrumLabel = Label(self, 'Spectrum', grid=(0, 0))
         self.spectrumPulldown = PulldownList(self, grid=(0, 1), callback=self._setSpectrum, gridSpan=(1, 2))
         # Only select 3D's for now
         validSpectra = [s for s in self.project.spectra if s.dimensionCount ==3]
         self.spectrumPulldown.setData([s.pid for s in validSpectra])
-        # filepath
-        filePathLabel = Label(self, 'Projection spectrum path', grid=(1, 0))
-        self.filePathLineEdit = LineEdit(self, grid=(1, 1))
-        self.pathButton = Button(self, grid=(1, 2), callback=self._getSpectrumFile, icon='icons/applications-system')
+
         # projection axis
-        axisLabel = Label(self, 'Projection axis', grid=(2, 0))
-        self.projectionAxisPulldown = PulldownList(self, grid=(2, 1), gridSpan=(1, 2), callback=self._setProjectionAxis)
+        self.axisLabel = Label(self, 'Projection axis', grid=(2, 0))
+        self.projectionAxisPulldown = PulldownList(self, grid=(2, 1), gridSpan=(1, 2))
+
         # method
-        methodLabel = Label(self, 'Projection Method', grid=(4, 0))
+        self.methodLabel = Label(self, 'Projection method', grid=(4, 0))
         self.methodPulldown = PulldownList(self, grid=(4, 1), gridSpan=(1, 2), callback=self._setMethod)
         self.methodPulldown.setData(PROJECTION_METHODS)
+
         # threshold
-        thresholdLabel = Label(self, 'Threshold', grid=(5, 0))
+        self.thresholdLabel = Label(self, 'Threshold', grid=(5, 0))
         self.thresholdData = ScientificDoubleSpinBox(self, grid=(5, 1), gridSpan=(1, 2), vAlign='t', min=0.1, max=1e12)
-        # self.thresholdData.setMinimumHeight(25)
-        # Contour coulours checkbox
-        contourLabel = Label(self, 'Preserve contour colours', grid=(6, 0))
+
+        # Contour colours checkbox
+        self.contourLabel = Label(self, 'Preserve contour colours', grid=(6, 0))
         self.contourCheckBox = CheckBox(self, checked=True, grid=(6, 1))
 
         self.addSpacer(0, 10, grid=(7,0))
@@ -103,15 +102,7 @@ class SpectrumProjectionPopup(CcpnDialog):
         """Callback for selecting spectrum"""
         spectrum = self.project.getByPid(spectrumPid)
         self.projectionAxisPulldown.setData(spectrum.axisCodes)
-        self._setProjectionAxis(self.projectionAxisPulldown.currentText())
         self.thresholdData.set(spectrum.positiveContourBase)
-
-    def _setProjectionAxis(self, projectionAxis):
-        """Callback when setting projection axis
-        """
-        spectrum = self.project.getByPid(self.spectrumPulldown.currentText())
-        path = spectrum._getDefaultProjectionPath(self.axisCodes)
-        self.filePathLineEdit.setText(path)
 
     def _setMethod(self, method):
         """Callback when setting method"""
@@ -135,21 +126,14 @@ class SpectrumProjectionPopup(CcpnDialog):
     def makeProjection(self):
         spectrum = self.project.getByPid(self.spectrumPulldown.currentText())
         axisCodes = self.axisCodes
-        filePath = self.filePathLineEdit.text()
         method = self.methodPulldown.currentText()
         threshold = self.thresholdData.get()
 
         with progressManager(self, 'Making %s projection from %s' % ('-'.join(axisCodes), spectrum.name)):
-            # spectrum.getProjection(axisCodes, method=method, threshold=threshold, path=filePath)
-            # objs = self.project.loadData(filePath)
-            # #print('>>> obj', objs)
-            # if len(objs) == 0:
-            #     raise RuntimeError('Error loading "%s"' % filePath)
-            projectedSpectrum = spectrum.extractProjectionToFile(axisCodes, method=method, threshold=threshold, path=filePath)
-            if self.contourCheckBox.get():
-                # projectedSpectrum = objs[0]
-                projectedSpectrum.positiveContourColour = spectrum.positiveContourColour
-                projectedSpectrum.negativeContourColour = spectrum.negativeContourColour
+            projectedSpectrum = spectrum.extractProjectionToFile(axisCodes, method=method, threshold=threshold)
+            if not self.contourCheckBox.get():
+                # settings are copied by default from the originating spectrum
+                projectedSpectrum._setDefaultContourColours()
         self.accept()  # close the popup
 
     def _getSpectrumFile(self):

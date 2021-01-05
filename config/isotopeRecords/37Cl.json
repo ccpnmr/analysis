@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/37Cl.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.2422
+    ],
+    [
+        "elementNumber",
+        17
+    ],
+    [
+        "gFactor",
+        0.456082
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "37Cl"
+    ],
+    [
+        "massNumber",
+        37
+    ],
+    [
+        "name",
+        "Chlorine"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.0644
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Cl"
+    ]
+]

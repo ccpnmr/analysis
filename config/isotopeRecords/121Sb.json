@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/121Sb.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.5721
+    ],
+    [
+        "elementNumber",
+        51
+    ],
+    [
+        "gFactor",
+        1.3454
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "121Sb"
+    ],
+    [
+        "massNumber",
+        121
+    ],
+    [
+        "name",
+        "Antimony"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.543
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Sb"
+    ]
+]

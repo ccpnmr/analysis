@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/93Nb.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        1.0
+    ],
+    [
+        "elementNumber",
+        41
+    ],
+    [
+        "gFactor",
+        1.3712
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "93Nb"
+    ],
+    [
+        "massNumber",
+        93
+    ],
+    [
+        "name",
+        "Niobium"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.32
+    ],
+    [
+        "spin",
+        4.5
+    ],
+    [
+        "symbol",
+        "Nb"
+    ]
+]

@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/45Sc.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        1.0
+    ],
+    [
+        "elementNumber",
+        21
+    ],
+    [
+        "gFactor",
+        1.35899
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "45Sc"
+    ],
+    [
+        "massNumber",
+        45
+    ],
+    [
+        "name",
+        "Scandium"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.22
+    ],
+    [
+        "spin",
+        3.5
+    ],
+    [
+        "symbol",
+        "Sc"
+    ]
+]

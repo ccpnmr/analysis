@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/17O.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.00038
+    ],
+    [
+        "elementNumber",
+        8
+    ],
+    [
+        "gFactor",
+        -0.757516
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "17O"
+    ],
+    [
+        "massNumber",
+        17
+    ],
+    [
+        "name",
+        "Oxygen"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.0256
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "O"
+    ]
+]

@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/50V.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0025
+    ],
+    [
+        "elementNumber",
+        23
+    ],
+    [
+        "gFactor",
+        0.557615
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "50V"
+    ],
+    [
+        "massNumber",
+        50
+    ],
+    [
+        "name",
+        "Vanadium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.21
+    ],
+    [
+        "spin",
+        6.0
+    ],
+    [
+        "symbol",
+        "V"
+    ]
+]

@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/141Pr.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        1.0
+    ],
+    [
+        "elementNumber",
+        59
+    ],
+    [
+        "gFactor",
+        1.7102
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "141Pr"
+    ],
+    [
+        "massNumber",
+        141
+    ],
+    [
+        "name",
+        "Praesodymium"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.077
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Pr"
+    ]
+]

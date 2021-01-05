@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/137Cs.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        55
+    ],
+    [
+        "gFactor",
+        0.81466
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "137Cs"
+    ],
+    [
+        "massNumber",
+        137
+    ],
+    [
+        "name",
+        "Caesium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.048
+    ],
+    [
+        "spin",
+        3.5
+    ],
+    [
+        "symbol",
+        "Cs"
+    ]
+]

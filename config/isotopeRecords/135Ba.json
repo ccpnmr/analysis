@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/135Ba.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.06592
+    ],
+    [
+        "elementNumber",
+        56
+    ],
+    [
+        "gFactor",
+        0.55863
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "135Ba"
+    ],
+    [
+        "massNumber",
+        135
+    ],
+    [
+        "name",
+        "Barium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.16
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Ba"
+    ]
+]

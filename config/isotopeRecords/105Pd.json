@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/105Pd.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.2233
+    ],
+    [
+        "elementNumber",
+        46
+    ],
+    [
+        "gFactor",
+        -0.257
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "105Pd"
+    ],
+    [
+        "massNumber",
+        105
+    ],
+    [
+        "name",
+        "Palladium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.66
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Pd"
+    ]
+]

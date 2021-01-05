@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/197Au.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        1.0
+    ],
+    [
+        "elementNumber",
+        79
+    ],
+    [
+        "gFactor",
+        0.097164
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "197Au"
+    ],
+    [
+        "massNumber",
+        197
+    ],
+    [
+        "name",
+        "Gold"
+    ],
+    [
+        "quadrupoleMoment",
+        0.547
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Au"
+    ]
+]

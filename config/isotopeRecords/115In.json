@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/115In.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.9571
+    ],
+    [
+        "elementNumber",
+        49
+    ],
+    [
+        "gFactor",
+        1.2313
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "115In"
+    ],
+    [
+        "massNumber",
+        115
+    ],
+    [
+        "name",
+        "Indium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.77
+    ],
+    [
+        "spin",
+        4.5
+    ],
+    [
+        "symbol",
+        "In"
+    ]
+]

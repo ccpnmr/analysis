@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/14N.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.99632
+    ],
+    [
+        "elementNumber",
+        7
+    ],
+    [
+        "gFactor",
+        0.403761
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "14N"
+    ],
+    [
+        "massNumber",
+        14
+    ],
+    [
+        "name",
+        "Nitrogen"
+    ],
+    [
+        "quadrupoleMoment",
+        0.02044
+    ],
+    [
+        "spin",
+        1.0
+    ],
+    [
+        "symbol",
+        "N"
+    ]
+]

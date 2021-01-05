@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/6Li.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0759
+    ],
+    [
+        "elementNumber",
+        3
+    ],
+    [
+        "gFactor",
+        0.822047
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "6Li"
+    ],
+    [
+        "massNumber",
+        6
+    ],
+    [
+        "name",
+        "Lithium"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.000806
+    ],
+    [
+        "spin",
+        1.0
+    ],
+    [
+        "symbol",
+        "Li"
+    ]
+]

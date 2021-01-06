@@ -1914,8 +1914,8 @@ class Spectrum(AbstractWrapperObject):
 
         return axisOrder
 
-    def automaticIntegration(self, spectralData):
-        return self._apiDataSource.automaticIntegration(spectralData)
+    # def automaticIntegration(self, spectralData):
+    #     return self._apiDataSource.automaticIntegration(spectralData)
 
     def _mapAxisCodes(self, axisCodes: Sequence[str]):
         """Map axisCodes on self.axisCodes

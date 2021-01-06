@@ -29,6 +29,8 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 #=========================================================================================
 
 from typing import Sequence
+import numpy
+from numpy.lib import scimath
 
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
@@ -52,22 +54,29 @@ XEASY_PARAM_DICT = {
 }
 firstLine = 'Version ....................... '
 
+# A lookup dict for sqrt exponents (this is the slow step in decoding the 2-byte xeasy format)
+_exponentDict = {}
+sqrt2 = scimath.sqrt(2.0)
+for i in range(-128,129,1):
+    _exponentDict[i] = scimath.power(sqrt2, i)
 
 class XeasySpectrumDataSource(SpectrumDataSourceABC):
     """
     Xeasy spectral storage
     """
+    #=========================================================================================
     dataFormat = 'Xeasy'
 
     isBlocked = True
     wordSize = 2
     headerSize = 0
     blockHeaderSize = 0
-    isFloatData = True
+    isFloatData = False
 
     suffixes = ['.param', '.16']
     openMethod = open
     defaultOpenReadMode = 'rb'
+    #=========================================================================================
 
     @property
     def parameterPath(self):
@@ -140,13 +149,43 @@ class XeasySpectrumDataSource(SpectrumDataSourceABC):
             return None
         return func(self._parseDict[paramKey])
 
-    #TODO: implement Xeasy byte conversion routine
-    # def _convertBlockData(self, blockdata):
-    #     """Convert the blockdata array
-    #     """
-    #     if blockdata.dtype != numpy.float32:
-    #         blockdata = numpy.array(blockdata, numpy.float32)
-    #     return blockdata
+    @property
+    def dtype(self):
+        "return the numpy dtype string; usigned 2 byte words"
+        return '%s%s%s' % (self.isBigEndian and '>' or '<', 'u', self.wordSize)
+
+    def _convertBlockData(self, blockdata):
+        """Convert the blockdata array from  2 byte xeasy format into float32
+        closely following the Xeasy manual found at:
+        http://triton.iqfr.csic.es/HTML-manuals/xeasy-manual/xeasy_m3.html
+        """
+
+        blockDataByteView = blockdata.view(numpy.int8)
+        result = numpy.zeros(blockdata.size, numpy.float32)
+
+        idx = 0
+        for i in range(0, blockDataByteView.size, 2):
+            e_k = int(blockDataByteView[i+1])
+            a_k = int(blockDataByteView[i])
+            if e_k <= 47:
+                sign = 1.0
+                ell = e_k - 1
+            else:
+                sign = -1.0
+                ell = -1 * (e_k - 95)
+
+            exponent = 1.0
+            if ell != 0:
+                exponent = _exponentDict[ell]
+
+            mantissa = 1.0
+            if ell != 0:
+                mantissa = float(a_k + 615) / 721.0
+
+            result[idx] = sign * mantissa * exponent
+            idx += 1
+
+        return result
 
     def getPlaneData(self, position:Sequence=None, xDim:int=1, yDim:int=2):
         """Get plane defined by xDim, yDim and position (all 1-based)

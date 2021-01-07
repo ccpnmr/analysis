@@ -630,6 +630,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if spectrum is None:
             raise ValueError('Undefined spectrum; cannot import parameters')
 
+        if not isinstance(spectrum, Spectrum):
+            raise TypeError('%s.importFromSpectrum: Wrong spectrum class type; got %s' %
+                            (self.__class__.__name__, spectrum))
+
         self._copyParametersFromSpectrum(spectrum)
         self._assureProperDimensionality()
         if spectrum.filePath is not None and includePath:
@@ -643,6 +647,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if spectrum is None:
             raise ValueError('Undefined spectrum; cannot export parameters')
 
+        if not isinstance(spectrum, Spectrum):
+            raise TypeError('%s.exportSpectrum: Wrong spectrum class type; got %s' %
+                            (self.__class__.__name__, spectrum))
+
         self._copyParametersToSpectrum(spectrum)
         if self.dataFile is not None and includePath:
             spectrum.filePath = self.dataFile
@@ -654,6 +662,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         if dataSource is None:
             raise ValueError('Undefined dataSource; cannot import parameters')
+        if not isinstance(dataSource, SpectrumDataSourceABC):
+            raise TypeError('%s.copyDataTo: Wrong dataSource class type; got %s' %
+                            (self.__class__.__name__, dataSource))
 
         self.copyParametersFrom(dataSource)
         self._assureProperDimensionality()
@@ -681,7 +692,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """Copy parameters from source to self
         """
         if not isinstance(source, SpectrumDataSourceABC):
-            raise TypeError('%s.copyDataTo: Wrong target class type; got %s' %
+            raise TypeError('%s.copyDataTo: Wrong source class type; got %s' %
                             (self.__class__.__name__, source))
         source.copyParametersTo(self)
         return self
@@ -715,7 +726,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return self
         """
         if not isinstance(source, SpectrumDataSourceABC):
-            raise TypeError('%s.copyDataFrom: Wrong target class type; got %s' %
+            raise TypeError('%s.copyDataFrom: Wrong source class type; got %s' %
                             (self.__class__.__name__, source))
         if self.dimensionCount != source.dimensionCount:
             raise RuntimeError('%s.copyDataFrom: incompatible dimensionCount with source' %
@@ -1644,6 +1655,19 @@ class SpectrumDataSourceABC(CcpNmrJson):
             raise RuntimeError('fillHdf5Buffer: initialise  Hdf5SpectrumBuffer instance first')
         self.copyDataTo(self.hdf5buffer)
 
+    def duplicateDataToHdf5(self, path=None):
+        """Make a duplicate from self to a Hdf5 file;
+        return an Hdf5SpectrumDataSource instance
+        """
+        from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
+
+        if path is None:
+            path = self.path
+
+        hdf5 = Hdf5SpectrumDataSource().copyParametersFrom(self)
+        with hdf5.openNewFile(path=path):
+            self.copyDataTo(hdf5)
+        return hdf5
 
     #=========================================================================================
     # Others

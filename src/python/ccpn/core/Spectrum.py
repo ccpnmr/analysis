@@ -2601,7 +2601,6 @@ class Spectrum(AbstractWrapperObject):
             # Check  contourLevels, contourColours
             if self.positiveContourCount == 0 or self.negativeContourCount == 0:
                 self._setDefaultContourValues()
-            if not self.positiveContourColour or not self.negativeContourColour:
                 self._setDefaultContourColours()
             if not self.sliceColour:
                 self.sliceColour = self.positiveContourColour
@@ -3159,8 +3158,9 @@ def _newSpectrum(project: Project, path: str, name: str) -> (Spectrum, None):
         return None
 
     if name is None:
-        dir, base, ext = _path.split3()
-        name = base
+        # dir, base, ext = _path.split3()
+        # name = base
+        name = _path.basename
 
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
     # Hack to trigger initialisation of contours

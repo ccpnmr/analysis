@@ -3243,7 +3243,7 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
                 data = input.getSliceData(position, readSliceDim)
 
                 # map the input position to the output position and write the data
-                outPosition = [position[inverseIndexMap[p]] for p in output.indices]
+                outPosition = [position[inverseIndexMap[p]] for p in output.axes]
                 # print('>>>', position, outPosition)
                 output.setSliceData(data, outPosition, writeSliceDim)
     # copy/set some more parameters (e.g. noiseLevel)

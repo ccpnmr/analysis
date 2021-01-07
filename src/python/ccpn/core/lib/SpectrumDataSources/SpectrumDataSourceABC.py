@@ -437,8 +437,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return range(1, self.dimensionCount+1)
 
     @property
-    def indices(self):
-        """A zero-based list of dimensions [0,dimensionCount-1]
+    def axes(self):
+        """A zero-based list of axes [0,dimensionCount-1]
         """
         return [i for i in range(0, self.dimensionCount)]
 
@@ -446,7 +446,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def totalNumberOfPoints(self):
         "Total number of points of the data"
         result = self.pointCounts[0]
-        for axis in self.indices[1:]:
+        for axis in self.axes[1:]:
             result *= self.pointCounts[axis]
         return result
 
@@ -1418,8 +1418,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
             # get aliasing factor determined by dimensions other than sliceDim
             factor = 1.0
-            for idx, fac, aliase in zip(self.indices, aliasingFlags, aliased):
-                if idx != sliceAxis and aliase:
+            for axis, fac, aliase in zip(self.axes, aliasingFlags, aliased):
+                if axis != sliceAxis and aliase:
                     factor *= fac
 
             if not aliased[sliceAxis]:

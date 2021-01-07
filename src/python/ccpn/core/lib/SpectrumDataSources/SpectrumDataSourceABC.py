@@ -14,12 +14,17 @@ readParameters()            read paramters from spectral data format
 writeParameters()           write parameters to spectral data format (currently hdf5 and NmrPipe only)
                             (to be subclassed)
 
-copyParameters()            copy parameters to a target SpectrumDataSource instance
-importFromSpectrum()        import parameters and path from a Spectrum instance
-exportToSpectrum()          export parameters and path to a Spectrum instance
+copyParametersTo()          copy parameters from self to a target SpectrumDataSource instance
+copyDataTo()                copy data from self to target SpectrumDataSource instance
+
+copyParametersFrom()        copy parameters from a source to self
+copyDataFrom()              copy data from self a source to self
+
+importFromSpectrum()        import parameters (and optionally path) from a Spectrum instance
+exportToSpectrum()          export parameters (and optionally path) to a Spectrum instance
 
 getByDimension()            Get specific parameter in dimension order
-setByDimension()            Set specific paramerer in dimension order
+setByDimension()            Set specific parameter in dimension order
 
 getSliceData()              get 1D slice (to be subclassed)
 setSliceData()              set 1D slice (to be subclassed; specific formats only)
@@ -66,6 +71,13 @@ Example 2 (with Spectrum instance):
         for position, data in sp.allPlanes(axes, exactMatch=False):
             output.setPlaneData(data, position=position, xDim=xDim, yDim=yDim)
 
+Example 3 (using Spectrum instance to make a hdf5 duplicate):
+
+    sp = get('SP:hnca')
+    outputPath = 'myCopiedHNCA.hdf5'
+
+    with Hdf5SpectrumDataSource(spectrum=sp).openNewFile(outputPath) as output:
+        output.copyDataFrom(sp._dataSource)
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -483,6 +495,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         super().__init__()
 
+        self.hdf5buffer = None  # Hdf5SpectrumBuffer instance
+
         self.reset()  # This will initialise everything to the default values
         self.setPath(path)
         if spectrum is not None:
@@ -652,7 +666,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return self
         """
         if not isinstance(target, SpectrumDataSourceABC):
-            raise TypeError('Wrong target class type; got %s' % target)
+            raise TypeError('%s.copyDataTo: Wrong target class type; got %s' %
+                            (self.__class__.__name__, target))
 
         for param in self.keys():
             doCopy = self.getMetadata(param, 'doCopy') and target.hasTrait(param)
@@ -666,7 +681,45 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """Copy parameters from source to self
         """
         if not isinstance(source, SpectrumDataSourceABC):
-            raise TypeError('Wrong source class type; got %s' % source)
+            raise TypeError('%s.copyDataTo: Wrong target class type; got %s' %
+                            (self.__class__.__name__, source))
+        source.copyParametersTo(self)
+        return self
+
+    def copyDataTo(self, target):
+        """Copy data from self to target;
+        return self
+        """
+        if not isinstance(target, SpectrumDataSourceABC):
+            raise TypeError('%s.copyDataTo: Wrong target class type; got %s' %
+                            (self.__class__.__name__, target))
+
+        if self.dimensionCount != target.dimensionCount:
+            raise RuntimeError('%s.copyDataTo: incompatible dimensionCount with target' %
+                               self.__class__.__name__)
+
+        if self.dimensionCount == 1:
+            # 1D's
+            data = self.getSliceData()
+            target.setSliceData(data)
+
+        else:
+            # nD's'
+            for position, data in self.allPlanes(xDim=1, yDim=2):
+                target.setPlaneData(data=data, position=position, xDim=1, yDim=2)
+
+        return self
+
+    def copyDataFrom(self, source):
+        """Copy data from source to self;
+        return self
+        """
+        if not isinstance(source, SpectrumDataSourceABC):
+            raise TypeError('%s.copyDataFrom: Wrong target class type; got %s' %
+                            (self.__class__.__name__, source))
+        if self.dimensionCount != source.dimensionCount:
+            raise RuntimeError('%s.copyDataFrom: incompatible dimensionCount with source' %
+                               self.__class__.__name__)
         source.copyParametersTo(self)
         return self
 
@@ -1557,6 +1610,40 @@ class SpectrumDataSourceABC(CcpNmrJson):
             with notificationEchoBlocking():
                 pointData = self.getPointData(position=position)
             yield (position, pointData)
+
+    #=========================================================================================
+    # Hdf5 buffer
+    #=========================================================================================
+
+    def initialiseHdf5Buffer(self, temporary=True, path=None):
+        """Initialise a Hdf5SpectrumBuffer instance and fill with data from self
+
+        :param temporary: flag indicating to create a temporary file, discarded upon closing
+        :param path: explicit path or derived from self.path if None and temporary=False
+        :return: Hdf5SpectrumBuffer instance
+        """
+        from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumBuffer
+
+        if self.hdf5buffer is not None:
+            getLogger().debug('Closing %s' % self.hdf5buffer)
+            self.hdf5buffer.closeFile()
+            self.hdf5buffer = None
+
+        if not temporary and path is None:
+            path = self.path
+
+        self.hdf5buffer = Hdf5SpectrumBuffer(self, temporary=temporary, path=path)
+        self.fillHdf5Buffer()
+        return self.hdf5buffer
+
+    def fillHdf5Buffer(self):
+        """Fill hdf5Buffer with data from self;
+        this routine will be subclassed in the more problematic cases such as NmrPipe
+        """
+        if self.hdf5buffer is None:
+            raise RuntimeError('fillHdf5Buffer: initialise  Hdf5SpectrumBuffer instance first')
+        self.copyDataTo(self.hdf5buffer)
+
 
     #=========================================================================================
     # Others

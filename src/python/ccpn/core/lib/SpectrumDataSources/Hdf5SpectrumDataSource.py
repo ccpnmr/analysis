@@ -433,23 +433,29 @@ class Hdf5SpectrumBuffer(Hdf5SpectrumDataSource):
     """A class to act as an temporary HDF5 spectrum buffer; always opened as 'new', ie. mode='w'
     """
 
-    def __init__(self, spectrumDataSource):
+    def __init__(self, spectrumDataSource, temporary=True, path=None):
         super().__init__()
         self.copyParametersFrom(spectrumDataSource)
-        # self.setPath(spectrumDataSource.path, substituteSuffix=True)
-        self.openTempFile('CcpNmr_%s_' % spectrumDataSource.path.basename)
+        self.spectrumDataSource = spectrumDataSource  # retain the reference to the original file
+        self.openBufferFile(temporary=temporary, path=path)
         self.writeParameters()
 
-    def openTempFile(self, name, **kwds):
-        """open temporary file, set self.fp, return self.fp
+    def openBufferFile(self, temporary=True, path=None, **kwds):
+        """open Hd5 spectrum buffer file, generate temporary path if temporary==True, use path otherwise
         """
 
         try:
             if self.hasOpenFile():
                 self.closeFile()
 
-            tFile = tempfile.NamedTemporaryFile(prefix=name, suffix=self.suffixes[0])
-            self.setPath(tFile.name, substituteSuffix=False)
+            if temporary:
+                name = 'CcpNmr_hdf5SpectrumBuffer_%s_' % self.spectrumDataSource.path.basename
+                tFile = tempfile.NamedTemporaryFile(prefix=name, suffix=self.suffixes[0])
+                self.setPath(tFile.name, substituteSuffix=False)
+            else:
+                if path is None:
+                    raise ValueError('Hdf5SpectrumBuffer.openBufferFile: temporary=False and path=None')
+                self.setPath(path, substituteSuffix=True)
 
             self.disableCache()  # Hdf has its own caching
             # Adjust hdf chunck caching parameters
@@ -458,7 +464,7 @@ class Hdf5SpectrumBuffer(Hdf5SpectrumDataSource):
             kwds.setdefault('rdcc_w0', 0.25)  # most-often will read
 
             self.mode = self.defaultOpenWriteMode
-            self.fp = self.openMethod(tFile, self.mode, **kwds)
+            self.fp = self.openMethod(self.path, self.mode, **kwds)
 
         except Exception as es:
             self.closeFile()
@@ -480,5 +486,3 @@ class Hdf5SpectrumBuffer(Hdf5SpectrumDataSource):
 
         getLogger().debug('opened %s; %s blocks with size %s; chunks=%s' %
                           (self, self._totalBlocks, self._totalBlockSize, tuple(self.blockSizes)))
-
-        return self.fp

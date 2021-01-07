@@ -134,11 +134,16 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         """Intialise; optionally set path or extract from spectrum
         """
         super().__init__(path=path, spectrum=spectrum)
-        self.header = None  # NmrPipeHeader instance
-        self.hdf5buffer = None  # HDFfile acting as buffer object for multi-file nDs
 
+        self.header = None  # NmrPipeHeader instance
         self.pipeDimension = None
         self.nusDimension = None
+
+    def _readHeader(self):
+        "Create NmrPipeHeader instance and read the data"
+        if not self.hasOpenFile():
+            self.openFile(mode=self.defaultOpenReadMode)
+        self.header = NmrPipeHeader(self.headerSize, self.wordSize).read(self.fp, doSeek=True)
 
     def readParameters(self):
         """Read the parameters from the NmrPipe file header
@@ -149,10 +154,11 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         self.setDefaultParameters()
 
         try:
-            if not self.hasOpenFile():
-                self.openFile(mode=self.defaultOpenReadMode)
-
-            self.header = NmrPipeHeader(self.headerSize, self.wordSize).read(self.fp)
+            # if not self.hasOpenFile():
+            #     self.openFile(mode=self.defaultOpenReadMode)
+            #
+            # self.header = NmrPipeHeader(self.headerSize, self.wordSize).read(self.fp)
+            self._readHeader()
 
             # check the 'magic' bytes
             magicBytes = tuple(self.header.bytes[8:12])
@@ -304,37 +310,44 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         return path, offset
 
+    def fillHdf5Buffer(self):
+        """Fill HDF5 buffer with data from self
+        """
+        if self.hdf5buffer is None:
+            raise RuntimeError('fillHdf5Buffer: initialise  Hdf5SpectrumBuffer instance first')
+
+        xAxis = self.X_AXIS
+        xDim = self.X_DIM
+        yAxis = self.Y_AXIS
+        yDim = self.Y_DIM
+
+        if self.dimensionCount == 1:
+            # 1D
+            position = [1]
+            path, offset = self._getPathAndOffset(position)
+            with open(path, 'r') as fp:
+                fp.seek(offset, 0)
+                data = numpy.fromfile(file=fp, dtype=self.dtype, count=self.pointCounts[xAxis])
+            self.hdf5buffer.setSliceData(data, position=position, sliceDim=xDim)
+
+        else:
+            # nD's: fill the buffer, reading x,y planes from the nmrPipe files into the hdf5 buffer
+            planeSize = self.pointCounts[xAxis] * self.pointCounts[yAxis]
+            sliceTuples = [(1, p) for p in self.pointCounts]
+            for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=(xDim, yDim)):
+                path, offset = self._getPathAndOffset(position)
+                with open(path, 'r') as fp:
+                    fp.seek(offset, 0)
+                    data = numpy.fromfile(file=fp, dtype=self.dtype, count=planeSize)
+                    data.resize( (self.pointCounts[yAxis], self.pointCounts[xAxis]))
+                self.hdf5buffer.setPlaneData(data, position=position, xDim=xDim, yDim=yDim)
+
     def _fillBuffer(self):
         """Create (if needed) and fill HDF5 buffer
         """
         if self.hdf5buffer is None:
             # Buffer has not been created and filled
-            self.hdf5buffer = Hdf5SpectrumBuffer(spectrumDataSource=self)
-
-            xAxis = self.X_AXIS
-            xDim = self.X_DIM
-            yAxis = self.Y_AXIS
-            yDim = self.Y_DIM
-
-            if self.dimensionCount == 1:
-                position = [1]
-                path, offset = self._getPathAndOffset(position)
-                with open(path, 'r') as fp:
-                    fp.seek(offset, 0)
-                    data = numpy.fromfile(file=fp, dtype=self.dtype, count=self.pointCounts[xAxis])
-                self.hdf5buffer.setSliceData(data, position=position, sliceDim=xDim)
-
-            else:
-                # nD's: fill the buffer, reading x,y planes from the nmrPipe files into the hdf5 buffer
-                planeSize = self.pointCounts[xAxis] * self.pointCounts[yAxis]
-                sliceTuples = [(1, p) for p in self.pointCounts]
-                for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=(xDim, yDim)):
-                    path, offset = self._getPathAndOffset(position)
-                    with open(path, 'r') as fp:
-                        fp.seek(offset, 0)
-                        data = numpy.fromfile(file=fp, dtype=self.dtype, count=planeSize)
-                        data.resize( (self.pointCounts[yAxis], self.pointCounts[xAxis]))
-                    self.hdf5buffer.setPlaneData(data, position=position, xDim=xDim, yDim=yDim)
+            self.initialiseHdf5Buffer(temporary=True)
 
     def getPlaneData(self, position:Sequence=None, xDim:int=1, yDim:int=2):
         """Get plane defined by xDim, yDim and position (all 1-based)
@@ -385,3 +398,5 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
 # Register this format
 NmrPipeSpectrumDataSource._registerFormat()
+
+

@@ -47,10 +47,13 @@ class BinaryHeader(object):
         self.intValues = None
         self.floatValues = None
 
-    def read(self, fp):
-        "Read and initialise the header from binary file pointed to by fp; return self"
+    def read(self, fp, doSeek=True):
+        """Read and initialise the header from binary file pointed to by fp; return self
+        :param doSeek: seek to start of file if True
+        """
 
-        fp.seek(0,0)  # rewind the file as header should be at the start
+        if doSeek:
+            fp.seek(0,0)  # rewind the file as header should be at the start
 
         bytes = array('B')
         bytes.fromfile(fp, self.headerSize * self.wordSize)

@@ -309,30 +309,31 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def dimensions(self) -> tuple:
-        """Convenience: tuple of length dimensionCount with dimension integers; ie. (1,2,3,..).
+        """Convenience: tuple of length dimensionCount with dimension integers (1-based); e.g. (1,2,3,..).
         Useful for mapping axisCodes: eg: self.getByAxisCodes('dimensions', ['N','C','H'])
         """
         return tuple(range(1, self.dimensionCount + 1))
 
     @property
-    def indices(self) -> tuple:
-        """Convenience: tuple of length dimensionCount with indices integers; ie. (0,1,2,3).
-        Useful for mapping axisCodes: eg: self.getByAxisCodes('indices', ['N','C','H'])
+    def axes(self) -> tuple:
+        """Convenience: tuple of length dimensionCount with axes integers (0-based); e.g. (0,1,2,3).
+        Useful for mapping axisCodes: eg: self.getByAxisCodes('axes', ['N','C','H'])
         """
         return tuple(range(0, self.dimensionCount))
 
     @property
     def axisTriples(self) -> tuple:
-        """Convenience: return a list of triples (index, axisCode, dimension) for each dimension
+        """Convenience: return a list of triples (axis, axisCode, dimension) for each dimension
+
         Useful for iterating over axis codes; eg in an H-N-CO ordered spectrum
-            for idx, axisCode, dimension in self.getByAxisCodes('axisTriples', ('N','C','H'), exactMatch=False)
+            for axis, axisCode, dimension in self.getByAxisCodes('axisTriples', ('N','C','H'), exactMatch=False)
 
             would yield:
                 (1, 'N', 2)
                 (2, 'CO', 3)
                 (0, 'H', 1)
         """
-        return tuple(z for z in zip(self.indices, self.axisCodes, self.dimensions))
+        return tuple(z for z in zip(self.axes, self.axisCodes, self.dimensions))
 
     @property
     def comment(self) -> str:

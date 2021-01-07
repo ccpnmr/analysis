@@ -103,7 +103,7 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
 
         # create the array with zeros
         pointCounts = (self.pointCounts[yDim-1], self.pointCounts[xDim-1])  # y,x ordering
-        data = numpy.zeros(pointCounts, dtype=numpy.float32)
+        data = numpy.zeros(pointCounts, dtype=self.dataType)
 
         return data
 
@@ -114,7 +114,7 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
 
         # create the array with zeros
-        data = numpy.zeros(self.pointCounts[sliceDim-1], dtype=numpy.float32)
+        data = numpy.zeros(self.pointCounts[sliceDim-1], dtype=self.dataType)
         return data
 
     def getPointData(self, position:Sequence=None) -> float:
@@ -151,7 +151,7 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
 
         sizes = [(stop-start+1) for start,stop in sliceTuples]
         # The result being assembled
-        regionData = numpy.zeros(sizes[::-1], dtype=numpy.float32) # ...,z,y,x numpy ordering
+        regionData = numpy.zeros(sizes[::-1], dtype=self.dataType) # ...,z,y,x numpy ordering
         return regionData
 
     def _setDefaultIsotopeValues(self, isotopeCode, dimension, field=18.8):

@@ -323,7 +323,7 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def axisTriples(self) -> tuple:
-        """Convenience: return a list of triples (axis, axisCode, dimension) for each dimension
+        """Convenience: return a tuple of triples (axis, axisCode, dimension) for each dimension
 
         Useful for iterating over axis codes; eg in an H-N-CO ordered spectrum
             for axis, axisCode, dimension in self.getByAxisCodes('axisTriples', ('N','C','H'), exactMatch=False)

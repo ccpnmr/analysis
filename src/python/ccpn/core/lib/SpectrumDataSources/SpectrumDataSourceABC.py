@@ -188,6 +188,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
     D_DIM = Spectrum.D_DIM
     E_DIM = Spectrum.E_DIM
 
+    dataType = numpy.float32   # numpy data format of the resulting slice, plane, region data
+
     #=========================================================================================
     # to be subclassed
     #=========================================================================================
@@ -840,10 +842,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return absIndex
 
     def _convertBlockData(self, blockdata):
-        """Convert the blockdata array if dtype is not float32
+        """Convert the blockdata array if dtype is not self.dataType (ie. currently float32)
         """
-        if blockdata.dtype != numpy.float32:
-            blockdata = numpy.array(blockdata, numpy.float32)
+        if blockdata.dtype != self.dataType:
+            blockdata = numpy.array(blockdata, self.dataType)
         return blockdata
 
     @property
@@ -922,7 +924,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         points = [p-1 for p in position]
 
         # create the array with zeros
-        data = numpy.zeros(self.pointCounts[sliceDim], dtype=numpy.float32)
+        data = numpy.zeros(self.pointCounts[sliceDim], dtype=self.dataType)
 
         # we are reading nD blocks; need to slice across these with depth of 1 in non-slice dims and a
         # size of blockSizes[sliceDim] along the sliceDim (set dynamically during the looping)
@@ -961,7 +963,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # create the array with zeros
         pointCounts = (self.pointCounts[yDim], self.pointCounts[xDim])  # y,x ordering
-        data = numpy.zeros(pointCounts, dtype=numpy.float32)
+        data = numpy.zeros(pointCounts, dtype=self.dataType)
 
         # we are reading nD blocks; need to slice across these with depth of 1 in non-plane dims and a
         # size of blockSizes[xDim], blockSizes[yDim] along the xDim,yDim (set dynamically during the looping)
@@ -1395,10 +1397,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
         sliceAxis = sliceDim - 1  # 0-based axis of sliceDim
 
         # The result being assembled
-        regionData = numpy.zeros(sizes[::-1], dtype=numpy.float32) # ...,z,y,x numpy ordering
+        regionData = numpy.zeros(sizes[::-1], dtype=self.dataType) # ...,z,y,x numpy ordering
 
         # temp buffer for unpacking aliased data along sliceDim
-        sliceData2 = numpy.zeros(sizes[sliceAxis], dtype=numpy.float32)
+        sliceData2 = numpy.zeros(sizes[sliceAxis], dtype=self.dataType)
         nPoints = self.pointCounts[sliceAxis]
 
         for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim]):

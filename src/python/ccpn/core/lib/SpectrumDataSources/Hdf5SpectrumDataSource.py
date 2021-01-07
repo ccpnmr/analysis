@@ -83,7 +83,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     # lzf compression seems not to yield any improvement, but rather a increase in file size;
     # gzip compression about 30% reductions, albeit at a great cost-penalty
     compressionModes = ('lzf', 'gzip')  # 'szip' not in conda distribution
-    defaultCompressionMode = None  # hsf5 compression modes
+    defaultCompressionMode = None  # hdf5 compression modes
 
     _NONE = bytes('__NONE__','utf8')
 
@@ -141,7 +141,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
                 dataSetKwds.setdefault('compression', self.defaultCompressionMode)
                 dataSetKwds.setdefault('fletcher32', False)
 
-            self.fp.create_dataset(SPECTRUM_DATASET_NAME, self.pointCounts[::-1], dtype='float32',
+            self.fp.create_dataset(SPECTRUM_DATASET_NAME, self.pointCounts[::-1], dtype=self.dataType,
                                    chunks=True, **dataSetKwds)
             self.blockSizes = tuple(self.spectrumData.chunks[::-1])
             self.writeParameters()
@@ -435,7 +435,6 @@ class Hdf5SpectrumBuffer(Hdf5SpectrumDataSource):
 
     def __init__(self, spectrumDataSource):
         super().__init__()
-        self.disableCache()  # in-memory file does not need a cache
         self.copyParametersFrom(spectrumDataSource)
         # self.setPath(spectrumDataSource.path, substituteSuffix=True)
         self.openTempFile('CcpNmr_%s_' % spectrumDataSource.path.basename)
@@ -474,7 +473,7 @@ class Hdf5SpectrumBuffer(Hdf5SpectrumDataSource):
             dataSetKwds.setdefault('compression', self.defaultCompressionMode)
             dataSetKwds.setdefault('fletcher32', False)
 
-        self.fp.create_dataset(SPECTRUM_DATASET_NAME, self.pointCounts[::-1], dtype='float32',
+        self.fp.create_dataset(SPECTRUM_DATASET_NAME, self.pointCounts[::-1], dtype=self.dataType,
                                chunks=True, **dataSetKwds)
         self.blockSizes = tuple(self.spectrumData.chunks[::-1])
         self.writeParameters()

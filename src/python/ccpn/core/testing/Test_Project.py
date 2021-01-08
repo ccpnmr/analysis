@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:48 +0000 (Fri, January 22, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2021-01-08 11:49:57 +0000 (Fri, January 08, 2021) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,6 +28,19 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import os
 
 from ccpn.core.testing.WrapperTesting import WrapperTesting
+from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+
+
+class ProjectTestRename(WrapperTesting):
+    # Path of project to load (None for new project)
+    projectPath = None
+
+    def test_name_and_rename(self):
+        apiNmrProject = self.project._apiNmrProject
+        self.assertEqual(self.project.name, 'default')
+        self.assertEqual(apiNmrProject.root.name, 'default')
+        oldLocation = apiNmrProject.root.findFirstRepository(name='userData').url.getDataLocation()
+        self.assertTrue(os.path.isdir(oldLocation))
 
 
 class ProjectTestExperimentTypeMap(WrapperTesting):
@@ -47,7 +60,7 @@ class ProjectTestExperimentTypeMap(WrapperTesting):
 
 class ProjectTestIo(WrapperTesting):
     # Path of project to load (None for new project)
-    projectPath = 'CcpnCourse2b'
+    projectPath = 'CcpnCourse2b.ccpn'
 
     def test_name(self):
         project = self.project

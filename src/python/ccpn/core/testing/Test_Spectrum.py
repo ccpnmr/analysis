@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:48 +0000 (Fri, January 22, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2021-01-08 11:49:57 +0000 (Fri, January 08, 2021) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,7 +31,7 @@ from ccpn.util import Path
 
 class SimpleSpectrumTest(WrapperTesting):
     # Path of project to load (None for new project)
-    projectPath = 'CcpnCourse1b'
+    projectPath = 'CcpnCourse1b.ccpn'
 
     def test_have_spectrum(self):
         assert self.project.getSpectrum('HSQC-115') is not None
@@ -45,18 +45,18 @@ class SimpleSpectrumTest(WrapperTesting):
 
 class SpectrumTest(WrapperTesting):
     # Path of project to load (None for new project)
-    projectPath = 'CcpnCourse1b'
+    projectPath = 'CcpnCourse1b.ccpn'
 
     def test_dimensionCount(self):
         spectrum = self.project.getSpectrum('HSQC-115')
         # Undo and redo all operations
         self.undo.undo()
         self.undo.redo()
-        # Nonsense test, removed api call
+        assert spectrum.dimensionCount == spectrum._apiDataSource.numDim
 
     def test_pointCount(self):
         spectrum = self.project.getSpectrum('HSQC-115')
-        numPoints = spectrum.pointCounts
+        numPoints = tuple([dataDim.numPoints for dataDim in spectrum._apiDataSource.sortedDataDims()])
 
         # Undo and redo all operations
         self.undo.undo()
@@ -84,7 +84,7 @@ class SpectrumTest(WrapperTesting):
 
 class SpectrumIntensitiesTest(WrapperTesting):
     # Path of project to load (None for new project)
-    projectPath = 'Ccpn1Dtesting'
+    projectPath = 'Ccpn1Dtesting.ccpn'
 
     def test_intensities_get(self):
         self.project._wrappedData.root.checkAllValid(complete=True)

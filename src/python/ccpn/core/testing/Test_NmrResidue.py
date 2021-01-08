@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:47 +0000 (Fri, January 22, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2021-01-08 11:49:57 +0000 (Fri, January 08, 2021) $"
+__version__ = "$Revision: 3.0.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -762,7 +762,7 @@ class NmrStretchTest(WrapperTesting):
 
 class NmrResidueTest(WrapperTesting):
     # Path of project to load (None for new project
-    projectPath = 'CcpnCourse2c'
+    projectPath = 'CcpnCourse2c.ccpn'
 
     def test_reassign_attributes(self):
         nchain = self.project.getByPid('NC:A')
@@ -861,6 +861,7 @@ class NmrResidueTest(WrapperTesting):
         # self.assertEqual(len(self.undo.waypoints), 0)
         self.assertEqual(nr2.id, 'A.515.XXX-Deleted')
         self.assertIs(nrx, nr1)
+        self.assertIsNone(nr2._apiResonanceGroup)
         self.assertTrue(len(nr1.nmrAtoms) == 4)
 
     def test_fetchNmrResidue(self):

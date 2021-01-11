@@ -486,8 +486,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def __init__(self, path=None, spectrum=None, dimensionCount=None):
         """initialise default values; optionally set path or associate with an Spectrum instance
 
-        :param path: optional input path
+        :param path: optional, path of the (binary) spectral data
         :param spectrum: associate instance with spectrum and import spectrum's parameters
+        :param dimensionCount: limit instance to dimensionCount dimensions
         """
         if self.dataFormat is None:
             raise RuntimeError('Subclassed attribute "dataFormat" of class "%s" needs to be defined' % self.__class__.__name__)
@@ -500,10 +501,17 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         super().__init__()
 
-        self.hdf5buffer = None  # Hdf5SpectrumBuffer instance
+        self.dataFile = None  # Absolute path of the binary data; set by setPath method
+        self.fp = None  # File pointer; None indicates closed
+        self.mode = None  # Open mode
 
-        self.reset()  # This will initialise everything to the default values
-        self.setPath(path)
+        self.hdf5buffer = None  # Hdf5SpectrumBuffer instance; None indicates no Hdf5 buffer used
+        self.spectrum = None  # Spectrum instance
+
+        self.setDefaultParameters()
+
+        if path is not None:
+            self.setPath(path)
         if spectrum is not None:
             self.importFromSpectrum(spectrum, includePath=False)
         if dimensionCount is not None:
@@ -513,14 +521,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self._initBlockCache()  # This wil initiate the cache instance
         if not self.hasBlockCached:
             self.disableCache()
-
-    def reset(self):
-        "Return parameters to default values"
-        self.fp = None
-        self.mode = None
-        self.setPath(None)
-        self.spectrum = None
-        self.setDefaultParameters()
 
     def setDefaultParameters(self, nDim=MAXDIM):
         """Set default values for all parameters
@@ -986,8 +986,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if not self.isBlocked:
             raise RuntimeError('%s is not a blocked format' % self)
 
-        position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
-
         # converts to zero-based
         sliceDim -= 1
         points = [p-1 for p in position]
@@ -1022,8 +1020,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         if not self.isBlocked:
             raise RuntimeError('%s is not a blocked format' % self)
-
-        position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
 
         # convert to zero-based
         xDim -= 1
@@ -1222,6 +1218,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             self.fp = None
             self.mode = None
 
+        # Close optional non-temporary hdf5 buffer
         if self.hdf5buffer is not None and not self.temporaryBuffer:
             self.hdf5buffer.closeFile()
 
@@ -1292,11 +1289,20 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     def getPlaneData(self, position: Sequence = None, xDim: int = 1, yDim: int = 2):
         """Get plane defined by xDim, yDim and position (all 1-based)
-        returns NumPy data array
+        Check for hdf5buffer first, then blocked format
+        Optionally to be subclassed
 
-        to be subclassed
+        :return NumPy data array
         """
-        raise NotImplementedError('Not implemented')
+        if self.hdf5buffer is not None:
+            return self.hdf5buffer.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+
+        elif self.isBlocked:
+            position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
+            return self._readBlockedPlane(xDim=xDim, yDim=yDim, position=position)
+
+        else:
+            raise NotImplementedError('Not implemented')
 
     def setPlaneData(self, data, position: Sequence = None, xDim: int = 1, yDim: int = 2):
         """Set the plane defined by xDim, yDim and position (all 1-based)
@@ -1321,11 +1327,20 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     def getSliceData(self, position:Sequence=None, sliceDim:int=1):
         """Get slice defined by sliceDim and position (all 1-based)
-        return NumPy data array
+        Check for hdf5buffer first, then blocked format
+        Optionally to be subclassed
 
-        to be subclassed
+        :return NumPy data array
         """
-        raise NotImplementedError('Not implemented')
+        if self.hdf5buffer is not None:
+            return self.hdf5buffer.getSliceData(position=position, sliceDim=sliceDim)
+
+        elif self.isBlocked:
+            position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
+            return self._readBlockedSlice(sliceDim=sliceDim, position=position)
+
+        else:
+            raise NotImplementedError('Not implemented')
 
     def setSliceData(self, data, position:Sequence=None, sliceDim:int=1):
         """Set data as slice defined by sliceDim and position (all 1-based)
@@ -1363,12 +1378,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """Get value defined by position (1-based, integer values)
         Use getPointValue() for an interpolated value
         """
-        position = self.checkForValidPosition(position)
+        if self.hdf5buffer is not None:
+            return self.hdf5buffer.getPointData(position=position)
 
-        if self.isBlocked:
+        elif self.isBlocked:
+            position = self.checkForValidPosition(position)
             return self._readBlockedPoint(position)
+
         else:
-            # piggback on getSliceData
+            # piggyback on getSliceData
             data = self.getSliceData(position=position, sliceDim=1)
             return float(data[position[0]-1])
 
@@ -1446,23 +1464,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
             if start > stop:
                 raise ValueError('invalid sliceTuple for dimension %s; start (%s) > stop (%s)' % (idx+1, start,stop))
 
-    def getRegionData(self, sliceTuples, aliasingFlags=None):
-        """Return an numpy array containing the points defined by
-                sliceTuples=[(start_1,stop_1), (start_2,stop_2), ...],
-
-        sliceTuples are 1-based; sliceTuple stop values are inclusive (i.e. different
-        from the python slice object)
-
-        aliaisingFlags: Optionally allow for aliasing per dimension:
-            0: No aliasing
-            1: aliasing with positive sign
-           -1: aliasing with negative sign
+    def _getRegionData(self, sliceTuples, aliasingFlags=None):
+        """Return an numpy array containing the region data; see getRegionData description
+        implementation based upon getSliceData method
         """
-        if aliasingFlags is None:
-            aliasingFlags = [0] * self.dimensionCount
-
-        self.checkForValidRegion(sliceTuples, aliasingFlags)
-
         sizes = [(stop-start+1) for start,stop in sliceTuples]
         starts = [start-1 for start,stop in sliceTuples] # 0-based
         stops = [stop for start,stop in sliceTuples] # 0-based, non-inclusive
@@ -1512,6 +1517,30 @@ class SpectrumDataSourceABC(CcpNmrJson):
                     sliceData2[idx] = factor * pointFactor * sliceData[p]
                 # copy the sliceData2 into the (nD) data array
                 regionData[dataSlices[::-1]] = sliceData2[:] # dimensions run in ..,z,y,x order
+
+        return regionData
+
+    def getRegionData(self, sliceTuples, aliasingFlags=None):
+        """Return an numpy array containing the points defined by
+                sliceTuples=[(start_1,stop_1), (start_2,stop_2), ...],
+
+        sliceTuples are 1-based; sliceTuple stop values are inclusive (i.e. different
+        from the python slice object)
+
+        aliaisingFlags: Optionally allow for aliasing per dimension:
+            0: No aliasing
+            1: aliasing with positive sign
+           -1: aliasing with negative sign
+        """
+        if aliasingFlags is None:
+            aliasingFlags = [0] * self.dimensionCount
+
+        if self.hdf5buffer is not None:
+            regionData =  self.hdf5buffer.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
+
+        else:
+            self.checkForValidRegion(sliceTuples, aliasingFlags)
+            regionData = self._getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
 
         return regionData
 

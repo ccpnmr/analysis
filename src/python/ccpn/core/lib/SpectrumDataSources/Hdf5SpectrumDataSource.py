@@ -416,7 +416,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         if 1 in aliasingFlags or -1 in aliasingFlags:
             # fall back on the slice-based extraction
-            data = super().getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
+            data = super()._getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
         else:
             dataset = self.spectrumData
             slices = tuple(slice(start-1, stop) for start,stop in sliceTuples)

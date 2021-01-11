@@ -356,27 +356,21 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         """Get plane defined by xDim, yDim and position (all 1-based)
         return NumPy data array
         """
-        position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
         self._fillBuffer()
-        data = self.hdf5buffer.getPlaneData(position=position, xDim=xDim, yDim=yDim)
-        return data
+        return self.hdf5buffer.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
     def getSliceData(self, position:Sequence=None, sliceDim:int=1):
         """Get slice defined by sliceDim and position (all 1-based)
         return NumPy data array
         """
-        position = self.checkForValidSlice(position=position, sliceDim = sliceDim)
         self._fillBuffer()
-        data = self.hdf5buffer.getSliceData(position=position, sliceDim=sliceDim)
-        return data
+        return self.hdf5buffer.getSliceData(position=position, sliceDim=sliceDim)
 
     def getPointData(self, position:Sequence=None) -> float:
         """Get value defined by points (1-based)
         """
-        position = self.checkForValidPosition(position=position)
         self._fillBuffer()
-        data = self.hdf5buffer.getPointData(position=position)
-        return data
+        return self.hdf5buffer.getPointData(position=position)
 
     def getRegionData(self, sliceTuples, aliasingFlags=None):
         """Return an numpy array containing the points defined by
@@ -390,13 +384,8 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             1: aliasing with identical sign
            -1: aliasing with inverted sign
         """
-        if aliasingFlags is None:
-            aliasingFlags = [0] * self.dimensionCount
-
-        self.checkForValidRegion(sliceTuples, aliasingFlags)
         self._fillBuffer()
-        data = self.hdf5buffer.getRegionData(sliceTuples, aliasingFlags)
-        return data
+        return self.hdf5buffer.getRegionData(sliceTuples, aliasingFlags)
 
 # Register this format
 NmrPipeSpectrumDataSource._registerFormat()
@@ -407,7 +396,7 @@ class NmrPipeInputStreamDataSource(NmrPipeSpectrumDataSource):
     NmrPipe spectral storage, reading from an stdinp stream
     """
     def __init__(self, spectrum=None, temporaryBuffer=True, bufferPath=None):
-        """Intialise; optionally set path or extract from spectrum
+        """Initialise; optionally set path or extract from spectrum
 
         :param path: optional input path
         :param spectrum: associate instance with spectrum and import spectrum's parameters
@@ -443,7 +432,7 @@ class NmrPipeInputStreamDataSource(NmrPipeSpectrumDataSource):
     def closeFile(self):
         """close the file
         """
-        self.fp = None  # Do not close sys.stdin --> set to None here!
+        self.fp = None  # Do not close sys.stdin --> set self.fp to None here!
         self.mode = None
         super().closeFile()
 

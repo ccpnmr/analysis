@@ -321,24 +321,6 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         # procs is a dict with procFiles[i] as keys; convert to a list in dimension order
         self.procs = [procs[key] for key in procFiles]
 
-    def getPlaneData(self, position:Sequence=None, xDim:int=1, yDim:int=2):
-        """Get plane defined by xDim, yDim and position (all 1-based)
-        return NumPy data array
-        """
-        if position is None:
-            position = [1] * self.dimensionCount
-
-        return self._readBlockedPlane(xDim=xDim, yDim=yDim, position=position)
-
-    def getSliceData(self, position:Sequence=None, sliceDim:int=1):
-        """Get slice defined by sliceDim and position (all 1-based)
-        return NumPy data array
-        """
-        if position is None:
-            position = [1] * self.dimensionCount
-
-        return self._readBlockedSlice(sliceDim=sliceDim, position=position)
-
 # Register this format
 BrukerSpectrumDataSource._registerFormat()
 

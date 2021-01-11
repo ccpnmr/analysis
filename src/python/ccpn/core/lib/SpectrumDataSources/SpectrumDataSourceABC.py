@@ -108,6 +108,8 @@ from typing import Sequence
 from contextlib import contextmanager
 from collections import OrderedDict
 
+import tempfile
+
 import numpy
 
 from ccpn.util.Common import isIterable
@@ -483,6 +485,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     def __init__(self, path=None, spectrum=None, dimensionCount=None):
         """initialise default values; optionally set path or associate with an Spectrum instance
+
+        :param path: optional input path
+        :param spectrum: associate instance with spectrum and import spectrum's parameters
         """
         if self.dataFormat is None:
             raise RuntimeError('Subclassed attribute "dataFormat" of class "%s" needs to be defined' % self.__class__.__name__)
@@ -1216,6 +1221,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
             self.fp.close()
             self.fp = None
             self.mode = None
+
+        if self.hdf5buffer is not None and not self.temporaryBuffer:
+            self.hdf5buffer.closeFile()
+
         self.cache.clear()
 
     def hasOpenFile(self):
@@ -1626,25 +1635,38 @@ class SpectrumDataSourceABC(CcpNmrJson):
     # Hdf5 buffer
     #=========================================================================================
 
-    def initialiseHdf5Buffer(self, temporary=True, path=None):
+    def initialiseHdf5Buffer(self, temporaryBuffer=True, path=None):
         """Initialise a Hdf5SpectrumBuffer instance and fill with data from self
 
-        :param temporary: flag indicating to create a temporary file, discarded upon closing
+        :param temporaryBuffer: flag indicating to create a temporary file, discarded upon closing
         :param path: explicit path or derived from self.path if None and temporary=False
         :return: Hdf5SpectrumBuffer instance
         """
-        from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumBuffer
+        from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
 
         if self.hdf5buffer is not None:
             getLogger().debug('Closing %s' % self.hdf5buffer)
             self.hdf5buffer.closeFile()
             self.hdf5buffer = None
 
-        if not temporary and path is None:
-            path = self.path
+        self.temporaryBuffer = temporaryBuffer
+        if self.temporaryBuffer:
+            name = 'CcpNmr_hdf5buffer_%s_' % self.path.basename
+            tFile = tempfile.NamedTemporaryFile(prefix=name, suffix=Hdf5SpectrumDataSource.suffixes[0])
+            path = tFile.name
 
-        self.hdf5buffer = Hdf5SpectrumBuffer(self, temporary=temporary, path=path)
+        if not self.temporaryBuffer:
+            if path is None:
+                path = self.path
+
+        # self.hdf5buffer = Hdf5SpectrumBuffer(self, temporary=temporary, path=path)
+        self.hdf5buffer = Hdf5SpectrumDataSource().copyParametersFrom(self)
+        self.hdf5buffer._dataSource = self # link back to self
+        self.hdf5buffer.setPath(path=path, substituteSuffix=True)
+        # do not use openNewFile as it has to remain open after filling the buffer
+        self.hdf5buffer.openFile(mode=Hdf5SpectrumDataSource.defaultOpenWriteMode)
         self.fillHdf5Buffer()
+
         return self.hdf5buffer
 
     def fillHdf5Buffer(self):

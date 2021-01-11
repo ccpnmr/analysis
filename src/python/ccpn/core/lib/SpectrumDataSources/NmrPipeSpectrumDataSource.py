@@ -38,7 +38,6 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.traits.CcpNmrTraits import CInt, CString
 
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
-from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumBuffer
 from ccpn.core.lib.SpectrumDataSources.lib.NmrPipeHeader import NmrPipeHeader
 
 #============================================================================================================
@@ -130,14 +129,22 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                                        )
 
 
-    def __init__(self, path=None, spectrum=None):
+    def __init__(self, path=None, spectrum=None, temporaryBuffer=True, bufferPath=None):
         """Intialise; optionally set path or extract from spectrum
+
+        :param path: optional input path
+        :param spectrum: associate instance with spectrum and import spectrum's parameters
+        :param temporaryBuffer: used temporary file to buffer the data
+        :param bufferPath: (optionally) use path to generate buffer file (implies temporaryBuffer=False)
         """
         super().__init__(path=path, spectrum=spectrum)
 
         self.header = None  # NmrPipeHeader instance
         self.pipeDimension = None
         self.nusDimension = None
+        # we hold off from opening the hdf5 buffer until we actually needs the data
+        self.temporaryBuffer=temporaryBuffer
+        self.bufferPath = bufferPath
 
     def _readHeader(self):
         "Create NmrPipeHeader instance and read the data"
@@ -154,10 +161,6 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         self.setDefaultParameters()
 
         try:
-            # if not self.hasOpenFile():
-            #     self.openFile(mode=self.defaultOpenReadMode)
-            #
-            # self.header = NmrPipeHeader(self.headerSize, self.wordSize).read(self.fp)
             self._readHeader()
 
             # check the 'magic' bytes
@@ -179,7 +182,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                     self.temperature = None
 
                 # Pipe and NUS dimensions??
-                map1 = {1:self.X_AXIS, 2:self.Y_AXIS, 3:self.Z_AXIS, 4:self.A_AXIS, 0:None}
+                map1 = {1:self.X_DIM, 2:self.Y_DIM, 3:self.Z_DIM, 4:self.A_DIM, 0:None}
                 if parName == "pipeDimension":
                     self.pipeDimension = map1[self.pipeDimension]
                 if parName == "nusDimension":
@@ -347,7 +350,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         """
         if self.hdf5buffer is None:
             # Buffer has not been created and filled
-            self.initialiseHdf5Buffer(temporary=True)
+            self.initialiseHdf5Buffer(temporaryBuffer=self.temporaryBuffer, path=self.bufferPath)
 
     def getPlaneData(self, position:Sequence=None, xDim:int=1, yDim:int=2):
         """Get plane defined by xDim, yDim and position (all 1-based)
@@ -395,8 +398,53 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         data = self.hdf5buffer.getRegionData(sliceTuples, aliasingFlags)
         return data
 
-
 # Register this format
 NmrPipeSpectrumDataSource._registerFormat()
 
 
+class NmrPipeInputStreamDataSource(NmrPipeSpectrumDataSource):
+    """
+    NmrPipe spectral storage, reading from an stdinp stream
+    """
+    def __init__(self, spectrum=None, temporaryBuffer=True, bufferPath=None):
+        """Intialise; optionally set path or extract from spectrum
+
+        :param path: optional input path
+        :param spectrum: associate instance with spectrum and import spectrum's parameters
+        :param temporaryBuffer: used temporary file to buffer the data
+        :param bufferPath: (optionally) use path to generate buffer file (implies temporaryBuffer=False)
+        """
+        super().__init__(spectrum=spectrum, temporaryBuffer=temporaryBuffer, bufferPath=bufferPath)
+        self.fp = sys.stdin
+        self.readParameters()
+        self.initialiseHdf5Buffer(temporaryBuffer=temporaryBuffer, path=bufferPath)
+
+    def _readHeader(self):
+        "Create NmrPipeHeader instance and read the data"
+        self.header = NmrPipeHeader(self.headerSize, self.wordSize).read(self.fp, doSeek=False)
+
+    def _guessTemplate(self):
+        "Guess template not active/required for input stream"
+        return None
+
+    def fillHdf5Buffer(self):
+        """Fill hdf5 buffer reading all slices from input stream
+        """
+        sliceDim = self.pipeDimension
+        if sliceDim is None:
+            raise RuntimeError('%s.fillHdf5Buffer: undefined dimension of the input stream')
+        getLogger().debug('Fill hdf5 buffer from sys.stdin reading %d slices along dimension %s' %
+                          (self.sliceCount, sliceDim))
+
+        for position, data in self.allSlices(self.pipeDimension):
+            data = numpy.fromfile(file=self.fp, dtype=self.dtype, count=self.pointCounts[sliceDim-1])
+            self.hdf5buffer.setSliceData(data, position=position, sliceDim=sliceDim)
+
+    def closeFile(self):
+        """close the file
+        """
+        self.fp = None  # Do not close sys.stdin --> set to None here!
+        self.mode = None
+        super().closeFile()
+
+# NmrPipeInputStreamDataSource._registerFormat()

@@ -4,7 +4,7 @@ Code for exporting OpenGL stripDisplay to pdf and svg files.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:06:41 +0100 (Wed, October 07, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-12 17:55:25 +0000 (Tue, January 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -202,22 +202,21 @@ class GLExporter():
         self._addDrawingToStory()
 
     def _importFonts(self):
-        import os
         from ccpn.framework.PathsAndUrls import fontsPath
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLFONT_SUBSTITUTE
 
         # load all system fonts to find matches with OpenGl fonts
         for glFonts in self._parent.globalGL.fonts.values():
-            pdfmetrics.registerFont(TTFont(glFonts.fontName, os.path.join(fontsPath, 'open-sans', GLFONT_SUBSTITUTE + '.ttf')))
+            pdfmetrics.registerFont(TTFont(glFonts.fontName, fontsPath / 'open-sans' / GLFONT_SUBSTITUTE + '.ttf'))
 
         # set a default fontName
         self.fontName = self._parent.getSmallFont().fontName
 
         # load a .pfb/.afm font for the png exporter
-        afmdir = fontsPath + '/open-sans/'
-        pfbdir = fontsPath + '/open-sans/'
-        afmFile = os.path.join(afmdir, 'OpenSans-Regular.afm')
-        pfbFile = os.path.join(pfbdir, 'OpenSans-Regular.pfb')
+        afmdir = fontsPath / 'open-sans'
+        pfbdir = fontsPath / 'open-sans'
+        afmFile = afmdir / 'OpenSans-Regular.afm'
+        pfbFile = pfbdir / 'OpenSans-Regular.pfb'
 
         justFace = pdfmetrics.EmbeddedType1Face(afmFile, pfbFile)
         faceName = 'OpenSans'  # pulled from AFM file

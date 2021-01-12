@@ -278,9 +278,6 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         Check presence of result path
         Return aPath instance of path and offset (in bytes) as a tuple
         """
-        if self.dimensionCount > 2 and self.template is None:
-            raise RuntimeError('%s: Undefined template' % self)
-
         if self.dimensionCount <= 2:
             path = self.path
             offset = self.headerSize * self.wordSize
@@ -292,14 +289,20 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                      ) * self.wordSize
 
         elif self.dimensionCount == 3 and self.baseDimensionality == 2:
+            if self.template is None:
+                raise RuntimeError('%s: Undefined template' % self)
             path = self.template % (position[self.Z_AXIS],)
             offset = self.headerSize * self.wordSize
 
         elif self.dimensionCount == 4 and self.baseDimensionality == 2:
+            if self.template is None:
+                raise RuntimeError('%s: Undefined template' % self)
             path =  self.template % (position[self.Z_AXIS], position[self.A_AXIS])
             offset = self.headerSize * self.wordSize
 
         elif self.dimensionCount == 4 and self.baseDimensionality == 3:
+            if self.template is None:
+                raise RuntimeError('%s: Undefined template' % self)
             path =  self.template % (position[self.A_AXIS],)
             offset = ( self.headerSize + \
                       (position[self.A_AXIS]-1) *self.pointCounts[self.X_AXIS] * self.pointCounts[self.Y_AXIS]

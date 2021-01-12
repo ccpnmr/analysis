@@ -1,42 +1,40 @@
-"""Spectrum  class. Gives spectrum values, including per-dimension values as tuples.
+"""Spectrum  class.
+Maintains the parameters of a spectrum, including per-dimension/axis values.
 Values that are not defined for a given dimension (e.g. sampled dimensions) are given as None.
-Reference-related values apply only to the first Reference given (which is sufficient for
-all common cases).
 
-Dimension identifiers run from 1 to the number of dimensions (e.g. 1,2,3 for a 3D).
-Per-dimension values are given in the order data are stored in the spectrum file - for
+Dimension identifiers run from 1 to the number of dimensions, i.e. dimensionCount,  (e.g. 1,2,3 for a 3D).
 CCPN data the preferred convention is to have the acquisition dimension as dimension 1.
 
-The axisCodes are used as an alternative axis identifier. They are unique strings (so they can
-b recognised even if the axes are reordered in display). The axisCodes reflect the isotope
-on the relevant axis, and match the dimension identifiers in the reference experiment templates,
-linking a dimension to the correct reference experiment dimension. They are also used to map
-automatically spectrum axes to display axes and to other spectra. By default the axis name
-is the name of the atom being measured.
-Axes that are linked by a onebond magnetisation transfer could be given a lower-case suffix
-to show the nucleus bound to.
-Duplicate axis names are distinguished by a numerical suffix.
+Axes identifiers run from 0 to the dimensionCount-1 (e.g. 0,1,2 for a 3D)
+Per-axis values are given in the order data are stored in the spectrum file
 
+The axisCodes are used as an alternative axis identifier. These are unique strings (so they can
+be recognised even if the axes are reordered in display). The axisCodes reflect the isotope
+on the relevant axis, and can match the dimension identifiers in the reference experiment templates,
+linking a dimension to the correct reference experiment dimension. They are also used to
+automatically map spectrum display-axes between different spectra.
+
+By default the axis name is derived from the name of the atom being measured.
+Axes that are linked by a one-bond magnetisation transfer could be given a lower-case suffix
+to show the nucleus bound to.
+Duplicate axis names should be distinguished by a numerical suffix.
 The rules are best shown by example:
 
 Experiment                 axisCodes
 
 1D Bromine NMR             Br
-
 3D proton NOESY-TOCSY      H, H1, H2
-
 19F-13C-HSQC               Fc, Cf
-
 15N-NOESY-HSQC OR
 15N-HSQC-NOESY:            Hn, Nh, H
-
 4D HCCH-TOCSY              Hc, Ch, Hc1, Ch1
+HNCA/CB                    H N C
+HNCO                       H, N, CO
+HCACO                      H, CA, CO
 
-HNCA/CB                    H. N. C
-
-HNCO                       Hn, Nh, CO     *(CO is treated as a separate type)*
-
-HCACO                      Hca, CAh, CO    *(CA is treated as a separate type)*
+Useful reordering methods exist to get dimensional/axis parameters in a particular order, i.e.:
+getByDimension(), setByDimension(), getByAxisCode(), setByAxisCode()
+See doc strings of these methods for detailed documentation
 
 """
 #=========================================================================================

@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-08 17:27:38 +0000 (Tue, December 08, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-12 18:04:57 +0000 (Tue, January 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -64,7 +64,11 @@ from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, \
     USERACHIVESPATH, USERDATAPATH, USERNMRSTARPATH, USERSPECTRUMPATH, \
-    USERLAYOUTSPATH, USERMACROSPATH, USERNEFPATH, USERSAVEPROJECTPATH, setInitialPath
+    USERLAYOUTSPATH, USERMACROSPATH, USERNEFPATH, USERSAVEPROJECTPATH, setInitialPath, \
+    ProjectFileDialog, ExcelFileDialog, DataFileDialog, ExportFileDialog, NefFileDialog, \
+    AuxiliaryFileDialog, ArchivesFileDialog, MacrosFileDialog, OtherFileDialog, PipelineFileDialog, \
+    PreferencesFileDialog, PluginsFileDialog, TablesFileDialog, BackupsFileDialog, PDFFileDialog, \
+    LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog
 from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView
 
 from ccpn.util import Logging
@@ -779,7 +783,6 @@ class Framework(NotifierBase):
         except Exception as e:
             getLogger().warning('Impossible to restore SpectrumDisplays')
 
-
         # Initialise strips
         try:
             for strip in project.strips:
@@ -900,7 +903,6 @@ class Framework(NotifierBase):
         #   spectrumDisplay.setColumnStretches(True)
         #
         #~~~~~~~~~~~~~~~~
-
 
     def get(self, identifier):
         """General method to obtain object (either gui or data) from identifier (pid, gid, obj-string)
@@ -1305,7 +1307,7 @@ class Framework(NotifierBase):
             (),
             ("Residue Information", self.showResidueInformation, [('shortcut', 'ri')]),
             (),
-            ("Reference Chemical Shifts", self.showRefChemicalShifts, [('shortcut', 'rc')]),
+            ("Reference Chemical Shifts", self.showReferenceChemicalShifts, [('shortcut', 'rc')]),
             ]
                    ))
 
@@ -1521,11 +1523,7 @@ class Framework(NotifierBase):
            ReturnsProject instance or None on error
         """
         if not path:
-            dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.Directory, text='Load Project',
-                                acceptMode=FileDialog.AcceptOpen,
-                                preferences=self.preferences,
-                                initialPath=self.preferences.general.userWorkingPath,
-                                pathID=USERWORKINGPATH)
+            dialog = ProjectFileDialog(parent=self.ui.mainWindow, acceptMode='load')
             dialog._show()
             path = dialog.selectedFile()
             if not path:
@@ -1571,8 +1569,9 @@ class Framework(NotifierBase):
 
             if self.preferences.general.useProjectPath:
                 getLogger().debug2('application - setting current path %s' % Path.Path(path).parent)
-                setInitialPath(initialPath=Path.Path(path).parent,
-                               pathID=USERWORKINGPATH)
+                # temporary dialog to set initialPath
+                _dialog = ProjectFileDialog(self.ui.mainWindow)
+                _dialog.initialPath = Path.Path(path).parent
 
             if project and project._undo:
                 project._undo.clear()
@@ -1627,12 +1626,7 @@ class Framework(NotifierBase):
 
     def _loadNMRStarFile(self, path=None):
         if not path:
-            text = 'Import NMR-Star File into Project'
-            dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
-                                acceptMode=FileDialog.AcceptOpen,
-                                preferences=self.preferences,
-                                initialPath=self.preferences.general.userWorkingPath,
-                                pathID=USERNMRSTARPATH)
+            dialog = NMRStarFileDialog(parent=self.ui.mainWindow, acceptMode='import')
             dialog._show()
             path = dialog.selectedFile()
             if not path:
@@ -1740,12 +1734,8 @@ class Framework(NotifierBase):
             #     m = 'Native dialog not available on multiple selections. ' \
             #         'For loading a single file (not Dir) through a native dialog please use: Project > Load Data...'
             #     getLogger().info(m)
-            dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.ExistingFiles, text='Load Spectra',
-                                acceptMode=FileDialog.AcceptOpen, multiSelection=True,
-                                filter=filter, useNative=False,
-                                preferences=self.preferences,
-                                initialPath=self.preferences.general.userWorkingPath,
-                                pathID=USERSPECTRUMPATH)
+            dialog = SpectrumFileDialog(parent=self.ui.mainWindow, acceptMode='load', filter=filter, useNative=False)
+
             dialog._show()
             paths = dialog.selectedFiles()
 
@@ -1783,15 +1773,7 @@ class Framework(NotifierBase):
             text = 'Load Data'
 
         if paths is None:
-            #TODO:LIST-AS-ISSUE: This fails for native file dialogs on OSX when trying to select a project (i.e. a directory)
-            # NBNB TBD I assume here that path is either a string or a list lf string paths.
-            # NBNB #FIXME if incorrect
-            dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
-                                acceptMode=FileDialog.AcceptOpen,
-                                filter=filter,
-                                preferences=self.preferences,
-                                initialPath=self.preferences.general.userWorkingPath,
-                                pathID=USERDATAPATH)
+            dialog = DataFileDialog(parent=self.ui.mainWindow, acceptMode='load', filter=filter)
             dialog._show()
             path = dialog.selectedFile()
             if not path:
@@ -1882,14 +1864,9 @@ class Framework(NotifierBase):
         return successful
 
     def _importNef(self):
-        text = 'Import Nef File into Project'
         filter = '*.nef'
-        dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
-                            acceptMode=FileDialog.AcceptOpen,
-                            filter=filter,
-                            preferences=self.preferences,
-                            initialPath=self.preferences.general.userWorkingPath,
-                            pathID=USERNEFPATH)
+        dialog = NefFileDialog(parent=self.ui.mainWindow, acceptMode='import', filter=filter)
+
         dialog._show()
         path = dialog.selectedFile()
         if not path:
@@ -2188,14 +2165,9 @@ class Framework(NotifierBase):
     def restoreFromArchive(self, archivePath=None):
 
         if not archivePath:
-            archivesDirectory = os.path.join(self.project.path, Path.CCPN_ARCHIVES_DIRECTORY)
-            dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.ExistingFile, text="Select Archive",
-                                acceptMode=FileDialog.AcceptOpen,
-                                # directory=archivesDirectory,
-                                filter='*.tgz',
-                                preferences=self.preferences,
-                                initialPath=archivesDirectory,
-                                pathID=USERACHIVESPATH)
+            archivesDirectory = Path.aPath(self.project.path) / Path.CCPN_ARCHIVES_DIRECTORY
+            _filter = '*.tgz'
+            dialog = ArchivesFileDialog(parent=self.ui.mainWindow, acceptMode='select', directory=archivesDirectory, filter=_filter)
             dialog._show()
             archivePath = dialog.selectedFile()
 
@@ -2255,10 +2227,7 @@ class Framework(NotifierBase):
         """Opens a saved Layout as dialog box and gets directory specified in the file dialog."""
 
         fType = 'JSON (*.json)'
-        dialog = FileDialog(fileMode=FileDialog.AnyFile, text='Open Saved Layout',
-                            acceptMode=FileDialog.AcceptOpen, filter=fType,
-                            initialPath=self.preferences.general.userLayoutsPath,
-                            pathID=USERLAYOUTSPATH)
+        dialog = LayoutsFileDialog(parent=self.ui.mainWindow, acceptMode='open', filter=fType)
         dialog._show()
         path = dialog.selectedFile()
         if not path:
@@ -2268,15 +2237,10 @@ class Framework(NotifierBase):
 
     def getSaveLayoutPath(self):
         """Opens save Layout as dialog box and gets directory specified in the file dialog."""
+
         jsonType = '.json'
         fType = 'JSON (*.json)'
-
-        # NOTE:ED - need to add a directory identifier, can keep track of different directories then :)
-
-        dialog = FileDialog(fileMode=FileDialog.AnyFile, text='Save Layout As',
-                            acceptMode=FileDialog.AcceptSave, filter=fType,
-                            initialPath=self.preferences.general.userLayoutsPath,
-                            pathID=USERLAYOUTSPATH)
+        dialog = LayoutsFileDialog(parent=self.ui.mainWindow, acceptMode='save', filter=fType)
         dialog._show()
         newPath = dialog.selectedFile()
         if not newPath:
@@ -2589,45 +2553,29 @@ class Framework(NotifierBase):
     ## MENU callbacks:  Molecule
     ################################################################################################
 
+    @logCommand('application.')
     def showCreateChainPopup(self):
         """
         Displays sequence creation popup.
         """
         from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
 
-        self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showCreateChainPopup()")
-        getLogger().info("application.showCreateChainPopup()")
-        popup = CreateChainPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
+        popup = CreateChainPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+        popup.exec_()
 
+    @logCommand('application.')
     def toggleSequenceModule(self):
-        """Toggles whether Sequence Module is displayed or not"""
-
-        # openList = [m for m in SequenceModule.getInstances()]
-        # if openList:
-        #   openList[0].close()
-        #   # SequenceModule._alreadyOpened = False
-        # # if SequenceModule._alreadyOpened is True:
-        # #   if SequenceModule._currentModule is not None:
-        # #     SequenceModule._currentModule.close()
-        # #     SequenceModule._alreadyOpened = False
-        # else:
+        """
+        Toggles whether Sequence Module is displayed or not
+        """
         self.showSequenceModule()
 
-        # if hasattr(self, 'sequenceModule'):
-        #   if self.sequenceModule.isVisible():
-        #     self.hideSequenceModule()
-        # else:
-        #   self.showSequenceModule()
-        self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.toggleSequenceModule()")
-        getLogger().info("application.toggleSequenceModule()")
-
+    @logCommand('application.')
     def showSequenceModule(self, position='top', relativeTo=None):
         """
         Displays Sequence Module at the top of the screen.
         """
         from ccpn.ui.gui.modules.SequenceModule import SequenceModule
-
-        # if not hasattr(self, 'sequenceModule'):
 
         if SequenceModule._alreadyOpened is False:
             mainWindow = self.ui.mainWindow
@@ -2635,15 +2583,14 @@ class Framework(NotifierBase):
             mainWindow.moduleArea.addModule(self.sequenceModule,
                                             position=position, relativeTo=relativeTo)
             action = self._findMenuAction('View', 'Show Sequence')
-            if action:  # should be True
+            if action:
                 action.setChecked(True)
 
             # set the colours of the currently highlighted chain in open sequenceGraph
             # should really be in the class, but doesn't fire correctly during __init__
             self.sequenceModule.populateFromSequenceGraphs()
 
-        return self.sequenceModule
-
+    @logCommand('application.')
     def hideSequenceModule(self):
         """Hides sequence module"""
 
@@ -2654,6 +2601,7 @@ class Framework(NotifierBase):
     def inspectMolecule(self):
         pass
 
+    @logCommand('application.')
     def showResidueInformation(self, position: str = 'bottom', relativeTo: CcpnModule = None):
         """Displays Residue Information module.
         """
@@ -2668,25 +2616,25 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea  # ejb
-        self.residueModule = ResidueInformation(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(self.residueModule, position=position, relativeTo=relativeTo)
-        mainWindow.pythonConsole.writeConsoleCommand("application.showResidueInformation()")
-        getLogger().info("application.showResidueInformation()")
+        residueModule = ResidueInformation(mainWindow=mainWindow)
+        mainWindow.moduleArea.addModule(residueModule, position=position, relativeTo=relativeTo)
 
-    def showRefChemicalShifts(self, position='left', relativeTo=None):
+    @logCommand('application.')
+    def showReferenceChemicalShifts(self, position='left', relativeTo=None):
         """Displays Reference Chemical Shifts module."""
         from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
 
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        self.refChemShifts = ReferenceChemicalShifts(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(self.refChemShifts, position=position, relativeTo=relativeTo)
+        refChemShifts = ReferenceChemicalShifts(mainWindow=mainWindow)
+        mainWindow.moduleArea.addModule(refChemShifts, position=position, relativeTo=relativeTo)
 
     ###################################################################################################################
     ## MENU callbacks:  VIEW
     ###################################################################################################################
 
+    @logCommand('application.')
     def showChemicalShiftTable(self,
                                position: str = 'bottom',
                                relativeTo: CcpnModule = None,
@@ -2698,14 +2646,12 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        self.chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow,
-                                                                 chemicalShiftList=chemicalShiftList, selectFirstItem=selectFirstItem)
+        chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow,
+                                                            chemicalShiftList=chemicalShiftList, selectFirstItem=selectFirstItem)
 
-        mainWindow.moduleArea.addModule(self.chemicalShiftTableModule, position=position, relativeTo=relativeTo)
-        mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
-        getLogger().info("application.showChemicalShiftTable()")
-        return self.chemicalShiftTableModule
+        mainWindow.moduleArea.addModule(chemicalShiftTableModule, position=position, relativeTo=relativeTo)
 
+    @logCommand('application.')
     def showNmrResidueTable(self, position='bottom', relativeTo=None,
                             nmrChain=None, selectFirstItem=False):
         """Displays Nmr Residue Table
@@ -2715,14 +2661,12 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        self.nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow,
-                                                           nmrChain=nmrChain, selectFirstItem=selectFirstItem)
+        nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow,
+                                                      nmrChain=nmrChain, selectFirstItem=selectFirstItem)
 
-        mainWindow.moduleArea.addModule(self.nmrResidueTableModule, position=position, relativeTo=relativeTo)
-        mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
-        getLogger().info("application.showNmrResidueTable()")
-        return self.nmrResidueTableModule
+        mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
 
+    @logCommand('application.')
     def showResidueTable(self, position='bottom', relativeTo=None,
                          chain=None, selectFirstItem=False):
         """Displays  Residue Table
@@ -2732,31 +2676,12 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        self.residueTableModule = ResidueTableModule(mainWindow=mainWindow,
-                                                     chain=chain, selectFirstItem=selectFirstItem)
+        residueTableModule = ResidueTableModule(mainWindow=mainWindow,
+                                                chain=chain, selectFirstItem=selectFirstItem)
 
-        mainWindow.moduleArea.addModule(self.residueTableModule, position=position, relativeTo=relativeTo)
-        mainWindow.pythonConsole.writeConsoleCommand("application.showResidueTable()")
-        getLogger().info("application.showResidueTable()")
-        return self.residueTableModule
+        mainWindow.moduleArea.addModule(residueTableModule, position=position, relativeTo=relativeTo)
 
-    # def showStructureTable(self, position='bottom', relativeTo=None,
-    #                         structureEnsemble=None, selectFirstItem=False):
-    #   """Displays Structure Table
-    #   """
-    #   from ccpn.ui.gui.modules.StructureTable import StructureTableModule
-    #
-    #   mainWindow = self.ui.mainWindow
-    #   if not relativeTo:
-    #     relativeTo = mainWindow.moduleArea
-    #   self.structureTableModule = StructureTableModule(mainWindow=mainWindow,
-    #                                               structureEnsemble=structureEnsemble, selectFirstItem=selectFirstItem)
-    #   mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)
-    #
-    #   mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
-    #   logger.info("application.showStructureTable()")
-    #   return self.structureTableModule
-    #
+    @logCommand('application.')
     def showPeakTable(self, position: str = 'left', relativeTo: CcpnModule = None,
                       peakList: PeakList = None, selectFirstItem=False):
         """Displays Peak table on left of main window with specified list selected.
@@ -2766,14 +2691,12 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        self.peakTableModule = PeakTableModule(mainWindow,
-                                               peakList=peakList, selectFirstItem=selectFirstItem)
+        peakTableModule = PeakTableModule(mainWindow,
+                                          peakList=peakList, selectFirstItem=selectFirstItem)
 
-        mainWindow.moduleArea.addModule(self.peakTableModule, position=position, relativeTo=relativeTo)
-        mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
-        getLogger().info("application.showPeakTable()")
-        return self.peakTableModule
+        mainWindow.moduleArea.addModule(peakTableModule, position=position, relativeTo=relativeTo)
 
+    @logCommand('application.')
     def showMultipletTable(self, position: str = 'left', relativeTo: CcpnModule = None,
                            multipletList: MultipletList = None, selectFirstItem=False):
         """Displays multipletList table on left of main window with specified list selected.
@@ -2783,14 +2706,12 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        self.multipletTableModule = MultipletTableModule(mainWindow,
-                                                         multipletList=multipletList, selectFirstItem=selectFirstItem)
+        multipletTableModule = MultipletTableModule(mainWindow,
+                                                    multipletList=multipletList, selectFirstItem=selectFirstItem)
 
-        mainWindow.moduleArea.addModule(self.multipletTableModule, position=position, relativeTo=relativeTo)
-        mainWindow.pythonConsole.writeConsoleCommand("application.showMultipletTable()")
-        getLogger().info("application.showMultipletTable()")
-        return self.multipletTableModule
+        mainWindow.moduleArea.addModule(multipletTableModule, position=position, relativeTo=relativeTo)
 
+    @logCommand('application.')
     def showIntegralTable(self, position: str = 'left', relativeTo: CcpnModule = None,
                           integralList: IntegralList = None, selectFirstItem=False):
         """Displays integral table on left of main window with specified list selected.
@@ -2800,14 +2721,12 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        self.integralTableModule = IntegralTableModule(mainWindow=mainWindow,
-                                                       integralList=integralList, selectFirstItem=selectFirstItem)
+        integralTableModule = IntegralTableModule(mainWindow=mainWindow,
+                                                  integralList=integralList, selectFirstItem=selectFirstItem)
 
-        mainWindow.moduleArea.addModule(self.integralTableModule, position=position, relativeTo=relativeTo)
-        mainWindow.pythonConsole.writeConsoleCommand("application.showIntegralTable()")
-        getLogger().info("application.showIntegralTable()")
-        return self.integralTableModule
+        mainWindow.moduleArea.addModule(integralTableModule, position=position, relativeTo=relativeTo)
 
+    @logCommand('application.')
     def showRestraintTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
                            restraintList: PeakList = None, selectFirstItem=False):
         """Displays Peak table on left of main window with specified list selected.
@@ -2817,14 +2736,12 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        self.restraintTableModule = RestraintTableModule(mainWindow=mainWindow,
-                                                         restraintList=restraintList, selectFirstItem=selectFirstItem)
+        restraintTableModule = RestraintTableModule(mainWindow=mainWindow,
+                                                    restraintList=restraintList, selectFirstItem=selectFirstItem)
 
-        mainWindow.moduleArea.addModule(self.restraintTableModule, position=position, relativeTo=relativeTo)
-        mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()")
-        getLogger().info("application.showRestraintTable()")
-        return self.restraintTableModule
+        mainWindow.moduleArea.addModule(restraintTableModule, position=position, relativeTo=relativeTo)
 
+    @logCommand('application.')
     def showStructureTable(self, position='bottom', relativeTo=None,
                            structureEnsemble=None, selectFirstItem=False):
         """Displays Structure Table
@@ -2834,15 +2751,12 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        self.structureTableModule = StructureTableModule(mainWindow=mainWindow,
-                                                         structureEnsemble=structureEnsemble, selectFirstItem=selectFirstItem)
+        structureTableModule = StructureTableModule(mainWindow=mainWindow,
+                                                    structureEnsemble=structureEnsemble, selectFirstItem=selectFirstItem)
 
-        mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)
+        mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
 
-        mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
-        getLogger().info("application.showStructureTable()")
-        return self.structureTableModule
-
+    @logCommand('application.')
     def showNotesEditor(self, position: str = 'bottom', relativeTo: CcpnModule = None,
                         note=None, selectFirstItem=False):
         """Displays Notes Editing Table
@@ -2852,17 +2766,14 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        self.notesEditorModule = NotesEditorModule(mainWindow=mainWindow,
-                                                   note=note, selectFirstItem=selectFirstItem)
+        notesEditorModule = NotesEditorModule(mainWindow=mainWindow,
+                                              note=note, selectFirstItem=selectFirstItem)
 
-        mainWindow.moduleArea.addModule(self.notesEditorModule, position=position, relativeTo=relativeTo)
-        mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditorTable()")
-        getLogger().info("application.showNotesEditorTable()")
-        return self.notesEditorModule
+        mainWindow.moduleArea.addModule(notesEditorModule, position=position, relativeTo=relativeTo)
 
     def showPrintSpectrumDisplayPopup(self):
-        # from ccpn.ui.gui.popups.PrintSpectrumPopup import SelectSpectrumDisplayPopup #,PrintSpectrumDisplayPopup
-
+        """Show the print spectrumDisplay dialog
+        """
         from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup
 
         if len(self.project.spectrumDisplays) == 0:
@@ -2997,6 +2908,7 @@ class Framework(NotifierBase):
     ## MENU callbacks:  Macro
     #################################################################################################
 
+    @logCommand('application.')
     def showMacroEditor(self):
         """
         Displays macro editor.
@@ -3004,21 +2916,14 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         self.editor = MacroEditor(mainWindow=mainWindow)
         mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
-        # mainWindow.pythonConsole.writeConsoleCommand("application.showMacroEditor()")
-        # getLogger().info("application.showMacroEditor()")
 
     def openMacroOnEditor(self):
         """
         Displays macro editor.
         """
         mainWindow = self.ui.mainWindow
-        dialog = FileDialog(text='Open Macro', fileMode=FileDialog.ExistingFile,
-                            acceptMode=FileDialog.AcceptOpen,
-                            # directory=self.macroPath,
-                            filter='*.py',
-                            preferences=self.preferences,
-                            initialPath=self.preferences.general.userMacroPath,
-                            pathID=USERMACROSPATH)
+        fType = '*.py'
+        dialog = MacrosFileDialog(parent=mainWindow, acceptMode='open', filter=fType)
         dialog._show()
         filePath = dialog.selectedFile()
         if filePath is not None:
@@ -3046,13 +2951,8 @@ class Framework(NotifierBase):
         runs the selected macro.
         """
         if macroFile is None:
-            dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.ExistingFile, text="Run Macro",
-                                acceptMode=FileDialog.AcceptOpen,
-                                # directory=self.preferences.general.userMacroPath,
-                                filter='*.py',
-                                preferences=self.preferences,
-                                initialPath=self.preferences.general.userMacroPath,
-                                pathID=USERMACROSPATH)
+            fType = '*.py'
+            dialog = MacrosFileDialog(parent=self.ui.mainWindow, acceptMode='run', filter=fType)
             dialog._show()
             macroFile = dialog.selectedFile()
             if not macroFile:
@@ -3209,7 +3109,6 @@ class Framework(NotifierBase):
         # check valid internet connection first
         if Url.checkInternetConnection():
             self.updatePopup = UpdatePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            self.updatePopup.show()
             self.updatePopup.exec_()
 
             # if updates have been installed then popup the quit dialog with no cancel button
@@ -3233,6 +3132,8 @@ class Framework(NotifierBase):
 
         # check valid internet connection first
         if Url.checkInternetConnection():
+
+            # this is non-modal so you can copy/paste from the project as required
             if not self.feedbackPopup:
                 self.feedbackPopup = FeedbackPopup(parent=self.ui.mainWindow)
             self.feedbackPopup.show()
@@ -3294,12 +3195,7 @@ class Framework(NotifierBase):
 def getSaveDirectory(parent, preferences=None):
     """Opens save Project as dialog box and gets directory specified in the file dialog."""
 
-    dialog = FileDialog(parent=parent, fileMode=FileDialog.AnyFile, text='Save Project As',
-                        acceptMode=FileDialog.AcceptSave,
-                        restrictDirToFilter=False,
-                        preferences=preferences,
-                        initialPath=preferences.general.userWorkingPath,
-                        pathID=USERSAVEPROJECTPATH)
+    dialog = ProjectFileDialog(parent=parent, acceptMode='save')
     dialog._show()
     newPath = dialog.selectedFile()
 

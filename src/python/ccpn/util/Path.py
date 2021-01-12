@@ -108,6 +108,14 @@ class Path(_Path_):
         suffixes.insert(0, '.' + str(version))
         return self.parent / (self.basename + ''.join(suffixes))
 
+    def uniqueVersion(self):
+        """Return a Path instance which is unique by incrementing version index
+        """
+        result = Path(self)
+        while result.exists():
+            result = result.incrementVersion()
+        return result
+
     def normalise(self):
         """Return normalised path
         """
@@ -154,7 +162,7 @@ class Path(_Path_):
         """Remove file represented by self.
         """
         if self.is_dir():
-            raise ValueError('%s is a directory' % self)
+            raise RuntimeError('%s is a directory' % self)
         self.unlink()
 
     def assureSuffix(self, suffix):

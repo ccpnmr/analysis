@@ -484,7 +484,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
 
     def __init__(self, path=None, spectrum=None, dimensionCount=None):
-        """initialise default values; optionally set path or associate with an Spectrum instance
+        """initialise instance; optionally set path or associate with and import from
+        a Spectrum instance or set dimensionCount
 
         :param path: optional, path of the (binary) spectral data
         :param spectrum: associate instance with spectrum and import spectrum's parameters
@@ -1686,25 +1687,24 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         if not self.temporaryBuffer:
             if path is None:
-                path = self.path
+                path = self.path.withSuffix(Hdf5SpectrumDataSource.suffixes[0]).uniqueVersion()
 
-        # self.hdf5buffer = Hdf5SpectrumBuffer(self, temporary=temporary, path=path)
-        self.hdf5buffer = Hdf5SpectrumDataSource().copyParametersFrom(self)
-        self.hdf5buffer._dataSource = self # link back to self
-        self.hdf5buffer.setPath(path=path, substituteSuffix=True)
+        # create a hdf5 buffer file instance
+        hdf5buffer = Hdf5SpectrumDataSource().copyParametersFrom(self)
+        hdf5buffer._dataSource = self # link back to self
+        hdf5buffer.setPath(path=path, substituteSuffix=True)
         # do not use openNewFile as it has to remain open after filling the buffer
-        self.hdf5buffer.openFile(mode=Hdf5SpectrumDataSource.defaultOpenWriteMode)
-        self.fillHdf5Buffer()
+        hdf5buffer.openFile(mode=Hdf5SpectrumDataSource.defaultOpenWriteMode)
+        self.fillHdf5Buffer(hdf5buffer)
+        # buffer is filled now; associate with self so that future reads will use it to retrieve data
+        self.hdf5buffer = hdf5buffer
+        return hdf5buffer
 
-        return self.hdf5buffer
-
-    def fillHdf5Buffer(self):
+    def fillHdf5Buffer(self, hdf5buffer):
         """Fill hdf5Buffer with data from self;
         this routine will be subclassed in the more problematic cases such as NmrPipe
         """
-        if self.hdf5buffer is None:
-            raise RuntimeError('fillHdf5Buffer: initialise  Hdf5SpectrumBuffer instance first')
-        self.copyDataTo(self.hdf5buffer)
+        self.copyDataTo(hdf5buffer)
 
     def duplicateDataToHdf5(self, path=None):
         """Make a duplicate from self to a Hdf5 file;
@@ -1713,7 +1713,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
 
         if path is None:
-            path = self.path
+            path = self.path.withSuffix(Hdf5SpectrumDataSource.suffixes[0]).uniqueVersion()
 
         hdf5 = Hdf5SpectrumDataSource().copyParametersFrom(self)
         with hdf5.openNewFile(path=path):
@@ -1742,12 +1742,21 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if self.dimensionCount == 0:
             return '<%s: _D (), path=%s>' % (self.__class__.__name__, self.path)
         else:
-            fpStatus = '%r:' % self.mode if self.fp is not None else '%r:' % 'closed'
-            return '<%s: %dD (%s), %s path=%s>' % (self.__class__.__name__,
+            if self.hdf5buffer is not None:
+                fpStatus = '%r' % 'buffered'
+                path = self.hdf5buffer.path
+            elif self.fp is not None:
+                fpStatus = '%r' % self.mode
+                path = self.path
+            else:
+                fpStatus = '%r' % 'closed'
+                path = self.path
+
+            return '<%s: %dD (%s), %s: path=%s>' % (self.__class__.__name__,
                                                 self.dimensionCount,
                                                 'x'.join([str(p) for p in self.pointCounts]),
                                                 fpStatus,
-                                                self.path
+                                                path
                                                )
 #end class
 

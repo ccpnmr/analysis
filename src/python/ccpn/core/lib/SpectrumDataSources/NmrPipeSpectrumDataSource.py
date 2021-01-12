@@ -313,12 +313,9 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         return path, offset
 
-    def fillHdf5Buffer(self):
-        """Fill HDF5 buffer with data from self
+    def fillHdf5Buffer(self, hdf5buffer):
+        """Fill hdf5buffer with data from self
         """
-        if self.hdf5buffer is None:
-            raise RuntimeError('fillHdf5Buffer: initialise  Hdf5SpectrumBuffer instance first')
-
         xAxis = self.X_AXIS
         xDim = self.X_DIM
         yAxis = self.Y_AXIS
@@ -331,7 +328,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             with open(path, 'r') as fp:
                 fp.seek(offset, 0)
                 data = numpy.fromfile(file=fp, dtype=self.dtype, count=self.pointCounts[xAxis])
-            self.hdf5buffer.setSliceData(data, position=position, sliceDim=xDim)
+            hdf5buffer.setSliceData(data, position=position, sliceDim=xDim)
 
         else:
             # nD's: fill the buffer, reading x,y planes from the nmrPipe files into the hdf5 buffer
@@ -343,7 +340,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                     fp.seek(offset, 0)
                     data = numpy.fromfile(file=fp, dtype=self.dtype, count=planeSize)
                     data.resize( (self.pointCounts[yAxis], self.pointCounts[xAxis]))
-                self.hdf5buffer.setPlaneData(data, position=position, xDim=xDim, yDim=yDim)
+                hdf5buffer.setPlaneData(data, position=position, xDim=xDim, yDim=yDim)
 
     def _fillBuffer(self):
         """Create (if needed) and fill HDF5 buffer

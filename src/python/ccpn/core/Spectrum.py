@@ -259,11 +259,15 @@ class Spectrum(AbstractWrapperObject):
         return None
 
     # Inherited from AbstractWrapperObject
-
     # @property
     # def project(self) -> 'Project':
     #     """The Project (root)containing the object."""
     #     return self._project
+
+    @property
+    def _parent(self) -> Project:
+        """Parent (containing) object."""
+        return self._project
 
     #-----------------------------------------------------------------------------------------
 
@@ -283,6 +287,19 @@ class Spectrum(AbstractWrapperObject):
         self.showDoubleCrosshair = False
         self._scaleChanged = False
 
+    @property
+    def dataStore(self):
+        """A DataStore instance encoding the path and dataFormat of the (binary) spectrum data.
+        None indicates no spectrum data file path has been defined
+        """
+        return self._dataStore
+
+    @property
+    def dataSource(self):
+        """A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
+        None indicates no valid spectrum data file has been defined
+        """
+        return self._dataSource
     #-----------------------------------------------------------------------------------------
     # Spectrum properties
     #-----------------------------------------------------------------------------------------
@@ -296,11 +313,6 @@ class Spectrum(AbstractWrapperObject):
     def name(self, value: str):
         """set name of Spectrum."""
         self.rename(value)
-
-    @property
-    def _parent(self) -> Project:
-        """Parent (containing) object."""
-        return self._project
 
     @property
     def dimensionCount(self) -> int:
@@ -696,7 +708,7 @@ class Spectrum(AbstractWrapperObject):
     def hasValidPath(self) -> bool:
         """Return true if the spectrum currently points to an valid dataSource object.
         """
-        return (self._dataSource is not None)
+        return (self.dataSource is not None)
 
     def isEmptySpectrum(self):
         """Return True if instance refers to an empty spectrum; i.e. as in without actual spectral data"
@@ -2140,8 +2152,8 @@ class Spectrum(AbstractWrapperObject):
     def estimateNoise(self):
         """Estimate and return the noise level, or None if it cannot be
         """
-        if self._dataSource is not None:
-            noise = self._dataSource.estimateNoise()
+        if self.dataSource is not None:
+            noise = self.dataSource.estimateNoise()
         else:
             noise = None
         return noise
@@ -2183,11 +2195,11 @@ class Spectrum(AbstractWrapperObject):
         if not all(isinstance(dimVal, (int, float)) for dimVal in pointPosition):
             raise ValueError('position values must be floats.')
 
-        if self._dataSource is None:
+        if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zero' % self)
             return 0.0
 
-        value = self._dataSource.getPointValue(pointPosition)
+        value = self.dataSource.getPointValue(pointPosition)
         return value * self.scale
 
     @logCommand(get='self')
@@ -2202,14 +2214,14 @@ class Spectrum(AbstractWrapperObject):
 
         NB: use getSlice() method for axisCode based access
         """
-        if self._dataSource is None:
+        if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
             data = numpy.zeros( (self.pointCounts[sliceDim-1], ), dtype=numpy.float32)
 
         else:
             try:
-                position = self._dataSource.checkForValidSlice(position, sliceDim)
-                data = self._dataSource.getSliceData(position=position, sliceDim=sliceDim)
+                position = self.dataSource.checkForValidSlice(position, sliceDim)
+                data = self.dataSource.getSliceData(position=position, sliceDim=sliceDim)
                 data = data.copy(order='K') * self.scale
 
             except (RuntimeError, ValueError) as es:
@@ -2246,7 +2258,7 @@ class Spectrum(AbstractWrapperObject):
 
         :return: Spectrum instance
         """
-        if self._dataSource is None:
+        if self.dataSource is None:
             text = 'No proper (filePath, dataFormat) set for %s; unable to extract slice' % self
             getLogger().error(text)
             raise RuntimeError(text)
@@ -2256,7 +2268,7 @@ class Spectrum(AbstractWrapperObject):
 
         try:
             dimensions = self.getByAxisCodes('dimensions', [axisCode])
-            self._dataSource.checkForValidSlice(position=position, sliceDim=dimensions[0])
+            self.dataSource.checkForValidSlice(position=position, sliceDim=dimensions[0])
             newSpectrum = self._extractToFile(axisCodes=[axisCode], position=position, path=path, dataFormat=dataFormat,
                                               tag='slice')
 
@@ -2279,18 +2291,18 @@ class Spectrum(AbstractWrapperObject):
 
         NB: use getPlane() method for axisCode based access
         """
-        if self._dataSource is None:
+        if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
             data = numpy.zeros( (self.pointCounts[yDim-1], self.pointCounts[xDim-1]), dtype=numpy.float32)
 
         else:
             try:
-                position = self._dataSource.checkForValidPlane(position, xDim=xDim, yDim=yDim)
+                position = self.dataSource.checkForValidPlane(position, xDim=xDim, yDim=yDim)
             except (RuntimeError, ValueError) as es:
                 getLogger().error('invalid arguments: %s' % es)
                 raise es
 
-            data = self._dataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+            data = self.dataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
             # Make a copy in order to preserve the original data and apply scaling
             data = data.copy(order='K') * self.scale
 
@@ -2326,7 +2338,7 @@ class Spectrum(AbstractWrapperObject):
 
         :returns plane as Spectrum instance
         """
-        if self._dataSource is None:
+        if self.dataSource is None:
             text = 'No proper (filePath, dataFormat) set for %s; unable to extract plane' % self
             getLogger().error(text)
             raise RuntimeError(text)
@@ -2336,7 +2348,7 @@ class Spectrum(AbstractWrapperObject):
 
         try:
             dimensions = self.getByAxisCodes('dimensions', axisCodes)
-            self._dataSource.checkForValidPlane(position=position, xDim=dimensions[0], yDim=dimensions[1])
+            self.dataSource.checkForValidPlane(position=position, xDim=dimensions[0], yDim=dimensions[1])
             newSpectrum = self._extractToFile(axisCodes=axisCodes, position=position, path=path, dataFormat=dataFormat,
                                               tag='plane')
 
@@ -2376,7 +2388,7 @@ class Spectrum(AbstractWrapperObject):
 
         :returns projected plane as Spectrum instance
         """
-        if self._dataSource is None:
+        if self.dataSource is None:
             text = 'No proper (filePath, dataFormat) set for %s; unable to extract plane' % self
             getLogger().error(text)
             raise RuntimeError(text)
@@ -2387,13 +2399,13 @@ class Spectrum(AbstractWrapperObject):
         try:
             xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)
             position = [1]*self.dimensionCount
-            self._dataSource.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
+            self.dataSource.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
             newSpectrum = self._extractToFile(axisCodes=axisCodes, position=position, path=path, dataFormat=dataFormat,
                                               tag='projection')
             projectionData = self.getProjection(axisCodes=axisCodes, method=method, threshold=threshold)
             # For writing, we need to remap the axisCodes onto the newSpectrum
             xDim2, yDim2 = newSpectrum.getByAxisCodes('dimensions', axisCodes)
-            newSpectrum._dataSource.setPlaneData(data=projectionData, position=position, xDim=xDim2, yDim=yDim2)
+            newSpectrum.dataSource.setPlaneData(data=projectionData, position=position, xDim=xDim2, yDim=yDim2)
 
         except (ValueError, RuntimeError) as es:
             text = 'Spectrum.extractProjectionToFile: %s' % es
@@ -2474,7 +2486,7 @@ class Spectrum(AbstractWrapperObject):
 
         getLogger().debug('Spectrum.getRegion: axisDict = %s; sliceTuples = %s' % (axisDict, sliceTuples))
 
-        return self._dataSource.getRegionData(sliceTuples)
+        return self.dataSource.getRegionData(sliceTuples)
 
     def getRegionData(self, exclusionBuffer: Optional[Sequence] = None, minimumDimensionSize: int = 3, **axisDict):
         """Return the region of the spectrum data defined by the axis limits.
@@ -2543,7 +2555,7 @@ class Spectrum(AbstractWrapperObject):
         if not self.hasValidPath():
             raise RuntimeError('No valid spectral datasource defined')
 
-        return self._dataSource.allPlanes(xDim=axisDims[0], yDim=axisDims[1])
+        return self.dataSource.allPlanes(xDim=axisDims[0], yDim=axisDims[1])
 
     def allSlices(self, axisCode, exactMatch=True):
         """An iterator over all slices defined by axisCode, yielding (positions, data-array) tuples
@@ -2554,7 +2566,7 @@ class Spectrum(AbstractWrapperObject):
         if self.hasValidPath():
             raise RuntimeError('No valid spectral datasource defined')
 
-        return self._dataSource.allSlices(sliceDim=sliceDim)
+        return self.dataSource.allSlices(sliceDim=sliceDim)
 
     #-----------------------------------------------------------------------------------------
     # Implementation functions
@@ -2562,7 +2574,8 @@ class Spectrum(AbstractWrapperObject):
 
     def _getDataSource(self, dataStore, reportWarnings=False):
         """Check the validity of the file defined by dataStore;
-        returns DataSource instance or None when filePath and/or dataFormat of the dataStore instance are incorrect
+        returns SpectrumDataSource instance or None when filePath and/or dataFormat of the
+        dataStore instance are incorrect
         Optionally report warnings
         """
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getSpectrumDataSource
@@ -2678,8 +2691,8 @@ class Spectrum(AbstractWrapperObject):
     def _clearCache(self):
         """Clear the cache
         """
-        if self._dataSource is not None:
-            self._dataSource.clearCache()
+        if self.dataSource is not None:
+            self.dataSource.clearCache()
 
     @deleteObject()
     def _delete(self):
@@ -2693,8 +2706,8 @@ class Spectrum(AbstractWrapperObject):
         with undoBlock():
 
             self._clearCache()
-            if self._dataSource is not None:
-                self._dataSource.closeFile()
+            if self.dataSource is not None:
+                self.dataSource.closeFile()
 
             # self.deleteAllNotifiers() TODO: no longer required?
 
@@ -3031,7 +3044,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name) -> Spectrum
         name = '%s_%s' % (name, i)
 
     # check the dataSources of all spectra of the project for open file pointers to the same file
-    for ds in [sp._dataSource for sp in project.spectra if sp.hasValidPath()]:
+    for ds in [sp.dataSource for sp in project.spectra if sp.hasValidPath()]:
         if ds.path == dataStore.aPath and ds.hasOpenFile():
             raise RuntimeError('Unable to create new Spectrum; project has existing open dataSource %s' % ds)
 
@@ -3186,7 +3199,7 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
 
     if spectrum is None or not isinstance(spectrum, Spectrum):
         raise ValueError('invalid spectrum argument %r' % spectrum)
-    if spectrum._dataSource is None:
+    if spectrum.dataSource is None:
         raise RuntimeError('No proper (filePath, dataFormat) set for %s' % spectrum)
 
     for dim in dimensions:
@@ -3194,7 +3207,7 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
             raise ValueError('invalid dimnsion %r in dimensions argument (%s)' % (dim, dimensions))
     dimensions = list(dimensions)  # assure a list
 
-    position = spectrum._dataSource.checkForValidPosition(position)
+    position = spectrum.dataSource.checkForValidPosition(position)
 
     dimString = '_' + '_'.join(spectrum.getByDimensions('axisCodes', dimensions))
     if name is None:
@@ -3236,8 +3249,8 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
     for dim in dimensions[1:]:
         sliceTuples[dim-1] = (1, spectrum.pointCounts[dim-1])
 
-    with spectrum._dataSource.openExistingFile() as input:
-        with newSpectrum._dataSource.openNewFile() as output:
+    with spectrum.dataSource.openExistingFile() as input:
+        with newSpectrum.dataSource.openNewFile() as output:
             # loop over all requested slices
             for position, aliased in input._selectedPointsIterator(sliceTuples=sliceTuples,
                                                                    excludeDimensions=[readSliceDim]):

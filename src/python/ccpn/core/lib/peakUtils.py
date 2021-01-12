@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-15 18:35:35 +0100 (Tue, September 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-12 18:01:53 +0000 (Tue, January 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -78,11 +78,9 @@ def getMultipletPosition(multiplet, dim, unit='ppm'):
         #   value = multiplet.pointPosition[dim]
 
         elif unit == 'Hz':
-            # value = peak.position[dim]*peak._apiPeak.sortedPeakDims()[dim].dataDimRef.expDimRef.sf
             value = multiplet.position[dim] * multiplet.multipletList.spectrum.spectrometerFrequencies[dim]
 
         else:  # sampled
-            # value = unit.pointValues[int(peak._apiPeak.sortedPeakDims()[dim].position)-1]
             raise ValueError("Unit passed to getPeakPosition must be 'ppm', 'point', or 'Hz', was %s"
                              % unit)
 
@@ -119,11 +117,9 @@ def getPeakPosition(peak, dim, unit='ppm'):
             value = peak.pointPosition[dim]
 
         elif unit == 'Hz':
-            # value = peak.position[dim]*peak._apiPeak.sortedPeakDims()[dim].dataDimRef.expDimRef.sf
             value = peak.position[dim] * peak.peakList.spectrum.spectrometerFrequencies[dim]
 
         else:  # sampled
-            # value = unit.pointValues[int(peak._apiPeak.sortedPeakDims()[dim].position)-1]
             raise ValueError("Unit passed to getPeakPosition must be 'ppm', 'point', or 'Hz', was %s"
                              % unit)
 

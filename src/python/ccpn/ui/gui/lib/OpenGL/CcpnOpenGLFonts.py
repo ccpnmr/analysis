@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-12 17:55:25 +0000 (Tue, January 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -85,7 +85,7 @@ class CcpnGLFont():
 
         # no checking yet
         self.fontFile = self.fontInfo[FONT_FILE].replace('textures: ', '')
-        self.fontPNG = imread(os.path.join(os.path.dirname(fileName), self.fontFile))
+        self.fontPNG = imread(fileName.filepath / self.fontFile)
         self._fontArray = np.array(self.fontPNG * (fontTransparency if fontTransparency is not None else 1.0), dtype=np.uint8)[:, :, 3]
 
         fontRows = []
@@ -106,6 +106,11 @@ class CcpnGLFont():
             _nextRow = _nextFont[0]
 
             self._buildFont(_fontName, _startRow, _kerningRow, _nextRow, scale, fontTransparency)
+
+        _foundFonts = [glyph.fontName for glyph in self.fontGlyph.values()]
+        if len(set(_foundFonts)) != 1:
+            raise Exception('font file should only contain a single font type')
+        self.fontName = _foundFonts[0]
 
         self.activeTexture = GL.GL_TEXTURE0 + activeTexture
         self.activeTextureNum = activeTexture

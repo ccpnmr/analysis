@@ -6,7 +6,7 @@ It works in concert with a wrapper object for storing/retrieving attibute values
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-04 15:06:01 +0000 (Wed, November 04, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-12 18:00:20 +0000 (Tue, January 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -53,7 +53,7 @@ from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, setInitialPath
+from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog, setInitialPath
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, \
     USERMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU
@@ -136,7 +136,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.moduleArea.setContentsMargins(0, 2, 2, 0)
         self.setCentralWidget(self.moduleArea)
         self._shortcutsDict = {}
-        self.recordingMacro = False
+
         self._setupWindow()
         self._setupMenus()
         self._initProject()
@@ -152,35 +152,12 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.disabledFileIcon = self.makeDisabledFileIcon(self.fileIcon)
 
         # blank display opened later by the _initLayout if there is nothing to show otherwise
-        # self.newBlankDisplay()
         self.pythonConsoleModule = None
         self.statusBar().showMessage('Ready')
         setCurrentMouseMode(SELECT)
         self.show()
 
         self._project._undo.undoChanged.add(self._undoChangeCallback)
-
-        #   QtWidgets.QShortcut.installEventFilter(self)
-        #   # for action in self.actions():
-        #   #   print (action)
-        #   # QtWidgets.QShortcut.activated.connect(self._activatedkeySequence)
-        #     # action.activatedAmbiguously.connect(self._ambiguouskeySequence)
-        #
-        # def eventFilter(self, obj, event):
-        #   # if event.type() == QtGui.QKeySequence.ExactMatch or event.type() == QtGui.QKeySequence.PartialMatch:
-        #   #   try:
-        #   #     print ('>>>key')
-        #   #     self.statusBar().showMessage('key: %s' % str(event.key()))
-        #   #     QtGui.QKeySequence.count = 0
-        #   #
-        #   #   except Exception as es:
-        #   #     print (str(es))
-        #
-        #   if event.type() == QtCore.QEvent.KeyPress:
-        #     print ('key: %s' % str(event.key()))
-        #     return True
-        #
-        #   return False
 
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
@@ -225,7 +202,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     @property
     def modules(self):
-        "Return tuple of modules currently displayed"
+        """Return tuple of modules currently displayed
+        """
         return tuple([m for m in self.moduleArea.modules.values()])
 
     def _setupNotifiers(self):
@@ -239,9 +217,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
-        # Peaks
-        # self.setNotifier(self.application.project, [Notifier.DELETE], 'Peak', GuiSpectrumDisplay._deletedPeak)
-        # self.setNotifier(self.application.project, [Notifier.RENAME], 'NmrAtom', GuiPeakListView._updateAssignmentsNmrAtom)
 
     def _activatedkeySequence(self, ev):
         key = ev.key()
@@ -280,9 +255,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         msg = path + (' created' if isNew else ' opened')
         self.statusBar().showMessage(msg)
         msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
-
-        # write first console message to the console - not required
-        # self.pythonConsole.writeConsoleCommand(msg2)
 
         self._fillRecentProjectsMenu()
         self.pythonConsole.setProject(project)
@@ -626,11 +598,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         project = None
         if result:
             if projectDir is None:
-                dialog = FileDialog(self, fileMode=FileDialog.Directory, text="Open Project",
-                                    acceptMode=FileDialog.AcceptOpen,
-                                    preferences=self.application.preferences,
-                                    initialPath=self.application.preferences.general.userWorkingPath,
-                                    pathID=USERWORKINGPATH)
+                dialog = ProjectFileDialog(parent=self, acceptMode='open')
                 dialog._show()
                 projectDir = dialog.selectedFile()
 
@@ -641,8 +609,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
                     if self.application.preferences.general.useProjectPath:
                         Logging.getLogger().debug2('mainWindow - setting current path %s' % Path.Path(projectDir).parent)
-                        setInitialPath(initialPath=Path.Path(projectDir).parent,
-                                       pathID=USERWORKINGPATH)
+                        # this dialog doesn't need to be seen, required to set initialPath
+                        _dialog = ProjectFileDialog(parent=self, acceptMode='open')
+                        _dialog.initialPath = Path.Path(projectDir).parent
 
                 except Exception as es:
                     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s' % str(projectDir))

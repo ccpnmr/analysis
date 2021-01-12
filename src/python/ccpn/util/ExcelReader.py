@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:58 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-01-12 18:00:21 +0000 (Tue, January 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,7 +28,7 @@ from os.path import isfile, join
 import pathlib
 import pandas as pd
 import time
-from ccpn.util.Logging import getLogger, _debug3
+from ccpn.util.Logging import getLogger
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from tqdm import tqdm, tqdm_gui
 
@@ -42,7 +42,7 @@ SUBSTANCE = 'Substance'
 SAMPLE = 'Sample'
 NOTGIVEN = 'Not Given'
 
-# '''REFERENCES PAGE'''
+# """REFERENCES PAGE"""
 SPECTRUM_GROUP_NAME = 'spectrumGroupName'
 EXP_TYPE = 'experimentType'
 SPECTRUM_PATH = 'spectrumPath'
@@ -51,7 +51,6 @@ SUBSTANCE_NAME = 'substanceName'
 SPECTRUM_NAME = 'spectrumName'
 SPECTRUMGROUP = 'SpectrumGroup'
 SERIES = 'series'
-
 
 ### Substance properties: # do not change these names
 comment = 'comment'
@@ -70,7 +69,7 @@ userCode = 'userCode'
 sequenceString = 'sequenceString'
 casNumber = 'casNumber'
 
-# '''SAMPLES PAGE'''
+# """SAMPLES PAGE"""
 SAMPLE_NAME = 'sampleName'
 
 ### other sample properties # do not change these names
@@ -104,20 +103,19 @@ SUBSTANCE_PROPERTIES = [comment, smiles, synonyms, molecularMass, empiricalFormu
                         hBondAcceptorCount, hBondDonorCount, bondCount, ringCount, polarSurfaceArea,
                         logPartitionCoefficient, userCode, ]
 
-SUBSTANCES_SHEET_COLUMNS =  [SUBSTANCE_NAME,SPECTRUM_PATH,SPECTRUM_GROUP_NAME,EXP_TYPE]+SUBSTANCE_PROPERTIES
+SUBSTANCES_SHEET_COLUMNS = [SUBSTANCE_NAME, SPECTRUM_PATH, SPECTRUM_GROUP_NAME, EXP_TYPE] + SUBSTANCE_PROPERTIES
 SAMPLE_SHEET_COLUMNS = [SAMPLE_NAME, SPECTRUM_GROUP_NAME, SPECTRUM_PATH, SPECTRUM_NAME]
 
 
-
-def makeTemplate(path,fileName='lookupTemplate.xlsx',):
+def makeTemplate(path, fileName='lookupTemplate.xlsx', ):
     """
     :param path: path where to save the template
     :param fileName: name of template
     :return:  the file path where is saved
     """
     if path is not None:
-        path = path+ '/' if not path.endswith('/') else path
-    file = path+fileName
+        path = path + '/' if not path.endswith('/') else path
+    file = path + fileName
     substanceDf = getDefaultSubstancesDF()
     sampleDF = getDefaultSampleDF()
     writer = pd.ExcelWriter(file, engine='xlsxwriter')
@@ -126,14 +124,16 @@ def makeTemplate(path,fileName='lookupTemplate.xlsx',):
     writer.save()
     return writer
 
+
 def getDefaultSubstancesDF():
-    return  pd.DataFrame(columns=SUBSTANCES_SHEET_COLUMNS)
+    return pd.DataFrame(columns=SUBSTANCES_SHEET_COLUMNS)
+
 
 def getDefaultSampleDF():
-    return  pd.DataFrame(columns=SAMPLE_SHEET_COLUMNS)
+    return pd.DataFrame(columns=SAMPLE_SHEET_COLUMNS)
 
 
-def _filterBrukerExperiments(brukerFilePaths, fileType = '1r', multipleExp=False, expDirName='1', procDirName='1'):
+def _filterBrukerExperiments(brukerFilePaths, fileType='1r', multipleExp=False, expDirName='1', procDirName='1'):
     """
 
     :param brukerFilePaths:
@@ -156,16 +156,17 @@ def _filterBrukerExperiments(brukerFilePaths, fileType = '1r', multipleExp=False
     filteredPaths = []
     for path in brukerFilePaths:
         if path.endswith(fileType):
-           d = os.path.dirname(path)  ## directory of  1r file has to be as defaultProcsNumber
-           if d.endswith(procDirName):
-               if multipleExp: # search for other expeiments and take only the one of interest.
-                   pdata = os.path.dirname(d)
-                   expP = os.path.dirname(pdata)
-                   if expP.endswith(expDirName):
-                       filteredPaths.append(path)
-               else:
-                filteredPaths.append(path)
+            d = os.path.dirname(path)  ## directory of  1r file has to be as defaultProcsNumber
+            if d.endswith(procDirName):
+                if multipleExp:  # search for other expeiments and take only the one of interest.
+                    pdata = os.path.dirname(d)
+                    expP = os.path.dirname(pdata)
+                    if expP.endswith(expDirName):
+                        filteredPaths.append(path)
+                else:
+                    filteredPaths.append(path)
     return filteredPaths
+
 
 class ExcelReader(object):
 
@@ -200,6 +201,7 @@ class ExcelReader(object):
 
         """
         from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+
         self._project = project
         self.excelPath = excelPath
         self.pandasFile = pd.ExcelFile(self.excelPath)
@@ -212,7 +214,7 @@ class ExcelReader(object):
         # with undoBlockWithoutSideBar():
         #     getLogger().info('Loading Excel File...')
         #     with notificationEchoBlocking():
-        self._tempSpectrumGroupsSpectra = {} # needed to improve the loading speed
+        self._tempSpectrumGroupsSpectra = {}  # needed to improve the loading speed
         self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
         self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
         self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
@@ -229,16 +231,14 @@ class ExcelReader(object):
         self._fillSpectrumGroups()
         getLogger().info('Loading from Excel completed...')
 
-
-
-                # self._project.unblankNotification()
+        # self._project.unblankNotification()
 
     ######################################################################################################################
     ######################                  PARSE EXCEL                     ##############################################
     ######################################################################################################################
 
     def _getSheets(self, pandasfile):
-        '''return: list of the sheet names'''
+        """return: list of the sheet names"""
         return pandasfile.sheet_names
 
     def _getDataFrameFromSheet(self, sheetName):
@@ -248,7 +248,7 @@ class ExcelReader(object):
         return dataFrame
 
     def _getDataFrameFromSheets(self, sheetNamesList):
-        '''Reads sheets containing the names SUBSTANCES or SAMPLES and creates a dataFrame for each'''
+        """Reads sheets containing the names SUBSTANCES or SAMPLES and creates a dataFrame for each"""
 
         dataFrames = []
         for sheetName in [name for name in sheetNamesList if SUBSTANCE in name]:
@@ -263,8 +263,8 @@ class ExcelReader(object):
     ######################################################################################################################
 
     def _createSubstancesDataFrames(self, dataframesList):
-        '''Creates substances in the project if not already present, For each substance link a dictionary of all its values
-         from the dataframe row. '''
+        """Creates substances in the project if not already present, For each substance link a dictionary of all its values
+         from the dataframe row. """
         from ccpn.core.Substance import _newSubstance
 
         substancesDataFrames = []
@@ -288,8 +288,8 @@ class ExcelReader(object):
     ######################################################################################################################
 
     def _createSamplesDataDicts(self, dataframesList):
-        '''Creates samples in the project if not already present, For each sample link a dictionary of all its values
-         from the dataframe row. '''
+        """Creates samples in the project if not already present, For each sample link a dictionary of all its values
+         from the dataframe row. """
         samplesDataFrames = []
         ## first creates samples without duplicates,
         samples = self._createSamples(dataframesList)
@@ -309,6 +309,7 @@ class ExcelReader(object):
 
     def _createSamples(self, dataframesList):
         from ccpn.core.Sample import _newSample
+
         samples = []
         for dataFrame in dataframesList:
             if SAMPLE_NAME in dataFrame.columns:
@@ -327,8 +328,8 @@ class ExcelReader(object):
     ######################################################################################################################
 
     def _createSpectrumGroups(self, dataframesList):
-        '''Creates SpectrumGroup in the project if not already present. Otherwise finds another name a creates new one.
-        dropping the same file over and over will create new spectrum groups each time'''
+        """Creates SpectrumGroup in the project if not already present. Otherwise finds another name a creates new one.
+        dropping the same file over and over will create new spectrum groups each time"""
         spectrumGroups = []
         for dataFrame in dataframesList:
             if SPECTRUM_GROUP_NAME in dataFrame.columns:
@@ -350,6 +351,7 @@ class ExcelReader(object):
 
     def _createNewSpectrumGroup(self, name):
         from ccpn.core.SpectrumGroup import _newSpectrumGroup
+
         if self._project:
             if not self._project.getByPid('SG:' + str(name)):
                 return _newSpectrumGroup(self._project, name=str(name))
@@ -365,12 +367,12 @@ class ExcelReader(object):
     ######################################################################################################################
 
     def _loadSpectraForSheet(self, dictLists):
-        '''
+        """
         If only the file name is given:
         - All paths are relative to the excel file! So the spectrum file of bruker top directory must be in the same directory
         of the excel file.
         If the full path is given, from the root to the spectrum file name, then it uses that.
-        '''
+        """
         _args = []
         # todo change hardcoded / for path
         if self._project is not None:
@@ -378,10 +380,10 @@ class ExcelReader(object):
                 for obj, dct in objDict.items():
                     for key, value in dct.items():
                         if key == SPECTRUM_PATH:
-                            value = str(value) # no point of being int/float
+                            value = str(value)  # no point of being int/float
                             if os.path.exists(value):
                                 # if isinstance(value, str):  # means it's a pathlike str### the full path is given:
-                                    self._addSpectrum(filePath=value, dct=dct, obj=obj)
+                                self._addSpectrum(filePath=value, dct=dct, obj=obj)
 
                             else:  ### needs to find the path from the excel file:
                                 self.directoryPath = str(pathlib.Path(self.excelPath).parent)
@@ -405,25 +407,25 @@ class ExcelReader(object):
                                         getLogger().warning(e)
 
     def _addSpectrum(self, filePath, dct, obj):
-        '''
+        """
         :param filePath: spectrum full file path
         :param dct:  dict with information for the spectrum. eg EXP type
         :obj: obj to link the spectrum to. E.g. Sample or Substance,
-        '''
+        """
         name = dct.get(SPECTRUM_NAME)
         if not name:
             name = obj.name
-        if filePath.endswith('1r'): # Not ideal implementation. But makes the loader much faster down the model by skipping internal loops.
-            data = self._project._loadSpectrum(filePath, 'Bruker', str(name) )
+        if filePath.endswith('1r'):  # Not ideal implementation. But makes the loader much faster down the model by skipping internal loops.
+            data = self._project._loadSpectrum(filePath, 'Bruker', str(name))
         else:
             data = self._project.loadData(filePath)
         if data is not None:
             if len(data) > 0:
                 self._linkSpectrumToObj(obj, data[0], dct)
-                if EXP_TYPE in dct: # use exp name as it is much faster and safer to save than exp type.
+                if EXP_TYPE in dct:  # use exp name as it is much faster and safer to save than exp type.
                     data[0].experimentName = dct[EXP_TYPE]
 
-                        # _debug3(getLogger(), msg=(e, data[0], dct[EXP_TYPE]))
+                    # getLogger().debug3(msg=(e, data[0], dct[EXP_TYPE]))
 
     ######################################################################################################################
     ######################              ADD SPECTRUM TO RELATIVE OBJECTS              ####################################
@@ -448,8 +450,8 @@ class ExcelReader(object):
                     tempSGspectra.append(spectrum)
                 # if spectrumGroup is not None: # this strategy is very slow. do not use here.
                 #     spectrumGroup.spectra += (spectrum,)
-                if SERIES in dct: # direct insertion of series values for speed optimisation
-                    spectrum.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, {'SG:'+str(value):dct[SERIES]})
+                if SERIES in dct:  # direct insertion of series values for speed optimisation
+                    spectrum.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, {'SG:' + str(value): dct[SERIES]})
 
     def _fillSpectrumGroups(self):
         for sgName, spectra in self._tempSpectrumGroupsSpectra.items():
@@ -492,7 +494,7 @@ class ExcelReader(object):
 
                 except:
                     print('Value  not set for %s' % attr)
-                    _debug3(getLogger(), msg=('Value  not set for %s' % attr))
+                    getLogger().debug3(msg=('Value  not set for %s' % attr))
 
     def _getDFValue(self, header, data):
         value = [[excelHeader, value] for excelHeader, value in data.items()
@@ -506,6 +508,7 @@ class ExcelReader(object):
 
     def _createSampleComponents(self, sample, data):
         from ccpn.core.SampleComponent import _newComponent
+
         sampleComponentsNames = [[header, sampleComponentName] for header, sampleComponentName in data.items() if
                                  header == SAMPLE_COMPONENTS and sampleComponentName != NOTGIVEN]
         if len(sample.sampleComponents) == 0:

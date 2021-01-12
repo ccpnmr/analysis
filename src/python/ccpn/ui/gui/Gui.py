@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:46 +0100 (Wed, October 07, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-12 18:00:20 +0000 (Tue, January 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -259,8 +259,6 @@ class Gui(Ui):
         project = self.application.project
         self.application.experimentClassifications = getExperimentClassifications(project)
 
-        # sys.stderr.write('==> Gui interface is ready\n')
-
         self.mainWindow.show()
         QtWidgets.QApplication.setActiveWindow(self.mainWindow)
 
@@ -289,11 +287,6 @@ class Gui(Ui):
         # Set up mainWindow
 
         project = self.application.project
-
-        # mainWindow = self.application.mainWindow
-        # mainWindow.sideBar.setProject(project)
-        # mainWindow.sideBar.fillSideBar(project)
-
         mainWindow.sideBar.buildTree(project, False)
 
         mainWindow.raise_()
@@ -313,50 +306,11 @@ class Gui(Ui):
             if self.application._enableLoggingToConsole:
                 console._write(command + '\n')
 
-            logger.info(command)
+            logger.echoInfo(command)
 
     #TODO:RASMUS: should discuss how application should deal with it
     def getByGid(self, gid):
         return self.application.project.getByPid(gid)
-
-    from ccpn.core.IntegralList import IntegralList
-    from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-
-    def showIntegralTable(self, position: str = 'bottom', relativeTo: CcpnModule = None, selectedList: IntegralList = None):
-        logParametersString = "position={position}, relativeTo={relativeTo}, selectedList={selectedList}".format(
-                position="'" + position + "'" if isinstance(position, str) else position,
-                relativeTo="'" + relativeTo + "'" if isinstance(relativeTo, str) else relativeTo,
-                selectedList="'" + selectedList + "'" if isinstance(selectedList, str) else selectedList)
-        # log = False
-        # import inspect
-        # i0, i1 = inspect.stack()[0:2]
-        # if i0.function != i1.function:  # Caller function name matches, we don't log...
-        #   code_context = i1.code_context[0]
-        #   if 'ui.{}('.format(i0.function) in code_context:
-        #     log = True
-        # if log:
-        #   self.application._startCommandBlock(
-        #     'application.ui.showIntegralTable({})'.format(logParametersString))
-        # try:
-        #   from ccpn.ui.gui.modules.IntegralTable import IntegralTable
-        #
-        #   if 'INTEGRAL TABLE' in self.mainWindow.moduleArea.findAll()[1]:
-        #     integralTable = self.mainWindow.moduleArea.findAll()[1]['INTEGRAL TABLE']
-        #     if integralTable.isVisible():
-        #       return
-        #     else:
-        #       self.mainWindow.moduleArea.moveModule(integralTable, position=position,
-        #                                                 relativeTo=relativeTo)
-        #   else:
-        #    integralTable = IntegralTable(project=self.application.project, selectedList=selectedList)
-        #    self.mainWindow.moduleArea.addModule(integralTable, position=position,
-        #                                         relativeTo=relativeTo)
-        #
-        #   return integralTable
-        #
-        # finally:
-        #   if log:
-        #     self.application._endCommandBlock()
 
     def _execUpdates(self):
         sys.stderr.write('==> Gui update\n')
@@ -366,7 +320,6 @@ class Gui(Ui):
         # check valid internet connection first
         if Url.checkInternetConnection():
             self.updatePopup = UpdatePopup(parent=self.mainWindow, mainWindow=self.mainWindow)
-            self.updatePopup.show()
             self.updatePopup.exec_()
 
             # if updates have been installed then popup the quit dialog with no cancel button
@@ -437,7 +390,7 @@ class SideWindow(coreClass, _GuiWindow):
 
     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
         AbstractWrapperObject.__init__(self, project, wrappedData)
-        _GuiWindow.__init__(self)
+        _GuiWindow.__init__(self, project.application)
 
 
 def _factoryFunction(project: Project, wrappedData) -> coreClass:

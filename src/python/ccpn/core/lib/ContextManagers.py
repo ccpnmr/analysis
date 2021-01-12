@@ -89,7 +89,7 @@ def echoCommand(obj, funcName, *params, values=None, defaults=None,
 
 
 def _resumeNotification(application):
-    """A try/except here because resume Notification MAY in exceptions circumstances
+    """A try/except here because resume Notification MAY in exceptional circumstances
     cause fatal errors.
     """
     with catchExceptions(application=application,

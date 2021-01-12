@@ -23,7 +23,7 @@ showStripLabel(doShow:bool):  show/hide the stripLabel
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -33,8 +33,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-08 12:34:08 +0100 (Tue, September 08, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-12 18:00:20 +0000 (Tue, January 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -374,36 +374,6 @@ class GuiStripNd(GuiStrip):
     def reorderSpectra(self):
         pass
 
-    # def resetZoom(self, axis=None):
-    #   """
-    #   Resets zoom of strip axes to limits of maxima and minima of the limits of the displayed spectra.
-    #   """
-    #   x = []
-    #   y = []
-    #   for spectrumView in self.spectrumViews:
-    #
-    #     # Get spectrum dimension index matching display X and Y
-    #     # without using axis codes, as they may not match
-    #     spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
-    #     spectrumLimits = spectrumView.spectrum.spectrumLimits
-    #     x.append(spectrumLimits[spectrumIndices[0]])
-    #     y.append(spectrumLimits[spectrumIndices[1]])
-    #     # xIndex = spectrumView.spectrum.axisCodes.index(self.axisCodes[0])
-    #     # yIndex = spectrumView.spectrum.axisCodes.index(self.axisCodes[1])
-    #     # x.append(spectrumView.spectrum.spectrumLimits[xIndex])
-    #     # y.append(spectrumView.spectrum.spectrumLimits[yIndex])
-    #
-    #   xArray = numpy.array(x).flatten()
-    #   yArray = numpy.array(y).flatten()
-    #
-    #   zoomXArray = ([min(xArray), max(xArray)])
-    #   zoomYArray = ([min(yArray), max(yArray)])
-    #   self.zoomToRegion(zoomXArray, zoomYArray)
-    #
-    #   self.pythonConsole.writeConsoleCommand("strip.resetZoom()", strip=self)
-    #   getLogger().info("strip = application.getByGid('%s')\nstrip.resetZoom()" % self.pid)
-    #   return zoomXArray, zoomYArray
-
     def resetAxisRange(self, axis):
         if axis is None:
             return
@@ -636,38 +606,6 @@ class GuiStripNd(GuiStrip):
                 self.axisRegionChanged(zAxis)
                 self.refresh()
 
-            # else:
-            #   print('position is outside spectrum bounds')
-
-    # def _changePlaneCount(self, n: int = 0, value: int = 1):
-    #     """
-    #     Changes the number of planes displayed simultaneously.
-    #     """
-    #     zAxis = self.orderedAxes[n + 2]
-    #     planeLabel = self.planeToolbar.planeLabels[n]
-    #     zAxis.width = value * planeLabel.singleStep()
-    #     self.refresh()
-    #
-    # def nextZPlane(self, n: int = 0, *args):
-    #     """
-    #     Increases z ppm position by one plane
-    #     """
-    #     self.changeZPlane(n, planeCount=-1)  # -1 because ppm units are backwards
-    #     self.refresh()
-    #
-    #     self.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self)
-    #     getLogger().info("application.getByGid(%r).nextZPlane()" % self.pid)
-    #
-    # def prevZPlane(self, n: int = 0, *args):
-    #     """
-    #     Decreases z ppm position by one plane
-    #     """
-    #     self.changeZPlane(n, planeCount=1)
-    #     self.refresh()
-    #
-    #     self.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self)
-    #     getLogger().info("application.getByGid(%r).prevZPlane()" % self.pid)
-
     def _setZPlanePosition(self, n: int, value: float):
         """
         Sets the value of the z plane position box if the specified value is within the displayable limits.
@@ -681,14 +619,6 @@ class GuiStripNd(GuiStrip):
         if planeLabel.minimum() <= value <= planeLabel.maximum():
             self.changeZPlane(n, position=value)
 
-    # def setPlaneCount(self, n:int=0, value:int=1):
-    #   """
-    #   Sets the number of planes to be displayed simultaneously.
-    #   """
-    #   planeCount = self.planeToolbar.planeCounts[n]
-    #   self.changePlaneCount(value=(value/planeCount.oldValue))
-    #   planeCount.oldValue = value
-
     def _findPeakListView(self, peakList: PeakList):
         if hasattr(self, 'spectrumViews'):
             for spectrumView in self.spectrumViews:
@@ -696,12 +626,6 @@ class GuiStripNd(GuiStrip):
                     if peakList is peakListView.peakList:
                         #self.peakListViewDict[peakList] = peakListView
                         return peakListView
-
-        return None
-
-        # if hasattr(self, 'spectrumViews'):
-        #     for spectrumView in self.spectrumViews:
-        #         spectrumView.updateGeometryChange()
 
     def _addCalibrateXNDSpectrumWidget(self, enableClose=True):
         """add a new widget for calibrateX

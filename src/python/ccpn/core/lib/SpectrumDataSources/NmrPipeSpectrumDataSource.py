@@ -404,7 +404,8 @@ class NmrPipeInputStreamDataSource(NmrPipeSpectrumDataSource):
         :param bufferPath: (optionally) use path to generate buffer file (implies temporaryBuffer=False)
         """
         super().__init__(spectrum=spectrum, temporaryBuffer=temporaryBuffer, bufferPath=bufferPath)
-        self.fp = sys.stdin
+        # sys.stdin.reconfigure(encoding='ISO-8859-1')
+        self.fp = sys.stdin.buffer
         self.readParameters()
         self.initialiseHdf5Buffer(temporaryBuffer=temporaryBuffer, path=bufferPath)
 
@@ -416,7 +417,7 @@ class NmrPipeInputStreamDataSource(NmrPipeSpectrumDataSource):
         "Guess template not active/required for input stream"
         return None
 
-    def fillHdf5Buffer(self):
+    def fillHdf5Buffer(self, hdf5buffer):
         """Fill hdf5 buffer reading all slices from input stream
         """
         sliceDim = self.pipeDimension
@@ -425,9 +426,10 @@ class NmrPipeInputStreamDataSource(NmrPipeSpectrumDataSource):
         getLogger().debug('Fill hdf5 buffer from sys.stdin reading %d slices along dimension %s' %
                           (self.sliceCount, sliceDim))
 
-        for position, data in self.allSlices(self.pipeDimension):
+        sliceTuples = [(1, p) for p in self.pointCounts]
+        for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=(sliceDim,)):
             data = numpy.fromfile(file=self.fp, dtype=self.dtype, count=self.pointCounts[sliceDim-1])
-            self.hdf5buffer.setSliceData(data, position=position, sliceDim=sliceDim)
+            hdf5buffer.setSliceData(data, position=position, sliceDim=sliceDim)
 
     def closeFile(self):
         """close the file

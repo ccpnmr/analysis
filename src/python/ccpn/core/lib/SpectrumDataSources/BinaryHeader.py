@@ -55,8 +55,9 @@ class BinaryHeader(object):
         if doSeek:
             fp.seek(0,0)  # rewind the file as header should be at the start
 
-        bytes = array('B')
-        bytes.fromfile(fp, self.headerSize * self.wordSize)
+        # bytes = array('B')
+        # bytes.fromfile(fp, self.headerSize * self.wordSize)
+        bytes = fp.read(self.headerSize * self.wordSize)
         if len(bytes) < self.headerSize*self.wordSize:
             raise RuntimeError('%s appears truncated' % self)
         self.fromBytes(bytes)

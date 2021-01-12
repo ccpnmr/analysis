@@ -261,6 +261,11 @@ class Spectrum(AbstractWrapperObject):
         "STUB: hot-fixed later"
         return None
 
+    @property
+    def spectrumHits(self):
+        "STUB: hot-fixed later"
+        return None
+
     # Inherited from AbstractWrapperObject
     # @property
     # def project(self) -> 'Project':

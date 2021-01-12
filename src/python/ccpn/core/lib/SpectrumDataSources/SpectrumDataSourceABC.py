@@ -1570,10 +1570,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """Get an iterator points defined by sliceTuples=[(start_1,stop_1), (start_2,stop_2), ...],
         iterating along dimensions perpendicular to any excludeDims
 
-        sliceTuples and excludeDimensions are 1-based; sliceTuple stop values are inclusive (i.e. different
-        from the python slice object)
-        Looping aliases back (ie. when start,stop < 1 and > pointCounts) in all dimensions. It is the task of the
-        calling routine to prevent that if not desired
+        sliceTuples and excludeDimensions are 1-based; sliceTuple stop values are inclusive
+        (i.e. different from the python slice object)
+        Looping aliases back (ie. when start,stop < 1 and > pointCounts) in all dimensions.
+        It is the task of the calling routine to prevent that if not desired
 
         return a (position, aliased) tuple of lists
         """
@@ -1631,12 +1631,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self.checkForValidPlane(position=None, xDim=xDim, yDim=yDim)
 
         sliceTuples = [(1, p) for p in self.pointCounts]
-        for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[xDim, yDim]):
-            position[xDim-1] = 1
-            position[yDim-1] = 1
-            with notificationEchoBlocking():
+        with notificationEchoBlocking():
+            for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[xDim, yDim]):
+                position[xDim-1] = 1
+                position[yDim-1] = 1
                 planeData = self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
-            yield (position, planeData)
+                yield (position, planeData)
 
     def allSlices(self, sliceDim=1):
         """An iterator over all slices defined by sliceDim, yielding (position, data-array) tuples
@@ -1645,21 +1645,21 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self.checkForValidSlice(position=None, sliceDim=sliceDim)
 
         sliceTuples = [(1, p) for p in self.pointCounts]
-        for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim]):
-            position[sliceDim-1] = 1
-            with notificationEchoBlocking():
+        with notificationEchoBlocking():
+            for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim]):
+                position[sliceDim-1] = 1
                 sliceData = self.getSliceData(position=position, sliceDim=sliceDim)
-            yield (position, sliceData)
+                yield (position, sliceData)
 
     def allPoints(self):
         """An iterator over all points, yielding (position, data-array) tuples
         positions are one-based
         """
         sliceTuples = [(1, p) for p in self.pointCounts]
-        for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[]):
-            with notificationEchoBlocking():
+        with notificationEchoBlocking():
+            for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[]):
                 pointData = self.getPointData(position=position)
-            yield (position, pointData)
+                yield (position, pointData)
 
     #=========================================================================================
     # Hdf5 buffer

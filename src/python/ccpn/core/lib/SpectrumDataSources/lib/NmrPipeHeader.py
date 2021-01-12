@@ -27,7 +27,7 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 
 from array import array
 
-from ccpn.core.lib.SpectrumDataSources.BinaryHeader import BinaryHeader
+from ccpn.core.lib.SpectrumDataSources.lib.BinaryHeader import BinaryHeader
 from ccpn.core.lib.SpectrumDataSources.lib.NmrPipeFDdict import nmrPipeFDdict
 
 

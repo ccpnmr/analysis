@@ -28,12 +28,10 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence
-
 from ccpn.util.Logging import getLogger
 
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
-from ccpn.core.lib.SpectrumDataSources.BinaryHeader import BinaryHeader
+from ccpn.core.lib.SpectrumDataSources.lib.BinaryHeader import BinaryHeader
 
 
 class FelixSpectrumDataSource(SpectrumDataSourceABC):

@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-12 17:55:25 +0000 (Tue, January 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -24,9 +24,7 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 # Start of code
 #=========================================================================================
 
-import os
 from ccpn.util import Path
-
 
 # CCPN Urls
 ccpnUrl                         = 'http://www.ccpn.ac.uk'
@@ -39,42 +37,44 @@ oldCcpnIssuesUrl                = 'https://sourceforge.net/p/ccpn/bugs/'
 ccpnIssuesUrl                   = 'https://bitbucket.org/ccpnmr/issue-tracker/issues?status=new&status=open'
 
 # CCPN code
-ccpnCodePath                    = Path.getTopDirectory()
-ccpnConfigPath                  = os.path.join(ccpnCodePath, 'config')
-ccpnRunTerminal                 = os.path.join(ccpnCodePath, 'bin', 'runTerminal.sh')
-defaultPreferencesPath          = os.path.join(ccpnConfigPath, 'defaultv3settings.json')
-ccpnmodelPythonPath             = os.path.join(Path.getPythonDirectory(), 'ccpnmodel')
-ccpnPythonPath                  = os.path.join(Path.getPythonDirectory(), 'ccpn')
-analysisAssignPath              = os.path.join(ccpnPythonPath, 'AnalysisAssign')
-analysisScreenPath              = os.path.join(ccpnPythonPath, 'AnalysisScreen')
-analysisStructurePath           = os.path.join(ccpnPythonPath, 'AnalysisStructure')
-analysisMetabolomicsPath        = os.path.join(ccpnPythonPath, 'AnalysisMetabolomics')
-macroPath                       = os.path.join(ccpnPythonPath, 'macros')
-pluginPath                      = os.path.join(ccpnPythonPath, 'plugins')
-pipePath                        = os.path.join(ccpnPythonPath, 'pipes')
-pipeTemplates                   = os.path.join(ccpnPythonPath, 'framework', 'lib', 'pipeline', 'templates')
-fontsPath                       = os.path.join(ccpnPythonPath, 'ui', 'gui', 'widgets', 'fonts')
-nefValidationPath               = os.path.join(ccpnPythonPath, 'util', 'nef', 'NEF', 'specification', 'mmcif_nef_v1_1.dic')
+ccpnCodePath                    = Path.aPath(Path.getTopDirectory())
+ccpnConfigPath                  = ccpnCodePath / 'config'
+ccpnRunTerminal                 = ccpnCodePath / 'bin' / 'runTerminal.sh'
+defaultPreferencesPath          = ccpnConfigPath / 'defaultv3settings.json'
+_ccpnPythonPath                 = Path.aPath(Path.getPythonDirectory())
+ccpnmodelPythonPath             = _ccpnPythonPath / 'ccpnmodel'
+ccpnPythonPath                  = _ccpnPythonPath / 'ccpn'
+analysisAssignPath              = ccpnPythonPath / 'AnalysisAssign'
+analysisScreenPath              = ccpnPythonPath / 'AnalysisScreen'
+analysisStructurePath           = ccpnPythonPath / 'AnalysisStructure'
+analysisMetabolomicsPath        = ccpnPythonPath / 'AnalysisMetabolomics'
+macroPath                       = ccpnPythonPath / 'macros'
+pluginPath                      = ccpnPythonPath / 'plugins'
+pipePath                        = ccpnPythonPath / 'pipes'
+pipeTemplates                   = ccpnPythonPath / 'framework' / 'lib' / 'pipeline' / 'templates'
+fontsPath                       = ccpnPythonPath / 'ui' / 'gui' / 'widgets' / 'fonts'
+openGLFontsPath                 = fontsPath / 'Fonts'
+nefValidationPath               = ccpnPythonPath / 'util' / 'nef' / 'NEF' / 'specification' / 'mmcif_nef_v1_1.dic'
 
 # Program tutorials and documentation
-shortcutsPath                   = os.path.join(ccpnCodePath, 'doc', 'static', 'AnalysisShortcuts.pdf')
-tutorialsPath                   = os.path.join(ccpnCodePath, 'tutorials')
-beginnersTutorialPath           = os.path.join(ccpnCodePath, 'tutorials', 'BeginnersTutorial.pdf')
-backboneAssignmentTutorialPath  = os.path.join(ccpnCodePath, 'tutorials', 'BackboneAssignmentTutorial.pdf')
-screenTutorialPath              = os.path.join(ccpnCodePath, 'tutorials', 'CcpNmr_AnalysisScreen_Tutorial_Beta2Release.pdf')
-cspTutorialPath                 = os.path.join(ccpnCodePath, 'tutorials', 'CSPTutorial.pdf')
-solidStateTutorialPath          = os.path.join(ccpnCodePath, 'tutorials', 'SolidStateAssignmentTutorial.pdf')
-analysisScreenTutorialPath      = os.path.join(ccpnCodePath, 'tutorials', 'ScreenTutorial.pdf')
+shortcutsPath                   = ccpnCodePath / 'doc' / 'static' / 'AnalysisShortcuts.pdf'
+tutorialsPath                   = ccpnCodePath / 'tutorials'
+beginnersTutorialPath           = ccpnCodePath / 'tutorials' / 'BeginnersTutorial.pdf'
+backboneAssignmentTutorialPath  = ccpnCodePath / 'tutorials' / 'BackboneAssignmentTutorial.pdf'
+screenTutorialPath              = ccpnCodePath / 'tutorials' / 'CcpNmr_AnalysisScreen_Tutorial_Beta2Release.pdf'
+cspTutorialPath                 = ccpnCodePath / 'tutorials' / 'CSPTutorial.pdf'
+solidStateTutorialPath          = ccpnCodePath / 'tutorials' / 'SolidStateAssignmentTutorial.pdf'
+analysisScreenTutorialPath      = ccpnCodePath / 'tutorials' / 'ScreenTutorial.pdf'
 
-documentationPath               = os.path.join(ccpnCodePath, 'doc', 'build', 'html', 'index.html')
-licensePath                     = os.path.join(ccpnCodePath, 'LICENSE.txt')
+documentationPath               = ccpnCodePath / 'doc' / 'build' / 'html' / 'index.html'
+licensePath                     = ccpnCodePath / 'LICENSE.txt'
 
 # User settings
-userPreferencesDirectory        = os.path.expanduser('~/.ccpn')
-userPreferencesPath             = os.path.join(userPreferencesDirectory, 'v3settings.json')
+userPreferencesDirectory        = Path.aPath('~/.ccpn')
+userPreferencesPath             = userPreferencesDirectory / 'v3settings.json'
 
 # Predefined layouts
-predefinedLayouts               = os.path.join(ccpnCodePath, 'layouts')
+predefinedLayouts               = ccpnCodePath / 'layouts'
 
 # others
 CCPN_EXTENSION = '.ccpn'

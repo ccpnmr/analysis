@@ -756,7 +756,7 @@ class GuiWindow():
         Snaps selected peaks. If more then one, pops up a Yes/No.
         Uses the minDropFactor from the preferences, and applies a parabolic fit to give first-estimate of lineWidths
         """
-        peaks = self.current.peaks
+        peaks = list(self.current.peaks)
         if not peaks:
             return
 
@@ -778,6 +778,7 @@ class GuiWindow():
                 if MessageDialog.showYesNo(title, msg, parent):
                     with progressManager(self, 'Snapping peaks to extrema'):
                         for peak in peaks:
+                            peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
                             peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
                                                 minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
             else:

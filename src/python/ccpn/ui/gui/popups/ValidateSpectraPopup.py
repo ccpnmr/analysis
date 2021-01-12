@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-23 17:36:45 +0000 (Mon, November 23, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-12 18:21:40 +0000 (Tue, January 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,7 +32,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 from ccpn.core.lib import Util as ccpnUtil
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERSPECTRUMPATH
+from ccpn.ui.gui.widgets.FileDialog import OtherFileDialog, SpectrumFileDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
@@ -705,12 +705,7 @@ class ValidateSpectraFrameABC(Frame):
             urlNum = list(self.dataUrlData.keys()).index(dataUrl)
 
             newUrl = urlData.text().strip()
-
-            dialog = FileDialog(self, text='Select DataUrl File', directory=newUrl,
-                                fileMode=FileDialog.Directory, acceptMode=0,
-                                preferences=self.application.preferences,
-                                initialPath=self.application.preferences.general.userWorkingPath,
-                                pathID=USERSPECTRUMPATH)
+            dialog = SpectrumFileDialog(parent=self, acceptMode='select', directory=newUrl, _useDirectoryOnly=True)
             dialog._show()
             directory = dialog.selectedFiles()
             if directory and len(directory) > 0:
@@ -817,12 +812,7 @@ class ValidateSpectraFrameABC(Frame):
 
             # filePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
             filePath = _expandFilePath(self.project, spectrum, pathData.text())
-
-            dialog = FileDialog(self, text='Select Spectrum File', directory=filePath,
-                                fileMode=1, acceptMode=0,
-                                preferences=self.application.preferences,
-                                initialPath=self.application.preferences.general.userWorkingPath,
-                                pathID=USERSPECTRUMPATH)
+            dialog = SpectrumFileDialog(parent=self, acceptMode='select', directory=filePath)
             dialog._show()
             directory = dialog.selectedFiles()
             if directory and len(directory) > 0:

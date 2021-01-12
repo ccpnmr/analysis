@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-12 18:21:40 +0000 (Tue, January 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,7 +32,7 @@ import datetime
 import os
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERMACROSPATH
+from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
@@ -83,7 +83,6 @@ class MacroEditor(CcpnModule):
         self._preEditorText = ''          # text as appeared the first time the file was opened
         self._lastTimestp = None          # used to check if the file has been changed externally
         self._lastSaved = None
-        self._DIALOGID = USERMACROSPATH
         self.filePath = filePath          # working filePath. If None, it will be created
         self._tempFile = None             # a temp file holder, used when the filePath is not specified
         self.userMacroDirPath = None      # dir path containing user Macros. from preferences if defined otherwise from .ccpn/macros
@@ -202,14 +201,8 @@ class MacroEditor(CcpnModule):
         """
         Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.
         """
-        dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
-                            acceptMode=FileDialog.AcceptSave, selectFile=self.filePath,
-                            filter='*.py',
-                            directory=self.userMacroDirPath,
-                            # preferences=self.preferences,
-                            # initialPath=self.userMacroDirPath,
-                            # pathID=self._DIALOGID
-                            )
+        fType = '*.py'
+        dialog = MacrosFileDialog(parent=self, acceptMode='save', directory=self.userMacroDirPath, selectFile=self.filePath, filter=fType)
         dialog._show()
         filePath = dialog.selectedFile()
         if filePath is not None:
@@ -481,16 +474,10 @@ class MacroEditor(CcpnModule):
         Opens a file dialog box at the macro path specified in the application preferences and loads the
         contents of the macro file into the textbox.
         """
-
-        dialog = FileDialog(self, text='Open Macro', fileMode=FileDialog.ExistingFile,
-                            acceptMode=FileDialog.AcceptOpen,
-                            filter='*.py',
-                            directory=self.userMacroDirPath or self.ccpnMacroPath,
-                            preferences=self.preferences,
-                            initialPath=self.userMacroDirPath,
-                            pathID=self._DIALOGID
-                            )
+        fType = '*.py'
+        dialog = MacrosFileDialog(parent=self, acceptMode='open', directory=self.userMacroDirPath, filter=fType)
         dialog._show()
+
         filePath = dialog.selectedFile()
         self.openPath(filePath)
         self._setFileName()

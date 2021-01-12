@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-05 12:54:47 +0000 (Tue, January 05, 2021) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-01-12 18:21:41 +0000 (Tue, January 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import sys
 import os
 from PyQt5 import QtGui, QtWidgets, QtCore, QtPrintSupport
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERMACROSPATH
+from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Action import Action
 # from ccpn.ui.gui.guiSettings import fixedWidthFont
@@ -221,10 +221,8 @@ class TextEditor(QtWidgets.QTextEdit, Base):
 
     def saveToPDF(self, fileName=None):
 
-        dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
-                            acceptMode=FileDialog.AcceptSave, selectFile=fileName,
-                            filter='*.pdf',
-                            pathID=USERMACROSPATH)
+        fType = '*.pdf'
+        dialog = MacrosFileDialog(parent=self, acceptMode='save', filter=fType, selectFile=fileName)
         dialog._show()
         filename = dialog.selectedFile()
         if filename:
@@ -376,10 +374,8 @@ class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
 
     def saveToPDF(self, fileName=None):
 
-        dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
-                            acceptMode=FileDialog.AcceptSave, selectFile=fileName,
-                            filter='*.pdf',
-                            pathID=USERMACROSPATH)
+        fType = '*.pdf'
+        dialog = MacrosFileDialog(parent=self.ui.mainWindow, acceptMode='save', filter=fType, selectFile=fileName)
         dialog._show()
         filename = dialog.selectedFile()
         if filename:

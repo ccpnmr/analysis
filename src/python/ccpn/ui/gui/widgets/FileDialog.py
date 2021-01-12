@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-03 10:01:42 +0000 (Thu, December 03, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-12 18:21:41 +0000 (Tue, January 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,10 +27,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import sys
 import os
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets
 from ccpn.util.Path import aPath
 from ccpn.util.Common import makeIterableList
 from ccpn.util.AttrDict import AttrDict
+from ccpn.util.Logging import getLogger
+from ccpn.util.decorators import singleton
+from ccpn.framework.Application import getApplication
+
 
 USERDEFAULTPATH = 'userDefaultPath'
 USERWORKINGPATH = 'userWorkingPath'
@@ -52,104 +56,188 @@ USERSAVEPROJECTPATH = 'userSaveProjectPath'
 USEREXPORTPDFPATH = 'userExportPdfPath'
 USEREXPORTPATH = 'userExportPath'
 
-_initialPaths = {}
-
 def getInitialPath(pathID=USERDEFAULTPATH):
-    if pathID in _initialPaths:
-        return _initialPaths[pathID]
+    _dialog = FileDialogABC()
+    if pathID in _dialog._initialPaths:
+        return _dialog._initialPaths[pathID]
 
 
 def setInitialPath(pathID=USERDEFAULTPATH, initialPath=None):
-    _initialPaths[pathID] = initialPath
+    _dialog = FileDialogABC()
+    _dialog._initialPaths[pathID] = initialPath
+
+
+ACCEPTMODEDICT = {
+    'open'  : QtWidgets.QFileDialog.AcceptOpen, # 0
+    'load'  : QtWidgets.QFileDialog.AcceptOpen, # 0
+    'save'  : QtWidgets.QFileDialog.AcceptSave, # 1
+    'import': QtWidgets.QFileDialog.AcceptOpen, # 0
+    'export': QtWidgets.QFileDialog.AcceptSave, # 1
+    'select': QtWidgets.QFileDialog.AcceptOpen, # 0
+    'run'   : QtWidgets.QFileDialog.AcceptOpen, # 0
+    }
+
+FILEMODESDICT = {
+    'anyFile'      : QtWidgets.QFileDialog.AnyFile, # 0
+    'existingFile' : QtWidgets.QFileDialog.ExistingFile, # 1
+    'directory'    : QtWidgets.QFileDialog.Directory, # 2
+    'directoryOnly': QtWidgets.QFileDialog.Directory, # 2
+    'existingFiles': QtWidgets.QFileDialog.ExistingFiles, # 3
+    }
+
+STATICFUNCTIONDICT = {
+    (0, 0)                                                                 : 'getOpenFileName',
+    (0, 1)                                                                 : 'getOpenFileName',
+    (0, 2)                                                                 : 'getExistingDirectory',
+    (0, 3)                                                                 : 'getOpenFileNames',
+    (1, 0)                                                                 : 'getSaveFileName',
+    (1, 1)                                                                 : 'getSaveFileName',
+    (1, 2)                                                                 : 'getSaveFileName',
+    (1, 3)                                                                 : 'getSaveFileName',
+    (QtWidgets.QFileDialog.AcceptOpen, QtWidgets.QFileDialog.AnyFile)      : 'getOpenFileName',
+    (QtWidgets.QFileDialog.AcceptOpen, QtWidgets.QFileDialog.ExistingFile) : 'getOpenFileName',
+    (QtWidgets.QFileDialog.AcceptOpen, QtWidgets.QFileDialog.Directory)    : 'getExistingDirectory',
+    (QtWidgets.QFileDialog.AcceptOpen, QtWidgets.QFileDialog.ExistingFiles): 'getOpenFileNames',
+    (QtWidgets.QFileDialog.AcceptSave, QtWidgets.QFileDialog.AnyFile)      : 'getSaveFileName',
+    (QtWidgets.QFileDialog.AcceptSave, QtWidgets.QFileDialog.ExistingFile) : 'getSaveFileName',
+    (QtWidgets.QFileDialog.AcceptSave, QtWidgets.QFileDialog.Directory)    : 'getSaveFileName',
+    (QtWidgets.QFileDialog.AcceptSave, QtWidgets.QFileDialog.ExistingFiles): 'getSaveFileName',
+    }
 
 
 class FileDialog(QtWidgets.QFileDialog):
+    # Temporary to search for instances
+    pass
 
-    # def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
-    #              acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, **kwds):
 
-    def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
-                 acceptMode=QtWidgets.QFileDialog.AcceptOpen,
-                 preferences=None,
+class FileDialogABC(QtWidgets.QFileDialog):
+    """
+    Class to implement open/save dialogs
+    """
+    _initialPaths = {}
+    _fileMode = 'anyFile'
+    _text = None
+    _updatePathOnReject = True
+    _multiSelect = False
+    restrictDirToFilter = False,
+
+    # path attribute to read from preferences.general dict in __new__
+    _initialPath = 'userWorkingPath'
+
+    def __init__(self, parent=None,
+                 acceptMode='open',
                  selectFile=None, filter=None, directory=None,
-                 restrictDirToFilter=False, multiSelection=False, useNative=False,
-                 initialPath=None, pathID=USERDEFAULTPATH, updatePathOnReject=True,
+                 # restrictDirToFilter=False,
+                 # multiSelection=False,
+                 useNative=None,
+                 initialPath=None,
+                 _useDirectoryOnly=False,
                  **kwds):
+        """
+        Initialise the dialog widget
 
-        # ejb - added selectFile to suggest a filename in the file box
-        #       this is not passed to the super class
+        :param parent:
+        :param acceptMode: 'open' or 'save'
+        :param selectFile:
+        :param filter:
+        :param directory:
+        :param restrictDirToFilter:
+        :param multiSelection:
+        :param useNative:
+        :param initialPath:
+        :param kwds:
+        """
 
-        self._preferences = None
-        if preferences is not None:
-            if isinstance(preferences, AttrDict) and hasattr(preferences, 'general'):
-                self._preferences = preferences
-            else:
-                raise TypeError("Error: preferences incorrectly defined")
+        # NOTE:ED - hack for the minute to set the directories from preferences
+        if _useDirectoryOnly:
+            self._fileMode = 'directoryOnly'
+            self._text = ' '.join([self._text, 'Path'])
 
-        # GWV - added default directory and path expansion
-        # EJB - added _lastUserWorkingPath to store current directory - removed
-        # EJB - added _initialPaths to store current directories - must be set when calling FileDialog
+        # check that the subclass attributes has been defined
+        if self._fileMode is None and not self._text:
+            raise RuntimeError(f'{self.__class__.__name__} not defined correctly')
+        _fm = FILEMODESDICT.get(self._fileMode)
+        if _fm is None:
+            raise RuntimeError(f'{self.__class__.__name__}: _fileMode \'{self._fileMode}\' not defined')
+
+        _am = ACCEPTMODEDICT.get(acceptMode)
+        if _am is None:
+            raise TypeError(f'{self.__class__.__name__}: acceptMode \'{acceptMode}\' not defined')
+
+        try:
+            application = getApplication()
+            self._preferences = application.preferences
+            _general = self._preferences.general
+        except:
+            raise RuntimeError('application is not defined')
+
         if directory is None:
+            _path = aPath(_general.get(self._initialPath))
+            if not _path:
+                raise RuntimeError(f'preferences.general.{self._initialPath} not defined correctly')
             # set the current working path if this is the first time the dialog has been opened
-            if pathID not in _initialPaths and initialPath:
-                _initialPaths[pathID] = initialPath
-            if pathID in _initialPaths:
-                directory = str(aPath(_initialPaths[pathID] or '~'))
-            else:
-                directory = str(aPath('~'))
+            if self._clsID not in self._initialPaths:
+                self._initialPaths[self._clsID] = _path
+            directory = self._initialPaths[self._clsID]
             self._setDirectory = False
         else:
-            directory = str(aPath(directory))
+            directory = directory
             self._setDirectory = True
-        self._pathID = pathID
-        self._updatePathOnReject = updatePathOnReject
 
-        QtWidgets.QFileDialog.__init__(self, parent, caption=text, directory=directory, **kwds)
+        # # set the current working path if this is the first time the dialog has been opened
+        # if self._clsID not in self._initialPaths:
+        #     self._initialPaths[self._clsID] = aPath(_path or '~')
 
-        self.staticFunctionDict = {
-            (0, 0)                               : 'getOpenFileName',
-            (0, 1)                               : 'getOpenFileName',
-            (0, 2)                               : 'getExistingDirectory',
-            (0, 3)                               : 'getOpenFileNames',
-            (1, 0)                               : 'getSaveFileName',
-            (1, 1)                               : 'getSaveFileName',
-            (1, 2)                               : 'getSaveFileName',
-            (1, 3)                               : 'getSaveFileName',
-            (self.AcceptOpen, self.AnyFile)      : 'getOpenFileName',
-            (self.AcceptOpen, self.ExistingFile) : 'getOpenFileName',
-            (self.AcceptOpen, self.Directory)    : 'getExistingDirectory',
-            (self.AcceptOpen, self.ExistingFiles): 'getOpenFileNames',
-            (self.AcceptSave, self.AnyFile)      : 'getSaveFileName',
-            (self.AcceptSave, self.ExistingFile) : 'getSaveFileName',
-            (self.AcceptSave, self.Directory)    : 'getSaveFileName',
-            (self.AcceptSave, self.ExistingFiles): 'getSaveFileName',
-            }
+        # if directory is None:
+        #     # set the current working path if this is the first time the dialog has been opened
+        #     if self._clsID not in self._initialPaths and initialPath:
+        #         self._initialPaths[self._clsID] = initialPath
+        #     if self._clsID in self._initialPaths:
+        #         directory = str(aPath(self._initialPaths[self._clsID] or '~'))
+        #     else:
+        #         directory = str(aPath('~'))
+        #     self._setDirectory = False
+        # else:
+        #     directory = str(aPath(directory))
+        #     self._setDirectory = True
 
-        self._fileMode = fileMode
-        self._acceptMode = acceptMode
+        # self._updatePathOnReject = updatePathOnReject
+
+        _txt = self._text.format(acceptMode) if '{}' in self._text else self._text
+        _txt = _txt[0].capitalize() + _txt[1:]
+        super().__init__(parent, caption=_txt, directory=str(directory), **kwds)
+
+        try:
+            if self._fileMode == 'directoryOnly':
+                # fix obsolete DirectoryOnly
+                self.setOption(self.ShowDirsOnly, True)
+        except  Exception as es:
+            pass
+
         self._kwds = kwds
-        self._text = text
-        self._selectFile = os.path.basename(selectFile) if selectFile else None
+        # self._selectFile = os.path.basename(selectFile) if selectFile else None
+        self._selectFile = aPath(selectFile).name if selectFile else None
 
-        self.setFileMode(fileMode)
+        self.setFileMode(_fm)
         self._customMultiSelectedFiles = []  #used to multiselect directories and files at the same time. Available only on Non Native
-        self._multiSelect = multiSelection
+        # self._multiSelect = multiSelection
 
-        if acceptMode:
-            self.setAcceptMode(acceptMode)
+        self._acceptMode = ACCEPTMODEDICT.get(acceptMode)
+        self.setAcceptMode(self._acceptMode)
+
         if filter is not None:
             self.setNameFilter(filter)
-
-        if selectFile is not None:  # ejb - populates fileDialog with a suggested filename
+        if selectFile is not None:
+            # populates fileDialog with the suggested filename
             self.selectFile(selectFile)
 
-        if self._preferences is not None and self._preferences.general.useNative:
-            self.useNative = True
+        if useNative is not None:
+            self.useNative = useNative
         else:
-            self.useNative = True if useNative else False
+            self.useNative = self._preferences.general.useNative
 
-        # need to do this before setting DontUseNativeDialog
-        if restrictDirToFilter == True:
+        # need to do this before setting DontUseNativeDialog (only for non-native?)
+        if self.restrictDirToFilter == True:
             self.filterSelected.connect(self._predir)
             self.directoryEntered.connect(self._dir)
             self._restrictedType = filter
@@ -165,38 +253,53 @@ class FileDialog(QtWidgets.QFileDialog):
             # if isinstance(self.result, tuple):
             #     self.result = self.result[0]
         else:
-            self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
+            self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog, not self.useNative)
 
-            # add a multiselection option - only for non-native dialogs
+            # add a multi-selection option - only for non-native dialogs
             for view in self.findChildren((QtWidgets.QListView, QtWidgets.QTreeView)):
                 if isinstance(view.model(), QtWidgets.QFileSystemModel):
 
                     # set the selection mode for the dialog
-                    if multiSelection:
+                    if self._multiSelect:
                         view.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
                     else:
                         view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
 
             btns = self.findChildren(QtWidgets.QPushButton)
             if btns:
-                # search for the open button
+                # search for the open button and connect to the clicked signal
                 self.openBtn = [x for x in btns if 'open' in str(x.text()).lower()]
                 if self.openBtn:
                     self.openBtn[0].clicked.disconnect()
                     self.openBtn[0].clicked.connect(self._openClicked)
 
-            # self.result = self.exec_()
+            # NOTE:ED - exec separated from the _init__ to stop threading issues with Windows 10
+            #           _show or exec_ must be called after creating a FileDialog object
+
+    @property
+    def _clsID(self):
+        return self.__class__.__name__
 
     def getCurrentWorkingPath(self):
-        if self._pathID in _initialPaths:
-            return _initialPaths[self._pathID]
+        if self._clsID in self._initialPaths:
+            return self._initialPaths[self._clsID]
+
+    @property
+    def initialPath(self):
+        if self._clsID in self._initialPaths:
+            return self._initialPaths[self._clsID]
+
+    @initialPath.setter
+    def initialPath(self, value):
+        if self._clsID in self._initialPaths:
+            self._initialPaths[self._clsID] = value
 
     def _show(self):
         """Separated from the _init__ to stop threading issues with Windows 10
         Must be called after creating a FileDialog object
         """
         if self.useNative and not sys.platform.lower() == 'linux':
-            funcName = self.staticFunctionDict[(self._acceptMode, self._fileMode)]
+            funcName = STATICFUNCTIONDICT[(self._acceptMode, self._fileMode)]
             self.result = getattr(self, funcName)(caption=self._text, directory=self._selectFile, **self._kwds)
             if isinstance(self.result, tuple):
                 self.result = self.result[0]
@@ -209,26 +312,27 @@ class FileDialog(QtWidgets.QFileDialog):
             self._updateCurrentPath()
 
     def _updateCurrentPath(self):
-        """Update the current path for the current pathID
+        """Update the current path
         """
         if not self._setDirectory:
             # accept the dialog and set the current selected folder for next time if directory not originally set
-            absPath = self.directory().absolutePath()
-            _initialPaths[self._pathID] = absPath
+            absPath = aPath(self.directory().absolutePath())
+            getLogger().info(f'>>> update path {self._clsID}')
+            self._initialPaths[self._clsID] = absPath
 
     def accept(self):
         """Update the current path and exit the dialog
         """
         self._updateCurrentPath()
-        super(FileDialog, self).accept()
+        super().accept()
 
     def reject(self):
         """Update the current path (if required) and exit the dialog
         """
-        self.selectedFiles = lambda : None # needs to clear the selection when closing
+        self.selectedFiles = lambda: None  # needs to clear the selection when closing
         if self._updatePathOnReject:
             self._updateCurrentPath()
-        super(FileDialog, self).reject()
+        super().reject()
 
     def _predir(self, file: str):
         if file.endswith(self._restrictedType):
@@ -252,6 +356,8 @@ class FileDialog(QtWidgets.QFileDialog):
                 if i.column() == 0:
                     files.append(os.path.join(str(self.directory().absolutePath()), str(i.data())))
             self._customMultiSelectedFiles = files
+
+            # NOTE:ED - does this need to hide here?
             self.hide()
 
     # overrides Qt function, which does not pay any attention to whether Cancel button selected
@@ -266,7 +372,7 @@ class FileDialog(QtWidgets.QFileDialog):
                 return []
         else:
             # use our ccpn dialog
-            files = super(FileDialog, self).selectedFiles()
+            files = super().selectedFiles()
             return files
 
     def selectedFile(self):
@@ -285,7 +391,9 @@ class NefFileDialog(QtWidgets.QFileDialog):
 
     def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
                  acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, selectFile=None,
-                 directory=None, initialPath=None, pathID=USERDEFAULTPATH, updatePathOnReject=True,
+                 directory=None, initialPath=None,
+                 # pathID=USERDEFAULTPATH,
+                 updatePathOnReject=True,
                  confirmOverwrite=True,
                  **kwds):
 
@@ -299,10 +407,10 @@ class NefFileDialog(QtWidgets.QFileDialog):
                 raise TypeError("Error: preferences incorrectly defined")
 
         if directory is None:
-            if pathID not in _initialPaths and initialPath:
-                _initialPaths[pathID] = initialPath
-            if pathID in _initialPaths:
-                directory = str(aPath(_initialPaths[pathID] or '~'))
+            if self.pathID not in self._initialPaths and initialPath:
+                self._initialPaths[self.pathID] = initialPath
+            if self.pathID in self._initialPaths:
+                directory = str(aPath(self._initialPaths[self.pathID] or '~'))
             else:
                 directory = str(aPath('~'))
             self._setDirectory = False
@@ -312,31 +420,31 @@ class NefFileDialog(QtWidgets.QFileDialog):
 
         selectFile = os.path.basename(selectFile) if selectFile else None
 
-        self._pathID = pathID
+        # self._pathID = pathID
         self._updatePathOnReject = updatePathOnReject
 
         QtWidgets.QFileDialog.__init__(self, parent, caption=text, directory=directory, **kwds)
         if not confirmOverwrite:
             self.setOption(QtWidgets.QFileDialog.DontConfirmOverwrite)
 
-        self.staticFunctionDict = {
-            (0, 0)                               : 'getOpenFileName',
-            (0, 1)                               : 'getOpenFileName',
-            (0, 2)                               : 'getExistingDirectory',
-            (0, 3)                               : 'getOpenFileNames',
-            (1, 0)                               : 'getSaveFileName',
-            (1, 1)                               : 'getSaveFileName',
-            (1, 2)                               : 'getSaveFileName',
-            (1, 3)                               : 'getSaveFileName',
-            (self.AcceptOpen, self.AnyFile)      : 'getOpenFileName',
-            (self.AcceptOpen, self.ExistingFile) : 'getOpenFileName',
-            (self.AcceptOpen, self.Directory)    : 'getExistingDirectory',
-            (self.AcceptOpen, self.ExistingFiles): 'getOpenFileNames',
-            (self.AcceptSave, self.AnyFile)      : 'getSaveFileName',
-            (self.AcceptSave, self.ExistingFile) : 'getSaveFileName',
-            (self.AcceptSave, self.Directory)    : 'getSaveFileName',
-            (self.AcceptSave, self.ExistingFiles): 'getSaveFileName',
-            }
+        # self.staticFunctionDict = {
+        #     (0, 0)                               : 'getOpenFileName',
+        #     (0, 1)                               : 'getOpenFileName',
+        #     (0, 2)                               : 'getExistingDirectory',
+        #     (0, 3)                               : 'getOpenFileNames',
+        #     (1, 0)                               : 'getSaveFileName',
+        #     (1, 1)                               : 'getSaveFileName',
+        #     (1, 2)                               : 'getSaveFileName',
+        #     (1, 3)                               : 'getSaveFileName',
+        #     (self.AcceptOpen, self.AnyFile)      : 'getOpenFileName',
+        #     (self.AcceptOpen, self.ExistingFile) : 'getOpenFileName',
+        #     (self.AcceptOpen, self.Directory)    : 'getExistingDirectory',
+        #     (self.AcceptOpen, self.ExistingFiles): 'getOpenFileNames',
+        #     (self.AcceptSave, self.AnyFile)      : 'getSaveFileName',
+        #     (self.AcceptSave, self.ExistingFile) : 'getSaveFileName',
+        #     (self.AcceptSave, self.Directory)    : 'getSaveFileName',
+        #     (self.AcceptSave, self.ExistingFiles): 'getSaveFileName',
+        #     }
 
         self._fileMode = fileMode
         self._acceptMode = acceptMode
@@ -365,15 +473,15 @@ class NefFileDialog(QtWidgets.QFileDialog):
         #         self.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
 
     def getCurrentWorkingPath(self):
-        if self._pathID in _initialPaths:
-            return _initialPaths[self._pathID]
+        if self.pathID in self._initialPaths:
+            return self._initialPaths[self.pathID]
 
     def setInitialFile(self, initialFile):
         initialPath = os.path.dirname(initialFile)
-        if self._pathID not in _initialPaths and initialPath:
-            _initialPaths[self._pathID] = initialPath
-        if self._pathID in _initialPaths:
-            directory = str(aPath(_initialPaths[self._pathID] or '~'))
+        if self.pathID not in self._initialPaths and initialPath:
+            self._initialPaths[self.pathID] = initialPath
+        if self.pathID in self._initialPaths:
+            directory = str(aPath(self._initialPaths[self.pathID] or '~'))
         else:
             directory = str(aPath('~'))
 
@@ -382,10 +490,10 @@ class NefFileDialog(QtWidgets.QFileDialog):
         self._setDirectory = False
 
     def setInitialPath(self, initialPath):
-        if self._pathID not in _initialPaths and initialPath:
-            _initialPaths[self._pathID] = initialPath
-        if self._pathID in _initialPaths:
-            directory = str(aPath(_initialPaths[self._pathID] or '~'))
+        if self.pathID not in self._initialPaths and initialPath:
+            self._initialPaths[self.pathID] = initialPath
+        if self.pathID in self._initialPaths:
+            directory = str(aPath(self._initialPaths[self.pathID] or '~'))
         else:
             directory = str(aPath('~'))
 
@@ -424,21 +532,21 @@ class NefFileDialog(QtWidgets.QFileDialog):
         if not self._setDirectory:
             # accept the dialog and set the current selected folder for next time if directory not originally set
             absPath = self.directory().absolutePath()
-            _initialPaths[self._pathID] = absPath
+            self._initialPaths[self.pathID] = absPath
 
     def reject(self):
         """Update the current path (if required) and exit the dialog
         """
         if self._updatePathOnReject:
             self._updateCurrentPath()
-        super(NefFileDialog, self).reject()
+        super().reject()
         # self.rejectFunc()
 
     def accept(self):
         """Update the current path and exit the dialog
         """
         self._updateCurrentPath()
-        super(NefFileDialog, self).accept()
+        super().accept()
         # self.acceptFunc(self.selectedFile())
 
     def setLabels(self, save='Save', cancel='Cancel'):
@@ -450,7 +558,7 @@ class NefFileDialog(QtWidgets.QFileDialog):
 
     def _show(self):
         if self.useNative and not sys.platform.lower() == 'linux':
-            funcName = self.staticFunctionDict[(self._acceptMode, self._fileMode)]
+            funcName = STATICFUNCTIONDICT[(self._acceptMode, self._fileMode)]
             self.result = getattr(self, funcName)(caption=self._text, directory=self._selectFile, **self._kwds)
             # self.result = getattr(self, funcName)(caption=self._text, **self._kwds)
             if isinstance(self.result, tuple):
@@ -465,6 +573,125 @@ class NefFileDialog(QtWidgets.QFileDialog):
         if self.selectedFiles():
             # empty assumes that the dialog has been rejected
             self._updateCurrentPath()
+
+
+# Define the subclasses for each dialog
+
+class ProjectFileDialog(FileDialogABC):
+    _fileMode = 'directory'
+    _text = '{} Project'
+
+
+class WorkingPathFileDialog(FileDialogABC):
+    _fileMode = 'directoryOnly'
+    _text = '{} Working Path'
+
+
+class DataPathFileDialog(FileDialogABC):
+    _fileMode = 'directoryOnly'
+    _text = '{} Data Path'
+
+
+class DataFileDialog(FileDialogABC):
+    _text = '{} Data'
+
+
+class LayoutsFileDialog(FileDialogABC):
+    _initialPath = 'userLayoutsPath'
+    _text = '{} Layout'
+
+
+class MacrosFileDialog(FileDialogABC):
+    _initialPath = 'userMacroPath'
+    _text = '{} Macro'
+
+
+# class NefFileDialog(FileDialogABC):
+#     pathID = USERNEFPATH
+
+
+class ArchivesFileDialog(FileDialogABC):
+    _text = '{} Archive'
+
+
+class PluginsFileDialog(FileDialogABC):
+    _initialPath = 'userPluginPath'
+    _text = '{} Plugin'
+
+
+class PreferencesFileDialog(FileDialogABC):
+    _text = '{} Preferences'
+
+
+class SpectrumFileDialog(FileDialogABC):
+    _text = '{} Spectra'
+    _fileMode = 'existingFiles'
+    _multiSelect = True
+
+
+class TablesFileDialog(FileDialogABC):
+    _text = '{} Table'
+
+
+class BackupsFileDialog(FileDialogABC):
+    _text = '{} Backup'
+
+
+class AuxiliaryFileDialog(FileDialogABC):
+    _text = '{} Auxiliary File'
+
+
+class PipelineFileDialog(FileDialogABC):
+    _text = '{} Pipeline'
+
+
+class NMRStarFileDialog(FileDialogABC):
+    _text = '{} NMRStar File'
+
+
+class OtherFileDialog(FileDialogABC):
+    _text = '{} File'
+
+
+# class SaveProjectFileDialog(FileDialogABC):
+#     _text = '{} Project'
+
+
+class PDFFileDialog(FileDialogABC):
+    _text = '{} PDF Document'
+
+
+class ExportFileDialog(FileDialogABC):
+    _text = '{} as'
+
+
+class ExcelFileDialog(FileDialogABC):
+    _text = '{} Excel File'
+
+
+class ExecutablesFileDialog(FileDialogABC):
+    _text = '{} Executable'
+
+
+class AdminFileDialog(FileDialogABC):
+    _text = '{} Files'
+    _fileMode = 'existingFiles'
+    _multiSelect = True
+
+
+class LineButtonFileDialog(FileDialogABC):
+    """Special class for a lineEdit button in pipelines
+    """
+
+    def __init__(self, parent=None,
+                 fileMode=QtWidgets.QFileDialog.AnyFile,
+                 text=None,
+                 directory=None,
+                 filter=None,
+                 **kwds):
+        self._fileMode = fileMode
+        self._text = text
+        super().__init__(parent, filter=filter, directory=directory, **kwds)
 
 
 from ccpn.ui.gui.widgets.Base import Base
@@ -509,8 +736,8 @@ class LineEditButtonDialog(Widget):
         button.setStyleSheet("border: 0px solid transparent")
 
     def _openFileDialog(self):
-        self.fileDialog = FileDialog(self, fileMode=self.fileMode, text=self.textDialog,
-                                     acceptMode=QtWidgets.QFileDialog.AcceptOpen, directory=self.directory, filter=self.filter)
+        self.fileDialog = LineButtonFileDialog(self, fileMode=self.fileMode, text=self.textDialog,
+                                               directory=self.directory, filter=self.filter)
         self.fileDialog._show()
         selectedFile = self.fileDialog.selectedFile()
         if selectedFile:

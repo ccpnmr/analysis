@@ -1,6 +1,7 @@
 from PyQt5 import QtGui, QtWidgets, QtCore
 import os, re
 import pyqtgraph as pg
+# This is not the ccpn FileDialog widget
 from pyqtgraph.widgets.FileDialog import FileDialog
 LastExportDirectory = None
 

@@ -98,114 +98,114 @@ AtomIdTuple = collections.namedtuple('AtomIdTuple', ['chainCode', 'sequenceCode'
                                                      'residueType', 'atomName', ])
 
 
-def _fetchDataUrl(memopsRoot, nameStore, filePath):
-    """Get or create DataUrl that matches fullPath, prioritising insideData, alongsideDta, remoteData
-    and existing dataUrls"""
-    from memops.api.Implementation import Url
-    from memops.universal import Io as uniIo
-    import os
+# def _fetchDataUrl(memopsRoot, nameStore, filePath):
+#     """Get or create DataUrl that matches fullPath, prioritising insideData, alongsideDta, remoteData
+#     and existing dataUrls"""
+#     from memops.api.Implementation import Url
+#     from memops.universal import Io as uniIo
+#     import os
+#
+#     standardStore = memopsRoot.findFirstDataLocationStore(name='standard')
+#
+#     # standardStore = (memopsRoot.findFirstDataLocationStore(name='standard')
+#     #                  or memopsRoot.newDataLocationStore(name='standard'))
+#
+#     # [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
+#     # [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
+#
+#     if standardStore is None:
+#         raise TypeError("Coding error - standard DataLocationStore has not been set")
+#
+#     stores = set([(store, store.dataUrl) for store in standardStore.sortedDataStores() if store.path == filePath])
+#
+#     if stores and len(stores) > 1:
+#         raise ValueError("Too many stores")
+#
+#     for store, dataUrl in stores:
+#         directoryPath = os.path.join(dataUrl.url.path, '')
+#
+#         # print('>>>_fetchDataUrl', filePath, directoryPath)
+#
+#         if filePath.startswith(directoryPath):
+#             return store.fullPath
+#         else:
+#             return store.fullPath
+#
+#
+#     # # for dataUrl in standardStore.sortedDataUrls():
+#     # #     if dataUrl.name is nameStore:
+#     #
+#     #
+#     # # fullPath = uniIo.normalisePath(fullPath, makeAbsolute=True)
+#     # standardTags = ('insideData', 'alongsideData', 'remoteData')
+#     # # Check standard DataUrls first
+#     # checkUrls = [standardStore.findFirstDataUrl(name=tag) for tag in standardTags]
+#     # # Then check other existing DataUrls
+#     # checkUrls += [x for x in standardStore.sortedDataUrls() if x.name not in standardTags]
+#     # for dataUrl in checkUrls:
+#     #     if dataUrl is not None and dataUrl.name is nameStore:
+#     #
+#     #         directoryPath = os.path.join(dataUrl.url.path, '')
+#     #         if filePath.startswith(directoryPath):
+#     #             break
+#     # else:
+#     #     # No matches found, make a new one
+#     #     dirName, path = os.path.split(filePath)
+#     #     dataUrl = standardStore.newDataUrl(url=Url(path=dirName))
+#     # #
+#     # return dataUrl
 
-    standardStore = memopsRoot.findFirstDataLocationStore(name='standard')
-
-    # standardStore = (memopsRoot.findFirstDataLocationStore(name='standard')
-    #                  or memopsRoot.newDataLocationStore(name='standard'))
-
-    # [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
-    # [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
-
-    if standardStore is None:
-        raise TypeError("Coding error - standard DataLocationStore has not been set")
-
-    stores = set([(store, store.dataUrl) for store in standardStore.sortedDataStores() if store.path == filePath])
-
-    if stores and len(stores) > 1:
-        raise ValueError("Too many stores")
-
-    for store, dataUrl in stores:
-        directoryPath = os.path.join(dataUrl.url.path, '')
-
-        # print('>>>_fetchDataUrl', filePath, directoryPath)
-
-        if filePath.startswith(directoryPath):
-            return store.fullPath
-        else:
-            return store.fullPath
-
-
-    # # for dataUrl in standardStore.sortedDataUrls():
-    # #     if dataUrl.name is nameStore:
-    #
-    #
-    # # fullPath = uniIo.normalisePath(fullPath, makeAbsolute=True)
-    # standardTags = ('insideData', 'alongsideData', 'remoteData')
-    # # Check standard DataUrls first
-    # checkUrls = [standardStore.findFirstDataUrl(name=tag) for tag in standardTags]
-    # # Then check other existing DataUrls
-    # checkUrls += [x for x in standardStore.sortedDataUrls() if x.name not in standardTags]
-    # for dataUrl in checkUrls:
-    #     if dataUrl is not None and dataUrl.name is nameStore:
-    #
-    #         directoryPath = os.path.join(dataUrl.url.path, '')
-    #         if filePath.startswith(directoryPath):
-    #             break
-    # else:
-    #     # No matches found, make a new one
-    #     dirName, path = os.path.split(filePath)
-    #     dataUrl = standardStore.newDataUrl(url=Url(path=dirName))
-    # #
-    # return dataUrl
-
-def expandDollarFilePath(project: 'Project', spectrum, filePath: str) -> str:
-    """Expand paths that start with $REPOSITORY to full path.
-
-    NBNB Should be moved to ccpnmodel.ccpncore.lib.ccp.general.DataLocation.DataLocationstore"""
-
-    # Convert from custom repository names to full names
-    stdRepositoryNames = {
-        '$INSIDE/'   : 'insideData',
-        '$ALONGSIDE/': 'alongsideData',
-        '$DATA/'     : 'remoteData',
-        }
-
-    if not filePath.startswith('$'):
-        # Nothing to expand
-        return filePath
-
-    dataLocationStore = project._wrappedData.root.findFirstDataLocationStore(name='standard')
-
-    if dataLocationStore is None:
-        raise TypeError("Coding error - standard DataLocationStore has not been set")
-
-    for prefix, dataUrlName in stdRepositoryNames.items():
-        if filePath.startswith(prefix):
-
-            apiDataStore = spectrum._apiDataSource.dataStore
-            if not apiDataStore:
-                return filePath
-
-            elif apiDataStore.dataLocationStore.name == 'standard':
-
-                # this fails on the first loading of V2 projects - ordering issue?
-                spectrumDataUrlName = apiDataStore.dataUrl.name
-
-                if spectrumDataUrlName == dataUrlName:
-                    return os.path.join(apiDataStore.dataUrl.url.dataLocation, filePath[len(prefix):])
-
-                # if dataUrlName == 'insideData':
-                #     pathData.setText('$INSIDE/%s' % apiDataStore.path)
-                # elif dataUrlName == 'alongsideData':
-                #     pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
-                # elif dataUrlName == 'remoteData':
-                #     pathData.setText('$DATA/%s' % apiDataStore.path)
-            else:
-                # pathData.setText(apiDataStore.fullPath)
-                return filePath
-
-            # dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
-            # if dataUrl is not None:
-            #     return os.path.join(dataUrl.url.dataLocation, filePath[len(prefix):])
-
-    return filePath
+# def expandDollarFilePath(project: 'Project', spectrum, filePath: str) -> str:
+#     """Expand paths that start with $REPOSITORY to full path.
+#
+#     NBNB Should be moved to ccpnmodel.ccpncore.lib.ccp.general.DataLocation.DataLocationstore"""
+#
+#     # Convert from custom repository names to full names
+#     stdRepositoryNames = {
+#         '$INSIDE/'   : 'insideData',
+#         '$ALONGSIDE/': 'alongsideData',
+#         '$DATA/'     : 'remoteData',
+#         }
+#
+#     if not filePath.startswith('$'):
+#         # Nothing to expand
+#         return filePath
+#
+#     dataLocationStore = project._wrappedData.root.findFirstDataLocationStore(name='standard')
+#
+#     if dataLocationStore is None:
+#         raise TypeError("Coding error - standard DataLocationStore has not been set")
+#
+#     for prefix, dataUrlName in stdRepositoryNames.items():
+#         if filePath.startswith(prefix):
+#
+#             apiDataStore = spectrum._apiDataSource.dataStore
+#             if not apiDataStore:
+#                 return filePath
+#
+#             elif apiDataStore.dataLocationStore.name == 'standard':
+#
+#                 # this fails on the first loading of V2 projects - ordering issue?
+#                 spectrumDataUrlName = apiDataStore.dataUrl.name
+#
+#                 if spectrumDataUrlName == dataUrlName:
+#                     return os.path.join(apiDataStore.dataUrl.url.dataLocation, filePath[len(prefix):])
+#
+#                 # if dataUrlName == 'insideData':
+#                 #     pathData.setText('$INSIDE/%s' % apiDataStore.path)
+#                 # elif dataUrlName == 'alongsideData':
+#                 #     pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
+#                 # elif dataUrlName == 'remoteData':
+#                 #     pathData.setText('$DATA/%s' % apiDataStore.path)
+#             else:
+#                 # pathData.setText(apiDataStore.fullPath)
+#                 return filePath
+#
+#             # dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
+#             # if dataUrl is not None:
+#             #     return os.path.join(dataUrl.url.dataLocation, filePath[len(prefix):])
+#
+#     return filePath
 
 
 def commandParameterString(*params, values: dict = None, defaults: dict = None):

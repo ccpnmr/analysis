@@ -256,6 +256,11 @@ class Spectrum(AbstractWrapperObject):
         "STUB: hot-fixed later"
         return None
 
+    @property
+    def spectrumReferences(self):
+        "STUB: hot-fixed later"
+        return None
+
     # Inherited from AbstractWrapperObject
     # @property
     # def project(self) -> 'Project':
@@ -645,32 +650,33 @@ class Spectrum(AbstractWrapperObject):
     def filePath(self) -> Optional[str]:
         """Path to NMR data file; can contain redirections (e.g. $DATA)
         """
-        if self._dataStore is None:
+        if self.dataStore is None:
             raise RuntimeError('dataStore not defined')
-        return str(self._dataStore.path)
+        return str(self.dataStore.path)
 
     @filePath.setter
     @ccpNmrV3CoreSetter()
     def filePath(self, value: str):
 
-        if self._dataStore is None:
+        if self.dataStore is None:
             raise RuntimeError('dataStore not defined')
+
         if value is None:
-            self._dataStore.path = None
+            self.dataStore.path = None
             self._dataSource = None
             self._clearCache()
             return
 
-        oldPath = self._dataStore.path
-        self._dataStore.path = value
-        if not self._dataStore.exists():
-            self._dataStore.errorMessage()
-            self._dataStore.path = oldPath
+        oldPath = self.dataStore.path
+        self.dataStore.path = value
+        if not self.dataStore.exists():
+            self.dataStore.errorMessage()
+            self.dataStore.path = oldPath
             raise ValueError('Setting Spectrum.filePath to "%s"' % value)
 
-        newDataSource = self._getDataSource(self._dataStore, reportWarnings=True)
+        newDataSource = self._getDataSource(self.dataStore, reportWarnings=True)
         if newDataSource is None:
-            self._dataStore.path = oldPath
+            self.dataStore.path = oldPath
             raise ValueError('Spectrum.filePath: incompatible "%s"' % value)
 
         else:
@@ -681,27 +687,27 @@ class Spectrum(AbstractWrapperObject):
                                  (newDataSource.dataFormat,value))
 
             if self.dimensionCount != newDataSource.dimensionCount:
-                self._dataStore.path = oldPath
+                self.dataStore.path = oldPath
                 raise ValueError('Spectrum.filePath: incompatible dimensionCount = %s of "%s"' %
                                  (newDataSource.dimensionCount,value))
 
             for idx, np in enumerate(self.pointCounts):
                 if newDataSource.pointCounts[idx] != np:
-                    self._dataStore.path = oldPath
+                    self.dataStore.path = oldPath
                     raise ValueError('Spectrum.filePath: incompatible pointsCount[%s] = %s of "%s"' %
                                      (idx, newDataSource.pointCounts[idx], value))
 
         self._dataSource = newDataSource
-        self._dataStore._saveInternal()
+        self.dataStore._saveInternal()
         self._clearCache()
 
     @property
     def path(self):
         """return a Path instance defining the absolute path of filePath
         """
-        if self._dataStore is None:
+        if self.dataStore is None:
             raise RuntimeError('dataStore not defined')
-        return self._dataStore.aPath()
+        return self.dataStore.aPath()
 
     def hasValidPath(self) -> bool:
         """Return true if the spectrum currently points to an valid dataSource object.
@@ -713,18 +719,18 @@ class Spectrum(AbstractWrapperObject):
         """
         # local import to avoid cycles
         from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
-        if self._dataStore is None:
+        if self.dataStore is None:
             raise RuntimeError('dataStore not defined')
-        return self._dataStore.dataFormat == EmptySpectrumDataSource.dataFormat
+        return self.dataStore.dataFormat == EmptySpectrumDataSource.dataFormat
 
     @property
     def dataFormat(self):
         """Return the spectrum data-format identifier (e.g. Hdf5, NMRPipe)
         """
-        if self._dataStore is None:
+        if self.dataStore is None:
             raise RuntimeError('dataStore not defined')
 
-        return self._dataStore.dataFormat
+        return self.dataStore.dataFormat
 
 
     # @dataFormat.setter
@@ -782,12 +788,11 @@ class Spectrum(AbstractWrapperObject):
     def axisCodes(self) -> Tuple[Optional[str], ...]:
         """axisCode, per dimension - None if no main ExpDimRef
         """
-
-        # See if axis codes are set
-        for expDim in self._wrappedData.experiment.expDims:
-            if expDim.findFirstExpDimRef(axisCode=None) is not None:
-                self._wrappedData.experiment.resetAxisCodes()
-                break
+        # # See if axis codes are set
+        # for expDim in self._wrappedData.experiment.expDims:
+        #     if expDim.findFirstExpDimRef(axisCode=None) is not None:
+        #         self._wrappedData.experiment.resetAxisCodes()
+        #         break
 
         result = []
         for dataDim in self._wrappedData.sortedDataDims():
@@ -1848,7 +1853,7 @@ class Spectrum(AbstractWrapperObject):
         if dimension is None or dimension < 1 or dimension > self.dimensionCount:
             raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
-        return self.mainSpectrumReferences[dimension-1].valueToPoint(value)
+        return self.spectrumReferences[dimension-1].valueToPoint(value)
 
     def point2ppm(self, value, axisCode=None, dimension=None):
         """Convert point value to ppm for axis corresponding to to either axisCode or
@@ -1865,7 +1870,7 @@ class Spectrum(AbstractWrapperObject):
         if dimension is None or dimension < 1 or dimension > self.dimensionCount:
             raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
-        return self.mainSpectrumReferences[dimension-1].pointToValue(value)
+        return self.spectrumReferences[dimension-1].pointToValue(value)
 
     def getPpmArray(self, axisCode=None, dimension=None):
         """Return a numpy array with ppm values of the grid points along axisCode or dimension
@@ -2179,8 +2184,6 @@ class Spectrum(AbstractWrapperObject):
         if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPosition):
             raise ValueError('ppmPositions values must be floats')
 
-        # ref = self.mainSpectrumReferences
-        # pointPosition = tuple(ref[dim].valueToPoint(ppm) for dim, ppm in enumerate(ppmPositions))
         pointPosition = [self.ppm2point(p, dimension=idx+1) for idx, p in enumerate(ppmPosition)]
         return self.getPointvalue(pointPosition)
 
@@ -3055,17 +3058,12 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name) -> Spectrum
                                                 dataType='processed'
                                                 )
 
+
+
     # Intialise the freq/time dimensions; This seems a very complicated datastructure! (GWV)
     # dataDim classnames are FidDataDim, FreqDataDim, SampledDataDim
     for n, expDim in enumerate(apiExperiment.sortedExpDims()):
         expDim.isAcquisition = False  #(dataSource.aquisitionAxisCode == dataSource.axisCodes[n]),
-        expDimRef = expDim.newExpDimRef(
-                            isotopeCodes=(dataSource.isotopeCodes[n],),
-                            axisCode=dataSource.axisCodes[n],
-                            sf=dataSource.spectrometerFrequencies[n],
-                            unit='ppm'
-                           )
-
         _nPoints = dataSource.pointCounts[n]
         freqDataDim = apiDataSource.newFreqDataDim(dim=n+1, expDim=expDim,
                                                    numPoints=_nPoints,
@@ -3074,16 +3072,13 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name) -> Spectrum
                                                    isComplex=dataSource.isComplex[n],
                                                    valuePerPoint=dataSource.spectralWidthsHz[n]/float(_nPoints)
                                                    )
-        # expDimRef = (expDim.findFirstExpDimRef(measurementType='Shift') or expDim.findFirstExpDimRef())
-        if expDimRef:
-            freqDataDim.newDataDimRef(expDimRef=expDimRef)
 
     # Done with api generation; Create the Spectrum object
 
     # Agggh, cannot do
     #   spectrum = Spectrum(self, apiDataSource)
     # as the object was magically already created
-    # This was done by Project_newApiObject, called from Nmr.DataSource.__init__ through an api notifier.
+    # This was done by Project._newApiObject, called from Nmr.DataSource.__init__ through an api notifier.
     # This notifier is set in the AbstractWrapper class and is part of the machinery generation; i.e.
     # _linkWrapperClasses (needs overhaul!!)
 
@@ -3091,6 +3086,17 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name) -> Spectrum
     if spectrum is None:
         raise RuntimeError("something went wrong creating a new Spectrum instance")
     spectrum._apiExperiment = apiExperiment
+
+    with inactivity():
+        # initialise the dimensional SpectrumReference objects
+        for dim in dataSource.dimensions:
+            n = dim-1
+            spectrum.newSpectrumReference(dimension = dim,
+                                          spectrometerFrequency = dataSource.spectrometerFrequencies[n],
+                                          isotopeCodes=(dataSource.isotopeCodes[n],),
+                                          axisCode=dataSource.axisCodes[n],
+                                          axisUnit='ppm'
+            )
 
     # Set the references between spectrum and dataStore
     dataStore.dataFormat = dataSource.dataFormat

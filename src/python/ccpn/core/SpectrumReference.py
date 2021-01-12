@@ -35,11 +35,10 @@ from ccpn.util.Logging import getLogger
 
 
 class SpectrumReference(AbstractWrapperObject):
-    """ ADVANCED. A **SpectrumReference** holds detailed information about axes and referencing
+    """A SpectrumReference holds detailed information about axes and referencing
     needed for e.g. multple-quantum, projection, and reduced-dimensionality experiments.
 
-
-    SpectrumRefefences can only exist for Fourier transformed dimensions.
+    SpectrumRefefences can only exist for frequency dimensions.
     Required for describing experiments with assignable splittings (e.g. J-coupling, RDC),
     reduced dimensionality, more than one nucleus per axis,
     or multi-atom parameters (J-dimensions, MQ dimensions)."""
@@ -146,8 +145,8 @@ class SpectrumReference(AbstractWrapperObject):
     @property
     def isotopeCodes(self) -> typing.Tuple[str, ...]:
         """Isotope identification strings for isotopes.
-        NB there can be several isotopes for e.g. J-coupling or multiple quantum coherence."""
-
+        NB there can be several isotopes for e.g. J-coupling or multiple quantum coherence.
+        """
         return self._wrappedData.expDimRef.isotopeCodes
 
     @isotopeCodes.setter
@@ -169,11 +168,11 @@ class SpectrumReference(AbstractWrapperObject):
     def axisCode(self) -> str:
         """Reference axisCode """
         expDimRef = self._wrappedData.expDimRef
-        dataDim = self._wrappedData.dataDim
+        # dataDim = self._wrappedData.dataDim
         result = expDimRef.axisCode
-        if result is None:
-            dataDim.dataSource.experiment.resetAxisCodes()
-            result = expDimRef.axisCode
+        # if result is None:
+        #     dataDim.dataSource.experiment.resetAxisCodes()
+        #     result = expDimRef.axisCode
         #
         return result
 
@@ -322,7 +321,7 @@ def _newSpectrumReference(self: Spectrum, dimension: int, spectrometerFrequency:
 
     expDimRef = dataDim.expDim.newExpDimRef(sf=spectrometerFrequency, isotopeCodes=isotopeCodes,
                                             measurementType=measurementType,
-                                            isFolded=(foldingMode != 'folded'), name=axisCode,
+                                            isFolded=(foldingMode != 'folded'), axisCode=axisCode,
                                             unit=axisUnit, minAliasedFreq=minAliasedFrequency,
                                             maxAliasedFreq=maxAliasedFrequency, )
 

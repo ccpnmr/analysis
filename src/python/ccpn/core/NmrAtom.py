@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from typing import Union, Tuple, Sequence
 from functools import partial
+
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -546,6 +547,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     # NOTE:ED - check violated name, replaces the isotopeCode with '?' - follows v2 model check
     checkIsotopeCode = isotopeCode.upper()
     if name and not name.startswith(checkIsotopeCode):
+        # TODO: Ed use isotope.py here
         from ccpn.util.Constants import isotopeRecords
 
         record = isotopeRecords.get(checkIsotopeCode)

@@ -28,6 +28,7 @@ import itertools
 import operator
 import numpy as np
 from typing import Optional, Tuple, Union, Sequence, TypeVar, Any
+
 from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project

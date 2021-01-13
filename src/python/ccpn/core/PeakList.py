@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import numpy as np
 import math
 from typing import Sequence, List, Optional
+
 from ccpn.util.Common import percentage
 from scipy.ndimage import maximum_filter, minimum_filter
 from ccpn.util import Common as commonUtil
@@ -44,8 +45,6 @@ GAUSSIANMETHOD = 'gaussian'
 LORENTZIANMETHOD = 'lorentzian'
 PARABOLICMETHOD = 'parabolic'
 PICKINGMETHODS = (GAUSSIANMETHOD, LORENTZIANMETHOD, PARABOLICMETHOD)
-
-
 
 
 class PeakList(PMIListABC):

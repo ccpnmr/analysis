@@ -30,6 +30,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import collections
 from typing import Sequence, Tuple
 from itertools import zip_longest
+
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark

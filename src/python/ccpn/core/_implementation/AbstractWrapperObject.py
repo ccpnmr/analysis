@@ -30,6 +30,8 @@ import typing
 import re
 from collections import OrderedDict
 from copy import deepcopy
+
+import ccpn.core._implementation.resetSerial
 from ccpn.core import _importOrder
 # from ccpn.core.lib import CcpnSorting
 from ccpn.util import Common as commonUtil
@@ -272,9 +274,19 @@ class AbstractWrapperObject(NotifierBase):
                 or not hasattr(self._project, '_data2Obj') or self._wrappedData.isDeleted)
 
     # default name to use for objects with a name/title
-    # @property
-    def _defaultName(self, cls):
-        return cls.className.lower()
+    @classmethod
+    def _defaultName(cls):
+        return 'my%s' % cls.className
+
+    @classmethod
+    def _uniqueName(cls, project, name=None):
+        "Return a unique name based on name (set to defaultName if None)"
+        if name is None:
+            name = cls._defaultName()
+        names = [sib.name for sib in getattr(project, cls._pluralLinkName)]
+        while name in names:
+            name = commonUtil.incrementName(name)
+        return name
 
     @staticmethod
     def _nextAvailableName(cls, project):
@@ -1229,7 +1241,7 @@ class AbstractWrapperObject(NotifierBase):
         Raises ValueError for objects that do not have a serial
         (or, more precisely, where the _wrappedData does not have a serial)."""
 
-        commonUtil.resetSerial(self._wrappedData, newSerial)
+        ccpn.core._implementation.resetSerial.resetSerial (self._wrappedData, newSerial)
         self._resetIds()
 
     def getAsDict(self, _includePrivate=False) -> OrderedDict:

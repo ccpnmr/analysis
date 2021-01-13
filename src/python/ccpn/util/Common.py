@@ -40,14 +40,12 @@ import sys
 import string
 import itertools
 from functools import partial
-from collections.abc import Iterable
 from collections import OrderedDict
 from string import whitespace
 
 from ccpn.util.LabelledEnum import LabelledEnum
 from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
 from ccpn.util.FrozenDict import FrozenDict
-from ccpn.util import Constants
 from ccpn.util.Logging import getLogger
 
 from ccpn.util import Constants
@@ -594,52 +592,6 @@ def contains_whitespace(s):
 
 def contains_whitespace_nospace(s):
     return True in [c in s for c in string.whitespace if c != ' ']
-
-
-def resetSerial(apiObject, newSerial):
-    """ADVANCED Reset serial of object to newSerial, resetting parent link
-    and the nextSerial of the parent.
-
-    Raises ValueError for objects that do not have a serial
-    (or, more precisely, where the _wrappedData does not have a serial)."""
-
-    # NB, needed both from V2 NefIo and V3, hence putting nit here,
-    # even though it uses V2 objects
-
-    if not hasattr(apiObject, 'serial'):
-        raise ValueError("Cannot reset serial, %s does not have a 'serial' attribute"
-                         % apiObject)
-    downlink = apiObject.__class__._metaclass.parentRole.otherRole.name
-
-    parentDict = apiObject.parent.__dict__
-    downdict = parentDict[downlink]
-    oldSerial = apiObject.serial
-    serialDict = parentDict['_serialDict']
-
-    if newSerial == oldSerial:
-        return
-
-    elif newSerial in downdict:
-        # get the identifier of the v3 object
-        from ccpn.framework.Application import getApplication
-
-        getApp = getApplication()
-        v3obj = None
-        if getApp:
-            project = getApp.project
-            if project and apiObject in project._data2Obj:
-                v3obj = project._data2Obj[apiObject]
-        raise ValueError("Cannot reset serial to %s - value already in use (%s)" % (newSerial, v3obj or apiObject))
-
-    else:
-        maxSerial = serialDict[downlink]
-        apiObject.__dict__['serial'] = newSerial
-        downdict[newSerial] = apiObject
-        del downdict[oldSerial]
-        if newSerial > maxSerial:
-            serialDict[downlink] = newSerial
-        elif oldSerial == maxSerial:
-            serialDict[downlink] = max(downdict)
 
 
 def makeIterableList(inList=None):

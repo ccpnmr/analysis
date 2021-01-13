@@ -26,6 +26,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from typing import Tuple, Sequence, List
 from functools import partial
+
+import ccpn.core._implementation.resetSerial
 from ccpn.util import Common as commonUtil
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.PeakList import PeakList
@@ -283,8 +285,9 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
         getByPid = self._project.getByPid
         spectra = [getByPid(x) if isinstance(x, str) else x for x in spectra]
 
-    if not name:
-        name = ChemicalShiftList._nextAvailableName(ChemicalShiftList, self)
+    if name is None:
+        name = ChemicalShiftList._defaultName
+    name = ChemicalShiftList._uniqueName(project=self, name=name)
     commonUtil._validateName(self, ChemicalShiftList, name)
 
     dd = {'name': name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
@@ -299,7 +302,7 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
 
     if serial is not None:
         try:
-            result.resetSerial(serial)
+            result.resetSerial (serial)
         except ValueError:
             self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
                                          % (result, serial))

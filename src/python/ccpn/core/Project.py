@@ -1649,8 +1649,7 @@ class Project(AbstractWrapperObject):
         return _newSpectrum(self, path=path, name=name)
 
     @logCommand('project.')
-    def createDummySpectrum(self, axisCodes: Sequence[str], name=None,
-                            chemicalShiftList=None):
+    def createDummySpectrum(self, axisCodes: Sequence[str], name=None, chemicalShiftList=None):
         """
         Make dummy spectrum from isotopeCodes list - without data and with default parameters.
 

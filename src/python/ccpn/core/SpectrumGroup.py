@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:31:18 +0000 (Thu, January 14, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-13 17:21:44 +0000 (Wed, January 13, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import Tuple, Any
+import numpy as np
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -302,7 +303,6 @@ class SpectrumGroup(AbstractWrapperObject):
         return getSpectralPeakHeightForNmrResidue(self.spectra)
 
     def sortSpectraBySeries(self, reverse=True):
-        import numpy as np
         if not None in self.series:
             series = np.array(self.series)
             if reverse:
@@ -311,6 +311,12 @@ class SpectrumGroup(AbstractWrapperObject):
                 ind = series.argsort()
             self.spectra = list(np.array(self.spectra)[ind])
             self.series = list(series[ind])
+
+    def sortSpectraByName(self, reverse=True):
+        from ccpn.util.Common import sortObjectByName
+        spectra = list(self.spectra)
+        sortObjectByName(spectra, reverse=reverse)
+        self.spectra = spectra
 
     def clone(self):
         name = _incrementObjectName(self.project, self._pluralLinkName, self.name)

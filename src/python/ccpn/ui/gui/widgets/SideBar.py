@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-13 17:21:06 +0000 (Wed, January 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-13 18:14:21 +0000 (Wed, January 13, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1377,7 +1377,10 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         NB, the clean-up of the side bar is done through notifiers
         """
         from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+        from ccpn.util.Logging import getLogger
+
         try:
+            getLogger().info('Deleting: %s' % ', '.join(map(str, objs)))
             with undoBlockWithoutSideBar():
                 with notificationEchoBlocking():
                     self.project.deleteObjects(*objs)

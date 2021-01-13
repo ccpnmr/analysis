@@ -222,6 +222,15 @@ class Spectrum(AbstractWrapperObject):
     D_DIM = 7
     E_DIM = 8
 
+    # Isotope-dependent assignment tolerances (in ppm)
+    defaultAssignmentTolerance = 0.4
+    isotope2Tolerance = {
+        '1H' : 0.03,
+        '13C': 0.4,
+        '15N': 0.4,
+        '19F': 0.03,
+        }
+
     #-----------------------------------------------------------------------------------------
 
     _DATASTORE_KEY = '_dataStore'    # Key for storing the dataStore info in the Ccpn internal parameter store of the
@@ -1265,15 +1274,14 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def defaultAssignmentTolerances(self):
-        """Default assignment tolerances, per dimension.
-
+        """Default assignment tolerances per dimension (in ppm), upward adjusted (if needed) for
+        digital resolution
         NB for Fid or Sampled dimensions value will be None
         """
         tolerances = [None] * self.dimensionCount
         for ii, dimensionType in enumerate(self.dimensionTypes):
             if dimensionType == 'Frequency':
-                tolerance = Constants.isotope2Tolerance.get(self.isotopeCodes[ii],
-                                                            Constants.defaultAssignmentTolerance)
+                tolerance = self.isotope2Tolerance.get(self.isotopeCodes[ii], self.defaultAssignmentTolerance)
                 tolerances[ii] = max(tolerance, self.spectralWidths[ii] / self.pointCounts[ii])
         #
         return tolerances

@@ -243,4 +243,3 @@ def findNucleiFromSpectrometerFrequencies(spectrometerFrequencies):
 
     nuclei = [theField.findNucleus(sf) for sf in spectrometerFrequencies]
     return tuple(nuclei)
-

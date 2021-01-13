@@ -325,12 +325,6 @@ def isotopeCode2Nucleus(isotopeCode=None):
     else:
         return record.symbol.upper()
 
-    # for tag,val in sorted(Constants.DEFAULT_ISOTOPE_DICT.items()):
-    #   if val == isotopeCode:
-    #     return tag
-    # else:
-    #   return None
-
 
 def name2ElementSymbol(name):
     """Get standard element symbol matching name or axisCode

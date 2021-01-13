@@ -65,9 +65,7 @@ WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 #                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 #                           + defaultFileNameChar)
 # validCcpnFileNameChars = validFileNamePartChars + '-.' + separatorFileNameChar
-CAMELCASEPTN = r'((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))'
-CAMELCASEREP = r' \1'
-# alternative camelCase split = r'((?<=[a-z])[A-Z]|(?<=[A-Z])[A-Z](?=[a-z]))''
+
 
 # # Not used - Rasmus 20/2/2017
 # Sentinel = collections.namedtuple('Sentinel', ['value'])
@@ -1240,9 +1238,12 @@ def stringToCamelCase(label):
     attr = label.translate({ord(c): None for c in whitespace})
     return attr[0].lower() + attr[1:]
 
+CAMELCASEPTN = r'((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))'
+CAMELCASEREP = r' \1'
+# alternative camelCase split = r'((?<=[a-z])[A-Z]|(?<=[A-Z])[A-Z](?=[a-z]))''
 
 def camelCaseToString(name):
-    """Change a camelCase string to string with spaces infront of capitals.
+    """Change a camelCase string to string with spaces in front of capitals.
     Groups of capitals are taken as acronyms and only the last letter of a group is separated.
     The first letter is capitalised except in the special case of a camel case string beginning
     <lowerCase,uppercase>, in which case the first lowercase letter is preserved.
@@ -1256,6 +1257,7 @@ def camelCaseToString(name):
     else:
         label = re.sub(CAMELCASEPTN, CAMELCASEREP, name)
         return label[0:1].upper() + label[1:]
+
 
 # GWV 20210113: moved to Project.py as only used there and was creating circular imports
 

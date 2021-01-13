@@ -558,20 +558,20 @@ PSEUDO_ATOM_NAMES = {PSEUDO_ATOM_NAME: '1H'}
 PSEUDO_ATOMS = ['QA', 'QB', 'QD', 'QE', 'QG', 'QH', 'QH1', 'QH2', 'QR', 'QZ']
 
 # GWV: now handled by EmptySpectrumDataSource class
-# TODO: remove once ccpncore.lib._ccp.nmr.NmrProject createDummySpectrum has been removed
-# default isotopes and nucleus codes
-# Default parameters - 10Hz/pt, 0.1ppm/point for 1H; 10 Hz/pt, 1ppm/pt for 13C
-# NB this is in order to give simple numbers. it does NOT match the gyromagnetic ratios
-DEFAULT_SPECTRUM_PARAMETERS = {
-    '1H' : {'numPoints': 12800, 'sf': 100., 'sw': 1280, 'refppm': 11.8, 'refpt': 1, },
-    '2H' : {'numPoints': 12800, 'sf': 100., 'sw': 1280, 'refppm': 11.8, 'refpt': 1, },
-    '3H' : {'numPoints': 12800, 'sf': 100., 'sw': 1280, 'refppm': 11.8, 'refpt': 1, },
-    '13C': {'numPoints': 25600, 'sf': 100., 'sw': 2560, 'refppm': 236., 'refpt': 1, },
-    '19F': {'numPoints': 25600, 'sf': 100., 'sw': 20000,'refppm': -40.4,'refpt': 0, }
-    }
-for isotopCode in isotopeRecords:
-    if isotopCode not in DEFAULT_SPECTRUM_PARAMETERS:
-        DEFAULT_SPECTRUM_PARAMETERS[isotopCode] = DEFAULT_SPECTRUM_PARAMETERS['13C']
+# #
+# # default isotopes and nucleus codes
+# # Default parameters - 10Hz/pt, 0.1ppm/point for 1H; 10 Hz/pt, 1ppm/pt for 13C
+# # NB this is in order to give simple numbers. it does NOT match the gyromagnetic ratios
+# DEFAULT_SPECTRUM_PARAMETERS = {
+#     '1H' : {'numPoints': 12800, 'sf': 100., 'sw': 1280, 'refppm': 11.8, 'refpt': 1, },
+#     '2H' : {'numPoints': 12800, 'sf': 100., 'sw': 1280, 'refppm': 11.8, 'refpt': 1, },
+#     '3H' : {'numPoints': 12800, 'sf': 100., 'sw': 1280, 'refppm': 11.8, 'refpt': 1, },
+#     '13C': {'numPoints': 25600, 'sf': 100., 'sw': 2560, 'refppm': 236., 'refpt': 1, },
+#     '19F': {'numPoints': 25600, 'sf': 100., 'sw': 20000,'refppm': -40.4,'refpt': 0, }
+#     }
+# for isotopCode in isotopeRecords:
+#     if isotopCode not in DEFAULT_SPECTRUM_PARAMETERS:
+#         DEFAULT_SPECTRUM_PARAMETERS[isotopCode] = DEFAULT_SPECTRUM_PARAMETERS['13C']
 
 
 if __name__ == '__main__':

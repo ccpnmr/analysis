@@ -3284,40 +3284,6 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
     return newSpectrum
 
 
-@newObject(Spectrum)
-def _createDummySpectrum(project: Project, axisCodes: Sequence[str], name=None,
-                         chemicalShiftList=None, serial: int = None) -> Spectrum:
-    """Make dummy Spectrum from isotopeCodes list - without data and with default parameters.
-
-    See the Spectrum class for details.
-
-    :param project:
-    :param axisCodes:
-    :param name:
-    :param chemicalShiftList:
-    :return: a new Spectrum instance.
-    """
-    # TODO - change so isotopeCodes can be passed in instead of axisCodes
-
-    apiShiftList = chemicalShiftList._wrappedData if chemicalShiftList else None
-
-    if name:
-        if Pid.altCharacter in name:
-            raise ValueError("Character %s not allowed in ccpn.Spectrum.name" % Pid.altCharacter)
-
-    apiSpectrum = project._wrappedData.createDummySpectrum(axisCodes, name=name,
-                                                        shiftList=apiShiftList)
-    result = project._data2Obj[apiSpectrum]
-    if result is None:
-        raise RuntimeError('Unable to generate new Spectrum item')
-
-    # newly created spectra require a peaklist
-    if not result.peakLists:
-        result.newPeakList()
-
-    return result
-
-
 # EJB 20181130: not sure what do with this...
 # EJB 20181210: Moved to Project.loadSpectrum, and _createDummySpectrum
 # def _spectrumMakeFirstPeakList(project: Project, dataSource: Nmr.DataSource):

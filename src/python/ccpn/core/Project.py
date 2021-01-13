@@ -1659,11 +1659,7 @@ class Project(AbstractWrapperObject):
         :param chemicalShiftList:
         :return: a new Spectrum instance.
         """
-
-        from ccpn.core.Spectrum import _createDummySpectrum
-
-        return _createDummySpectrum(self, axisCodes=axisCodes, name=name,
-                                    chemicalShiftList=chemicalShiftList)
+        raise NotImplementedError('Use Project.newEmptySpectrum')
 
     @logCommand('project.')
     def newEmptySpectrum(self, isotopeCodes: Sequence[str], name='empty'):

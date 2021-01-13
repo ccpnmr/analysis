@@ -56,15 +56,15 @@ maxRandomInt = 2000000000
 
 WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 
-# valid characters for file names
-# NB string.ascii_letters and string.digits are not compatible
-# with Python 2.1 (used in ObjectDomain)
-defaultFileNameChar = '_'
-separatorFileNameChar = '+'
-validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
-                          'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                          + defaultFileNameChar)
-validCcpnFileNameChars = validFileNamePartChars + '-.' + separatorFileNameChar
+# # valid characters for file names
+# # NB string.ascii_letters and string.digits are not compatible
+# # with Python 2.1 (used in ObjectDomain)
+# defaultFileNameChar = '_'
+# separatorFileNameChar = '+'
+# validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
+#                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+#                           + defaultFileNameChar)
+# validCcpnFileNameChars = validFileNamePartChars + '-.' + separatorFileNameChar
 CAMELCASEPTN = r'((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))'
 CAMELCASEREP = r' \1'
 # alternative camelCase split = r'((?<=[a-z])[A-Z]|(?<=[A-Z])[A-Z](?=[a-z]))''
@@ -73,23 +73,23 @@ CAMELCASEREP = r' \1'
 # Sentinel = collections.namedtuple('Sentinel', ['value'])
 
 
-def convertStringToFileName(fileNameString, validChars=validCcpnFileNameChars,
-                            defaultChar=defaultFileNameChar):
-    ll = [x for x in fileNameString]
-    for ii, char in enumerate(ll):
-        if char not in validChars:
-            ll[ii] = defaultChar
-    #
-    return ''.join(ll)
+# def convertStringToFileName(fileNameString, validChars=validCcpnFileNameChars,
+#                             defaultChar=defaultFileNameChar):
+#     ll = [x for x in fileNameString]
+#     for ii, char in enumerate(ll):
+#         if char not in validChars:
+#             ll[ii] = defaultChar
+#     #
+#     return ''.join(ll)
 
-
-def getCcpFileString(fileNameString):
-    """
-    Changes an input string to the one used for a component of file names.
-    """
-
-    return convertStringToFileName(fileNameString, validFileNamePartChars,
-                                   defaultFileNameChar)
+#
+# def getCcpFileString(fileNameString):
+#     """
+#     Changes an input string to the one used for a component of file names.
+#     """
+#
+#     return convertStringToFileName(fileNameString, validFileNamePartChars,
+#                                    defaultFileNameChar)
 
 
 def incrementName(name):

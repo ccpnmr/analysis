@@ -457,12 +457,11 @@ def suggestFileLocations(fileNames, startDir=None):
 
 
 def fetchDir(path, dirName):
-    '''
-
+    """
     :param path: string of parent path where to add a new subdir
     :param dirName: str of the new sub dir
     :return: if not already existing, creates a new folder with the given name, return the full path as str
-    '''
+    """
     if path is not None:
         newPath = os.path.join(path, dirName)
         if not os.path.exists(newPath):
@@ -470,3 +469,21 @@ def fetchDir(path, dirName):
             return newPath
         else:
             return newPath
+
+# Original in util.Common
+defaultFileNameChar = '_'
+separatorFileNameChar = '+'
+validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
+                          'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                          + defaultFileNameChar)
+validCcpnFileNameChars = validFileNamePartChars + '-.' + separatorFileNameChar
+
+def makeValidCcpnFilePath(path):
+    """Replace invalid chars in path to assure Python 2.1 (used in ObjectDomain) compatibility
+    """
+    ll = []
+    for ii, char in enumerate(path):
+        if char not in validFileNamePartChars:
+            char = defaultFileNameChar
+        ll.append(char)
+    return ''.join(ll)

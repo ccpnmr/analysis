@@ -106,15 +106,15 @@ def incrementName(name):
     return name + '_1'
 
 
-def _incrementObjectName(project, pluralLinkName, name):
-    """ fetch an incremented name if an object in list (project.xs) has already taken it. """
-    originalName = name
-    names = [d.name for d in getattr(project, pluralLinkName) if hasattr(d, 'name')]
-    while name in names:
-        name = incrementName(name)
-    if originalName != name:
-        getLogger().info('Name:% already assigned. Renamed to %s' %(originalName, name))
-    return name
+# def _incrementObjectName(project, pluralLinkName, name):
+#     """ fetch an incremented name if an object in list (project.xs) has already taken it. """
+#     originalName = name
+#     names = [d.name for d in getattr(project, pluralLinkName) if hasattr(d, 'name')]
+#     while name in names:
+#         name = incrementName(name)
+#     if originalName != name:
+#         getLogger().info('Name:% already assigned. Renamed to %s' %(originalName, name))
+#     return name
 
 
 def recursiveImport(dirname, modname=None, ignoreModules=None, force=False):

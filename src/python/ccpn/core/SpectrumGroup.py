@@ -36,7 +36,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameObject
 from ccpn.util.Logging import getLogger
 from ccpn.util.LabelledEnum import LabelledEnum
-from ccpn.util.Common import _incrementObjectName, _validateName
+from ccpn.util.Common import _validateName
 
 SPECTRUMGROUP = 'spectrumGroup'
 SPECTRUMGROUPCOMMENT = 'spectrumGroupComment'
@@ -314,8 +314,8 @@ class SpectrumGroup(AbstractWrapperObject):
             self.series = list(series[ind])
 
     def clone(self):
-        name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
-        newSpectrumGroup = self.project.newSpectrumGroup(name=name, spectra=self.spectra)
+        # name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
+        newSpectrumGroup = self.project.newSpectrumGroup(name=self.name, spectra=self.spectra)
         attrNames = ['series', 'seriesType', 'seriesUnits', 'sliceColour',
                  'positiveContourColour', 'negativeContourColour', 'comment']
         for name in attrNames:

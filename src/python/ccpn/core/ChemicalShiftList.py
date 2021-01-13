@@ -38,7 +38,6 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
-from ccpn.util.Common import _incrementObjectName
 
 class ChemicalShiftList(AbstractWrapperObject):
     """An object containing Chemical Shifts. Note: the object is not a (subtype of a) Python list.
@@ -163,8 +162,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         :param autoUpdate: automatically update according to the project changes.
         :return: a duplicated copy of itself containing all chemicalShifts.
         """
-        name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
-        ncsl = self.project.newChemicalShiftList(name)
+        # name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
+        ncsl = self.project.newChemicalShiftList()
         ncsl.spectra = self.spectra if includeSpectra else ()
         ncsl.autoUpdate = autoUpdate
         for att in ['unit', 'isSimulated', 'comment']:

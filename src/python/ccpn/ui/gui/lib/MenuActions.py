@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-13 17:21:06 +0000 (Wed, January 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-13 18:12:13 +0000 (Wed, January 13, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -451,7 +451,7 @@ class OpenItemABC():
         from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
         try:
             if len(objs)>0:
-                project = objs[-1]
+                project = objs[-1].project
                 with undoBlockWithoutSideBar():
                     with notificationEchoBlocking():
                         project.deleteObjects(*objs)

@@ -220,6 +220,7 @@ def propertyUndo():
 # Adapted from from sandbox.Geerten.Refactored.decorators to fit current setup
 #----------------------------------------------------------------------------------------------
 
+import ccpn.util.Logging as Logging
 
 def _makeLogString(prefix, addSelf, func, *args, **kwds):
     """Helper function to create the log string from func, args and kwds
@@ -233,11 +234,14 @@ def _makeLogString(prefix, addSelf, func, *args, **kwds):
       prefix+CLASSNAME-of-SELF+'.'+func.__name__(EXPANDED-ARGUMENTS)
 
     """
-    from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-    from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
     def obj2pid(obj):
         "Convert core objects and CcpnModules to pids; expand list, tuples, dicts but don't use recursion"
+
+        # local import to prevent circular import
+        from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+        from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+
         if isinstance(obj, (AbstractWrapperObject, CcpnModule)):
             obj = obj.pid
 
@@ -391,105 +395,105 @@ def logCommand(prefix='', get=None, isProperty=False):
 #     return theDecorator
 
 
-# def debugEnter(verbosityLevel=Logger.DEBUG1):
-#     """A decorator to log the invocation of the call
-#     """
-#
-#     @decorator.decorator
-#     def decoratedFunc(*args, **kwds):
-#         # def debugEnter(func, *args, **kwds):
-#         # to avoid potential conflicts with potential 'func' named keywords
-#         func = args[0]
-#         args = args[1:]
-#
-#         logs = _makeLogString('ENTERING: ', True, func, *args, **kwds)
-#
-#         # get a logger and call the correct routine depending on verbosityLevel
-#         logger = getLogger()
-#         if verbosityLevel == Logger.DEBUG1:
-#             logger.debug(logs)
-#         elif verbosityLevel == Logger.DEBUG2:
-#             logger.debug2(logs)
-#         elif verbosityLevel == Logger.DEBUG3:
-#             logger.debug3(logs)
-#         else:
-#             raise ValueError('invalid verbosityLevel "%s"' % verbosityLevel)
-#
-#         # execute the function and return the result
-#         return func(*args, **kwds)
-#
-#     return decoratedFunc
-#
-#
-# def debug1Enter():
-#     """Convenience"""
-#     return debugEnter(verbosityLevel=Logger.DEBUG1)
-#
-#
-# def debug2Enter():
-#     """Convenience"""
-#     return debugEnter(verbosityLevel=Logger.DEBUG2)
-#
-#
-# def debug3Enter():
-#     """Convenience"""
-#     return debugEnter(verbosityLevel=Logger.DEBUG3)
-#
-#
-# def debugLeave(verbosityLevel=Logger.DEBUG1):
-#     """A decorator to log the invocation of the call
-#     """
-#
-#     @decorator.decorator
-#     def decoratedFunc(*args, **kwds):
-#         # def debugLeave(func, *args, **kwds):
-#         # to avoid potential conflicts with potential 'func' named keywords
-#         func = args[0]
-#         args = args[1:]
-#
-#         ba = inspect.signature(func).bind(*args, **kwds)
-#         ba.apply_defaults()
-#         allArgs = ba.arguments
-#
-#         #execute the function
-#         result = func(*args, **kwds)
-#
-#         if 'self' in allArgs or 'cls' in allArgs:
-#             logs = 'LEAVING: %s.%s(); result=%r' % \
-#                    (args[0].__class__.__name__, func.__name__, result)
-#         else:
-#             logs = 'LEAVING: %s(); result=%r' % (func.__name__, result)
-#
-#         # get a logger and call the correct routine depending on verbosityLevel
-#         logger = getLogger()
-#         if verbosityLevel == Logger.DEBUG1:
-#             logger.debug(logs)
-#         elif verbosityLevel == Logger.DEBUG2:
-#             logger.debug2(logs)
-#         elif verbosityLevel == Logger.DEBUG3:
-#             logger.debug3(logs)
-#         else:
-#             raise ValueError('invalid verbosityLevel "%s"' % verbosityLevel)
-#
-#         #return the function result
-#         return result
-#
-#     return decoratedFunc
-#
-#
-# def debug1Leave():
-#     """Convenience"""
-#     return debugLeave(verbosityLevel=Logger.DEBUG1)
-#
-#
-# def debug2Leave():
-#     """Convenience"""
-#     return debugLeave(verbosityLevel=Logger.DEBUG2)
-#
-#
-# def debug3Leave():
-#     """Convenience"""
-#     return debugLeave(verbosityLevel=Logger.DEBUG3)
+def debugEnter(verbosityLevel=Logging.DEBUG1):
+    """A decorator to log the invocation of the call
+    """
+
+    @decorator.decorator
+    def decoratedFunc(*args, **kwds):
+        # def debugEnter(func, *args, **kwds):
+        # to avoid potential conflicts with potential 'func' named keywords
+        func = args[0]
+        args = args[1:]
+
+        logs = _makeLogString('ENTERING: ', True, func, *args, **kwds)
+
+        # get a logger and call the correct routine depending on verbosityLevel
+        logger = getLogger()
+        if verbosityLevel == Logging.DEBUG1:
+            logger.debug(logs)
+        elif verbosityLevel == Logging.DEBUG2:
+            logger.debug2(logs)
+        elif verbosityLevel == Logging.DEBUG3:
+            logger.debug3(logs)
+        else:
+            raise ValueError('invalid verbosityLevel "%s"' % verbosityLevel)
+
+        # execute the function and return the result
+        return func(*args, **kwds)
+
+    return decoratedFunc
+
+
+def debug1Enter():
+    """Convenience"""
+    return debugEnter(verbosityLevel=Logging.DEBUG1)
+
+
+def debug2Enter():
+    """Convenience"""
+    return debugEnter(verbosityLevel=Logging.DEBUG2)
+
+
+def debug3Enter():
+    """Convenience"""
+    return debugEnter(verbosityLevel=Logging.DEBUG3)
+
+
+def debugLeave(verbosityLevel=Logging.DEBUG1):
+    """A decorator to log the invocation of the call
+    """
+
+    @decorator.decorator
+    def decoratedFunc(*args, **kwds):
+        # def debugLeave(func, *args, **kwds):
+        # to avoid potential conflicts with potential 'func' named keywords
+        func = args[0]
+        args = args[1:]
+
+        ba = inspect.signature(func).bind(*args, **kwds)
+        ba.apply_defaults()
+        allArgs = ba.arguments
+
+        #execute the function
+        result = func(*args, **kwds)
+
+        if 'self' in allArgs or 'cls' in allArgs:
+            logs = 'LEAVING: %s.%s(); result=%r' % \
+                   (args[0].__class__.__name__, func.__name__, result)
+        else:
+            logs = 'LEAVING: %s(); result=%r' % (func.__name__, result)
+
+        # get a logger and call the correct routine depending on verbosityLevel
+        logger = getLogger()
+        if verbosityLevel == Logging.DEBUG1:
+            logger.debug(logs)
+        elif verbosityLevel == Logging.DEBUG2:
+            logger.debug2(logs)
+        elif verbosityLevel == Logging.DEBUG3:
+            logger.debug3(logs)
+        else:
+            raise ValueError('invalid verbosityLevel "%s"' % verbosityLevel)
+
+        #return the function result
+        return result
+
+    return decoratedFunc
+
+
+def debug1Leave():
+    """Convenience"""
+    return debugLeave(verbosityLevel=Logging.DEBUG1)
+
+
+def debug2Leave():
+    """Convenience"""
+    return debugLeave(verbosityLevel=Logging.DEBUG2)
+
+
+def debug3Leave():
+    """Convenience"""
+    return debugLeave(verbosityLevel=Logging.DEBUG3)
 
 
 #==========================================================================================================================

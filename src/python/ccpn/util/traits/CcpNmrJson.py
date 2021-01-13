@@ -35,7 +35,7 @@ from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase
 from ccpn.util.traits.CcpNmrTraits import default, Dict
 from ccpn.util.Logging import getLogger
-from sandbox.Geerten.Refactored.decorators import debug2Enter, debug3Enter, debug3Leave
+from ccpn.util.decorators import debug2Enter, debug3Enter, debug3Leave  # Not used now to avoid circular import
 
 
 @singleton
@@ -95,7 +95,7 @@ class _GenericFileHandler(object):
             raise AttributeError('invalid fromString method "%s" for object "%s"' % (fromString, cls))
         self.fromString = getattr(cls, fromString)
 
-    @debug2Enter()
+    # @debug2Enter()
     def save(self, obj, path, **kwds):
         """Saves obj to path
         """
@@ -106,7 +106,7 @@ class _GenericFileHandler(object):
 
         path.write_text(self.toString(obj, **kwds))
 
-    @debug2Enter()
+    # @debug2Enter()
     def restore(self, obj, path, **kwds):
         """Restores obj from path, returns obj
         """
@@ -496,8 +496,8 @@ class CcpNmrJson(TraitBase):
 
     #--------------------------------------------------------------------------------------------
 
-    @debug3Enter()
-    @debug3Leave()
+    # @debug3Enter()
+    # @debug3Leave()
     def _getJsonHandler(self, trait):
         """Check metadata trait for specific jsonHandler, 
         or subsequently check for one of the traitlet class.

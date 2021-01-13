@@ -44,6 +44,8 @@ ccpnConfigPath                  = os.path.join(ccpnCodePath, 'config')
 ccpnRunTerminal                 = os.path.join(ccpnCodePath, 'bin', 'runTerminal.sh')
 defaultPreferencesPath          = os.path.join(ccpnConfigPath, 'defaultv3settings.json')
 ccpnmodelPythonPath             = os.path.join(Path.getPythonDirectory(), 'ccpnmodel')
+ccpnmodelDataPythonPath         = os.path.join(Path.getPythonDirectory(), 'ccpnmodel', 'data')
+ccpnmodelRefDataPythonPath      = os.path.join(Path.getPythonDirectory(), 'ccpnmodel', 'data', 'ccpnv3')
 ccpnPythonPath                  = os.path.join(Path.getPythonDirectory(), 'ccpn')
 analysisAssignPath              = os.path.join(ccpnPythonPath, 'AnalysisAssign')
 analysisScreenPath              = os.path.join(ccpnPythonPath, 'AnalysisScreen')
@@ -72,9 +74,30 @@ licensePath                     = os.path.join(ccpnCodePath, 'LICENSE.txt')
 # User settings
 userPreferencesDirectory        = os.path.expanduser('~/.ccpn')
 userPreferencesPath             = os.path.join(userPreferencesDirectory, 'v3settings.json')
+userCcpnPath                    = userPreferencesDirectory
+userCcpnPathSubDirectories      = ['data', 'macros', 'pipes']  # These get created by framework
+userCcpnDataPath                = os.path.join(userCcpnPath, 'data')
+userDefaultProjectPath          = os.path.join(userCcpnDataPath, 'default.ccpn')
 
 # Predefined layouts
 predefinedLayouts               = os.path.join(ccpnCodePath, 'layouts')
 
-# others
-CCPN_EXTENSION = '.ccpn'
+# others; also defined in util.Path and from there imported in Api and Implementation
+# DO NOT REMOVE and keep in sinc (for circular import reasons) (for now!)
+CCPN_DIRECTORY_SUFFIX    = '.ccpn'
+CCPN_BACKUP_SUFFIX       = '_backup'  # used by ApiLoader; deprecated
+
+# subdirectories of Projects
+CCPN_API_DIRECTORY       = 'ccpnv3'
+CCPN_ARCHIVES_DIRECTORY  = 'archives'
+CCPN_BACKUPS_DIRECTORY   = 'backups'
+CCPN_SUMMARIES_DIRECTORY = 'summaries'
+CCPN_LOGS_DIRECTORY      = 'logs'
+CCPN_DATA_DIRECTORY      = 'data'
+CCPN_PLUGINS_DIRECTORY   = 'data/plugins'
+CCPN_SPECTRA_DIRECTORY   = 'data/spectra'
+CCPN_SCRIPTS_DIRECTORY   = 'scripts'
+CCPN_STATE_DIRECTORY     = 'state'
+
+# historical
+CCPN_EXTENSION = CCPN_DIRECTORY_SUFFIX

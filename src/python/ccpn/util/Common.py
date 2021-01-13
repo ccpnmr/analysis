@@ -43,6 +43,7 @@ from functools import partial
 from collections.abc import Iterable
 from collections import OrderedDict
 from string import whitespace
+
 from ccpn.util.LabelledEnum import LabelledEnum
 from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
 from ccpn.util.FrozenDict import FrozenDict
@@ -1310,49 +1311,50 @@ def camelCaseToString(name):
         label = re.sub(CAMELCASEPTN, CAMELCASEREP, name)
         return label[0:1].upper() + label[1:]
 
+# GWV 20210113: moved to Project.py as only used there and was creating circular imports
 
-def isValidPath(projectName, stripFullPath=True, stripExtension=True):
-    """Check whether the project name is valid after stripping fullpath and extension
-    Can only contain alphanumeric characters and underscores
-
-    :param projectName: name of project to check
-    :param stripFullPath: set to true to remove leading directory
-    :param stripExtension: set to true to remove extension
-    :return: True if valid else False
-    """
-    if not projectName:
-        return
-
-    if isinstance(projectName, str):
-
-        name = os.path.basename(projectName) if stripFullPath else projectName
-        name = os.path.splitext(name)[0] if stripExtension else name
-
-        STRIPCHARS = '_'
-        for ss in STRIPCHARS:
-            name = name.replace(ss, '')
-
-        if name.isalnum():
-            return True
-
-
-def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
-    """Check whether the project name is valid after stripping fullpath and extension
-    Can only contain alphanumeric characters and underscores
-
-    :param projectName: name of project to check
-    :param stripFullPath: set to true to remove leading directory
-    :param stripExtension: set to true to remove extension
-    :return: True if length <= 32 else False
-    """
-    if not projectName:
-        return
-
-    if isinstance(projectName, str):
-        name = os.path.basename(projectName) if stripFullPath else projectName
-        name = os.path.splitext(name)[0] if stripExtension else name
-
-        return len(name) <= 32
+# def isValidPath(projectName, stripFullPath=True, stripExtension=True):
+#     """Check whether the project name is valid after stripping fullpath and extension
+#     Can only contain alphanumeric characters and underscores
+#
+#     :param projectName: name of project to check
+#     :param stripFullPath: set to true to remove leading directory
+#     :param stripExtension: set to true to remove extension
+#     :return: True if valid else False
+#     """
+#     if not projectName:
+#         return
+#
+#     if isinstance(projectName, str):
+#
+#         name = os.path.basename(projectName) if stripFullPath else projectName
+#         name = os.path.splitext(name)[0] if stripExtension else name
+#
+#         STRIPCHARS = '_'
+#         for ss in STRIPCHARS:
+#             name = name.replace(ss, '')
+#
+#         if name.isalnum():
+#             return True
+#
+#
+# def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
+#     """Check whether the project name is valid after stripping fullpath and extension
+#     Can only contain alphanumeric characters and underscores
+#
+#     :param projectName: name of project to check
+#     :param stripFullPath: set to true to remove leading directory
+#     :param stripExtension: set to true to remove extension
+#     :return: True if length <= 32 else False
+#     """
+#     if not projectName:
+#         return
+#
+#     if isinstance(projectName, str):
+#         name = os.path.basename(projectName) if stripFullPath else projectName
+#         name = os.path.splitext(name)[0] if stripExtension else name
+#
+#         return len(name) <= 32
 
 def zipCycle(*iterables, emptyDefault=None):
     """

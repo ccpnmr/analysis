@@ -32,7 +32,7 @@ from typing import Sequence, Union, Optional
 from collections import OrderedDict
 from time import time
 from datetime import datetime
-from ccpn.util.Common import isValidPath, isValidFileNameLength
+# from ccpn.util.Common import isValidPath, isValidFileNameLength
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
@@ -2102,3 +2102,47 @@ class Project(AbstractWrapperObject):
         from ccpn.core.ChemicalShiftList import _getChemicalShiftList
 
         return _getChemicalShiftList(self, name=name, **kwds)
+
+
+def isValidPath(projectName, stripFullPath=True, stripExtension=True):
+    """Check whether the project name is valid after stripping fullpath and extension
+    Can only contain alphanumeric characters and underscores
+
+    :param projectName: name of project to check
+    :param stripFullPath: set to true to remove leading directory
+    :param stripExtension: set to true to remove extension
+    :return: True if valid else False
+    """
+    if not projectName:
+        return
+
+    if isinstance(projectName, str):
+
+        name = os.path.basename(projectName) if stripFullPath else projectName
+        name = os.path.splitext(name)[0] if stripExtension else name
+
+        STRIPCHARS = '_'
+        for ss in STRIPCHARS:
+            name = name.replace(ss, '')
+
+        if name.isalnum():
+            return True
+
+
+def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
+    """Check whether the project name is valid after stripping fullpath and extension
+    Can only contain alphanumeric characters and underscores
+
+    :param projectName: name of project to check
+    :param stripFullPath: set to true to remove leading directory
+    :param stripExtension: set to true to remove extension
+    :return: True if length <= 32 else False
+    """
+    if not projectName:
+        return
+
+    if isinstance(projectName, str):
+        name = os.path.basename(projectName) if stripFullPath else projectName
+        name = os.path.splitext(name)[0] if stripExtension else name
+
+        return len(name) <= 32

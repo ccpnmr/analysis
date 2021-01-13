@@ -16,7 +16,7 @@ SidebarClassTreeItems: A Tree with a number of dynamically added items of type V
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -25,9 +25,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-04 15:06:02 +0000 (Wed, November 04, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-13 17:21:06 +0000 (Wed, January 13, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1376,14 +1376,15 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         """Removes the specified item from the sidebar and deletes it from the project.
         NB, the clean-up of the side bar is done through notifiers
         """
-        from ccpn.core.lib.ContextManagers import undoBlock
-
+        from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
         try:
-            with undoBlock():
-                for obj in objs:
-                    if obj:
-                        # just delete the object
-                        obj.delete()
+            with undoBlockWithoutSideBar():
+                with notificationEchoBlocking():
+                    self.project.deleteObjects(*objs)
+                # for obj in objs:
+                #     if obj:
+                #         # just delete the object
+                #         obj.delete()
 
         except Exception as es:
             showWarning('Delete', str(es))

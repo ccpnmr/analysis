@@ -210,8 +210,7 @@ def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, d
     :return: a new StructureEnsemble instance.
     """
 
-    if not name:
-        name = StructureEnsemble._nextAvailableName(StructureEnsemble, self)
+    name = StructureEnsemble._uniqueName(project=self, name=name)
     commonUtil._validateName(self, StructureEnsemble, name)
 
     nmrProject = self._wrappedData

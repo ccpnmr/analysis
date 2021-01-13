@@ -403,8 +403,7 @@ def _newSample(self: Project, name: str = None, pH: float = None, ionicStrength:
     :return: a new Sample instance.
     """
 
-    if not name:
-        name = Sample._nextAvailableName(Sample, self)
+    name = Sample._uniqueName(project=self, name=name)
     commonUtil._validateName(self, Sample, name)
 
     nmrProject = self._wrappedData

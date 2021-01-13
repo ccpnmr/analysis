@@ -725,8 +725,7 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
 
     if isinstance(name, int):
         name = str(name)
-    if name is None:
-        name = Substance._nextAvailableName(Substance, self)
+    name = Substance._uniqueName(project=self, name=name)
     commonUtil._validateName(self, Substance, name, allowNone=True, checkExisting=False)
     commonUtil._validateName(self, Substance, _labelling, allowNone=True, checkExisting=False, attribName='labelling')
 
@@ -884,8 +883,7 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
 
     if isinstance(name, int):
         name = str(name)
-    if name is None:
-        name = Substance._nextAvailableName(Substance, self)
+    name = Substance._uniqueName(project=self, name=name)
     commonUtil._validateName(self, Substance, name, allowNone=True, checkExisting=False)
     commonUtil._validateName(self, Substance, labelling, allowNone=True, attribName='labelling', checkExisting=False)
 

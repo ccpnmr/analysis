@@ -216,8 +216,7 @@ def _newNote(self: Project, name: str = None, text: str = None, comment: str = N
     :return: a new Note instance.
     """
 
-    if not name:
-        name = Note._nextAvailableName(Note, self)
+    name = Note._uniqueName(project=self, name=name)
     commonUtil._validateName(self, Note, name)
 
     if text is not None:

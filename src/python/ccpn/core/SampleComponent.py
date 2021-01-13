@@ -275,8 +275,7 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
 
     labelling = labelling or DEFAULT_LABELLING
 
-    if not name:
-        name = SampleComponent._nextAvailableName(SampleComponent, self)
+    name = SampleComponent._uniqueName(self.project, name=name)
     commonUtil._validateName(self, SampleComponent, name, checkExisting=False)
     commonUtil._validateName(self, SampleComponent, labelling, attribName='labelling',
                              allowNone=True, checkExisting=False)

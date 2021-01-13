@@ -224,7 +224,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
     def _populateInitialValues(self):
         """Populate the initial values for an empty object
         """
-        self.obj.name = self.klass._nextAvailableName(self.klass, self.project)
+        self.obj.name = self.klass._uniqueName(self.project)
 
     def _newContainer(self):
         """Make a new container to hold attributes for objects not created yet

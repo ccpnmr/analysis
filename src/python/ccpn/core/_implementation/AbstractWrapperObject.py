@@ -288,31 +288,31 @@ class AbstractWrapperObject(NotifierBase):
             name = commonUtil.incrementName(name)
         return name
 
-    @staticmethod
-    def _nextAvailableName(cls, project):
-        # Get the next available name
-        _cls = getattr(project, cls._pluralLinkName)
-        nextNumber = len(_cls) + 1
-        _name = cls.className  #._defaultName(cls, cls)
-        name = 'my%s_%s' % (_name, nextNumber)  # if nextNumber > 0 else sampleName
-        names = [d.name for d in _cls]
-        while name in names:
-            name = commonUtil.incrementName(name)
+    # @staticmethod
+    # def _nextAvailableName(cls, project):
+    #     # Get the next available name
+    #     _cls = getattr(project, cls._pluralLinkName)
+    #     nextNumber = len(_cls) + 1
+    #     _name = cls.className  #._defaultName(cls, cls)
+    #     name = 'my%s_%s' % (_name, nextNumber)  # if nextNumber > 0 else sampleName
+    #     names = [d.name for d in _cls]
+    #     while name in names:
+    #         name = commonUtil.incrementName(name)
+    #
+    #     return name
 
-        return name
-
-    @staticmethod
-    def _nextAvailableWrappedName(cls, project):
-        # Get the next available name
-        _cls = getattr(project, cls._pluralLinkName)
-        nextNumber = len(_cls) + 1
-        _name = cls.className  #._defaultName(cls, cls)
-        name = 'my%s_%s' % (_name, nextNumber)  # if nextNumber > 0 else sampleName
-        names = [d._wrappedData.name for d in _cls]
-        while name in names:
-            name = commonUtil.incrementName(name)
-
-        return name
+    # @staticmethod
+    # def _nextAvailableWrappedName(cls, project):
+    #     # Get the next available name
+    #     _cls = getattr(project, cls._pluralLinkName)
+    #     nextNumber = len(_cls) + 1
+    #     _name = cls.className  #._defaultName(cls, cls)
+    #     name = 'my%s_%s' % (_name, nextNumber)  # if nextNumber > 0 else sampleName
+    #     names = [d._wrappedData.name for d in _cls]
+    #     while name in names:
+    #         name = commonUtil.incrementName(name)
+    #
+    #     return name
 
     @staticmethod
     def _defaultNameFromSerial(cls, serial):

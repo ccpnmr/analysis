@@ -368,13 +368,13 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     # either string, or list/tuple of strings
     # list must all be 3 chars long if more than 1 element in list
     if not sequence:
-        raise TypeError('sequence must be defined')
+        raise ValueError('sequence must be defined')
 
     if isinstance(sequence, str):
 
         # alpha string
         if not sequence.isalpha():
-            raise TypeError('sequence contains bad characters: %s' % str(sequence))
+            raise ValueError('sequence contains bad characters: %s' % str(sequence))
 
         sequence = sequence.upper()
 

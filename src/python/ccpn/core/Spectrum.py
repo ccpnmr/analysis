@@ -3050,12 +3050,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name) -> Spectrum
         raise ValueError('dataSource.dimensionCount = 0')
 
     # assure unique name
-    names = [sp.name for sp in project.spectra]
-    if name in names:
-        i = 1
-        while '%s_%s' % (name, i) in names:
-            i += 1
-        name = '%s_%s' % (name, i)
+    name = Spectrum._uniqueName(project=project, name=name)
 
     # check the dataSources of all spectra of the project for open file pointers to the same file
     for ds in [sp.dataSource for sp in project.spectra if sp.hasValidPath()]:
@@ -3188,8 +3183,6 @@ def _newSpectrum(project: Project, path: str, name: str) -> (Spectrum, None):
         return None
 
     if name is None:
-        # dir, base, ext = _path.split3()
-        # name = base
         name = _path.basename
 
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)

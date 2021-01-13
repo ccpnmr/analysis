@@ -369,8 +369,7 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
     :return: a new RestraintList instance.
     """
 
-    if not name:
-        name = RestraintList._nextAvailableName(RestraintList, self)
+    name = RestraintList._uniqueName(project=self.project, name=name)
     _validateName(self, RestraintList, name)
 
     if restraintItemLength is None:

@@ -1432,7 +1432,7 @@ class Spectrum(AbstractWrapperObject):
                 apiExperiment.newExpTransfer(expDimRefs=expDimRefs, transferType=transferType,
                                              isDirect=(not isIndirect))
         else:
-            getLogger.warning(
+            getLogger().warning(
                     """An attempt to set Spectrum.magnetisationTransfers directly was ignored
                   because the spectrum experimentType was defined.
                   Use axisCodes to set magnetisation transfers instead.""")

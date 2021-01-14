@@ -198,7 +198,7 @@ if __name__ == '__main__':
         import os
         plt = PyPlotWidget()
         path = os.getcwd()
-        imgPath = (os.path.join(path, 'About_CcpNmr.png'))
+        imgPath = (os.path.join(path, 'AboutCcpNmr.png'))
         plt.displayImage(imgPath)
         plt.tight_layout()
         plt.show(windowTitle='Image', size=(500, 500))

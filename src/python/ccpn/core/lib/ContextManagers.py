@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-04 17:16:40 +0000 (Wed, November 04, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-14 19:25:52 +0000 (Thu, January 14, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,6 +35,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
 from ccpn.util.Common import makeIterableList
 import traceback
+
 
 @contextmanager
 def echoCommand(obj, funcName, *params, values=None, defaults=None,
@@ -466,7 +467,7 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
     except Exception as es:
         getLogger().warning(errorStringTemplate % str(es))
         if printTraceBack:
-            traceback.print_exc() # please give more info about the error!
+            traceback.print_exc()  # please give more info about the error!
         if application.hasGui and popupAsWarning:
             from ccpn.ui.gui.widgets import MessageDialog  # Local import: in case of no-gui, we never get here
 
@@ -1124,11 +1125,11 @@ def ccpNmrV3CoreSetter():
                 # call the wrapped function
                 result = func(*args, **kwds)
 
-                addUndoItem(undo=partial(func, self, oldValue),
-                            redo=partial(func, self, args[1])
-                            )
+                addUndoItem(undo=BlankedPartial(func, self, 'change', False, self, oldValue),
+                            redo=BlankedPartial(func, self, 'change', False, self, args[1]))
 
         self._finaliseAction('change')
+
         return result
 
     return theDecorator
@@ -1149,10 +1150,25 @@ def ccpNmrV3CoreUndoBlock():
 
         with notificationBlanking(application=application):
             with undoBlock():
+
+                # must be done like this as the undo functions are not known
+                with undoStackBlocking(application=application) as addUndoItem:
+                    # incorporate the change notifier to simulate the decorator
+                    addUndoItem(undo=partial(self._finaliseAction, 'change'))
+                    addUndoItem(undo=application.project.unblankNotification,
+                                redo=application.project.blankNotification)
+
                 # call the wrapped function
                 result = func(*args, **kwds)
 
+                with undoStackBlocking(application=application) as addUndoItem:
+                    # incorporate the change notifier to simulate the decorator
+                    addUndoItem(undo=application.project.blankNotification,
+                                redo=application.project.unblankNotification)
+                    addUndoItem(redo=partial(self._finaliseAction, 'change'))
+
         self._finaliseAction('change')
+
         return result
 
     return theDecorator

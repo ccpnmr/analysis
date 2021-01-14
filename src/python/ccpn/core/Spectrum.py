@@ -365,15 +365,6 @@ class Spectrum(AbstractWrapperObject):
         return tuple(z for z in zip(self.axes, self.axisCodes, self.dimensions))
 
     @property
-    def comment(self) -> str:
-        """Free-form text comment"""
-        return self._wrappedData.details
-
-    @comment.setter
-    def comment(self, value: str):
-        self._wrappedData.details = value
-
-    @property
     @_includeInCopy
     def positiveContourCount(self) -> int:
         """number of positive contours to draw"""

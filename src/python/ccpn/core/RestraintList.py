@@ -137,15 +137,6 @@ class RestraintList(AbstractWrapperObject):
         """Set name of RestraintList."""
         self.rename(value)
 
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
-
     @property
     def unit(self) -> str:
         """Unit for restraints"""

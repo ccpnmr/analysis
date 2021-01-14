@@ -223,15 +223,6 @@ class Model(AbstractWrapperObject):
         #
         return result
 
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
-
     def clearData(self):
         """Remove all data for model by successively calling the deleteRow method
         """

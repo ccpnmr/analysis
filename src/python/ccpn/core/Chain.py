@@ -120,15 +120,6 @@ class Chain(AbstractWrapperObject):
         """True if this is a cyclic polymer."""
         return self._wrappedData.molecule.isStdCyclic
 
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._none2str(self._wrappedData.details)
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = self._str2none(value)
-
     @property
     def substances(self) -> Tuple[Substance, ...]:
         """Substances matching to Chain (based on chain.compoundName)"""

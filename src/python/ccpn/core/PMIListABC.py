@@ -128,15 +128,6 @@ class PMIListABC(AbstractWrapperObject):
     def title(self, value: str):
         self._wrappedData.name = value
 
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
-
     @property
     def symbolStyle(self) -> str:
         """Symbol style for annotation display in all displays."""

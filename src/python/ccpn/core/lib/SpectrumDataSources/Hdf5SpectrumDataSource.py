@@ -92,7 +92,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     @property
     def spectrumData(self):
         if not self.hasOpenFile():
-            raise RuntimeError('File "%s" is not open', self.path)
+            raise RuntimeError('File "%s" is not open' % self.path)
         data = self.fp[SPECTRUM_DATASET_NAME]
         return data
 
@@ -413,6 +413,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             aliasingFlags = [0] * self.dimensionCount
 
         self.checkForValidRegion(sliceTuples, aliasingFlags)
+
+        if not self.hasOpenFile():
+            self.openFile(mode=self.defaultOpenReadMode)
 
         if 1 in aliasingFlags or -1 in aliasingFlags:
             # fall back on the slice-based extraction

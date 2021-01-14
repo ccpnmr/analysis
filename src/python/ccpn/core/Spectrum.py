@@ -2449,8 +2449,8 @@ class Spectrum(AbstractWrapperObject):
         Axis limits  are passed in as a dict of (axisCode, tupleLimit) key, value pairs
         with the tupleLimit supplied as (start,stop) axis limits in ppm (lower ppm value first).
 
-        For axisCodes that are not included in the axisDict, the limits will by taken from the spectrum limits
-        along the relvant axis
+        For axisCodes that are not included in the axisDict, the limits will by taken from the
+        spectrum limits along the relvant axis
 
         Illegal axisCodes will raise an error.
 
@@ -2460,8 +2460,8 @@ class Spectrum(AbstractWrapperObject):
              }
 
         Example calling function:
-            regionData = spectrum.getRegionData(**limitsDict)
-            regionData = spectrum.getRegionData(Hn=(7.0, 9.0), Nh=(110, 130))
+            regionData = spectrum.getRegion(**limitsDict)
+            regionData = spectrum.getRegion(Hn=(7.0, 9.0), Nh=(110, 130))
 
         :param axisDict: dict of (axisCode, tupleLimit) key,value pairs
         :return: numpy array
@@ -2478,16 +2478,16 @@ class Spectrum(AbstractWrapperObject):
             axisDict.setdefault(ac, self.spectrumLimits[idx])
 
         axisCodes = [k for k in axisDict.keys()]  # just in case; should be complete now
-        indices = self.getByAxisCodes('indices', axisCodes, exactMatch=False)
+        axes = self.getByAxisCodes('axes', axisCodes, exactMatch=False)
 
         sliceTuples = [None]*self.dimensionCount
-        for idx, ac in zip(indices, axisCodes):
+        for axis, ac in zip(axes, axisCodes):
             stop, start = axisDict.get(ac)  # to be converted to points; ppm scale runs backwards
 
             start = max(int(self.ppm2point(start, axisCode=ac) + 0.5), 1)
-            stop = min(int(self.ppm2point(stop, axisCode=ac) + 0.5), self.pointCounts[idx])
+            stop = min(int(self.ppm2point(stop, axisCode=ac) + 0.5), self.pointCounts[axis])
 
-            sliceTuples[idx] = (start,stop)
+            sliceTuples[axis] = (start,stop)
 
         getLogger().debug('Spectrum.getRegion: axisDict = %s; sliceTuples = %s' % (axisDict, sliceTuples))
 
@@ -3181,8 +3181,8 @@ def _newSpectrum(project: Project, path: str, name: str) -> (Spectrum, None):
 
 
 def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=None, dataFormat = 'Hdf5') -> Spectrum:
-    """Extract a region of spectrum, defined by dimensions, position to path defined by dataStore (optionally
-    auto-generated from spectrum.path)
+    """Extract a region of spectrum, defined by dimensions, position to path defined by dataStore
+    (optionally auto-generated from spectrum.path)
 
     :param dimensions:  [dim_a, dim_b, ...];  defining dimensions to be extracted (1-based)
     :param position, spectrum position-vector of length spectrum.dimensionCount (list, tuple; 1-based)
@@ -3224,15 +3224,17 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
 
     disgardedDimensions = list(set(spectrum.dimensions) - set(dimensions))
     # The dimensional parameters of spectrum were copied on initialisation
-    # remap the N-axes (as defined by the N items in the dimensions argument) onto the first N axes of dataSource;
+    # remap the N-axes (as defined by the N items in the dimensions argument) onto the first N axes
+    # of the dataSource;
     dimensionsMap = dict(zip(dimensions+disgardedDimensions, dataSource.dimensions))
     dataSource._mapDimensionalParameters(dimensionsMap=dimensionsMap)
-    # Now reduce the dimensionality to the length of dimensions; i.e. the dimensionality of the new spectrum
+    # Now reduce the dimensionality to the length of dimensions; i.e. the dimensionality of the
+    # new spectrum
     dataSource.setDimensionCount(len(dimensions))
 
     # create the new spectrum from the dataSource
-    newSpectrum = _newSpectrumFromDataSource(project=spectrum.project, dataStore=dataStore, dataSource=dataSource,
-                                             name=name)
+    newSpectrum = _newSpectrumFromDataSource(project=spectrum.project, dataStore=dataStore,
+                                             dataSource=dataSource, name=name)
     # copy the data
     indexMap = dict((k-1,v-1) for k,v in dimensionsMap.items())  # source -> destination
     inverseIndexMap = dict((v-1, k-1) for k,v, in dimensionsMap.items())  # destination -> source
@@ -3262,25 +3264,6 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
 
     return newSpectrum
 
-
-# EJB 20181130: not sure what do with this...
-# EJB 20181210: Moved to Project.loadSpectrum, and _createDummySpectrum
-# def _spectrumMakeFirstPeakList(project: Project, dataSource: Nmr.DataSource):
-#     """Add PeakList if none is present - also IntegralList for 1D. For notifiers."""
-#     if not dataSource.findFirstPeakList(dataType='Peak'):
-#         dataSource.newPeakList()
-#
-#
-# Project._setupApiNotifier(_spectrumMakeFirstPeakList, Nmr.DataSource, 'postInit')
-# del _spectrumMakeFirstPeakList
-
-# Connections to parents:
-
-# EJB 20181128: moved to Project
-# Project.newSpectrum = _newSpectrum
-# del _newSpectrum
-# Project.createDummySpectrum = _createDummySpectrum
-# del _createDummySpectrum
 
 # Additional Notifiers:
 Project._apiNotifiers.extend(

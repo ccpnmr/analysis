@@ -322,12 +322,7 @@ class Sample(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Sample, changing its name and Pid.
         """
-        commonUtil._validateName(self.project, Sample, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.__dict__['name'] = value
-        return (oldName,)
+        return self._rename(value)
 
     #=========================================================================================
     # CCPN functions
@@ -404,7 +399,6 @@ def _newSample(self: Project, name: str = None, pH: float = None, ionicStrength:
     """
 
     name = Sample._uniqueName(project=self, name=name)
-    commonUtil._validateName(self, Sample, name)
 
     nmrProject = self._wrappedData
     apiSampleStore = nmrProject.sampleStore

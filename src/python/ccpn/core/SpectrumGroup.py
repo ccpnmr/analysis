@@ -36,7 +36,6 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameObject
 from ccpn.util.Logging import getLogger
 from ccpn.util.LabelledEnum import LabelledEnum
-from ccpn.util.Common import _validateName
 
 SPECTRUMGROUP = 'spectrumGroup'
 SPECTRUMGROUPCOMMENT = 'spectrumGroupComment'
@@ -344,12 +343,7 @@ class SpectrumGroup(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename SpectrumGroup, changing its name and Pid.
         """
-        _validateName(self.project, SpectrumGroup, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.__dict__['name'] = value
-        return (oldName,)
+        return self._rename(value)
 
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated seriesValues instances

@@ -358,7 +358,7 @@ class NmrChain(AbstractWrapperObject):
         elif wrappedData.code == Constants.defaultNmrChainCode:
             raise ValueError("NmrChain:%s cannot be renamed" % Constants.defaultNmrChainCode)
 
-        commonUtil._validateName(self.project, NmrChain, value=value, allowWhitespace=False)
+        value = self._uniqueName(project=self.project, name=value)
 
         # rename functions from here
         oldName = self.shortName

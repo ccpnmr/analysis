@@ -181,12 +181,8 @@ class ChemicalShiftList(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename ChemicalShiftList, changing its name and Pid.
         """
-        commonUtil._validateName(self.project, ChemicalShiftList, value=value, allowWhitespace=False)
+        return self._rename(value)
 
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.name = value
-        return (oldName,)
 
     #=========================================================================================
     # CCPN functions
@@ -284,10 +280,7 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
         getByPid = self._project.getByPid
         spectra = [getByPid(x) if isinstance(x, str) else x for x in spectra]
 
-    if name is None:
-        name = ChemicalShiftList._defaultName
     name = ChemicalShiftList._uniqueName(project=self, name=name)
-    commonUtil._validateName(self, ChemicalShiftList, name)
 
     dd = {'name': name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
           'details': comment}

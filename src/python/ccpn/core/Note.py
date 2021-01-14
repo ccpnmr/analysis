@@ -181,14 +181,8 @@ class Note(AbstractWrapperObject):
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename Note, changing its name and Pid.
-
-        NB, the serial remains immutable."""
-        commonUtil._validateName(self.project, Note, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.name = value
-        return (oldName,)
+        """
+        return self._rename()
 
     #=========================================================================================
     # CCPN functions
@@ -217,7 +211,6 @@ def _newNote(self: Project, name: str = None, text: str = None, comment: str = N
     """
 
     name = Note._uniqueName(project=self, name=name)
-    commonUtil._validateName(self, Note, name)
 
     if text is not None:
         if not isinstance(text, str):

@@ -1188,47 +1188,47 @@ def _compareDict(d1, d2):
 
     return True
 
-
-def _validateName(project, cls, value: str, attribName: str = 'name', allowWhitespace: bool = False, allowEmpty: bool = False,
-                  allowNone: bool = False, allowLeadingTrailingWhitespace: bool = False, allowSpace: bool = True,
-                  checkExisting: bool = True):
-    """Check that the attribName is valid
-    """
-    from ccpn.core.lib import Pid # avoids circular imports
-
-    if value is not None:
-        if not isinstance(value, str):
-            raise TypeError('{}.{} must be a string'.format(cls.className, attribName))
-        if not value and not allowEmpty:
-            raise ValueError('{}.{} must be set'.format(cls.className, attribName))
-        if Pid.altCharacter in value:
-            raise ValueError('Character {} not allowed in {}.{}'.format(Pid.altCharacter, cls.className, attribName))
-        if allowWhitespace:
-            if not allowSpace and ' ' in value:
-                raise ValueError('space not allowed in {}.{}'.format(cls.className, attribName))
-        else:
-            if allowSpace and contains_whitespace_nospace(value):
-                raise ValueError('whitespace not allowed in {}.{}'.format(cls.className, attribName))
-            elif not allowSpace and contains_whitespace(value):
-                raise ValueError('whitespace not allowed in {}.{}'.format(cls.className, attribName))
-        if not allowLeadingTrailingWhitespace and value != value.strip():
-            raise ValueError('{}.{} cannot contain leading/trailing whitespace'.format(cls.className, attribName))
-
-    elif not allowNone:
-        raise ValueError('None not allowed in {}.{}'.format(cls.className, attribName))
-
-    # previous = project.getByRelativeId(value)
-    # if previous not in (None, cls):
-    #     raise ValueError('{} already exists'.format(previous.longPid))
-
-    if checkExisting:
-        # this is not valid for nmrAtoms
-        found = [obj for obj in getattr(project, cls._pluralLinkName, []) if getattr(obj, attribName, None) == value]
-        if found:
-            raise ValueError('{} already exists'.format(found[0].id))
-
-    # will only get here if all the tests pass
-    return True
+# GWV 14/01/2021: replaced by near similar _validateStringValue classmethod on AbtractWrapper
+# def _validateName(project, cls, value: str, attribName: str = 'name', allowWhitespace: bool = False, allowEmpty: bool = False,
+#                   allowNone: bool = False, allowLeadingTrailingWhitespace: bool = False, allowSpace: bool = True,
+#                   checkExisting: bool = True):
+#     """Check that the attribName is valid
+#     """
+#     from ccpn.core.lib import Pid # avoids circular imports
+#
+#     if value is not None:
+#         if not isinstance(value, str):
+#             raise TypeError('{}.{} must be a string'.format(cls.className, attribName))
+#         if not value and not allowEmpty:
+#             raise ValueError('{}.{} must be set'.format(cls.className, attribName))
+#         if Pid.altCharacter in value:
+#             raise ValueError('Character {} not allowed in {}.{}'.format(Pid.altCharacter, cls.className, attribName))
+#         if allowWhitespace:
+#             if not allowSpace and ' ' in value:
+#                 raise ValueError('space not allowed in {}.{}'.format(cls.className, attribName))
+#         else:
+#             if allowSpace and contains_whitespace_nospace(value):
+#                 raise ValueError('whitespace not allowed in {}.{}'.format(cls.className, attribName))
+#             elif not allowSpace and contains_whitespace(value):
+#                 raise ValueError('whitespace not allowed in {}.{}'.format(cls.className, attribName))
+#         if not allowLeadingTrailingWhitespace and value != value.strip():
+#             raise ValueError('{}.{} cannot contain leading/trailing whitespace'.format(cls.className, attribName))
+#
+#     elif not allowNone:
+#         raise ValueError('None not allowed in {}.{}'.format(cls.className, attribName))
+#
+#     # previous = project.getByRelativeId(value)
+#     # if previous not in (None, cls):
+#     #     raise ValueError('{} already exists'.format(previous.longPid))
+#
+#     if checkExisting:
+#         # this is not valid for nmrAtoms
+#         found = [obj for obj in getattr(project, cls._pluralLinkName, []) if getattr(obj, attribName, None) == value]
+#         if found:
+#             raise ValueError('{} already exists'.format(found[0].id))
+#
+#     # will only get here if all the tests pass
+#     return True
 
 
 def stringToCamelCase(label):

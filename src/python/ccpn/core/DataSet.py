@@ -242,12 +242,7 @@ class DataSet(AbstractWrapperObject):
         """Rename DataSet, changing its name and Pid.
         NB, the serial remains immutable.
         """
-        commonUtil._validateName(self.project, DataSet, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.name = value
-        return (oldName,)
+        return self._rename(value)
 
     #=========================================================================================
     # CCPN functions
@@ -374,8 +369,6 @@ def _newDataSet(self: Project, title: str = None, name: str = None, programName:
         name = title
 
     name = DataSet._uniqueName(project=self, name=name)
-    # match the error message to the attribute
-    commonUtil._validateName(self, DataSet, value=name, attribName='title' if title else 'name')
 
     nmrProject = self._wrappedData
 

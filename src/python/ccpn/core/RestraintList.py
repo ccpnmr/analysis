@@ -26,7 +26,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from typing import Sequence, Union
 
-from ccpn.util.Common import _validateName
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -257,12 +256,7 @@ class RestraintList(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename RestraintList, changing its name and Pid.
         """
-        _validateName(self.project, RestraintList, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.name = value
-        return (oldName,)
+        return self._rename(value)
 
     #=========================================================================================
     # CCPN functions
@@ -370,7 +364,6 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
     """
 
     name = RestraintList._uniqueName(project=self.project, name=name)
-    _validateName(self, RestraintList, name)
 
     if restraintItemLength is None:
         restraintItemLength = coreConstants.constraintListType2ItemLength.get(restraintType)

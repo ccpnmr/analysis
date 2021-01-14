@@ -6121,7 +6121,7 @@ class CcpnNefReader(CcpnNefContent):
 
     def _defaultName(self, cls, serial):
         # Get the next class name using serial, this may already exist
-        return self.project._defaultNameFromSerial(cls, serial)
+        return '%s_%s' % (cls._defaultName, serial)
 
     def fetchDataSet(self, serial: int = None):
         """Fetch DataSet with given serial.

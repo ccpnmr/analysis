@@ -87,7 +87,7 @@ from ccpn.core.lib.DataStore import DataStore
 
 from ccpn.util import Constants
 from ccpn.util.Constants import SCALETOLERANCE
-from ccpn.util.Common import isIterable, _validateName
+from ccpn.util.Common import isIterable
 # 2019010:ED test new matching
 # from ccpn.util.Common import axisCodeMapping
 from ccpn.util.Common import getAxisCodeMatch as axisCodeMapping
@@ -2654,12 +2654,7 @@ class Spectrum(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Spectrum, changing its name and Pid.
         """
-        _validateName(self.project, Spectrum, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.name = value
-        return (oldName,)
+        return self._rename(value)
 
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated spectrumViews instances

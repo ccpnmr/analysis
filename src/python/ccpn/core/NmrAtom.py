@@ -35,7 +35,7 @@ from ccpn.core.lib import Pid
 from ccpn.core.lib.Util import AtomIdTuple
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Constants
-from ccpn.util.Common import name2IsotopeCode, makeIterableList, _validateName
+from ccpn.util.Common import name2IsotopeCode, makeIterableList
 from ccpn.util.Constants import PSEUDO_ATOM_NAMES
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoBlock, renameObjectContextManager
@@ -372,13 +372,14 @@ class NmrAtom(AbstractWrapperObject):
 
     @logCommand(get='self')
     def rename(self, value: str = None):
-        """Rename the NmrAtom, changing its name, Pid, and internal representation."""
+        """Rename the NmrAtom, changing its name, Pid, and internal representation.
+        """
 
         # NBNB TODO change so you can set names of the form '@123' (?)
 
         # NB This is a VERY special case
         # - API code and notifiers will take care of resetting id and Pid
-        _validateName(self.project, NmrAtom, value=value, allowWhitespace=False, allowNone=True, checkExisting=False)
+        value = self._uniqueName(project=self.project, name=value)
 
         with renameObjectContextManager(self) as addUndoItem:
             oldName = self.name

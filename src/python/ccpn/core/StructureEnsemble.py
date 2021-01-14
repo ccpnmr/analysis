@@ -160,12 +160,7 @@ class StructureEnsemble(AbstractWrapperObject):
         """Rename StructureEnsemble, changing its name and Pid.
         NB, the serial remains immutable.
         """
-        commonUtil._validateName(self.project, StructureEnsemble, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.name = value
-        return (oldName,)
+        return self._rename(value)
 
     #=========================================================================================
     # CCPN functions
@@ -211,7 +206,6 @@ def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, d
     """
 
     name = StructureEnsemble._uniqueName(project=self, name=name)
-    commonUtil._validateName(self, StructureEnsemble, name)
 
     nmrProject = self._wrappedData
 

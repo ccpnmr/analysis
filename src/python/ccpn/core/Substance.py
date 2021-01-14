@@ -595,16 +595,14 @@ class Substance(AbstractWrapperObject):
         will be used. Labelling 'None'  means 'Natural abundance'"""
 
         # ejb - name should always be passed in, strange not to
-
-        oldName = self.name
         if name is None:
-            name = oldName
-        commonUtil._validateName(self.project, Substance, value=name, allowWhitespace=False, checkExisting=False)
+            name = self.name
+        oldName = self.name
+        name = self._uniqueName(project=self.project, name=name)
 
         oldLabelling = self.labelling
         apiLabeling = labelling = labelling or DEFAULT_LABELLING
-        commonUtil._validateName(self.project, Substance, value=labelling, attribName='labelling',
-                                 allowNone=True, checkExisting=False)
+        self._validateStringValue(attribName='labelling', value=labelling, allowNone=True)
 
         apiNmrProject = self.project._wrappedData
         if apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name, labeling=apiLabeling) is not None:
@@ -726,8 +724,7 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
     if isinstance(name, int):
         name = str(name)
     name = Substance._uniqueName(project=self, name=name)
-    commonUtil._validateName(self, Substance, name, allowNone=True, checkExisting=False)
-    commonUtil._validateName(self, Substance, _labelling, allowNone=True, checkExisting=False, attribName='labelling')
+    self._validateStringValue(attribName='labelling', value=_labelling, allowNone=True)
 
     apiNmrProject = self._wrappedData
     apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore
@@ -884,8 +881,8 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
     if isinstance(name, int):
         name = str(name)
     name = Substance._uniqueName(project=self, name=name)
-    commonUtil._validateName(self, Substance, name, allowNone=True, checkExisting=False)
-    commonUtil._validateName(self, Substance, labelling, allowNone=True, attribName='labelling', checkExisting=False)
+
+    self._validateStringValue(attribName='labelling', value=labelling, allowNone=True)
 
     if not sequence:
         raise ValueError("createPolymerSubstance requires non-empty sequence")

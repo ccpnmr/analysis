@@ -233,60 +233,108 @@ class AbstractWrapperObject(NotifierBase):
 
     @property
     def className(self) -> str:
-        """Class name - necessary since the actual objects may be of a subclass.."""
+        """Class name - necessary since the actual objects may be of a subclass.
+        """
         return self.__class__.className
 
     @property
     def shortClassName(self) -> str:
-        """Short class name, for PID. Must be overridden for each subclass."""
+        """Short class name, for PID. Must be overridden for each subclass.
+        """
         return self.__class__.shortClassName
 
     @property
     def project(self) -> 'Project':
-        """The Project (root)containing the object."""
+        """The Project (root)containing the object.
+        """
         return self._project
 
     @property
     def pid(self) -> Pid.Pid:
         """Identifier for the object, unique within the project.
         Set automatically from the short class name and object.id
-        E.g. 'NA:A.102.ALA.CA' """
+        E.g. 'NA:A.102.ALA.CA'
+        """
         return Pid.Pid(Pid.PREFIXSEP.join((self.shortClassName, self._id)))
 
     @property
     def longPid(self) -> Pid.Pid:
         """Identifier for the object, unique within the project.
         Set automatically from the full class name and object.id
-        E.g. 'NmrAtom:A.102.ALA.CA' """
+        E.g. 'NmrAtom:A.102.ALA.CA'
+        """
         return Pid.Pid(Pid.PREFIXSEP.join((self.className, self._id)))
 
     def _longName(self, name):
-        """long name generated form the name and the object id
+        """long name generated from the name and the object id
         """
         return Pid.Pid(Pid.PREFIXSEP.join((name, self._id)))
 
     @property
     def isDeleted(self) -> bool:
-        """True if this object is deleted."""
+        """True if this object is deleted.
+        """
         # The many variants are to make sure this catches deleted objects
         # also during the deletion process, for filtering
         return (not hasattr(self, '_wrappedData') or self._wrappedData is None
                 or not hasattr(self._project, '_data2Obj') or self._wrappedData.isDeleted)
 
-    # default name to use for objects with a name/title
     @classmethod
-    def _defaultName(cls):
+    def _defaultName(cls) -> str:
+        """default name to use for objects with a name/title
+        """
         return 'my%s' % cls.className
 
+    # @staticmethod
+    # def _defaultNameFromSerial(cls, serial):
+    #     # Get the next default name using serial, this may already exist
+    #     name = 'my%s_%s' % (cls.className, serial)
+    #     return name
+
     @classmethod
-    def _uniqueName(cls, project, name=None):
-        "Return a unique name based on name (set to defaultName if None)"
+    def _uniqueName(cls, project, name=None) -> str:
+        """Return a unique name based on name (set to defaultName if None)
+        """
         if name is None:
             name = cls._defaultName()
+        name = name.strip()
         names = [sib.name for sib in getattr(project, cls._pluralLinkName)]
         while name in names:
             name = commonUtil.incrementName(name)
+        cls._validateStringValue('name', name)
         return name
+
+    @classmethod
+    def _validateStringValue(cls, attribName: str, value: str,
+                                  allowWhitespace: bool = False,
+                                  allowEmpty: bool = False,
+                                  allowNone: bool = False):
+        """Validate the value of any string
+
+        :param attribName: used for reporting
+        :param value: value to be validated
+
+        CCPNINTERNAL: used in many rename() and newXYZ method of core classes
+        """
+        if value is None and not allowNone:
+            raise ValueError('%s: None not allowed for %r' %
+                             (cls.__name__, attribName))
+
+        if not isinstance(value, str):
+            raise ValueError('%s: %r must be a string' %
+                             (cls.__name__, attribName))
+
+        if len(value) == 0 and not allowEmpty:
+            raise ValueError('%s: %r must be set' %
+                             (cls.__name__, attribName))
+
+        if Pid.altCharacter in value:
+            raise ValueError('%s: Character %r not allowed for %r' %
+                             (cls.__name__, Pid.altCharacter, attribName))
+
+        if not allowWhitespace and commonUtil.contains_whitespace(value):
+           raise ValueError('%s: Whitespace not allowed in %r' %
+                             (cls.__name__, attribName))
 
     # @staticmethod
     # def _nextAvailableName(cls, project):
@@ -313,13 +361,6 @@ class AbstractWrapperObject(NotifierBase):
     #         name = commonUtil.incrementName(name)
     #
     #     return name
-
-    @staticmethod
-    def _defaultNameFromSerial(cls, serial):
-        # Get the next default name using serial, this may already exist
-        name = 'my%s_%s' % (cls.className, serial)
-
-        return name
 
     @property
     def _ccpnInternalData(self) -> dict:
@@ -694,6 +735,16 @@ class AbstractWrapperObject(NotifierBase):
             raise Exception
         raise NotImplementedError("Code error: function not implemented")
 
+    def _rename(self, value: str):
+        """Generic rename method that individual classes can use for implementation
+        of their rename method to minimises code duplication
+        """
+        name = self._uniqueName(project=self.project, name=value)
+        # rename functions from here
+        oldName = self.name
+        self._wrappedData.name = name
+        return (oldName,)
+
     def rename(self, value: str):
         """Change the object name or other key attribute(s), changing the object pid,
            and all internal references to maintain consistency.
@@ -703,9 +754,6 @@ class AbstractWrapperObject(NotifierBase):
     # In addition each class (except for Project) must define a  newClass method
     # The function (e.g. Project.newMolecule), ... must create a new child object
     # AND ALL UNDERLYING DATA, taking in all parameters necessary to do so.
-    # This can be done by defining a function (not a method)
-    # def newMolecule( self, *args, **kwds):
-    # and then doing Project.newMolecule = newMolecule
 
     #=========================================================================================
     # CCPN functions
@@ -1206,33 +1254,6 @@ class AbstractWrapperObject(NotifierBase):
                 for dd in iterator:
                     for notifier in tuple(dd):
                         notifier(self)
-
-    def _validateName(self, value: str, attribName: str = None, allowWhitespace: bool = False,
-                            allowEmpty: bool = False, allowNone: bool = False):
-        """GWV guesses: validate the name of any named core class object
-
-        :param attribName: used for reporting, defaults to className
-        """
-        attrib = attribName if attribName else self.className
-
-        if value is not None:
-            if not isinstance(value, str):
-                raise TypeError("%s name must be a string" % attrib)
-            if not value and not allowEmpty:
-                raise ValueError("%s name must be set" % attrib)
-            if Pid.altCharacter in value:
-                raise ValueError("Character %s not allowed in %s name" % (Pid.altCharacter, attrib))
-            if not allowWhitespace and commonUtil.contains_whitespace(value):
-                raise ValueError("whitespace not allowed in %s name" % attrib)
-        elif not allowNone:
-            raise ValueError("None not allowed in %s name" % attrib)
-
-        previous = self.getByRelativeId(value)
-        if previous not in (None, self):
-            raise ValueError("%s already exists" % previous.longPid)
-
-        # will only get here if all the tests pass
-        return True
 
     def resetSerial(self, newSerial: int):
         """ADVANCED Reset serial of object to newSerial, resetting parent link

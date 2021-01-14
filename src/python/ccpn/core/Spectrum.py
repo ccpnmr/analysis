@@ -42,7 +42,7 @@ HCACO                      Hca, CAh, CO    *(CA is treated as a separate type)*
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -52,8 +52,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-03 10:01:40 +0000 (Thu, December 03, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-14 19:31:18 +0000 (Thu, January 14, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2810,16 +2810,17 @@ assignmentTolerances
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated spectrumViews instances
         """
-        super()._finaliseAction(action=action)
+        if not super()._finaliseAction(action):
+            return
 
         # notify peak/integral/multiplet list
         if action in ['create', 'delete']:
             for peakList in self.peakLists:
-                peakList._finaliseAction(action=action)
+                peakList._finaliseAction(action)
             for multipletList in self.multipletLists:
-                multipletList._finaliseAction(action=action)
+                multipletList._finaliseAction(action)
             for integralList in self.integralLists:
-                integralList._finaliseAction(action=action)
+                integralList._finaliseAction(action)
 
         # propagate the rename to associated spectrumViews
         if action in ['change']:
@@ -2827,7 +2828,7 @@ assignmentTolerances
                 if self._scaleChanged:
                     # force a rebuild of the contours/etc.
                     specView.buildContoursOnly = True
-                specView._finaliseAction(action=action)
+                specView._finaliseAction(action)
 
             if self._scaleChanged:
                 self._scaleChanged = False
@@ -2835,13 +2836,13 @@ assignmentTolerances
                 # notify peaks/multiplets/integrals that the scale has changed
                 for peakList in self.peakLists:
                     for peak in peakList.peaks:
-                        peak._finaliseAction(action=action)
+                        peak._finaliseAction(action)
                 for multipletList in self.multipletLists:
                     for multiplet in multipletList.multiplets:
-                        multiplet._finaliseAction(action=action)
+                        multiplet._finaliseAction(action)
                 for integralList in self.integralLists:
                     for integral in integralList.integrals:
-                        integral._finaliseAction(action=action)
+                        integral._finaliseAction(action)
 
             # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
             #

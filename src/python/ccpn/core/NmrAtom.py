@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-23 10:34:50 +0000 (Mon, November 23, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-14 19:31:17 +0000 (Thu, January 14, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -345,7 +345,8 @@ class NmrAtom(AbstractWrapperObject):
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated ChemicalShift instances
         """
-        super()._finaliseAction(action=action)
+        if not super()._finaliseAction(action):
+            return
 
         # propagate the rename to associated ChemicalShift instances
         if action in ['rename', 'delete', 'change', 'create']:
@@ -353,7 +354,7 @@ class NmrAtom(AbstractWrapperObject):
                 if cs and not (cs.isDeleted or cs._flaggedForDelete):
                     # copy same action to the chemicalShift as one-one relation
                     # so delete => delete and create => create
-                    cs._finaliseAction(action=action)
+                    cs._finaliseAction(action)
 
             # if the assignedPeaks have changed then notifier the peaks
             # This contains the pre-post set to handle updating the peakTable/spectrumDisplay
@@ -361,7 +362,7 @@ class NmrAtom(AbstractWrapperObject):
             if peaks:
                 for peak in peaks:
                     if not (peak.isDeleted or peak._flaggedForDelete):
-                        peak._finaliseAction(action='change')
+                        peak._finaliseAction('change')
             setattr(self, ASSIGNEDPEAKSCHANGED, None)
 
     def _setIsotopeCode(self, value):

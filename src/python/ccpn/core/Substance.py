@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-03 10:01:40 +0000 (Thu, December 03, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-14 19:31:18 +0000 (Thu, January 14, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -574,14 +574,15 @@ class Substance(AbstractWrapperObject):
     def _finaliseAction(self, action: str):
         """Subclassed to notify changes to associated integralListViews
         """
-        super()._finaliseAction(action=action)
+        if not super()._finaliseAction(action):
+            return
 
         try:
             if action in ['rename']:
                 for sampleComponent in self.sampleComponents:
                     for spectrumHit in sampleComponent.spectrumHits:
-                        spectrumHit._finaliseAction(action=action)
-                    sampleComponent._finaliseAction(action=action)
+                        spectrumHit._finaliseAction(action)
+                    sampleComponent._finaliseAction(action)
 
         except Exception as es:
             raise RuntimeError('Error _finalising Substance.spectrumHits: %s' % str(es))

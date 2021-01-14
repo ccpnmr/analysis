@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2021-01-14 08:16:51 +0000 (Thu, January 14, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -65,7 +65,7 @@ boundAtomsTestData = collections.OrderedDict((
     ('A.2.ASP.OD1', ['CG']),
     ('A.2.ASP.OD2', ['CG']),
     ('A.2.ASP.QB', ['CB']),
-    ('A.3.LEU.C', ['CA', 'O', 'OXT']),
+    ('A.3.LEU.C', ['CA', 'O\'', 'O\'\'']),
     ('A.3.LEU.CA', ['C', 'CB', 'HA', 'N']),
     ('A.3.LEU.CB', ['CA', 'CG', 'HB%', 'HB2', 'HB3', 'HBx', 'HBy', 'QB']),
     ('A.3.LEU.CD%', ['CG', 'HD%']),
@@ -96,8 +96,8 @@ boundAtomsTestData = collections.OrderedDict((
     ('A.3.LEU.MD1', ['CD1']),
     ('A.3.LEU.MD2', ['CD2']),
     ('A.3.LEU.N', ['A.2.ASP.C', 'CA', 'H']),
-    ('A.3.LEU.O', ['C']),
-    ('A.3.LEU.OXT', ['C']),
+    ('A.3.LEU.O\'', ['C']),
+    ('A.3.LEU.O\'\'', ['C']),
     ('A.3.LEU.QB', ['CB']),
     ('A.3.LEU.QD', []),
     ('B.1.PHE.C', ['CA', 'O', 'B.2.PRO.N']),
@@ -169,7 +169,7 @@ boundAtomsTestData = collections.OrderedDict((
     ('B.2.PRO.QB', ['CB']),
     ('B.2.PRO.QD', ['CD']),
     ('B.2.PRO.QG', ['CG']),
-    ('B.3.CYS.C', ['CA', 'O', 'OXT']),
+    ('B.3.CYS.C', ['CA', 'O\'', 'O\'\'']),
     ('B.3.CYS.CA', ['C', 'CB', 'HA', 'N']),
     ('B.3.CYS.CB', ['CA', 'HB%', 'HB2', 'HB3', 'HBx', 'HBy', 'QB', 'SG']),
     ('B.3.CYS.H', ['N']),
@@ -181,8 +181,8 @@ boundAtomsTestData = collections.OrderedDict((
     ('B.3.CYS.HBy', ['CB']),
     ('B.3.CYS.HG', ['SG']),
     ('B.3.CYS.N', ['B.2.PRO.C', 'CA', 'H']),
-    ('B.3.CYS.O', ['C']),
-    ('B.3.CYS.OXT', ['C']),
+    ('B.3.CYS.O\'', ['C']),
+    ('B.3.CYS.O\'\'', ['C']),
     ('B.3.CYS.QB', ['CB']),
     ('B.3.CYS.SG', ['CB', 'HG']),
     ))

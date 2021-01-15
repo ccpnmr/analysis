@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-12 20:17:00 +0000 (Tue, January 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-15 10:43:01 +0000 (Fri, January 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -643,7 +643,7 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     numDim = dataSource.numDim
     peakDims = apiPeak.sortedPeakDims()
 
-    if numDim == 1: # testing
+    if numDim == 1:
         _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1)
         return
 

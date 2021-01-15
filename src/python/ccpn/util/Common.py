@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-13 17:21:44 +0000 (Wed, January 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-15 10:42:41 +0000 (Fri, January 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -826,9 +826,18 @@ def _SortByMatch(item):
 def _atoi(text):
     return int(text) if text.isdigit() else text
 
-def _naturalKeys(obj, theProperty='name'):
+def _naturalKeyObjs(obj, theProperty='name'):
     text = getattr(obj, theProperty)
     return [_atoi(c) for c in re.split(r'(\d+)', text) ]
+
+def naturalSortList(ll, reverse=True):
+    """
+    :param ll: a list of strings
+    :return: a sorted list by natural sort
+    """
+    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    alphanumKey = lambda key:[convert(c) for c in re.split('([0-9]+)', key)]
+    return sorted(ll, key=alphanumKey, reverse=reverse)
 
 def sortObjectByName(objs, reverse=True):
     """
@@ -838,7 +847,7 @@ def sortObjectByName(objs, reverse=True):
     :return: None
     Sorts the objects by digit if present in the name, otherwise alphabetically.
     """
-    objs.sort(key=_naturalKeys, reverse=reverse)
+    objs.sort(key=_naturalKeyObjs, reverse=reverse)
 
 def getAxisCodeMatch(axisCodes, refAxisCodes, exactMatch=False, allMatches=False) -> OrderedDict:
     """Return an OrderedDict containing the mapping from the refAxisCodes to axisCodes

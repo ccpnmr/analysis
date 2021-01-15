@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:58 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2021-01-15 10:42:41 +0000 (Fri, January 15, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,7 +31,7 @@ import time
 from ccpn.util.Logging import getLogger, _debug3
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from tqdm import tqdm, tqdm_gui
-
+from ccpn.util.Common import sortObjectByName, naturalSortList
 
 ################################       Excel Headers Warning      ######################################################
 """The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.
@@ -312,7 +312,9 @@ class ExcelReader(object):
         samples = []
         for dataFrame in dataframesList:
             if SAMPLE_NAME in dataFrame.columns:
-                for name in list(set((dataFrame[SAMPLE_NAME]))):
+                saNames = list(set((dataFrame[SAMPLE_NAME])))
+                saNames = naturalSortList(saNames, False)
+                for name in saNames:
                     if not self._project.getByPid('SA:' + str(name)):
                         sample = _newSample(self._project, name=str(name))
                         samples.append(sample)
@@ -419,7 +421,9 @@ class ExcelReader(object):
             data = self._project.loadData(filePath)
         if data is not None:
             if len(data) > 0:
-                self._linkSpectrumToObj(obj, data[0], dct)
+                sp = data[0]
+                sp.rename(name)
+                self._linkSpectrumToObj(obj, sp, dct)
                 if EXP_TYPE in dct: # use exp name as it is much faster and safer to save than exp type.
                     data[0].experimentName = dct[EXP_TYPE]
 

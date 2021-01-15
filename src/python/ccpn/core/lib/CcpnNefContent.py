@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-03 10:01:41 +0000 (Thu, December 03, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-15 17:12:45 +0000 (Fri, January 15, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,8 +35,10 @@ from ccpn.util.nef import StarIo
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpn.core.Project import Project
 from ccpn.core.SpectrumGroup import SpectrumGroup
+from ccpn.core.Spectrum import Spectrum
 from ccpn.core.Complex import Complex
 from ccpn.core.PeakList import PeakList
+from ccpn.core.Substance import Substance
 from ccpn.core.Sample import Sample
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.RestraintList import RestraintList
@@ -639,6 +641,26 @@ class CcpnNefContent:
     contents['nef_peak'] = content_nef_peak
     contents['nef_peaks'] = content_nef_peaks
     contents['nef_peak_assignments'] = content_nef_peak_assignments
+
+    def content_ccpn_spectrum_reference_substances(self, parent: Spectrum, loop: StarIo.NmrLoop,
+                                                   parentFrame: StarIo.NmrSaveFrame, **kwargs):
+        """Get the contents of ccpn_group_spectrum loop"""
+        substances = OrderedSet()
+        for row in loop.data:
+            substances.add(row.get('serial'))
+        return substances
+
+    contents['ccpn_spectrum_reference_substances'] = content_ccpn_spectrum_reference_substances
+
+    def content_ccpn_substance_reference_spectra(self, parent: Substance, loop: StarIo.NmrLoop,
+                                                   parentFrame: StarIo.NmrSaveFrame, **kwargs):
+        """Get the contents of ccpn_group_spectrum loop"""
+        spectra = OrderedSet()
+        for row in loop.data:
+            spectra.add(row.get('nmr_spectrum_id'))
+        return spectra
+
+    contents['ccpn_substance_reference_spectra'] = content_ccpn_substance_reference_spectra
 
     def content_nef_restraint(self, restraintList: RestraintList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
                               itemLength: int = None) -> Optional[OrderedSet]:

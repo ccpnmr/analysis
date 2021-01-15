@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-15 17:12:46 +0000 (Fri, January 15, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1361,6 +1361,16 @@ class CcpnNefWriter:
         else:
             del result['ccpn_spectrum_hit']
 
+        if exportCompleteSpectrum and spectrum.referenceSubstances:
+            loopName = 'ccpn_spectrum_reference_substances'
+            loop = result[loopName]
+            referenceSubstances = spectrum.referenceSubstances
+            if len(referenceSubstances) > 0:
+                for substance in referenceSubstances:
+                    loop.newRow(self._loopRowData(loopName, substance))
+            else:
+                del result[loopName]
+
         # NOTE:ED - new for ccpn_peak_lists
         spectrumPeakLists = set(spectrum.peakLists) & set(peakLists)
         if exportCompleteSpectrum and spectrumPeakLists:
@@ -1542,7 +1552,7 @@ class CcpnNefWriter:
         # Fill in loop
         loopName = 'ccpn_group_spectrum'
         loop = result[loopName]
-        spectra = sorted(spectrumGroup.spectra)
+        spectra = spectrumGroup.spectra
         if spectra:
             for spectrum in spectra:
                 loop.newRow((spectrum.name,))
@@ -1634,7 +1644,16 @@ class CcpnNefWriter:
                 loop.newRow((synonym,))
         else:
             del result[loopName]
-        #
+
+        loopName = 'ccpn_substance_reference_spectra'
+        loop = result[loopName]
+        referenceSpectra = substance.referenceSpectra
+        if len(referenceSpectra)>0:
+            for spectrum in referenceSpectra:
+                loop.newRow((spectrum.name,))
+        else:
+            del result[loopName]
+
         return result
 
     def ccpnAssignentToNef(self, nmrChains: List[NmrChain]):
@@ -4240,6 +4259,28 @@ class CcpnNefReader(CcpnNefContent):
     #
     importers['nef_nmr_spectrum'] = load_nef_nmr_spectrum
 
+    def load_ccpn_spectrum_reference_substances(self, parent: Spectrum, loop: StarIo.NmrLoop,
+                                                saveFrame: StarIo.NmrSaveFrame, **kwargs):
+        """load  reference_substances loop"""
+
+        referenceSubstances = []
+        for row in loop.data:
+            name = row.get('name')
+            labelling = row.get('labelling')
+            nameLabelling = '.'.join([name, labelling or ''])
+            substance = self.project.getSubstance(nameLabelling)
+            if substance is None:
+                self.warning(
+                        "No substance saveframe found with framecode %s. Skipping substance from referenceSubstances"
+                        % nameLabelling,loop)
+            else:
+                referenceSubstances.append(substance)
+        #
+        parent.referenceSubstances = referenceSubstances
+
+    #
+    importers['ccpn_spectrum_reference_substances'] = load_ccpn_spectrum_reference_substances
+
     def verify_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         _rowSpectrumErrors = saveFrame._rowErrors[saveFrame.name] = OrderedSet()
         # _rowPeakErrors = saveFrame._rowErrors['nef_peak_list'] = OrderedSet()
@@ -5538,6 +5579,20 @@ class CcpnNefReader(CcpnNefContent):
     #
     importers['ccpn_substance_synonym'] = load_ccpn_substance_synonym
     verifiers['ccpn_substance_synonym'] = _noLoopVerify
+
+    def load_ccpn_substance_reference_spectra(self, parent: Substance, loop: StarIo.NmrLoop,
+                                              saveFrame: StarIo.NmrSaveFrame, **kwargs):
+        """load  reference_spectra loop"""
+
+        referenceSpectra = []
+        for row in loop.data:
+            spectrum = self.project.getSpectrum(row.get('nmr_spectrum_id'))
+            if spectrum is not None:
+                referenceSpectra.append(spectrum)
+        parent.referenceSpectra = referenceSpectra
+
+    #
+    importers['ccpn_substance_reference_spectra'] = load_ccpn_substance_reference_spectra
 
     def load_ccpn_assignment(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
 

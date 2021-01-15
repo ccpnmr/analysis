@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-15 19:27:29 +0000 (Fri, January 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-15 19:29:28 +0000 (Fri, January 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -473,7 +473,7 @@ class OpenItemABC():
         import pandas as pd
         pids = [str(obj.pid) for obj in objs]
         text = '{}'.format(', '.join(["'{}'".format(item) for item in pids]))
-        df = pd.DataFrame(text)
+        df = pd.DataFrame([text])
         df.to_clipboard(index=False, header=False)
 
 

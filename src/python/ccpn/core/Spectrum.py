@@ -2441,16 +2441,60 @@ class Spectrum(AbstractWrapperObject):
                 pass
         return newSpectrum
 
+    def _axisDictToSliceTuples(self, axisDict) -> list:
+        """Convert dict of (key,value) = (axisCode, (startPpm, stopPpm)) pairs
+        to a list of sliceTuples (1-based)
+
+        if (axisDict[axisCode] is None) ==> use spectrumLimits
+        if (startPpm is None) ==> point=1
+        if (stopPpm is None) ==> point=pointCounts[axis]
+
+        :param axisDict: dict of (axisCode, (startPpm,stopPpm)) (key,value) pairs
+        :return list of sliceTuples
+
+        CCPNINTERMAL: also used by PeakPickerABC
+        """
+        axisCodes = [ac for ac in axisDict.keys()]
+        if None in self._mapAxisCodes(axisCodes):
+            raise ValueError('Illegal axisCode in axisDict')
+
+       # augment axisDict with any missing axisCodes or replace any None values with spectrumLimits
+        for idx, ac in enumerate(self.axisCodes):
+            if ac not in axisDict or axisDict[ac] is None:
+                axisDict[ac] = self.spectrumLimits[idx]
+
+        sliceTuples = [None]*self.dimensionCount
+        for axis, ac, dim in self.axisTriples:
+            stopPpm, startPpm = axisDict.get(ac)  # to be converted to points; ppm scale runs backwards
+
+            if startPpm is None:
+                startPoint = 1
+            else:
+                startPoint = int(self.ppm2point(startPpm, axisCode=ac) + 0.5)
+
+            if stopPpm is None:
+                stopPoint = self.pointCounts[axis]
+            else:
+                stopPoint = int(self.ppm2point(stopPpm, axisCode=ac) + 0.5)
+
+            sliceTuples[axis] = (startPoint,stopPoint)
+
+        getLogger().debug('Spectrum._axisDictToSliceTuples: axisDict = %s; sliceTuples = %s' %
+                          (axisDict, sliceTuples))
+        return sliceTuples
+
     def getRegion(self, **axisDict):
         """
         Return the region of the spectrum data defined by the axis limits in ppm as numpy array
         of the same dimensionality as defined by the Spectrum instance.
 
         Axis limits  are passed in as a dict of (axisCode, tupleLimit) key, value pairs
-        with the tupleLimit supplied as (start,stop) axis limits in ppm (lower ppm value first).
+        with the tupleLimit supplied as (startPpm,stopPpm) axis limits in ppm (lower ppm value first).
 
         For axisCodes that are not included in the axisDict, the limits will by taken from the
-        spectrum limits along the relvant axis
+        spectrum limits along the relevant axis
+        For axisCodes that are None, the limits will by taken from the spectrum limits along the
+        relevant axis
 
         Illegal axisCodes will raise an error.
 
@@ -2463,34 +2507,12 @@ class Spectrum(AbstractWrapperObject):
             regionData = spectrum.getRegion(**limitsDict)
             regionData = spectrum.getRegion(Hn=(7.0, 9.0), Nh=(110, 130))
 
-        :param axisDict: dict of (axisCode, tupleLimit) key,value pairs
+        :param axisDict: dict of (axisCode, (startPpm,stopPpm)) key,value pairs
         :return: numpy array
         """
         if not self.hasValidPath():
             raise RuntimeError('No valid spectral datasource defined')
-
-        axisCodes = [ac for ac in axisDict.keys()]
-        if None in self._mapAxisCodes(axisCodes):
-            raise ValueError('Illegal axisCode in axisDict')
-
-        # augment axisDict with any missing axisCodes
-        for idx, ac in enumerate(self.axisCodes):
-            axisDict.setdefault(ac, self.spectrumLimits[idx])
-
-        axisCodes = [k for k in axisDict.keys()]  # just in case; should be complete now
-        axes = self.getByAxisCodes('axes', axisCodes, exactMatch=False)
-
-        sliceTuples = [None]*self.dimensionCount
-        for axis, ac in zip(axes, axisCodes):
-            stop, start = axisDict.get(ac)  # to be converted to points; ppm scale runs backwards
-
-            start = max(int(self.ppm2point(start, axisCode=ac) + 0.5), 1)
-            stop = min(int(self.ppm2point(stop, axisCode=ac) + 0.5), self.pointCounts[axis])
-
-            sliceTuples[axis] = (start,stop)
-
-        getLogger().debug('Spectrum.getRegion: axisDict = %s; sliceTuples = %s' % (axisDict, sliceTuples))
-
+        sliceTuples = self._axisDictToSliceTuples(axisDict)
         return self.dataSource.getRegionData(sliceTuples)
 
     def getRegionData(self, exclusionBuffer: Optional[Sequence] = None, minimumDimensionSize: int = 3, **axisDict):

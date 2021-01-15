@@ -27,6 +27,8 @@ __date__ = "$Date: 2021-01-13 10:28:41 +0000 (Wed, Jan 13, 2021) $"
 # Start of code
 #=========================================================================================
 
+from collections import OrderedDict
+
 from ccpn.core.Spectrum import Spectrum
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 from ccpn.util.Logging import getLogger
@@ -39,7 +41,7 @@ class SimplePeak(object):
 
     def __init__(self, points, height, volume=None):
         """
-        :param points: list/tuple of points (0-based)
+        :param points: list/tuple of points (0-based); z,y,x ordered in case of nD (i.e. numpy ordering)
         :param height: height of the peak
         :param volume: volume of the peak (optional)
         """
@@ -59,7 +61,29 @@ class PeakPickerABC(object):
     """ABC for implementation of a peak picker
     """
 
-    peakPickerType = None
+    #=========================================================================================
+    # to be subclassed
+    #=========================================================================================
+
+    peakPickerType = None       # A unqiue string identifying the peak picker
+    defaultPointExtension = 1   # points to extend the region to pick on either side
+    onlyFor1D = False
+
+    #=========================================================================================
+    # data formats
+    #=========================================================================================
+    # A dict of registered dataFormat: filled by _registerPeakPicker classmethod, called once after
+    # each definition of a new derived class
+    _peakPickers = OrderedDict()
+
+    @classmethod
+    def _register(cls):
+        "register cls.peakPickerType"
+        if cls.peakPickerType in PeakPickerABC._peakPickers:
+            raise RuntimeError('PeakPicker "%s" was already registered' % cls.peakPickerType)
+        PeakPickerABC._peakPickers[cls.peakPickerType] = cls
+
+    #=========================================================================================
 
     def __init__(self, spectrum):
         """Intialise the instance and associate with spectrum
@@ -72,10 +96,15 @@ class PeakPickerABC(object):
         if not isinstance(spectrum, Spectrum):
             raise ValueError('%s: spectrum %r is not of Spectrum class' % self.__class__.__name__)
 
+        if spectrum.dimensionCount > 1 and self.onlyFor1D:
+            raise ValueError('%s only works for 1D spectra' % self.__class__.__name__)
+
         self.spectrum = spectrum
         self.dimensionCount = spectrum.dimensionCount
+        self.pointExtension = self.defaultPointExtension
 
         self.lastPickedPeaks = None
+        self.sliceTuples = None
 
     def setParameters(self, **parameters):
         """
@@ -88,27 +117,28 @@ class PeakPickerABC(object):
 
     def findPeaks(self, data) -> list:
         """find the peaks in data (type numpy-array) and return as a list of SimplePeak instances
+        note that SimplePeak.points are ordered z,y,x for nD, in accordance with the numpy nD data array
 
         called from pickPeaks()
         any required parameters this method needs should be initialised/set before using the
         setParameters() method; i.e.:
                 myPeakPicker = PeakPicker(spectrum=mySpectrum)
                 myPeakPicker.setParameters(dropFactor=0.2, positiveThreshold=1e6, negativeThreshold=None)
-                corePeaks = myPeakPicker.pickPeaks(axisDict={H:(6.0,11.5),N:(102.3,130.0)})
+                corePeaks = myPeakPicker.pickPeaks(axisDict={'H':(6.0,11.5),'N':(102.3,130.0)})
 
+        :param data: nD numpy array
         :return list of SimplePeak instances
 
         To be subclassed
         """
         raise NotImplementedError('%s.findPeaks should be implemented' % self.__class__.__name__)
 
-    def pickPeaks(self, axisDict, peakList=None) -> list:
+    def pickPeaks(self, axisDict, peakList) -> list:
         """
         :param axisDict: Axis limits  are passed in as a dict of (axisCode, tupleLimit) key, value
                          pairs with the tupleLimit supplied as (start,stop) axis limits in ppm
                          (lower ppm value first).
-        :param peakList: peakList instance to add newly pickedPeaks (defaults to last PeakList of
-                         spectrum)
+        :param peakList: peakList instance to add newly pickedPeaks
         :return: list of core.Peak instances
         """
         if self.spectrum is None:
@@ -118,7 +148,10 @@ class PeakPickerABC(object):
             raise RuntimeError('%s.pickPeaks: spectrum %s, No valid spectral datasource defined' %
                                (self.__class__.__name__, self.spectrum))
 
-        data = self.spectrum.getRegion(**axisDict)
+        self.sliceTuples = self.spectrum._axisDictToSliceTuples(axisDict)
+        # TODO: use Spectrum aliasing definitions once defined
+        data = self.spectrum.dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1]*self.spectrum.dimensionCount)
+
         peaks = self.findPeaks(data)
         getLogger().debug('%s.pickPeaks: found %d peaks in spectrum %s; %r' %
                          (self.__class__.__name__, len(peaks), self.spectrum, axisDict))
@@ -141,7 +174,8 @@ class PeakPickerABC(object):
         for pk in peaks:
             if len(pk.points) != self.dimensionCount:
                 raise RuntimeError('%s: invalid dimensionality of points attribute' % pk)
-            pointPosition = [p+1.0 for p in pk.points]
+            # correct the peak.points for "offset" (the slice-positions taken) and ordering (i.e. inverse)
+            pointPosition = [float(p)+float(self.sliceTuples[idx][0]) for idx,p in enumerate(pk.points[::-1])]
             result = peakList.newPeak(pointPosition=pointPosition, height=pk.height, volume=pk.volume)
             corePeaks.append(result)
         return corePeaks

@@ -36,17 +36,16 @@ class Simple1DPeakPicker(PeakPickerABC):
     """
 
     peakPickerType = "Simple1D"
+    onlyFor1D = True
 
     def __init__(self, spectrum):
-
-        if spectrum.dimensionCount != 1:
-            raise ValueError('%s only works for 1D spectra' % self.__class__.__name__)
-
         super().__init__(spectrum=spectrum)
         self.noise = None
 
     def findPeaks(self, data) -> list:
-        """Find the local (positive) maxima in the numpy data
+        """Find the local (positive) maxima in the numpy data;
+        return a list with SimplePeak instances; note that SimplePeak.points are ordered z,y,x for nD,
+        in accordance with the numpy data array
         """
         if self.noise is None:
             self.noise = self.spectrum.estimateNoise()
@@ -63,3 +62,5 @@ class Simple1DPeakPicker(PeakPickerABC):
                 i += 1
 
         return peaks
+
+Simple1DPeakPicker._register()

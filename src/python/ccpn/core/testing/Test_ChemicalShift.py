@@ -30,24 +30,24 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 class ChemicalShiftTest(WrapperTesting):
     # Path of project to load (None for new project
-    projectPath = 'CcpnCourse2b.ccpn'
+    projectPath = 'V3ProjectForTests.ccpn'
 
     def test_rename_list(self):
         self.project._wrappedData.root.checkAllValid(complete=True)
 
         shiftList = self.project.chemicalShiftLists[0]
 
-        self.assertEqual(shiftList.pid, 'CL:ShiftList_2')
-        self.assertEqual(sorted(shiftList.chemicalShifts)[5].pid, 'CS:ShiftList_2.A.3.GLU.CA')
+        self.assertEqual(shiftList.pid, 'CL:default')
+        self.assertEqual(sorted(shiftList.chemicalShifts)[20].pid, 'CS:default.A.2.GLU.H')
         shiftList.rename('RenamedList')
         self.assertEqual(shiftList.pid, 'CL:RenamedList')
-        self.assertEqual(sorted(shiftList.chemicalShifts)[5].pid, 'CS:RenamedList.A.3.GLU.CA')
+        self.assertEqual(sorted(shiftList.chemicalShifts)[20].pid, 'CS:RenamedList.A.2.GLU.H')
 
         # Undo and redo all operations
         self.undo.undo()
-        self.assertEqual(shiftList.pid, 'CL:ShiftList_2')
-        self.assertEqual(sorted(shiftList.chemicalShifts)[5].pid, 'CS:ShiftList_2.A.3.GLU.CA')
+        self.assertEqual(shiftList.pid, 'CL:default')
+        self.assertEqual(sorted(shiftList.chemicalShifts)[20].pid, 'CS:default.A.2.GLU.H')
 
         self.undo.redo()
         self.assertEqual(shiftList.pid, 'CL:RenamedList')
-        self.assertEqual(sorted(shiftList.chemicalShifts)[5].pid, 'CS:RenamedList.A.3.GLU.CA')
+        self.assertEqual(sorted(shiftList.chemicalShifts)[20].pid, 'CS:RenamedList.A.2.GLU.H')

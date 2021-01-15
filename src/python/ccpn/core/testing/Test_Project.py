@@ -60,14 +60,14 @@ class ProjectTestExperimentTypeMap(WrapperTesting):
 
 class ProjectTestIo(WrapperTesting):
     # Path of project to load (None for new project)
-    projectPath = 'CcpnCourse2b.ccpn'
+    projectPath = 'V3ProjectForTests.ccpn'
 
     def test_name(self):
         project = self.project
-        self.assertTrue(project.name.startswith('CcpnCourse2b'))
+        self.assertTrue(project.name.startswith('V3ProjectForTests'))
         baseDir, projDir = os.path.split(project.path)
         self.assertEquals(projDir[-5:], '.ccpn')
-        self.assertTrue(projDir.startswith('CcpnCourse2b'))
+        self.assertTrue(projDir.startswith('V3ProjectForTests'))
 
         self.assertTrue(project.save(newPath=os.path.join(baseDir, '_SAVED_TO_NAME.ccpn'),
                                      overwriteExisting=True))

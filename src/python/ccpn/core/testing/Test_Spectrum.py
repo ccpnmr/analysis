@@ -31,13 +31,13 @@ from ccpn.util import Path
 
 class SimpleSpectrumTest(WrapperTesting):
     # Path of project to load (None for new project)
-    projectPath = 'CcpnCourse1b.ccpn'
+    projectPath = 'V3ProjectForTests.ccpn'
 
     def test_have_spectrum(self):
-        assert self.project.getSpectrum('HSQC-115') is not None
+        self.assertTrue(self.project.getSpectrum('hsqc_115') is not None)
 
     def test_id_is_spectrum(self):
-        assert self.project.getSpectrum('HSQC-115').name == 'HSQC-115'
+        self.assertEqual(self.project.getSpectrum('hsqc_115').name, 'hsqc_115')
         # Undo and redo all operations
         self.undo.undo()
         self.undo.redo()
@@ -45,33 +45,33 @@ class SimpleSpectrumTest(WrapperTesting):
 
 class SpectrumTest(WrapperTesting):
     # Path of project to load (None for new project)
-    projectPath = 'CcpnCourse1b.ccpn'
+    projectPath = 'V3ProjectForTests.ccpn'
 
     def test_dimensionCount(self):
-        spectrum = self.project.getSpectrum('HSQC-115')
+        spectrum = self.project.getSpectrum('hsqc_115')
         # Undo and redo all operations
         self.undo.undo()
         self.undo.redo()
-        assert spectrum.dimensionCount == spectrum._apiDataSource.numDim
+        self.assertEqual(spectrum.dimensionCount, spectrum._apiDataSource.numDim)
 
     def test_pointCount(self):
-        spectrum = self.project.getSpectrum('HSQC-115')
+        spectrum = self.project.getSpectrum('hsqc_115')
         numPoints = tuple([dataDim.numPoints for dataDim in spectrum._apiDataSource.sortedDataDims()])
 
         # Undo and redo all operations
         self.undo.undo()
         self.undo.redo()
-        assert spectrum.pointCounts == numPoints
+        self.assertEqual(spectrum.pointCounts, numPoints)
 
     def test_filePath(self):
-        spectrum = self.project.getSpectrum('HSQC-115')
+        spectrum = self.project.getSpectrum('hsqc_115')
         # Undo and redo all operations
         self.undo.undo()
         self.undo.redo()
         self.assertTrue(spectrum.filePath.startswith(Path.getTopDirectory()))
 
     def test_rename(self):
-        spectrum = self.project.getSpectrum('HSQC-115')
+        spectrum = self.project.getSpectrum('hsqc_115')
         peakList = spectrum.peakLists[0]
         spectrum.rename('NEWNAME')
         # Undo and redo all operations
@@ -84,16 +84,16 @@ class SpectrumTest(WrapperTesting):
 
 class SpectrumIntensitiesTest(WrapperTesting):
     # Path of project to load (None for new project)
-    projectPath = 'Ccpn1Dtesting.ccpn'
+    projectPath = 'V3ProjectForTests.ccpn'
 
     def test_intensities_get(self):
         self.project._wrappedData.root.checkAllValid(complete=True)
-        spectrum = self.project.getSpectrum('1D-1')
+        spectrum = self.project.getSpectrum('1H_1D')
         intensities = spectrum.intensities
         self.assertIs(intensities, spectrum.intensities)
 
     def test_intensities_set(self):
-        spectrum = self.project.getSpectrum('1D-1')
+        spectrum = self.project.getSpectrum('1H_1D')
         intensities = spectrum.intensities
         intensities[0] = 19.23
         constant1 = intensities[0]  # have to do as separate step o/w constant1 has type float instead of numpy.float32

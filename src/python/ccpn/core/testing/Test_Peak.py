@@ -32,10 +32,10 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 class PeakTest(WrapperTesting):
     # Path of project to load (None for new project
-    projectPath = 'CcpnCourse1b.ccpn'
+    projectPath = 'V3ProjectForTests.ccpn'
 
     def test_assignPeak(self):
-        spectrum = self.project.getSpectrum('HSQC-115')
+        spectrum = self.project.getSpectrum('hsqc_115')
         shiftList = self.project.newChemicalShiftList()
         spectrum.chemicalShiftList = shiftList
         nmrResidue = self.project.nmrChains[0].fetchNmrResidue()

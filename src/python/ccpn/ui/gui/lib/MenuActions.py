@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-13 18:14:21 +0000 (Wed, January 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-15 18:17:25 +0000 (Fri, January 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -427,6 +427,7 @@ class OpenItemABC():
                                   partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False, defaultItems=spectra),
                                           self.mainWindow, self.getObj(), self.node))
 
+        contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
         contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
         canBeCloned = True
         for obj in objs:
@@ -463,6 +464,13 @@ class OpenItemABC():
             #             obj.delete()
         except Exception as es:
             showWarning('Delete', str(es))
+
+    def _copyPidsToClipboard(self, objs):
+        import pandas as pd
+        pids = [str(obj.pid) for obj in objs]
+        text = ["'{}',".format(item) for item in pids]
+        df = pd.DataFrame(text)
+        df.to_clipboard(index=False, header=False)
 
 
 class _openItemChemicalShiftListTable(OpenItemABC):

@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:31:18 +0000 (Thu, January 14, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-15 17:11:32 +0000 (Fri, January 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -85,6 +85,9 @@ class Substance(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiRefComponent._metaclass.qualifiedName()
+
+    # CCPN internal
+    _linkedSpectraPids = '_linkedSpectraPids'
 
     # CCPN properties
     @property
@@ -533,24 +536,18 @@ class Substance(AbstractWrapperObject):
 
     @property
     def referenceSpectra(self) -> typing.Tuple[Spectrum, ...]:
-        """Reference Spectra acquired for Substance.
-        There should be only one reference spectrum for each experiment type"""
-
-        name = self.name
-        data2Obj = self._project._data2Obj
-        return tuple(sorted(data2Obj[y] for x in self._project._apiNmrProject.experiments
-                            for y in x.dataSources
-                            if x.refComponentName == name))
+        """Reference Spectra acquired for Substance"""
+        _referenceSpectra = []
+        for spectum in self.project.spectra:
+            if self in spectum.referenceSubstances:
+                _referenceSpectra.append(spectum)
+        return _referenceSpectra
 
     @referenceSpectra.setter
-    def referenceSpectra(self, value):
-        name = self.name
-        if not value:
-            for spectrum in self.referenceSpectra:
-                spectrum._apiDataSource.experiment.refComponentName = None
-        for spectrum in value:
-            if isinstance(spectrum, Spectrum):
-                spectrum._apiDataSource.experiment.refComponentName = name
+    def referenceSpectra(self, spectra):
+
+        for spectrum in spectra:
+            spectrum.referenceSubstances = [self]
 
     @property
     def _molecule(self):
@@ -1037,26 +1034,30 @@ SampleComponent.substance = property(getter, None, None,
                                      "Substance corresponding to SampleComponent")
 
 
-def getter(self: Spectrum) -> Substance:
-    apiRefComponent = self._apiDataSource.experiment.refComponent
-    # return apiRefComponent and self._project._data2Obj[apiRefComponent]
+####### Moved to spectrum as referenceSubstances.
+####### ReferenceSubstance is Deprecated from 3.0.3.
 
-    return None if apiRefComponent is None else self._project._data2Obj.get(apiRefComponent)
-
-
-def setter(self: Spectrum, value: Substance):
-    # apiRefComponent = value and value._apiSubstance
-
-    apiRefComponent = None if value is None else value._apiSubstance
-
-    self._apiDataSource.experiment.refComponent = apiRefComponent
-
-
+# def getter(self: Spectrum) -> Substance:
+#     apiRefComponent = self._apiDataSource.experiment.refComponent
+#     # return apiRefComponent and self._project._data2Obj[apiRefComponent]
 #
-Spectrum.referenceSubstance = property(getter, setter, None,
-                                       "Substance that has this Spectrum as a reference spectrum")
-del getter
-del setter
+#     return None if apiRefComponent is None else self._project._data2Obj.get(apiRefComponent)
+#
+#
+# def setter(self: Spectrum, value: Substance):
+#     # apiRefComponent = value and value._apiSubstance
+#
+#     apiRefComponent = None if value is None else value._apiSubstance
+#
+#     self._apiDataSource.experiment.refComponent = apiRefComponent
+#
+#
+# #
+# Spectrum.referenceSubstance = property(getter, setter, None,
+#                                        "Substance that has this Spectrum as a reference spectrum")
+# del getter
+# del setter
+####### End referenceSubstance link ####
 
 # Notifiers:
 

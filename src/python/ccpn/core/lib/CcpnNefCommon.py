@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-15 17:12:45 +0000 (Fri, January 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-16 17:06:25 +0000 (Sat, January 16, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -492,6 +492,9 @@ nef2CcpnMap = {
         ('symbol_colour', 'symbolColour'),
         ('symbol_style', 'symbolStyle'),
         ('text_colour', 'textColour'),
+        ('meritColour', 'meritColour'),
+        ('meritEnabled', 'meritEnabled'),
+        ('meritThreshold', 'meritThreshold'),
         )),
     # NOTE:ED - added for older nef when no peakList information in the spectrum saveFrame
     'ccpn_no_peak_list'              : OD((

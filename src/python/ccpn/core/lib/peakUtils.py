@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-15 10:43:01 +0000 (Fri, January 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-16 16:55:40 +0000 (Sat, January 16, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1027,14 +1027,17 @@ def find_nearest(array, value):
     return array[idx]
 
 
-def snap1DPeaksToExtrema(peaks, maximumLimit=0.1):
+def snap1DPeaksToExtrema(peaks, maximumLimit=0.1, figOfMeritLimit=1,):
     with undoBlockWithoutSideBar():
         with notificationEchoBlocking():
             if len(peaks) > 0:
                 peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
                 for peak in peaks:  # peaks can be from diff peakLists
                     if peak is not None:
-                        _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit)
+                        _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit,
+                                                         figOfMeritLimit=figOfMeritLimit)
+
+
 
 def _fitBins(y, bins):
     # fit a gauss curve over the bins
@@ -1168,18 +1171,32 @@ def _getAdjacentPeakPositions1D(peak):
 #         spectrum.noiseLevel, spectrum.negativeNoiseLevel =  noiseLevel, minNoiseLevel = estimateNoiseLevel1D(y)
 #
 
-def _get1DClosestExtremum(peak, maximumLimit=0.1, doNeg=True):
+def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=False, doNeg=True, figOfMeritLimit=1):
     from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
     from ccpn.util.Logging import getLogger
     spectrum = peak.peakList.spectrum
     x = spectrum.positions
     y = spectrum.intensities
     position, height  = peak.position, peak.height
-    a, b = _getAdjacentPeakPositions1D(peak)
-    if not a:
-        a = peak.position[0] - maximumLimit
-    if not b:
-        b = peak.position[0] + maximumLimit
+
+    if peak.figureOfMerit < figOfMeritLimit:
+        height = peak.peakList.spectrum.getIntensity(peak.position)
+        return position, height
+
+    if useAdjacientPeaksAsLimits: #  a left # b right limit
+        a, b = _getAdjacentPeakPositions1D(peak)
+        if not a: # could not find adjacient peaks if the snapping peak is the first or last
+            if peak.position[0] > 0: #it's positive
+                a = peak.position[0] - maximumLimit
+            else:
+                a = peak.position[0] + maximumLimit
+        if not b:
+            if peak.position[0] > 0: # it's positive
+                b = peak.position[0] + maximumLimit
+            else:
+                b = peak.position[0] - maximumLimit
+    else:
+        a, b = peak.position[0] - maximumLimit, peak.position[0] + maximumLimit
 
     # refind maxima
     noiseLevel = spectrum.noiseLevel
@@ -1199,10 +1216,17 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, doNeg=True):
         heights = allValues[:, 1]
         nearestPosition = find_nearest(positions, peak.position[0])
         nearestHeight = heights[positions == nearestPosition]
-        if a == nearestPosition or b == nearestPosition:  # avoid snapping to an existing peak, as it might be a wrong snap.
-            height = peak.peakList.spectrum.getIntensity(peak.position)
-        # elif abs(nearestPosition) > abs(peak.position[0] + maximumLimit):  # avoid snapping on the noise if not maximum found
-        #     peak.height = peak.peakList.spectrum.getIntensity(peak.position)
+        if useAdjacientPeaksAsLimits:
+            if a == nearestPosition or b == nearestPosition:  # avoid snapping to an existing peak, as it might be a wrong snap.
+                height = peak.peakList.spectrum.getIntensity(peak.position)
+            # elif abs(nearestPosition) > abs(peak.position[0] + maximumLimit):  # avoid snapping on the noise if not maximum found
+            #
+            #     # peak.height = peak.peakList.spectrum.getIntensity(peak.position)
+            #     print('#####', peak.pid,)
+            #     print('nearestPosition', nearestPosition, 'abs(peak.position[0] + maximumLimit)', abs(peak.position[0] + maximumLimit))
+            else:
+                position = [float(nearestPosition), ]
+                height = nearestHeight[0]
         else:
             position = [float(nearestPosition), ]
             height = nearestHeight[0]
@@ -1212,7 +1236,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, doNeg=True):
 
     return position, height
 
-def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True):
+def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True, figOfMeritLimit=1):
     '''
     It snaps a peak to its closest extremum, that can be considered as a peak.
     it uses adjacent peak positions as boundaries. However if no adjacent peaks then uses the maximumlimits.
@@ -1220,7 +1244,7 @@ def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True):
     :param peak: obj peak
     :param maximumLimit: maximum tolerance left or right from the peak position (ppm)
     '''
-    position, height = _get1DClosestExtremum(peak, maximumLimit, doNeg)
+    position, height = _get1DClosestExtremum(peak, maximumLimit, doNeg=doNeg, figOfMeritLimit=figOfMeritLimit)
     with undoBlockWithoutSideBar():
         with notificationEchoBlocking():
             peak.position = position

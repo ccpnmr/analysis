@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-13 18:14:21 +0000 (Wed, January 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-17 18:47:34 +0000 (Sun, January 17, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1319,6 +1319,10 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                         strip._clear()
                         if isinstance(objFromPid, Spectrum):
                             strip._displaySpectrum(objFromPid, useUndoBlock=False)
+                        if isinstance(objFromPid, SpectrumGroup):
+                            if not strip.spectrumDisplay.isGrouped:
+                                for sp in objFromPid.spectra:
+                                    strip._displaySpectrum(sp, useUndoBlock=False)
                         if isinstance(objFromPid, Sample):
                             strip.setStackingMode(False)
                             _openItemSampleDisplay._openSampleSpectraOnDisplay(objFromPid, strip.spectrumDisplay)

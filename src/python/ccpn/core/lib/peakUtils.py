@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-12 18:01:53 +0000 (Tue, January 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-18 14:41:31 +0000 (Mon, January 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -932,8 +932,7 @@ def _findPeakHeight(peak):
     """may need this later
     """
     spectrum = peak.peakList.spectrum
-    dataSource = spectrum._apiDataSource
-    numDim = dataSource.numDim
+    numDim = spectrum.dimensionCount
 
     exclusionBuffer = [1] * numDim
     valuesPerPoint = spectrum.valuesPerPoint

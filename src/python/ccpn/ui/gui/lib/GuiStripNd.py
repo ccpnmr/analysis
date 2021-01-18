@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-12 18:00:20 +0000 (Tue, January 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-18 14:40:44 +0000 (Mon, January 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -135,7 +135,7 @@ class GuiStripNd(GuiStrip):
         # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
         ###self.peakLayerDict = {}  # peakList --> peakLayer
         ###self.peakListViewDict = {}  # peakList --> peakListView
-        self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button); used in SpectrumToolBar
+        # self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button); used in SpectrumToolBar
 
         self.haveSetupZWidgets = False
         self.viewStripMenu = _getNdDefaultMenu(self)

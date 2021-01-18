@@ -1060,45 +1060,35 @@ def _getBins(y, binCount=None):
     return statistics, edges, binNumbers, fittedCurve, mostCommonBinNumber, highestValues, fittedCurveExtremum
 
 
-def snap1DPeaksToExtrema_TESTINGFit(peaks, maximumLimit=0.1, doNeg=True):
+def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaksAsLimits=False,
+                                    doNeg=True, figOfMeritLimit=1):
 
+    spectrum = peaks[0].peakList.spectrum
     peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
     oPositions, oHeights = [x.position for x in peaks], [x.height for x in peaks]
-    nPositions, nHeights  =  [], []
+    nPositions, nHeights = [], []
     for peak in peaks:
         if peak is not None:
-            position, height =_get1DClosestExtremum(peak, maximumLimit=maximumLimit)
+            position, height = _get1DClosestExtremum(peak, maximumLimit=maximumLimit,
+                                                     useAdjacientPeaksAsLimits=useAdjacientPeaksAsLimits, doNeg=doNeg,
+                                                     figOfMeritLimit=figOfMeritLimit)
             nPositions.append(position)
             nHeights.append(height)
     deltas = np.array(nPositions) - np.array(oPositions)
     deltas = deltas.flatten()
-    totDeltas = np.sum(abs(deltas))
-    s, e, bN, fc, mcbn, hv, fittedCurveExtremum = _getBins(deltas)
-    print('++ fittedCurveExtremum',max(hv), totDeltas)
-    print('++ Max shift %s. totDeltas %s' %(max(hv), totDeltas))
-
-    n1Positions, n1Heights = [], []
+    stats, edges, binNumbers, fittedCurve, mostCommonBinNumber, highestValues, fittedCurveExtremum = _getBins(deltas)
+    shift = max(highestValues)
+    spectrum.referenceValues = [spectrum.referenceValues[0] - shift]
+    spectrum.positions = spectrum.positions - shift
     for peak in peaks:
         if peak is not None:
-            peak.position = [peak.position[0]+fittedCurveExtremum,]
-            position, height =_get1DClosestExtremum(peak, maximumLimit=maximumLimit, doNeg=doNeg)
-            n1Positions.append(position)
-            n1Heights.append(height)
-    deltas1 = np.array(n1Positions) - np.array(oPositions)
-    deltas1 = deltas1.flatten()
-    totDeltas1 = np.sum(abs(deltas1))
-    print('~~ totDeltas1',  totDeltas1)
-    if abs(totDeltas1) < abs(totDeltas):
-        print('~~ found better fit', )
-        for peak, pos, h in zip(peaks, n1Positions, n1Heights):
-            peak.position = pos
-            peak.height = float(h)
-    else:
-        print('~~ not found better fit', )
-        for peak, pos, h in zip(peaks, nPositions, nHeights):
-            peak.position = pos
-            peak.height = float(h)
-
+            peak.position = [peak.position[0] + shift,]
+            position, height = _get1DClosestExtremum(peak, maximumLimit=maximumLimit,
+                                                     useAdjacientPeaksAsLimits=useAdjacientPeaksAsLimits, doNeg=doNeg,
+                                                     figOfMeritLimit=figOfMeritLimit)
+            peak.position = position
+            peak.height = height
+    return shift
 
 # def add(x,y):
 #     if y > 0:

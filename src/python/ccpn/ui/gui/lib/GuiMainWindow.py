@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-12 18:00:20 +0000 (Tue, January 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-18 14:43:36 +0000 (Mon, January 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -244,10 +244,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """
         Puts relevant information from the project into the appropriate places in the main window.
         """
-        #TODO:RASMUS: assure that isNew() and isTemporary() get added to Project; remove API calls
-        isNew = self._apiWindow.root.isModified  # a bit of a hack this, but should be correct
-
         project = self.application.project
+        isNew = project.isNew
+
         path = project.path
         self.namespace['project'] = project
         self.namespace['runMacro'] = self.pythonConsole._runMacro
@@ -486,16 +485,14 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     def _isTemporaryProject(self):
         """Return true if the project is temporary, i.e., not saved or updated.
         """
-        apiProject = self._project._wrappedData.root
-        return hasattr(apiProject, '_temporaryDirectory')
+        return self._project.isTemporary
 
     def _queryCloseProject(self, title, phrase):
 
-        apiProject = self._project._wrappedData.root
-        if hasattr(apiProject, '_temporaryDirectory'):
+        if self._isTemporaryProject():
             return True
 
-        if apiProject.isProjectModified():
+        if self._project.isModified:
             ss = ' and any changes will be lost'
         else:
             ss = ''

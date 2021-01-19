@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:47 +0000 (Fri, January 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-18 12:33:38 +0000 (Mon, January 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1061,9 +1061,10 @@ def _getBins(y, binCount=None):
 
 
 def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaksAsLimits=False,
-                                    doNeg=True, figOfMeritLimit=1):
+                                    doNeg=True, figOfMeritLimit=1, spectrum=None):
 
-    spectrum = peaks[0].peakList.spectrum
+    if not spectrum:
+        spectrum = peaks[0].peakList.spectrum
     peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
     oPositions, oHeights = [x.position for x in peaks], [x.height for x in peaks]
     nPositions, nHeights = [], []

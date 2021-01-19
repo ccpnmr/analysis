@@ -89,7 +89,8 @@ class IsotopeRecords(CcpnJsonDirectoryABC):
     sorted = True
 
     def isotopesWithSpin(self, minValue=0.5, maxValue=None):
-        "Return list of all isotopeRecords that have spin between minValue and maxValue (inclusive)"
+        """Return list of all isotopeRecords that have spin between minValue and maxValue (inclusive)
+        """
         if maxValue is None: maxValue = 1000.0  # Some rediculus high number
         result = []
         for record in self.values():
@@ -129,14 +130,16 @@ class Nucleus(str):
         return gFac * self.muDivHbar
 
     def frequencyAtField(self, field):
-        "Return absolute frequency (MHz) at field (T)"
+        """Return absolute frequency (MHz) at field (T)
+        """
         if not self.isotopeRecord:
             raise RuntimeError('Undefined isotopeRecord for %s' % self)
         freq = self.gamma * field
         return math.fabs(freq)
 
     def fieldAtFrequency(self, frequency):
-        "Return field (T) at absolute frequency (MHz)"
+        """Return field (T) at absolute frequency (MHz)
+        """
         if not self.isotopeRecord:
             raise RuntimeError('Undefined isotopeRecord for %s' % self)
         field = frequency / self.gamma
@@ -144,7 +147,8 @@ class Nucleus(str):
 
     @property
     def axisCode(self):
-        "Return axis code string"
+        """Return axis code string
+        """
         if not self.isotopeRecord:
             raise RuntimeError('Undefined isotopeRecord for %s' % self)
         return self.isotopeRecord.symbol
@@ -166,7 +170,8 @@ class Field(dict):
             self.addNucleus(isotope)
 
     def addNucleus(self, isotopeCode):
-        "Add a Nucleus instance defined by isotopeCode"
+        """Add a Nucleus instance defined by isotopeCode
+        """
         if isotopeCode not in isotopeRecords:
             raise ValueError('Undefined isotope "%s"' % isotopeCode)
         nuc = Nucleus(isotopeCode)
@@ -174,16 +179,19 @@ class Field(dict):
 
     @property
     def nuclei(self):
-        "return a tuple of Nucleus instances for this field"
+        """return a tuple of Nucleus instances for this field
+        """
         return tuple([n for n, f in self.items()])
 
     @property
     def frequencies(self):
-        "return a tuple of frequencies for this field"
+        """return a tuple of frequencies for this field
+        """
         return tuple([f for n, f in self.items()])
 
     def isInRange(self, nucleus, freq):
-        "return True in freq is withing validRange"
+        """return True in freq is withing validRange
+        """
         if nucleus not in self:
             raise ValueError('frequency of nucleus "%s" is not defined' % nucleus)
         lower, upper = (self[nucleus] + self.validRange[0], self[nucleus] + self.validRange[1])
@@ -191,7 +199,8 @@ class Field(dict):
         return (lower <= freq <= upper)
 
     def findNucleus(self, freq):
-        "Find nucleus corresponding with freq; return None if not found"
+        """Find nucleus corresponding with freq; return None if not found
+        """
         for nucleus in self.nuclei:
             if self.isInRange(nucleus, freq):
                 return nucleus

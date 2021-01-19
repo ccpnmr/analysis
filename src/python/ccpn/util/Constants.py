@@ -29,7 +29,7 @@ import re
 
 from collections import namedtuple
 from collections import OrderedDict
-from ccpn.util.isotopes import isotopeRecords  # NB also import from here in ccpnmodel/ccpncore/lib/spectrum/NmrExpProtoType.py
+from ccpn.util.isotopes import isotopeRecords  # NB also used from here in ccpnmodel/ccpncore/lib/spectrum/NmrExpProtoType.py
                                                # and ccpnmodel/ccpncore/api/ccp/nmr/ExpPrototype.py.
                                                # TODO remove these dependencies
 
@@ -93,6 +93,9 @@ ALL_CONCENTRATION_UNITS = tuple('{}/{}'.format(val, MASS_UNITS[0]) for val in MA
 # Default name for natural abundance labelling - given as None externally
 DEFAULT_LABELLING = '_NATURAL_ABUNDANCE'
 
+# NB also used from here in ccpnmodel/ccpncore/lib/spectrum/NmrExpProtoType.py
+# and ccpnmodel/ccpncore/api/ccp/nmr/ExpPrototype.py.
+# TODO remove these dependencies
 # Map of (lower-cased) NmrExpPrototype.measurementType to element type code
 measurementType2ElementCode = {
     'shift'          : 'shift',

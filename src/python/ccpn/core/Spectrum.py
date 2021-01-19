@@ -2451,7 +2451,7 @@ assignmentTolerances
     # data access functions
     #=========================================================================================
 
-    @logCommand(get='self')
+    # @logCommand(get='self')
     def getIntensity(self, ppmPositions):
         """Returns the interpolated height at the ppm position
         """
@@ -2471,8 +2471,13 @@ assignmentTolerances
 
         if self._intensities is not None and self._intensities.size != 0:
             # need to interpolate between pp-1, and pp
-            height = self._intensities[int(pp) - 1] + \
-                     frac * (self._intensities[int(pp)] - self._intensities[int(pp) - 1])
+            try:
+                height = self._intensities[int(pp) - 1] + \
+                         frac * (self._intensities[int(pp)] - self._intensities[int(pp) - 1])
+            except IndexError as ie:
+                height = 0
+                getLogger().warning('Intensity not found found at the ppm position: %s' %
+                                    ', '.join(map(str,ppmPositions)))
 
             # don't need to scale as _intensities is already scaled
             return height

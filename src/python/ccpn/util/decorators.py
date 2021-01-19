@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-12 18:03:34 +0000 (Tue, January 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-19 17:07:58 +0000 (Tue, January 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -300,20 +300,33 @@ def _makeLogString(prefix, addSelf, func, *args, **kwds):
     return logString
 
 
-def quickCache(f):
+def quickCache(func):
     """Class to implement a quick caching decorator
+
+    For speed, only the first argument of the wrapped function is taken as the key
     """
 
+    cache = {}
 
-    class _cacheDict(dict):
-        __slots__ = ()
+    def _cacheFunc(*args, **kwds):
+        try:
+            return cache[args[0]]
+        except:
+            cache[args[0]] = result = func(*args, **kwds)
 
-        def __missing__(self, key):
-            self[key] = ret = f(key)
-            return ret
+        return result
 
+    def cacheClearItem(item):
+        if item in cache:
+            del cache[item]
 
-    return _cacheDict().__getitem__
+    # attach external methods to _cacheFunc
+    # must be done like this, as internal functions are only created at runtime
+    _cacheFunc.cacheClear = lambda: cache.clear()
+    _cacheFunc.cachePrint = lambda: print(f'>>> {cache}')
+    _cacheFunc.cacheClearItem = cacheClearItem
+
+    return _cacheFunc
 
 
 @quickCache
@@ -321,6 +334,7 @@ def _inspectFunc(func):
     """Function to return the module.function:lineNo of the wrapped function
     """
     # this is cached to speed up the get_ methods (cache may have to be cleared if modules are reloaded)
+    # but can be cleared with _inspectFunc.cacheClear()
     _, _line = inspect.getsourcelines(func)
     _file = aPath(inspect.getsourcefile(func)).basename
     return f'({_file}.{func.__name__}:{_line + 1})'

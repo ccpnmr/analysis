@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-18 12:33:38 +0000 (Mon, January 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-19 15:44:13 +0000 (Tue, January 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1091,21 +1091,21 @@ def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaks
             peak.height = height
     return shift
 
-# def add(x,y):
-#     if y > 0:
-#         return add(x, y-1) + 1
-#     elif y < 0:
-#         return add(x, y+1) - 1
-#     else:
-#         return x
-#
-# def sub(x,y):
-#     if y > 0:
-#         return sub(x, y-1) - 1
-#     elif y < 0:
-#         return sub(x, y+1) + 1
-#     else:
-#         return x
+def _add(x, y):
+    if y > 0:
+        return _add(x, y - 1) + 1
+    elif y < 0:
+        return _add(x, y + 1) - 1
+    else:
+        return x
+
+def _sub(x, y):
+    if y > 0:
+        return _sub(x, y - 1) - 1
+    elif y < 0:
+        return _sub(x, y + 1) + 1
+    else:
+        return x
 
 def _getAdjacentPeakPositions1D(peak):
     positions = [p.position[0] for p in peak.peakList.peaks]

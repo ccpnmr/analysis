@@ -5,7 +5,7 @@ Settings used in gui modules, widgets and popups
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-08 11:19:35 +0100 (Thu, October 08, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-20 18:04:37 +0000 (Wed, January 20, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,7 +26,7 @@ __date__ = "$Date: 2016-11-15 21:37:50 +0000 (Tue, 15 Nov 2016) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore
+from itertools import product
 from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONT, \
     DEFAULTFONTSIZE, DEFAULTFONTNAME, CONSOLEFONT, SIDEBARFONT, \
     TABLEFONT, SEQUENCEGRAPHFONT, _readFontFromAppearances
@@ -36,7 +36,7 @@ from ccpn.util.Colour import allColours, hexToRgbRatio, autoCorrectHexColour, \
     spectrumHexDarkColours, spectrumHexLightColours, spectrumHexMediumColours, \
     spectrumHexDefaultLightColours, spectrumHexDefaultDarkColours, rgbRatioToHex
 from ccpn.util.LabelledEnum import LabelledEnum
-from itertools import product
+from ccpn.framework.Application import getApplication
 
 
 FONTLIST = ['Modules', 'IPython Console', 'Sidebar', 'Tables', 'Sequence Graph']
@@ -375,34 +375,37 @@ colourSchemes[DARK][MARKS_COLOURS] = MARK_LINE_COLOUR_DICT_DARK
 
 
 def getColourScheme():
-    """
+    """Get the current colourScheme
+
     :return: colourScheme
     """
-    app = QtCore.QCoreApplication.instance()
-    if hasattr(app, '_ccpnApplication'):
-        application = getattr(app, '_ccpnApplication')
+
+    application = getApplication()
+    if application:
         colourScheme = application.colourScheme
         if colourScheme not in COLOUR_SCHEMES:
             getLogger().warning('Undefined colour scheme')
             return DEFAULT
         return colourScheme
-    # for now to make the tests run
+
     else:
         return DEFAULT
 
 
 def setColourScheme(colourScheme):
-    """set the current colourScheme
+    """Set the current colourScheme
     """
-    app = QtCore.QCoreApplication.instance()
-    if hasattr(app, '_ccpnApplication'):
-        application = getattr(app, '_ccpnApplication')
-        # colourScheme = application.colourScheme
+
+    application = getApplication()
+    if application:
         if colourScheme not in COLOUR_SCHEMES:
             raise RuntimeError('Undefined colour scheme')
 
         application.colourScheme = colourScheme
         ColourDict(colourScheme).setColourScheme(colourScheme)
+
+    else:
+        getLogger().warning('Application not defined; colourScheme not set')
 
 
 @singleton

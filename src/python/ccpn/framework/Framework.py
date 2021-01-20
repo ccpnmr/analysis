@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-12 18:04:57 +0000 (Tue, January 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-20 18:04:37 +0000 (Wed, January 20, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -62,15 +62,8 @@ from ccpn.ui import interfaces, defaultInterface
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, \
-    USERACHIVESPATH, USERDATAPATH, USERNMRSTARPATH, USERSPECTRUMPATH, \
-    USERLAYOUTSPATH, USERMACROSPATH, USERNEFPATH, USERSAVEPROJECTPATH, setInitialPath, \
-    ProjectFileDialog, ExcelFileDialog, DataFileDialog, ExportFileDialog, NefFileDialog, \
-    AuxiliaryFileDialog, ArchivesFileDialog, MacrosFileDialog, OtherFileDialog, PipelineFileDialog, \
-    PreferencesFileDialog, PluginsFileDialog, TablesFileDialog, BackupsFileDialog, PDFFileDialog, \
-    LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog
-from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView
-
+from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog, DataFileDialog, NefFileDialog, \
+    ArchivesFileDialog, MacrosFileDialog, LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog
 from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
@@ -378,7 +371,8 @@ class Framework(NotifierBase):
         print('>>> Testing shortcuts1')
 
     def start(self):
-        """Start the program execution"""
+        """Start the program execution
+        """
 
         # register the programme for later
         from ccpn.framework.Application import ApplicationContainer
@@ -523,7 +517,6 @@ class Framework(NotifierBase):
             from ccpn.ui.gui.Gui import Gui
 
             ui = Gui(self)
-            ui.qtApp._ccpnApplication = self
             # ui.mainWindow is None upon initialization: gets filled later
             getLogger().debug('%s %s %s' % (self, ui, ui.mainWindow))
         else:
@@ -835,37 +828,33 @@ class Framework(NotifierBase):
                     else:
                         getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(spectrumDisplay))
 
-                    if not spectrumDisplay.isGrouped:
+                    if not spectrumDisplay.is1D:
+                        strip._setZWidgets()
 
-                        # spectra are not grouped
-                        specViews = strip.spectrumViews
-                        # for iSV, spectrumView in enumerate(strip.orderedSpectrumViews(includeDeleted=False)):
+                if spectrumDisplay.isGrouped:
+                    # setup the spectrumGroup toolbar
 
-                        for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):
-                            _createdSpectrumView({Notifier.OBJECT: spectrumView})
-                            # for peakList in spectrumView.spectrum.peakLists:
-                            #     strip.showPeaks(peakList)
+                    spectrumDisplay.spectrumToolBar.hide()
+                    spectrumDisplay.spectrumGroupToolBar.show()
 
-                    else:
-                        # spectra are grouped
-                        specViews = strip.spectrumViews
+                    _spectrumGroups = [project.getByPid(pid) for pid in spectrumDisplay._getSpectrumGroups()]
 
-                        for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):
-                            _createdSpectrumView({Notifier.OBJECT: spectrumView})
+                    for group in _spectrumGroups:
+                        spectrumDisplay.spectrumGroupToolBar._forceAddAction(group)
 
-                        spectrumDisplay.spectrumToolBar.hide()
-                        spectrumDisplay.spectrumGroupToolBar.show()
+                else:
+                    # setup the spectrum toolbar
 
-                        _spectrumGroups = [project.getByPid(pid) for pid in spectrumDisplay._getSpectrumGroups()]
-
-                        for group in _spectrumGroups:
-                            spectrumDisplay.spectrumGroupToolBar._forceAddAction(group)
+                    spectrumDisplay.spectrumToolBar.show()
+                    spectrumDisplay.spectrumGroupToolBar.hide()
+                    spectrumDisplay.setToolbarButtons()
 
                 # some of the strips may not be instantiated at this point
                 # resize the stripFrame to the spectrumDisplay - ready for first resize event
                 # spectrumDisplay.stripFrame.resize(spectrumDisplay.width() - 2, spectrumDisplay.stripFrame.height())
                 spectrumDisplay.showAxes(stretchValue=True, widths=True,
                                          minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
+
         except Exception as e:
             getLogger().warning('Impossible to restore spectrumDisplay(s) %s' % e)
 
@@ -1734,7 +1723,7 @@ class Framework(NotifierBase):
             #     m = 'Native dialog not available on multiple selections. ' \
             #         'For loading a single file (not Dir) through a native dialog please use: Project > Load Data...'
             #     getLogger().info(m)
-            dialog = SpectrumFileDialog(parent=self.ui.mainWindow, acceptMode='load', filter=filter, useNative=False)
+            dialog = SpectrumFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter, useNative=False)
 
             dialog._show()
             paths = dialog.selectedFiles()
@@ -1773,7 +1762,7 @@ class Framework(NotifierBase):
             text = 'Load Data'
 
         if paths is None:
-            dialog = DataFileDialog(parent=self.ui.mainWindow, acceptMode='load', filter=filter)
+            dialog = DataFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter)
             dialog._show()
             path = dialog.selectedFile()
             if not path:
@@ -1865,7 +1854,7 @@ class Framework(NotifierBase):
 
     def _importNef(self):
         filter = '*.nef'
-        dialog = NefFileDialog(parent=self.ui.mainWindow, acceptMode='import', filter=filter)
+        dialog = NefFileDialog(parent=self.ui.mainWindow, acceptMode='import', fileFilter=filter)
 
         dialog._show()
         path = dialog.selectedFile()
@@ -1949,7 +1938,7 @@ class Framework(NotifierBase):
                                 preferences=self.preferences,
                                 selectFile=os.path.join(self.preferences.general.userWorkingPath or '~', self.project.name + '.nef'),
                                 # new flag to populate dialog,
-                                filter='*.nef')
+                                fileFilter='*.nef')
 
         # an exclusion list comes out of the dialog as it
         result = dialog.exec_()
@@ -2167,7 +2156,7 @@ class Framework(NotifierBase):
         if not archivePath:
             archivesDirectory = Path.aPath(self.project.path) / Path.CCPN_ARCHIVES_DIRECTORY
             _filter = '*.tgz'
-            dialog = ArchivesFileDialog(parent=self.ui.mainWindow, acceptMode='select', directory=archivesDirectory, filter=_filter)
+            dialog = ArchivesFileDialog(parent=self.ui.mainWindow, acceptMode='select', directory=archivesDirectory, fileFilter=_filter)
             dialog._show()
             archivePath = dialog.selectedFile()
 
@@ -2227,7 +2216,7 @@ class Framework(NotifierBase):
         """Opens a saved Layout as dialog box and gets directory specified in the file dialog."""
 
         fType = 'JSON (*.json)'
-        dialog = LayoutsFileDialog(parent=self.ui.mainWindow, acceptMode='open', filter=fType)
+        dialog = LayoutsFileDialog(parent=self.ui.mainWindow, acceptMode='open', fileFilter=fType)
         dialog._show()
         path = dialog.selectedFile()
         if not path:
@@ -2240,7 +2229,7 @@ class Framework(NotifierBase):
 
         jsonType = '.json'
         fType = 'JSON (*.json)'
-        dialog = LayoutsFileDialog(parent=self.ui.mainWindow, acceptMode='save', filter=fType)
+        dialog = LayoutsFileDialog(parent=self.ui.mainWindow, acceptMode='save', fileFilter=fType)
         dialog._show()
         newPath = dialog.selectedFile()
         if not newPath:
@@ -2923,7 +2912,7 @@ class Framework(NotifierBase):
         """
         mainWindow = self.ui.mainWindow
         fType = '*.py'
-        dialog = MacrosFileDialog(parent=mainWindow, acceptMode='open', filter=fType)
+        dialog = MacrosFileDialog(parent=mainWindow, acceptMode='open', fileFilter=fType)
         dialog._show()
         filePath = dialog.selectedFile()
         if filePath is not None:
@@ -2952,7 +2941,7 @@ class Framework(NotifierBase):
         """
         if macroFile is None:
             fType = '*.py'
-            dialog = MacrosFileDialog(parent=self.ui.mainWindow, acceptMode='run', filter=fType)
+            dialog = MacrosFileDialog(parent=self.ui.mainWindow, acceptMode='run', fileFilter=fType)
             dialog._show()
             macroFile = dialog.selectedFile()
             if not macroFile:
@@ -3167,23 +3156,6 @@ class Framework(NotifierBase):
         self._showHtmlFile("CCPN Licence", licensePath)
 
     #########################################    End Menu callbacks   ##################################################
-
-    # def printToFile(self, spectrumDisplay=None):
-    #
-    #   current = self.current
-    #   # if not spectrumDisplay:
-    #   #   spectrumDisplay = current.spectrumDisplay
-    #   if not spectrumDisplay and current.strip:
-    #     spectrumDisplay = current.strip.spectrumDisplay
-    #   if not spectrumDisplay and self.spectrumDisplays:
-    #     spectrumDisplay = self.spectrumDisplays[0]
-    #   if spectrumDisplay:
-    #     dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text='Print to File',
-    #                         acceptMode=FileDialog.AcceptSave, preferences=self.preferences.general, filter='SVG (*.svg)')
-    #     path = dialog.selectedFile()
-    #     if not path:
-    #       return
-    #     spectrumDisplay.printToFile(path)
 
     def _initialiseFonts(self):
 

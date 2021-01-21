@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-20 18:04:37 +0000 (Wed, January 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 15:03:53 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1776,9 +1776,9 @@ class Framework(NotifierBase):
             self.project.loadData(path)
 
     def _cloneSpectraToProjectDir(self):
-        ''' Keep a copy of spectra inside the project directory "myproject.ccpn/data/spectra".
+        """ Keep a copy of spectra inside the project directory "myproject.ccpn/data/spectra".
         This is useful when saving the project in an external driver and want to keep the spectra together with the project.
-        '''
+        """
         from shutil import copyfile
 
         try:
@@ -1929,18 +1929,15 @@ class Framework(NotifierBase):
         Temporary routine because I don't know how else to do it yet
         """
         from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
+        from ccpn.core.lib.CcpnNefIo import NEFEXTENSION
 
+        _path = Path.aPath(self.preferences.general.userWorkingPath or '~').filepath / (self.project.name + NEFEXTENSION)
         dialog = ExportNefPopup(self.ui.mainWindow,
                                 mainWindow=self.ui.mainWindow,
-                                fileMode=FileDialog.AnyFile,
-                                text="Export to Nef File",
-                                acceptMode=FileDialog.AcceptSave,
-                                preferences=self.preferences,
-                                selectFile=os.path.join(self.preferences.general.userWorkingPath or '~', self.project.name + '.nef'),
-                                # new flag to populate dialog,
+                                selectFile=_path,
                                 fileFilter='*.nef')
 
-        # an exclusion list comes out of the dialog as it
+        # an exclusion dict comes out of the dialog as it
         result = dialog.exec_()
 
         if not result:

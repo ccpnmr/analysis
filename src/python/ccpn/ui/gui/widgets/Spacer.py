@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:56 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-01-21 16:48:31 +0000 (Thu, January 21, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,6 +26,10 @@ __date__ = "$Date: 2017-05-17 13:51:05 +0000 (Wed, May 17, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets
+from ccpn.ui.gui.widgets.Base import POLICY_DICT
+
+
+POLICY_DICT_DEFAULT = QtWidgets.QSizePolicy.MinimumExpanding
 
 
 class Spacer(QtWidgets.QSpacerItem):
@@ -33,24 +37,29 @@ class Spacer(QtWidgets.QSpacerItem):
     Widget used to put spaces into modules and popups.
     """
 
-    def __init__(self, parent, width, height, *args, **kwds):
+    def __init__(self, parent, width, height, hPolicy='minimumExpanding', vPolicy='minimumExpanding', **kwds):
         """
         Add a spacer item to the layout of parent
         :param parent: parent widget (required)
         :param args: passed to SpacerItem
         :param kwds: grid
         """
-        super().__init__(width, height, *args)
+
+        # Change strings to policy values from the dict
+        hPolicy = hPolicy if hPolicy in POLICY_DICT.values() else POLICY_DICT.get(hPolicy) or POLICY_DICT_DEFAULT
+        vPolicy = vPolicy if vPolicy in POLICY_DICT.values() else POLICY_DICT.get(vPolicy) or POLICY_DICT_DEFAULT
+
+        super().__init__(width, height, hPolicy=hPolicy, vPolicy=vPolicy)
 
         if parent is None:
             raise ValueError('Spacer: parent parameter cannot be None')
 
         grid = kwds.get('grid')
-        if not isinstance(grid, (list,tuple)) or len(grid) != 2:
+        if not isinstance(grid, (list, tuple)) or len(grid) != 2:
             raise ValueError('grid parameter is required and should be a tuple or list with two elements (row, column)')
 
-        gridSpan = kwds.setdefault('gridSpan', (1,1))
-        if not isinstance(gridSpan, (list,tuple)) or len(grid) != 2:
+        gridSpan = kwds.setdefault('gridSpan', (1, 1))
+        if not isinstance(gridSpan, (list, tuple)) or len(grid) != 2:
             raise ValueError('gridSpan parameter should be a tuple or list with two elements (rowSpan, columnSpan)')
 
         parent.getLayout().addItem(self, grid[0], grid[1], gridSpan[0], gridSpan[1])

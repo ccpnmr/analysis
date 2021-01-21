@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-20 18:04:38 +0000 (Wed, January 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 17:46:52 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -194,7 +194,7 @@ class FileDialogABC(QtWidgets.QFileDialog):
             self.setNameFilter(fileFilter)
         if selectFile is not None:
             # populates fileDialog with the suggested filename
-            self.selectFile(selectFile)
+            self.selectFile(selectFile.asString())
 
         if useNative is not None:
             self.useNative = useNative

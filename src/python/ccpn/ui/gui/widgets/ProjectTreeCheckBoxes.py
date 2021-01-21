@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-03 10:01:42 +0000 (Thu, December 03, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-21 17:46:52 +0000 (Thu, January 21, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -132,8 +132,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
             self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
         self.header().hide()
-        if self.project is not None:
-            self._populateTreeView()
+        self.populate(self.project)
 
         self.itemClicked.connect(self._clicked)
 
@@ -171,6 +170,18 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         # NOTE:ED - this works for most of the row, not the left-hand side yet
         for col in range(self.columnCount()):
             item.setForeground(col, colour)
+
+    def populate(self, project=None):
+        """Populate the contents of the treeView from the project
+        """
+        if not isinstance(project, (Project, type(None))):
+            raise TypeError('project must be of type Project or None')
+
+        self.clear()
+        if project:
+            with self.blockWidgetSignals():
+                # disable events while populating
+                self._populateTreeView(project)
 
     def _populateTreeView(self, project=None):
         if project:

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-21 17:46:52 +0000 (Thu, January 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 18:46:44 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -864,34 +864,6 @@ class Framework(NotifierBase):
                     self.current.strip = self.project.strips[0]
         except Exception as e:
             getLogger().warning('Impossible to restore spectrumDisplay(s) %s' % e)
-        #~~~~~~~~~~~~~~~~
-        #
-        # # Initialise SpectrumDisplays, SpectrumViews
-        # for spectrumDisplay in project.spectrumDisplays:
-        #
-        #   # self.moduleArea.addModule(spectrumDisplay, position='right')
-        #   strips = spectrumDisplay.strips
-        #   for strip in strips:
-        #
-        #     # move to the correct place in the widget
-        #     stripIndex = strips.index(strip)
-        #     spectrumDisplay.stripFrame.layout().addWidget(strip, 0, stripIndex)
-        #
-        #     specViews = strip.spectrumViews
-        #     # for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):
-        #     for iSV, spectrumView in enumerate(specViews):
-        #
-        #       # set up the Z widgets and add new toolbar button
-        #       spectrumDisplay._createdSpectrumView({Notifier.OBJECT: spectrumView})  #iSV)
-        #
-        #       for peakList in spectrumView.spectrum.peakLists:
-        #         strip.showPeaks(peakList)
-        #
-        #   # some of the strips may no be instantiated at this point
-        #   spectrumDisplay.showAxes()
-        #   spectrumDisplay.setColumnStretches(True)
-        #
-        #~~~~~~~~~~~~~~~~
 
     def get(self, identifier):
         """General method to obtain object (either gui or data) from identifier (pid, gid, obj-string)

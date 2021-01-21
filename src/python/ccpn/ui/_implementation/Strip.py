@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:31:18 +0000 (Thu, January 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 18:46:44 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -327,7 +327,7 @@ class Strip(AbstractWrapperObject):
 
     @logCommand(get='self')
     def displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = ()):
-        self._displaySpectrum(spectrum, axisOrder)
+        return self._displaySpectrum(spectrum, axisOrder)
 
     def _displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = (), useUndoBlock=True):
         """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder

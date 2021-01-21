@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-21 16:07:02 +0000 (Thu, January 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 18:46:44 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -163,23 +163,19 @@ class Gui(Ui):
         # self._currentIntegralNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
         # self._currentMultipletNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
 
-        from ccpn.ui.gui.lib.GuiSpectrumDisplay import _spectrumHasChanged, _deletedSpectrumView
+        from ccpn.ui.gui.lib.GuiSpectrumDisplay import _spectrumHasChanged
 
         # project.registerNotifier('Peak', 'delete', GuiSpectrumDisplay._deletedPeak)
 
         # project.registerNotifier('Spectrum', 'change', GuiSpectrumDisplay._spectrumHasChanged)
         self.setNotifier(project, [Notifier.CHANGE], 'Spectrum', _spectrumHasChanged)
 
-        # from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView, _spectrumViewHasChanged
+        # from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
         # from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
 
-        # project.registerNotifier('SpectrumView', 'delete', GuiSpectrumView._deletedSpectrumView)
-
-        # project.registerNotifier('SpectrumView', 'create', GuiSpectrumView._createdSpectrumView)
         # project.registerNotifier('SpectrumView', 'change', GuiSpectrumView._spectrumViewHasChanged)
-        self.setNotifier(project, [Notifier.CREATE], 'SpectrumView', _createdSpectrumView)
-        self.setNotifier(project, [Notifier.CHANGE], 'SpectrumView', _spectrumViewHasChanged)
-        self.setNotifier(project, [Notifier.CHANGE], 'SpectrumGroup', _spectrumGroupViewHasChanged)
+        # self.setNotifier(project, [Notifier.CHANGE], 'SpectrumView', _spectrumViewHasChanged)
+        # self.setNotifier(project, [Notifier.CHANGE], 'SpectrumGroup', _spectrumGroupViewHasChanged)
 
         from ccpn.ui.gui.lib import GuiPeakListView
 
@@ -233,7 +229,6 @@ class Gui(Ui):
         project._registerApiNotifier(SpectrumDisplayNd._changedBoundDisplayAxisOrdering,
                                      SpectrumDisplayNd.ApiBoundDisplay, 'axisOrder')
 
-        # # TODO:ED remove if not needed
         # from ccpn.ui.gui.modules import SpectrumDisplay1d
         # project._registerApiNotifier(SpectrumDisplay1d._updateSpectrumPlotColour,
         #                              SpectrumDisplay1d.ApiDataSource, 'setSliceColour')
@@ -244,13 +239,6 @@ class Gui(Ui):
         # project._registerApiNotifier(GuiStrip._rulerCreated, 'ccpnmr.gui.Task.Ruler', 'postInit')
         # project._registerApiNotifier(GuiStrip._rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'preDelete')
         project._registerApiNotifier(GuiStrip._setupGuiStrip, 'ccpnmr.gui.Task.Strip', 'postInit')
-
-        # project._registerApiNotifier(_deletedSpectrumView,
-        #                              'ccpnmr.gui.Task.StripSpectrumView', 'preDelete')
-
-        # from ccpn.ui.gui.lib.GuiSpectrumDisplay import _spectrumHasChanged, _deletedSpectrumViewTEST
-        # # does not catch the undo/redo notifiers
-        # self.setNotifier(project, [Notifier.DELETE], 'SpectrumView', _deletedSpectrumViewTEST)
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # TODO:ED   added so that some modules are cleared on changing projects

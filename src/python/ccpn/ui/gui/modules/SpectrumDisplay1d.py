@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 18:39:16 +0100 (Fri, October 23, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-21 18:46:44 +0000 (Thu, January 21, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,6 +30,7 @@ from typing import Sequence
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayPropertiesPopup1d
+from ccpn.util.Logging import getLogger
 
 
 class SpectrumDisplay1d(GuiSpectrumDisplay):
@@ -55,40 +56,6 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
 
         # store the list of ordered spectrumViews
         self._orderedSpectrumViews = None
-
-    # def showPeaks(self, peakListView, peaks):
-    #     """
-    #     Displays specified peaks in all strips of the display using peakListView
-    #     """
-    #
-    #     # NB should not be imported at top of file to avoid potential cyclic imports
-    #     from ccpn.ui.gui.lib import GuiPeakListView
-    #
-    #     viewBox = peakListView.spectrumView.strip.viewBox
-    #     activePeakItemDict = self.activePeakItemDict
-    #     peakItemDict = activePeakItemDict.setdefault(peakListView, {})
-    #     inactivePeakItemDict = self.inactivePeakItemDict
-    #     inactivePeakItems = inactivePeakItemDict.setdefault(peakListView, set())
-    #     ##inactivePeakItems = self.inactivePeakItems
-    #     existingApiPeaks = set(peakItemDict.keys())
-    #     unusedApiPeaks = existingApiPeaks - set([peak._wrappedData for peak in peaks])
-    #     for apiPeak in unusedApiPeaks:
-    #         peakItem = peakItemDict.pop(apiPeak)
-    #         #viewBox.removeItem(peakItem)
-    #         inactivePeakItems.add(peakItem)
-    #         peakItem.setVisible(False)
-    #     for peak in peaks:
-    #         apiPeak = peak._wrappedData
-    #         if apiPeak in existingApiPeaks:
-    #             continue
-    #         if inactivePeakItems:
-    #             peakItem = inactivePeakItems.pop()
-    #             peakItem.setupPeakItem(peakListView, peak)
-    #             #viewBox.addItem(peakItem)
-    #             peakItem.setVisible(True)
-    #         else:
-    #             peakItem = GuiPeakListView.Peak1d(peak, peakListView)
-    #         peakItemDict[apiPeak] = peakItem
 
     def _fillToolBar(self):
         """
@@ -126,17 +93,8 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
     def processSpectra(self, pids: Sequence[str], event):
         """Display spectra defined by list of Pid strings"""
         for ss in pids:
-            print('processing Spectrum', ss)
-        print(self.parent())
-
-    def _updatePlotColour(self, spectrum):
-        apiDataSource = spectrum._wrappedData
-        action = self.spectrumActionDict.get(apiDataSource)
-        if action:
-            for strip in self.strips:
-                for spectrumView in strip.spectrumViews:
-                    if spectrumView.spectrum is spectrum:
-                        spectrumView.plot.setPen(apiDataSource.sliceColour)
+            getLogger().info('processing Spectrum %s' % ss)
+        getLogger().info(str(self.parent()))
 
     def adjustContours(self):
         # insert popup to modify contours
@@ -167,23 +125,3 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
         """Highlight the last row axis if strip
         """
         pass
-
-# Functions for notifiers
-
-# def _updateSpectrumPlotColour(project:Project, apiDataSource:ApiDataSource):
-#   getDataObj = project._data2Obj.get
-#   spectrum = getDataObj(apiDataSource)
-#
-#   for task in project.tasks:
-#     if task.status == 'active':
-#       for spectrumDisplay in task.spectrumDisplays:
-#         if spectrumDisplay.is1D:
-#           spectrumDisplay._updatePlotColour(spectrum)
-#
-# def _updateSpectrumViewPlotColour(project:Project, apiSpectrumView:ApiSpectrumView):
-#   getDataObj = project._data2Obj.get
-#   spectrum = getDataObj(apiSpectrumView.dataSource)
-#   if spectrum:
-#     spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
-#     if spectrumDisplay.is1D:
-#       spectrumDisplay._updatePlotColour(spectrum)

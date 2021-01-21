@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-21 18:46:44 +0000 (Thu, January 21, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,9 +44,7 @@ from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.core.lib import Pid
 from ccpn.ui.gui.lib.GuiStripContextMenus import _SCMitem, ItemTypes, ITEM, _addMenuItems, _createMenu, _separator
-
-
-TOOLBAR_EXTENSIONNAME = 'qt_toolbar_ext_button'
+from ccpn.util import Colour
 
 
 class SpectrumToolBar(ToolBar):
@@ -60,10 +58,6 @@ class SpectrumToolBar(ToolBar):
 
         self.setMouseTracking(True)
         self._spectrumToolBarBlockingLevel = 0
-
-        for child in self.children():
-            if child.objectName() == TOOLBAR_EXTENSIONNAME:
-                self._extButton = child
 
         self._firstButton = 0
 
@@ -309,7 +303,7 @@ class SpectrumToolBar(ToolBar):
         key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
 
         for spectrumView in self.widget.spectrumViews:
-            if spectrumView._apiDataSource == key:
+            if spectrumView.spectrum == key:
                 spvs.append(spectrumView)
         if len(spvs) == 1:
             return spvs[0]
@@ -348,31 +342,14 @@ class SpectrumToolBar(ToolBar):
         """
         Removes the spectrum from the display and its button from the toolbar.
         """
-        # TODO:ED this needs patching in to the spectrumView.delete()
-        # remove the item from the toolbar
-        self.removeAction(button.actions()[0])
-
-        # and delete the spectrumView from the V2
+        # event called from right-mouse menu
         key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
-        stripUpdateList = []
         for spectrumView in self.widget.spectrumViews:
-            if spectrumView._apiDataSource == key:
-                index = self.widget.spectrumViews.index(spectrumView)
+            if spectrumView.spectrum == key:
+                self.widget.removeSpectrum(spectrumView.spectrum)
                 break
         else:
-            showWarning('Spectrum not found in toolbar')
-            return
-
-        # found value is spectrumView, index
-
-        spectrumView.delete()
-        # self.widget.removeOrderedSpectrumView(index)
-
-        # spawn a redraw of the GL windows
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-        GLSignals = GLNotifier(parent=None)
-        GLSignals.emitPaintEvent()
+            showWarning('Spectrum', 'Spectrum not found in toolbar')
 
     def _dragButton(self, event):
 
@@ -404,28 +381,13 @@ class SpectrumToolBar(ToolBar):
                     if nextButton == toolButton:
                         return
 
-                    if allActionsTexts.index(toolButton.text()) > allActionsTexts.index(nextButton.text()):
+                    # get the new index and call setOrderedSpectrumViewsIndex
+                    startInd = allActionsTexts.index(toolButton.text())
+                    endInd = allActionsTexts.index(nextButton.text())
+                    self.widget.moveSpectrumByIndex(startInd, endInd)
+                    return
 
-                        # move button to the left
-                        self.insertAction(nextButton.actions()[0], toolButton.actions()[0])
-                    else:
-
-                        # move button to the right
-                        startInd = allActionsTexts.index(toolButton.text())
-                        endInd = allActionsTexts.index(nextButton.text())
-                        moveleftlist = [action for action in self.actions()]
-                        for act in moveleftlist[startInd + 1:endInd + 1]:
-                            self.insertAction(toolButton.actions()[0], act)
-
-                    actionIndex = [allActionsTexts.index(act.text()) for act in self.actions() if act.text() in allActionsTexts]
-                    self._updateSpectrumViews(actionIndex)
-                    for action in self.actions():
-                        self._setSizes(action)
-
-                else:
-                    event.ignore()
-            else:
-                event.ignore()
+        event.ignore()
 
     def event(self, event: QtCore.QEvent) -> bool:
         """
@@ -450,17 +412,83 @@ class SpectrumToolBar(ToolBar):
             if event.button() == QtCore.Qt.MiddleButton:
                 self._dragButton(event)
 
-        elif event.type() == QtCore.QEvent.Resize:
-            self._processToolBarExtension()
+        return super().event(event)
 
-        return super(SpectrumToolBar, self).event(event)
+    def _addNewButton(self, spectrumView):
+        _actions = {act.objectName(): act for act in self.actions()}
 
-    def _toolbarAddSpectrum(self, data):
-        """Respond to a new spectrum being added to the spectrumDisplay; add new toolbar Icon
+        # create new action for any spectrumViews without an action (create spectrumView)
+        if spectrumView.spectrum.pid not in _actions:
+            self._setupAction(spectrumView)
+
+    def reorderButtons(self, spectrumViews):
+        """Reorder the buttons to match the spectrumView ordering
         """
-        trigger = data[Notifier.TRIGGER]
-        spectrum = data[Notifier.OBJECT]
-        self._addSpectrumViewToolButtons(spectrum.spectrumViews)
+        _actions = {act.objectName(): act for act in self.actions()}
+
+        # create new action for any spectrumViews without an action (create spectrumView)
+        for specView in spectrumViews:
+            if specView.spectrum.pid not in _actions:
+                self._setupAction(specView)
+
+        # apply the new ordering
+        _newOrder = [_actions[sv.spectrum.pid] for sv in spectrumViews if sv.spectrum.pid in _actions]
+        self.insertActions(None, _newOrder)
+
+        # reset the sizes of the action widgets - not sure why they change :|
+        for action in _actions.values():
+            # get the attached widget
+            widget = self.widgetForAction(action)
+
+            _height1 = max(getFontHeight(size='SMALL') or 12, 12)
+            widget.setIconSize(QtCore.QSize(_height1 * 10, _height1))
+            self._setSizes(action)
+
+    def setButtonsFromSpectrumViews(self, spectrumViews):
+        """Set up the spectrumDisplay buttons when initialising a display
+        """
+        with self.spectrumToolBarBlocking():
+            # clear the old actions
+            # _actions = {act: act.objectName for act in self.actions}
+
+            for act in list(self.actions()):
+                self.removeAction(act)
+
+            for specView in spectrumViews:
+                self._setupAction(specView)
+
+    def _setupAction(self, spectrumView):
+        """Create and setup a new action attached to the spectrum
+        """
+        spectrum = spectrumView.spectrum
+        spectrumName = spectrum.name
+
+        # create new action
+        action = self.addAction(spectrumName)
+        action.setObjectName(spectrum.pid)
+
+        action.setCheckable(True)
+        action.setChecked(True)
+        action.setToolTip(spectrum.name)
+
+        # get the attached widget
+        widget = self.widgetForAction(action)
+
+        _height1 = max(getFontHeight(size='SMALL') or 12, 12)
+        widget.setIconSize(QtCore.QSize(_height1 * 10, _height1))
+        self._setSizes(action)
+
+        widget.spectrumView = spectrumView
+        action.spectrumViewPid = spectrumView.pid
+        self.widget.spectrumActionDict[spectrum] = action
+
+        # NOTE:ED - UPDATE, the following call sets the icon colours:
+        _spectrumViewHasChanged({Notifier.OBJECT: spectrumView})
+
+        # if spectrumDisplay.is1D:
+        #     action.toggled.connect(spectrumView.plot.setVisible)
+        action.toggled.connect(spectrumView.setVisible)
+        setWidgetFont(action, size='SMALL')
 
     def _addSpectrumViewToolButtons(self, spectrumView):
         spectrumDisplay = spectrumView.strip.spectrumDisplay
@@ -470,8 +498,7 @@ class SpectrumToolBar(ToolBar):
         with self.spectrumToolBarBlocking():
             spectrumDisplay = spectrumView.strip.spectrumDisplay
             spectrum = spectrumView.spectrum
-            apiDataSource = spectrum._wrappedData
-            action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
+            action = spectrumDisplay.spectrumActionDict.get(spectrum)
             if not action:
                 # add toolbar action (button)
                 spectrumName = spectrum.name
@@ -514,10 +541,10 @@ class SpectrumToolBar(ToolBar):
                 # widget.setIconSize(QtCore.QSize(120, 10))
                 self._setSizes(action)
                 # WHY _wrappedData and not spectrumView?
-                widget.spectrumView = spectrumView._wrappedData
+                widget.spectrumView = spectrumView
                 action.spectrumViewPid = spectrumView.pid
 
-                spectrumDisplay.spectrumActionDict[apiDataSource] = action
+                spectrumDisplay.spectrumActionDict[spectrum] = action
                 # The following call sets the icon colours:
                 _spectrumViewHasChanged({Notifier.OBJECT: spectrumView})
 
@@ -534,51 +561,58 @@ class SpectrumToolBar(ToolBar):
         _height2 = max(getFontHeight(size='VLARGE') or 30, 30)
         widget.setIconSize(QtCore.QSize(_height1 * 10, _height1))
         widget.setFixedSize(_height2 * 2.5, _height2)
-        # widget.setIconSize(QtCore.QSize(120, 10))
-        # widget.setFixedSize(75, 30)
 
-    def _toolbarChange(self, spectrumViews):
+    def setSpectrumGroupActionIcon(self, action, spectrumGroup):
+        self._addActionIcon(action, spectrumGroup)
 
-        with self.spectrumToolBarBlocking():
-            actionList = self.actions()
-            # self.clear()
-            for specView in spectrumViews:
+    def setSpectrumActionIcon(self, action, spectrum):
+        _sv = [sv for sv in self.spectrumDisplay.spectrumViews if sv.spectrum == spectrum]
+        if len(_sv) != 1:
+            return
 
-                # self._addSpectrumViewToolButtons(specView)
-                spectrum = specView.spectrum
-                spectrumName = spectrum.name
-                # if len(spectrumName) > 12:
-                #     spectrumName = spectrumName[:12] + '.....'
+        specView = _sv[0]
+        self._addActionIcon(action, specView)
 
-                for act in actionList:
-                    if act.text() == spectrumName:
-                        self.addAction(act)
+    def _addActionIcon(self, action, obj):
+        _iconX = int(60 / self.spectrumDisplay.devicePixelRatio())
+        _iconY = int(10 / self.spectrumDisplay.devicePixelRatio())
+        pix = QtGui.QPixmap(QtCore.QSize(_iconX, _iconY))
 
-                        widget = self.widgetForAction(act)
-                        _height1 = max(getFontHeight(size='SMALL') or 12, 12)
-                        widget.setIconSize(QtCore.QSize(_height1 * 10, _height1))
-                        # widget.setIconSize(QtCore.QSize(120, 10))
-                        self._setSizes(act)
-        self.update()
+        if getattr(obj, '_showContours', True) or self.spectrumDisplay.isGrouped:
+            if self.spectrumDisplay.is1D:
+                _col = obj.sliceColour
+            else:
+                _col = obj.positiveContourColour
 
-    def _processToolBarExtension(self):
-        # paint event sets visibility of actions...
-        return
+            if _col and _col.startswith('#'):
+                pix.fill(QtGui.QColor(_col))
 
-        # kept for the minute, but can be removed when the toolbar is changed to a tab bar
+            elif _col in Colour.colorSchemeTable:
+                colourList = Colour.colorSchemeTable[_col]
 
-        # self.removeChild(self._extButton)
-        # return
-        #
-        # # can hide the widgets inside a temporary frame if needed
-        # self._extButton.setParent(None)
-        # return
-        #
-        # if self._extButton.isVisible():
-        #     # toolbar does not fit, so need to process the buttons
-        #
-        #     actionList = self.actions()
-        #     if len(actionList) > 2:
-        #         for action in actionList[:2]:
-        #             widget = self.widgetForAction(action)
-        #             # widget.setParent(None)
+                step = _iconX
+                stepX = _iconX
+                stepY = len(colourList) - 1
+                jj = 0
+                painter = QtGui.QPainter(pix)
+
+                for ii in range(_iconX):
+                    _interp = (stepX - step) / stepX
+                    _intCol = Colour.interpolateColourHex(colourList[min(jj, stepY)], colourList[min(jj + 1, stepY)],
+                                                          _interp)
+
+                    painter.setPen(QtGui.QColor(_intCol))
+                    painter.drawLine(ii, 0, ii, _iconY)
+                    step -= stepY
+                    while step < 0:
+                        step += stepX
+                        jj += 1
+
+                painter.end()
+
+            else:
+                pix.fill(QtGui.QColor('gray'))
+        else:
+            pix.fill(QtGui.QColor('gray'))
+
+        action.setIcon(QtGui.QIcon(pix))

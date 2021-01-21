@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-12 18:21:40 +0000 (Tue, January 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 17:37:16 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -202,7 +202,7 @@ class MacroEditor(CcpnModule):
         Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.
         """
         fType = '*.py'
-        dialog = MacrosFileDialog(parent=self, acceptMode='save', directory=self.userMacroDirPath, selectFile=self.filePath, filter=fType)
+        dialog = MacrosFileDialog(parent=self, acceptMode='save', directory=self.userMacroDirPath, selectFile=self.filePath, fileFilter=fType)
         dialog._show()
         filePath = dialog.selectedFile()
         if filePath is not None:
@@ -475,7 +475,7 @@ class MacroEditor(CcpnModule):
         contents of the macro file into the textbox.
         """
         fType = '*.py'
-        dialog = MacrosFileDialog(parent=self, acceptMode='open', directory=self.userMacroDirPath, filter=fType)
+        dialog = MacrosFileDialog(parent=self, acceptMode='open', directory=self.userMacroDirPath, fileFilter=fType)
         dialog._show()
 
         filePath = dialog.selectedFile()

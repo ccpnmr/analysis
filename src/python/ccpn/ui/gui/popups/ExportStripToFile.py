@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-03 10:01:42 +0000 (Thu, December 03, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-21 17:37:16 +0000 (Thu, January 21, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,9 +25,7 @@ __date__ = "$Date: 2017-07-06 15:51:11 +0000 (Thu, July 06, 2017) $"
 # Start of code
 #=========================================================================================
 
-import os
 from collections import OrderedDict as OD
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USEREXPORTPATH
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -35,7 +33,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ProjectTreeCheckBoxes, PrintTreeCheckBoxes
-from ccpn.ui.gui.popups.ExportDialog import ExportDialog
+from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Button import Button
@@ -91,18 +89,22 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS, GLDIAGONALSIDEBANDS
 
 
-class ExportStripToFilePopup(ExportDialog):
+class ExportStripToFilePopup(ExportDialogABC):
+    """
+    Class to handle printing strips to file
+    """
+
     def __init__(self, parent=None, mainWindow=None, title='Export Strip to File',
-                 fileMode=FileDialog.AnyFile,
-                 text='Export File',
-                 acceptMode=FileDialog.AcceptSave,
-                 preferences=None,
+                 fileMode='anyFile',
+                 acceptMode='export',
                  selectFile=None,
-                 filter=EXPORTFILTERS,
+                 fileFilter=EXPORTFILTERS,
                  strips=None,
                  includeSpectumDisplays=True,
                  **kwds):
-
+        """
+        Initialise the widget
+        """
         # initialise attributes
         self.strips = strips
         self.objects = {}
@@ -113,9 +115,9 @@ class ExportStripToFilePopup(ExportDialog):
         self.specToExport = None
 
         super().__init__(parent=parent, mainWindow=mainWindow, title=title,
-                         fileMode=fileMode, text=text, acceptMode=acceptMode,
-                         preferences=preferences, selectFile=selectFile,
-                         filter=filter, pathID=USEREXPORTPATH,
+                         fileMode=fileMode, acceptMode=acceptMode,
+                         selectFile=selectFile,
+                         fileFilter=fileFilter,
                          **kwds)
 
         if not strips:
@@ -125,40 +127,19 @@ class ExportStripToFilePopup(ExportDialog):
         self.fullList = GLFULLLIST
 
     def initialise(self, userFrame):
-        for strip in self.strips:
-            self.objects[strip.id] = (strip, strip.pid)
-
-        # create radio buttons to choose the strip to print
-        # row = 0
-        if len(self.strips) > 1:
-            if self.includeSpectumDisplays:
-
-                # get the list of spectrumDisplays containing the strips
-                specDisplays = set()
-                for strip in self.strips:
-                    if len(strip.spectrumDisplay.strips) > 1:
-                        specDisplays.add(strip.spectrumDisplay)
-
-                for spec in specDisplays:
-                    self.objects['SpectrumDisplay: %s' % spec.id] = (spec, spec.pid)
-
-                pulldownLabel = 'Select Item:' if specDisplays else 'Select Strip:'
-
-        else:
-            pulldownLabel = 'Current Strip:'
-
+        """Create the widgets for the userFrame
+        """
         row = 0
         self.objectPulldown = PulldownListCompoundWidget(userFrame,
                                                          grid=(row, 0), gridSpan=(1, 3), vAlign='top', hAlign='left',
                                                          orientation='left',
-                                                         labelText=pulldownLabel,
-                                                         texts=sorted([ky for ky in self.objects.keys()]),
+                                                         labelText='Strip/SpectrumDisplay',
                                                          callback=self._changePulldown
                                                          )
 
         # add a spacer to separate from the common save widgets
         row += 1
-        HLine(userFrame, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+        HLine(userFrame, grid=(row, 0), gridSpan=(1, 4), colour=getColours()[DIVIDER], height=20)
         row += 1
         topRow = row
         Label(userFrame, text='Print Type', grid=(row, 0), hAlign='left', vAlign='centre')
@@ -167,7 +148,6 @@ class ExportStripToFilePopup(ExportDialog):
         self.exportType = RadioButtons(userFrame, list(EXPORTTYPES.keys()),
                                        grid=(row, 1), direction='h', hAlign='left', spacing=(20, 0),
                                        callback=self._changePrintType)
-        self.exportType.set(EXPORTPDF)
 
         row += 1
         Label(userFrame, text='Page orientation', grid=(row, 0), hAlign='left', vAlign='centre')
@@ -175,7 +155,6 @@ class ExportStripToFilePopup(ExportDialog):
         # row += 1
         self.pageType = RadioButtons(userFrame, PAGETYPES,
                                      grid=(row, 1), direction='h', hAlign='left', spacing=(20, 0))
-        self.pageType.set(PAGEPORTRAIT)
 
         # create a pulldown for the foreground (axes) colour
         row += 1
@@ -184,23 +163,7 @@ class ExportStripToFilePopup(ExportDialog):
         self.foregroundColourBox = PulldownList(foregroundColourFrame, vAlign='t', grid=(0, 1))
         self.foregroundColourButton = Button(foregroundColourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
                                              callback=self._changeForegroundButton, icon='icons/colours')
-
-        # populate initial pulldown from background colour
-        spectrumColourKeys = list(spectrumColours.keys())
         fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
-
-        # set foreground to black
-        self.foregroundColourBox.setCurrentText(spectrumColours['#000000'])
-        self._changeForegroundPulldown(0)
-
-        if self.foregroundColour in spectrumColourKeys:
-            self.foregroundColourBox.setCurrentText(spectrumColours[self.foregroundColour])
-        else:
-            addNewColourString(self.foregroundColour)
-            fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
-            spectrumColourKeys = list(spectrumColours.keys())
-            self.foregroundColourBox.setCurrentText(spectrumColours[self.foregroundColour])
-
         self.foregroundColourBox.activated.connect(self._changeForegroundPulldown)
 
         # create a pulldown for the background colour
@@ -210,65 +173,111 @@ class ExportStripToFilePopup(ExportDialog):
         self.backgroundColourBox = PulldownList(backgroundColourFrame, vAlign='t', grid=(0, 1))
         self.backgroundColourButton = Button(backgroundColourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
                                              callback=self._changeBackgroundButton, icon='icons/colours')
-
-        # populate initial pulldown from background colour
-        spectrumColourKeys = list(spectrumColours.keys())
         fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
+        self.backgroundColourBox.activated.connect(self._changeBackgroundPulldown)
 
-        # set background to white
-        self.backgroundColourBox.setCurrentText(spectrumColours['#FFFFFF'])
-        self._changeBackgroundPulldown(0)
+        row += 1
+        self.baseThicknessBox = DoubleSpinBoxCompoundWidget(userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
+                                                            labelText='Line Thickness',
+                                                            # value=1.0,
+                                                            decimals=2, step=0.05, range=(0.01, 20))
+        row += 1
+        self.stripPaddingBox = DoubleSpinBoxCompoundWidget(userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
+                                                           labelText='Strip Padding',
+                                                           # value=5,
+                                                           decimals=0, step=1, range=(0, 50))
+        row += 1
+        self.exportDpiBox = DoubleSpinBoxCompoundWidget(userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
+                                                        labelText='Image dpi',
+                                                        # value=300,
+                                                        decimals=0, step=5, range=(36, 2400))
+        row += 1
+        userFrame.addSpacer(0, 10, grid=(row, 0))
+        Spacer(userFrame, 5, 5, vPolicy='minimum', grid=(row, 3))
+
+        row += 1
+        self.treeView = PrintTreeCheckBoxes(userFrame, project=None, grid=(row, 0), gridSpan=(1, 4))
+
+    def populate(self, userframe):
+        """Populate the widgets with project
+        """
+
+        with self.blockWidgetSignals(userframe):
+            self._populate(userframe)
+
+    def _populate(self, userframe):
+        """Populate the widget
+        """
+        self.objects = {strip.id: (strip, strip.pid) for strip in self.strips}
+
+        # define the contents for the object pulldown
+        if len(self.strips) > 1:
+            specDisplays = set()
+            if self.includeSpectumDisplays:
+
+                # get the list of spectrumDisplays containing the strips
+                for strip in self.strips:
+                    if len(strip.spectrumDisplay.strips) > 1:
+                        specDisplays.add(strip.spectrumDisplay)
+
+                # add to the pulldown objects
+                for spec in specDisplays:
+                    self.objects['SpectrumDisplay: %s' % spec.id] = (spec, spec.pid)
+
+            pulldownLabel = 'Select Item:' if specDisplays else 'Select Strip:'
+
+        else:
+            pulldownLabel = 'Current Strip:'
+
+        self.objectPulldown.setLabelText(pulldownLabel)
+        self.objectPulldown.modifyTexts(sorted([ky for ky in self.objects.keys()]))
+
+        # set the page types
+        self.exportType.set(EXPORTPDF)
+        self.pageType.set(PAGEPORTRAIT)
+
+        # populate pulldown from foreground colour
+        spectrumColourKeys = list(spectrumColours.keys())
+        self.foregroundColour = '#000000'
+        self.backgroundColour = '#FFFFFF'
+
+        if self.foregroundColour in spectrumColourKeys:
+            self.foregroundColourBox.setCurrentText(spectrumColours[self.foregroundColour])
+        else:
+            # add new colour to the pulldowns if not defined
+            addNewColourString(self.foregroundColour)
+            fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
+            fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
+            self.foregroundColourBox.setCurrentText(spectrumColours[self.foregroundColour])
 
         if self.backgroundColour in spectrumColourKeys:
             self.backgroundColourBox.setCurrentText(spectrumColours[self.backgroundColour])
         else:
+            # add new colour to the pulldowns if not defined
             addNewColourString(self.backgroundColour)
+            fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
             fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
-            spectrumColourKeys = list(spectrumColours.keys())
             self.backgroundColourBox.setCurrentText(spectrumColours[self.backgroundColour])
 
-        self.backgroundColourBox.activated.connect(self._changeBackgroundPulldown)
+        self.baseThicknessBox.setValue(1.0)
+        self.stripPaddingBox.setValue(5)
+        self.exportDpiBox.setValue(300)
 
-        row += 1
-        self.baseThicknessBox = DoubleSpinBoxCompoundWidget(
-                userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
-                labelText='Line Thickness',
-                value=1.0,
-                decimals=2, step=0.05, range=(0.01, 20))
-        # self.baseThicknessBox.setFixedHeight(25)
-
-        row += 1
-        self.stripPaddingBox = DoubleSpinBoxCompoundWidget(
-                userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
-                labelText='Strip Padding',
-                value=5,
-                decimals=0, step=1, range=(0, 50))
-        # self.stripPaddingBox.setFixedHeight(25)
-
-        row += 1
-        self.exportDpiBox = DoubleSpinBoxCompoundWidget(
-                userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
-                labelText='Image dpi',
-                value=300,
-                decimals=0, step=5, range=(36, 2400))
-        # self.exportDpiBox.setFixedHeight(25)
-
-        row += 1
-        userFrame.addSpacer(0, 10, grid=(row, 0))
-
-        row += 1
-        self.treeView = PrintTreeCheckBoxes(userFrame, project=self.project, grid=(row, 0), gridSpan=(1, 3))
-        if self.current.strip:
+        # set the pulldown to current strip of selected
+        if self.current and self.current.strip:
             self.objectPulldown.select(self.current.strip.id)
             self.strip = self.current.strip
         else:
-            self.objectPulldown.select(self.strips[0].id)
-            self.strip = self.strips[0]
+            if self.strips:
+                self.objectPulldown.select(self.strips[0].id)
+                self.strip = self.strips[0]
+            else:
+                self.strip = None
 
+        # fill the tree from the current strip
         self._populateTreeView()
-        # currentPath = self.getPathHistory()
-        # currentPath = currentPath if currentPath else os.path.expanduser(self.project.path)
 
+        # set the default save name
         exType = self.exportType.get()
         if exType in EXPORTTYPES:
             exportExtension = EXPORTTYPES[exType][EXPORTEXT]
@@ -277,15 +286,9 @@ class ExportStripToFilePopup(ExportDialog):
 
         self.setSave(self.objectPulldown.getText() + exportExtension)
 
-        self.setFixedWidth(self.sizeHint().width())
-        self.setMinimumHeight(self.sizeHint().height())
-
-    def _changeForegroundPulldown(self, int):
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.foregroundColourBox.currentText()))]
-        if newColour:
-            self.foregroundColour = newColour
-
-    def _changeForegroundButton(self, int):
+    def _changeColourButton(self):
+        """Popup a dialog and set the colour in the pulldowns
+        """
         dialog = ColourDialog(self)
 
         newColour = dialog.getColor()
@@ -293,6 +296,19 @@ class ExportStripToFilePopup(ExportDialog):
             addNewColour(newColour)
             fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
             fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
+
+            return newColour
+
+    def _changeForegroundPulldown(self, int):
+        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.foregroundColourBox.currentText()))]
+        if newColour:
+            self.foregroundColour = newColour
+
+    def _changeForegroundButton(self, int):
+        """Change the colour from the foreground colour button
+        """
+        newColour = self._changeColourButton()
+        if newColour:
             self.foregroundColourBox.setCurrentText(spectrumColours[newColour.name()])
             self.foregroundColour = newColour.name()
 
@@ -302,13 +318,10 @@ class ExportStripToFilePopup(ExportDialog):
             self.backgroundColour = newColour
 
     def _changeBackgroundButton(self, int):
-        dialog = ColourDialog(self)
-
-        newColour = dialog.getColor()
+        """Change the colour from the background colour button
+        """
+        newColour = self._changeColourButton()
         if newColour:
-            addNewColour(newColour)
-            fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
-            fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
             self.backgroundColourBox.setCurrentText(spectrumColours[newColour.name()])
             self.backgroundColour = newColour.name()
 
@@ -358,6 +371,9 @@ class ExportStripToFilePopup(ExportDialog):
 
     def _populateTreeView(self, selectList=None):
         self.treeView.clear()
+
+        if not self.strip:
+            return
 
         # add Spectra to the treeView
         if self.strip.spectrumViews:
@@ -481,16 +497,17 @@ class ExportStripToFilePopup(ExportDialog):
 
     def _changePrintType(self):
         selected = self.exportType.get()
-        lastPath = self.saveText.text().strip()
+        lastPath = self.getSaveTextWidget()
 
         if selected in EXPORTTYPES:
             ext = EXPORTTYPES[selected][EXPORTEXT]
             filt = EXPORTTYPES[selected][EXPORTFILTER]
 
-            if not lastPath.endswith(ext):
-                # remove other extension
-                lastPath = os.path.splitext(lastPath)[0]
-                lastPath += ext
+            # if not lastPath.endswith(ext):
+            #     # remove other extension
+            #     lastPath = os.path.splitext(lastPath)[0]
+            #     lastPath += ext
+            lastPath.assureSuffix(ext)
             self._dialogFilter = filt
             self.updateDialog()
             self.updateFilename(lastPath)
@@ -610,34 +627,28 @@ class ExportStripToFilePopup(ExportDialog):
                     pngExport.writePSFile()
 
     def actionButtons(self):
-        self.buttonFrame.addSpacer(0, 10, grid=(0, 1))
-        self.buttons = ButtonList(self.buttonFrame, ['Close', 'Save', 'Save and Close'], [self._rejectDialog, self._saveDialog, self._saveAndCloseDialog],
-                                  tipTexts=['Close the export dialog',
-                                            'Export the strip to a file, dialog will remain open',
-                                            'Export the strip and close the dialog'],
-                                  grid=(1, 0), gridSpan=(1, 3))
+        self.setOkButton(callback=self._saveAndCloseDialog, text='Save and Close', tipText='Export the strip and close the dialog')
+        self.setCancelButton(callback=self._rejectDialog, text='Close', tipText='Export the strip and close the dialog')
+        self.setCloseButton(callback=self._saveDialog, text='Save', tipText='Export the strip and close the dialog')
+        self.setDefaultButton(ExportDialogABC.CANCELBUTTON)
+
+        # self.buttonFrame.addSpacer(0, 10, grid=(0, 1))
+        # self.buttons = ButtonList(self.buttonFrame, ['Close', 'Save', 'Save and Close'], [self._rejectDialog, self._saveDialog, self._saveAndCloseDialog],
+        #                           tipTexts=['Close the export dialog',
+        #                                     'Export the strip to a file, dialog will remain open',
+        #                                     'Export the strip and close the dialog'],
+        #                           grid=(1, 0), gridSpan=(1, 3))
 
     def _saveDialog(self, exitSaveFileName=None):
         """save button has been clicked
         """
-        # self.exitFilename = self.saveText.text().strip()  # strip the trailing whitespace
-
         selected = self.exportType.get()
-        lastPath = self.saveText.text().strip()
-        if selected == EXPORTPDF:
-            if not lastPath.endswith(EXPORTPDFEXTENSION):
-                lastPath += EXPORTPDFEXTENSION
-        elif selected == EXPORTSVG:
-            if not lastPath.endswith(EXPORTSVGEXTENSION):
-                lastPath += EXPORTSVGEXTENSION
-        elif selected == EXPORTPNG:
-            if not lastPath.endswith(EXPORTPNGEXTENSION):
-                lastPath += EXPORTPNGEXTENSION
-        elif selected == EXPORTPS:
-            if not lastPath.endswith(EXPORTPSEXTENSION):
-                lastPath += EXPORTPSEXTENSION
+        lastPath = self.getSaveTextWidget()
 
-        self.saveText.setText(lastPath)
+        if selected in EXPORTTYPES:
+            lastPath = lastPath.assureSuffix(EXPORTTYPES[selected][EXPORTEXT])
+
+        self.setSaveTextWidget(lastPath)
         self.exitFilename = lastPath
 
         if self.pathEdited is False:
@@ -645,71 +656,70 @@ class ExportStripToFilePopup(ExportDialog):
             self._exportToFile()
         else:
             # have edited the path so check the new file
-            if os.path.isfile(self.exitFilename):
-                yes = showYesNoWarning('%s already exists.' % os.path.basename(self.exitFilename),
+            if self.exitFilename.is_file():
+                yes = showYesNoWarning('%s already exists.' % self.exitFilename,
                                        'Do you want to replace it?')
                 if yes:
                     self._exportToFile()
             else:
-                if not self.exitFilename:
-                    showWarning('FileName Error:', 'Filename is empty.')
+                if self.exitFilename.is_dir():
+                    showWarning('Export Error:', 'Filename must be a file.')
                 else:
                     self._exportToFile()
 
     def _saveAndCloseDialog(self, exitSaveFilename=None):
         """save and Close button has been clicked
         """
-        # self.exitFilename = self.saveText.text().strip()  # strip the trailing whitespace
-
         selected = self.exportType.get()
-        lastPath = self.saveText.text().strip()
-        if selected == EXPORTPDF:
-            if not lastPath.endswith(EXPORTPDFEXTENSION):
-                lastPath += EXPORTPDFEXTENSION
-        elif selected == EXPORTSVG:
-            if not lastPath.endswith(EXPORTSVGEXTENSION):
-                lastPath += EXPORTSVGEXTENSION
-        elif selected == EXPORTPNG:
-            if not lastPath.endswith(EXPORTPNGEXTENSION):
-                lastPath += EXPORTPNGEXTENSION
-        elif selected == EXPORTPS:
-            if not lastPath.endswith(EXPORTPSEXTENSION):
-                lastPath += EXPORTPSEXTENSION
+        lastPath = self.getSaveTextWidget()
 
-        self.saveText.setText(lastPath)
+        if selected in EXPORTTYPES:
+            lastPath = lastPath.assureSuffix(EXPORTTYPES[selected][EXPORTEXT])
+
+        self.setSaveTextWidget(lastPath)
         self.exitFilename = lastPath
 
         self._acceptDialog()
 
 
 if __name__ == '__main__':
-    from sandbox.Geerten.Refactored.framework import Framework
-    from sandbox.Geerten.Refactored.programArguments import Arguments
+    # from sandbox.Geerten.Refactored.framework import Framework
+    # from sandbox.Geerten.Refactored.programArguments import Arguments
+    #
+    #
+    # _makeMainWindowVisible = False
+    #
+    #
+    # class MyProgramme(Framework):
+    #     "My first app"
+    #     pass
+    #
+    #
+    # myArgs = Arguments()
+    # myArgs.noGui = False
+    # myArgs.debug = True
+    #
+    # application = MyProgramme('MyProgramme', '3.0.0-beta3', args=myArgs)
+    # ui = application.ui
+    # ui.initialize()
+    #
+    # if _makeMainWindowVisible:
+    #     ui.mainWindow._updateMainWindow(newProject=True)
+    #     ui.mainWindow.show()
+    #     QtWidgets.QApplication.setActiveWindow(ui.mainWindow)
+    #
+    # dialog = ExportStripToFilePopup(parent=application.mainWindow,
+    #                                 mainWindow=application.mainWindow,
+    #                                 strips=[],
+    #                                 preferences=application.preferences)
+    # result = dialog.exec_()
+
+    from ccpn.ui.gui.widgets.Application import newTestApplication
+    from ccpn.framework.Application import getApplication
 
 
-    _makeMainWindowVisible = False
+    app = newTestApplication()
+    application = getApplication()
 
-
-    class MyProgramme(Framework):
-        "My first app"
-        pass
-
-
-    myArgs = Arguments()
-    myArgs.noGui = False
-    myArgs.debug = True
-
-    application = MyProgramme('MyProgramme', '3.0.0-beta3', args=myArgs)
-    ui = application.ui
-    ui.initialize()
-
-    if _makeMainWindowVisible:
-        ui.mainWindow._updateMainWindow(newProject=True)
-        ui.mainWindow.show()
-        QtWidgets.QApplication.setActiveWindow(ui.mainWindow)
-
-    dialog = ExportStripToFilePopup(parent=application.mainWindow,
-                                    mainWindow=application.mainWindow,
-                                    strips=[],
-                                    preferences=application.preferences)
+    dialog = ExportStripToFilePopup(strips=[])
     result = dialog.exec_()

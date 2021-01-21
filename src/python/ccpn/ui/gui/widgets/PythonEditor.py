@@ -284,7 +284,7 @@ class QCodeEditor(QPlainTextEdit,Base):
 
     def saveToPDF(self, fileName=None):
         fType = '*.pdf'
-        dialog = MacrosFileDialog(parent=self, acceptMode='save', selectFile=fileName, filter=fType)
+        dialog = MacrosFileDialog(parent=self, acceptMode='save', selectFile=fileName, fileFilter=fType)
         dialog._show()
         filename = dialog.selectedFile()
         if filename:

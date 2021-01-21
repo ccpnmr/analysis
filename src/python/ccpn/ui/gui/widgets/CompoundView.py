@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-12 18:21:40 +0000 (Tue, January 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 17:37:16 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -494,7 +494,7 @@ class CompoundView(QGraphicsView, Base):
             printer.setResolution(newRes)
 
             fType = 'PDF (*.pdf)'
-            dialog = PDFFileDialog(parent=self, acceptMode='export', filter=fType)
+            dialog = PDFFileDialog(parent=self, acceptMode='export', fileFilter=fType)
             dialog._show()
             filePaths = dialog.selectedFiles()
             if filePaths and len(filePaths) > 0:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-12 18:21:40 +0000 (Tue, January 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 11:48:08 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -99,13 +99,9 @@ class SpectrumValidator(QtGui.QValidator):
         if self.validationType != 'exists':
             raise NotImplemented('%s only checks that the path exists', self.__class__.__name__)
 
-        # filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, self.spectrum, p_str.strip())
-        filePath = _expandFilePath(self.spectrum._project, self.spectrum, p_str)
-
-        # filePath = p_str.strip()
-
         palette = self.parent().palette()
 
+        filePath = _expandFilePath(self.spectrum._project, self.spectrum, p_str)
         if os.path.exists(filePath):
             if filePath == self.spectrum.filePath:
                 palette.setColor(QtGui.QPalette.Base, VALIDROWCOLOUR)
@@ -155,11 +151,10 @@ class DataUrlValidator(QtGui.QValidator):
     def validate(self, p_str, p_int):
         if self.validationType != 'exists':
             raise NotImplemented('%s only checks that the path exists', self.__class__.__name__)
-        # filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, self.spectrum, p_str.strip())
-        filePath = p_str
 
         palette = self.parent().palette()
 
+        filePath = p_str
         if os.path.isdir(filePath):
 
             # validate dataStores
@@ -810,7 +805,6 @@ class ValidateSpectraFrameABC(Frame):
             pathData, pathButton, pathLabel, pathUrlLabel = self.spectrumData[spectrum]
             specNum = list(self.spectrumData.keys()).index(spectrum)
 
-            # filePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
             filePath = _expandFilePath(self.project, spectrum, pathData.text())
             dialog = SpectrumFileDialog(parent=self, acceptMode='select', directory=filePath)
             dialog._show()
@@ -914,14 +908,9 @@ class ValidateSpectraFrameABC(Frame):
             pathData, pathButton, pathLabel, pathUrlLabel = self.spectrumData[spectrum]
             specNum = list(self.spectrumData.keys()).index(spectrum)
 
-            # newFilePath = ccpnUtil.expandDollarFilePath(self.project, spectrum, pathData.text().strip())
-            newFilePath = _expandFilePath(self.project, spectrum, pathData.text())
-
-            # print('>>> _setSpectrumPath', newFilePath)
-            # if spectrum.filePath != newFilePath:
-
             from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 
+            newFilePath = _expandFilePath(self.project, spectrum, pathData.text())
             dataType, subType, usePath = ioFormats.analyseUrl(newFilePath)
             if dataType == 'Spectrum':
                 pass

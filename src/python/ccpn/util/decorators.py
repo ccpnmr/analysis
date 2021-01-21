@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-19 17:07:58 +0000 (Tue, January 19, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 11:48:08 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -204,6 +204,49 @@ def propertyUndo():
 
     return theDecorator
 
+
+def callList(func):
+    """
+    Decorator to give the realtime call stack for the decorated function.
+    Adds _callList=None, _callStr=None to the parameter list for the function call
+    so function can access full list.
+
+    _callList is tuple of tuples of the form:
+
+        ((caller info, simple print string), string)
+
+        caller info is: (index, name of calling method, stack info)
+
+        simple print string is repr if caller info.
+
+    The function will need either _callList=None, or **kwds adding to the parameter list.
+
+    # Not fully tested
+    """
+
+    def inner(*args, **kwargs):
+        stack = inspect.stack()
+        minStack = len(stack)  # min(stack_size, len(stack))
+        modules = [(index, inspect.getmodule(stack[index][0]))
+                   for index in range(1, minStack)]
+        callers = [(0, func.__module__, func.__name__)]
+        for index, module in modules:
+            try:
+                name = module.__name__
+            except:
+                name = '<NOT_FOUND>'
+            callers.append((index, name, stack[index][3]))
+
+        s = '{index:>5} : {module:^%i} : {name}' % 20
+        printStr = []
+        for i in range(0, len(callers)):
+            printStr.append(s.format(index=callers[i][0], module=callers[i][1], name=callers[i][2]))
+
+        kwargs['_callList'] = tuple((cc, pp) for cc, pp in zip(callers, printStr))
+
+        return func(*args, **kwargs)
+
+    return inner
 
 #----------------------------------------------------------------------------------------------
 # Adapted from from sandbox.Geerten.Refactored.decorators to fit current setup

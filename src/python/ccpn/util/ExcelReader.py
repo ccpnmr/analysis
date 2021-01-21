@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:51 +0000 (Fri, January 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-21 13:59:26 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -423,8 +423,8 @@ class ExcelReader(object):
             data = self._project.loadData(filePath)
         if data is not None:
             if len(data) > 0:
-                sp = data[0]
-                sp.rename(name)
+                # sp = data[0]
+                # sp.rename(name)
                 self._linkSpectrumToObj(obj, sp, dct)
                 if EXP_TYPE in dct:  # use exp name as it is much faster and safer to save than exp type.
                     data[0].experimentName = dct[EXP_TYPE]

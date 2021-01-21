@@ -4,7 +4,7 @@ Test code for NmrResidue
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-09-20 11:04:13 +0100 (Wed, September 20, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2021-01-21 15:55:18 +0000 (Thu, January 21, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -861,7 +861,6 @@ class NmrResidueTest(WrapperTesting):
         # self.assertEqual(len(self.undo.waypoints), 0)
         self.assertEqual(nr2.id, 'A.515.XXX-Deleted')
         self.assertIs(nrx, nr1)
-        self.assertIsNone(nr2._apiResonanceGroup)
         self.assertTrue(len(nr1.nmrAtoms) == 4)
 
     def test_fetchNmrResidue(self):

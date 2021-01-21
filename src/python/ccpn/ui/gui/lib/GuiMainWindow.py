@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-18 14:43:36 +0000 (Mon, January 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 15:03:25 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -53,7 +53,7 @@ from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
-from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog, setInitialPath
+from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, \
     USERMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU
@@ -1114,33 +1114,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
         editor.textBox.setText(text)
 
-    #Framework owns the command, this part juts get the file to run
-    # def runMacro(self, macroFile:str=None):
-    #   """
-    #   Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
-    #   runs the selected macro.
-    #   """
-    #   if macroFile is None:
-    #     dialog = FileDialog(self, fileMode=FileDialog.ExistingFile, text="Run Macro",
-    #                         acceptMode=FileDialog.AcceptOpen, preferences=self.application.preferences.general)
-    #     if os.path.exists(self.application.preferences.general.userMacroPath):
-    #       dialog.setDirectory(self.application.preferences.general.userMacroPath)
-    #     macroFile = dialog.selectedFile()
-    #     if not macroFile:
-    #       return
-    #
-    #   # Don't do this here
-    #   # if os.path.isfile(macroFile):
-    #   #   self.application.preferences.recentMacros.append(macroFile)
-    #     # self._fillRecentMacrosMenu()
-    #     self.pythonConsole._runMacro(macroFile)
-
-    # GWV 20181127: commented not used
-    # def _resetRemoveStripAction(self, strips):
-    #     "Callback on current"
-    #     for spectrumDisplay in self.spectrumDisplays:
-    #         pass  # GWV: poor solution spectrumDisplay._resetRemoveStripAction()
-
     def _highlightCurrentStrip(self, data):
         """Callback on current to highlight the strip
         """
@@ -1161,81 +1134,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     def printToFile(self):
         self.application.showPrintSpectrumDisplayPopup()
-
-    # Not in use, Broken after refactoring to a new GL
-    # def printToFile(self, spectrumDisplayOrStrip=None, path=None, width=800, height=800):
-    #   #TODO:LUCA: Docstring needed
-    #
-    #   try:
-    #     saveName = spectrumDisplayOrStrip.title+'.svg'
-    #   except:
-    #     saveName=''
-    #
-    #   current = self.application.current
-    #   if not spectrumDisplayOrStrip:
-    #     spectrumDisplayOrStrip = current.spectrumDisplay
-    #   if not spectrumDisplayOrStrip and current.strip:
-    #     spectrumDisplayOrStrip = current.strip.spectrumDisplay
-    #   if not spectrumDisplayOrStrip and self.spectrumDisplays:
-    #     spectrumDisplayOrStrip = self.spectrumDisplays[0]
-    #   if spectrumDisplayOrStrip:
-    #     if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
-    #       strips = spectrumDisplayOrStrip.strips
-    #       if not strips:
-    #         return
-    #
-    #     if not path:
-    #       dialog = FileDialog(parent=self,
-    #                           directory=saveName, fileMode=FileDialog.AnyFile, text='Print to File',
-    #                           acceptMode=FileDialog.AcceptSave, preferences=self.application.preferences.general,
-    #                           filter='SVG (*.svg)')
-    #       path = dialog.selectedFile()
-    #       if not path:
-    #         return
-    #       if not path.endswith(".svg"):
-    #         path = path+".svg"
-    #
-    #     xCount = yCount = 1
-    #     if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
-    #       if spectrumDisplayOrStrip.stripArrangement == 'X':
-    #         yCount = len(strips)
-    #       else:
-    #         xCount = len(strips)
-    #
-    #     with Svg(path, xCount=xCount, yCount=yCount, width=width, height=height) as printer:
-    #
-    #       # box
-    #       printer.writeLine(0, 0, width, 0)
-    #       printer.writeLine(width, 0, width, height)
-    #       printer.writeLine(width, height, 0, height)
-    #       printer.writeLine(0, height, 0, 0)
-    #
-    #       xNumber = yNumber = 0
-    #       if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
-    #         for n, strip in enumerate(strips):
-    #           if spectrumDisplayOrStrip.stripArrangement == 'X':
-    #             xOutputRegion = (0, width)
-    #             yOutputRegion = (n * height / yCount, (n + 1) * height / yCount)
-    #             yNumber = n
-    #             if n > 0:
-    #               # strip separator
-    #               printer.writeLine(0, yOutputRegion[0], width, yOutputRegion[0])
-    #           else:
-    #             xOutputRegion = (n * width / xCount, (n + 1) * width / xCount)
-    #             yOutputRegion = (0, height)
-    #             xNumber = n
-    #             if n > 0:
-    #               # strip separator
-    #               printer.writeLine(xOutputRegion[0], 0, xOutputRegion[0], height)
-    #           printer.startRegion(xOutputRegion, yOutputRegion, xNumber, yNumber)
-    #           strip._printToFile(printer)
-    #       else:
-    #         xOutputRegion = (0, width)
-    #         yOutputRegion = (0, height)
-    #         printer.startRegion(xOutputRegion, yOutputRegion)
-    #         spectrumDisplayOrStrip._printToFile(printer)
-
-    # _mouseMovedSignal = QtCore.pyqtSignal(dict)
 
     def _mousePositionMoved(self, strip: GuiStrip.GuiStrip, position: QtCore.QPointF):
         """ CCPN INTERNAL: called from ViewBox

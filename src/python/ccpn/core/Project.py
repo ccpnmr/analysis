@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-18 14:43:36 +0000 (Mon, January 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 11:49:32 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1537,6 +1537,13 @@ class Project(AbstractWrapperObject):
                                               useSameMultiplier=True)
                 except Exception as es:
                     getLogger().warning('Cannot set noise levels for spectrum {}'.format(spectrum.pid))
+
+    def getCcpCodeData(self, ccpCode, molType=None, atomType=None):
+        """Get the CcpCode for molType/AtomType
+        """
+        from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getCcpCodeData
+
+        return getCcpCodeData(self._apiNmrProject, ccpCode, molType='protein', atomType=atomType)
 
     #===========================================================================================
     # new'Object' and other methods

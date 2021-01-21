@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-12 18:00:20 +0000 (Tue, January 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 16:07:02 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 
 import sys
 import typing
+import re
 from PyQt5 import QtWidgets, QtCore
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
@@ -48,6 +49,8 @@ def qtMessageHandler(*errors):
     for err in errors:
         Logging.getLogger().warning('QT error: %s' % err)
 
+
+REMOVEDEBUG = r'\(\w+\.\w+:\d+\)$'
 
 # un/suppress messages
 QtCore.qInstallMessageHandler(qtMessageHandler)
@@ -167,8 +170,8 @@ class Gui(Ui):
         # project.registerNotifier('Spectrum', 'change', GuiSpectrumDisplay._spectrumHasChanged)
         self.setNotifier(project, [Notifier.CHANGE], 'Spectrum', _spectrumHasChanged)
 
-        from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView, _spectrumViewHasChanged
-        from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
+        # from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView, _spectrumViewHasChanged
+        # from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
 
         # project.registerNotifier('SpectrumView', 'delete', GuiSpectrumView._deletedSpectrumView)
 
@@ -242,8 +245,12 @@ class Gui(Ui):
         # project._registerApiNotifier(GuiStrip._rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'preDelete')
         project._registerApiNotifier(GuiStrip._setupGuiStrip, 'ccpnmr.gui.Task.Strip', 'postInit')
 
-        project._registerApiNotifier(_deletedSpectrumView,
-                                     'ccpnmr.gui.Task.SpectrumView', 'preDelete')
+        # project._registerApiNotifier(_deletedSpectrumView,
+        #                              'ccpnmr.gui.Task.StripSpectrumView', 'preDelete')
+
+        # from ccpn.ui.gui.lib.GuiSpectrumDisplay import _spectrumHasChanged, _deletedSpectrumViewTEST
+        # # does not catch the undo/redo notifiers
+        # self.setNotifier(project, [Notifier.DELETE], 'SpectrumView', _deletedSpectrumViewTEST)
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # TODO:ED   added so that some modules are cleared on changing projects
@@ -262,7 +269,11 @@ class Gui(Ui):
         self.mainWindow.show()
         QtWidgets.QApplication.setActiveWindow(self.mainWindow)
 
-        self.qtApp.start()
+        # check whether to skip the execution loop for testing with mainWindow
+        import builtins
+        _skip = getattr(builtins, '_skipExecuteLoop', False)
+        if not _skip:
+            self.qtApp.start()
 
     def _registerDetails(self, registered=False, acceptedTerms=False):
         """Display registration popup"""
@@ -304,6 +315,7 @@ class Gui(Ui):
 
             # only write to the console if enabled in framework
             if self.application._enableLoggingToConsole:
+                command = re.sub(REMOVEDEBUG, '', command)
                 console._write(command + '\n')
 
             logger.echoInfo(command)

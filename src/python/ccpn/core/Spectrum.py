@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:31:18 +0000 (Thu, January 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 16:11:41 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -870,6 +870,20 @@ assignmentTolerances
         if len(value) == apiDataSource.numDim:
             for ii, dataDim in enumerate(apiDataSource.sortedDataDims()):
                 dataDim.isComplex = value[ii]
+        else:
+            raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
+
+    @property
+    @_includeInDimensionalCopy
+    def blockSizes(self) -> Tuple[int, ...]:
+        """BlockSizes -  per dimension"""
+        return tuple(self._apiDataStore.blockSizes)
+
+    @blockSizes.setter
+    def blockSizes(self, value: Sequence):
+        apiDataSource = self._wrappedData
+        if len(value) == apiDataSource.numDim:
+            self._apiDataStore.blockSizes = value
         else:
             raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 

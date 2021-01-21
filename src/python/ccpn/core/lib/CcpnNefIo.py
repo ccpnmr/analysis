@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-12 18:00:20 +0000 (Tue, January 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 16:11:41 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -113,6 +113,7 @@ POSITIONCERTAINTYLEN = len(POSITIONCERTAINTY)
 DEFAULTRESTRAINTLINKLOAD = False
 REGEXREMOVEENDQUOTES = u'\`\d*`+?'
 
+NEFEXTENSION = '.nef'
 
 # NEf to CCPN tag mapping (and tag order)
 #
@@ -1777,7 +1778,7 @@ class CcpnNefWriter:
                     except AttributeError:
                         # You can get this error if a) the mapping is incorrect
                         # The dotted navigation expression can not always be followed
-                        # as is the case e.g. for (PeakList.)spectrum._apiDataStore.headerSize'
+                        # as is the case e.g. for (PeakList.)spectrum dataStore headerSize'
                         # where the dataStore is sometimes None
                         self.project._logger.debug("Could not get %s from %s\n" % (itemvalue, wrapperObj))
                 else:
@@ -1805,7 +1806,7 @@ class CcpnNefWriter:
                     except AttributeError:
                         # You can get this error if a) the mapping is incorrect
                         # The dotted navigation expression can not always be followed
-                        # as is the case e.g. for (PeakList.)spectrum._apiDataStore.headerSize'
+                        # as is the case e.g. for (PeakList.)spectrum dataStore headerSize'
                         # where the dataStore is sometimes None
                         self.project._logger.debug("Could not get %s from %s\n" % (itemvalue, wrapperObj))
                 else:
@@ -4407,10 +4408,10 @@ class CcpnNefReader(CcpnNefContent):
         # set storage attributes
         value = extras.get('dimension_is_complex')
         if value:
-            spectrum._apiDataStore.isComplex = value
+            spectrum.isComplex = value
         value = extras.get('dimension_block_size')
         if value:
-            spectrum._apiDataStore.blockSizes = value
+            spectrum.blockSizes = value
 
         # set aliasingLimits
         defaultLimits = spectrum.dimensionCount * [None]

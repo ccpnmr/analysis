@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:25:52 +0000 (Thu, January 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-21 11:48:52 +0000 (Thu, January 21, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -186,266 +186,6 @@ def undoBlockWithoutSideBar(application=None):
 undoBlock = undoBlockWithSideBar
 
 
-# @contextmanager
-# def blankNotification(obj, message, *args, **kwargs):
-#     print('Starting', message)
-#     try:
-#         yield
-#     finally:
-#         print('Done', message)
-
-# def _startCommandBlock(self, command:str, quiet:bool=False, **objectParameters):
-#   """Start block for command echoing, set undo waypoint, and echo command to ui and logger
-#
-#   MUST be paired with _endCommandBlock call - use try ... finally to ensure both are called
-#
-#   Set keyword:value objectParameters to point to the relevant objects in setup commands,
-#   and pass setup commands and command proper to ui for echoing
-#
-#   Example calls:
-#
-#   _startCommandBlock("application.createSpectrumDisplay(spectrum)", spectrum=spectrumOrPid)
-#
-#   _startCommandBlock(
-#      "newAssignment = peak.assignDimension(axisCode=%s, value=[newNmrAtom]" % axisCode,
-#      peak=peakOrPid)"""
-#
-#   undo = self.project._undo
-#   if undo is not None:                # ejb - changed from if undo:
-#     # set undo step
-#     undo.newWaypoint()                # DO NOT CHANGE
-#
-#     if not self.project._blockSideBar and not undo._blocked:
-#       if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-#         self.ui.mainWindow.sideBar._saveExpandedState()
-#
-#     undo.increaseWaypointBlocking()
-#   if not self._echoBlocking:
-#
-#     self.project.suspendNotification()
-#
-#     # Get list of command strings
-#     commands = []
-#     for parameter, value in sorted(objectParameters.items()):
-#       if value is not None:
-#         if not isinstance(value, str):
-#           value = value.pid
-#         commands.append("%s = project.getByPid(%s)\n" % (parameter, repr(value)))
-#     commands.append(command)    # ED: newLine NOT needed here
-#
-#     # echo command strings
-#     # added 'quiet' mode to keep full functionality to 'startCommandEchoBLock'
-#     # but without the screen output
-#     if not quiet:
-#       self.ui.echoCommands(commands)
-#
-#   self._echoBlocking += 1
-#   getLogger().debug('command=%s, echoBlocking=%s, undo.blocking=%s'
-#                              % (command, self._echoBlocking, undo.blocking))
-
-
-# # temporary import from refactored
-# """
-# Context managers for controlling log, undo, sidebar, and project notifier blocking and unblocking.
-# Contains:
-#
-#     logCommand:             log a command mirroring the console command
-#     undoBlock:              wrap functions in a single undo/redo block
-#     suspendSidebar:         suspend update of the sidebar until end of function block
-#     suspendNotification:    suspend notifications until end of function block
-#     blankNotification:      block all notifiers, re-enable at the end of the function block
-#
-# Context managers are currently nested in the following order:
-#
-#     logCommand:
-#         undoBlock:
-#             suspendSidebar:
-#                 suspendNotification:
-#
-# Any level can be called, but will always contain the lower levels
-#
-# There is also blankNotification that disables all notifiers.
-# This can be called inside any of the above.
-# """
-
-
-# @contextmanager
-# def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], logCommandOnly=False, withSideBar=True):
-#     """
-#     Echo a command to the logger reflecting the python command required to call the function.
-#
-#     :param prefix: string to be prepended to the echo command
-#     :param get: function containing the function
-#     :param isProperty: is the function a property
-#     :param showArguments: list of string names for arguments that need to be included.
-#                         By default, the parameters set to the defaults are not included.
-#
-#     Examples:
-#
-#     ::
-#
-#     1)  def something(self, name=None, value=0):
-#             logCommandManager(prefix='process.') as log:
-#                 log('something')
-#
-#                 ... code here
-#
-#         call function                   echo command
-#
-#         something('Hello')              process.something(name='Hello')
-#         something('Hello', 12)          process.something(name='Hello', value=12)
-#
-#         Parameters are not required in the log() command, parameters are picked up from
-#         the containing function; however, changes can be inserted by including
-#         the parameter, e.g., log('something', name=name+'There') will append 'There' to the name.
-#
-#             something('Hello')          process.something(name='HelloThere')
-#
-#     2)  def something(self, name=None, value=0):
-#             logCommandManager(get='self') as log:
-#                 log('something')
-#
-#                 ... code here
-#
-#         call function                   echo command
-#
-#         something('Hello')              get('parent:ID').something(name='Hello')
-#         something('Hello', 12)          get('parent:ID').something(name='Hello', value=12)
-#
-#     3)  @property
-#         def something(self, value=0):
-#             logCommandManager(get='self', isProperty=True) as log:
-#                 log('something', value=value)
-#
-#                 ... code here
-#
-#
-#         call function                   echo command
-#
-#         something = 12                  get('parent:ID').something = 12
-#
-#         functions of this type can only contain one parameter, and
-#         must be set as a keyword in the log.
-#
-#     4)  Mixing prefix and get:
-#
-#         def something(self, value=0):
-#             logCommandManager(prefix='process.', get='self') as log:
-#                 log('something')
-#
-#         if called from SpectrumDisplay:
-#
-#         call function                   echo command
-#
-#         spectrumDisplay.something(12)   process.get('spectrumDisplay:1').something(12)
-#
-#     5)  If the log command needs modifying, this can be included in the log command,
-#         e.g., if the pid of an object needs inserting
-#
-#         def something(self, value=None):
-#             logCommandManager(prefix='process.', get='self') as log:
-#                 log('something', value=value.pid)
-#
-#         if called from SpectrumDisplay:
-#
-#         call function                   echo command
-#
-#         spectrumDisplay.something(<anObject>)   process.get('spectrumDisplay:1').something(value=anObject:pid)
-#
-#         To make quotes appear around the value use: log('something', value=repr(value.pid))
-#
-#     """
-#
-#     # get the current application
-#     application = getApplication()
-#
-#     def log(funcName, *args, **kwargs):  # remember _undoBlocked, as first parameter
-#         if application._echoBlocking > 1:  # already increased before entry
-#             return
-#
-#         # get the caller from the getframe stack
-#         fr1 = sys._getframe(1)
-#         selfCaller = fr1.f_locals[get] if get else None
-#         pid = selfCaller.pid if selfCaller is not None and hasattr(selfCaller, 'pid') else ''
-#
-#         # make a list for modifying the log string with more readable labels
-#         checkList = [(application, 'application.'),
-#                      (application.ui.mainWindow, 'mainWindow.'),
-#                      (application.project, 'project.'),
-#                      (application.current, 'current.')]
-#         for obj, label in checkList:
-#             if selfCaller is obj:
-#                 getPrefix = label
-#                 break
-#         else:
-#             getPrefix = "get('%s')." % pid if (get and pid) else ''
-#
-#         # search if caller matches the main items in the application namespace, e.g., 'application', 'project', etc.
-#         # nameSpace = application._getNamespace()
-#         # for k in nameSpace.keys():
-#         #     if selfCaller == nameSpace[k]:
-#         #         getPrefix = k+'.'
-#         #         break
-#         # else:
-#         #     getPrefix = "get('%s')." % pid if get else ''
-#
-#         # construct the new log string
-#         if isProperty:
-#             logs = prefix + getPrefix + funcName + ' = ' + repr(list(kwargs.values())[0])
-#         else:
-#
-#             # build the log command from the parameters of the caller function
-#             # only those that are not in the default list are added, i.e. those defined
-#             # explicitly by the caller
-#             if selfCaller is not None:
-#                 selfFunc = getattr(selfCaller, funcName)
-#                 sig0 = [(k, v) for k, v in signature(selfFunc).parameters.items()]
-#                 sig1 = [k for k, v in signature(selfFunc).parameters.items()
-#                         if v.default is Parameter.empty
-#                         or k in showArguments
-#                         or k in kwargs]
-#                 # or (k in fr1.f_locals and (repr(fr1.f_locals[k]) != repr(v.default)))]
-#             else:
-#                 sig1 = {}
-#
-#             # create the log string
-#             logs = prefix + getPrefix + funcName + '('
-#             for k in sig1:
-#                 if k != 'self':
-#                     kval = str(kwargs[k]) if k in kwargs else repr(fr1.f_locals[k])
-#                     logs += str(k) + '=' + kval + ', '
-#             logs = logs.rstrip(', ')
-#             logs += ')'
-#
-#         # logger.log(logs)
-#         logger.info(logs)
-#
-#     # log commands to the registered outputs
-#     logger = getLogger()
-#     application._increaseNotificationBlocking()
-#
-#     try:
-#         if logCommandOnly:
-#             # only execute the calling function
-#             yield log
-#         else:
-#             # transfer control to the calling function, create an undo waypoint
-#             if withSideBar:
-#                 with undoBlock(application=application):  # as _undoBlocking:
-#                     yield log  # partial(log, _undoBlocking)
-#
-#             else:
-#                 with undoBlockWithoutSideBar(application=application):  # as _undoBlocking:
-#                     yield log  # partial(log, _undoBlocking)
-#
-#     except AttributeError as es:
-#         raise
-#
-#     finally:
-#         # clean up log command block
-#         application._decreaseNotificationBlocking()
-
-
 @contextmanager
 def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAsWarning=True, printTraceBack=False):
     """Catches exceptions in try except; logging it as warning;
@@ -474,54 +214,6 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
             MessageDialog.showWarning('Warning', errorStringTemplate % str(es))
         if application._isInDebugMode:
             raise es
-
-
-# @contextmanager
-# def undoBlockManager(application=None, undoBlockOnly=False):
-#     """Wrap all the contained operations into a single undo/redo event.
-#     """
-#
-#     # get the current application
-#     if not application:
-#         application = getApplication()
-#     if application is None:
-#         raise RuntimeError('Error getting application')
-#
-#     undo = application._getUndo()
-#     if undo is not None:  # ejb - changed from if undo:
-#         undo.newWaypoint()  # DO NOT CHANGE
-#         undo.increaseWaypointBlocking()
-#
-#     logger = getLogger()
-#     logger.debug3('_enterUndoBlock')
-#
-#     try:
-#         # transfer control to the calling function
-#         if undoBlockOnly:
-#             yield
-#         else:
-#             # transfer control to the calling function, with sidebar blocking
-#             with sidebarBlocking(application=application):
-#                 yield  # undo._blocked if undo is not None else False
-#
-#     except Exception as es:
-#         raise
-#
-#     finally:
-#         # clean up the undo block
-#         if undo is not None:
-#             undo.decreaseWaypointBlocking()
-#
-#         logger.debug3('_exitUndoBlock')
-#
-#     # with suspendSidebar():
-#     #     yield  # undo._blocked if undo is not None else False
-#     #
-#     # # clean up the undo block
-#     # if undo is not None:
-#     #     undo.decreaseWaypointBlocking()
-#     #
-#     # logger.debug2('_exitUndoBlock')
 
 
 @contextmanager
@@ -718,37 +410,6 @@ def undoStackBlocking(application=None):
             undo._newItem(undoPartial=item[0], redoPartial=item[1])
 
 
-# @contextmanager
-# def undoStackUnblocking(application=None):
-#     """
-#     Temporarily release the undoStack (for newObject)
-#     """
-#
-#     # get the current application
-#     if not application:
-#         application = getApplication()
-#     if application is None:
-#         raise RuntimeError('Error getting application')
-#
-#     undo = application._getUndo()
-#     if undo is None:
-#         raise RuntimeError("Unable to get the application's undo stack")
-#     _undoStack = []
-#
-#     undo.decreaseBlocking()
-#
-#     try:
-#         # transfer control to the calling function
-#         yield
-#
-#     except AttributeError as es:
-#         raise es
-#
-#     finally:
-#         # clean up after blocking undo items
-#         undo.increaseBlocking()
-
-
 @contextmanager
 def waypointBlocking(application=None):
     """
@@ -779,47 +440,6 @@ def waypointBlocking(application=None):
     finally:
         # clean up after blocking undo items
         undo.decreaseWaypointBlocking()
-
-
-# @contextmanager
-# def deleteBlockManager(application=None, deleteBlockOnly=False):
-#     """
-#     Wrap all the following calls with a single undo/redo method.
-#     """
-#
-#     # get the application
-#     if not application:
-#         application = getApplication()
-#     if application is None:
-#         raise RuntimeError('Error getting application')
-#
-#     undo = application._getUndo()
-#
-#     if undo is not None:  # ejb - changed from if undo:
-#         undo.newWaypoint()  # DO NOT CHANGE
-#         undo.increaseWaypointBlocking()
-#
-#     logger = getLogger()
-#     logger.debug2('_enterDeleteBlock')
-#
-#     try:
-#         # transfer control to the calling function
-#         if deleteBlockOnly:
-#             yield
-#         else:
-#             # transfer control to the calling function, with sidebar blocking
-#             with sidebarBlocking(application=application):
-#                 yield  # undo._blocked if undo is not None else False
-#
-#     except AttributeError as es:
-#         raise es
-#
-#     finally:
-#         # clean up the undo block
-#         if undo is not None:
-#             undo.decreaseWaypointBlocking()
-#
-#         logger.debug2('_exitDeleteBlock')
 
 
 CURRENT_ATTRIBUTE_NAME = '_currentAttributeName'
@@ -1002,6 +622,45 @@ def deleteObject():
                 result = func(*args, **kwds)
 
         return result
+
+    return theDecorator
+
+
+def deleteWrapperWithoutSideBar():
+    """ A decorator to wrap the delete(self) method of the V3 core classes
+    calls self._finalise('delete') prior to deletion
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]
+        application = getApplication()  # pass it in to reduce overhead
+
+        self._finaliseAction('delete')
+
+        with notificationBlanking(application=application):
+            with undoBlockWithoutSideBar():
+
+                # must be done like this as the undo functions are not known
+                with undoStackBlocking(application=application) as addUndoItem:
+                    # incorporate the change notifier to simulate the decorator
+                    addUndoItem(redo=partial(self._finaliseAction, 'delete'),
+                                undo=partial(self._finaliseAction, 'create'))
+                    addUndoItem(undo=application.project.unblankNotification,
+                                redo=application.project.blankNotification)
+
+                # call the wrapped function
+                result = func(*args, **kwds)
+
+                with undoStackBlocking(application=application) as addUndoItem:
+                    # incorporate the change notifier to simulate the decorator
+                    addUndoItem(undo=application.project.blankNotification,
+                                redo=application.project.unblankNotification)
+
+        return result
+
 
     return theDecorator
 

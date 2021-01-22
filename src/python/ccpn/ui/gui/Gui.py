@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-21 18:46:44 +0000 (Thu, January 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-22 10:39:22 +0000 (Fri, January 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -163,12 +163,12 @@ class Gui(Ui):
         # self._currentIntegralNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
         # self._currentMultipletNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
 
-        from ccpn.ui.gui.lib.GuiSpectrumDisplay import _spectrumHasChanged
-
-        # project.registerNotifier('Peak', 'delete', GuiSpectrumDisplay._deletedPeak)
-
-        # project.registerNotifier('Spectrum', 'change', GuiSpectrumDisplay._spectrumHasChanged)
-        self.setNotifier(project, [Notifier.CHANGE], 'Spectrum', _spectrumHasChanged)
+        # from ccpn.ui.gui.lib.GuiSpectrumDisplay import _spectrumHasChanged
+        #
+        # # project.registerNotifier('Peak', 'delete', GuiSpectrumDisplay._deletedPeak)
+        #
+        # # project.registerNotifier('Spectrum', 'change', GuiSpectrumDisplay._spectrumHasChanged)
+        # self.setNotifier(project, [Notifier.CHANGE], 'Spectrum', _spectrumHasChanged)
 
         # from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
         # from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-21 18:46:44 +0000 (Thu, January 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-22 10:39:22 +0000 (Fri, January 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -406,6 +406,11 @@ class GuiSpectrumDisplay(CcpnModule):
                                                         Spectrum.className,
                                                         self._spectrumRenameChanged)
 
+        self._spectrumChangeNotifier = self.setNotifier(self.project,
+                                                        [Notifier.CHANGE],
+                                                        Spectrum.className,
+                                                        self._spectrumChanged)
+
         self._spectrumViewNotifier = self.setNotifier(self.project,
                                                       [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
                                                       SpectrumView.className,
@@ -483,6 +488,49 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         self.spectrumToolBar._spectrumRename(data)
 
+    def getSpectrumViewFromSpectrum(self, spectrum):
+        """Get the local spectrumView linked to the spectrum
+        """
+        specViews = [specView for specView in self.spectrumViews if specView.spectrum == spectrum]
+        if len(specViews) == 1:
+            return specViews[0]
+
+    def _spectrumChanged(self, data):
+        """Handle notifier for changes to spectrum
+        This can also be used after creation of new spectrumView
+        """
+        # NOTE:ED - this needs a better system to determine which notifiers affect the screen
+
+        spectrum = data[Notifier.OBJECT]
+        specView = self.getSpectrumViewFromSpectrum(spectrum)
+        if not specView:
+            return
+
+        action = self.spectrumActionDict.get(spectrum)
+        if action:
+            # update toolbar button name
+            action.setText(spectrum.name)
+            setWidgetFont(action, size='SMALL')
+
+        # check the visibleAliasing here and update planeToolbar
+        for strip in self.strips:
+            strip._checkAliasingRange(spectrum)
+            strip._checkVisibleAliasingRange(spectrum)
+
+        specView = self.getSpectrumViewFromSpectrum(spectrum)
+        specView.buildContours = True
+
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        # fire refresh event to repaint the screen
+        GLSignals = GLNotifier(parent=spectrum)
+        targets = [objList for objList in spectrum.peakLists] + [objList for objList in spectrum.multipletLists]
+        GLSignals.emitEvent(targets=targets, triggers=[GLNotifier.GLPEAKLISTS,
+                                                       GLNotifier.GLPEAKLISTLABELS,
+                                                       GLNotifier.GLMULTIPLETLISTS,
+                                                       GLNotifier.GLMULTIPLETLISTLABELS
+                                                       ])
+
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
         """
@@ -502,7 +550,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     strip._setZWidgets()
 
             if spectrumView in self.spectrumViews:
-                _spectrumHasChanged({Notifier.OBJECT: spectrum})
+                self._spectrumChanged({Notifier.OBJECT: spectrum})
 
         elif trigger == Notifier.DELETE:
 
@@ -2530,40 +2578,40 @@ class GuiSpectrumDisplay(CcpnModule):
 #=========================================================================================
 
 
-def _spectrumHasChanged(data):
-    """Handle notifier for changes to spectrum
-    This can also be used after creation of new spectrumView
-    """
-    spectrum = data[Notifier.OBJECT]
-
-    project = spectrum.project
-
-    for spectrumDisplay in project.spectrumDisplays:
-        action = spectrumDisplay.spectrumActionDict.get(spectrum)
-        if action:  # spectrum might not be in all displays
-            # update toolbar button name
-            action.setText(spectrum.name)
-            setWidgetFont(action, size='SMALL')
-
-        # check the visibleAliasing here and update planeToolbar
-        for strip in spectrumDisplay.strips:
-            strip._checkAliasingRange(spectrum)
-            strip._checkVisibleAliasingRange(spectrum)
-
-    # force redraw of the spectra
-    for specView in spectrum.spectrumViews:
-        specView.buildContours = True
-
-    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-    # fire refresh event to repaint the screen
-    GLSignals = GLNotifier(parent=spectrum)
-    targets = [objList for objList in spectrum.peakLists] + [objList for objList in spectrum.multipletLists]
-    GLSignals.emitEvent(targets=targets, triggers=[GLNotifier.GLPEAKLISTS,
-                                                   GLNotifier.GLPEAKLISTLABELS,
-                                                   GLNotifier.GLMULTIPLETLISTS,
-                                                   GLNotifier.GLMULTIPLETLISTLABELS
-                                                   ])
+# def _spectrumHasChanged(data):
+#     """Handle notifier for changes to spectrum
+#     This can also be used after creation of new spectrumView
+#     """
+#     spectrum = data[Notifier.OBJECT]
+#
+#     project = spectrum.project
+#
+#     for spectrumDisplay in project.spectrumDisplays:
+#         action = spectrumDisplay.spectrumActionDict.get(spectrum)
+#         if action:  # spectrum might not be in all displays
+#             # update toolbar button name
+#             action.setText(spectrum.name)
+#             setWidgetFont(action, size='SMALL')
+#
+#         # check the visibleAliasing here and update planeToolbar
+#         for strip in spectrumDisplay.strips:
+#             strip._checkAliasingRange(spectrum)
+#             strip._checkVisibleAliasingRange(spectrum)
+#
+#     # force redraw of the spectra
+#     for specView in spectrum.spectrumViews:
+#         specView.buildContours = True
+#
+#     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+#
+#     # fire refresh event to repaint the screen
+#     GLSignals = GLNotifier(parent=spectrum)
+#     targets = [objList for objList in spectrum.peakLists] + [objList for objList in spectrum.multipletLists]
+#     GLSignals.emitEvent(targets=targets, triggers=[GLNotifier.GLPEAKLISTS,
+#                                                    GLNotifier.GLPEAKLISTLABELS,
+#                                                    GLNotifier.GLMULTIPLETLISTS,
+#                                                    GLNotifier.GLMULTIPLETLISTLABELS
+#                                                    ])
 
 
 GuiSpectrumDisplay.processSpectrum = GuiSpectrumDisplay.displaySpectrum  # ejb - from SpectrumDisplay

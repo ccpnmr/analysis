@@ -45,7 +45,7 @@ By Mouse button:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-22 15:44:49 +0000 (Fri, January 22, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -4957,7 +4957,6 @@ class CcpnGLWidget(QOpenGLWidget):
                     ph1 = phasingFrame.slider1.value()
                     pivotPpm = phasingFrame.pivotEntry.get()
                     direction = phasingFrame.getDirection()
-                    # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
                     # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
                     axisIndex = spectrumView._displayOrderSpectrumDimensionIndices[direction]
                     pivot = spectrumView.spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
@@ -5022,7 +5021,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 ph1 = phasingFrame.slider1.value()
                 pivotPpm = phasingFrame.pivotEntry.get()
                 direction = phasingFrame.getDirection()
-                # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
                 # pivot = dataDim.primaryDataDimRef.(pivotPpm)
                 axisIndex = spectrumView._displayOrderSpectrumDimensionIndices[direction]
                 ref = spectrumView.spectrum.mainSpectrumReferences
@@ -5095,7 +5093,6 @@ class CcpnGLWidget(QOpenGLWidget):
             ph1 = phasingFrame.slider1.value()
             pivotPpm = phasingFrame.pivotEntry.get()
             direction = phasingFrame.getDirection()
-            # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
             # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
 
             deleteHList = []

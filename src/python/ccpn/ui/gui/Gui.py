@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:46 +0100 (Wed, October 07, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-22 15:44:48 +0000 (Fri, January 22, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 
 import sys
 import typing
+import re
 from PyQt5 import QtWidgets, QtCore
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
@@ -48,6 +49,8 @@ def qtMessageHandler(*errors):
     for err in errors:
         Logging.getLogger().warning('QT error: %s' % err)
 
+
+REMOVEDEBUG = r'\(\w+\.\w+:\d+\)$'
 
 # un/suppress messages
 QtCore.qInstallMessageHandler(qtMessageHandler)
@@ -160,23 +163,19 @@ class Gui(Ui):
         # self._currentIntegralNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
         # self._currentMultipletNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
 
-        from ccpn.ui.gui.lib.GuiSpectrumDisplay import _spectrumHasChanged, _deletedSpectrumView
+        # from ccpn.ui.gui.lib.GuiSpectrumDisplay import _spectrumHasChanged
+        #
+        # # project.registerNotifier('Peak', 'delete', GuiSpectrumDisplay._deletedPeak)
+        #
+        # # project.registerNotifier('Spectrum', 'change', GuiSpectrumDisplay._spectrumHasChanged)
+        # self.setNotifier(project, [Notifier.CHANGE], 'Spectrum', _spectrumHasChanged)
 
-        # project.registerNotifier('Peak', 'delete', GuiSpectrumDisplay._deletedPeak)
+        # from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
+        # from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
 
-        # project.registerNotifier('Spectrum', 'change', GuiSpectrumDisplay._spectrumHasChanged)
-        self.setNotifier(project, [Notifier.CHANGE], 'Spectrum', _spectrumHasChanged)
-
-        from ccpn.ui.gui.lib.GuiSpectrumView import _createdSpectrumView, _spectrumViewHasChanged
-        from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
-
-        # project.registerNotifier('SpectrumView', 'delete', GuiSpectrumView._deletedSpectrumView)
-
-        # project.registerNotifier('SpectrumView', 'create', GuiSpectrumView._createdSpectrumView)
         # project.registerNotifier('SpectrumView', 'change', GuiSpectrumView._spectrumViewHasChanged)
-        self.setNotifier(project, [Notifier.CREATE], 'SpectrumView', _createdSpectrumView)
-        self.setNotifier(project, [Notifier.CHANGE], 'SpectrumView', _spectrumViewHasChanged)
-        self.setNotifier(project, [Notifier.CHANGE], 'SpectrumGroup', _spectrumGroupViewHasChanged)
+        # self.setNotifier(project, [Notifier.CHANGE], 'SpectrumView', _spectrumViewHasChanged)
+        # self.setNotifier(project, [Notifier.CHANGE], 'SpectrumGroup', _spectrumGroupViewHasChanged)
 
         from ccpn.ui.gui.lib import GuiPeakListView
 
@@ -230,7 +229,6 @@ class Gui(Ui):
         project._registerApiNotifier(SpectrumDisplayNd._changedBoundDisplayAxisOrdering,
                                      SpectrumDisplayNd.ApiBoundDisplay, 'axisOrder')
 
-        # # TODO:ED remove if not needed
         # from ccpn.ui.gui.modules import SpectrumDisplay1d
         # project._registerApiNotifier(SpectrumDisplay1d._updateSpectrumPlotColour,
         #                              SpectrumDisplay1d.ApiDataSource, 'setSliceColour')
@@ -241,9 +239,6 @@ class Gui(Ui):
         # project._registerApiNotifier(GuiStrip._rulerCreated, 'ccpnmr.gui.Task.Ruler', 'postInit')
         # project._registerApiNotifier(GuiStrip._rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'preDelete')
         project._registerApiNotifier(GuiStrip._setupGuiStrip, 'ccpnmr.gui.Task.Strip', 'postInit')
-
-        project._registerApiNotifier(_deletedSpectrumView,
-                                     'ccpnmr.gui.Task.SpectrumView', 'preDelete')
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # TODO:ED   added so that some modules are cleared on changing projects
@@ -259,12 +254,14 @@ class Gui(Ui):
         project = self.application.project
         self.application.experimentClassifications = getExperimentClassifications(project)
 
-        # sys.stderr.write('==> Gui interface is ready\n')
-
         self.mainWindow.show()
         QtWidgets.QApplication.setActiveWindow(self.mainWindow)
 
-        self.qtApp.start()
+        # check whether to skip the execution loop for testing with mainWindow
+        import builtins
+        _skip = getattr(builtins, '_skipExecuteLoop', False)
+        if not _skip:
+            self.qtApp.start()
 
     def _registerDetails(self, registered=False, acceptedTerms=False):
         """Display registration popup"""
@@ -289,11 +286,6 @@ class Gui(Ui):
         # Set up mainWindow
 
         project = self.application.project
-
-        # mainWindow = self.application.mainWindow
-        # mainWindow.sideBar.setProject(project)
-        # mainWindow.sideBar.fillSideBar(project)
-
         mainWindow.sideBar.buildTree(project, False)
 
         mainWindow.raise_()
@@ -311,52 +303,14 @@ class Gui(Ui):
 
             # only write to the console if enabled in framework
             if self.application._enableLoggingToConsole:
+                command = re.sub(REMOVEDEBUG, '', command)
                 console._write(command + '\n')
 
-            logger.info(command)
+            logger.echoInfo(command)
 
     #TODO:RASMUS: should discuss how application should deal with it
     def getByGid(self, gid):
         return self.application.project.getByPid(gid)
-
-    from ccpn.core.IntegralList import IntegralList
-    from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-
-    def showIntegralTable(self, position: str = 'bottom', relativeTo: CcpnModule = None, selectedList: IntegralList = None):
-        logParametersString = "position={position}, relativeTo={relativeTo}, selectedList={selectedList}".format(
-                position="'" + position + "'" if isinstance(position, str) else position,
-                relativeTo="'" + relativeTo + "'" if isinstance(relativeTo, str) else relativeTo,
-                selectedList="'" + selectedList + "'" if isinstance(selectedList, str) else selectedList)
-        # log = False
-        # import inspect
-        # i0, i1 = inspect.stack()[0:2]
-        # if i0.function != i1.function:  # Caller function name matches, we don't log...
-        #   code_context = i1.code_context[0]
-        #   if 'ui.{}('.format(i0.function) in code_context:
-        #     log = True
-        # if log:
-        #   self.application._startCommandBlock(
-        #     'application.ui.showIntegralTable({})'.format(logParametersString))
-        # try:
-        #   from ccpn.ui.gui.modules.IntegralTable import IntegralTable
-        #
-        #   if 'INTEGRAL TABLE' in self.mainWindow.moduleArea.findAll()[1]:
-        #     integralTable = self.mainWindow.moduleArea.findAll()[1]['INTEGRAL TABLE']
-        #     if integralTable.isVisible():
-        #       return
-        #     else:
-        #       self.mainWindow.moduleArea.moveModule(integralTable, position=position,
-        #                                                 relativeTo=relativeTo)
-        #   else:
-        #    integralTable = IntegralTable(project=self.application.project, selectedList=selectedList)
-        #    self.mainWindow.moduleArea.addModule(integralTable, position=position,
-        #                                         relativeTo=relativeTo)
-        #
-        #   return integralTable
-        #
-        # finally:
-        #   if log:
-        #     self.application._endCommandBlock()
 
     def _execUpdates(self):
         sys.stderr.write('==> Gui update\n')
@@ -366,7 +320,6 @@ class Gui(Ui):
         # check valid internet connection first
         if Url.checkInternetConnection():
             self.updatePopup = UpdatePopup(parent=self.mainWindow, mainWindow=self.mainWindow)
-            self.updatePopup.show()
             self.updatePopup.exec_()
 
             # if updates have been installed then popup the quit dialog with no cancel button
@@ -437,7 +390,7 @@ class SideWindow(coreClass, _GuiWindow):
 
     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
         AbstractWrapperObject.__init__(self, project, wrappedData)
-        _GuiWindow.__init__(self)
+        _GuiWindow.__init__(self, project.application)
 
 
 def _factoryFunction(project: Project, wrappedData) -> coreClass:

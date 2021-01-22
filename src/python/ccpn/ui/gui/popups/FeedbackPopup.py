@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-22 15:44:50 +0000 (Fri, January 22, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -141,20 +141,21 @@ class FeedbackPopup(CcpnDialogMainWidget):
             title = 'Failure'
             msg = 'Problem submitting feedback'
 
-        info = MessageDialog.showInfo(title, msg)
-
-        #print(response)
-        self.hide()
+        MessageDialog.showInfo(title, msg)
+        self.accept()
 
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
 
-
+    _modal = True
     app = TestApplication()
     popup = FeedbackPopup()
 
     popup.show()
-    popup.raise_()
 
-    app.start()
+    if _modal:
+        app.exec_()
+    else:
+        popup.raise_()
+        app.start()

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:22 +0100 (Tue, September 22, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-22 15:44:49 +0000 (Fri, January 22, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -55,14 +55,11 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
             (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
         """
 
-        QtWidgets.QGraphicsItem.__init__(self)  #, scene=self.strip.plotWidget.scene())
-        # self.scene = self.strip.plotWidget.scene
-        # self._currentBoundingRect = self.strip.plotWidget.sceneRect()
+        QtWidgets.QGraphicsItem.__init__(self)
 
-        self._apiDataSource = self._wrappedData.spectrumView.dataSource
         self.spectrumGroupsToolBar = None
 
-        action = self.strip.spectrumDisplay.spectrumActionDict.get(self._apiDataSource)
+        action = self.strip.spectrumDisplay.spectrumActionDict.get(self.spectrum)
         if action and not action.isChecked():
             self.setVisible(False)
 
@@ -88,7 +85,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
     #     return self._currentBoundingRect
 
     # Earlier versions too large value (~1400,1000);
-    # i.e larger then inital MainWIndow size; reduced to (900, 700); but (100, 150) appears
+    # i.e larger then initial MainWindow size; reduced to (900, 700); but (100, 150) appears
     # to give less flicker in Scrolled Strips.
 
     # override of Qt setVisible
@@ -96,8 +93,9 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         QtWidgets.QGraphicsItem.setVisible(self, visible)
         try:
             if self:  # ejb - ?? crashes on table update otherwise
-                action = self.strip.spectrumDisplay.spectrumActionDict.get(self._apiDataSource)
-                action.setChecked(visible)
+                action = self.strip.spectrumDisplay.spectrumActionDict.get(self.spectrum)
+                if action:
+                    action.setChecked(visible)
                 # for peakListView in self.peakListViews:
                 #   peakListView.setVisible(visible)
         except:
@@ -219,10 +217,9 @@ def _spectrumViewHasChanged(data):
         return
 
     spectrumDisplay = self.strip.spectrumDisplay
-    apiDataSource = self.spectrum._wrappedData
 
-    # Update action icol colour
-    action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
+    # Update action icon colour
+    action = spectrumDisplay.spectrumActionDict.get(self.spectrum)
     if action:
         # add spectrum action for non-grouped action
         _addActionIcon(action, self, spectrumDisplay)
@@ -287,19 +284,3 @@ def _addActionIcon(action, self, spectrumDisplay):
         pix.fill(QtGui.QColor('gray'))
 
     action.setIcon(QtGui.QIcon(pix))
-
-
-def _createdSpectrumView(data):
-    """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers.
-    This function adds the spectra buttons to the spectrumToolBar.
-    """
-    self = data[Notifier.OBJECT]
-
-    spectrumDisplay = self.strip.spectrumDisplay
-
-    # Set Z widgets for nD strips
-    strip = self.strip
-    if not spectrumDisplay.is1D:
-        strip._setZWidgets()
-
-    spectrumDisplay.spectrumToolBar._addSpectrumViewToolButtons(self)

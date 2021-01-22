@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:31:18 +0000 (Thu, January 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-22 15:44:48 +0000 (Fri, January 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -260,7 +260,28 @@ class SpectrumDisplay(AbstractWrapperObject):
         return self._orderedSpectrumViews.getOrderedSpectrumViewsIndex()
 
     def _rescaleSpectra(self):
-        self._spectrumViewChanged({})
+        """Reorder the buttons and spawn a redraw event
+        """
+        self.spectrumToolBar.reorderButtons(self.orderedSpectrumViews(self.spectrumViews))
+
+        # spawn the required event to reordered the spectrumViews in openGL
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        GLSignals = GLNotifier(parent=None)
+        GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict={})
+
+    def moveSpectrumByIndex(self, startInd, endInd):
+        """Move spectrum in spectrumDisplay list from index startInd to endInd
+        startInd/endInd are the order as seen in the spectrumToolbar
+        """
+        _order = self.getOrderedSpectrumViewsIndex()
+        _newOrder = list(_order)
+
+        _last = _newOrder.pop(startInd)
+        _newOrder.insert(endInd, _last)
+
+        self.setOrderedSpectrumViewsIndex(_newOrder)
+        self._rescaleSpectra()
 
     @logCommand(get='self')
     def setOrderedSpectrumViewsIndex(self, spectrumIndex: Tuple[int]):
@@ -281,6 +302,7 @@ class SpectrumDisplay(AbstractWrapperObject):
             if not self._orderedSpectrumViews:
                 self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
             self._orderedSpectrumViews.setOrderedSpectrumViewsIndex(spectrumIndex=spectrumIndex)
+            self._rescaleSpectra()
 
             # rebuild the display when the ordering has changed
             with undoStackBlocking() as addUndoItem:
@@ -623,10 +645,8 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                                                             stripSerial=stripSerial, dataSource=dataSource,
                                                             dimensionOrdering=dimensionOrdering)
 
-    try:
-        display.strips[0]._CcpnGLWidget.initialiseAxes(strip=display.strips[0])
-    except:
-        getLogger().debugGL('OpenGL widget not instantiated')
+    # call any post initialise routines for the spectrumDisplay here
+    display._postInit()
 
     return display
 
@@ -679,6 +699,3 @@ Project._apiNotifiers.extend(
           'setSpectrumDisplays'),
          )
         )
-
-# Drag-n-drop functions:
-# SpectrumDisplay.processSpectrum = SpectrumDisplay.displaySpectrum     # ejb moved to GuiSpectrumDisplay

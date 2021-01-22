@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-16 16:55:40 +0000 (Sat, January 16, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-01-22 15:44:47 +0000 (Fri, January 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -21,7 +21,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
 
 from typing import Sequence, Union
 import numpy as np
@@ -79,11 +78,9 @@ def getMultipletPosition(multiplet, dim, unit='ppm'):
         #   value = multiplet.pointPosition[dim]
 
         elif unit == 'Hz':
-            # value = peak.position[dim]*peak._apiPeak.sortedPeakDims()[dim].dataDimRef.expDimRef.sf
             value = multiplet.position[dim] * multiplet.multipletList.spectrum.spectrometerFrequencies[dim]
 
         else:  # sampled
-            # value = unit.pointValues[int(peak._apiPeak.sortedPeakDims()[dim].position)-1]
             raise ValueError("Unit passed to getPeakPosition must be 'ppm', 'point', or 'Hz', was %s"
                              % unit)
 
@@ -120,11 +117,9 @@ def getPeakPosition(peak, dim, unit='ppm'):
             value = peak.pointPosition[dim]
 
         elif unit == 'Hz':
-            # value = peak.position[dim]*peak._apiPeak.sortedPeakDims()[dim].dataDimRef.expDimRef.sf
             value = peak.position[dim] * peak.peakList.spectrum.spectrometerFrequencies[dim]
 
         else:  # sampled
-            # value = unit.pointValues[int(peak._apiPeak.sortedPeakDims()[dim].position)-1]
             raise ValueError("Unit passed to getPeakPosition must be 'ppm', 'point', or 'Hz', was %s"
                              % unit)
 
@@ -937,8 +932,7 @@ def _findPeakHeight(peak):
     """may need this later
     """
     spectrum = peak.peakList.spectrum
-    dataSource = spectrum._apiDataSource
-    numDim = dataSource.numDim
+    numDim = spectrum.dimensionCount
 
     exclusionBuffer = [1] * numDim
     valuesPerPoint = spectrum.valuesPerPoint

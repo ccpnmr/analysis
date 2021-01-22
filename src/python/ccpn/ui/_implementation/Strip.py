@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:31:18 +0000 (Thu, January 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-22 15:44:48 +0000 (Fri, January 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -327,7 +327,7 @@ class Strip(AbstractWrapperObject):
 
     @logCommand(get='self')
     def displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = ()):
-        self._displaySpectrum(spectrum, axisOrder)
+        return self._displaySpectrum(spectrum, axisOrder)
 
     def _displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = (), useUndoBlock=True):
         """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
@@ -715,24 +715,3 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
 
 SpectrumDisplay.copyStrip = _copyStrip
 del _copyStrip
-
-# #TODO:RASMUS: if this is a SpectrumDisplay thing, it should not be here
-# # SpectrumDisplay.orderedStrips property
-# def getter(self) -> Tuple[Strip, ...]:
-#     ff = self._project._data2Obj.get
-#     return tuple(ff(x) for x in self._wrappedData.orderedStrips)
-#
-#
-# def setter(self, value: Sequence):
-#     value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
-#     self._wrappedData.orderedStrips = tuple(x._wrappedData for x in value)
-#
-#
-# SpectrumDisplay.orderedStrips = property(getter, setter, None,
-#                                          "ccpn.Strips in displayed order ")
-# del getter
-# del setter
-
-# SHOULD NOT BE HERE like this
-# Drag-n-drop functions:
-#Strip.processSpectrum = Strip.displaySpectrum

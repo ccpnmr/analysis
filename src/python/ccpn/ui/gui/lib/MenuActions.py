@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-15 19:29:28 +0000 (Fri, January 15, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-01-22 15:44:49 +0000 (Fri, January 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -449,7 +449,7 @@ class OpenItemABC():
     def _deleteItemObject(self, objs):
         """Delete items from the project.
         """
-        from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+
         try:
             if len(objs)>0:
                 getLogger().info('Deleting: %s' % ', '.join(map(str, objs)))
@@ -624,39 +624,9 @@ class _openItemSpectrumDisplay(OpenItemABC):
         from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
         checkSpectraToOpen(mainWindow, [spectrum])
 
-        # with undoBlockWithoutSideBar():
-
         spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum, position=position, relativeTo=relativeTo)
-        if len(spectrumDisplay.strips) > 0:
+        if spectrumDisplay and len(spectrumDisplay.strips) > 0:
             mainWindow.current.strip = spectrumDisplay.strips[0]
-
-            # with undoStackBlocking() as addUndoItem:
-            #     # disable all notifiers in spectrumDisplays
-            #     addUndoItem(undo=partial(_setSpectrumDisplayNotifiers, spectrumDisplay, True))
-            #
-            # if len(spectrumDisplay.strips) > 0:
-            #     mainWindow.current.strip = spectrumDisplay.strips[0]
-            #     # if spectrum.dimensionCount == 1:
-            #     spectrumDisplay.autoRange()
-            #     # mainWindow.current.strip.plotWidget.autoRange()
-            #
-            # mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
-            #
-            # with undoStackBlocking() as addUndoItem:
-            #     # disable all notifiers in spectrumDisplays
-            #     addUndoItem(redo=partial(_setSpectrumDisplayNotifiers, spectrumDisplay, False))
-            #
-            #     # add/remove spectrumDisplay from module Area
-            #     addUndoItem(undo=partial(mainWindow._hiddenModules.addModule, spectrumDisplay),
-            #                 redo=partial(mainWindow.moduleArea.addModule, spectrumDisplay, position=position, relativeTo=relativeTo))
-
-
-        # # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
-        # # This routine can then be omitted and the call above replaced by the one remaining line
-        # mainWindow.pythonConsole.writeConsoleCommand(
-        #         "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
-        # getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
-        # getLogger().info('application.createSpectrumDisplay(spectrum)')
 
         return spectrumDisplay
 

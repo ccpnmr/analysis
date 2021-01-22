@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:31:18 +0000 (Thu, January 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-22 15:44:48 +0000 (Fri, January 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,7 @@ from ccpn.core.lib import Pid
 from ccpn.ui._implementation.Strip import Strip
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, newObject, undoStackBlocking
+from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, deleteWrapperWithoutSideBar
 
 
 class SpectrumView(AbstractWrapperObject):
@@ -82,32 +82,16 @@ class SpectrumView(AbstractWrapperObject):
 
     strip = _parent
 
-    # @deleteObject() - doesn't work here as works on _wrappedData.delete()
     def delete(self):
-        """Delete SpectrumView for all strips.
+        """trap this delete
         """
-        with undoBlockWithoutSideBar():
-            # self._finaliseAction('delete')
-            # with notificationBlanking():
+        raise RuntimeError('Please use spectrumDisplay.removeSpectrum()')
 
-            index = self._parent.spectrumViews.index(self)
-            parent = self._parent
-
-            self._finaliseAction('delete')
-            # with notificationBlanking():
-            self._wrappedData.spectrumView.delete()
-
-            parent._removeOrderedSpectrumViewIndex(index)
-
-    #EJB 20181122: why????
-    # @property
-    # def experimentType(self) -> str:
-    #     """Experiment type of attached experiment - used for reconnecting to correct spectrum"""
-    #     return self._wrappedData.spectrumView.experimentType
-    #
-    # @experimentType.setter
-    # def experimentType(self, value: str):
-    #     self._wrappedData.spectrumView.experimentType = value
+    @deleteWrapperWithoutSideBar()
+    def _delete(self):
+        """Delete SpectrumView from strip, should be unique.
+        """
+        self._wrappedData.spectrumView.delete()
 
     @property
     def isDisplayed(self) -> bool:

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-12 17:55:25 +0000 (Tue, January 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-22 15:44:51 +0000 (Fri, January 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -149,13 +149,21 @@ class Path(_Path_):
         self.unlink()
 
     def assureSuffix(self, suffix):
-        """Return Path instance with an assured suffix; adds suffic if not present.
-        NB: does not change suffix if there is one (like with_suffix does)
+        """Return Path instance with an assured suffix; adds suffix if not present.
+        .prefix to suffix is ignored if present.
+        Does not change suffix if there is one (like with_suffix does).
         """
+        if not isinstance(suffix, str):
+            raise TypeError('suffix %s must be a str' % str(suffix))
+
+        # strip leading .'s e.g. suffix is '.zip'
+        suffix = suffix.lstrip('.')
         if self.suffix != suffix:
-            return self + suffix
-        else:
-            return self
+            if self.name and self.name != '.':
+                _name = '.'.join([str(self.stem), str(suffix)])
+                return aPath(os.path.join(str(self.parent), _name))
+
+        return self
 
     def split3(self):
         """Return a tuple of (.parent, .stem, .suffix) strings

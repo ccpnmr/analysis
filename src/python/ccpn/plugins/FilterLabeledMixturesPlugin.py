@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-06-11 12:10:38 +0100 (Thu, June 11, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-22 15:44:48 +0000 (Fri, January 22, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,7 +35,7 @@ from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.guiSettings import BORDERNOFOCUS_COLOUR
 from ccpn.framework.lib.Plugin import Plugin
 from ccpn.ui.gui.modules.PluginModule import PluginModule
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.FileDialog import DataFileDialog
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
@@ -44,6 +44,7 @@ from xml.etree import ElementTree
 from ccpn.util.Path import aPath
 from ccpn.util.SafeFilename import getSafeFilename
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
+
 
 LineEditsMinimumWidth = 195
 DEFAULTSPACING = 3
@@ -108,15 +109,12 @@ class FilterLabeledMixturesGuiPlugin(PluginModule):
 
     def _setWidgets(self, parent):
 
-        # NOTE:ED - really need to have a ComplexAttributeEditorWidget
-
         row = 0
         self.userWorkingPathLabel = Label(parent, "Project Path ", grid=(row, 0), )
         self.userWorkingPathData = PathEdit(parent, grid=(row, 1), vAlign='t')
         self.userWorkingPathData.setMinimumWidth(LineEditsMinimumWidth)
         self.userWorkingPathButton = Button(parent, grid=(row, 2), callback=self._getUserWorkingPath,
                                             icon='icons/directory', hPolicy='fixed')
-        # self.userLayoutsLe.setText(self.preferences.general.get('userLayoutsPath'))
         self.userWorkingPathData.textChanged.connect(self._setUserWorkingPath)
 
         row += 1
@@ -137,14 +135,11 @@ class FilterLabeledMixturesGuiPlugin(PluginModule):
 
         row += 1
         _frame = MoreLessFrame(parent, name='Filter Log', showMore=False, grid=(row, 0), gridSpan=(1, 3))
+
         _row = 0
-        # self.wordWrapLabel = Label(_frame.contentsWidget, text="Wordwrap ", grid=(_row, 0))
-        # self.wordWrapData = CheckBox(_frame.contentsWidget, grid=(_row, 1), checked=False)
-        #
         self.wordWrapData = CheckBoxCompoundWidget(
                 _frame.contentsFrame,
                 grid=(_row, 0), hAlign='left',
-                #minimumWidths=(colwidth, 0),
                 fixedWidths=(None, 30),
                 orientation='left',
                 labelText='Wordwrap:',
@@ -156,7 +151,6 @@ class FilterLabeledMixturesGuiPlugin(PluginModule):
         self.xmlFilterLogData = TextEditor(_frame.contentsFrame, grid=(_row, 0), gridSpan=(1, 3))
         self.xmlFilterLogData.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         self.xmlFilterLogData.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
-        # self.wordWrapData.toggled.connect(partial(self._toggleWordWrap, self.xmlFilterLogData))
 
         row += 1
         texts = [RUNBUTTON]
@@ -178,8 +172,7 @@ class FilterLabeledMixturesGuiPlugin(PluginModule):
             currentDataPath = os.path.expanduser(self.userWorkingPathData.text())
         else:
             currentDataPath = os.path.expanduser('~')
-        dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
-                            preferences=self.preferences)
+        dialog = DataFileDialog(parent=self, directory=currentDataPath)
         dialog._show()
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
@@ -321,7 +314,7 @@ class FilterLabeledMixturesPlugin(Plugin):
         """Recursively deletes elements in the tree
         """
         for lm in list(parent):
-            self._deleteRecurse(lm, indent+1)
+            self._deleteRecurse(lm, indent + 1)
 
         for lm in list(parent):
             if lm.tag in self._kwds[REMOVETAGS]:
@@ -330,7 +323,7 @@ class FilterLabeledMixturesPlugin(Plugin):
 
     def writeFile(self, filePath, tree):
         fileName = filePath.basename
-        renameFilePath = (filePath.parent / fileName)     #.assureSuffix('.xml')
+        renameFilePath = (filePath.parent / fileName)  #.assureSuffix('.xml')
         prefix, ext = os.path.splitext(renameFilePath)
         renameFilePath = aPath(prefix).assureSuffix('.xmlOLD')
 
@@ -343,7 +336,6 @@ class FilterLabeledMixturesPlugin(Plugin):
 
     def removeTags(self, projectPath, projectFiles, invalidFiles, removeTags):
         for invalidFile in invalidFiles:
-
             parser = ElementTree.XMLParser(target=ElementTree.TreeBuilder(insert_comments=True))
             tree = ElementTree.parse(invalidFile, parser)
             root = tree.getroot()

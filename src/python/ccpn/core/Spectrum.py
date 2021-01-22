@@ -51,8 +51,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-15 17:11:32 +0000 (Fri, January 15, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-01-22 15:44:47 +0000 (Fri, January 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -874,6 +874,20 @@ assignmentTolerances
         else:
             raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
+    @property
+    @_includeInDimensionalCopy
+    def blockSizes(self) -> Tuple[int, ...]:
+        """BlockSizes -  per dimension"""
+        return tuple(self._apiDataStore.blockSizes)
+
+    @blockSizes.setter
+    def blockSizes(self, value: Sequence):
+        apiDataSource = self._wrappedData
+        if len(value) == apiDataSource.numDim:
+            self._apiDataStore.blockSizes = value
+        else:
+            raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
+
     #TODO: add setter for dimensionTypes
     @property
     def dimensionTypes(self) -> Tuple[str, ...]:
@@ -1272,7 +1286,7 @@ assignmentTolerances
     @referenceValues.setter
     def referenceValues(self, value):
         self._setDataDimRefAttribute('refValue', value)
-    #
+
     @property
     def referenceSubstances(self):
         """

@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:47 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-22 18:18:26 +0000 (Fri, January 22, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -53,17 +53,17 @@ class ChemicalShiftListEditor(_GroupEditorPopupABC):
       i.e. Menu Spectrum->Edit SpectrumGroup...
 
     """
-    KLASS = ChemicalShiftList
-    KLASS_ITEM_ATTRIBUTE = 'spectra'  # Attribute in KLASS containing items
-    KLASS_PULLDOWN = ChemicalShiftListPulldown
+    _class = ChemicalShiftList
+    _classItemAttribute = 'spectra'  # Attribute in _class containing items
+    _classPulldown = ChemicalShiftListPulldown
 
-    PROJECT_NEW_METHOD = 'newChemicalShiftList'  # Method of Project to create new KLASS instance
-    PROJECT_ITEM_ATTRIBUTE = 'spectra'  # Attribute of Project containing items
-    PLURAL_GROUPED_NAME = 'Chemical Shift Lists'
-    SINGULAR_GROUP_NAME = 'Chemical Shift List'
+    _projectNewMethod = 'newChemicalShiftList'  # Method of Project to create new _class instance
+    _projectItemAttribute = 'spectra'  # Attribute of Project containing items
+    _pluralGroupName = 'Chemical Shift Lists'
+    _singularGroupName = 'Chemical Shift List'
 
-    GROUP_PID_KEY = 'CL'
-    ITEM_PID_KEY = 'SP'
+    _groupPidKey = 'CL'
+    _itemPidKey = 'SP'
 
 
 # class ChemicalShiftListPopup(CcpnDialog):

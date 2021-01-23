@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-23 13:22:51 +0000 (Sat, January 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-23 13:57:36 +0000 (Sat, January 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -46,6 +46,7 @@ from ccpn.ui.gui.widgets.TextEditor import PlainTextEditor
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import ColourTab, ContoursTab, Colour1dFrame, ColourNdFrame
 from ccpn.util.AttrDict import AttrDict
@@ -439,7 +440,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
     def _populate(self):
         """Populate the widgets in the tabs
         """
-        # NOTE:ED - check that the list widgets are populated correctly - may be called twice
+        ## NOTE:ED - check that the  widgets are populated correctly - may be called exponentially from not
+        ## blocking the notification-change
         super()._populate()
         with self.seriesTab._changes.blockChanges():
             self._spectraChanged()
@@ -759,13 +761,13 @@ class SeriesFrame(Frame):
         # unitsLabel = Label(self, text='Series Units', grid=(self._row, self._col), hAlign='l')
         # self.unitsEditor = LineEdit(self, grid=(self._row, self._col + 1))
         # unitsLabel.setFixedHeight(30)
-        # reorderLabel = Label(self, text='Reorder spectra by series', grid=(self._row, self._col), hAlign='l')
-        # self._orderButtons = ButtonList(self, texts=['Ascending','Descending'],
-        #                                 icons=[Icon('icons/sort-up'),Icon('icons/sort-down')],
-        #                                 callbacks=[partial(self._reorderSpectraBySeries, False),
-        #                                            partial(self._reorderSpectraBySeries, True)],
-        #                                 grid=(self._row, self._col + 1))
-        # self._row += 1
+        reorderLabel = Label(self, text='Reorder spectra by series', grid=(self._row, self._col), hAlign='l')
+        self._orderButtons = ButtonList(self, texts=['Ascending','Descending'],
+                                        icons=[Icon('icons/sort-up'),Icon('icons/sort-down')],
+                                        callbacks=[partial(self._reorderSpectraBySeries, False),
+                                                   partial(self._reorderSpectraBySeries, True)],
+                                        grid=(self._row, self._col + 1))
+        self._row += 1
 
         self.unitsEditor = PulldownListCompoundWidget(self._seriesOptionsFrame, labelText='Series Units', grid=(self._row, self._col), gridSpan=(1, 3), hAlign='l',
                                                       editable=True, sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents)
@@ -820,14 +822,14 @@ class SeriesFrame(Frame):
         # get colours from the lineEdit and copy to the plainTextEdit
         # yourWidget.palette().highlight().color().name()?
 
-    # def _reorderSpectraBySeries(self, reverse=True):
-    #     idx = self.seriesType.getIndex()
-    #     if idx == SeriesTypes.FLOAT.value or idx == SeriesTypes.INTEGER.value:
-    #         dd = OrderedDict((k, v.get()) for k, v in sorted(self._editors.items(), key=lambda item: float(item[1].get()), reverse=reverse))
-    #         self._parent._groupedObjects = [i.pid for i in dd.keys()]
-    #         for v, e in zip(dd.values(), self._editors.values()):
-    #             e.set(v)
-    #     self.seriesType.setIndex(idx)
+    def _reorderSpectraBySeries(self, reverse=True):
+        idx = self.seriesType.getIndex()
+        ll = sorted(self._editors.items(), key=lambda item: item[1].get(), reverse=reverse)
+        dd = OrderedDict((k, v.get()) for k, v in ll)
+        self._parent._groupedObjects = [i.pid for i in dd.keys()]
+        for v, e in zip(dd.values(), self._editors.values()):
+            e.set(v)
+        self.seriesType.setIndex(idx)
 
     def _setDisabledSeriesTab(self):
 
@@ -845,7 +847,7 @@ class SeriesFrame(Frame):
         if not self._seriesEnabled:
             return
         # remove previous editor values
-
+        # print(traceback.print_stack())
         self._seriesDisabledFrame.hide()
         self._seriesOptionsFrame.show()
         for spec, editor in self._editors.items():
@@ -898,7 +900,6 @@ class SeriesFrame(Frame):
         """
         if not self._seriesEnabled:
             return
-        # print('populating textEditors')
         if self.defaultObject:
             with self._changes.blockChanges():
                 self.seriesType.setIndex(int(self.defaultObject.seriesType or 0))

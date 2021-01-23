@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-23 13:22:51 +0000 (Sat, January 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-23 13:57:36 +0000 (Sat, January 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -250,10 +250,12 @@ class _ListWidget(ListWidget):
         if len(texts) < len(data):
             raise Exception('more data than items!')
 
-        for text, datum in zip_longest(texts, data, fillvalue={}):
-            item = self._itemFactory.createItem(str(text), datum)
 
-            self.addItem(item)
+        self.insertItems(0, texts) #this avoids the notification leakage of adding one at the time
+
+        # for text, datum in zip_longest(texts, data, fillvalue={}):
+        #     item = self._itemFactory.createItem(str(text), datum)
+        #     self.addItem(item)
 
     def _buildItemData(self, objects, data):
 
@@ -715,9 +717,9 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             result.remove(self._leftEmptyText)
         return result
 
-    # @_groupedObjects.setter
-    # def _groupedObjects(self, vv):
-    #     self.leftListWidget.setTexts(vv)
+    @_groupedObjects.setter
+    def _groupedObjects(self, vv):
+        self.leftListWidget.setTexts(vv)
 
     @property
     def _editedObjectItems(self) -> list:

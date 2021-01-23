@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:48 +0000 (Fri, January 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-23 13:22:51 +0000 (Sat, January 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1239,7 +1239,7 @@ class Framework(NotifierBase):
         ms.append(('Spectrum', [
             ("Load Spectra...", self.loadSpectra, [('shortcut', 'ls')]),
             (),
-            ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]),
+            # ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]), # multiple edit temporarly disabled
             ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
             ("Validate Paths...", self.showValidateSpectraPopup, [('shortcut', 'vp')]),
             (),

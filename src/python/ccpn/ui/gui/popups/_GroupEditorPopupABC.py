@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-22 18:18:27 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-23 13:22:51 +0000 (Sat, January 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -482,7 +482,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self.current = mainWindow.application.current
 
         self.obj = obj
-        self.editMode = True
+        self.editMode = editMode
 
         # open popup with these items already added to left ListWidget. Ready to create the group.
         # assumes that defaultItems is a list of core objects (with pid)

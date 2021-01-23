@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-22 18:18:27 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-23 13:22:51 +0000 (Sat, January 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -458,7 +458,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         except:
             pass
 
-        with self.blockWidgetSignals():
+        with self.blockWidgetSignals(): # we already filled when calling _spectraChanged
             self.seriesTab._fillSeriesFrame(self._defaultSpectra, spectrumGroup=self.obj)
         self.seriesTab._populateSeries()
 
@@ -846,7 +846,6 @@ class SeriesFrame(Frame):
             return
         # remove previous editor values
 
-
         self._seriesDisabledFrame.hide()
         self._seriesOptionsFrame.show()
         for spec, editor in self._editors.items():
@@ -882,6 +881,7 @@ class SeriesFrame(Frame):
                 seriesEditor.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
                 if spec in self._currentSeriesValues and self._currentSeriesValues[spec] is not None:
+                    # print('filling seriesEditor value: %s' % self._currentSeriesValues[spec])
                     seriesEditor.set(self._currentSeriesValues[spec])
 
                 # add the callback after setting the initial values
@@ -898,7 +898,7 @@ class SeriesFrame(Frame):
         """
         if not self._seriesEnabled:
             return
-
+        # print('populating textEditors')
         if self.defaultObject:
             with self._changes.blockChanges():
                 self.seriesType.setIndex(int(self.defaultObject.seriesType or 0))
@@ -922,6 +922,7 @@ class SeriesFrame(Frame):
                         except Exception as es:
                             textEditor.set('')
                         else:
+                            # print('populating textEditor value: %s' % seriesValue)
                             textEditor.set(str(seriesValue))
 
                 if self.defaultObject.seriesUnits is not None and self.defaultObject.seriesUnits not in self._pulldownData:

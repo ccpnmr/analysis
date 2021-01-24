@@ -5,7 +5,7 @@ modified by Geerten 1-12/12/2016
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-04 15:06:02 +0000 (Wed, November 04, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-24 17:58:24 +0000 (Sun, January 24, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -586,9 +586,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     #   self._widgetsState = value
 
     def _setNestedWidgetsAttrToModule(self):
-        '''
+        """
         :return: nestedWidgets
-        '''
+        """
         allStorableWidgets = []
         self._findChildren(self)
         for num, w in enumerate(self._allChildren):
@@ -619,7 +619,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
     @widgetsState.getter
     def widgetsState(self):
-        '''return  {"variableName":"value"}  of all gui Variables  '''
+        """return  {"variableName":"value"}  of all gui Variables  """
         widgetsState = {}
         self._setNestedWidgetsAttrToModule()
         for varName, varObj in vars(self).items():
@@ -1194,12 +1194,12 @@ class CcpnModuleLabel(DockLabel):
 
         # GST colours are hard coded... help please I need  a central source for
         # these presumably a color palette or scheme
-        button.setStyleSheet(''' border: %ipx solid #a9a9a9 ;
+        button.setStyleSheet(""" border: %ipx solid #a9a9a9 ;
                                  border-top-left-radius: %ipx;
                                  border-top-right-radius: %ipx;
                                  border-bottom-left-radius: 0px;
                                  border-bottom-right-radius: 0px;
-                                 background-color: #ececec ;  ''' % styleInfo)
+                                 background-color: #ececec ;  """ % styleInfo)
         buttonSize = retinaIconSize + (self.buttonBorderWidth * 2) + (self.buttonIconMargin * 2)
         button.setMinimumSize(QtCore.QSize(buttonSize, buttonSize))
         button.setMaximumSize(QtCore.QSize(buttonSize, buttonSize))

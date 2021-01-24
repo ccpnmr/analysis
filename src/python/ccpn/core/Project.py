@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:47 +0000 (Fri, January 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-24 17:58:22 +0000 (Sun, January 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1312,9 +1312,9 @@ class Project(AbstractWrapperObject):
         return chains
 
     def _loadStructure(self, path: str, subType: str):
-        '''
+        """
         Load Structure ensemble(s) from file into Wrapper project
-        '''
+        """
 
         from ccpn.util.StructureData import averageStructure
 

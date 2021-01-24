@@ -5,7 +5,7 @@ PulldownList widget
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-05 12:08:52 +0100 (Mon, October 05, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-24 17:58:25 +0000 (Sun, January 24, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -298,7 +298,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self.setEnabled(True)
 
     def disableLabelsOnPullDown(self, texts, colour=None):
-        ''' Disable items from pulldown (not selectable, not clickable). And if given, changes the colour '''
+        """ Disable items from pulldown (not selectable, not clickable). And if given, changes the colour """
         for text in texts:
             if text is not None:
                 item = self.model().item(self.getItemIndex(text))

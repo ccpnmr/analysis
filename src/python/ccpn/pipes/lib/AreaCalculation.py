@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-22 18:47:07 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-24 17:58:24 +0000 (Sun, January 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -52,8 +52,8 @@ def _calculateIntegrals(x, y):
 
 
 def _getIntegralRegions(x, y):
-    ''' Just for coloring a plot
-    return: array of points '''
+    """ Just for coloring a plot
+    return: array of points """
     limitsPairs = _getPeaksLimits(x, y)
     integralRegions = []
     for i in limitsPairs:
@@ -65,22 +65,22 @@ def _getIntegralRegions(x, y):
 
 
 def _matchingPosition(data, limitMax, limitMin):
-    ''' copied from experimental analysis
+    """ copied from experimental analysis
     In this example will use numpy  logical and argwhere a condition is met.
     Data: the list of peak positions.
     limitRange: the limit to add on the left and on the right
     :return: array with matching positions
-    '''
+    """
     return data[np.argwhere(np.logical_and(data <= limitMax, data >= limitMin))]
 
 
 def _getMultiplet(peaks, limitA, limitB):
-    ''' CCPNmr specific
+    """ CCPNmr specific
     :param peaks: list of peaks from a full peakList obj
     :param limitA: limit range from where is supposed to start/finish the multiplet
     :param limitB: limit range from where is supposed to start/finish the multiplet
     :return: list of peaks that can be considered a multiplet of the same peak
-    '''
+    """
     multiplet = []
     for peak in peaks:
         matchedPosition = _matchingPosition(np.array(peak.position), limitA, limitB)
@@ -93,12 +93,12 @@ def _getMultiplet(peaks, limitA, limitB):
 
 
 def _calculateCenterOfMass(multiplet):
-    '''  CCPNmr specific
+    """  CCPNmr specific
 
     :param multiplet: list of peaks that can be considered a multiplet of the same peak.
     :return: the center of mass of the multiplet that can be used as peak position
              if you consider the multiplet as a single peak
-    '''
+    """
 
     if len(multiplet) > 0:
         peakPositions = [peak.position[0] for peak in multiplet]
@@ -117,7 +117,7 @@ def _getMultipletIntensity(multiplet):
 
 
 def _addAreaValuesToPeaks(spectrum, peakList, noiseThreshold=None, minimalLineWidth=0.01):
-    ''' CCPNmr specific
+    """ CCPNmr specific
 
     Create new multiplets. Needs a peakList with already picked peaks (with peak positions and height).
      This function will not replace any peak in the original peakList. It will be like a copy of the first plus the new peak will
@@ -126,7 +126,7 @@ def _addAreaValuesToPeaks(spectrum, peakList, noiseThreshold=None, minimalLineWi
 
      Integral objs will be added to the spectrum IntegralList
 
-     '''
+     """
 
     # TODO excludeRegions
     x, y = np.array(spectrum.positions), np.array(spectrum.intensities)

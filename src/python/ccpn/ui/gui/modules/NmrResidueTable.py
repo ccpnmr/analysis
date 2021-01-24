@@ -11,7 +11,7 @@ Geerten 1-7/12/2016; 11/04/2017
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -20,9 +20,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-24 17:58:25 +0000 (Sun, January 24, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -918,7 +918,7 @@ class _CSMNmrResidueTable(NmrResidueTable):
             return None
 
     def _selectPullDown(self, value):
-        ''' Used for automatic restoring of widgets '''
+        """ Used for automatic restoring of widgets """
         self.ncWidget.select(value)
         try:
             if self.chemicalShiftsMappingModule is not None:

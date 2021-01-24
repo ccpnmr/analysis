@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:49 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-24 17:58:25 +0000 (Sun, January 24, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -51,7 +51,7 @@ Manual = 'Manual'
 
 
 class ExcludeRegions(Widget):
-    '''This creates a widget group to exclude Regions from the Spectrum when automatically peak picking '''
+    """This creates a widget group to exclude Regions from the Spectrum when automatically peak picking """
     selectionLabelDefault = "Select Regions or \nsolvents to exclude"
 
     solvents = {'Acetic Acid-d4'               : [0, 0, 2.14, 2.0, 11.75, 11.65],
@@ -101,7 +101,7 @@ class ExcludeRegions(Widget):
         self.comboBoxes = []
 
     def _addRegions(self, pressed):
-        '''   '''
+        """   """
 
         widgetList = []
         # remove the old spacer
@@ -191,7 +191,7 @@ class ExcludeRegions(Widget):
             yield sorted(l[i:i + n], key=float, reverse=True)
 
     def _deleteRegions(self, positions):
-        '''   '''
+        """   """
         for position in positions:
             widget1 = self.scrollAreaWidgetContents.layout().itemAtPosition(*position).widget()
             if widget1 is self.solventType:

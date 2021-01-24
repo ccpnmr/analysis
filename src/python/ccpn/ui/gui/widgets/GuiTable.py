@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:51 +0000 (Fri, January 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-24 17:58:25 +0000 (Sun, January 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1746,12 +1746,12 @@ GuiTable::item::selected {
             return data
 
     def getSelectedObjects(self, fromSelection=None):
-        '''
+        """
 
         :param fromSelection:
         :return: get a list of table objects. If the table has a header called pid, the object is a ccpn Core obj like Peak,
          otherwise is a Pandas series object corresponding to the selected row(s).
-        '''
+        """
 
         model = self.selectionModel()
         # selects all the items in the row

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-13 17:21:44 +0000 (Wed, January 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-24 17:58:22 +0000 (Sun, January 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -269,7 +269,7 @@ class SpectrumGroup(AbstractWrapperObject):
 
     @property
     def seriesPeakHeightForPosition(self):
-        '''
+        """
         return: Pandas DataFrame with the following structure:
                 Index: multiIndex => axisCodes as levels;
                 Columns => NR_ID: ID for the nmrResidue(s) assigned to the peak if available
@@ -281,13 +281,13 @@ class SpectrumGroup(AbstractWrapperObject):
            -------------+-------- +-----------+-----------+---------
             7.5  104.3  | A.1.ARG |    10     |  100      | 1000
 
-            '''
+            """
         from ccpn.core.lib.peakUtils import getSpectralPeakHeights
         return getSpectralPeakHeights(self.spectra)
 
     @property
     def seriesPeakHeightForNmrResidue(self):
-        '''
+        """
         return: Pandas DataFrame with the following structure:
                 Index:  ID for the nmrResidue(s) assigned to the peak ;
                 Columns => Spectrum series values sorted by ascending values, if series values are not set, then the
@@ -298,7 +298,7 @@ class SpectrumGroup(AbstractWrapperObject):
            ------------+-----------+-----------+-----------+---------
             A.1.ARG    |    10     |  100      | 1000
 
-            '''
+            """
         from ccpn.core.lib.peakUtils import getSpectralPeakHeightForNmrResidue
         return getSpectralPeakHeightForNmrResidue(self.spectra)
 

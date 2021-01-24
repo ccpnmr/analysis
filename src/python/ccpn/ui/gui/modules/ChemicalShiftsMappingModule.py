@@ -67,8 +67,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:49 +0000 (Fri, January 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-24 17:58:24 +0000 (Sun, January 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1176,9 +1176,9 @@ class ChemicalShiftsMapping(CcpnModule):
   #     self._updateModule()
 
   def _checkBoxCallback(self, data):
-    '''
+    """
     Callback from checkboxes inside a table
-    '''
+    """
     objs = data[Notifier.OBJECT]
 
     itemSelection = data['rowItem']
@@ -1227,11 +1227,11 @@ class ChemicalShiftsMapping(CcpnModule):
         nmrR._colour = colour
 
   def _updateModule(self, silent=False):
-    '''
+    """
 
     :param silent: if silent does not update the module!
     :return: deltas
-    '''
+    """
 
     mode = self.modeButtons.getSelectedText()
     if not mode in MODES:
@@ -1571,7 +1571,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
   @CcpnModule.widgetsState.getter
   def widgetsState(self):
-    '''return  {"variableName":"value"}  of all gui Variables  '''
+    """return  {"variableName":"value"}  of all gui Variables  """
     widgetsState = super().widgetsState
     widgetsState[RelativeContribuitions] = self.relativeContribuitions
     widgetsState[SelectedNmrAtomNames] = self.selectedNmrAtomNames
@@ -1597,7 +1597,7 @@ class _BackCompatibility():
   
   @staticmethod
   def _spectraToSpectrumGroup(guiModule, **widgetsState):
-    '''
+    """
     A small helper to create spectrumGroups from spectra if opening a project with a CSM module saved in a layout
     before version 3.0.3.
     Up to Version 3.0.3 multiple spectra could be selected from the settings as input data.
@@ -1609,7 +1609,7 @@ class _BackCompatibility():
     :param guiModule: 
     :param widgetsState: 
     :return: 
-    '''
+    """
 
     isSpectraSelected = widgetsState.get('Spectra')
     isSGSelected = widgetsState.get('Groups')

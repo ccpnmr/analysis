@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:50 +0000 (Fri, January 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-24 17:58:25 +0000 (Sun, January 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -49,11 +49,11 @@ class BarGraph(pg.BarGraphItem):
     def __init__(self, application=None, viewBox=None, xValues=None, yValues=None,
                  objects=None, brush=None, drawLabels=True, labelDistanceRatio=0.1, **kwds):
         super().__init__(**kwds)
-        '''
+        """
         This class allows top draw bars with or without objects.It Needs only xValues and yValues.
         The bar width is by default set to 1.
         The objects are linked to the bars through the label annotations (with setData).
-        '''
+        """
         # TODO:
         # setObjects in a more general way. Initially implemented only for NmrResidues objects.
 
@@ -174,12 +174,12 @@ class BarGraph(pg.BarGraphItem):
         event.accept()
 
     def drawLabels(self, ratio=0.5):
-        '''
+        """
 
         The label Text is the str of the x values and is used to find and set an object to it.
         NB, changing the text to any other str may not set the objects correctly!
 
-        '''
+        """
         self.allLabelsShown = True
         for key, value in self.allValues.items():
             label = CustomLabel(text=str(key))
@@ -495,7 +495,7 @@ class CustomViewBox(pg.ViewBox):
             print('NOT FOUND')
 
     def selectAboveThreshold(self):
-        '''Reimplement this in the module subclass'''
+        """Reimplement this in the module subclass"""
 
         pass
 

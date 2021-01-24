@@ -119,8 +119,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:51 +0000 (Fri, January 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-24 17:58:26 +0000 (Sun, January 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1304,7 +1304,7 @@ CheckboxTipText = 'Select column to be visible on the table.'
 
 
 class ColumnViewSettings(Widget):
-    ''' hide show check boxes corresponding to the table columns '''
+    """ hide show check boxes corresponding to the table columns """
 
     def __init__(self, table, parent=None, direction='v', hideColumns=None, **kwds):
         Widget.__init__(self, parent, setLayout=True, **kwds)

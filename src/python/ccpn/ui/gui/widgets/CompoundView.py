@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:50 +0000 (Fri, January 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-24 17:58:25 +0000 (Sun, January 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -788,7 +788,7 @@ class CompoundView(QGraphicsView, Base):
 
 
 # def getAddPoint(self):
-#     ''' Set the compound on the specific position on the graphic scene. '''
+#     """ Set the compound on the specific position on the graphic scene. """
 #     compoundView = CompoundView
 #     globalPos = QtGui.QCursor.pos()
 #     pos = compoundView.mapFromGlobal(globalPos)
@@ -3408,7 +3408,7 @@ def importSmiles(smilesString, compoundName='Unnamed', project=None):
 
 
 def setCompound(self, compound, replace=True):
-    ''' Set the compound on the graphic scene. '''
+    """ Set the compound on the graphic scene. """
     if compound is not self.compound:
 
         if replace or not self.compound:

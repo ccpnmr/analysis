@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-19 15:44:13 +0000 (Tue, January 19, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-24 17:58:23 +0000 (Sun, January 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -231,11 +231,11 @@ def _estimateDeltaPeakDetect(y, xPercent=10):
 
 
 def _estimateDeltaPeakDetectSTD(y, xPercent=10):
-    '''
+    """
     :param y: intensities of spectrum
     :param xPercent: the percentage of the spectra points to use as training to calculate delta.
     :return: a delta intesities of the required percentage of the spectra
-    '''
+    """
 
     import numpy as np
 
@@ -257,10 +257,10 @@ def _pairIntersectionPoints(intersectionPoints):
 
 
 def _getIntersectionPoints(x, y, line):
-    '''
+    """
     :param line: x points of line to intersect y points
     :return: list of intersecting points
-    '''
+    """
     z = y - line
     dx = x[1:] - x[:-1]
     cross = np.sign(z[:-1] * z[1:])
@@ -273,12 +273,12 @@ def _getIntersectionPoints(x, y, line):
 
 
 def _getAtomWeight(axisCode, atomWeights) -> float or int:
-    '''
+    """
 
     :param axisCode: str of peak axis code
     :param atomWeights: dictionary of atomWeights eg {'H': 7.00, 'N': 1.00, 'C': 4.00, 'Other': 1.00}
     :return: float or int from dict atomWeights
-    '''
+    """
     value = 1.0
     if len(axisCode) > 0:
         firstLetterAxisCode = axisCode[0]
@@ -295,7 +295,7 @@ def _getAtomWeight(axisCode, atomWeights) -> float or int:
 
 
 def _traverse(o, tree_types=(list, tuple)):
-    '''used to flat the state in a long list '''
+    """used to flat the state in a long list """
     if isinstance(o, tree_types):
         for value in o:
             for subvalue in _traverse(value, tree_types):
@@ -342,14 +342,14 @@ def _getPeaksForNmrResidueByNmrAtomNames(nmrResidue, nmrAtomsNames, spectra):
 
 
 def getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty='height'):
-    '''
+    """
 
     :param nmrResidue:
     :param nmrAtomsNames: nmr Atoms to compare. str 'H', 'N', 'CA' etc
     :param spectra: compare peaks only from given spectra
     :param theProperty: 'height' or 'volume'
     :return:
-    '''
+    """
 
     ll = []
 
@@ -368,12 +368,12 @@ def getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty='h
 
 
 def getNmrResiduePeakHeight(nmrResidue, nmrAtomsNames, spectra):
-    '''
+    """
     :param nmrResidue:
     :param nmrAtomsNames: nmr Atoms to compare. str 'H', 'N', 'CA' etc
     :param spectra: compare peaks only from given spectra
     :return:
-    '''
+    """
     getLogger().warning('Deprecated. Used getNmrResiduePeakProperty with theProperty = "height"')
     return getNmrResiduePeakProperty(nmrResidue, nmrAtomsNames, spectra, theProperty='height')
 
@@ -404,13 +404,13 @@ def _getPeaksForNmrResidue(nmrResidue, nmrAtomsNames, spectra):
 
 
 def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atomWeights=None):
-    '''
+    """
 
     :param nmrResidue:
     :param nmrAtomsNames: nmr Atoms to compare. str 'H', 'N', 'CA' etc
     :param spectra: compare peaks only from given spectra
     :return:
-    '''
+    """
 
     deltas = []
 
@@ -1222,13 +1222,13 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
     return position, height
 
 def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True, figOfMeritLimit=1):
-    '''
+    """
     It snaps a peak to its closest extremum, that can be considered as a peak.
     it uses adjacent peak positions as boundaries. However if no adjacent peaks then uses the maximumlimits.
     Uses peak
     :param peak: obj peak
     :param maximumLimit: maximum tolerance left or right from the peak position (ppm)
-    '''
+    """
     position, height = _get1DClosestExtremum(peak, maximumLimit, doNeg=doNeg, figOfMeritLimit=figOfMeritLimit)
     with undoBlockWithoutSideBar():
         with notificationEchoBlocking():
@@ -1242,7 +1242,7 @@ def getSpectralPeakVolumes(spectra, peakListIndexes:list=None) -> pd.DataFrame:
     return _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=VOLUME, peakListIndexes=peakListIndexes)
 
 def getSpectralPeakHeightForNmrResidue(spectra, peakListIndexes:list=None) -> pd.DataFrame:
-    '''
+    """
     return: Pandas DataFrame with the following structure:
             Index:  ID for the nmrResidue(s) assigned to the peak ;
             Columns => Spectrum series values sorted by ascending values, if series values are not set, then the
@@ -1253,14 +1253,14 @@ def getSpectralPeakHeightForNmrResidue(spectra, peakListIndexes:list=None) -> pd
        ------------+-----------+-----------+----------
         A.1.ARG    |    10     |  100      | 1000
 
-        '''
+        """
     df = getSpectralPeakHeights(spectra, peakListIndexes)
     newDf = df[df[NR_ID] != ''] # remove rows if NR_ID is not defined
     newDf = newDf.reset_index(drop=True).groupby(NR_ID).max()
     return newDf
 
 def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID=NR_ID, peakListIndexes:list=None):
-    '''
+    """
     :param spectra: list of spectra
     :param peakProperty: 'height'or'volume'
     :param NR_ID: columnName for the NmrResidue ID
@@ -1279,7 +1279,7 @@ def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID=NR_I
 
     to sort the dataframe by an axisCode, eg 'H' use:
     df = df.sort_index(level='H')
-    '''
+    """
     dfs = []
     if peakListIndexes is None: peakListIndexes = [-1]*len(spectra)
     for spectrum, ix in zip(spectra, peakListIndexes):

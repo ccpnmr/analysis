@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:49 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-25 18:52:09 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -273,18 +273,3 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         popup = SpectrumDisplayPropertiesPopupNd(parent=self.mainWindow, mainWindow=self.mainWindow,
                                                  orderedSpectrumViews=self.orderedSpectrumViews(self.spectrumViews))
         popup.exec_()
-
-
-# Functions for notifiers
-
-# We are not currently using Free strips
-#
-# # Could be changed to wrapper level, but would be triggered much more often. Leave  as is.
-# def _changedFreeStripAxisOrdering(project:Project, apiStrip:ApiFreeStrip):
-#   """Used (and works) for either BoundDisplay of FreeStrip"""
-#   project._data2Obj[apiStrip]._setZWidgets()
-
-def _changedBoundDisplayAxisOrdering(project: Project, apiDisplay: ApiBoundDisplay):
-    """Used (and works) for either BoundDisplay of FreeStrip"""
-    for strip in project._data2Obj[apiDisplay].strips:
-        strip._setZWidgets()

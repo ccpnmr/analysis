@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:48 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-25 18:52:08 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -217,6 +217,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
+        self.setNotifier(self.application.project, [Notifier.CHANGE], 'SpectrumDisplay', self._spectrumDisplayChanged)
 
     def _activatedkeySequence(self, ev):
         key = ev.key()
@@ -1131,6 +1132,16 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             currentStrip._highlightStrip(True)
             currentStrip._attachZPlaneWidgets()
             currentStrip.spectrumDisplay._highlightAxes(currentStrip, True)
+
+    def _spectrumDisplayChanged(self, data):
+        """Callback on spectrumDisplay change
+        """
+        trigger = data[Notifier.TRIGGER]
+        spectrumDisplay = data[Notifier.OBJECT]
+
+        if trigger == Notifier.CHANGE:
+            getLogger().debug(f'>>> SPECTRUMDISPLAY CHANGED  -  {spectrumDisplay}')
+            spectrumDisplay.setZWidgets()
 
     def printToFile(self):
         self.application.showPrintSpectrumDisplayPopup()

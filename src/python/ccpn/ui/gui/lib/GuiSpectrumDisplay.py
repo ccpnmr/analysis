@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-25 16:07:51 +0000 (Mon, January 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-25 18:52:08 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -550,7 +550,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
             if spectrumView in self.spectrumViews:
                 self._spectrumChanged({Notifier.TRIGGER: Notifier.CHANGE,
-                                       Notifier.OBJECT: spectrum})
+                                       Notifier.OBJECT : spectrum})
 
         elif trigger == Notifier.DELETE:
 
@@ -810,6 +810,12 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self.stripFrame.update()
         self._stripFrameScrollArea._updateAxisWidgets()
+
+    def setZWidgets(self):
+        """Update the widgets in the planeToolbar
+        """
+        for strip in self.strips:
+            strip._setZWidgets()
 
     def _stripRange(self):
         """Return the bounds for the tilePositions of the strips

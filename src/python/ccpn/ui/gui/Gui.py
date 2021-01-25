@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-25 16:07:51 +0000 (Mon, January 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-25 18:52:08 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -224,10 +224,10 @@ class Gui(Ui):
         # project._registerApiNotifier(GuiPeakListView._deleteAssignmentsNmrAtomDelete,
         #                              'ccp.nmr.Nmr.AbstractPeakDimContrib', 'delete')
 
-        from ccpn.ui.gui.modules import SpectrumDisplayNd
-
-        project._registerApiNotifier(SpectrumDisplayNd._changedBoundDisplayAxisOrdering,
-                                     SpectrumDisplayNd.ApiBoundDisplay, 'axisOrder')
+        # from ccpn.ui.gui.modules import SpectrumDisplayNd
+        #
+        # project._registerApiNotifier(SpectrumDisplayNd._changedBoundDisplayAxisOrdering,
+        #                              SpectrumDisplayNd.ApiBoundDisplay, 'setAxisOrder')
 
         # from ccpn.ui.gui.modules import SpectrumDisplay1d
         # project._registerApiNotifier(SpectrumDisplay1d._updateSpectrumPlotColour,

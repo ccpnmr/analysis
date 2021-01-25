@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-30 16:09:18 +0100 (Wed, September 30, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-25 15:59:21 +0000 (Mon, January 25, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -570,14 +570,6 @@ class GuiWindow():
         # toggle crosshairs for the spectrum displays in this window
         for spectrumDisplay in self.spectrumDisplays:
             spectrumDisplay.toggleDoubleCrosshair()
-
-        # self.application.preferences.general.showDoubleCrosshair = not self.application.preferences.general.showDoubleCrosshair
-        #
-        # # repaint all windows
-        # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-        #
-        # GLSignals = GLNotifier(parent=self)
-        # GLSignals.emitPaintEvent()
 
     def estimateNoise(self):
         """estimate the noise in the visible region of the current strip

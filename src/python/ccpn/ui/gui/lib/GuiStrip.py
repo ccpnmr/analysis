@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:49 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-25 15:59:20 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -218,8 +218,6 @@ class GuiStrip(Frame):
         self.showActivePhaseTrace = True
         self.pivotLine = None
         self._lastClickedObjects = None
-
-        # self._CcpnGLWidget._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
 
         # initialise the notifiers
         self.setStripNotifiers()
@@ -2461,18 +2459,3 @@ def _axisRegionChanged(cDict):
 #     for strip in project.strips:
 #         strip.plotWidget._removeRulerLine(apiRuler)
 
-
-# Add notifier functions to Project
-
-
-# NB This notifier must be implemented as an API postInit notifier,
-# As it relies on Axs that are not yet created when 'created' notifiers are executed
-def _setupGuiStrip(project: Project, apiStrip):
-    """Set up graphical parameters for completed strips - for notifiers.
-    """
-    strip = project._data2Obj[apiStrip]
-    try:
-        strip._CcpnGLWidget.initialiseAxes(strip=strip)
-        # strip._CcpnGLWidget._resetAxisRange()
-    except:
-        getLogger().debugGL('OpenGL widget not instantiated')

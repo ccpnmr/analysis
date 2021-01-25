@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:49 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-25 15:59:21 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -260,21 +260,6 @@ class GuiStripNd(GuiStrip):
                 wid.setMinimumWidth(10)
         except Exception as es:
             pass
-
-    # def _rebuildStripContours(self):
-    #     # self._rebuildContours()
-    #
-    #     self._CcpnGLWidget._updateVisibleSpectrumViews()
-    #
-    #     # redraw the contours
-    #     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-    #
-    #     GLSignals = GLNotifier(parent=self)
-    #
-    #     for specNum, thisSpecView in enumerate(self.spectrumViews):
-    #         thisSpecView.buildContours = True
-    #
-    #     GLSignals.emitPaintEvent()
 
     def showExportDialog(self):
         """show the export strip to file dialog

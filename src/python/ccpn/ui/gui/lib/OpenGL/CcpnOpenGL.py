@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:49 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-25 16:07:52 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -499,57 +499,12 @@ class CcpnGLWidget(QOpenGLWidget):
         """Change to axes of the view, axis visibility, scale and rebuild matrices when necessary
         to improve display speed
         """
+
         if self.strip.isDeleted or not self.globalGL:
             return
 
-        if not self.viewports:
-            return
-
-        # use the updated size
-        w = self.w
-        h = self.h
-
-        currentShader = self.globalGL._shaderProgram1.makeCurrent()
-
-        # set projection to axis coordinates
-        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
-                                        self.axisT, -1.0, 1.0)
-        currentShader.setPMatrix(self._uPMatrix)
-
-        # needs to be offset from (0,0) for mouse scaling
-        if self._drawRightAxis and self._drawBottomAxis:
-
-            self._currentView = GLDefs.MAINVIEW
-            self._currentRightAxisView = GLDefs.RIGHTAXIS
-            self._currentRightAxisBarView = GLDefs.RIGHTAXISBAR
-            self._currentBottomAxisView = GLDefs.BOTTOMAXIS
-            self._currentBottomAxisBarView = GLDefs.BOTTOMAXISBAR
-
-        elif self._drawRightAxis and not self._drawBottomAxis:
-
-            self._currentView = GLDefs.MAINVIEWFULLHEIGHT
-            self._currentRightAxisView = GLDefs.FULLRIGHTAXIS
-            self._currentRightAxisBarView = GLDefs.FULLRIGHTAXISBAR
-
-        elif not self._drawRightAxis and self._drawBottomAxis:
-
-            self._currentView = GLDefs.MAINVIEWFULLWIDTH
-            self._currentBottomAxisView = GLDefs.FULLBOTTOMAXIS
-            self._currentBottomAxisBarView = GLDefs.FULLBOTTOMAXISBAR
-
-        else:
-
-            self._currentView = GLDefs.FULLVIEW
-
-        vp = self.viewports.getViewportFromWH(self._currentView, w, h)
-        vpwidth, vpheight = vp.width, vp.height
-        currentShader.setViewportMatrix(self._uVMatrix, 0, vpwidth, 0, vpheight,
-                                        -1.0, 1.0)
-
-        self.pixelX = (self.axisR - self.axisL) / vpwidth
-        self.pixelY = (self.axisT - self.axisB) / vpheight
-        self.deltaX = 1.0 / vpwidth
-        self.deltaY = 1.0 / vpheight
+        # update the shader settings - assume axis limits have changed
+        self._resizeGL()
 
         # calculate the aspect ratios for the current screen
         self._lockedAspectRatios = self._aspectRatios.copy()
@@ -563,34 +518,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if kx != base:
                 self._lockedAspectRatios[kx] = abs(self._lockedAspectRatios[ky] * self.pixelX / self.pixelY)
 
-        self.symbolX = abs(self._symbolSize * self.pixelX)
-        self.symbolY = abs(self._symbolSize * self.pixelY)
-
-        currentShader.setMVMatrix(self._IMatrix)
-
-        # map mouse coordinates to world coordinates - only needs to change on resize, move soon
-        currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
-                                        self.axisT, -1.0, 1.0)
-
-        # calculate the screen to axes transform
-        self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))
-        self.mouseTransform = np.matmul(self._aMatrix.reshape((4, 4)), self.vInv)
-
-        self.modelViewMatrix = (GL.GLdouble * 16)()
-        self.projectionMatrix = (GL.GLdouble * 16)()
-        self.viewport = (GL.GLint * 4)()
-
-        # change to the text shader
-        currentShader = self.globalGL._shaderProgramTex.makeCurrent()
-
-        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
-        currentShader.setPTexMatrix(self._uPMatrix)
-
-        self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
-
-        currentShader.setAxisScale(self._axisScale)
-        # currentShader.setGLUniform4fv('viewport', 1, self._view)
-
+        # rescale all the items in the scene
         if rescaleOverlayText:
             self._rescaleOverlayText()
 
@@ -824,11 +752,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_SPINNINGRATE] = spectrumView.spectrum.spinningRate
 
-        # indices = getAxisCodeMatchIndices(spectrumView.spectrum.axisCodes, self.strip.axisCodes)
         indices = getAxisCodeMatchIndices(self.strip.axisCodes, spectrumView.spectrum.axisCodes)
-
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
 
         if len(self._spectrumValues) > 2:
             # store a list for the extra dimensions
@@ -913,15 +838,92 @@ class CcpnGLWidget(QOpenGLWidget):
             return 1.0
 
     def resizeGL(self, w, h):
+        """Resize event form the openGL architecture
+        """
         # must be set here to catch the change of screen - possibly when unplugging a monitor
         self.refreshDevicePixelRatio()
-        self._resizeGL(w, h)
+        self.w, self.h = w, h
 
-    def _resizeGL(self, w, h):
-        self.w = w
-        self.h = h
+        self._rescaleAllZoom()
 
-        self._rescaleAllZoom(False)
+    def _resizeGL(self):
+        """Resize - update the GL settings
+        update  viewports
+                shader settings
+                pixel ratios
+        """
+        if not self.viewports:
+            getLogger().debug(f'viewport not defined: {self}')
+            return
+
+        currentShader = self.globalGL._shaderProgram1.makeCurrent()
+
+        # set projection to axis coordinates
+        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+                                        self.axisT, -1.0, 1.0)
+        currentShader.setPMatrix(self._uPMatrix)
+
+        # needs to be offset from (0, 0) for mouse scaling
+        if self._drawRightAxis and self._drawBottomAxis:
+
+            self._currentView = GLDefs.MAINVIEW
+            self._currentRightAxisView = GLDefs.RIGHTAXIS
+            self._currentRightAxisBarView = GLDefs.RIGHTAXISBAR
+            self._currentBottomAxisView = GLDefs.BOTTOMAXIS
+            self._currentBottomAxisBarView = GLDefs.BOTTOMAXISBAR
+
+        elif self._drawRightAxis and not self._drawBottomAxis:
+
+            self._currentView = GLDefs.MAINVIEWFULLHEIGHT
+            self._currentRightAxisView = GLDefs.FULLRIGHTAXIS
+            self._currentRightAxisBarView = GLDefs.FULLRIGHTAXISBAR
+
+        elif not self._drawRightAxis and self._drawBottomAxis:
+
+            self._currentView = GLDefs.MAINVIEWFULLWIDTH
+            self._currentBottomAxisView = GLDefs.FULLBOTTOMAXIS
+            self._currentBottomAxisBarView = GLDefs.FULLBOTTOMAXISBAR
+
+        else:
+
+            self._currentView = GLDefs.FULLVIEW
+
+        vp = self.viewports.getViewportFromWH(self._currentView, self.w, self.h)
+        vpwidth, vpheight = vp.width, vp.height
+        currentShader.setViewportMatrix(self._uVMatrix, 0, vpwidth, 0, vpheight,
+                                        -1.0, 1.0)
+
+        self.pixelX = (self.axisR - self.axisL) / vpwidth
+        self.pixelY = (self.axisT - self.axisB) / vpheight
+        self.deltaX = 1.0 / vpwidth
+        self.deltaY = 1.0 / vpheight
+
+        self.symbolX = abs(self._symbolSize * self.pixelX)
+        self.symbolY = abs(self._symbolSize * self.pixelY)
+
+        currentShader.setMVMatrix(self._IMatrix)
+
+        # map mouse coordinates to world coordinates - only needs to change on resize, move soon
+        currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
+                                        self.axisT, -1.0, 1.0)
+
+        # calculate the screen to axes transform
+        self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))
+        self.mouseTransform = np.matmul(self._aMatrix.reshape((4, 4)), self.vInv)
+
+        self.modelViewMatrix = (GL.GLdouble * 16)()
+        self.projectionMatrix = (GL.GLdouble * 16)()
+        self.viewport = (GL.GLint * 4)()
+
+        # change to the text shader
+        currentShader = self.globalGL._shaderProgramTex.makeCurrent()
+
+        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
+        currentShader.setPTexMatrix(self._uPMatrix)
+
+        self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
+
+        currentShader.setAxisScale(self._axisScale)
 
     def viewRange(self):
         return ((self.axisL, self.axisR),
@@ -1968,6 +1970,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.glReady = True
 
+        # make sure that the shaders are initialised
+        self._resizeGL()
+
     def _clearGLCursorQueue(self):
         for glBuf in self._glCursorQueue:
             glBuf.clearArrays()
@@ -2928,14 +2933,18 @@ class CcpnGLWidget(QOpenGLWidget):
     def _buildGL(self):
         """Separate the building of the display from the paint event; not sure that this is required
         """
-        # only call if the axes have changed
+
+        self.buildCursors()
+
+        # build spectrumSettings, spectrumView visibility
+        self.buildSpectra()
+
+        # only call if the axes have changed, and after spectra
         if self._updateAxes:
             self.buildGrid()
             self.buildDiagonals()
             self._updateAxes = False
 
-        self.buildCursors()
-        self.buildSpectra()
         self.buildBoundingBoxes()
 
         self._GLPeaks._spectrumSettings = self._spectrumSettings
@@ -4380,7 +4389,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._drawRightAxis = rightAxisVisible
         self._drawBottomAxis = bottomAxisVisible
 
-        self._resizeGL(self.width(), self.height())
+        self._resizeGL()
 
     @property
     def axesVisible(self):
@@ -5277,6 +5286,9 @@ class CcpnGLWidget(QOpenGLWidget):
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DYAF] = dyAF
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XSCALE] = xScale
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
+
+            indices = getAxisCodeMatchIndices(self.strip.axisCodes, spectrumView.spectrum.axisCodes)
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
 
     def _makeSpectrumArray(self, spectrumView, drawList):
         drawList.renderMode = GLRENDERMODE_DRAW

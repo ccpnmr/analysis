@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:24 +0000 (Sun, January 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-01-25 16:07:52 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -570,14 +570,6 @@ class GuiWindow():
         # toggle crosshairs for the spectrum displays in this window
         for spectrumDisplay in self.spectrumDisplays:
             spectrumDisplay.toggleDoubleCrosshair()
-
-        # self.application.preferences.general.showDoubleCrosshair = not self.application.preferences.general.showDoubleCrosshair
-        #
-        # # repaint all windows
-        # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-        #
-        # GLSignals = GLNotifier(parent=self)
-        # GLSignals.emitPaintEvent()
 
     def estimateNoise(self):
         """estimate the noise in the visible region of the current strip

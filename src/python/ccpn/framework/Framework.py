@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-23 13:22:51 +0000 (Sat, January 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-01-25 16:07:51 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -775,16 +775,6 @@ class Framework(NotifierBase):
             self.correctColours()
         except Exception as e:
             getLogger().warning('Impossible to restore SpectrumDisplays')
-
-        # Initialise strips
-        try:
-            for strip in project.strips:
-                GuiStrip._setupGuiStrip(project, strip._wrappedData)
-
-                # if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:
-                #   strip.setZWidgets()
-        except Exception as e:
-            getLogger().warning('Impossible to restore GuiStrip %s' % e)
 
         # Initialise SpectrumViews
         try:

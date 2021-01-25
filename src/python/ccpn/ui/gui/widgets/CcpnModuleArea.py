@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:25 +0000 (Sun, January 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-01-25 16:07:52 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -110,6 +110,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
         DropBase._init(self, acceptDrops=True)
 
         self.mainWindow = mainWindow  # a link back to the parent MainWindow
+        self.application = mainWindow.application
 
         self.modules = self.docks
         self.moveModule = self.moveDock
@@ -263,7 +264,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
             self._paint(ev)
 
         elif len(self.ccpnModules) == len(self._tempModules()):
-            # means all modules are popuout, so paint the label in the mai module area
+            # means all modules are pop-out, so paint the label in the main module area
             self._paint(ev)
 
     def _updateModuleNames(self):
@@ -285,7 +286,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
     @property
     def ccpnModules(self) -> list:
-        'return all current modules in area'
+        """return all current modules in area"""
         return self._ccpnModules
 
     @ccpnModules.getter

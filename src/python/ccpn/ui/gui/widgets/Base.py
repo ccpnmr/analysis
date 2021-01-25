@@ -8,7 +8,7 @@ widget.getLayout().addWidget(row, col, [rowspan, [colspan])
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-25 16:07:52 +0000 (Mon, January 25, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,6 +36,7 @@ from pyqtgraph.dockarea import Dock
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.Font import setWidgetFont
+from ccpn.util.AttrDict import AttrDict
 
 
 HALIGN_DICT = {
@@ -79,80 +80,81 @@ FOCUS_DICT = {
 
 class SignalBlocking():
     """
-    Class to add widget blocking methods to a subclass
+    Class to add widget blocking methods to a subclass.
+    Blocks signals from nested widgets.
+
+    Blocking is applied by a contextManager
     """
+    _widgetSignalBlockingLevel = 0
 
-    def _blockEvents(self, _widgetBlockers, blanking=False, project=None):
-        """Block all updates/signals/notifiers in the widget.
+    @property
+    def widgetIsBlocked(self):
+        """True if widget is blocked, i.e., blocking level > 0
         """
-        if not hasattr(self, '_widgetSignalBlockingLevel'):
-            self._widgetSignalBlockingLevel = 0
+        return self._widgetSignalBlockingLevel > 0
 
-        # block all signals on first entry
+    def _blockEvents(self, root, widgetState, recursive=True):
+        """Block all updates/signals in the widget and children.
+        """
+        # block all signals on first entry, each instance stores it's own blocking level
         if self._widgetSignalBlockingLevel == 0:
-            self.setUpdatesEnabled(False)
-            self._blockAllWidgetSignals(_widgetBlockers, self)
-            if blanking and project:
-                project.blankNotification()
+
+            # 'root' must be a widget, store previous updatesEnabled state
+            widgetState.root = root
+            widgetState.widgetUpdatesEnabled = root.updatesEnabled()
+            root.setUpdatesEnabled(False)
+
+            # create blocker objects to block child widget signals
+            widgetState.signalBlockers = [QtCore.QSignalBlocker(root)]
+            if recursive:
+                # add all the child widgets
+                widgetState.signalBlockers += [QtCore.QSignalBlocker(_child) for _child in root.findChildren(QtWidgets.QWidget)]
 
         self._widgetSignalBlockingLevel += 1
 
-    def _unblockEvents(self, _widgetBlockers, blanking=False, project=None):
-        """Unblock all updates/signals/notifiers in the dialog.
+    def _unblockEvents(self, root, widgetState):
+        """Unblock all updates/signals in the widget and children.
         """
         if self._widgetSignalBlockingLevel > 0:
             self._widgetSignalBlockingLevel -= 1
 
             # unblock all signals on last exit
             if self._widgetSignalBlockingLevel == 0:
-                if blanking and project:
-                    project.unblankNotification()
-                self._unblockAllWidgetSignals(_widgetBlockers, self)
-                self.setUpdatesEnabled(True)
+                # remove blockers to release widgets
+                widgetState.signalBlockers = None
+
+                # restore updatesEnabled state
+                root.setUpdatesEnabled(widgetState.widgetUpdatesEnabled)
 
         else:
             raise RuntimeError('Error: Widget signal blocking already at 0')
 
     @contextmanager
-    def blockWidgetSignals(self, projectBlanking=False):
-        """Block all signals for the widget (recursive)
+    def blockWidgetSignals(self, root=None, recursive=True):
+        """Block all signals for the widget.
+
+        root is the widget to be blocked, if no widget specified then self is assumed.
+        If recursive=False then only the specified widget is blocked.
+
+        Updates are also blocked for the widget, this should automatically block updates for all nested widgets.
+
+        :param root: widget to be blocked, defaults to self
+        :param recursive: bool, defaults to True
         """
-        _widgetBlockers = {}
-        self._blockEvents(_widgetBlockers, projectBlanking)
+        # local widgetState is kept private
+        _widgetState = AttrDict()
+        _root = root or self
+        self._blockEvents(_root, _widgetState, recursive=recursive)
         try:
             yield  # yield control to the calling process
 
         except Exception as es:
             raise es
         finally:
-            self._unblockEvents(_widgetBlockers, projectBlanking)
+            self._unblockEvents(_root, _widgetState)
 
-    def _blockAllWidgetSignals(self, _widgetBlockers, widget=None):
-        """Recursively block/unblock signals to all children
-        """
-        if widget and hasattr(widget, 'blockWidgetSignals'):
-            for child in widget.children():
-                self._blockAllWidgetSignals(_widgetBlockers, child)
-
-            # add the blocking signal by creation of QSignalBlocker
-            _block = QtCore.QSignalBlocker(widget)
-            assert widget not in _widgetBlockers
-            _widgetBlockers[widget] = _block
-
-    def _unblockAllWidgetSignals(self, _widgetBlockers, widget=None):
-        """Recursively block/unblock signals to all children
-        """
-        if widget and hasattr(widget, 'blockWidgetSignals'):
-            for child in widget.children():
-                self._unblockAllWidgetSignals(_widgetBlockers, child)
-
-            # remove the blocking signal by deletion of QSignalBlocker
-            if widget in _widgetBlockers:
-                del _widgetBlockers[widget]
-            else:
-                getLogger().debug2('_unblockAllWidgetSignals: widget not found {}'.format(widget))
-
-    def _removeWidget(self, widget, removeTopWidget=False):
+    @staticmethod
+    def _removeWidget(widget, removeTopWidget=False):
         """Destroy a widget and all it's contents
         """
 
@@ -173,7 +175,8 @@ class SignalBlocking():
                 widget.setParent(None)
                 del widget
 
-    def _setMinimumWidgetSize(self, widget):
+    @staticmethod
+    def _setMinimumWidgetSize(widget):
         """Set the minimum widget size of content widgets
         """
 
@@ -186,14 +189,12 @@ class SignalBlocking():
                         hint = widget.sizeHint()
                         if hint.isValid():
                             widget.setMinimumSize(hint)
-                            # widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
 
         if widget and hasattr(widget, 'getLayout'):
             _setWidgetSize(widget.getLayout())
             hint = widget.sizeHint()
             if hint.isValid():
                 widget.setMinimumSize(hint)
-                # widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
 
 
 class Base(DropBase, SignalBlocking):
@@ -307,7 +308,8 @@ class Base(DropBase, SignalBlocking):
         pass
 
     def setGridLayout(self, margins=(0, 0, 0, 0), spacing=(0, 0)):
-        "Add a QGridlayout to self"
+        """Add a QGridlayout to self
+        """
         layout = self._getLayout(self)  # use _getLayout as we do not want any message; if there is no
         # layout, we are going to add one
         if layout is None:
@@ -320,7 +322,8 @@ class Base(DropBase, SignalBlocking):
             getLogger().warning('Widget %s already has a layout!' % self)
 
     def getLayout(self):
-        "return the layout of self"
+        """return the layout of self
+        """
         layout = self._getLayout(self)
         if layout is None:
             getLogger().warning('Unable to query layout of %s' % self)
@@ -328,7 +331,8 @@ class Base(DropBase, SignalBlocking):
 
     @staticmethod
     def _getLayout(widget):
-        "return the layout of widget"
+        """return the layout of widget
+        """
         layout = None
         try:
             layout = QtWidgets.QWidget.layout(widget)
@@ -337,8 +341,8 @@ class Base(DropBase, SignalBlocking):
         return layout
 
     def _addToParent(self, grid, gridSpan, stretch, hAlign, vAlign):
-        "Add widget to parent of self (if can be obtained)"
-
+        """Add widget to parent of self (if can be obtained)
+        """
         parent = self.parent() if hasattr(self, 'parent') else None  # Not all Qt objects have a parent
         if parent is None:
             getLogger().warning('No parent: Cannot add widget %s (grid=%s)' % (self, grid))
@@ -369,7 +373,8 @@ class Base(DropBase, SignalBlocking):
 
     @staticmethod
     def _getRowCol(layout, grid):
-        "Returns (row, col) tuple from layout, using grid or using current rowCount"
+        """Returns (row, col) tuple from layout, using grid or using current rowCount
+        """
         if layout is None:
             getLogger().warning('Layout is None, cannot get (row, col) tuple')
             return (0, 0)
@@ -395,12 +400,14 @@ class Base(DropBase, SignalBlocking):
         grid=(row,col): tuple or list defining row, column
         gridSpan: tuple or list defining grid-span along row, column
 
+        if either expandX or expandY are True, then the corresponding expanding policy is set to 'minimumExpanding' otherwise it is set to 'fixed'
+
         :returns: Spacer widget
         """
         from ccpn.ui.gui.widgets.Spacer import Spacer
 
-        expandingX = QtWidgets.QSizePolicy.MinimumExpanding if expandX else QtWidgets.QSizePolicy.Fixed
-        expandingY = QtWidgets.QSizePolicy.MinimumExpanding if expandY else QtWidgets.QSizePolicy.Fixed
+        expandingX = 'minimumExpanding' if expandX else 'fixed'
+        expandingY = 'minimumExpanding' if expandY else 'fixed'
 
         if parent is None:
             parent = self

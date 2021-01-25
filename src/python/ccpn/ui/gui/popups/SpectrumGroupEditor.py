@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-23 13:57:36 +0000 (Sat, January 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-01-25 16:26:00 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -306,7 +306,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             if tabFunc:
                 tabFunc()
 
-        # self._populate() # is not needed to populate again all.
+        self._populate() # is not needed to populate again all.
         self.setDefaultButton(None)
 
         self.connectSignals()

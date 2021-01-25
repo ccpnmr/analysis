@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:25 +0000 (Sun, January 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-25 12:56:19 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1210,6 +1210,7 @@ GuiTable::item::selected {
     def _setContextMenu(self, enableExport=True, enableDelete=True):
         self.tableMenu = QtWidgets.QMenu()
         setWidgetFont(self.tableMenu, )
+        self.tableMenu.addAction("Copy clicked cell value", self._copySelectedCell)
         if enableExport:
             self.tableMenu.addAction("Export Visible Table", partial(self.exportTableDialog, exportAll=False))
         if enableExport:
@@ -1260,6 +1261,13 @@ GuiTable::item::selected {
     def showSearchSettings(self):
         if self.searchWidget is not None:
             self.searchWidget.show()
+
+    def _copySelectedCell(self):
+        i = self.currentItem()
+        if i is not None:
+            text = i.text()
+            df = pd.DataFrame([text])
+            df.to_clipboard(index=False, header=False)
 
     def deleteObjFromTable(self):
         selected = self.getSelectedObjects()

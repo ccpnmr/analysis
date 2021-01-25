@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-25 16:07:52 +0000 (Mon, January 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-25 19:21:40 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -579,14 +579,12 @@ class _openItemSampleDisplay(OpenItemABC):
             with notificationEchoBlocking():
                 if len(sample.spectra) > 0:
                     if len(spectrumDisplay.strips)>0:
-                        strip = spectrumDisplay.strips[0]
-
                         for sampleComponent in sample.sampleComponents:
                             if sampleComponent.substance is not None:
                                 for spectrum in sampleComponent.substance.referenceSpectra:
-                                    strip._displaySpectrum(spectrum, useUndoBlock = False)
+                                    spectrumDisplay.displaySpectrum(spectrum)
                         for spectrum in sample.spectra:
-                            strip._displaySpectrum(spectrum, useUndoBlock = False)
+                            spectrumDisplay.displaySpectrum(spectrum)
                         if autoRange:
                             spectrumDisplay.autoRange()
 
@@ -649,25 +647,22 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
             # check whether a new spectrumDisplay is needed, and check axisOrdering
             from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
             checkSpectraToOpen(mainWindow, [spectrumGroup])
-
             spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0], position=position, relativeTo=relativeTo, isGrouped=True)
             # set the spectrumView colours
             # spectrumDisplay._colourChanged(spectrumGroup)
             if len(spectrumDisplay.strips)>0:
-                strip = spectrumDisplay.strips[0]
 
                 with undoBlockWithoutSideBar():
                     with notificationEchoBlocking():
                         for spectrum in spectrumGroup.spectra[1:]:  # Add the other spectra
-                            strip._displaySpectrum(spectrum, useUndoBlock=False)
+                            spectrumDisplay.displaySpectrum(spectrum)
                         # update the spectrumView colours
                         spectrumDisplay._colourChanged(spectrumGroup)
                         # spectrumDisplay.isGrouped = True
                         spectrumDisplay.spectrumToolBar.hide()
                         spectrumDisplay.spectrumGroupToolBar.show()
                         spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
-
-                mainWindow.application.current.strip = strip
+                mainWindow.application.current.strip = spectrumDisplay.strips[0]
             # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
             spectrumDisplay.autoRange()
             return spectrumDisplay

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-25 18:52:08 +0000 (Mon, January 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-25 19:21:39 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -399,6 +399,15 @@ class GuiSpectrumDisplay(CcpnModule):
         self.stripScaleFactor = 1.0
 
         self._registerNotifiers()
+
+    def clear(self):
+        """
+        :return: remove all displayed spectra
+        """
+        with notificationEchoBlocking():
+            for specView in self.spectrumViews:
+                if specView.spectrum is not None:
+                    self.removeSpectrum(specView.spectrum)
 
     def _registerNotifiers(self):
         self._spectrumChangeNotifier = self.setNotifier(self.project,

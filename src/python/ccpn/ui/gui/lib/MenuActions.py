@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:49 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-25 12:52:33 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -768,30 +768,24 @@ def _openItemObjects(mainWindow, objs, **kwds):
     """
     spectrumDisplay = None
     with undoBlockWithoutSideBar():
-        if spectrumDisplay:
-            spectrumDisplay.spectrumToolBar.increaseSpectrumToolBarBlocking()
-            # FIXME STOP TOOLBAR REBUILDING EVERY SPECTRUM DROPPED
         for obj in objs:
             if obj:
-                # try:
-                    if obj.__class__ in OpenObjAction:
 
-                        # if a spectrum object has already been opened then attach to that spectrumDisplay
-                        if isinstance(obj, (Spectrum, SpectrumGroup)) and spectrumDisplay:
-                            spectrumDisplay._handlePids([obj.pid])
+                if obj.__class__ in OpenObjAction:
 
-                        else:
-                            # process objects to open
-                            func = OpenObjAction[obj.__class__](useNone=True, **kwds)
-                            returnObj = func._execOpenItem(mainWindow, obj)
-
-                            # if the first spectrum then set the spectrumDisplay
-                            if isinstance(obj, (Spectrum, SpectrumGroup)):
-                                spectrumDisplay = returnObj
+                    # if a spectrum object has already been opened then attach to that spectrumDisplay
+                    if isinstance(obj, (Spectrum, SpectrumGroup)) and spectrumDisplay:
+                        spectrumDisplay._handlePids([obj.pid])
 
                     else:
-                        info = showInfo('Not implemented yet!',
-                                        'This function has not been implemented in the current version')
-                # except Exception as e:
-                #     getLogger().warning('Error: %s' % e)
-                    # raise e
+                        # process objects to open
+                        func = OpenObjAction[obj.__class__](useNone=True, **kwds)
+                        returnObj = func._execOpenItem(mainWindow, obj)
+
+                        # if the first spectrum then set the spectrumDisplay
+                        if isinstance(obj, (Spectrum, SpectrumGroup)):
+                            spectrumDisplay = returnObj
+
+                else:
+                    showInfo('Not implemented yet!',
+                                    'This function has not been implemented in the current version')

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:51 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-25 12:52:33 +0000 (Mon, January 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -65,49 +65,8 @@ class SpectrumToolBar(ToolBar):
     def isBlocked(self):
         """True if spectrumToolBar is blocked
         """
-        return self._spectrumToolBarBlockingLevel > 0
-
-    def _blockSpectrumToolBarEvents(self):
-        """Block all updates/signals/notifiers on the spectrumToolBar
-        """
-        self.setUpdatesEnabled(False)
-        self.blockSignals(True)
-
-    def _unblockSpectrumToolBarEvents(self):
-        """Unblock all updates/signals/notifiers on the spectrumToolBar
-        """
-        self.blockSignals(False)
-        self.setUpdatesEnabled(True)
-
-    @contextmanager
-    def spectrumToolBarBlocking(self, node=None):
-        """Context manager to handle blocking of the spectrumToolBar events.
-        """
-        self.increaseSpectrumToolBarBlocking(node)
-        try:
-            # pass control to the calling function
-            yield
-
-        finally:
-            self.decreaseSpectrumToolBarBlocking(node)
-
-    def increaseSpectrumToolBarBlocking(self, node=None):
-        """increase level of blocking
-        """
-        if self._spectrumToolBarBlockingLevel == 0:
-            self._blockSpectrumToolBarEvents()
-        self._spectrumToolBarBlockingLevel += 1
-
-    def decreaseSpectrumToolBarBlocking(self, node=None):
-        """Reduce level of blocking - when level reaches zero, SpectrumToolBar is unblocked
-        """
-        if self._spectrumToolBarBlockingLevel > 0:
-            self._spectrumToolBarBlockingLevel -= 1
-            # check if level at zero; if so call post-blocking update
-            if self._spectrumToolBarBlockingLevel == 0:
-                self._unblockSpectrumToolBarEvents()
-        else:
-            raise RuntimeError('Error: cannot decrease spectrumToolBar blocking below 0')
+        # read state from widget blocking
+        return self.widgetIsBlocked
 
     def _paintButtonToMove(self, button):
         pixmap = button.grab()  # makes a "ghost" of the button as we drag
@@ -139,7 +98,7 @@ class SpectrumToolBar(ToolBar):
 
     def _addSubMenusToContext(self, contextMenu, button):
 
-        with self.spectrumToolBarBlocking():
+        with self.blockWidgetSignals(recursive=False):
             dd = OrderedDict([(PeakList, PeakListView), (IntegralList, IntegralListView), (MultipletList, MultipletListView)])
             spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
             if spectrum:
@@ -447,7 +406,7 @@ class SpectrumToolBar(ToolBar):
     def setButtonsFromSpectrumViews(self, spectrumViews):
         """Set up the spectrumDisplay buttons when initialising a display
         """
-        with self.spectrumToolBarBlocking():
+        with self.blockWidgetSignals(recursive=False):
             # clear the old actions
             # _actions = {act: act.objectName for act in self.actions}
 
@@ -495,7 +454,7 @@ class SpectrumToolBar(ToolBar):
         if spectrumDisplay.isGrouped:
             return
 
-        with self.spectrumToolBarBlocking():
+        with self.blockWidgetSignals(recursive=False):
             spectrumDisplay = spectrumView.strip.spectrumDisplay
             spectrum = spectrumView.spectrum
             action = spectrumDisplay.spectrumActionDict.get(spectrum)

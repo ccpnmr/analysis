@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-26 09:52:12 +0000 (Tue, January 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-26 13:42:37 +0000 (Tue, January 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -462,6 +462,13 @@ class GuiStrip1d(GuiStrip):
         """
         Changes the position of the z axis of the strip by number of planes or a ppm position, depending
         on which is specified.
+        """
+        # Not implemented for 1d strips
+        pass
+
+    def _setZWidgets(self, ignoreSpectrumView=None):
+        """
+        # CCPN INTERNAL - Sets values for the widgets in the plane toolbar.
         """
         # Not implemented for 1d strips
         pass

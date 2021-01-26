@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-21 16:46:31 +0000 (Thu, January 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-26 13:57:49 +0000 (Tue, January 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -422,7 +422,9 @@ class ExcelReader(object):
         else:
             data = self._project.loadData(filePath)
             if len(data) > 0:
-                data[0].rename(name)
+                if not data[0].name == name:
+                    data[0].rename(name)
+
         if data is not None:
             if len(data) > 0:
                 sp = data[0]

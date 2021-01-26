@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:24 +0000 (Sun, January 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-01-26 12:33:18 +0000 (Tue, January 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -23,6 +23,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import time as systime
+
 
 if not hasattr(systime, 'clock'):
     # NOTE:ED - quick patch to fix bug in pyqt 5.9
@@ -55,18 +56,19 @@ import tempfile
 from pathlib import Path
 from ccpn.util.Path import aPath
 
+
 _filenameLineEdit = '_filenameLineEdit'
 
 
 class MacroEditor(CcpnModule):
     """
     Macro editor will run Python Files only.
-    Other text files
-
     """
     includeSettingsWidget = True
-    className = 'MacroEditor'
+    maxSettingsState = 2
+    settingsPosition = 'top'
 
+    className = 'MacroEditor'
 
     def __init__(self, mainWindow=None, name='Macro Editor', filePath=None):
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
@@ -78,16 +80,16 @@ class MacroEditor(CcpnModule):
         self.preferences = None
         self._pythonConsole = None
         self.ccpnMacroPath = ccpnMacroPath
-        self._editor_windows = []         # used when running the macro externally on Analysis
-        self.autoOpenPythonConsole = False# When run: always open the PythonConsole module to see the output.
-        self._preEditorText = ''          # text as appeared the first time the file was opened
-        self._lastTimestp = None          # used to check if the file has been changed externally
+        self._editor_windows = []  # used when running the macro externally on Analysis
+        self.autoOpenPythonConsole = False  # When run: always open the PythonConsole module to see the output.
+        self._preEditorText = ''  # text as appeared the first time the file was opened
+        self._lastTimestp = None  # used to check if the file has been changed externally
         self._lastSaved = None
-        self.filePath = filePath          # working filePath. If None, it will be created
-        self._tempFile = None             # a temp file holder, used when the filePath is not specified
-        self.userMacroDirPath = None      # dir path containing user Macros. from preferences if defined otherwise from .ccpn/macros
+        self.filePath = filePath  # working filePath. If None, it will be created
+        self._tempFile = None  # a temp file holder, used when the filePath is not specified
+        self.userMacroDirPath = None  # dir path containing user Macros. from preferences if defined otherwise from .ccpn/macros
 
-        if self.mainWindow:               # is running in Analysis
+        if self.mainWindow:  # is running in Analysis
             self.application = mainWindow.application
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
@@ -128,7 +130,18 @@ class MacroEditor(CcpnModule):
             with open(aPath(self.filePath), 'w'):
                 pass
 
-           ### Gui settings ###
+        self._setupWidgets()
+        self.openPath(self.filePath)
+        self._setFileName()
+        self._setToolBar()
+        self._createWidgetSettings()
+        self.droppedNotifier = GuiNotifier(self.textEditor,
+                                           [GuiNotifier.DROPEVENT], [DropBase.URLS],
+                                           self._processDroppedItems)
+
+    def _setupWidgets(self):
+        """Setup the main widgets
+        """
         _spacing = 4
         self.mainWidget.getLayout().setSpacing(_spacing)
         self.mainWidget.getLayout().setContentsMargins(_spacing, _spacing, _spacing, _spacing)
@@ -144,7 +157,7 @@ class MacroEditor(CcpnModule):
         self._filenameLineEdit = LineEdit(self.mainWidget, grid=(hGrid, 1))
         self._filenameLineEdit.hide()
         setattr(self, _filenameLineEdit, LineEdit(self.mainWidget, grid=(hGrid, 1)))
-        getattr(self, _filenameLineEdit).hide() #  this is used only to store and restore the widgets
+        getattr(self, _filenameLineEdit).hide()  #  this is used only to store and restore the widgets
         hGrid += 1
         # macro editing area
         self.textEditor = PyCodeEditor(self.mainWidget, grid=(hGrid, 0), acceptDrops=True, gridSpan=(1, 2))
@@ -155,19 +168,9 @@ class MacroEditor(CcpnModule):
         self.textEditor.focused_in.connect(self._focusInEvent)
         self.textEditor.textChanged.connect(self._textedChanged)
 
-        #
-        self.openPath(self.filePath)
-        self._setFileName()
-        self._setToolBar()
-        self._createWidgetSettings()
-        self.droppedNotifier = GuiNotifier(self.textEditor,
-                                           [GuiNotifier.DROPEVENT], [DropBase.URLS],
-                                           self._processDroppedItems)
-
-
     def _createWidgetSettings(self):
         hGrid = 0
-        self.autoOpenPythonConsoleLabel = Label(self.settingsWidget, 'Auto-Open PythonConsole', grid=(hGrid, 0),)
+        self.autoOpenPythonConsoleLabel = Label(self.settingsWidget, 'Auto-Open PythonConsole', grid=(hGrid, 0), )
         self.autoOpenPythonConsoleCB = CheckBox(self.settingsWidget,
                                                 checked=self.autoOpenPythonConsole,
                                                 callback=self._setAutoOpenPythonConsole, grid=(hGrid, 1))
@@ -248,7 +251,6 @@ class MacroEditor(CcpnModule):
         self.textEditor.clear()
         self.textEditor.insertPlainText(self._preEditorText)
 
-
     def _textedChanged(self, *args):
         self.saveMacro()
         self.textEditor._on_text_changed()
@@ -276,7 +278,7 @@ class MacroEditor(CcpnModule):
                 if now != self._lastTimestp:
                     self._lastTimestp = now
                     reply = MessageDialog.showMulti(title='Warning', message='Detected an external change to the file.'
-                                            ,texts=[kc, sa, rf])
+                                                    , texts=[kc, sa, rf])
                     if kc in reply:
                         self.saveMacro()
                     if sa in reply:
@@ -289,74 +291,74 @@ class MacroEditor(CcpnModule):
     def _getToolBarDefs(self):
 
         toolBarDefs = (
-                        ['Open', od([
-                            ['text', 'Open'],
-                            ['toolTip', 'Open a Python File'],
-                            ['icon', Icon('icons/document_open_recent')],
-                            ['callback', self._openMacroFile],
-                            ['enabled', True]
-                        ])],
-                        ['Export', od([
-                            ['text', 'Export'],
-                            ['toolTip', 'Export code to PDF'],
-                            ['icon', Icon('icons/pdf')],
-                            ['callback', self.exportToPdf],
-                            ['enabled', True]
-                        ])],
-                        ['Add to shortcut', od([
-                            ['text', 'Add to shortcut'],
-                            ['toolTip', 'Add macro to a shortcut'],
-                            ['icon',  Icon('icons/shortcut')],
-                            ['callback', self._addToShortcuts],
-                            ['enabled', True]
-                        ])],
-                        (),
-                        ['Find', od([
-                            ['text', 'Find'],
-                            ['toolTip', ''],
-                            ['icon', Icon('icons/find')],
-                            ['callback', self._showFindWidgets],
-                            ['enabled', True]
-                        ])],
-                        ['Replace', od([
-                            ['text', 'Find and Replace'],
-                            ['toolTip', 'Find and Replace'],
-                            ['icon',Icon('icons/find-replace')],
-                            ['callback', self._showFindReplaceWidgets],
-                            ['enabled', True]
-                        ])],
-                        (),
-                        ['Undo', od([
-                            ['text', 'Undo'],
-                            ['toolTip', ''],
-                            ['icon', Icon('icons/undo')],
-                            ['callback',self.textEditor.undo],
-                            ['enabled', True]
-                        ])],
-                        ['Redo', od([
-                            ['text', 'Redo'],
-                            ['toolTip', ''],
-                            ['icon', Icon('icons/redo')],
-                            ['callback', self.textEditor.redo],
-                            ['enabled', True]
-                        ])],
-                        ['Revert', od([
-                            ['text', 'Revert'],
-                            ['toolTip', 'Revert all changes to initial state'],
-                            ['icon', Icon('icons/revert4')],
-                            ['callback', self.revertChanges],
-                            ['enabled', True]
-                        ])],
-                        (),
-                        ['Run', od([
-                            ['text', 'Run'],
-                            ['toolTip', 'Run the macro in the IpythonConsole.\nShortcut: cmd(ctrl)+r'],
-                            ['icon', Icon('icons/play')],
-                            ['callback', self.run],
-                            ['enabled', True],
-                            ['shortcut', '⌃r']
-                        ])],
-        )
+            ['Open', od([
+                ['text', 'Open'],
+                ['toolTip', 'Open a Python File'],
+                ['icon', Icon('icons/document_open_recent')],
+                ['callback', self._openMacroFile],
+                ['enabled', True]
+                ])],
+            ['Export', od([
+                ['text', 'Export'],
+                ['toolTip', 'Export code to PDF'],
+                ['icon', Icon('icons/pdf')],
+                ['callback', self.exportToPdf],
+                ['enabled', True]
+                ])],
+            ['Add to shortcut', od([
+                ['text', 'Add to shortcut'],
+                ['toolTip', 'Add macro to a shortcut'],
+                ['icon', Icon('icons/shortcut')],
+                ['callback', self._addToShortcuts],
+                ['enabled', True]
+                ])],
+            (),
+            ['Find', od([
+                ['text', 'Find'],
+                ['toolTip', ''],
+                ['icon', Icon('icons/find')],
+                ['callback', self._showFindWidgets],
+                ['enabled', True]
+                ])],
+            ['Replace', od([
+                ['text', 'Find and Replace'],
+                ['toolTip', 'Find and Replace'],
+                ['icon', Icon('icons/find-replace')],
+                ['callback', self._showFindReplaceWidgets],
+                ['enabled', True]
+                ])],
+            (),
+            ['Undo', od([
+                ['text', 'Undo'],
+                ['toolTip', ''],
+                ['icon', Icon('icons/undo')],
+                ['callback', self.textEditor.undo],
+                ['enabled', True]
+                ])],
+            ['Redo', od([
+                ['text', 'Redo'],
+                ['toolTip', ''],
+                ['icon', Icon('icons/redo')],
+                ['callback', self.textEditor.redo],
+                ['enabled', True]
+                ])],
+            ['Revert', od([
+                ['text', 'Revert'],
+                ['toolTip', 'Revert all changes to initial state'],
+                ['icon', Icon('icons/revert4')],
+                ['callback', self.revertChanges],
+                ['enabled', True]
+                ])],
+            (),
+            ['Run', od([
+                ['text', 'Run'],
+                ['toolTip', 'Run the macro in the IpythonConsole.\nShortcut: cmd(ctrl)+r'],
+                ['icon', Icon('icons/play')],
+                ['callback', self.run],
+                ['enabled', True],
+                ['shortcut', '⌃r']
+                ])],
+            )
         return toolBarDefs
 
     def _showFindWidgets(self):
@@ -369,7 +371,7 @@ class MacroEditor(CcpnModule):
 
     def _setToolBar(self):
         for v in self._getToolBarDefs():
-            if len(v)==2:
+            if len(v) == 2:
                 if isinstance(v[1], od):
                     action = Action(self, **v[1])
                     action.setObjectName(v[0])
@@ -380,11 +382,12 @@ class MacroEditor(CcpnModule):
     def _addToShortcuts(self):
         if self.application:
             from ccpn.ui.gui.popups.ShortcutsPopup import ShortcutsPopup
+
             sp = ShortcutsPopup(self, mainWindow=self.mainWindow)
             sp.shortcutWidget._addToFirstAvailableShortCut(self.filePath)
             sp.exec()
         else:
-            MessageDialog.showMessage('Set shortcuts','This option is availble only within Analysis')
+            MessageDialog.showMessage('Set shortcuts', 'This option is availble only within Analysis')
 
     def _processDroppedItems(self, data):
         """
@@ -446,6 +449,7 @@ class MacroEditor(CcpnModule):
 
     def _openPythonConsoleModule(self):
         from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
+
         if self.mainWindow.pythonConsoleModule is None:  # No pythonConsole module detected, so create one.
             self.mainWindow.moduleArea.addModule(PythonConsoleModule(self.mainWindow), 'bottom')
 
@@ -511,7 +515,7 @@ class MacroEditor(CcpnModule):
 
     def _deleteTempFile(self):
         if self._tempFile and self._tempFile.name == self.filePath:
-            if self.textEditor.get() == '': # delete empty temp
+            if self.textEditor.get() == '':  # delete empty temp
                 if os.path.exists(self.filePath):
                     os.remove(self.filePath)
 

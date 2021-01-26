@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-26 18:36:39 +0000 (Tue, January 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-26 18:42:52 +0000 (Tue, January 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -546,20 +546,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                     jj += 1
         else:
             colours = colourList[0]
-            
+
         return colours
-
-    def _releaseDisplayLists(self, displayLists):
-
-        for displayList in displayLists:
-            GL.glDeleteLists(displayList, 1)
-        displayLists[:] = []
-
-    def _createDisplayLists(self, levels, displayLists):
-
-        # could create them in one go but more likely to get fragmentation that way
-        for level in levels:
-            displayLists.append(GL.glGenLists(1))
 
     #def getPlaneData(self, guiStrip):
     def _getPlaneData(self):

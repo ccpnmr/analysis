@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-26 18:36:39 +0000 (Tue, January 26, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -304,10 +304,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                     printer.writePolyline(contour, colour)
 
     def _buildGLContours(self, glList, firstShow=True):
-
-        ##self.drawContoursCounter += 1
-        ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
-
+        """Build the contour arrays
+        """
         if not self.spectrum.noiseLevel and firstShow:
             getLogger().info("estimating noise level for spectrum %s" % str(self.spectrum.pid))
             setContourLevelsFromNoise(self.spectrum, setNoiseLevel=True,
@@ -332,14 +330,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         else:
             self.negLevels = []
 
-        # if not self.posLevels and not self.negLevels:
-        #   return
-
-        # self.posColour = Colour.scaledRgba(self._getColour('positiveContourColour'))  # TBD: for now assume only one colour
-        # self.negColour = Colour.scaledRgba(self._getColour('negativeContourColour'))  # and assumes these attributes are set
-        # glList.posColour = self.posColour
-        # glList.negColour = self.negColour
-
         colName = self._getColour('positiveContourColour')
         if not colName.startswith('#'):
             # get the colour from the gradient table or a single red
@@ -358,153 +348,22 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         glList.negColours = self.negColours = colListNeg
 
         try:
-            self._constructContours(self.posLevels, self.negLevels, glList=glList, doRefresh=True)
+            self._constructContours(self.posLevels, self.negLevels, glList=glList)
         except FileNotFoundError:
             self._project._logger.warning("No data file found for %s" % self)
             return
-
-    #def drawContours(self, painter, guiStrip):
-    def _buildContours(self, painter):
-
-        ##self.drawContoursCounter += 1
-        ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
-
-        # print('>>>_buildContours %s' % self)
-
-        if self.spectrum.positiveContourBase is None or self.spectrum.positiveContourBase == 0.0:
-            raise RuntimeError('Positive Contour Base is not defined')
-
-        if self.spectrum.negativeContourBase is None or self.spectrum.negativeContourBase == 0.0:
-            raise RuntimeError('Negative Contour Base is not defined')
-
-        if self.spectrum.includePositiveContours:  # .displayPositiveContours:
-            self.posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,
-                                        self.positiveContourFactor)
-        else:
-            self.posLevels = []
-
-        if self.spectrum.includeNegativeContours:  # .displayNegativeContours:
-            self.negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase,
-                                        self.negativeContourFactor)
-        else:
-            self.negLevels = []
-
-        # if not self.posLevels and not self.negLevels:
-        #     return
-
-        try:
-            self._constructContours(self.posLevels, self.negLevels)
-        except FileNotFoundError:
-            self._project._logger.warning("No data file found for %s" % self)
-            return
-
-        self.posColour = Colour.scaledRgba(self._getColour('positiveContourColour'))  # TBD: for now assume only one colour
-        self.negColour = Colour.scaledRgba(self._getColour('negativeContourColour'))  # and assumes these attributes are set
-
-    def _paintContours(self, painter, skip=False):
-        if not skip:
-            painter.beginNativePainting()  # this puts OpenGL back in its default coordinate system instead of Qt one
-
-        try:
-
-            xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(0)
-            yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(1)
-
-            xTile0 = xClipPoint0 // xTotalPointCount
-            xTile1 = 1 + (xClipPoint1 - 1) // xTotalPointCount
-            yTile0 = yClipPoint0 // yTotalPointCount
-            yTile1 = 1 + (yClipPoint1 - 1) // yTotalPointCount
-
-            # GL.glEnable(GL.GL_CLIP_PLANE0)
-            GL.glEnable(GL.GL_CLIP_PLANE1)
-            GL.glEnable(GL.GL_CLIP_PLANE2)
-            # GL.glEnable(GL.GL_CLIP_PLANE3)
-
-            # TODO:ED - why am I displaying a series of tiles?
-            # xTile1 = 1
-            # yTile1 = 1
-
-            # for xTile in range(xTile0, xTile1):
-            #   for yTile in range(yTile0, yTile1):
-
-            xTile = 0  # ejb - temp to only draw one set
-            yTile = 0
-
-            if not skip:
-                GL.glLoadIdentity()
-                GL.glPushMatrix()
-
-                # the below is because the y axis goes from top to bottom
-                GL.glScale(1.0, -1.0, 1.0)
-                GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
-
-                # the below makes sure that spectrum points get mapped to screen pixels correctly
-                GL.glTranslate(xTranslate, yTranslate, 0.0)
-                GL.glScale(xScale, yScale, 1.0)
-
-                GL.glTranslate(xTotalPointCount * xTile, yTotalPointCount * yTile, 0.0)
-
-            # GL.glClipPlane(GL.GL_CLIP_PLANE0, (1.0, 0.0, 0.0, - (xClipPoint0 - xTotalPointCount*xTile)))
-            GL.glClipPlane(GL.GL_CLIP_PLANE1, (-1.0, 0.0, 0.0, xClipPoint1 - xTotalPointCount * xTile))
-            GL.glClipPlane(GL.GL_CLIP_PLANE2, (0.0, 1.0, 0.0, - (yClipPoint0 - yTotalPointCount * yTile)))
-            # GL.glClipPlane(GL.GL_CLIP_PLANE3, (0.0, -1.0, 0.0, yClipPoint1 - yTotalPointCount*yTile))
-
-            for (colour, levels, displayLists) in ((self.posColour, self.posLevels, self.posDisplayLists),
-                                                   (self.negColour, self.negLevels, self.negDisplayLists)):
-                for n, level in enumerate(levels):
-                    GL.glColor4f(*colour)
-                    # TBD: scaling, translating, etc.
-                    GL.glCallList(displayLists[n])
-
-            if not skip:
-                GL.glPopMatrix()
-
-            # GL.glDisable(GL.GL_CLIP_PLANE0)
-            GL.glDisable(GL.GL_CLIP_PLANE1)
-            GL.glDisable(GL.GL_CLIP_PLANE2)
-            # GL.glDisable(GL.GL_CLIP_PLANE3)
-
-        finally:
-            if not skip:
-                painter.endNativePainting()
 
     # from ccpn.util.decorators import profile
     # @profile
-    def _constructContours(self, posLevels, negLevels, doRefresh=False, glList=None):
-        """ Construct the contours for this spectrum using an OpenGL display list
-            The way this is done here, any change in contour level needs to call this function.
+    def _constructContours(self, posLevels, negLevels, glList=None):
+        """Construct the contours for this spectrum using an OpenGL display list
+        The way this is done here, any change in contour level needs to call this function.
         """
 
         xDataDim, yDataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[:2]
 
-        if (doRefresh or xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev
-                or self.zRegionPrev != tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]])):
-            # self._releaseDisplayLists(self.posDisplayLists)
-            # self._releaseDisplayLists(self.negDisplayLists)
-            doPosLevels = doNegLevels = True
-        else:
-            if list(posLevels) == self.posLevelsPrev:
-                doPosLevels = False
-            else:
-                # self._releaseDisplayLists(self.posDisplayLists)
-                doPosLevels = posLevels and True
-            if list(negLevels) == self.negLevelsPrev:
-                doNegLevels = False
-            else:
-                # self._releaseDisplayLists(self.negDisplayLists)
-                doNegLevels = negLevels and True
-
-        ###self.previousRegion = self.guiSpectrumDisplay.region[:]  # TBD: not quite right, should be looking at the strip(s)
-
-        # do the contouring and store results in display list
-        if doPosLevels:
-            posLevelsArray = np.array(posLevels, np.float32)
-            # print(posLevelsArray)
-            # self._createDisplayLists(posLevelsArray, self.posDisplayLists)
-
-        if doNegLevels:
-            negLevelsArray = np.array(negLevels, np.float32)
-            # self._createDisplayLists(negLevelsArray, self.negDisplayLists)
+        posLevelsArray = np.array(posLevels, np.float32)
+        negLevelsArray = np.array(negLevels, np.float32)
 
         self.posLevelsPrev = list(posLevels)
         self.negLevelsPrev = list(negLevels)
@@ -512,57 +371,15 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         self.yDataDimPrev = yDataDim
         self.zRegionPrev = tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]])
 
-        # if not doPosLevels and not doNegLevels:
-        #     return
-
-        #for position, dataArray in self.getPlaneData(guiStrip):
         posContoursAll = negContoursAll = None
-
         numDims = self.spectrum.dimensionCount
 
         if _NEWCOMPILEDCONTOURS:
             # new code for the recompiled glList
-            # test = None
 
-            # get the positive contour colour list
-            _posColours = []
-            stepX = len(posLevels) - 1
-            step = stepX
-            stepY = len(self.posColours) - 1
-            jj = 0
-            if stepX > 0:
-                for ii in range(stepX + 1):
-                    _interp = (stepX - step) / stepX
-                    _intCol = Colour.interpolateColourRgba(self.posColours[min(jj, stepY)], self.posColours[min(jj + 1, stepY)],
-                                                           _interp,
-                                                           alpha=1.0)
-                    _posColours.extend(_intCol)
-                    step -= stepY
-                    while step < 0:
-                        step += stepX
-                        jj += 1
-            else:
-                _posColours = self.posColours[0]
-
-            # get the positive contour colour list
-            _negColours = []
-            stepX = len(negLevels) - 1
-            step = stepX
-            stepY = len(self.negColours) - 1
-            jj = 0
-            if stepX > 0:
-                for ii in range(stepX + 1):
-                    _interp = (stepX - step) / stepX
-                    _intCol = Colour.interpolateColourRgba(self.negColours[min(jj, stepY)], self.negColours[min(jj + 1, stepY)],
-                                                           _interp,
-                                                           alpha=1.0)
-                    _negColours.extend(_intCol)
-                    step -= stepY
-                    while step < 0:
-                        step += stepX
-                        jj += 1
-            else:
-                _negColours = self.negColours[0]
+            # get the positive/negative contour colour lists
+            _posColours = self._interpolateColours(self.posColours, posLevels)
+            _negColours = self._interpolateColours(self.negColours, negLevels)
 
             contourList = None
             if numDims < 3 or self._application.preferences.general.generateSinglePlaneContours:
@@ -575,8 +392,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                                           negLevelsArray,
                                                           np.array(_posColours, dtype=np.float32),
                                                           np.array(_negColours, dtype=np.float32))
-                # np.array(self.posColour * len(posLevels), dtype=np.float32),
-                # np.array(self.negColour * len(negLevels), dtype=np.float32))
             else:
 
                 specIndices = self._displayOrderSpectrumDimensionIndices
@@ -611,8 +426,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                                                       negLevelsArray,
                                                                       np.array(_posColours, dtype=np.float32),
                                                                       np.array(_negColours, dtype=np.float32))
-                            # np.array(self.posColour * len(posLevels), dtype=np.float32),
-                            # np.array(self.negColour * len(negLevels), dtype=np.float32))
 
             if contourList and contourList[1] > 0:
                 # set the contour arrays for the GL object
@@ -633,6 +446,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 glList.colors = np.array((), dtype=np.float32)
 
         else:
+            # old contouring
+            doPosLevels = doNegLevels = True
+
             for position, dataArray in self._getPlaneData():
                 if doPosLevels:
                     posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
@@ -711,6 +527,28 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                         thisVertex += count
                         thisColor += colCount
 
+    def _interpolateColours(self, colourList, levels):
+        colours = []
+        stepX = len(levels) - 1
+        step = stepX
+        stepY = len(colourList) - 1
+        jj = 0
+        if stepX > 0:
+            for ii in range(stepX + 1):
+                _interp = (stepX - step) / stepX
+                _intCol = Colour.interpolateColourRgba(colourList[min(jj, stepY)], colourList[min(jj + 1, stepY)],
+                                                       _interp,
+                                                       alpha=1.0)
+                colours.extend(_intCol)
+                step -= stepY
+                while step < 0:
+                    step += stepX
+                    jj += 1
+        else:
+            colours = colourList[0]
+            
+        return colours
+
     def _releaseDisplayLists(self, displayLists):
 
         for displayList in displayLists:
@@ -734,19 +572,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         xDim = dimIndices[0]
         yDim = dimIndices[1]
         orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
-
-        # apiSpectrumView = self._apiStripSpectrumView.spectrumView
-        # orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
-        # dataDims = apiSpectrumView.orderedDataDims
-        # ll = apiSpectrumView.dataSource.sortedDataDims()
-        # # NB Not all dataDIms must match spectrum e.g. 2D spectra in a 3D display
-        # dimIndices = [x and ll.index(x) for x in dataDims]
-        # xDim = dimIndices[0]
-        # yDim = dimIndices[1]
-        # # xDim = dataDims[0].dim - 1  # -1 because dataDim.dim starts at 1
-        # # yDim = dataDims[1].dim - 1
-        # spectrum = self.spectrum
-        # dimensionCount = spectrum.dimensionCount
 
         if dimensionCount == 2:
             planeData = spectrum.getPlaneData(xDim=xDim + 1, yDim=yDim + 1)
@@ -895,8 +720,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                             yield position, planeData
 
     def _getVisiblePlaneList(self, firstVisible=None, minimumValuePerPoint=None):
-
-        # NBNB TODO FIXME - Wayne, please check through the modified code
 
         spectrum = self.spectrum
         dimensionCount = spectrum.dimensionCount

@@ -39,6 +39,7 @@ def navigateToCurrentPeakPosition(application):
             if strip:
                 navigateToPositionInStrip(strip, peak.position, peak.axisCodes)
 
+        display.setZWidgets()
 
 def navigateToCurrentNmrResiduePosition(application):
     """

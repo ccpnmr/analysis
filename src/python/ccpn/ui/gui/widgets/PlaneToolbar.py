@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-25 16:07:52 +0000 (Mon, January 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-26 18:36:39 +0000 (Tue, January 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -153,7 +153,7 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
         if self._lastClick == SINGLECLICK:
             mouseDict = getMouseEventDict(event)
 
-            # set up a singleshot event, but a bit quicker than the normal interval (which seems a little long)
+            # set up a singleShot event, but a bit quicker than the normal interval (which seems a little long)
             QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() // 2,
                                      partial(self._handleMouseClicked, mouseDict))
 
@@ -246,8 +246,8 @@ class PlaneSelectorWidget(Frame):
     """
 
     def __init__(self, qtParent, mainWindow=None, strip=None, axis=None, **kwds):
-        "Setup the buttons and callbacks for axis"
-
+        """Setup the buttons and callbacks for axis
+        """
         super().__init__(parent=qtParent, setLayout=True, **kwds)
 
         self.mainWindow = mainWindow
@@ -259,32 +259,27 @@ class PlaneSelectorWidget(Frame):
         self._linkedPlaneCount = None
 
         _size = getFontHeight(size='MEDIUM')
-        # height = _size
 
         self._mainWidget = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
 
         self.previousPlaneButton = Button(parent=self._mainWidget, text='<', grid=(0, 0),
                                           callback=self._previousPlane)
-        # self.previousPlaneButton.setFixedWidth(_size)
-        # self.previousPlaneButton.setFixedHeight(height)
 
         self.spinBox = DoubleSpinbox(parent=self._mainWidget, showButtons=False, grid=(0, 1), decimals=3,
-                                     callback=self._spinBoxChanged, objectName='PlaneSelectorWidget_planeDepth')
+                                     objectName='PlaneSelectorWidget_planeDepth',
+                                     )
         self.spinBox.setFixedWidth(_size * 5)
-        # self.spinBox.setFixedHeight(height)
-        self.spinBox.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+
+        self.spinBox.returnPressed.connect(self._spinBoxChanged)
+        self.spinBox.wheelChanged.connect(self._spinBoxChanged)
 
         self.nextPlaneButton = Button(parent=self._mainWidget, text='>', grid=(0, 2),
                                       callback=self._nextPlane)
-        # self.nextPlaneButton.setFixedWidth(_size)
-        # self.nextPlaneButton.setFixedHeight(height)
 
         self.planeCountSpinBox = Spinbox(parent=self._mainWidget, showButtons=False, grid=(0, 3), min=1, max=1000,
                                          objectName='PlaneSelectorWidget_planeCount'
                                          )
         self.planeCountSpinBox.setFixedWidth(_size * 2.5)
-        # self.planeCountSpinBox.setFixedHeight(height)
-        self.planeCountSpinBox.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         self.planeCountSpinBox.returnPressed.connect(self._planeCountChanged)
         self.planeCountSpinBox.wheelChanged.connect(self._planeCountChanged)
@@ -313,30 +308,26 @@ class PlaneSelectorWidget(Frame):
         self._callbacks = callbacks
 
     def _planeCountChanged(self, value: int = 1):
-        """
-        Changes the number of planes displayed simultaneously.
+        """Changes the number of planes displayed simultaneously.
         """
         if self.strip:
             self._callbacks[3](value)
 
     def _nextPlane(self, *args):
-        """
-        Increases axis ppm position by one plane
+        """Increases axis ppm position by one plane
         """
         self.project._buildWithProfile = False
         if self.strip:
             self._callbacks[2](*args)
 
     def _previousPlane(self, *args):
-        """
-        Decreases axis ppm position by one plane
+        """Decreases axis ppm position by one plane
         """
         if self.strip:
             self._callbacks[0](*args)
 
     def _spinBoxChanged(self, value: float):
-        """
-        Sets the value of the axis plane position box if the specified value is within the displayable limits.
+        """Sets the value of the axis plane position box if the specified value is within the displayable limits.
         """
         if self.strip:
             self._callbacks[1](value)
@@ -1340,6 +1331,8 @@ class StripLabelWidget(_OpenGLFrameABC):
         self._resize()
 
     def setLabelColour(self, colour=DEFAULTCOLOUR):
+        """Set the colour for stripLabel
+        """
         self.show()
         self._setStyle(self._stripLabel, foregroundColour=colour)
         self._setPositionParameter(STRIPCOLOUR, colour)

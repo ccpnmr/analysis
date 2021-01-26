@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:47 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-26 16:47:33 +0000 (Tue, January 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,7 @@ __date__ = "$Date: 2018-12-20 15:44:34 +0000 (Thu, December 20, 2018) $"
 import decorator
 import inspect
 from contextlib import contextmanager
-from collections import Iterable
+from collections.abc import Iterable
 from functools import partial
 from ccpn.core.lib import Util as coreUtil
 from ccpn.util.Logging import getLogger
@@ -349,6 +349,65 @@ def notificationUnblanking():
 
 
 @contextmanager
+def undoStackRevert(application=None):
+    """
+    Revert the contents of the undo stack if an error occurred
+
+    usage:
+
+    e.g.
+        with undoStackRevert() as revertStack:
+            ...process
+
+            if error:
+                # set the error state of the context manager
+                revertStack(True)
+
+    'revertStack' could of course be any name, but best to keep relevant.
+    """
+    errorState = False
+
+    def setErrorState(state):
+        """Change the error state
+        """
+        # first time I've ever used nonlocal :)
+        nonlocal errorState
+        if not isinstance(state, bool):
+            raise TypeError('state must be a bool')
+        errorState = state
+
+    # get the current application
+    if not application:
+        application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
+
+    undo = application._getUndo()
+    if undo is None:
+        raise RuntimeError("Unable to get the application's undo stack")
+
+    # keep a shallow copy of the undo stack
+    _oldUndo = undo.__dict__.copy()
+    _oldUndoLen = len(undo)
+
+    try:
+        # transfer control to the calling function, and pass the setErrorState function
+        yield setErrorState
+
+    except Exception as es:
+        raise es
+
+    finally:
+        if errorState and len(undo) > _oldUndoLen:
+            # assumes that values have ONLY been added, not altered in the middle of the deque
+            # and that the values need removing from top
+            for rr in range(len(undo) - _oldUndoLen):
+                undo.pop()
+            # restore the state of the __dict__ to replace any other changed values
+            undo.__dict__.update(_oldUndo)
+
+
+@contextmanager
 def undoStackBlocking(application=None):
     """
     Block addition of items to the undo stack, re-enable at the end of the function block.
@@ -642,7 +701,6 @@ def deleteWrapperWithoutSideBar():
 
         with notificationBlanking(application=application):
             with undoBlockWithoutSideBar():
-
                 # must be done like this as the undo functions are not known
                 with undoStackBlocking(application=application) as addUndoItem:
                     # incorporate the change notifier to simulate the decorator
@@ -660,7 +718,6 @@ def deleteWrapperWithoutSideBar():
                                 redo=application.project.unblankNotification)
 
         return result
-
 
     return theDecorator
 
@@ -809,7 +866,6 @@ def ccpNmrV3CoreUndoBlock():
 
         with notificationBlanking(application=application):
             with undoBlock():
-
                 # must be done like this as the undo functions are not known
                 with undoStackBlocking(application=application) as addUndoItem:
                     # incorporate the change notifier to simulate the decorator
@@ -895,6 +951,7 @@ def queueStateChange(verify):
 
     return theDecorator
 
+
 # if __name__ == '__main__':
 #     # check that the undo mechanism is working with the new context managers
 #     from sandbox.Geerten.Refactored.framework import Framework, getApplication, getProject, getColourScheme
@@ -942,3 +999,41 @@ def queueStateChange(verify):
 #                  redo=partial(testRedo, value=8))
 #
 #         print('>>>close')
+
+if __name__ == '__main__':
+    from ccpn.ui.gui.widgets.Application import newTestApplication
+    from ccpn.framework.Application import getApplication
+
+
+    def _undoTest(value):
+        pass
+
+
+    app = newTestApplication()
+    application = getApplication()
+
+    with undoStackBlocking() as addUndoItem:
+        addUndoItem(undo=partial(_undoTest, 1),
+                    redo=partial(_undoTest, 2))
+        addUndoItem(undo=partial(_undoTest, 3),
+                    redo=partial(_undoTest, 4))
+        addUndoItem(undo=partial(_undoTest, 5),
+                    redo=partial(_undoTest, 6))
+
+    print(f'>>> {application.project._undo.undoList}')
+    print(f'>>> {application.project._undo}')
+    for value in application.project._undo:
+        print(f'>>>   {value}')
+    with undoStackRevert() as errorState:
+        with undoStackBlocking() as addUndoItem:
+            addUndoItem(undo=partial(_undoTest, 7),
+                        redo=partial(_undoTest, 8))
+            addUndoItem(undo=partial(_undoTest, 9),
+                        redo=partial(_undoTest, 10))
+
+        errorState(True)
+
+    print(f'>>> {application.project._undo.undoList}')
+    print(f'>>> {application.project._undo}')
+    for value in application.project._undo:
+        print(f'>>>   {value}')

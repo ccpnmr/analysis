@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-25 19:21:39 +0000 (Mon, January 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-01-26 16:47:33 +0000 (Tue, January 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -73,7 +73,7 @@ from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, \
-    BlankedPartial, undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
+    BlankedPartial, undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar, undoStackRevert
 from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
@@ -2246,23 +2246,28 @@ class GuiSpectrumDisplay(CcpnModule):
 
         _oldOrdering = self.getOrderedSpectrumViewsIndex()
 
-        with undoBlockWithoutSideBar(self.application):
-            # push/pop ordering
-            with undoStackBlocking(self.application) as addUndoItem:
-                addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))
+        with undoStackRevert(self.application) as revertStack:
+            with undoBlockWithoutSideBar(self.application):
+                # push/pop ordering
+                with undoStackBlocking(self.application) as addUndoItem:
+                    addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))
 
-            newSpectrumView = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
+                newSpectrumView = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
 
-            # push/pop ordering
-            with undoStackBlocking(self.application) as addUndoItem:
-                # add the spectrum to the end of the spectrum ordering in the toolbar
-                index = self.getOrderedSpectrumViewsIndex()
-                newInd = self.spectrumViews.index(newSpectrumView)
-                index = tuple((ii + 1) if (ii >= newInd) else ii for ii in index)
-                index += (newInd,)
+                if newSpectrumView:
+                    # push/pop ordering
+                    with undoStackBlocking(self.application) as addUndoItem:
+                        # add the spectrum to the end of the spectrum ordering in the toolbar
+                        index = self.getOrderedSpectrumViewsIndex()
+                        newInd = self.spectrumViews.index(newSpectrumView)
+                        index = tuple((ii + 1) if (ii >= newInd) else ii for ii in index)
+                        index += (newInd,)
 
-                self.setToolbarButtons(tuple(index))
-                addUndoItem(redo=partial(self.setToolbarButtons, tuple(index)))
+                        self.setToolbarButtons(tuple(index))
+                        addUndoItem(redo=partial(self.setToolbarButtons, tuple(index)))
+                else:
+                    # notify the stack to revert to the pre-context manager stack
+                    revertStack(True)
 
     @logCommand(get='self')
     def removeSpectrum(self, spectrum):

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-25 16:07:51 +0000 (Mon, January 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-26 16:47:33 +0000 (Tue, January 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2055,6 +2055,8 @@ class Framework(NotifierBase):
     #         getLogger().warning('nothing to redo.')
 
     def _getUndo(self):
+        """Return the undo object for the project
+        """
         if self.project:
             return self.project._undo
         else:

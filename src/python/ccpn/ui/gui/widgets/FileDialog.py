@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:51 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-26 12:16:04 +0000 (Tue, January 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -269,7 +269,8 @@ class FileDialogABC(QtWidgets.QFileDialog):
         Must be called after creating a subclassed FileDialogABC object.
         """
         if self.useNative and not sys.platform.lower() == 'linux':
-            funcName = STATICFUNCTIONDICT[(self._acceptMode, self._fileMode)]
+            _fm = FILEMODESDICT.get(self._fileMode)
+            funcName = STATICFUNCTIONDICT[(self._acceptMode, _fm)]
             self.result = getattr(self, funcName)(caption=self._text, directory=self._selectFile, **self._kwds)
             if isinstance(self.result, tuple):
                 self.result = self.result[0]

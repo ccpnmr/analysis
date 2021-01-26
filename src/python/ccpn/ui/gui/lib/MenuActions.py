@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-25 19:21:40 +0000 (Mon, January 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-26 13:57:18 +0000 (Tue, January 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -579,6 +579,7 @@ class _openItemSampleDisplay(OpenItemABC):
             with notificationEchoBlocking():
                 if len(sample.spectra) > 0:
                     if len(spectrumDisplay.strips)>0:
+                        spectrumDisplay.clearSpectra()
                         for sampleComponent in sample.sampleComponents:
                             if sampleComponent.substance is not None:
                                 for spectrum in sampleComponent.substance.referenceSpectra:

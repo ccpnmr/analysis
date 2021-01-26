@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-25 19:21:40 +0000 (Mon, January 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-26 13:57:18 +0000 (Tue, January 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1317,7 +1317,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                 with notificationEchoBlocking():
                     if strip:
                         spectrumDisplay = strip.spectrumDisplay
-                        spectrumDisplay.clear()
+                        spectrumDisplay.clearSpectra()
                         if isinstance(objFromPid, Spectrum):
                             spectrumDisplay.displaySpectrum(objFromPid)
                         if isinstance(objFromPid, SpectrumGroup):
@@ -1327,7 +1327,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                         if isinstance(objFromPid, Sample):
                             strip.setStackingMode(False)
                             _openItemSampleDisplay._openSampleSpectraOnDisplay(objFromPid, strip.spectrumDisplay)
-                            v = strip._getInitialOffset()
+                            # v = strip._getInitialOffset()
                             strip.setStackingMode(True)
 
     def keyPressEvent(self, e):

@@ -400,14 +400,15 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self._registerNotifiers()
 
-    def clear(self):
+    def clearSpectra(self):
         """
         :return: remove all displayed spectra
         """
-        with notificationEchoBlocking():
-            for specView in self.spectrumViews:
-                if specView.spectrum is not None:
-                    self.removeSpectrum(specView.spectrum)
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                for specView in self.spectrumViews:
+                    if specView.spectrum is not None:
+                        self.removeSpectrum(specView.spectrum)
 
     def _registerNotifiers(self):
         self._spectrumChangeNotifier = self.setNotifier(self.project,

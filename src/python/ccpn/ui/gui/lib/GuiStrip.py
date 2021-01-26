@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-25 16:07:51 +0000 (Mon, January 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-26 13:57:17 +0000 (Tue, January 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -442,6 +442,11 @@ class GuiStrip(Frame):
             peak = peaks[-1]
             peakTableModule = self.application.showPeakTable(peakList=peak.peakList)
 
+    def setStackingMode(self, value):
+        pass
+
+    def getStackingMode(self):
+        pass
 
     def _updateStripLabel(self, callbackDict):
         """Update the striplabel if it represented a NmrResidue that has changed its id.

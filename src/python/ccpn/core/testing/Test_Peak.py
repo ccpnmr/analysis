@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2021-01-11 15:39:41 +0000 (Mon, January 11, 2021) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-27 17:38:23 +0000 (Wed, January 27, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -57,7 +57,7 @@ class PeakTest(WrapperTesting):
 
 class PeakTest2(WrapperTesting):
     # Path of project to load (None for new project
-    projectPath = 'CCPN_H1GI_clean_extended.nef'
+    projectPath = 'V3ProjectForTests.ccpn'
 
     singleValueTags = ['height', 'volume', 'heightError', 'volumeError', 'figureOfMerit',
                        'annotation', 'comment']
@@ -66,8 +66,8 @@ class PeakTest2(WrapperTesting):
     # NBNB TODO We still need a case where axisCodes are not in the same order (e.g. HNC<->HCN)
 
     def test_Peak_copy_exo_1(self):
-        peakList1 = self.project.getPeakList('3dNOESY-182.3')
-        peak1 = peakList1.getPeak(1110)
+        peakList1 = self.project.getPeakList('15NNoesy_182.1')
+        peak1 = peakList1.getPeak(2)
         peak2 = peak1.copyTo(peakList1)
 
         self.project._wrappedData.root.checkAllValid(complete=True)
@@ -79,12 +79,12 @@ class PeakTest2(WrapperTesting):
 
         for tag in tags:
             self.assertEquals((tag, getattr(peak1, tag)), (tag, getattr(peak2, tag)))
-        self.assertEquals(('serial', peak2.serial), ('serial', 1131))
+        self.assertEquals(('serial', peak2.serial), ('serial', 11))
 
     def test_Peak_copy_exo_2(self):
-        peakList1 = self.project.getPeakList('3dNOESY-182.3')
-        peakList2 = self.project.getPeakList('3dTOCSY-181.1')
-        peak1 = peakList1.getPeak(1110)
+        peakList1 = self.project.getPeakList('15NNoesy_182.1')
+        peakList2 = self.project.getPeakList('15NTocsy_181.1')
+        peak1 = peakList1.getPeak(2)
         peak3 = peak1.copyTo(peakList2)
 
         tags = self.singleValueTags + self.dimensionValueTags

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:47 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-27 14:10:57 +0000 (Wed, January 27, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -186,6 +186,8 @@ def exportNef(project: Project,
               # exclusionDict={},
               pidList: typing.Sequence = None):
     """export NEF file to path"""
+
+    path = str(path)
 
     if path[-4:] != '.nef':
         path = path + '.nef'

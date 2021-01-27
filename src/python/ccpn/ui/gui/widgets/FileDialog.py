@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-26 12:25:16 +0000 (Tue, January 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-27 16:35:32 +0000 (Wed, January 27, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -271,7 +271,8 @@ class FileDialogABC(QtWidgets.QFileDialog):
         if self.useNative and not sys.platform.lower() == 'linux':
             _fm = FILEMODESDICT.get(self._fileMode)
             funcName = STATICFUNCTIONDICT[(self._acceptMode, _fm)]
-            self.result = getattr(self, funcName)(caption=self._text, directory=self._selectFile, **self._kwds)
+
+            self.result = getattr(self, funcName)(caption=self._text, directory=str(self._selectFile), **self._kwds)
             if isinstance(self.result, tuple):
                 self.result = self.result[0]
         else:
@@ -359,7 +360,7 @@ class FileDialogABC(QtWidgets.QFileDialog):
 # Define the subclasses for each dialog
 
 class ProjectFileDialog(FileDialogABC):
-    _fileMode = 'directory'
+    # _fileMode = 'directory'
     _text = '{} Project'
 
 

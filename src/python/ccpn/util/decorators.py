@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:52 +0000 (Fri, January 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-28 18:10:00 +0000 (Thu, January 28, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,6 @@ import time
 from functools import partial
 from ccpn.util.SafeFilename import getSafeFilename
 from ccpn.util.Path import aPath
-
 
 def trace(f):
     def globaltrace(frame, why, arg):
@@ -96,28 +95,6 @@ def singleton(cls):
     cls.__init__ = object.__init__
     return cls
 
-
-def profile(func):
-    """Profile the wrapped function to file
-    """
-
-    @functools.wraps(func)
-    def profileWrapper(*args, **kwargs):
-        # path = ''
-        profiler = cProfile.Profile()
-        try:
-            profiler.enable()
-            ret = func(*args, **kwargs)
-            profiler.disable()
-            return ret
-        finally:
-            filename = os.path.expanduser(os.path.join('~', func.__name__ + '.pstat'))
-            filename = getSafeFilename(filename, 'w')
-            profiler.dump_stats(filename)
-
-    return profileWrapper
-
-
 def pstatToText(pstatPath, outPath=None):
     """
     Converts a profile file of type .pstat into a plain text file.
@@ -138,6 +115,34 @@ def pstatToText(pstatPath, outPath=None):
         f.write(s.getvalue())
     return ps
 
+def profile(dirPath='~', asText=False):
+    """
+    Get the stats of all related calls firing from inside a specific function/method.
+    Add on top of a function/method to profile it. E.g.:
+
+        @profile(dirPath='/myDesktopPath/')
+        def my function(*args): ...
+
+    :param dirPath: str, dir where to dump the pstat file.
+    :param asText: bool. Make a pstat copy as a human readable text file.
+    """
+    def _profile(func):
+        @functools.wraps(func)
+        def profileWrapper(*args, **kwargs):
+            profiler = cProfile.Profile()
+            try:
+                profiler.enable()
+                result = func(*args, **kwargs)
+                profiler.disable()
+                return result
+            finally:
+                filename = aPath(dirPath).joinpath(func.__name__ + '.pstat')
+                filename = getSafeFilename(filename, 'w')
+                profiler.dump_stats(filename)
+                if asText:
+                    pstatToText(str(filename))
+        return profileWrapper
+    return _profile
 
 def notify(trigger, preExecution=False):
     """A decorator wrap a method around a notification blanking with explicit notification pre- or post-execution

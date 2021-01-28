@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-26 16:47:33 +0000 (Tue, January 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-28 10:49:18 +0000 (Thu, January 28, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2941,6 +2941,9 @@ class Framework(NotifierBase):
         if self.preferences.general.useNativeWebbrowser:
             import webbrowser
             import posixpath
+
+            # may be a Path object
+            urlPath = str(urlPath)
 
             urlPath = urlPath or ''
             if (urlPath.startswith('http://') or urlPath.startswith('https://')):

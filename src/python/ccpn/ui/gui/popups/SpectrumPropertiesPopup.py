@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:50 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-28 11:30:21 +0000 (Thu, January 28, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -506,7 +506,7 @@ class GeneralTab(Widget):
         row += 1
 
         Label(self, text="Sample", vAlign='t', hAlign='l', grid=(row, 0))
-        self.samplesPulldownList = PulldownList(self, texts=['None'], objects=[None], vAlign='t', grid=(row, 1))
+        self.samplesPulldownList = PulldownList(self, vAlign='t', grid=(row, 1))
         self.samplesPulldownList.currentIndexChanged.connect(partial(self._queueSampleChange, spectrum))
         row += 1
 
@@ -621,6 +621,8 @@ class GeneralTab(Widget):
             self.chemicalShiftListPulldown.setIndex(index)
 
             self.samplesPulldownList.clear()
+            # add a blank item
+            self.samplesPulldownList.addItem('', None)
             for sample in self.spectrum.project.samples:
                 self.samplesPulldownList.addItem(sample.name, sample)
             if self.spectrum.sample is not None:
@@ -750,14 +752,11 @@ class GeneralTab(Widget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueSampleChange(self, spectrum, value):
-        return partial(self._changeSampleSpectrum, spectrum, self.samplesPulldownList.currentObject())
+        _text, sample = self.samplesPulldownList.getSelected()
+        return partial(self._changeSampleSpectrum, spectrum, sample)
 
     def _changeSampleSpectrum(self, spectrum, sample):
-        if sample is not None:
-            sample.spectra += (spectrum,)
-        else:
-            if spectrum.sample is not None:
-                spectrum.sample = None
+        spectrum.sample = sample
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetSpectrumType(self, spectrum, value):

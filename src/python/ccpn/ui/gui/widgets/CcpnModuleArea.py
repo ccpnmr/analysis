@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-25 16:07:52 +0000 (Mon, January 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-01-28 14:28:12 +0000 (Thu, January 28, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -46,6 +46,7 @@ from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
 from ccpn.ui.gui.widgets.Font import getFont
 from functools import partial
+from ccpn.framework.Application import getApplication
 
 
 ModuleArea = DockArea
@@ -110,7 +111,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
         DropBase._init(self, acceptDrops=True)
 
         self.mainWindow = mainWindow  # a link back to the parent MainWindow
-        self.application = mainWindow.application
+        self.application = getApplication() # this will enable to create testing ModuleArea/Modules without mainWindow/project/application
 
         self.modules = self.docks
         self.moveModule = self.moveDock

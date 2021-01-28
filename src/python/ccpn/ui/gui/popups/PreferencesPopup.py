@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:50 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-28 12:58:51 +0000 (Thu, January 28, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -57,7 +57,7 @@ from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
-from ccpn.ui.gui.widgets.FileDialog import DataPathFileDialog, WorkingPathFileDialog, AuxiliaryFileDialog, \
+from ccpn.ui.gui.widgets.FileDialog import SpectrumFileDialog, ProjectFileDialog, AuxiliaryFileDialog, \
     LayoutsFileDialog, MacrosFileDialog, PluginsFileDialog, PipelineFileDialog, ExecutablesFileDialog
 from ccpn.framework.lib.pipeline.PipesLoader import _fetchUserPipesPath
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
@@ -93,7 +93,7 @@ def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, 
 
     # update the current userWorkingPath in the active file dialogs
     if userWorkingPath:
-        _dialog = WorkingPathFileDialog(parent=self.mainWindow)
+        _dialog = ProjectFileDialog(parent=self.mainWindow)
         _dialog.initialPath = aPath(userWorkingPath)
 
     self._updateDisplay(updateColourScheme, updateSpectrumDisplays)
@@ -154,6 +154,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self._size = QtCore.QSize(w, h)
         self.setMinimumWidth(w)
         self.setMaximumWidth(w * 1.5)
+
+        # keep a backup of the working paths in the dialogs
+        self._tempDialog = ProjectFileDialog()
+        self._tempDialog._storePaths()
 
         self.__postInit__()
         self._okButton = self.getButton(self.OKBUTTON)
@@ -270,7 +274,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             _changeUserWorkingPath = self.preferences.general.userWorkingPath != lastPrefs.general.userWorkingPath
 
             # read the last working path set in the file dialogs
-            _dialog = WorkingPathFileDialog(parent=self.mainWindow)
+            _dialog = ProjectFileDialog(parent=self.mainWindow)
             _lastUserWorkingPath = _dialog.initialPath.asString()  # an aPath
 
             _newUserWorkingPath = self.preferences.general.userWorkingPath
@@ -297,6 +301,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         if error.errorValue:
             # re-populate popup from self.preferences on error
             self._populate()
+
+            # revert the dialog paths
+            self._tempDialog._restorePaths()
             return False
 
         # remove all changes
@@ -305,6 +312,12 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self._currentNumApplies += 1
         self._revertButton.setEnabled(True)
         return True
+
+    def reject(self) -> None:
+        # revert the dialog paths
+        self._tempDialog._restorePaths()
+
+        super().reject()
 
     def _updateGui(self):
 
@@ -392,11 +405,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         userLayouts = Label(parent, text="User Predefined Layouts ", grid=(row, 0))
-        self.userLayoutsLe = PathEdit(parent, grid=(row, 1), vAlign='t')
-        self.userLayoutsLe.setMinimumWidth(LineEditsMinimumWidth)
+        self.userLayoutsPathData = PathEdit(parent, grid=(row, 1), vAlign='t')
+        self.userLayoutsPathData.setMinimumWidth(LineEditsMinimumWidth)
         self.userLayoutsLeButton = Button(parent, grid=(row, 2), callback=self._getUserLayoutsPath,
                                           icon='icons/directory', hPolicy='fixed')
-        self.userLayoutsLe.textChanged.connect(self._queueSetuserLayoutsPath)
+        self.userLayoutsPathData.textChanged.connect(self._queueSetuserLayoutsPath)
 
         row += 1
         self.auxiliaryFilesLabel = Label(parent, text="Auxiliary Files Path ", grid=(row, 0))
@@ -592,7 +605,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.restoreLayoutOnOpeningBox.setChecked(self.preferences.general.restoreLayoutOnOpening)
         self.autoBackupEnabledBox.setChecked(self.preferences.general.autoBackupEnabled)
         self.autoBackupFrequencyData.setValue(self.preferences.general.autoBackupFrequency)
-        self.userLayoutsLe.setText(self.preferences.general.userLayoutsPath)
+        self.userLayoutsPathData.setText(self.preferences.general.userLayoutsPath)
         self.userWorkingPathData.setText(self.preferences.general.userWorkingPath)
         self.auxiliaryFilesData.setText(self.preferences.general.auxiliaryFilesPath)
         self.macroPathData.setText(self.preferences.general.userMacroPath)
@@ -1151,11 +1164,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.dataPath = value
 
     def _getUserDataPath(self):
-        if os.path.exists(os.path.expanduser(self.userDataPathText.text())):
-            currentDataPath = os.path.expanduser(self.userDataPathText.text())
-        else:
-            currentDataPath = os.path.expanduser('~')
-        dialog = DataPathFileDialog(parent=self, acceptMode='select', directory=currentDataPath)
+        currentDataPath = aPath(self.userDataPathText.text() or '~')
+        currentDataPath = currentDataPath if currentDataPath.exists() else aPath('~')
+        dialog = SpectrumFileDialog(parent=self, acceptMode='select', directory=currentDataPath, _useDirectoryOnly=True)
         dialog._show()
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
@@ -1171,11 +1182,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.userWorkingPath = value
 
     def _getUserWorkingPath(self):
-        if os.path.exists(os.path.expanduser(self.userWorkingPathData.text())):
-            currentDataPath = os.path.expanduser(self.userWorkingPathData.text())
-        else:
-            currentDataPath = os.path.expanduser('~')
-        dialog = WorkingPathFileDialog(parent=self, acceptMode='select', directory=currentDataPath)
+        currentDataPath = aPath(self.userWorkingPathData.text() or '~')
+        currentDataPath = currentDataPath if currentDataPath.exists() else aPath('~')
+        dialog = ProjectFileDialog(parent=self, acceptMode='select', directory=currentDataPath, _useDirectoryOnly=True)
         dialog._show()
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
@@ -1191,10 +1200,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.auxiliaryFilesPath = value
 
     def _getAuxiliaryFilesPath(self):
-        if os.path.exists(os.path.expanduser(self.auxiliaryFilesData.text())):
-            currentDataPath = os.path.expanduser(self.auxiliaryFilesData.text())
-        else:
-            currentDataPath = os.path.expanduser('~')
+        currentDataPath = aPath(self.auxiliaryFilesData.text() or '~')
+        currentDataPath = currentDataPath if currentDataPath.exists() else aPath('~')
         dialog = AuxiliaryFileDialog(parent=self, acceptMode='select', directory=currentDataPath, _useDirectoryOnly=True)
         dialog._show()
         directory = dialog.selectedFiles()
@@ -1225,7 +1232,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetuserLayoutsPath(self):
-        value = self.userLayoutsLe.get()
+        value = self.userLayoutsPathData.get()
         if value != self.preferences.general.userLayoutsPath:
             return partial(self._setUserLayoutsPath, value)
 
@@ -1233,15 +1240,13 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.userLayoutsPath = value
 
     def _getUserLayoutsPath(self):
-        if os.path.exists(os.path.expanduser(self.userLayoutsLe.text())):
-            currentDataPath = os.path.expanduser(self.userLayoutsLe.text())
-        else:
-            currentDataPath = os.path.expanduser('~')
+        currentDataPath = aPath(self.userLayoutsPathData.text() or '~')
+        currentDataPath = currentDataPath if currentDataPath.exists() else aPath('~')
         dialog = LayoutsFileDialog(parent=self, acceptMode='select', directory=currentDataPath, _useDirectoryOnly=True)
         dialog._show()
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
-            self.userLayoutsLe.setText(directory[0])
+            self.userLayoutsPathData.setText(directory[0])
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetMacroFilesPath(self):
@@ -1253,10 +1258,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.userMacroPath = value
 
     def _getMacroFilesPath(self):
-        if os.path.exists(os.path.expanduser(self.macroPathData.text())):
-            currentDataPath = os.path.expanduser(self.macroPathData.text())
-        else:
-            currentDataPath = os.path.expanduser('~')
+        currentDataPath = aPath(self.macroPathData.text() or '~')
+        currentDataPath = currentDataPath if currentDataPath.exists() else aPath('~')
         dialog = MacrosFileDialog(parent=self, acceptMode='select', directory=currentDataPath, _useDirectoryOnly=True)
         dialog._show()
         directory = dialog.selectedFiles()
@@ -1273,10 +1276,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.userPluginPath = value
 
     def _getPluginFilesPath(self):
-        if os.path.exists(os.path.expanduser(self.pluginPathData.text())):
-            currentDataPath = os.path.expanduser(self.pluginPathData.text())
-        else:
-            currentDataPath = os.path.expanduser('~')
+        currentDataPath = aPath(self.pluginPathData.text() or '~')
+        currentDataPath = currentDataPath if currentDataPath.exists() else aPath('~')
         dialog = PluginsFileDialog(parent=self, acceptMode='select', directory=currentDataPath, _useDirectoryOnly=True)
         dialog._show()
         directory = dialog.selectedFiles()
@@ -1293,11 +1294,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.userPipesPath = value
 
     def _getUserPipesPath(self):
-        # TODO ADD OPTION TO CHANGE
-        if os.path.exists(os.path.expanduser(self.userPipesPath.text())):
-            currentDataPath = os.path.expanduser(self.userPipesPath.text())
-        else:
-            currentDataPath = _fetchUserPipesPath(self.application)
+        currentDataPath = aPath(self.userPipesPath.text() or '~')
+        currentDataPath = currentDataPath if currentDataPath.exists() else aPath('~')
         dialog = PipelineFileDialog(parent=self, acceptMode='select', directory=currentDataPath, _useDirectoryOnly=True)
         dialog._show()
         directory = dialog.selectedFiles()

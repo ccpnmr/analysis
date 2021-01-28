@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-27 16:35:32 +0000 (Wed, January 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-28 12:58:51 +0000 (Thu, January 28, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -164,6 +164,7 @@ class FileDialogABC(QtWidgets.QFileDialog):
             self._setDirectory = False
         else:
             directory = directory
+            # not sure why I put this flag in
             self._setDirectory = True
 
         _txt = self._text.format(acceptMode) if '{}' in self._text else self._text
@@ -264,6 +265,19 @@ class FileDialogABC(QtWidgets.QFileDialog):
         if self._clsID in self._initialPaths:
             self._initialPaths[self._clsID] = value
 
+    def _storePaths(self):
+        """Store the current path set - possibly for undo/redo cancelled
+        """
+        self._tempPaths = self._initialPaths.copy()
+
+    def _restorePaths(self):
+        """Restore the current path set - possibly for undo/redo cancelled
+        """
+        if getattr(self, '_tempPaths', None):
+            # keeps the original pointer
+            self._initialPaths.clear()
+            self._initialPaths.update(self._tempPaths)
+
     def _show(self):
         """Separated from the _init__ to stop threading issues with Windows 10.
         Must be called after creating a subclassed FileDialogABC object.
@@ -286,10 +300,9 @@ class FileDialogABC(QtWidgets.QFileDialog):
     def _updateCurrentPath(self):
         """Update the current path
         """
-        if not self._setDirectory:
-            # accept the dialog and set the current selected folder for next time if directory not originally set
-            absPath = aPath(self.directory().absolutePath())
-            self._initialPaths[self._clsID] = absPath
+        # accept the dialog and set the current selected folder for next time if directory not originally set
+        absPath = aPath(self.directory().absolutePath())
+        self._initialPaths[self._clsID] = absPath
 
     def accept(self):
         """Update the current path and exit the dialog.
@@ -312,7 +325,7 @@ class FileDialogABC(QtWidgets.QFileDialog):
     def _dir(self, directory: str):
         if directory.endswith(str(self._restrictedType)):
             return False
-        
+
         return True
 
     def _openClicked(self):
@@ -364,16 +377,6 @@ class ProjectFileDialog(FileDialogABC):
     _text = '{} Project'
 
 
-class WorkingPathFileDialog(FileDialogABC):
-    _fileMode = 'directoryOnly'
-    _text = '{} Working Path'
-
-
-class DataPathFileDialog(FileDialogABC):
-    _fileMode = 'directoryOnly'
-    _text = '{} Data Path'
-
-
 class DataFileDialog(FileDialogABC):
     _text = '{} Data'
 
@@ -406,6 +409,7 @@ class PreferencesFileDialog(FileDialogABC):
 
 
 class SpectrumFileDialog(FileDialogABC):
+    _initialPath = USERDATAPATH
     _text = '{} Spectra'
     _fileMode = 'existingFiles'
     _multiSelect = True

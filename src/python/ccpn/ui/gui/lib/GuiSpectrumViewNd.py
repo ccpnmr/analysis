@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-29 01:01:08 +0000 (Fri, January 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-29 13:43:32 +0000 (Fri, January 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -73,8 +73,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         self.setAcceptedMouseButtons = QtCore.Qt.LeftButton
         self.posLevelsPrev = []
         self.negLevelsPrev = []
-        self.xDataDimPrev = None
-        self.yDataDimPrev = None
         self.zRegionPrev = None
         self.posDisplayLists = []
         self.negDisplayLists = []
@@ -230,15 +228,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         The way this is done here, any change in contour level needs to call this function.
         """
 
-        xDataDim, yDataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[:2]
-
         posLevelsArray = np.array(posLevels, np.float32)
         negLevelsArray = np.array(negLevels, np.float32)
 
         self.posLevelsPrev = list(posLevels)
         self.negLevelsPrev = list(negLevels)
-        self.xDataDimPrev = xDataDim
-        self.yDataDimPrev = yDataDim
         self.zRegionPrev = tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]])
 
         posContoursAll = negContoursAll = None
@@ -584,10 +578,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         return planeList, planePointValues, dimIndices
 
-    def getVisibleState(self):
+    def getVisibleState(self, dimensionCount=None):
         """Get the visible state for the X/Y axes
         """
-        return tuple(self._getSpectrumViewParams(vParam) for vParam in range(0, 2))
+        if not dimensionCount:
+            dimensionCount = self.spectrum.dimensionCount
+
+        return tuple(self._getSpectrumViewParams(vParam) for vParam in range(0, dimensionCount))
 
     def refreshData(self):
         # spawn a rebuild in the openGL strip

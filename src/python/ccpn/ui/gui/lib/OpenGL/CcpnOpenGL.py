@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-29 01:01:08 +0000 (Fri, January 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-29 13:43:32 +0000 (Fri, January 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -96,7 +96,6 @@ from ccpn.ui.gui.lib.mouseEvents import \
     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK, \
     makeDragEvent
-
 
 try:
     # used to test whether all the arrays are defined correctly
@@ -756,37 +755,17 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
 
         if len(self._spectrumValues) > 2:
-            # store a list for the extra dimensions
+            # store a list for the extra dimensions - should only be one per spectrumDisplay really
+            # needed so that the planeDepth is calculated correctly for visible spectra
             vPP = ()
-            dDim = ()
-            vTP = ()
             for dim in range(2, len(self._spectrumValues)):
                 specVal = self._spectrumValues[dim]
-                specDataDim = specVal.dataDim
-
                 vPP = vPP + (specVal.valuePerPoint,)
-                dDim = dDim + (specDataDim,)
-
-                # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = specVal.valuePerPoint
-                # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = specVal.dataDim
-
-                if hasattr(specDataDim, 'primaryDataDimRef'):
-                    ddr = specDataDim.primaryDataDimRef
-                    valueToPoint = ddr and ddr.valueToPoint
-                else:
-                    valueToPoint = specDataDim.valueToPoint
-
-                vTP = vTP + (valueToPoint,)
-                # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUETOPOINT] = valueToPoint
 
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = vPP
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = dDim
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUETOPOINT] = vTP
 
         else:
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = None
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = None
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUETOPOINT] = None
 
         self._maxX = max(self._maxX, fx0)
         self._minX = min(self._minX, fx1)
@@ -3521,67 +3500,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.viewports.setViewport(self._currentBottomAxisView)
                 self.gridList[2].drawIndexVBO()
 
-        # CODE TAKEN FROM V2 :)
-
-        # (x0, x1) = self.findAxisRegion(xPanel, col)         # assume that this is the whole visible area?
-        # (y0, y1) = self.findAxisRegion(yPanel, row)
-        #
-        # if not self.hasValueAxis:
-        #     for view in allViews:
-        #         analysisSpectrum = view.analysisSpectrum
-        #         spectrum = analysisSpectrum.dataSource
-        #         if spectrum.numDim >= 2:
-        #             if self.isViewVisible(view) and analysisSpectrum.useBoundingBox:
-        #                 self.drawViewBox(handler, view, x0, x1, y0, y1)
-        #
-        # # print 'doCanvas4'
-        # self.drawMarks(handler, x0, x1, y0, y1)
-        # self.drawRulers(handler, x0, x1, y0, y1)
-        #
-        # project = window.root
-        # profile = getAnalysisProfile(project)
-        # color = inverseGrey(profile.bgColor)
-        #
-        # self.drawDeltaMarker(handler, x0, x1, y0, y1, color)
-        #
-        # xaxisType = xPanel.axisType
-        # yaxisType = yPanel.axisType
-        #
-        # #print 'doCanvas5'
-        # if xaxisType == yaxisType:
-        #     self.drawDiagonal(handler, x0, x1, y0, y1, color)
-        #
-        #     # pseudo-diagonals
-        #     # TBD: assume for now that have ppm
-        #     if xPanel.axisUnit.unit == yPanel.axisUnit.unit == 'ppm':
-        #         for view in allViews:
-        #             if view.isPosVisible or view.isNegVisible:
-        #                 analysisSpectrum = view.analysisSpectrum
-        #                 spectrum = analysisSpectrum.dataSource
-        #                 experiment = spectrum.experiment
-        #                 spinningRate = experiment.spinningRate
-        #                 if spinningRate:
-        #                     dataDim = view.findFirstAxisMapping(label='x').analysisDataDim.dataDim
-        #                     dataDimRef = ExperimentBasic.getPrimaryDataDimRef(dataDim)
-        #                     expDimRef = dataDimRef.expDimRef
-        #                     spinningRate /= expDimRef.sf  # assumes y expDimRef would give the same
-        #                     nmin = int((y1 - x0) // spinningRate)
-        #                     nmax = - int((x1 - y0) // spinningRate)
-        #                     for n in range(nmin, nmax + 1):
-        #                         if n:  # n = 0 is normal diagonal
-        #                             self.drawDiagonal(handler, x0 + n * spinningRate, x1 + n * spinningRate, y0, y1, color, isDashed=True)
-        #
-        # # extra multiple-quantum diagonals
-        # if xaxisType.isotopeCodes == yaxisType.isotopeCodes:
-        #     if xaxisType.measurementType == 'MQShift' and yaxisType.measurementType == 'Shift':
-        #         self.drawDiagonal(handler, x0, x1, 2 * y0, 2 * y1, color)
-        #     elif xaxisType.measurementType == 'Shift' and yaxisType.measurementType == 'MQShift':
-        #         self.drawDiagonal(handler, 2 * x0, 2 * x1, y0, y1, color)
-        #
-        # #print 'doCanvas6'
-        # if self.hasValueAxis and window.isZeroLineShown:
-        #     self.drawZeroLine(handler, y0, y1, color)
-
     def buildDiagonals(self):
         # determine whether the isotopeCodes of the first two visible axes are matching
         self._matchingIsotopeCodes = False
@@ -5036,7 +4954,6 @@ class CcpnGLWidget(QOpenGLWidget):
             ph1 = phasingFrame.slider1.value()
             pivotPpm = phasingFrame.pivotEntry.get()
             direction = phasingFrame.getDirection()
-            # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
 
             deleteHList = []
             for hTrace in self._staticHTraces:
@@ -5164,7 +5081,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 continue
 
             self._spectrumSettings[spectrumView] = {}
-            self._spectrumValues = spectrumView.getVisibleState()
+            self._spectrumValues = spectrumView.getVisibleState(dimensionCount=2)
 
             # get the bounding box of the spectra
             dx = self.sign(self.axisR - self.axisL)

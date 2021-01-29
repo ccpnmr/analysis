@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-29 01:01:08 +0000 (Fri, January 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-29 13:43:32 +0000 (Fri, January 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -207,7 +207,7 @@ class GuiNdWidget(CcpnGLWidget):
                 self._spectrumLabelling.removeString(specView)
 
         # make a list of the visible and not-deleted spectrumViews
-        visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+        # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
         visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
 
         self._visibleOrdering = visibleSpectrumViews
@@ -221,6 +221,7 @@ class GuiNdWidget(CcpnGLWidget):
 
         minList = [self._spectrumSettings[sp][SPECTRUM_VALUEPERPOINT] if SPECTRUM_VALUEPERPOINT in self._spectrumSettings[sp] else None
                    for sp in self._ordering if sp in self._spectrumSettings]
+
         minimumValuePerPoint = None
 
         # check the length of the min values, may have lower dimension spectra overlaid
@@ -1355,44 +1356,23 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_SPINNINGRATE] = spectrumView.spectrum.spinningRate
 
-        # indices = getAxisCodeMatchIndices(spectrumView.spectrum.axisCodes, self.strip.axisCodes)
         indices = getAxisCodeMatchIndices(self.spectrumDisplay.axisCodes, spectrumView.spectrum.axisCodes)
 
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
 
         if len(self._spectrumValues) > 2:
-            # store a list for the extra dimensions
+            # store a list for the extra dimensions - should only be one per spectrumDisplay really
+            # needed so that the planeDepth is calculated correctly for visible spectra
             vPP = ()
-            dDim = ()
-            vTP = ()
             for dim in range(2, len(self._spectrumValues)):
                 specVal = self._spectrumValues[dim]
-                specDataDim = specVal.dataDim
-
                 vPP = vPP + (specVal.valuePerPoint,)
-                dDim = dDim + (specDataDim,)
-
-                # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = specVal.valuePerPoint
-                # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = specVal.dataDim
-
-                if hasattr(specDataDim, 'primaryDataDimRef'):
-                    ddr = specDataDim.primaryDataDimRef
-                    valueToPoint = ddr and ddr.valueToPoint
-                else:
-                    valueToPoint = specDataDim.valueToPoint
-
-                vTP = vTP + (valueToPoint,)
-                # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUETOPOINT] = valueToPoint
 
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = vPP
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = dDim
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUETOPOINT] = vTP
 
         else:
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = None
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = None
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUETOPOINT] = None
 
         self._maxX = max(self._maxX, fx0)
         self._minX = min(self._minX, fx1)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-29 01:01:08 +0000 (Fri, January 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-29 13:43:32 +0000 (Fri, January 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -656,7 +656,7 @@ class GLExporter():
 
             # if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1:
             if spectrumView.spectrum.pid in self.params[GLSELECTEDPIDS] and spectrumView.spectrum.dimensionCount > 1:
-                self._spectrumValues = spectrumView.getVisibleState()
+                self._spectrumValues = spectrumView.getVisibleState(dimensionCount=2)
 
                 # get the bounding box of the spectra
                 fx0, fx1 = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency

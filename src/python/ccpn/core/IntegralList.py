@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:31:17 +0000 (Thu, January 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-29 14:41:18 +0000 (Fri, January 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D, estimateNoiseLevel1D, _filterROI1Darray
-from ccpn.core.PMIListABC import PMIListABC
+from ccpn.core._implementation.PMIListABC import PMIListABC
 from scipy import signal
 from ccpn.util.Common import percentage
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-26 16:47:33 +0000 (Tue, January 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-29 01:01:07 +0000 (Fri, January 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 # import importlib, os
-
+import numpy as np
 from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial
 from copy import deepcopy
@@ -1276,21 +1276,19 @@ class GuiSpectrumDisplay(CcpnModule):
             self.vTraceAction = False
 
             if not self.phasingFrame.pivotsSet:
-                inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints \
-                    = self.spectrumViews[0]._getTraceParams((0.0, 0.0))
-
-                self.phasingFrame.setInitialPivots((xDataDim.primaryDataDimRef.pointToValue((xMinFrequency + xMaxFrequency) / 2.0), 0.0))
+                _pivot = np.mean(self.spectrumViews[0].spectrum.spectrumLimits[0])
+                self.phasingFrame.setInitialPivots((_pivot, 0.0))
 
         else:
             self.hTraceAction = self.current.strip.hTraceAction.isChecked()
             self.vTraceAction = self.current.strip.vTraceAction.isChecked()
 
             if not self.phasingFrame.pivotsSet:
-                inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
-                    = self.spectrumViews[0]._getTraceParams((0.0, 0.0))
-
-                self.phasingFrame.setInitialPivots((xDataDim.primaryDataDimRef.pointToValue((xMinFrequency + xMaxFrequency) / 2.0),
-                                                    yDataDim.primaryDataDimRef.pointToValue((yMinFrequency + yMaxFrequency) / 2.0)))
+                specView = self.spectrumViews[0]
+                _indices = specView._displayOrderSpectrumDimensionIndices
+                _limits = specView.spectrum.spectrumLimits
+                _pivot = [np.mean(_limits[_indices[ll]]) for ll in range(2)]
+                self.phasingFrame.setInitialPivots(_pivot)
 
         for strip in self.strips:
             if isVisible:

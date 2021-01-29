@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-12 17:55:25 +0000 (Tue, January 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-29 01:01:08 +0000 (Fri, January 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -656,7 +656,7 @@ class GLExporter():
 
             # if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1:
             if spectrumView.spectrum.pid in self.params[GLSELECTEDPIDS] and spectrumView.spectrum.dimensionCount > 1:
-                self._spectrumValues = spectrumView._getValues(dimensionCount=2)
+                self._spectrumValues = spectrumView.getVisibleState()
 
                 # get the bounding box of the spectra
                 fx0, fx1 = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
@@ -669,12 +669,6 @@ class GLExporter():
                         fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
                     else:
                         fy0, fy1 = 0.0, 0.0
-
-                    # colour = spectrumView.sliceColour
-                    # colR = int(colour.strip('# ')[0:2], 16) / 255.0
-                    # colG = int(colour.strip('# ')[2:4], 16) / 255.0
-                    # colB = int(colour.strip('# ')[4:6], 16) / 255.0
-                    # colour = colors.Color(colR, colG, colB, alpha=alphaClip(0.5))
 
                     _col = spectrumView.posColours[0]
                     colour = colors.Color(*_col[0:3], alpha=alphaClip(0.5))

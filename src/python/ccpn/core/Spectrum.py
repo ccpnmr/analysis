@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:47 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-29 01:01:07 +0000 (Fri, January 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1301,6 +1301,7 @@ assignmentTolerances
         """
         """
         from ccpn.core.Substance import Substance
+
         pids = [su.pid for su in substances if isinstance(su, Substance)]
         if isinstance(self._ccpnInternalData, dict):
             tempCcpn = self._ccpnInternalData.copy()
@@ -1316,7 +1317,7 @@ assignmentTolerances
         """
         getLogger().warning('spectrum.referenceSubstance is deprecated. Use referenceSubstances instead. ')
         substance = None
-        if len(self.referenceSubstances)>0:
+        if len(self.referenceSubstances) > 0:
             substance = self.referenceSubstances[-1]
         return substance
 
@@ -1415,6 +1416,14 @@ assignmentTolerances
             else:
                 ll.append(tuple(sorted((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints + 1)))))
         return tuple(ll)
+
+    @property
+    @_includeInDimensionalCopy
+    def axesReversed(self) -> Tuple[Optional[bool], ...]:
+        """Return whether any of the axes are reversed
+        May contain None for undefined axes
+        """
+        return tuple((x and x.isAxisReversed) for x in self._mainExpDimRefs())
 
     @property
     def magnetisationTransfers(self) -> Tuple[MagnetisationTransferTuple, ...]:
@@ -1731,7 +1740,7 @@ assignmentTolerances
                 if sg.pid in items:
                     series += (items[sg.pid],)
                 else:
-                    series += (None, )
+                    series += (None,)
             return series
 
     @_seriesItems.setter
@@ -1809,7 +1818,6 @@ assignmentTolerances
         """
         seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
         if oldPid in (seriesItems if seriesItems else ()):
-
             # insert new items with the new pid
             oldItems = seriesItems[oldPid]
             del seriesItems[oldPid]
@@ -1842,7 +1850,6 @@ assignmentTolerances
         # useful for storing an item
         seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
         if id in seriesItems:
-
             del seriesItems[id]
             self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, seriesItems)
 
@@ -1869,7 +1876,65 @@ assignmentTolerances
 
     #=========================================================================================
     # Library functions
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
+
+    def ppm2point(self, value, axisCode=None, dimension=None):
+        """Convert ppm value to point value for axis corresponding to either axisCode or
+        dimension (1-based)
+        """
+        if dimension is None and axisCode is None:
+            raise ValueError('Spectrum.ppm2point: either axisCode or dimension needs to be defined')
+        if dimension is not None and axisCode is not None:
+            raise ValueError('Spectrum.ppm2point: axisCode and dimension cannot be both defined')
+
+        if axisCode is not None:
+            dimension = self.getByAxisCodes('dimensions', [axisCode], exactMatch=False)[0]
+
+        if dimension is None or dimension < 1 or dimension > self.dimensionCount:
+            raise RuntimeError('Invalid dimension (%s)' % (dimension,))
+
+        return self.spectrumReferences[dimension - 1].valueToPoint(value)
+
+    def point2ppm(self, value, axisCode=None, dimension=None):
+        """Convert point value to ppm for axis corresponding to to either axisCode or
+        dimension (1-based)
+        """
+        if dimension is None and axisCode is None:
+            raise ValueError('Spectrum.point2ppm: either axisCode or dimension needs to be defined')
+        if dimension is not None and axisCode is not None:
+            raise ValueError('Spectrum.point2ppm: axisCode and dimension cannot be both defined')
+
+        if axisCode is not None:
+            dimension = self.getByAxisCodes('dimensions', [axisCode], exactMatch=False)[0]
+
+        if dimension is None or dimension < 1 or dimension > self.dimensionCount:
+            raise RuntimeError('Invalid dimension (%s)' % (dimension,))
+
+        return self.spectrumReferences[dimension - 1].pointToValue(value)
+
+    def getPpmArray(self, axisCode=None, dimension=None):
+        """Return a numpy array with ppm values of the grid points along axisCode or dimension
+        """
+        if dimension is None and axisCode is None:
+            raise ValueError('Spectrum.getPpmArray: either axisCode or dimension needs to be defined')
+        if dimension is not None and axisCode is not None:
+            raise ValueError('Spectrum.getPpmArray: axisCode and dimension cannot be both defined')
+
+        if axisCode is not None:
+            dimension = self.getByAxisCodes('dimensions', [axisCode], exactMatch=False)[0]
+
+        if dimension is None or dimension < 1 or dimension > self.dimensionCount:
+            raise RuntimeError('Invalid dimension (%s)' % (dimension,))
+
+        axisReversed = self.axesReversed[dimension - 1]
+        valuePerPoint = self.valuesPerPoint[dimension - 1]
+        if axisReversed:
+            result = np.linspace(self.spectrumLimits[dimension - 1][1], self.spectrumLimits[dimension - 1][0] + valuePerPoint,
+                                 self.pointCounts[dimension - 1])
+        else:
+            result = np.linspace(self.spectrumLimits[dimension - 1][0], self.spectrumLimits[dimension - 1][1] - valuePerPoint,
+                                 self.pointCounts[dimension - 1])
+        return result
 
     def getDefaultOrdering(self, axisOrder):
         if not axisOrder:
@@ -2477,7 +2542,7 @@ assignmentTolerances
             except IndexError as ie:
                 height = 0
                 getLogger().warning('Intensity not found found at the ppm position: %s' %
-                                    ', '.join(map(str,ppmPositions)))
+                                    ', '.join(map(str, ppmPositions)))
 
             # don't need to scale as _intensities is already scaled
             return height
@@ -3009,7 +3074,7 @@ assignmentTolerances
     @logCommand(get='self')
     def newMultipletList(self, title: str = None,
                          symbolColour: str = None, textColour: str = None, lineColour: str = None,
-                         multipletAveraging = None,
+                         multipletAveraging=None,
                          comment: str = None, multiplets: Sequence[Union['Multiplet', str]] = None, **kwds):
         """Create new MultipletList within Spectrum.
 

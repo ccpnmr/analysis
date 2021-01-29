@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-26 13:57:17 +0000 (Tue, January 26, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-01-29 01:01:08 +0000 (Fri, January 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1366,13 +1366,10 @@ class GuiStrip(Frame):
         #     spectrumView._changedPhasingDirection()
 
     def _updatePhasing(self):
-        try:
-            if self.spectrumDisplay.phasingFrame.isVisible():
-                colour = getColours()[GUISTRIP_PIVOT]
-                self._CcpnGLWidget.setInfiniteLineColour(self.pivotLine, colour)
-                self._CcpnGLWidget.rescaleStaticTraces()
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated', spectrumDisplay=self.spectrumDisplay, strip=self)
+        if self.spectrumDisplay.phasingFrame.isVisible():
+            colour = getColours()[GUISTRIP_PIVOT]
+            self._CcpnGLWidget.setInfiniteLineColour(self.pivotLine, colour)
+            self._CcpnGLWidget.rescaleStaticTraces()
 
     def _toggleShowActivePhaseTrace(self):
         """Toggles whether the active phasing trace is visible.
@@ -2447,7 +2444,6 @@ def _axisRegionChanged(cDict):
         finally:
             strip.beingUpdated = False
 
-
 # NB The following two notifiers could be replaced by wrapper notifiers on
 # Mark, 'change'. But it would be rather more clumsy, so leave it as it is.
 
@@ -2463,4 +2459,3 @@ def _axisRegionChanged(cDict):
 #     """Notifier function for deleting rulers"""
 #     for strip in project.strips:
 #         strip.plotWidget._removeRulerLine(apiRuler)
-

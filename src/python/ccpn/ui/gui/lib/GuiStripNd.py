@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-26 09:52:12 +0000 (Tue, January 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-29 01:01:08 +0000 (Fri, January 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -505,32 +505,32 @@ class GuiStripNd(GuiStrip):
                 if ignoreSpectrumView is spectrumView:
                     continue
 
-                viewParams = spectrumView._getSpectrumViewParams(n + 2)
-                if not viewParams:
+                # get a mapping of the axes to the strip - effectively the same as spectrumView._displayOrderSpectrumDimensionIndices
+                # but allows for finding close matched axis codes
+                indices = getAxisCodeMatchIndices(self.axisCodes, spectrumView.spectrum.axisCodes)
+                _index = indices[n + 2]
+                if not _index:
                     continue
 
-                indices = getAxisCodeMatchIndices(self.axisCodes, spectrumView.spectrum.axisCodes)
-                alais = spectrumView.spectrum.visibleAliasingRange
-
-                minFrequency = viewParams.minSpectrumFrequency
-                maxFrequency = viewParams.maxSpectrumFrequency
-                freqRange = maxFrequency - minFrequency
+                _alias = spectrumView.spectrum.visibleAliasingRange[_index]
+                _minSpectrumFrequency, _maxSpectrumFrequency = spectrumView.spectrum.spectrumLimits[_index]
+                _valuePerPoint = spectrumView.spectrum.valuesPerPoint[_index]
+                freqRange = _maxSpectrumFrequency - _minSpectrumFrequency
 
                 # sign is in the aliasingRange - wrong dim - check indices defined
-                minFrequency += (freqRange * alais[indices[n + 2]][0])
-                maxFrequency += (freqRange * alais[indices[n + 2]][1])
+                _minSpectrumFrequency += (freqRange * _alias[0])
+                _maxSpectrumFrequency += (freqRange * _alias[1])
 
-                if minFrequency is not None:
-                    if minAliasedFrequency is None or minFrequency < minAliasedFrequency:
-                        minAliasedFrequency = minFrequency
+                if _minSpectrumFrequency is not None:
+                    if minAliasedFrequency is None or _minSpectrumFrequency < minAliasedFrequency:
+                        minAliasedFrequency = _minSpectrumFrequency
 
-                if maxFrequency is not None:
-                    if maxAliasedFrequency is None or maxFrequency > maxAliasedFrequency:
-                        maxAliasedFrequency = maxFrequency
+                if _maxSpectrumFrequency is not None:
+                    if maxAliasedFrequency is None or _maxSpectrumFrequency > maxAliasedFrequency:
+                        maxAliasedFrequency = _maxSpectrumFrequency
 
-                width = viewParams.valuePerPoint
-                if minZPlaneSize is None or width < minZPlaneSize:
-                    minZPlaneSize = width
+                if minZPlaneSize is None or _valuePerPoint < minZPlaneSize:
+                    minZPlaneSize = _valuePerPoint
 
             if minZPlaneSize is None:
                 minZPlaneSize = 1.0  # arbitrary

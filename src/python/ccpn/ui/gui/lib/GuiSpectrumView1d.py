@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-01-29 01:01:07 +0000 (Fri, January 29, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,7 +26,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
-import pyqtgraph as pg
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 from ccpn.util.Colour import spectrumColours, colorSchemeTable
 
@@ -65,8 +64,10 @@ class GuiSpectrumView1d(GuiSpectrumView):
         self.buildContours = True
         self.buildContoursOnly = False
 
-    def _getValues(self, dimensionCount=None):
-        return [self._getSpectrumViewParams(0)]
+    def getVisibleState(self):
+        """Get the visible state for the X/Y axes
+        """
+        return (self._getSpectrumViewParams(0),)
 
     def _turnOnPhasing(self):
 
@@ -81,64 +82,6 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
         if self.hPhaseTrace:
             self.hPhaseTrace.setVisible(False)
-
-    def _newPhasingTrace(self):
-        """
-        # CCPN INTERNAL - called in newPhasingTrace methods of GuiWindow and GuiStrip
-        """
-        phasingFrame = self.strip.spectrumDisplay.phasingFrame
-        if phasingFrame.isVisible() and not self.hPhaseTrace:
-            if not self.strip.haveSetHPhasingPivot:
-                viewParams = self._getSpectrumViewParams(0)
-                self.strip.hPhasingPivot.setPos(0.5 * (viewParams.minSpectrumFrequency +
-                                                       viewParams.maxSpectrumFrequency))
-                self.strip.hPhasingPivot.setVisible(True)
-                self.strip.haveSetHPhasingPivot = True
-
-            trace = pg.PlotDataItem()
-            self.strip.plotWidget.addItem(trace)
-            self.hPhaseTrace = trace
-            self._updatePhasing()
-
-    def removePhasingTraces(self):
-
-        trace = self.hPhaseTrace
-        if trace:
-            self.strip.plotWidget.scene().removeItem(trace)
-            self.hPhaseTrace = None
-
-    def _getTraceParams(self, position):
-        # position is in ppm (intensity in y)
-
-        inRange = True
-        point = []
-        xDataDim = xMinFrequency = xMaxFrequency = xPointCount = None
-
-        for n, pos in enumerate(position):  # n = 0 is x, n = 1 is y, etc.
-            if n != 1:
-
-                try:
-                    valuePerPoint, _, pointCount, _, _, dataDim, minSpectrumFrequency, maxSpectrumFrequency = self._getSpectrumViewParams(n)
-                except:
-                    # skip if the dimension doesn't exist
-                    break
-
-                if dataDim:
-                    if n == 0:
-                        xDataDim = dataDim
-                        # -1 below because points start at 1 in data model
-                        xMinFrequency = int(dataDim.primaryDataDimRef.valueToPoint(maxSpectrumFrequency) - 1)
-                        xMaxFrequency = int(dataDim.primaryDataDimRef.valueToPoint(minSpectrumFrequency) - 1)
-                        xPointCount = pointCount
-                    else:
-                        inRange = (minSpectrumFrequency <= pos <= maxSpectrumFrequency)
-                        if not inRange:
-                            break
-                    pnt = (dataDim.primaryDataDimRef.valueToPoint(pos) - 1) % pointCount
-                    pnt += (dataDim.pointOffset if hasattr(dataDim, "pointOffset") else 0)
-                    point.append(pnt)
-
-        return inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xPointCount
 
     def refreshData(self):
         # self.spectrum._intensities = None  # UGLY, but need to force data to be reloaded

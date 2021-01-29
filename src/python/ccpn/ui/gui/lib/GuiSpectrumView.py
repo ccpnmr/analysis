@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:49 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-01-29 01:01:07 +0000 (Fri, January 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -34,15 +34,9 @@ from ccpn.core.lib.Notifiers import Notifier
 from typing import Optional, Tuple
 
 
-SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoint',
-                                                                   'totalPointCount',
-                                                                   'pointCount',
-                                                                   'minAliasedFrequency',
-                                                                   'maxAliasedFrequency',
-                                                                   'dataDim',
-                                                                   'minSpectrumFrequency',
-                                                                   'maxSpectrumFrequency',
-                                                                   ))
+SpectrumViewParams = collections.namedtuple('SpectrumViewParams', 'valuePerPoint pointCount minAliasedFrequency maxAliasedFrequency '
+                                                                  'minSpectrumFrequency maxSpectrumFrequency')
+TraceParameters = collections.namedtuple('TraceParameters', 'inRange pointPosition startPoint, endPoint')
 
 
 class GuiSpectrumView(QtWidgets.QGraphicsObject):
@@ -139,61 +133,46 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
     #   self.xDim = xDim
     #   self.yDim = yDim
 
+    def dimensionIndex(self, axisDim):
+        """Return the spectrum index for the spectrumView index
+        """
+        return self._displayOrderSpectrumDimensionIndices[axisDim]
+
     def _getSpectrumViewParams(self, axisDim: int) -> Optional[Tuple]:
         """Get position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency
         for axisDimth axis (zero-origin)"""
 
-        # axis = self.strip.orderedAxes[axisDim]
-        dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[axisDim]
+        ii = self._displayOrderSpectrumDimensionIndices[axisDim]
+        if ii is not None:
+            minAliasedFrequency, maxAliasedFrequency = (self.spectrum.aliasingLimits)[ii]
+            minSpectrumFrequency, maxSpectrumFrequency = (self.spectrum.spectrumLimits)[ii]
+            pointCount = (self.spectrum.pointCounts)[ii]
+            valuePerPoint = (self.spectrum.valuesPerPoint)[ii]
 
-        # map self.spectrum.axisCodes onto self.axisCodes
+            return SpectrumViewParams(valuePerPoint, pointCount,
+                                      minAliasedFrequency, maxAliasedFrequency,
+                                      minSpectrumFrequency, maxSpectrumFrequency)
 
-        if not dataDim:
+    def getTraceParameters(self, position, dim):
+        # dim  = spectrumView index, i.e. 0 for X, 1 for Y
+
+        _indices = self._displayOrderSpectrumDimensionIndices
+        index = _indices[dim]
+        if index is None:
+            getLogger().warning('getTraceParameters: bad index')
             return
 
-        # totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, 'numPointsOrig')
-        #                    else dataDim.numPoints)
-        # pointCount = (dataDim.numPointsValid if hasattr(dataDim, 'numPointsValid')
-        #               else dataDim.numPoints)
-        # numPoints = dataDim.numPoints
+        pointCount = self.spectrum.pointCounts[index]
+        minSpectrumFrequency, maxSpectrumFrequency = self.spectrum.spectrumLimits[index]
 
-        for ii, dd in enumerate(dataDim.dataSource.sortedDataDims()):
-            # Must be done this way as dataDim.dim may not be in order 1,2,3 (e.g. for projections)
-            if dd is dataDim:
-                minAliasedFrequency, maxAliasedFrequency = (self.spectrum.aliasingLimits)[ii]
-                minSpectrumFrequency, maxSpectrumFrequency = (self.spectrum.spectrumLimits)[ii]
-                totalPointCount = (self.spectrum.totalPointCounts)[ii]
-                pointCount = (self.spectrum.pointCounts)[ii]
-                valuePerPoint = (self.spectrum.valuesPerPoint)[ii]
-                break
-        else:
-            minAliasedFrequency = maxAliasedFrequency = dataDim = None
-            minSpectrumFrequency = maxSpectrumFrequency = None
-            totalPointCount = pointCount = None
-            valuePerPoint = None
+        inRange = (minSpectrumFrequency <= position[index] <= maxSpectrumFrequency)
+        pointPos = (self.spectrum.ppm2point(position[index], dimension=index + 1) - 1) % pointCount
 
-        # if hasattr(dataDim, 'primaryDataDimRef'):
-        #     # FreqDataDim - get ppm valuePerPoint
-        #     ddr = dataDim.primaryDataDimRef
-        #     valuePerPoint = ddr and ddr.valuePerPoint
-        # elif hasattr(dataDim, 'valuePerPoint'):
-        #     # FidDataDim - get time valuePerPoint
-        #     valuePerPoint = dataDim.valuePerPoint
-        # else:
-        #     # Sampled DataDim - return None
-        #     valuePerPoint = None
-
-        # return axis.position, axis.width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim
-        return SpectrumViewParams(valuePerPoint, totalPointCount, pointCount,
-                                  minAliasedFrequency, maxAliasedFrequency, dataDim,
-                                  minSpectrumFrequency, maxSpectrumFrequency)
+        return TraceParameters(inRange, pointPos, 0, pointCount - 1)
 
     def _getColour(self, colourAttr, defaultColour=None):
 
         colour = getattr(self, colourAttr)
-        # if not colour:
-        #   colour = getattr(self.spectrum, colourAttr)
-
         if not colour:
             colour = defaultColour
 

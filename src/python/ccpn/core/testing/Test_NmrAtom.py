@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2021-01-13 10:27:56 +0000 (Wed, January 13, 2021) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-01 08:07:13 +0000 (Mon, February 01, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,21 +30,21 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 class NmrAtomTest(WrapperTesting):
     # Path of project to load (None for new project
-    projectPath = 'CcpnCourse2c.ccpn'
+    projectPath = 'V3ProjectForTests.ccpn'
 
     def test_fetchNmrAtomReassign(self):
         nchain = self.project.getByPid('NC:A')
 
-        arg11 = self.project.getByPid('NR:A.11.ARG')
-        atomN = arg11.fetchNmrAtom('N')
-        self.assertEqual(atomN.pid, 'NA:A.11.ARG.N')
+        ile5 = self.project.getByPid('NR:A.5.ILE')
+        atomN = ile5.fetchNmrAtom('N')
+        self.assertEqual(atomN.pid, 'NA:A.5.ILE.N')
 
-        atomNE = arg11.fetchNmrAtom('NE')
-        atomNE2 = arg11.fetchNmrAtom('NE')
+        atomNE = ile5.fetchNmrAtom('NE')
+        atomNE2 = ile5.fetchNmrAtom('NE')
         self.assertIs(atomNE, atomNE2)
 
-        atomCX = arg11.fetchNmrAtom('CX')
-        atomNX = arg11.newNmrAtom(name='NX')
+        atomCX = ile5.fetchNmrAtom('CX')
+        atomNX = ile5.newNmrAtom(name='NX')
         with self.assertRaises(ValueError):
             atomCX.rename('NX')
         with self.assertRaises(TypeError):
@@ -53,26 +53,26 @@ class NmrAtomTest(WrapperTesting):
             atomCX.rename(12.34)
 
         atomCX.rename('CZ')
-        self.assertEqual(atomCX.pid, 'NA:A.11.ARG.CZ')
+        self.assertEqual(atomCX.pid, 'NA:A.5.ILE.CZ')
 
         atomCX = atomCX.assignTo(chainCode='A', sequenceCode='888')
-        self.assertEqual(atomCX.pid, 'NA:A.888.ARG.CZ')
+        self.assertEqual(atomCX.pid, 'NA:A.888.ILE.CZ')
 
         atomCX = atomCX.assignTo()
-        self.assertEqual(atomCX.pid, 'NA:A.888.ARG.CZ')
+        self.assertEqual(atomCX.pid, 'NA:A.888.ILE.CZ')
 
         atomCX.rename()
-        self.assertEqual(atomCX.pid, 'NA:A.888.ARG.C@198')
+        self.assertEqual(atomCX.pid, 'NA:A.888.ILE.C@160')
 
         self.project._wrappedData.root.checkAllValid(complete=True)
 
 
-        self.assertEqual(atomCX.pid, 'NA:A.888.ARG.C@198')
+        self.assertEqual(atomCX.pid, 'NA:A.888.ILE.C@160')
         # Undo and redo all operations
         self.undo.undo()
-        self.assertEqual(atomCX.pid, 'NA:A.888.ARG.CZ')
+        self.assertEqual(atomCX.pid, 'NA:A.888.ILE.CZ')
         self.undo.redo()
-        self.assertEqual(atomCX.pid, 'NA:A.888.ARG.C@198')
+        self.assertEqual(atomCX.pid, 'NA:A.888.ILE.C@160')
 
     def test_newNmrAtomReassign(self):
         nc = self.project.newNmrChain(shortName='X')

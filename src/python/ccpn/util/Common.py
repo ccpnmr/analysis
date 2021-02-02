@@ -91,7 +91,8 @@ WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 
 
 def incrementName(name):
-    """Add '_1' to name or change suffix '_n' to '_(n+1) """
+    """Add '_1' to name or change suffix '_n' to '_(n+1)
+    """
     ll = name.rsplit('_', 1)
     if len(ll) == 2:
         try:
@@ -230,15 +231,16 @@ def dictionaryProduct(dict1, dict2):
     for key1, val1 in dict1.items():
         for key2, val2 in dict2.items():
             result[(key1, key2)] = val1 * val2
-    #
     return result
 
 
 def uniquify(sequence):
-    """Get list of unique elements in sequence, in order of first appearance"""
+    """Get list of unique elements in sequence, in order of first appearance
+    """
     seen = set()
     seen_add = seen.add
-    return [x for x in sequence if x not in seen and not seen_add(x)]
+    return [x for x in sequence if x not in seen and not seen_add(x)]  # NB: not seen.add(x) is always True; i.e. this
+                                                                       # part just adds the element during the list comprehension
 
 
 #from typing import Iterable
@@ -263,12 +265,14 @@ def isClose(a, b, relTolerance=1e-05, absTolerance=1e-08):
     """Are a and b identical within reasonable floating point tolerance?
     Uses sum of relative (relTolerance) and absolute (absTolerance) difference
 
-    Inspired by numpy.isclose()"""
+    Inspired by numpy.isclose()
+    """
     return (abs(a - b) <= (absTolerance + relTolerance * abs(b)))
 
 
 def isIterable(obj) -> bool:
-    "Returns True if obj is iterable"
+    """Returns True if obj is iterable
+    """
     try:
         iter(obj)
         return True
@@ -277,13 +281,40 @@ def isIterable(obj) -> bool:
     return False
 
 
+def indexOfMaxValue(theList):
+    """Return the index of the item in theList with the maximum value
+    :param theList: an iterable
+    :return index value or -1 for an empty list
+    """
+    if not isIterable(theList):
+        raise TypeError('indexOfMaxValue: theList is not iterable')
+    if len(theList) == 0:
+        return -1
+    idx = max( (val, i) for i,val in enumerate(theList))[1]
+    return idx
+
+
+def indexOfMinValue(theList):
+    """Return the index of the item in theList with the minimum value
+    :param theList: an iterable
+    :return index value or -1 for an empty list
+    """
+    if not isIterable(theList):
+        raise TypeError('indexOfMaxValue: theList is not iterable')
+    if len(theList) == 0:
+        return -1
+    idx = min( (val, i) for i,val in enumerate(theList))[1]
+    return idx
+
+
 def getTimeStamp():
     """Get iso-formtted timestamp"""
     return datetime.datetime.today().isoformat()
 
 
 def getUuid(programName, timeStamp=None):
-    """Get UUid following the NEF convention"""
+    """Get UUid following the NEF convention
+    """
     if timeStamp is None:
         timeStamp = getTimeStamp()
     return '%s-%s-%s' % (programName, timeStamp, random.randint(0, maxRandomInt))
@@ -291,7 +322,6 @@ def getUuid(programName, timeStamp=None):
 
 def name2IsotopeCode(name=None):
     """Get standard isotope code matching atom name or axisCode string
-
     """
     if not name:
         return None

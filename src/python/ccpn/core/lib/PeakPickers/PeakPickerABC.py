@@ -48,13 +48,19 @@ class SimplePeak(object):
         self.points = tuple(points)
         self.height = height
         self.volume = volume
-        self.indx = self.currentIndx
-        self.currentIndx += 1
+        self.indx = SimplePeak.currentIndx
+        SimplePeak.currentIndx += 1
 
     def __str__(self):
-        return '<SimplePeak %s: %r, height=%.1e, volume=%.1e>' % (
-            self.indx, self.points, self.height, self.volume
-        )
+        if self.volume is not None:
+            return '<SimplePeak %s: %r, height=%.1e, volume=%.1e>' % (
+                self.indx, self.points, self.height, self.volume
+            )
+        else:
+           return '<SimplePeak %s: %r, height=%.1e, volume=%s>' % (
+                self.indx, self.points, self.height, self.volume
+           )
+
 
 
 class PeakPickerABC(object):

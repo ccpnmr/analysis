@@ -29,8 +29,7 @@ import re
 
 from collections import namedtuple
 from collections import OrderedDict
-from ccpn.util.isotopes import isotopeRecords  # NB also used from here in ccpnmodel/ccpncore/lib/spectrum/NmrExpProtoType.py
-                                               # and ccpnmodel/ccpncore/api/ccp/nmr/ExpPrototype.py.
+from ccpn.util.isotopes import isotopeRecords  # NB also used from here in ccpnmodel/ccpncore/api/ccp/nmr/ExpPrototype.py.
                                                # TODO remove these dependencies
 
 

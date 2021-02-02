@@ -539,8 +539,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     # NOTE:ED - check violated name, replaces the isotopeCode with '?' - follows v2 model check
     checkIsotopeCode = isotopeCode.upper()
     if name and not name.startswith(checkIsotopeCode):
-        # TODO: Ed use isotope.py here
-        from ccpn.util.Constants import isotopeRecords
+        from ccpn.util.isotopes import isotopeRecords
 
         record = isotopeRecords.get(checkIsotopeCode)
         if record:

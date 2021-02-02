@@ -620,8 +620,8 @@ class CcpNmrJson(TraitBase):
 
 
 class CcpnJsonDirectoryABC(OrderedDict):
-    """An Abstract base class that restores objects from the json files in a directory
-    as (key, object) pairs
+    """An Abstract base class that restores objects (type CcpNmrJson) from the json files in a
+    directory as (key, object) pairs
     """
 
     #--------------------------------------------------------------------------------------------

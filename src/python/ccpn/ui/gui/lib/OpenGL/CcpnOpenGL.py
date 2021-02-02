@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-29 13:43:32 +0000 (Fri, January 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-02 09:59:24 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -96,6 +96,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK, \
     makeDragEvent
+
 
 try:
     # used to test whether all the arrays are defined correctly
@@ -1568,7 +1569,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._axisCodes = strip.axisCodes
         self._axisOrder = strip.axisOrder
 
-        axis = self._orderedAxes[0]
+        axis = self.orderedAxes[0]
         if self.INVERTXAXIS:
             self.axisL = max(axis.region[0], axis.region[1])
             self.axisR = min(axis.region[0], axis.region[1])
@@ -1576,7 +1577,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.axisL = min(axis.region[0], axis.region[1])
             self.axisR = max(axis.region[0], axis.region[1])
 
-        axis = self._orderedAxes[1]
+        axis = self.orderedAxes[1]
         if self.INVERTYAXIS:
             self.axisB = max(axis.region[0], axis.region[1])
             self.axisT = min(axis.region[0], axis.region[1])
@@ -5667,7 +5668,17 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self._scaleToYAxis(rescale=rescale, update=update)
 
-    def setAxisRange(self, axisIndex, range, rescale=True, update=True):
+    def getAxisRegion(self, axisIndex):
+        """Return the region for visible axisIndex 0/1 (for X/Y)
+        if axis is reversed, the region will be returned as (max, min)
+        """
+        if axisIndex == 0:
+            return self.axisL, self.axisR
+
+        elif axisIndex == 1:
+            return self.axisB, self.axisT
+
+    def setAxisRegion(self, axisIndex, range, rescale=True, update=True):
         if axisIndex == 0:
             if self.INVERTXAXIS:
                 self.axisL = max(range)

@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:23 +0000 (Sun, January 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-02 09:59:24 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -28,11 +28,11 @@ import collections
 import math
 import random
 import numpy as np
-from ccpn.core.Project import Project
-from ccpn.util.Common import percentage
 from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
-from ccpn.util.Logging import getLogger
+from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+from ccpn.util.Common import percentage, getAxisCodeMatchIndices
+from ccpn.util.Logging import getLogger
 
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
@@ -972,6 +972,63 @@ def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
     return [None] * 6
 
 
+def getNoiseEstimateFromRegion(spectrum, strip):
+    """
+    Get the noise estimate from the visible region of the strip
+
+    :param spectrum:
+    :param strip:
+    :return:
+    """
+
+    # calculate the region over which to estimate the noise
+    selectedRegion = [strip.getAxisRegion(0), strip.getAxisRegion(1)]
+    for n in strip.orderedAxes[2:]:
+        selectedRegion.append((n.region[0], n.region[1]))
+    sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
+
+    # get indexing for spectrum onto strip.axisCodes
+    indices = getAxisCodeMatchIndices(spectrum.axisCodes, strip.axisCodes)
+
+    if None in indices:
+        return
+
+    # map the spectrum selectedRegions to the strip
+    axisCodeDict = collections.OrderedDict((code, sortedSelectedRegion[indices[ii]])
+                                           for ii, code in enumerate(spectrum.axisCodes) if indices[ii] is not None)
+
+    # add an exclusion buffer to ensure that getRegionData always returns a region,
+    # otherwise region may be 1 plain thick which will contradict error trapping for peak fitting
+    # (which requires at least 3 points in each dimension)
+    # exclusionBuffer = [1] * spectrum.dimensionCount
+    # however, this shouldn't be needed of the range is > valuePrePoint in each dimension
+
+    foundRegions = spectrum.getRegionData(minimumDimensionSize=1, **axisCodeDict)
+
+    if foundRegions:
+
+        # just use the first region
+        for region in foundRegions[:1]:
+            dataArray, intRegion, *rest = region
+
+            if dataArray.size:
+                # calculate the noise values
+                flatData = dataArray.flatten()
+
+                std = np.std(flatData)
+                max = np.max(flatData)
+                min = np.min(flatData)
+                mean = np.mean(flatData)
+
+                value = NoiseEstimateTuple(mean=mean,
+                                           std=std * 1.1 if std != 0 else 1.0,
+                                           min=min, max=max,
+                                           noiseLevel=None)
+
+                # noise function is defined here, but needs cleaning up
+                return _noiseFunc(value)
+
+
 def getSpectrumNoise(spectrum):
     """
     Get the noise level for a spectrum. If the noise level is not already set it will
@@ -1023,9 +1080,9 @@ def getNoiseEstimate(spectrum):
 def _noiseFunc(value):
     # take the 'value' NoiseEstimateTuple and add the noiseLevel
     return NoiseEstimateTuple(mean=value.mean,
-                               std=value.std,
-                               min=value.min, max=value.max,
-                               noiseLevel=abs(value.mean) + 3.0 * value.std)
+                              std=value.std,
+                              min=value.min, max=value.max,
+                              noiseLevel=abs(value.mean) + 3.0 * value.std)
 
 
 def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
@@ -1077,7 +1134,7 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     if good == 0:
         getLogger().warning(f'Spectrum {spectrum} contains all bad points')
         return NoiseEstimateTuple(mean=None, std=None, min=None, max=None, noiseLevel=1.0)
-    elif good < 10: # arbitrary number of bad points
+    elif good < 10:  # arbitrary number of bad points
         getLogger().warning(f'Spectrum {spectrum} contains minimal data')
         maxValue = max([abs(x) for x in data])
         if maxValue > 0:

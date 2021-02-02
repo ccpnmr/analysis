@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-29 18:34:33 +0000 (Fri, January 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-02 09:59:24 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -379,7 +379,7 @@ class GuiStripNd(GuiStrip):
         elif axis == 1:
             self.zoomY(*zoomArray)
 
-    def getAxisRange(self, axis):
+    def getAxisLimits(self, axis):
         if axis is None:
             return
 

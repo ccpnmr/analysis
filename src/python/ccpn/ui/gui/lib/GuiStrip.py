@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-29 01:01:08 +0000 (Fri, January 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-02 09:59:24 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2363,6 +2363,28 @@ class GuiStrip(Frame):
         if rescale is False, the symbols, etc., must explicitly be refreshed
         """
         self._CcpnGLWidget.setAxisWidth(axisIndex, width, rescale=rescale, update=update)
+
+    def getAxisRegion(self, axisIndex):
+        """Return the region currently displayed in the strip as tuple(min, max) for given axis.
+        axisIndex is the screen axis; X is 0, Y is 1
+        """
+        return self._CcpnGLWidget.getAxisRegion(axisIndex)
+
+    def setAxisRegion(self, axisIndex, width, rescale=True, update=True):
+        """Set the axis region for the strip.
+        if rescale is False, the symbols, etc., must explicitly be refreshed
+        """
+        self._CcpnGLWidget.setAxisRegion(axisIndex, width, rescale=rescale, update=update)
+
+    def getAxisRegions(self) -> typing.Tuple[typing.Tuple, ...]:
+        """Return a tuple if tuples for the regions ((min, max), ...)
+        Visible direction of axes is not preserved
+        """
+        regions = []
+        for axis, position, width in zip(self.orderedAxes, self.positions, self.widths):
+            regions.append((position - width / 2.0, position + width / 2.0))
+
+        return tuple(regions)
 
 
 # Notifiers:

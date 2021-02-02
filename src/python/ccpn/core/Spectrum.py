@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-29 01:01:07 +0000 (Fri, January 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-02 13:50:39 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2948,10 +2948,11 @@ assignmentTolerances
         # propagate the rename to associated spectrumViews
         if action in ['change']:
             for specView in self.spectrumViews:
-                if self._scaleChanged:
-                    # force a rebuild of the contours/etc.
-                    specView.buildContoursOnly = True
-                specView._finaliseAction(action)
+                if specView:
+                    if self._scaleChanged:
+                        # force a rebuild of the contours/etc.
+                        specView.buildContoursOnly = True
+                    specView._finaliseAction(action)
 
             if self._scaleChanged:
                 self._scaleChanged = False

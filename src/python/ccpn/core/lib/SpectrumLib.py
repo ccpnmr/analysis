@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-02 09:59:24 +0000 (Tue, February 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-02 15:50:50 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -28,8 +28,6 @@ import collections
 import math
 import random
 import numpy as np
-from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
-from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.util.Common import percentage, getAxisCodeMatchIndices
 from ccpn.util.Logging import getLogger
@@ -37,13 +35,6 @@ from ccpn.util.Logging import getLogger
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
-
-
-def getExperimentClassifications(project: Project) -> dict:
-    """
-    Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.
-    """
-    return getExpClassificationDict(project._wrappedData)
 
 
 # def _oldEstimateNoiseLevel1D(x, y, factor=3):

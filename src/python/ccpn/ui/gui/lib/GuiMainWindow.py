@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-25 18:52:08 +0000 (Mon, January 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-02 15:50:51 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -259,7 +259,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._fillRecentProjectsMenu()
         self.pythonConsole.setProject(project)
         self._updateWindowTitle()
-        if hasattr(self.application.project._wrappedData.root, '_temporaryDirectory'):
+        if self.application.project.isTemporary:
             self.getMenuAction('Project->Archive').setEnabled(False)
         else:
             self.getMenuAction('Project->Archive').setEnabled(True)
@@ -886,6 +886,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     def _showCCPNTutorials(self):
         from ccpn.framework.PathsAndUrls import ccpnVideos
+
         # import webbrowser
 
         # webbrowser.open(ccpnVideos)
@@ -941,7 +942,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         pluginUserPath = self.application.preferences.general.userPluginPath
         import importlib.util
 
-        filePaths = [(aPath(r) / file) for r,d,f in os.walk(aPath(pluginUserPath)) for file in f if os.path.splitext(file)[1] == '.py']
+        filePaths = [(aPath(r) / file) for r, d, f in os.walk(aPath(pluginUserPath)) for file in f if os.path.splitext(file)[1] == '.py']
 
         for filePath in filePaths:
             # iterate and load the .py files in the plugins directory

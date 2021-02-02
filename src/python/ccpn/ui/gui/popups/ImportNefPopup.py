@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-25 16:07:52 +0000 (Mon, January 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-02 15:50:51 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -276,7 +276,7 @@ class NefDictFrame(Frame):
         self._optionsSplitter.addWidget(self._optionsFrame)
 
         self._frameOptionsNested = Frame(self._optionsFrame, setLayout=True, showBorder=False, grid=(1, 0))
-        self.frameOptionsFrame = Frame(self._frameOptionsNested, setLayout=True, showBorder=False, grid=(1, 0))#, vAlign='t')
+        self.frameOptionsFrame = Frame(self._frameOptionsNested, setLayout=True, showBorder=False, grid=(1, 0))  #, vAlign='t')
         self.fileFrame = Frame(self._optionsFrame, setLayout=True, showBorder=False, grid=(2, 0))
         self._filterLogFrame = MoreLessFrame(self._optionsFrame, name='Filter Log', showMore=False, grid=(3, 0), gridSpan=(1, 1))
         self._treeSplitter.addWidget(self._filterLogFrame)
@@ -628,7 +628,6 @@ class NefDictFrame(Frame):
 
             row = 0
             if self._renameValid(item=item, saveFrame=saveFrame):
-
                 # editFrame = Frame(self.frameOptionsFrame, setLayout=True, grid=(row, 0), showBorder=False)
                 Label(self.frameOptionsFrame, text=singular, grid=(row, 0))
                 saveFrameData = LineEdit(self.frameOptionsFrame, text=str(itemName), grid=(row, 1))
@@ -843,10 +842,10 @@ class NefDictFrame(Frame):
                                                       tableColourFunc=None)
 
     handleSaveFrames['nef_peak_restraint_links'] = partial(handle_treeView_selection,
-                                                              prefix='nef_peak_restraint_',
-                                                              mappingCode='nef_peak_restraint_links',
-                                                              errorCode='nef_peak_restraint_links',
-                                                              tableColourFunc=None)
+                                                           prefix='nef_peak_restraint_',
+                                                           mappingCode='nef_peak_restraint_links',
+                                                           errorCode='nef_peak_restraint_links',
+                                                           tableColourFunc=None)
 
     handleSaveFrames['ccpn_sample'] = partial(handle_treeView_selection,
                                               prefix='ccpn_sample_component_',
@@ -947,10 +946,10 @@ class NefDictFrame(Frame):
                                                        tableColourFunc=None)
 
     _setBadSaveFrames['nef_peak_restraint_links'] = partial(_set_bad_saveframe,
-                                                               prefix='nef_peak_restraint_',
-                                                               mappingCode='nef_peak_restraint_links',
-                                                               errorCode='nef_peak_restraint_links',
-                                                               tableColourFunc=None)
+                                                            prefix='nef_peak_restraint_',
+                                                            mappingCode='nef_peak_restraint_links',
+                                                            errorCode='nef_peak_restraint_links',
+                                                            tableColourFunc=None)
 
     _setBadSaveFrames['ccpn_sample'] = partial(_set_bad_saveframe,
                                                prefix='ccpn_sample_component_',
@@ -1045,9 +1044,9 @@ class NefDictFrame(Frame):
                                                      )
 
     applyCheckBoxes['nef_peak_restraint_links'] = partial(apply_checkBox_item,
-                                                             prefix='nef_peak_restraint_',
-                                                             mappingCode='nef_peak_restraint_links',
-                                                             )
+                                                          prefix='nef_peak_restraint_',
+                                                          mappingCode='nef_peak_restraint_links',
+                                                          )
 
     applyCheckBoxes['ccpn_sample'] = partial(apply_checkBox_item,
                                              prefix='ccpn_sample_component_',
@@ -1102,9 +1101,9 @@ class NefDictFrame(Frame):
                                                 )
 
     applyCheckBoxes['nef_peak_restraint_link'] = partial(apply_checkBox_item,
-                                                prefix='nef_peak_restraint_',
-                                                mappingCode='nef_peak_restraint_link',
-                                                )
+                                                         prefix='nef_peak_restraint_',
+                                                         mappingCode='nef_peak_restraint_link',
+                                                         )
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1160,7 +1159,7 @@ class NefDictFrame(Frame):
                 self._nefTables = {}
                 frame, table = self._addTableToFrame(_data, _name.upper())
                 self._tableSplitter.addWidget(frame)
-                self._nefWidgets = [frame,]
+                self._nefWidgets = [frame, ]
 
                 # get the group name add fetch the correct mapping
                 mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
@@ -1504,6 +1503,7 @@ if __name__ == '__main__':
 
     from ccpn.util.nef import NefImporter as Nef
 
+
     # load the file and the validate dict
     _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
     _loader.loadFile(TESTNEF)
@@ -1546,8 +1546,7 @@ if __name__ == '__main__':
     name = _loader.getName()
     project = application.newProject(name or DEFAULTNAME)
 
-    project._wrappedData.shiftAveraging = False
-    # with suspendSideBarNotifications(project=self.project):
+    project.shiftAveraging = False
 
     nefReader = CcpnNefIo.CcpnNefReader(application)
     _loader._attachVerifier(nefReader.verifyProject)

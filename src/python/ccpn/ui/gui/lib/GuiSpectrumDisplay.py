@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-29 01:01:07 +0000 (Fri, January 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-02 15:50:51 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -772,7 +772,6 @@ class GuiSpectrumDisplay(CcpnModule):
             raise ValueError("stripArrangement must be either 'X', 'Y' or 'T'")
 
         AbstractWrapperObject.setParameter(self, SPECTRUMDISPLAY, STRIPARRANGEMENT, value)
-        # leave the _wrappedData as it's initialised value
 
         self.setVisibleAxes()
 

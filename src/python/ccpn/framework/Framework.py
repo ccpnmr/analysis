@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-02 13:02:36 +0000 (Tue, February 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-02 15:50:50 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1560,7 +1560,7 @@ class Framework(NotifierBase):
                 self._closeProject()
             self.project = self.newProject(dataBlock.name)
 
-        self.project._wrappedData.shiftAveraging = False
+        self.project.shiftAveraging = False
         # with suspendSideBarNotifications(project=self.project):
 
         with undoBlock():
@@ -1570,7 +1570,7 @@ class Framework(NotifierBase):
 
                     self.nefReader.importNewProject(self.project, dataBlock)
 
-        self.project._wrappedData.shiftAveraging = True
+        self.project.shiftAveraging = True
 
         getLogger().info('==> Loaded NEF file: "%s"' % (path,))
         return self.project
@@ -1639,7 +1639,7 @@ class Framework(NotifierBase):
                 self._closeProject()
             self.project = self.newProject(sparkyName)
 
-        self.project._wrappedData.shiftAveraging = True
+        self.project.shiftAveraging = True
 
         # with suspendSideBarNotifications(project=self.project):
         with undoBlock():
@@ -1657,7 +1657,7 @@ class Framework(NotifierBase):
         #         getLogger().warning('Error loading Sparky file: %s' % str(es))
         #
 
-        self.project._wrappedData.shiftAveraging = True
+        self.project.shiftAveraging = True
 
         getLogger().info('==> Loaded Sparky project files: "%s", building project' % (path,))
         return self.project
@@ -1870,7 +1870,7 @@ class Framework(NotifierBase):
                     self._closeProject()
                 self.project = self.newProject(_loader._nefDict.name)
 
-            self.project._wrappedData.shiftAveraging = False
+            self.project.shiftAveraging = False
             # with suspendSideBarNotifications(project=self.project):
 
             with undoBlock():
@@ -1880,7 +1880,7 @@ class Framework(NotifierBase):
 
                         _nefReader.importNewProject(self.project, _loader._nefDict, selection)
 
-            self.project._wrappedData.shiftAveraging = True
+            self.project.shiftAveraging = True
 
             getLogger().info('==> Loaded NEF file: "%s"' % (path,))
             return self.project

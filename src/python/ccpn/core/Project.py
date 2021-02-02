@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:22 +0000 (Sun, January 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-02 15:50:50 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -471,6 +471,21 @@ class Project(AbstractWrapperObject):
             self._implExperimentTypeMap = result
         #
         return result
+
+    @property
+    def shiftAveraging(self):
+        """Return shiftAveraging
+        """
+        return self._wrappedData.shiftAveraging
+
+    @shiftAveraging.setter
+    def shiftAveraging(self, value):
+        """Set shiftAveraging
+        """
+        if not isinstance(value, bool):
+            raise TypeError('shiftAveraging must be True/False')
+
+        self._wrappedData.shiftAveraging = value
 
     #===========================================================================================
     #  Notifiers system
@@ -1544,6 +1559,23 @@ class Project(AbstractWrapperObject):
         from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getCcpCodeData
 
         return getCcpCodeData(self._apiNmrProject, ccpCode, molType='protein', atomType=atomType)
+
+    def packageProject(self, filePrefix, includeBackups=True, includeLogs=True):
+        """Package the project
+        """
+        from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+
+        return apiIo.packageProject(self._wrappedData.parent, filePrefix,
+                                    includeBackups=includeBackups, includeLogs=includeLogs)
+
+    def getExperimentClassifications(self) -> dict:
+        """Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.
+        """
+        # NOTE:ED - better than being in spectrumLib but still needs moving
+
+        from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
+
+        return getExpClassificationDict(self._wrappedData)
 
     #===========================================================================================
     # new'Object' and other methods

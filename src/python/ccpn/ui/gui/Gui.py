@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-25 18:52:08 +0000 (Mon, January 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-02 15:50:50 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -32,11 +32,9 @@ from PyQt5 import QtWidgets, QtCore
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.lib.SpectrumLib import getExperimentClassifications
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application
-from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.MessageDialog import showError, showWarning
 from ccpn.ui.gui.widgets.Font import getFontHeight, setWidgetFont
 # This import initializes relative paths for QT style-sheets.  Do not remove!
@@ -250,15 +248,15 @@ class Gui(Ui):
     def start(self):
         self.mainWindow._fillRecentMacrosMenu()
         self.mainWindow._updateRestoreArchiveMenu()
-        # self.mainWindow._setUserShortcuts(self.application.preferences, mainWindow=self.mainWindow)
         project = self.application.project
-        self.application.experimentClassifications = getExperimentClassifications(project)
+        self.application.experimentClassifications = project.getExperimentClassifications()
 
         self.mainWindow.show()
         QtWidgets.QApplication.setActiveWindow(self.mainWindow)
 
         # check whether to skip the execution loop for testing with mainWindow
         import builtins
+
         _skip = getattr(builtins, '_skipExecuteLoop', False)
         if not _skip:
             self.qtApp.start()

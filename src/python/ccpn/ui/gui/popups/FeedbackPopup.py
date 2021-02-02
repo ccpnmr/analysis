@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:50 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-02 15:50:51 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,9 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import os
 import random
-from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.framework.PathsAndUrls import ccpn2Url
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -35,10 +33,10 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.Font import getFontHeight
-from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpn.util import Logging
 from ccpn.util import Register
 from ccpn.util import Url
+from ccpn.util.Path import aPath
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 
 
@@ -69,8 +67,8 @@ class FeedbackPopup(CcpnDialogMainWidget):
 
         for key in ('name', 'organisation', 'email'):
             row += 1
-            label = Label(self.mainWidget, text='%s: ' % metaUtil.upperFirst(key), grid=(row, 0))
-            label = Label(self.mainWidget, text=self._registrationDict.get(key), grid=(row, 1))
+            Label(self.mainWidget, text='%s: ' % key.capitalize(), grid=(row, 0))
+            Label(self.mainWidget, text=self._registrationDict.get(key), grid=(row, 1))
 
         row += 1
         label = Label(self.mainWidget, text='Include: ', grid=(row, 0))
@@ -103,15 +101,17 @@ class FeedbackPopup(CcpnDialogMainWidget):
             # cannot use tempfile because that always hands back open object and tarfile needs actual path
             filePrefix = 'feedback%s' % random.randint(1, 10000000)
             project = application.project
-            projectPath = project.path
-            directory = os.path.dirname(projectPath)
-            filePrefix = os.path.join(directory, filePrefix)
-            fileName = apiIo.packageProject(project._wrappedData.parent, filePrefix, includeBackups=True, includeLogs=includeLog)
+            projectPath = aPath(project.path)
+            directory = projectPath.parent
+            filePrefix = directory / filePrefix
+
+            fileName = project.packageProject(filePrefix, includeBackups=True, includeLogs=includeLog)
+
         elif includeLog:
             logger = Logging.getLogger()
             if not hasattr(logger, 'logPath'):
                 return
-            fileName = logger.logPath
+            fileName = aPath(logger.logPath)
         else:
             fileName = None
 
@@ -127,7 +127,7 @@ class FeedbackPopup(CcpnDialogMainWidget):
                 response = Url.uploadFile(SCRIPT_URL, fileName, data)
             finally:
                 if includeProject:
-                    os.remove(fileName)
+                    fileName.removeFile()
         else:
             try:
                 response = Url.fetchUrl(SCRIPT_URL, data)
@@ -147,6 +147,7 @@ class FeedbackPopup(CcpnDialogMainWidget):
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
+
 
     _modal = True
     app = TestApplication()

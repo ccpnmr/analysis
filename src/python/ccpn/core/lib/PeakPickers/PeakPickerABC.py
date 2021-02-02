@@ -4,7 +4,7 @@ PeakPicker abstract base class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2018"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: geertenv $"
-__dateModified__ = "$dateModified: 2021-01-13 10:28:41 +0000 (Wed, Jan 13, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-02 17:38:19 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -71,7 +71,7 @@ class PeakPickerABC(object):
     # to be subclassed
     #=========================================================================================
 
-    peakPickerType = None       # A unqiue string identifying the peak picker
+    peakPickerType = None       # A unique string identifying the peak picker
     defaultPointExtension = 1   # points to extend the region to pick on either side
     onlyFor1D = False
 
@@ -92,7 +92,7 @@ class PeakPickerABC(object):
     #=========================================================================================
 
     def __init__(self, spectrum):
-        """Intialise the instance and associate with spectrum
+        """Initialise the instance and associate with spectrum
         """
         if self.peakPickerType is None:
             raise RuntimeError('%s: peakPickerType is undefined' % self.__class__.__name__)
@@ -130,7 +130,7 @@ class PeakPickerABC(object):
         setParameters() method; i.e.:
                 myPeakPicker = PeakPicker(spectrum=mySpectrum)
                 myPeakPicker.setParameters(dropFactor=0.2, positiveThreshold=1e6, negativeThreshold=None)
-                corePeaks = myPeakPicker.pickPeaks(axisDict={'H':(6.0,11.5),'N':(102.3,130.0)})
+                corePeaks = myPeakPicker.pickPeaks(axisDict={'H':(6.0,11.5),'N':(102.3,130.0)}, spectrum.peaklists[-1])
 
         :param data: nD numpy array
         :return list of SimplePeak instances

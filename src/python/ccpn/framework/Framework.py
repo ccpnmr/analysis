@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-28 10:49:18 +0000 (Thu, January 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-02 13:02:36 +0000 (Tue, February 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1897,7 +1897,8 @@ class Framework(NotifierBase):
         dialog = ExportNefPopup(self.ui.mainWindow,
                                 mainWindow=self.ui.mainWindow,
                                 selectFile=_path,
-                                fileFilter='*.nef')
+                                fileFilter='*.nef',
+                                minimumSize=(400, 550))
 
         # an exclusion dict comes out of the dialog as it
         result = dialog.exec_()

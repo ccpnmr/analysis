@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2021-01-08 11:49:58 +0000 (Fri, January 08, 2021) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-03 11:50:33 +0000 (Wed, February 03, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,21 +31,40 @@ from ccpn.core.lib.Undo import Undo
 
 class ComplexUndoTest(WrapperTesting):
     # Path of project to load (None for new project)
-    projectPath = 'CcpnCourse2c.ccpn'
+    projectPath = 'V3ProjectForTests.ccpn'
 
     def test_loaded_project(self):
         project = self.project._wrappedData.root
+        project.checkAllValid()
+
+    def test_delete_nmrAtoms_undo(self):
+        project = self.project._wrappedData.root
+        project._undo = Undo()
+        self.project.newUndoPoint()
+        nc = self.project.getByPid('NC:A')
+        for na in nc.nmrResidues[1].nmrAtoms:
+            na.delete()
+        project._undo.undo()
+        project.checkAllValid()
+
+    def test_delete_resonances_undo_redo(self):
+        project = self.project._wrappedData.root
+        project._undo = Undo()
+        self.project.newUndoPoint()
+        nc = self.project.getByPid('NC:A')
+        for na in nc.nmrResidues[1].nmrAtoms:
+            na.delete()
+        project._undo.undo()
+        project._undo.redo()
         project.checkAllValid()
 
     def test_make_chain_undo(self):
         project = self.project._wrappedData.root
         project._undo = Undo()
         self.project.newUndoPoint()
-        molSystem = project.findFirstMolSystem(code='MS1')
-        chainA = molSystem.findFirstChain(code='A')
         self.project.blankNotification()
         try:
-            chainB = molSystem.newChain(code='X', molecule=chainA.molecule)
+            chainB = self.project.createChain(sequence='VICKYHIGMAN', compoundName='MyProtein', molType='protein')
             project._undo.undo()
         finally:
             self.project.unblankNotification()
@@ -55,24 +74,21 @@ class ComplexUndoTest(WrapperTesting):
         project = self.project._wrappedData.root
         project._undo = Undo()
         self.project.newUndoPoint()
-        molSystem = project.findFirstMolSystem(code='MS1')
-        chainA = molSystem.findFirstChain(code='A')
         self.project.blankNotification()
         try:
-            chainB = molSystem.newChain(code='X', molecule=chainA.molecule)
+            chainB = self.project.createChain(sequence='VICKYHIGMAN', compoundName='MyProtein', molType='protein')
             project._undo.undo()
             project._undo.redo()
         finally:
             self.project.unblankNotification()
         project.checkAllValid()
 
+
     def test_copy_chain_undo(self):
         apiProject = self.project._wrappedData.root
         apiProject._undo = Undo()
         self.project.newUndoPoint()
-        molSystem = apiProject.findFirstMolSystem(code='MS1')
-        apiChainA = molSystem.findFirstChain(code='A')
-        chainA = self.project._data2Obj.get(apiChainA)
+        chainA = self.project.chains[0]
         chainB = chainA.clone()
         apiProject._undo.undo()
         apiProject.checkAllValid()
@@ -81,100 +97,9 @@ class ComplexUndoTest(WrapperTesting):
         apiProject = self.project._wrappedData.root
         apiProject._undo = Undo()
         self.project.newUndoPoint()
-        molSystem = apiProject.findFirstMolSystem(code='MS1')
-        apiChainA = molSystem.findFirstChain(code='A')
-        chainA = self.project._data2Obj.get(apiChainA)
+        chainA = self.project.chains[0]
         chainB = chainA.clone()
         apiProject._undo.undo()
         apiProject._undo.redo()
         apiProject.checkAllValid(complete=True)
 
-    def test_delete_residues_undo(self):
-        project = self.project._wrappedData.root
-        project._undo = Undo()
-        self.project.newUndoPoint()
-        molSystem = project.findFirstMolSystem(code='MS1')
-        residues = molSystem.findFirstChain(code='A').sortedResidues()
-        residues[22].delete()
-        residues[45].delete()
-        residues[21].delete()
-        residues[20].delete()
-        project._undo.undo()
-        project.checkAllValid()
-
-    def test_delete_residues_undo_redo(self):
-        project = self.project._wrappedData.root
-        project._undo = Undo()
-        self.project.newUndoPoint()
-        molSystem = project.findFirstMolSystem(code='MS1')
-        residues = molSystem.findFirstChain(code='A').sortedResidues()
-        residues[22].delete()
-        residues[45].delete()
-        residues[21].delete()
-        residues[20].delete()
-        project._undo.undo()
-        project._undo.redo()
-        project.checkAllValid()
-
-    def test_delete_chain_undo(self):
-        project = self.project._wrappedData.root
-        project._undo = Undo()
-        self.project.newUndoPoint()
-        molSystem = project.findFirstMolSystem(code='MS1')
-        chain = molSystem.findFirstChain(code='A')
-        chain.delete()
-        project._undo.undo()
-        project.checkAllValid()
-
-    def test_delete_chain_undo_redo(self):
-        project = self.project._wrappedData.root
-        project._undo = Undo()
-        self.project.newUndoPoint()
-        molSystem = project.findFirstMolSystem(code='MS1')
-        chain = molSystem.findFirstChain(code='A')
-        chain.delete()
-        project._undo.undo()
-        project._undo.redo()
-        project.checkAllValid()
-
-    def test_delete_molSystem_undo(self):
-        project = self.project._wrappedData.root
-        project._undo = Undo()
-        self.project.newUndoPoint()
-        molSystem = project.findFirstMolSystem(code='MS1')
-        molSystem.delete()
-        project._undo.undo()
-        project.checkAllValid()
-
-    def test_delete_molSystem_undo_redo(self):
-        project = self.project._wrappedData.root
-        project._undo = Undo()
-        self.project.newUndoPoint()
-        molSystem = project.findFirstMolSystem(code='MS1')
-        molSystem.delete()
-        project._undo.undo()
-        project._undo.redo()
-        project.checkAllValid()
-
-    def test_delete_resonances_undo(self):
-        project = self.project._wrappedData.root
-        project._undo = Undo()
-        self.project.newUndoPoint()
-        resonances = project.findFirstNmrProject().sortedResonances()
-        for ii in range(1, 10):
-            resonances[ii].delete()
-            resonances[-ii].delete()
-        project._undo.undo()
-        project.checkAllValid()
-
-    def test_delete_resonances_undo_redo(self):
-        project = self.project._wrappedData.root
-        project._undo = Undo()
-        self.project.newUndoPoint()
-        resonances = project.findFirstNmrProject().sortedResonances()
-        for ii in range(1, 10):
-            resonances[ii].delete()
-            resonances[-ii].delete()
-        project._undo.undo()
-        project._undo.redo()
-        project.checkAllValid()

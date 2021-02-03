@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-03 17:17:12 +0000 (Wed, February 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 17:51:41 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1925,8 +1925,10 @@ assignmentTolerances
             raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
         spectrumLimits = self.spectrumLimits[dimension - 1]
-        result = np.linspace(spectrumLimits[0], spectrumLimits[1] - self.valuesPerPoint[dimension - 1],
-                             self.pointCounts[dimension - 1])
+        axisReversed = self.axesReversed[dimension -1]
+        valuePerPoint = self.valuesPerPoint[dimension - 1] * (-1.0 if axisReversed else 1.0)
+
+        result = np.linspace(spectrumLimits[0], spectrumLimits[1] - valuePerPoint, self.pointCounts[dimension - 1])
 
         return result
 

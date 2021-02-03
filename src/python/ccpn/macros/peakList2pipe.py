@@ -1,6 +1,5 @@
 """
-This macro writes a file containing an NmrPipe table style using some of the CcpNmr peak properties.
-It will require some final modifications to create the correct NmrPipe file for relaxation analysis...
+This macro writes an NmrPipe-like file using some of the CcpNmr peak properties.
 
 Copy this macro inside the Macro Editor module and amend it as necessary.
 Post your changes/improvements on the Ccpn Forum!
@@ -23,6 +22,7 @@ Gui Tips:
 
 Warnings:
      - Always backup the project before running macros!
+     - Not tested on NMRPIPE
      - The macro will set peak annotations. This will help visualising the clusters ids. If overwrites your annotations,
        undo to revert to the previous state.
      - Before running the macro close all GuiTables to avoid waiting for Gui updates!
@@ -41,7 +41,6 @@ peakListIndex = -1              # Use last added peakList  as default index (-1)
 
 export = True                    # Set to False if don't want to export
 outputPath = '~/Desktop/myPath'          # Path dir where to export the files. FileName from the spectrum Name.
-fileExt = '.tsv'                 # Extension type. Tested only with tsv
 
 
 # clustering options
@@ -221,33 +220,34 @@ MEMCNT = 'MEMCNT'   # REQUIRED      - ?? default 1
 
 NULLVALUE =  -666
 NULLSTRING = '*'
+UNKNOWN = 1
 
 VarsDict = {
         INDEX   : lambda x: VFdict.get(INDEX) % x.serial,
-        DX      : None,
-        DY      : None,
+        DX      : lambda x: NULLVALUE, #VFdict.get(DX) % NULLVALUE,
+        DY      : lambda x: NULLVALUE, #VFdict.get(DY) % NULLVALUE,
         X_PPM   : lambda x: VFdict.get(X_PPM) % x.position[0] if x.position[0] else NULLVALUE,
         Y_PPM   : lambda x: VFdict.get(Y_PPM) % x.position[1] if x.position[1] else NULLVALUE,
-        X_HZ    : None,
-        Y_HZ    : None,
+        X_HZ    : lambda x: NULLVALUE, #VFdict.get(X_HZ) % NULLVALUE,
+        Y_HZ    : lambda x: NULLVALUE, #VFdict.get(Y_HZ) % NULLVALUE,
         X_AXIS  : lambda x: VFdict.get(X_AXIS) % x.pointPosition[0] if x.pointPosition[0] else NULLVALUE,
         Y_AXIS  : lambda x: VFdict.get(Y_AXIS) % x.pointPosition[1] if x.pointPosition[1] else NULLVALUE,
         XW      : lambda x: VFdict.get(XW) % getLineWidthsPnt(x)[0] if getLineWidthsPnt(x)[0] else NULLVALUE,
         YW      : lambda x: VFdict.get(YW) % getLineWidthsPnt(x)[1] if getLineWidthsPnt(x)[1] else NULLVALUE,
         XW_HZ   : lambda x: VFdict.get(XW_HZ) % x.lineWidths[0] if x.lineWidths[0] else NULLVALUE,
         YW_HZ   : lambda x: VFdict.get(YW_HZ) % x.lineWidths[1] if x.lineWidths[0] else NULLVALUE,
-        X1      : None,
-        X3      : None,
-        Y1      : None,
-        Y3      : None,
+        X1      : lambda x: NULLVALUE, #VFdict.get(X1) % NULLVALUE,
+        X3      : lambda x: NULLVALUE, #VFdict.get(X3) % NULLVALUE,
+        Y1      : lambda x: NULLVALUE, #VFdict.get(Y1) % NULLVALUE,
+        Y3      : lambda x: NULLVALUE, #VFdict.get(Y3) % NULLVALUE,
         HEIGHT  : lambda x: VFdict.get(HEIGHT) % x.height if x.height else NULLVALUE,
         DHEIGHT : lambda x: VFdict.get(DHEIGHT) % x.heightError if x.heightError else NULLVALUE,
         VOL     : lambda x: VFdict.get(VOL) % x.volume if x.volume else NULLVALUE,
-        PCHI2   : None,
-        TYPE    : lambda x: VFdict.get(TYPE) % 1,
+        PCHI2   : lambda x: NULLVALUE, #VFdict.get(PCHI2) % NULLVALUE,
+        TYPE    : lambda x: VFdict.get(TYPE) % UNKNOWN,
         ASS     : lambda x: VFdict.get(ASS) % _getScreenPeakAnnotation(x, usePid=True),
         CLUSTID : lambda x: VFdict.get(CLUSTID) % _getClustID(x) if _getClustID(x) else NULLVALUE,
-        MEMCNT  : lambda x: VFdict.get(MEMCNT) % 1,
+        MEMCNT  : lambda x: VFdict.get(MEMCNT) % UNKNOWN,
         }
 
 def buildDataFrame(peaks):
@@ -257,9 +257,18 @@ def buildDataFrame(peaks):
             df[k] = list(map(lambda x: v(x), peaks))
         else:
             df[k] = [None]*len(peaks)
-    df.columns = [np.array(VARS), np.array(FORMAT)]
     return df
 
+def dfToTab(df):
+    "Return NmrPipe (NIH) tab-file formatted string"
+
+    string = ''
+    string += 'VARS %s\n' % ' '.join(VARS)
+    string += 'FORMAT %s\n\n' % ' '.join(FORMAT)
+    string += 'NULLVALUE -666'
+    string += '\nNULLSTRING *\n\n'
+    string += df.to_string(header=False, index=False) # formats are already defined when building the dataframe.
+    return string
 
 def runMacro():
 
@@ -281,15 +290,17 @@ def runMacro():
         peaks.sort(key=lambda x: x.pointPosition[0], reverse=False)
         setClusterIDs(peaks, guessClusterId)
         df = buildDataFrame(peaks)
-
         if export:
             isPathOk, msgErr = checkFilePath(aPath(outputPath))
             if not isPathOk:
                 print('File not saved. Error: %s.'%msgErr)
             else:
-                fileName = aPath(outputPath).joinpath(spectrum.name + fileExt)
-                df.to_csv(str(fileName), sep='\t', index=False)
-                print('File saved in: %s.' % fileName)
+                fileName = aPath(outputPath).joinpath(spectrum.name)
+                string = dfToTab(df)
+                with open(fileName, 'w') as f:
+                    f.write(string)
+                    print('File saved in: %s.' % fileName)
+
 
 
 if __name__ == '__main__':

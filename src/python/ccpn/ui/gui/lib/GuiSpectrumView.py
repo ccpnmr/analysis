@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-29 01:01:07 +0000 (Fri, January 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 17:17:13 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -145,7 +145,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         ii = self._displayOrderSpectrumDimensionIndices[axisDim]
         if ii is not None:
             minAliasedFrequency, maxAliasedFrequency = (self.spectrum.aliasingLimits)[ii]
-            minSpectrumFrequency, maxSpectrumFrequency = (self.spectrum.spectrumLimits)[ii]
+            minSpectrumFrequency, maxSpectrumFrequency = sorted(self.spectrum.spectrumLimits[ii])
             pointCount = (self.spectrum.pointCounts)[ii]
             valuePerPoint = (self.spectrum.valuesPerPoint)[ii]
 
@@ -163,7 +163,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
             return
 
         pointCount = self.spectrum.pointCounts[index]
-        minSpectrumFrequency, maxSpectrumFrequency = self.spectrum.spectrumLimits[index]
+        minSpectrumFrequency, maxSpectrumFrequency = sorted(self.spectrum.spectrumLimits[index])
 
         inRange = (minSpectrumFrequency <= position[index] <= maxSpectrumFrequency)
         pointPos = (self.spectrum.ppm2point(position[index], dimension=index + 1) - 1) % pointCount

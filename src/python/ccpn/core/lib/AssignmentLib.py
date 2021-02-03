@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:23 +0000 (Sun, January 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-03 17:17:13 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -294,7 +294,7 @@ def propagateAssignments(peaks: typing.List[Peak] = None, referencePeak: Peak = 
         for i, axisCode in enumerate(peak.peakList.spectrum.axisCodes):
 
             if axisCode not in shiftRanges:
-                shiftMin, shiftMax = peak.peakList.spectrum.spectrumLimits[i]
+                shiftMin, shiftMax = sorted(peak.peakList.spectrum.spectrumLimits[i])
                 shiftRanges[axisCode] = (shiftMin, shiftMax)
 
             else:

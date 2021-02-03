@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-02 15:50:51 +0000 (Tue, February 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 17:17:13 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -367,10 +367,8 @@ class GuiStripNd(GuiStrip):
 
         for spectrumView in self.spectrumViews:
             # Get spectrum dimension index matching display X or Y
-            # without using axis codes, as they may not match
-            spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
-            spectrumLimits = spectrumView.spectrum.spectrumLimits
-            positionArray.append(spectrumLimits[spectrumIndices[axis]])
+            _spectrumLimits = spectrumView.spectrum.getByAxisCodes('spectrumLimits', spectrumView.strip.axisCodes)
+            positionArray.append(_spectrumLimits[axis])
 
         positionArrayFlat = numpy.array(positionArray).flatten()
         zoomArray = ([min(positionArrayFlat), max(positionArrayFlat)])
@@ -387,10 +385,8 @@ class GuiStripNd(GuiStrip):
 
         for spectrumView in self.spectrumViews:
             # Get spectrum dimension index matching display X or Y
-            # without using axis codes, as they may not match
-            spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
-            spectrumLimits = spectrumView.spectrum.spectrumLimits
-            positionArray.append(spectrumLimits[spectrumIndices[axis]])
+            _spectrumLimits = spectrumView.spectrum.getByAxisCodes('spectrumLimits', spectrumView.strip.axisCodes)
+            positionArray.append(_spectrumLimits[axis])
 
         positionArrayFlat = numpy.array(positionArray).flatten()
         zoomArray = ([min(positionArrayFlat), max(positionArrayFlat)])
@@ -510,7 +506,7 @@ class GuiStripNd(GuiStrip):
                     continue
 
                 _alias = spectrumView.spectrum.visibleAliasingRange[_index]
-                _minSpectrumFrequency, _maxSpectrumFrequency = spectrumView.spectrum.spectrumLimits[_index]
+                _minSpectrumFrequency, _maxSpectrumFrequency = sorted(spectrumView.spectrum.spectrumLimits[_index])
                 _valuePerPoint = spectrumView.spectrum.valuesPerPoint[_index]
                 freqRange = _maxSpectrumFrequency - _minSpectrumFrequency
 

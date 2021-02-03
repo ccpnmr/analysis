@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-02 15:50:51 +0000 (Tue, February 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 17:17:13 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1275,8 +1275,8 @@ class GuiSpectrumDisplay(CcpnModule):
             self.vTraceAction = False
 
             if not self.phasingFrame.pivotsSet:
-                _pivot = np.mean(self.spectrumViews[0].spectrum.spectrumLimits[0])
-                self.phasingFrame.setInitialPivots((_pivot, 0.0))
+                pivot = np.mean(self.spectrumViews[0].spectrum.spectrumLimits[0])
+                self.phasingFrame.setInitialPivots((pivot, 0.0))
 
         else:
             self.hTraceAction = self.current.strip.hTraceAction.isChecked()
@@ -1284,10 +1284,9 @@ class GuiSpectrumDisplay(CcpnModule):
 
             if not self.phasingFrame.pivotsSet:
                 specView = self.spectrumViews[0]
-                _indices = specView._displayOrderSpectrumDimensionIndices
-                _limits = specView.spectrum.spectrumLimits
-                _pivot = [np.mean(_limits[_indices[ll]]) for ll in range(2)]
-                self.phasingFrame.setInitialPivots(_pivot)
+                limits = specView.spectrum.getByAxisCodes('spectrumLimits', axisCodes=specView.strip.axisCodes)
+                pivot = [np.mean(lim) for lim in limits[:2]]
+                self.phasingFrame.setInitialPivots(pivot)
 
         for strip in self.strips:
             if isVisible:

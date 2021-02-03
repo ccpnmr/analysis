@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-02 13:50:39 +0000 (Tue, February 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 17:17:12 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1408,13 +1408,15 @@ assignmentTolerances
     def spectrumLimits(self) -> Tuple[Tuple[Optional[float], Optional[float]], ...]:
         """\- (*(float,float)*)\*dimensionCount
 
-        tuple of tuples of (lowerLimit, higherLimit) for spectrum """
+        tuple of tuples of (ppmPoint(1), ppmPoint(n+1)) for each spectrum axis
+        direction of axis is preserved
+        """
         ll = []
         for ii, ddr in enumerate(self._mainDataDimRefs()):
             if ddr is None:
                 ll.append((None, None))
             else:
-                ll.append(tuple(sorted((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints + 1)))))
+                ll.append((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints + 1)))
         return tuple(ll)
 
     @property
@@ -1532,7 +1534,7 @@ assignmentTolerances
     def intensities(self, value: np.ndarray):
         self._intensities = value
 
-        # # temporary hack for showing straight the result of intensities change
+        # NOTE:ED - temporary hack for showing straight the result of intensities change
         for spectrumView in self.spectrumViews:
             spectrumView.refreshData()
 
@@ -1545,11 +1547,7 @@ assignmentTolerances
             return np.array([])
 
         if self._positions is None:
-            spectrumLimits = self.spectrumLimits[0]
-            pointCount = self.pointCounts[0]
-            # WARNING: below assumes that spectrumLimits are "backwards" (as is true for ppm)
-            scale = (spectrumLimits[0] - spectrumLimits[1]) / pointCount
-            self._positions = spectrumLimits[1] + scale * np.arange(pointCount, dtype='float32')
+            self._positions = self.getPpmArray(dimension=1)
 
         return self._positions
 
@@ -1558,7 +1556,7 @@ assignmentTolerances
         # self._scaleChanged = True
         self._positions = value
 
-        # # temporary hack for showing straight the result of intensities change
+        # NOTE:ED - temporary hack for showing straight the result of intensities change
         for spectrumView in self.spectrumViews:
             spectrumView.refreshData()
 
@@ -1926,14 +1924,10 @@ assignmentTolerances
         if dimension is None or dimension < 1 or dimension > self.dimensionCount:
             raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
-        axisReversed = self.axesReversed[dimension - 1]
-        valuePerPoint = self.valuesPerPoint[dimension - 1]
-        if axisReversed:
-            result = np.linspace(self.spectrumLimits[dimension - 1][1], self.spectrumLimits[dimension - 1][0] + valuePerPoint,
-                                 self.pointCounts[dimension - 1])
-        else:
-            result = np.linspace(self.spectrumLimits[dimension - 1][0], self.spectrumLimits[dimension - 1][1] - valuePerPoint,
-                                 self.pointCounts[dimension - 1])
+        spectrumLimits = self.spectrumLimits[dimension - 1]
+        result = np.linspace(spectrumLimits[0], spectrumLimits[1] - self.valuesPerPoint[dimension - 1],
+                             self.pointCounts[dimension - 1])
+
         return result
 
     def getDefaultOrdering(self, axisOrder):
@@ -2073,7 +2067,7 @@ assignmentTolerances
         endPoint = []
 
         # fill with the spectrum limits first
-        regionToPick = list(self.spectrumLimits)
+        regionToPick = sorted(self.spectrumLimits)
 
         codes = axisDict.keys()
         limits = tuple(axisDict.values())

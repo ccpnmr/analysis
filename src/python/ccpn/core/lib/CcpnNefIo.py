@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-27 14:10:57 +0000 (Wed, January 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 17:17:13 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1218,7 +1218,7 @@ class CcpnNefWriter:
                 data[neftag] = attrgetter(attrstring)(spectrum)
 
         data['folding'] = ['none' if x is None else x for x in spectrum.foldingModes]
-        data['value_first_point'] = [tt[1] for tt in spectrum.spectrumLimits]
+        data['value_first_point'] = [tt[1] for tt in sorted(spectrum.spectrumLimits)]
         # NBNB All CCPN peaks are in principle at the correct unaliased positions
         # Whether they are set correctly is another matter.
         data['absolute_peak_positions'] = spectrum.dimensionCount * [True]

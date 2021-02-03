@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-02 15:50:50 +0000 (Tue, February 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 17:17:13 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -752,7 +752,7 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
         raise NotImplementedError("setContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
 
     # get specLimits for all dimensions
-    specLimits = list(spectrum.spectrumLimits)
+    specLimits = sorted(spectrum.spectrumLimits)
     dims = spectrum.dimensionCount
     valsPerPoint = spectrum.valuesPerPoint
 
@@ -886,7 +886,7 @@ def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
         raise NotImplementedError("getContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
 
     # get specLimits for all dimensions
-    specLimits = list(spectrum.spectrumLimits)
+    specLimits = sorted(spectrum.spectrumLimits)
     dims = spectrum.dimensionCount
     valsPerPoint = spectrum.valuesPerPoint
 

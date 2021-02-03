@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-29 14:41:18 +0000 (Fri, January 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 17:17:12 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -527,7 +527,7 @@ class PeakList(PMIListABC):
         # divide by 2 to get the double-width tolerance, i.e. the width of the region - CHECK WITH GEERTEN
         tolerances = tuple(tol / 2 for tol in self.spectrum.assignmentTolerances)
 
-        limits = self.spectrum.spectrumLimits
+        limits = sorted(self.spectrum.spectrumLimits)
         selectedRegion = []
         minDropFactor = self.project._appBase.preferences.general.peakDropFactor
 

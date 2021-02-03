@@ -51,7 +51,10 @@ if not AxisCode in df:
 else:
     peaks = df.get(AxisCode)
     sp = project.createDummySpectrum(name=str(SpectrumName), axisCodes=[AxisCode])
-    sp.positions = np.arange(*sp.spectrumLimits[0], 0.001)
+    # sp.positions = np.arange(*sp.spectrumLimits[0], 0.001)
+    # can just call sp.positions which will fill of position is None, but here for clarity
+    sp.positions = sp.getPpmArray(dimension=1)
+
     noise = np.random.normal(size=sp.positions.shape, scale=Noise)
     peakLines = []
     if peaks is not None:

@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-02 09:59:24 +0000 (Tue, February 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 17:13:31 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -382,11 +382,11 @@ class CcpnGLWidget(QOpenGLWidget):
             self._fullWidthBottomAxis = True
 
             self._GLPeaks = GLpeak1dLabelling(parent=self, strip=self.strip,
-                                              name='peaks', resizeGL=True)
+                                              name='peaks', enableResize=True)
             self._GLIntegrals = GLintegral1dLabelling(parent=self, strip=self.strip,
-                                                      name='integrals', resizeGL=True)
+                                                      name='integrals', enableResize=True)
             self._GLMultiplets = GLmultiplet1dLabelling(parent=self, strip=self.strip,
-                                                        name='multiplets', resizeGL=True)
+                                                        name='multiplets', enableResize=True)
         else:
             self._drawRightAxis = True
             self._drawBottomAxis = True
@@ -394,11 +394,11 @@ class CcpnGLWidget(QOpenGLWidget):
             self._fullWidthBottomAxis = True
 
             self._GLPeaks = GLpeakNdLabelling(parent=self, strip=self.strip,
-                                              name='peaks', resizeGL=True)
+                                              name='peaks', enableResize=True)
             self._GLIntegrals = GLintegralNdLabelling(parent=self, strip=self.strip,
-                                                      name='integrals', resizeGL=True)
+                                                      name='integrals', enableResize=True)
             self._GLMultiplets = GLmultipletNdLabelling(parent=self, strip=self.strip,
-                                                        name='multiplets', resizeGL=True)
+                                                        name='multiplets', enableResize=True)
 
         self._buildMouse = True
         self._mouseCoords = [-1.0, -1.0]
@@ -1332,29 +1332,29 @@ class CcpnGLWidget(QOpenGLWidget):
         if xRange < self._minXRange and self._rangeXDefined and self._applyXLimit:
             if setLimits:
                 xMid = (self.axisR + self.axisL) / 2.0
-                self.axisL = xMid - self._minXRange * np.sign(self.pixelX)
-                self.axisR = xMid + self._minXRange * np.sign(self.pixelX)
+                self.axisL = xMid - self._minXRange * self.sign(self.pixelX)
+                self.axisR = xMid + self._minXRange * self.sign(self.pixelX)
             self._minXReached = True
 
         if yRange < self._minYRange and self._rangeYDefined and self._applyYLimit:
             if setLimits:
                 yMid = (self.axisT + self.axisB) / 2.0
-                self.axisT = yMid + self._minYRange * np.sign(self.pixelY)
-                self.axisB = yMid - self._minYRange * np.sign(self.pixelY)
+                self.axisT = yMid + self._minYRange * self.sign(self.pixelY)
+                self.axisB = yMid - self._minYRange * self.sign(self.pixelY)
             self._minYReached = True
 
         if xRange > self._maxXRange and self._rangeXDefined and self._applyXLimit:
             if setLimits:
                 xMid = (self.axisR + self.axisL) / 2.0
-                self.axisL = xMid - self._maxXRange * np.sign(self.pixelX)
-                self.axisR = xMid + self._maxXRange * np.sign(self.pixelX)
+                self.axisL = xMid - self._maxXRange * self.sign(self.pixelX)
+                self.axisR = xMid + self._maxXRange * self.sign(self.pixelX)
             self._maxXReached = True
 
         if yRange > self._maxYRange and self._rangeYDefined and self._applyYLimit:
             if setLimits:
                 yMid = (self.axisT + self.axisB) / 2.0
-                self.axisT = yMid + self._maxYRange * np.sign(self.pixelY)
-                self.axisB = yMid - self._maxYRange * np.sign(self.pixelY)
+                self.axisT = yMid + self._maxYRange * self.sign(self.pixelY)
+                self.axisB = yMid - self._maxYRange * self.sign(self.pixelY)
             self._maxYReached = True
 
         self._minReached = self._minXReached or self._minYReached
@@ -5653,7 +5653,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def setAxisWidth(self, axisIndex, width, rescale=True, update=True):
         if axisIndex == 0:
-            diff = np.sign(self.axisR - self.axisL) * abs(width) / 2.0
+            diff = self.sign(self.axisR - self.axisL) * abs(width) / 2.0
             mid = (self.axisR + self.axisL) / 2.0
             self.axisL = mid - diff
             self.axisR = mid + diff
@@ -5661,7 +5661,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._scaleToXAxis(rescale=rescale, update=update)
 
         elif axisIndex == 1:
-            diff = np.sign(self.axisT - self.axisB) * abs(width) / 2.0
+            diff = self.sign(self.axisT - self.axisB) * abs(width) / 2.0
             mid = (self.axisT + self.axisB) / 2.0
             self.axisB = mid - diff
             self.axisT = mid + diff
@@ -6269,18 +6269,19 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      abs(self.pixelY))):
 
                     if self.INVERTXAXIS:
-                        self.axisL = max(self._startCoordinate[0], self._successiveClicks[0])
-                        self.axisR = min(self._startCoordinate[0], self._successiveClicks[0])
+                        # need to stop float becoming a np.float64
+                        self.axisL = float(max(self._startCoordinate[0], self._successiveClicks[0]))
+                        self.axisR = float(min(self._startCoordinate[0], self._successiveClicks[0]))
                     else:
-                        self.axisL = min(self._startCoordinate[0], self._successiveClicks[0])
-                        self.axisR = max(self._startCoordinate[0], self._successiveClicks[0])
+                        self.axisL = float(min(self._startCoordinate[0], self._successiveClicks[0]))
+                        self.axisR = float(max(self._startCoordinate[0], self._successiveClicks[0]))
 
                     if self.INVERTYAXIS:
-                        self.axisB = max(self._startCoordinate[1], self._successiveClicks[1])
-                        self.axisT = min(self._startCoordinate[1], self._successiveClicks[1])
+                        self.axisB = float(max(self._startCoordinate[1], self._successiveClicks[1]))
+                        self.axisT = float(min(self._startCoordinate[1], self._successiveClicks[1]))
                     else:
-                        self.axisB = min(self._startCoordinate[1], self._successiveClicks[1])
-                        self.axisT = max(self._startCoordinate[1], self._successiveClicks[1])
+                        self.axisB = float(min(self._startCoordinate[1], self._successiveClicks[1]))
+                        self.axisT = float(max(self._startCoordinate[1], self._successiveClicks[1]))
 
                     self._testAxisLimits(setLimits=True)
                     self._rescaleXAxis()
@@ -6613,18 +6614,19 @@ class CcpnGLWidget(QOpenGLWidget):
         elif shiftLeftMouse(event):
             # zoom into the region - yellow box
             if self.INVERTXAXIS:
-                self.axisL = max(self._startCoordinate[0], self._endCoordinate[0])
-                self.axisR = min(self._startCoordinate[0], self._endCoordinate[0])
+                # need to stop float becoming a np.float64
+                self.axisL = float(max(self._startCoordinate[0], self._endCoordinate[0]))
+                self.axisR = float(min(self._startCoordinate[0], self._endCoordinate[0]))
             else:
-                self.axisL = min(self._startCoordinate[0], self._endCoordinate[0])
-                self.axisR = max(self._startCoordinate[0], self._endCoordinate[0])
+                self.axisL = float(min(self._startCoordinate[0], self._endCoordinate[0]))
+                self.axisR = float(max(self._startCoordinate[0], self._endCoordinate[0]))
 
             if self.INVERTYAXIS:
-                self.axisB = max(self._startCoordinate[1], self._endCoordinate[1])
-                self.axisT = min(self._startCoordinate[1], self._endCoordinate[1])
+                self.axisB = float(max(self._startCoordinate[1], self._endCoordinate[1]))
+                self.axisT = float(min(self._startCoordinate[1], self._endCoordinate[1]))
             else:
-                self.axisB = min(self._startCoordinate[1], self._endCoordinate[1])
-                self.axisT = max(self._startCoordinate[1], self._endCoordinate[1])
+                self.axisB = float(min(self._startCoordinate[1], self._endCoordinate[1]))
+                self.axisT = float(max(self._startCoordinate[1], self._endCoordinate[1]))
 
             self._testAxisLimits(setLimits=True)
             self._resetBoxes()

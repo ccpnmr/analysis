@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-29 01:01:08 +0000 (Fri, January 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 17:14:00 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -367,10 +367,10 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLLabelling):  #, GLpeakNdL
     """Class to handle symbol and symbol labelling for Nd displays
     """
 
-    def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
+    def __init__(self, parent=None, strip=None, name=None, enableResize=False):
         """Initialise the class
         """
-        super(GLmultipletNdLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
+        super().__init__(parent=parent, strip=strip, name=name, enableResize=enableResize)
 
         # use different colouring
         self.autoColour = self._GLParent.SPECTRUMNEGCOLOUR

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:48 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 18:11:37 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -28,14 +28,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import operator
 from typing import Tuple
 from functools import partial
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpn.ui._implementation.Strip import Strip
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, deleteWrapperWithoutSideBar
+from ccpn.ui._implementation.Strip import Strip
 
 
 class SpectrumView(AbstractWrapperObject):
@@ -355,18 +355,17 @@ class SpectrumView(AbstractWrapperObject):
         return self._project._data2Obj.get(self._wrappedData.spectrumView.dataSource)
 
     @property
-    def _displayOrderSpectrumDimensionIndices(self) -> Tuple[int, ...]:
+    def dimensionOrdering(self) -> Tuple[int, ...]:
         """Indices of spectrum dimensions in display order (x, y, Z1, ...)"""
         apiStripSpectrumView = self._wrappedData
-        apiStrip = apiStripSpectrumView.strip
-
-        axisCodes = apiStrip.axisCodes
+        axisCodes = self.strip.axisCodes
+        axisOrder = self.strip.axisOrder
 
         # DimensionOrdering is one-origin (first dim is dim 1)
         dimensionOrdering = apiStripSpectrumView.spectrumView.dimensionOrdering
 
         # Convert to zero-origin (for indices) and return
-        ll = tuple(dimensionOrdering[axisCodes.index(x)] for x in apiStrip.axisOrder)
+        ll = tuple(dimensionOrdering[axisCodes.index(x)] for x in axisOrder)
         return tuple(None if not x else x - 1 for x in ll)
 
     #=========================================================================================

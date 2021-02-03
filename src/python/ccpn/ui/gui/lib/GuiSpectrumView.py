@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-03 17:17:13 +0000 (Wed, February 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 18:11:37 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -105,44 +105,11 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         # notify that the spectrumView has changed
         self._finaliseAction('change')
 
-    # def setDimMapping(self, dimMapping=None):
-    #
-    #   dimensionCount = self.spectrum.dimensionCount
-    #   if dimMapping is None:
-    #     dimMapping = {}
-    #     for i in range(dimensionCount):
-    #       dimMapping[i] = i
-    #   self.dimMapping = dimMapping
-    #
-    #   xDim = yDim = None
-    #   inverseDimMapping = {}
-    #   for dim in dimMapping:
-    #     inverseDim = dimMapping[dim]
-    #     if inverseDim == 0:
-    #       xDim = inverseDim
-    #     elif inverseDim == 1:
-    #       yDim = inverseDim
-    #
-    #   if xDim is not None:
-    #     assert 0 <= xDim < dimensionCount, 'xDim = %d, dimensionCount = %d' % (xDim, dimensionCount)
-    #
-    #   if yDim is not None:
-    #     assert 0 <= yDim < dimensionCount, 'yDim = %d, dimensionCount = %d' % (yDim, dimensionCount)
-    #     assert xDim != yDim, 'xDim = yDim = %d' % xDim
-    #
-    #   self.xDim = xDim
-    #   self.yDim = yDim
-
-    def dimensionIndex(self, axisDim):
-        """Return the spectrum index for the spectrumView index
-        """
-        return self._displayOrderSpectrumDimensionIndices[axisDim]
-
     def _getSpectrumViewParams(self, axisDim: int) -> Optional[Tuple]:
         """Get position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency
         for axisDimth axis (zero-origin)"""
 
-        ii = self._displayOrderSpectrumDimensionIndices[axisDim]
+        ii = self.dimensionOrdering[axisDim]
         if ii is not None:
             minAliasedFrequency, maxAliasedFrequency = (self.spectrum.aliasingLimits)[ii]
             minSpectrumFrequency, maxSpectrumFrequency = sorted(self.spectrum.spectrumLimits[ii])
@@ -156,7 +123,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
     def getTraceParameters(self, position, dim):
         # dim  = spectrumView index, i.e. 0 for X, 1 for Y
 
-        _indices = self._displayOrderSpectrumDimensionIndices
+        _indices = self.dimensionOrdering
         index = _indices[dim]
         if index is None:
             getLogger().warning('getTraceParameters: bad index')

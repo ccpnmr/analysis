@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-03 17:17:13 +0000 (Wed, February 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 18:11:37 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -498,7 +498,7 @@ class GuiStripNd(GuiStrip):
                 if ignoreSpectrumView is spectrumView:
                     continue
 
-                # get a mapping of the axes to the strip - effectively the same as spectrumView._displayOrderSpectrumDimensionIndices
+                # get a mapping of the axes to the strip - effectively the same as spectrumView.dimensionOrdering
                 # but allows for finding close matched axis codes
                 indices = getAxisCodeMatchIndices(self.axisCodes, spectrumView.spectrum.axisCodes)
                 _index = indices[n + 2]

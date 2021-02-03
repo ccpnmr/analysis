@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-03 17:17:12 +0000 (Wed, February 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 18:11:36 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -561,7 +561,7 @@ class PeakList(PMIListABC):
     #     spectrumView = self.findSpectrumView(peakList.spectrum)
     #     if spectrumView is None:
     #         return False
-    #     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+    #     displayIndices = spectrumView.dimensionOrdering
     #     orderedAxes = self.orderedAxes[2:]
     #
     #     for ii, displayIndex in enumerate(displayIndices[2:]):

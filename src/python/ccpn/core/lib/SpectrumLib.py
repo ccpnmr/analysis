@@ -244,43 +244,33 @@ def _getProjection(spectrum: 'Spectrum', axisCodes: tuple,
     return projectedData
 
 
-###################################################################################################
-##################             Baseline Correction for 1D spectra                ##################
-###################################################################################################
-
-
-"""
-14/2/2017
-
-Baseline Correction for 1D spectra.
-Multiple algorithms comparison:
-
--Asl
--Whittaker Smooth
--AirPls
--ArPls
--Lowess
--Polynomial Fit
-
-NB: Yet To be tested the newest algorithm found in literature based on machine learning:
-“Estimating complicated baselines in analytical signals using the iterative training of
-Bayesian regularized artificial neural networks. Abolfazl Valadkhani et al.
-Analytica Chimica Acta. September 2016 DOI: 10.1016/j.aca.2016.08.046
-
-"""
+#------------------------------------------------------------------------------------------------------
+#  Baseline Correction for 1D spectra
+# 14/2/2017
+#
+# Baseline Correction for 1D spectra.
+# Multiple algorithms comparison:
+#
+# -Asl
+# -Whittaker Smooth
+# -AirPls
+# -ArPls
+# -Lowess
+# -Polynomial Fit
+#
+# NB: Yet To be tested the newest algorithm found in literature based on machine learning:
+# “Estimating complicated baselines in analytical signals using the iterative training of
+# Bayesian regularized artificial neural networks. Abolfazl Valadkhani et al.
+# Analytica Chimica Acta. September 2016 DOI: 10.1016/j.aca.2016.08.046
+#
+#------------------------------------------------------------------------------------------------------
 
 from scipy.sparse import csc_matrix, eye, diags
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
 
-
-"""
-Asl algorithm
-"""
-
-
 def als(y, lam=10 ** 2, p=0.001, nIter=10):
-    """Implements an Asymmetric Least Squares Smoothing
+    """Implements an Asymmetric Least Squares (Asl) Smoothing
     baseline correction algorithm
     H C Eilers, Paul & F M Boelens, Hans. (2005). Baseline Correction with Asymmetric Least Squares Smoothing. Unpubl. Manuscr. .
 
@@ -302,16 +292,9 @@ def als(y, lam=10 ** 2, p=0.001, nIter=10):
     return z
 
 
-###################################################################################################
-
-
-"""
-Whittaker Smooth algorithm
-"""
-
-
 def WhittakerSmooth(y, w, lambda_, differences=1):
     """
+    Whittaker Smooth algorithm
     no licence, source from web
     Penalized least squares algorithm for background fitting
 
@@ -336,15 +319,9 @@ def WhittakerSmooth(y, w, lambda_, differences=1):
     return np.array(background)
 
 
-###################################################################################################
-
-"""
-airPLS algorithm
-"""
-
-
 def airPLS(y, lambda_=100, porder=1, itermax=15):
     """
+    airPLS algorithm
     no licence, source from web
     Adaptive iteratively reweighted penalized least squares for baseline fitting
 
@@ -372,16 +349,9 @@ def airPLS(y, lambda_=100, porder=1, itermax=15):
     return z
 
 
-###################################################################################################
-
-
-"""
-polynomial Fit algorithm
-"""
-
-
 def polynomialFit(x, y, order: int = 3):
     """
+    polynomial Fit algorithm
     :param x: x values
     :param y: y values
     :param order: polynomial order
@@ -391,22 +361,12 @@ def polynomialFit(x, y, order: int = 3):
     return fit
 
 
-###################################################################################################
-
-
-"""
-arPLS algorithm
-"""
-
-
 def arPLS(y, lambda_=5.e5, ratio=1.e-6, itermax=50):
     """
+    arPLS algorithm
     Baseline correction using asymmetrically reweighted penalized least squares
     smoothing.
-
     http://pubs.rsc.org/en/Content/ArticleLanding/2015/AN/C4AN01061B#!divAbstract
-
-
 
     :param y: The 1D spectrum
     :param lambda_: (Optional) Adjusts the balance between fitness and smoothness.
@@ -481,20 +441,12 @@ def arPLS(y, lambda_=5.e5, ratio=1.e-6, itermax=50):
     return z
 
 
-###################################################################################################
-
-
-"""
-Implementation of the  arPLS algorithm
-"""
-
-
 def arPLS_Implementation(y, lambdaValue=5.e4, maxValue=1e6, minValue=-1e6, itermax=10, interpolate=True):
     """
-    maxValue = maxValue of the baseline noise
-    minValue = minValue of the baseline noise
-    interpolate: Where are the peaks: interpolate the points from neighbours otherwise set them to 0.
-
+    Implementation of the  arPLS algorithm
+    :param maxValue = maxValue of the baseline noise
+    :param minValue = minValue of the baseline noise
+    :param interpolate: Where are the peaks: interpolate the points from neighbours otherwise set them to 0.
     """
 
     lenghtY = len(y)
@@ -637,7 +589,6 @@ def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
 
 def get1DdataInRange(x, y, xRange):
     """
-
     :param x:
     :param y:
     :param xRange:
@@ -686,6 +637,9 @@ def _recurseData(ii, dataList, startCondition, endCondition):
                 newData = [val for sublist in newData for val in sublist]
 
             _recurseData(ii + 1, newData, startCondition, endCondition)
+
+
+#------------------------------------------------------------------------------------------------------
 
 
 def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,

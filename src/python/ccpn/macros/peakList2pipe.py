@@ -1,5 +1,6 @@
 """
-This macro writes to an NMRPipe file style some of the CcpNmr peak properties.
+This macro writes a file containing an NmrPipe table style using some of the CcpNmr peak properties.
+It will require some final modifications to create the correct NmrPipe file for relaxation analysis...
 
 Copy this macro inside the Macro Editor module and amend it as necessary.
 Post your changes/improvements on the Ccpn Forum!
@@ -28,6 +29,7 @@ Warnings:
      - Check the assignment formatting if is as required. Default:
        format: 'NmrChain.NmrResidue.NmrAtom1, NmrAtom2; ...'
         e.g.: 'A.66.GLN.HE21, NE2'
+    - Tested only for nD spectra and hard-coded on first two dimensions. Will not work on 1D as it is now.
 
 """
 
@@ -38,7 +40,7 @@ spectrumGroupName = 'group'     # Pid for the spectrumGroup containing the spect
 peakListIndex = -1              # Use last added peakList  as default index (-1)
 
 export = True                    # Set to False if don't want to export
-outputPath = '~/myPath'          # Path dir where to export the files. FileName from the spectrum Name.
+outputPath = '~/Desktop/myPath'          # Path dir where to export the files. FileName from the spectrum Name.
 fileExt = '.tsv'                 # Extension type. Tested only with tsv
 
 

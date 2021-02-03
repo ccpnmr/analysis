@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-28 11:30:21 +0000 (Thu, January 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-03 10:22:41 +0000 (Wed, February 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -46,7 +46,6 @@ from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, 
     colourNameNoSpace, _setColourPulldown, getSpectrumColour
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Tabs import Tabs
-from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
@@ -497,9 +496,6 @@ class GeneralTab(Widget):
         self._validateFrame._matchFilePathWidths = self
         row += 1
 
-        self.pythonConsole = mainWindow.pythonConsole
-        self.logger = getLogger()
-
         Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(row, 0))
         self.chemicalShiftListPulldown = PulldownList(self, vAlign='t', grid=(row, 1),
                                                       callback=partial(self._queueChemicalShiftListChange, spectrum))
@@ -692,7 +688,6 @@ class GeneralTab(Widget):
 
     def _changeSpectrumName(self, spectrum, name):
         spectrum.rename(name)
-        self._writeLoggingMessage("spectrum.rename('%s')" % str(name))
 
     @queueStateChange(_verifyPopupApply)
     def _queueSpectrumCommentChange(self, spectrum, value):
@@ -701,7 +696,6 @@ class GeneralTab(Widget):
 
     def _changeSpectrumComment(self, spectrum, comment):
         spectrum.comment = comment
-        self._writeLoggingMessage("spectrum.comment = '%s'" % str(comment))
 
     @queueStateChange(_verifyPopupApply)
     def _queueSpectrumScaleChange(self, spectrum, textFromValue, value):
@@ -720,7 +714,6 @@ class GeneralTab(Widget):
 
     def _setNoiseLevelData(self, spectrum, noise):
         spectrum.noiseLevel = float(noise)
-        self._writeLoggingMessage("spectrum.noiseLevel = %s" % str(noise))
 
     @queueStateChange(_verifyPopupApply)
     def _queueChemicalShiftListChange(self, spectrum, item):
@@ -826,9 +819,6 @@ class DimensionsTab(Widget):
         self.spectrum = spectrum
         self.dimensions = dimensions
         self._changes = ChangeDict()
-
-        self.pythonConsole = mainWindow.pythonConsole
-        self.logger = getLogger()
 
         Label(self, text="Dimension ", grid=(1, 0), hAlign='l', vAlign='t', )
 
@@ -1123,10 +1113,6 @@ class DimensionsTab(Widget):
         """
         return self._parent._getChangeState()
 
-    def _writeLoggingMessage(self, command):
-        self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
-        self.logger.info(command)
-
     @queueStateChange(_verifyPopupApply)
     def _queueSetAssignmentTolerances(self, spectrum, dim, textFromValue, value):
         specValue = textFromValue(spectrum.assignmentTolerances[dim] or 0.0)  # this means they are not being set
@@ -1321,9 +1307,6 @@ class ContoursTab(Widget):
 
         # store the options for which spectra to copy to when clicking the copy button (if active)
         self._showCopyOptions = showCopyOptions
-
-        self.pythonConsole = mainWindow.pythonConsole
-        self.logger = getLogger()
 
         self._changes = ChangeDict()
         self._copyWidgetSet = set()
@@ -1571,10 +1554,6 @@ class ContoursTab(Widget):
                 texts = [SELECTND] + [spectrum.pid for spectrum in self._copyToSpectra if spectrum != self.spectrum]
                 self._copyToSpectraPullDown.modifyTexts(texts)
 
-    def _writeLoggingMessage(self, command):
-        self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
-        self.logger.info(command)
-
     def _cleanWidgetQueue(self):
         """Clean the items from the stateChange queue
         """
@@ -1590,14 +1569,10 @@ class ContoursTab(Widget):
             spectrum.includePositiveContours = True
             for spectrumView in spectrum.spectrumViews:
                 spectrumView.displayPositiveContours = True
-                self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
-                self.logger.info("spectrumView.displayPositiveContours = True")
         else:
             self.spectrum.includePositiveContours = False
             for spectrumView in spectrum.spectrumViews:
                 spectrumView.displayPositiveContours = False
-                self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
-                self.logger.info("spectrumView.displayPositiveContours = False")
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangeNegativeContourDisplay(self, spectrum, state):
@@ -1609,14 +1584,10 @@ class ContoursTab(Widget):
             spectrum.includeNegativeContours = True
             for spectrumView in spectrum.spectrumViews:
                 spectrumView.displayNegativeContours = True
-                self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
-                self.logger.info("spectrumView.displayNegativeContours = True")
         else:
             spectrum.includeNegativeContours = False
             for spectrumView in spectrum.spectrumViews:
                 spectrumView.displayNegativeContours = False
-                self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
-                self.logger.info("spectrumView.displayNegativeContours = False")
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangePositiveContourBase(self, spectrum, textFromValue, value):
@@ -1898,9 +1869,6 @@ class ColourTab(Widget):
 
         self._showCopyOptions = showCopyOptions
 
-        self.pythonConsole = mainWindow.pythonConsole
-        self.logger = getLogger()
-
         self._copyWidgetSet = set()
         self._topRow = 7
         self._checkBoxCol = 4
@@ -2016,10 +1984,6 @@ class ColourTab(Widget):
             if self._copyToSpectra:
                 texts = [SELECT1D] + [spectrum.pid for spectrum in self._copyToSpectra if spectrum != self.spectrum]
                 self._copyToSpectraPullDown.modifyTexts(texts)
-
-    def _writeLoggingMessage(self, command):
-        self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
-        self.logger.info(command)
 
     # spectrum sliceColour button and pulldown
     def _queueSetSpectrumColour(self, spectrum):
@@ -2145,9 +2109,6 @@ class ColourFrameABC(Frame):
         self.item = item
         self._changes = ChangeDict()
 
-        self.pythonConsole = mainWindow.pythonConsole
-        self.logger = getLogger()
-
         row = 0
         if self.POSITIVECOLOUR:
             Label(self, text="Group Positive Contour Colour", vAlign='t', hAlign='l', grid=(row, 0))
@@ -2216,10 +2177,6 @@ class ColourFrameABC(Frame):
         """Get the change state from the parent widget
         """
         return self._container._getChangeState()
-
-    def _writeLoggingMessage(self, command):
-        self.logger.info("spectrumGroup = project.getByPid('%s')" % self.spectrumGroup.pid)
-        self.logger.info(command)
 
     # spectrum positiveContourColour button and pulldown
     def _queueChangePosSpectrumColour(self, spectrum):

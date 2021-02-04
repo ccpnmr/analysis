@@ -6,7 +6,7 @@ It works in concert with a wrapper object for storing/retrieving attibute values
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-04 15:06:01 +0000 (Wed, November 04, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -53,7 +53,7 @@ from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERWORKINGPATH, setInitialPath
+from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, \
     USERMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU
@@ -137,7 +137,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.moduleArea.setContentsMargins(0, 2, 2, 0)
         self.setCentralWidget(self.moduleArea)
         self._shortcutsDict = {}
-        self.recordingMacro = False
+
         self._setupWindow()
         self._setupMenus()
         self._initProject()
@@ -153,35 +153,12 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.disabledFileIcon = self.makeDisabledFileIcon(self.fileIcon)
 
         # blank display opened later by the _initLayout if there is nothing to show otherwise
-        # self.newBlankDisplay()
         self.pythonConsoleModule = None
         self.statusBar().showMessage('Ready')
         setCurrentMouseMode(SELECT)
         self.show()
 
         self._project._undo.undoChanged.add(self._undoChangeCallback)
-
-        #   QtWidgets.QShortcut.installEventFilter(self)
-        #   # for action in self.actions():
-        #   #   print (action)
-        #   # QtWidgets.QShortcut.activated.connect(self._activatedkeySequence)
-        #     # action.activatedAmbiguously.connect(self._ambiguouskeySequence)
-        #
-        # def eventFilter(self, obj, event):
-        #   # if event.type() == QtGui.QKeySequence.ExactMatch or event.type() == QtGui.QKeySequence.PartialMatch:
-        #   #   try:
-        #   #     print ('>>>key')
-        #   #     self.statusBar().showMessage('key: %s' % str(event.key()))
-        #   #     QtGui.QKeySequence.count = 0
-        #   #
-        #   #   except Exception as es:
-        #   #     print (str(es))
-        #
-        #   if event.type() == QtCore.QEvent.KeyPress:
-        #     print ('key: %s' % str(event.key()))
-        #     return True
-        #
-        #   return False
 
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
@@ -226,7 +203,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     @property
     def modules(self):
-        "Return tuple of modules currently displayed"
+        """Return tuple of modules currently displayed
+        """
         return tuple([m for m in self.moduleArea.modules.values()])
 
     def _setupNotifiers(self):
@@ -240,9 +218,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
         self.setNotifier(self.application.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
-        # Peaks
-        # self.setNotifier(self.application.project, [Notifier.DELETE], 'Peak', GuiSpectrumDisplay._deletedPeak)
-        # self.setNotifier(self.application.project, [Notifier.RENAME], 'NmrAtom', GuiPeakListView._updateAssignmentsNmrAtom)
+        self.setNotifier(self.application.project, [Notifier.CHANGE], 'SpectrumDisplay', self._spectrumDisplayChanged)
 
     def _activatedkeySequence(self, ev):
         key = ev.key()
@@ -270,10 +246,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """
         Puts relevant information from the project into the appropriate places in the main window.
         """
-        #TODO:RASMUS: assure that isNew() and isTemporary() get added to Project; remove API calls
-        isNew = self._apiWindow.root.isModified  # a bit of a hack this, but should be correct
-
         project = self.application.project
+        isNew = project.isNew
+
         path = project.path
         self.namespace['project'] = project
         self.namespace['runMacro'] = self.pythonConsole._runMacro
@@ -282,13 +257,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.statusBar().showMessage(msg)
         msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
 
-        # write first console message to the console - not required
-        # self.pythonConsole.writeConsoleCommand(msg2)
-
         self._fillRecentProjectsMenu()
         self.pythonConsole.setProject(project)
         self._updateWindowTitle()
-        if hasattr(self.application.project._wrappedData.root, '_temporaryDirectory'):
+        if self.application.project.isTemporary:
             self.getMenuAction('Project->Archive').setEnabled(False)
         else:
             self.getMenuAction('Project->Archive').setEnabled(True)
@@ -515,16 +487,14 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     def _isTemporaryProject(self):
         """Return true if the project is temporary, i.e., not saved or updated.
         """
-        apiProject = self._project._wrappedData.root
-        return hasattr(apiProject, '_temporaryDirectory')
+        return self._project.isTemporary
 
     def _queryCloseProject(self, title, phrase):
 
-        apiProject = self._project._wrappedData.root
-        if hasattr(apiProject, '_temporaryDirectory'):
+        if self._isTemporaryProject():
             return True
 
-        if apiProject.isProjectModified():
+        if self._project.isModified:
             ss = ' and any changes will be lost'
         else:
             ss = ''
@@ -626,11 +596,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         project = None
         if result:
             if projectDir is None:
-                dialog = FileDialog(self, fileMode=FileDialog.Directory, text="Open Project",
-                                    acceptMode=FileDialog.AcceptOpen,
-                                    preferences=self.application.preferences,
-                                    initialPath=self.application.preferences.general.userWorkingPath,
-                                    pathID=USERWORKINGPATH)
+                dialog = ProjectFileDialog(parent=self, acceptMode='open')
                 dialog._show()
                 projectDir = dialog.selectedFile()
 
@@ -641,8 +607,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
                     if self.application.preferences.general.useProjectPath:
                         Logging.getLogger().debug2('mainWindow - setting current path %s' % Path.Path(projectDir).parent)
-                        setInitialPath(initialPath=Path.Path(projectDir).parent,
-                                       pathID=USERWORKINGPATH)
+                        # this dialog doesn't need to be seen, required to set initialPath
+                        _dialog = ProjectFileDialog(parent=self, acceptMode='open')
+                        _dialog.initialPath = Path.Path(projectDir).parent
 
                 except (ValueError, RuntimeError) as es:
                     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s' % str(projectDir))
@@ -921,6 +888,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     def _showCCPNTutorials(self):
         from ccpn.framework.PathsAndUrls import ccpnVideos
+
         # import webbrowser
 
         # webbrowser.open(ccpnVideos)
@@ -976,7 +944,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         pluginUserPath = self.application.preferences.general.userPluginPath
         import importlib.util
 
-        filePaths = [(aPath(r) / file) for r,d,f in os.walk(aPath(pluginUserPath)) for file in f if os.path.splitext(file)[1] == '.py']
+        filePaths = [(aPath(r) / file) for r, d, f in os.walk(aPath(pluginUserPath)) for file in f if os.path.splitext(file)[1] == '.py']
 
         for filePath in filePaths:
             # iterate and load the .py files in the plugins directory
@@ -1150,33 +1118,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
         editor.textBox.setText(text)
 
-    #Framework owns the command, this part juts get the file to run
-    # def runMacro(self, macroFile:str=None):
-    #   """
-    #   Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
-    #   runs the selected macro.
-    #   """
-    #   if macroFile is None:
-    #     dialog = FileDialog(self, fileMode=FileDialog.ExistingFile, text="Run Macro",
-    #                         acceptMode=FileDialog.AcceptOpen, preferences=self.application.preferences.general)
-    #     if os.path.exists(self.application.preferences.general.userMacroPath):
-    #       dialog.setDirectory(self.application.preferences.general.userMacroPath)
-    #     macroFile = dialog.selectedFile()
-    #     if not macroFile:
-    #       return
-    #
-    #   # Don't do this here
-    #   # if os.path.isfile(macroFile):
-    #   #   self.application.preferences.recentMacros.append(macroFile)
-    #     # self._fillRecentMacrosMenu()
-    #     self.pythonConsole._runMacro(macroFile)
-
-    # GWV 20181127: commented not used
-    # def _resetRemoveStripAction(self, strips):
-    #     "Callback on current"
-    #     for spectrumDisplay in self.spectrumDisplays:
-    #         pass  # GWV: poor solution spectrumDisplay._resetRemoveStripAction()
-
     def _highlightCurrentStrip(self, data):
         """Callback on current to highlight the strip
         """
@@ -1195,83 +1136,18 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             currentStrip._attachZPlaneWidgets()
             currentStrip.spectrumDisplay._highlightAxes(currentStrip, True)
 
+    def _spectrumDisplayChanged(self, data):
+        """Callback on spectrumDisplay change
+        """
+        trigger = data[Notifier.TRIGGER]
+        spectrumDisplay = data[Notifier.OBJECT]
+
+        if trigger == Notifier.CHANGE:
+            getLogger().debug(f'>>> SPECTRUMDISPLAY CHANGED  -  {spectrumDisplay}')
+            spectrumDisplay.setZWidgets()
+
     def printToFile(self):
         self.application.showPrintSpectrumDisplayPopup()
-
-    # Not in use, Broken after refactoring to a new GL
-    # def printToFile(self, spectrumDisplayOrStrip=None, path=None, width=800, height=800):
-    #   #TODO:LUCA: Docstring needed
-    #
-    #   try:
-    #     saveName = spectrumDisplayOrStrip.title+'.svg'
-    #   except:
-    #     saveName=''
-    #
-    #   current = self.application.current
-    #   if not spectrumDisplayOrStrip:
-    #     spectrumDisplayOrStrip = current.spectrumDisplay
-    #   if not spectrumDisplayOrStrip and current.strip:
-    #     spectrumDisplayOrStrip = current.strip.spectrumDisplay
-    #   if not spectrumDisplayOrStrip and self.spectrumDisplays:
-    #     spectrumDisplayOrStrip = self.spectrumDisplays[0]
-    #   if spectrumDisplayOrStrip:
-    #     if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
-    #       strips = spectrumDisplayOrStrip.strips
-    #       if not strips:
-    #         return
-    #
-    #     if not path:
-    #       dialog = FileDialog(parent=self,
-    #                           directory=saveName, fileMode=FileDialog.AnyFile, text='Print to File',
-    #                           acceptMode=FileDialog.AcceptSave, preferences=self.application.preferences.general,
-    #                           filter='SVG (*.svg)')
-    #       path = dialog.selectedFile()
-    #       if not path:
-    #         return
-    #       if not path.endswith(".svg"):
-    #         path = path+".svg"
-    #
-    #     xCount = yCount = 1
-    #     if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
-    #       if spectrumDisplayOrStrip.stripArrangement == 'X':
-    #         yCount = len(strips)
-    #       else:
-    #         xCount = len(strips)
-    #
-    #     with Svg(path, xCount=xCount, yCount=yCount, width=width, height=height) as printer:
-    #
-    #       # box
-    #       printer.writeLine(0, 0, width, 0)
-    #       printer.writeLine(width, 0, width, height)
-    #       printer.writeLine(width, height, 0, height)
-    #       printer.writeLine(0, height, 0, 0)
-    #
-    #       xNumber = yNumber = 0
-    #       if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
-    #         for n, strip in enumerate(strips):
-    #           if spectrumDisplayOrStrip.stripArrangement == 'X':
-    #             xOutputRegion = (0, width)
-    #             yOutputRegion = (n * height / yCount, (n + 1) * height / yCount)
-    #             yNumber = n
-    #             if n > 0:
-    #               # strip separator
-    #               printer.writeLine(0, yOutputRegion[0], width, yOutputRegion[0])
-    #           else:
-    #             xOutputRegion = (n * width / xCount, (n + 1) * width / xCount)
-    #             yOutputRegion = (0, height)
-    #             xNumber = n
-    #             if n > 0:
-    #               # strip separator
-    #               printer.writeLine(xOutputRegion[0], 0, xOutputRegion[0], height)
-    #           printer.startRegion(xOutputRegion, yOutputRegion, xNumber, yNumber)
-    #           strip._printToFile(printer)
-    #       else:
-    #         xOutputRegion = (0, width)
-    #         yOutputRegion = (0, height)
-    #         printer.startRegion(xOutputRegion, yOutputRegion)
-    #         spectrumDisplayOrStrip._printToFile(printer)
-
-    # _mouseMovedSignal = QtCore.pyqtSignal(dict)
 
     def _mousePositionMoved(self, strip: GuiStrip.GuiStrip, position: QtCore.QPointF):
         """ CCPN INTERNAL: called from ViewBox

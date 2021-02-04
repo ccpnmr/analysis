@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-20 18:10:04 +0000 (Fri, March 20, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:39 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,11 +37,11 @@ import functools
 import cProfile
 import decorator
 import inspect
+import time
 from functools import partial
 from ccpn.util.SafeFilename import getSafeFilename
-# from ccpn.core.lib.ContextManagers import undoBlock
-from ccpn.util.Logging import getLogger
-import time
+from ccpn.util.Path import aPath
+import ccpn.util.Logging as Logging
 
 
 def trace(f):
@@ -98,20 +98,10 @@ def singleton(cls):
     return cls
 
 
-def timeit(method):
-    ''' times the execution time of a function/method'''
-
-    def timed(*args, **kwds):
-        ts = time.time()
-        result = method(*args, **kwds)
-        te = time.time()
-        final = te - ts
-        m = 'Execution time for %r: %.3f ms'
-        print( m % (method.__name__, final))
-        return result
-    return timed
-
 def profile(func):
+    """Profile the wrapped function to file
+    """
+
     @functools.wraps(func)
     def profileWrapper(*args, **kwargs):
         # path = ''
@@ -216,11 +206,52 @@ def propertyUndo():
     return theDecorator
 
 
+def callList(func):
+    """
+    Decorator to give the realtime call stack for the decorated function.
+    Adds _callList=None, _callStr=None to the parameter list for the function call
+    so function can access full list.
+
+    _callList is tuple of tuples of the form:
+
+        ((caller info, simple print string), string)
+
+        caller info is: (index, name of calling method, stack info)
+
+        simple print string is repr if caller info.
+
+    The function will need either _callList=None, or **kwds adding to the parameter list.
+
+    # Not fully tested
+    """
+
+    def inner(*args, **kwargs):
+        stack = inspect.stack()
+        minStack = len(stack)  # min(stack_size, len(stack))
+        modules = [(index, inspect.getmodule(stack[index][0]))
+                   for index in range(1, minStack)]
+        callers = [(0, func.__module__, func.__name__)]
+        for index, module in modules:
+            try:
+                name = module.__name__
+            except:
+                name = '<NOT_FOUND>'
+            callers.append((index, name, stack[index][3]))
+
+        s = '{index:>5} : {module:^%i} : {name}' % 20
+        printStr = []
+        for i in range(0, len(callers)):
+            printStr.append(s.format(index=callers[i][0], module=callers[i][1], name=callers[i][2]))
+
+        kwargs['_callList'] = tuple((cc, pp) for cc, pp in zip(callers, printStr))
+
+        return func(*args, **kwargs)
+
+    return inner
+
 #----------------------------------------------------------------------------------------------
 # Adapted from from sandbox.Geerten.Refactored.decorators to fit current setup
 #----------------------------------------------------------------------------------------------
-
-import ccpn.util.Logging as Logging
 
 def _makeLogString(prefix, addSelf, func, *args, **kwds):
     """Helper function to create the log string from func, args and kwds
@@ -315,6 +346,46 @@ def _makeLogString(prefix, addSelf, func, *args, **kwds):
     return logString
 
 
+def quickCache(func):
+    """Class to implement a quick caching decorator
+
+    For speed, only the first argument of the wrapped function is taken as the key
+    """
+
+    cache = {}
+
+    def _cacheFunc(*args, **kwds):
+        try:
+            return cache[args[0]]
+        except:
+            cache[args[0]] = result = func(*args, **kwds)
+
+        return result
+
+    def cacheClearItem(item):
+        if item in cache:
+            del cache[item]
+
+    # attach external methods to _cacheFunc
+    # must be done like this, as internal functions are only created at runtime
+    _cacheFunc.cacheClear = lambda: cache.clear()
+    _cacheFunc.cachePrint = lambda: print(f'>>> {cache}')
+    _cacheFunc.cacheClearItem = cacheClearItem
+
+    return _cacheFunc
+
+
+@quickCache
+def _inspectFunc(func):
+    """Function to return the module.function:lineNo of the wrapped function
+    """
+    # this is cached to speed up the get_ methods (cache may have to be cleared if modules are reloaded)
+    # but can be cleared with _inspectFunc.cacheClear()
+    _, _line = inspect.getsourcelines(func)
+    _file = aPath(inspect.getsourcefile(func)).basename
+    return f'({_file}.{func.__name__}:{_line + 1})'
+
+
 def logCommand(prefix='', get=None, isProperty=False):
     """A decorator to log the invocation of the call to a Framework, Project, ... method.
     Use prefix to set the proper command context, e.g. 'application.' or 'project.'
@@ -324,7 +395,6 @@ def logCommand(prefix='', get=None, isProperty=False):
 
     @decorator.decorator
     def theDecorator(*args, **kwds):
-        # def logCommand(func, self, *args, **kwds):
         # to avoid potential conflicts with potential 'func' named keywords
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
@@ -343,9 +413,13 @@ def logCommand(prefix='', get=None, isProperty=False):
             else:
                 logS = _makeLogString(_pref, False, func, *args, **kwds)
 
-            application.ui.echoCommands([logS])
+            # get the trace for the func method and append to log string (cached function; may need to be cleared?)
+            # this has been removed from the logger.formatting and moved to the logging methods
+            _trace = _inspectFunc(func)
+            msg = f'{logS:90}    {_trace}'
+            application.ui.echoCommands([msg])
 
-        # blocking += 1
+        # increase blocking
         with notificationEchoBlocking(application=application):
             result = func(*args, **kwds)
 
@@ -354,45 +428,37 @@ def logCommand(prefix='', get=None, isProperty=False):
     return theDecorator
 
 
-# def logCommand__Container(prefix='', get=None, isProperty=False):
-#     """A decorator to log the invocation of the call to a Framework, Project, ... method.
-#     Use prefix to set the proper command context, e.g. 'application.' or 'project.'
-#     Use isProperty to get ' = 'args[1]
-#     """
-#
-#     @decorator.decorator
-#     def theDecorator(*args, **kwds):
-#         # def logCommand(func, self, *args, **kwds):
-#         # to avoid potential conflicts with potential 'func' named keywords
-#         func = args[0]
-#         args = args[1:]  # Optional 'self' is now args[0]
-#         self = args[0]
-#
-#         application = self.__container.project.application
-#         blocking = application._echoBlocking
-#         if blocking == 0:
-#             _pref = prefix
-#             if get == 'self':
-#                 _pref += "get('%s')." % args[0].pid
-#
-#             if isProperty:
-#                 logS = _pref + '%s = %r' % (func.__name__, args[1])
-#             else:
-#                 logS = _makeLogString(_pref, False, func, *args, **kwds)
-#
-#             application.ui.echoCommands([logS])
-#
-#         # blocking += 1
-#         application._increaseNotificationBlocking()
-#         try:
-#             result = func(*args, **kwds)
-#         finally:
-#             # blocking -= 1
-#             application._decreaseNotificationBlocking()
-#
-#         return result
-#
-#     return theDecorator
+def timeDecorator(method):
+    """calculate execution time of a function/method
+    """
+
+    def timed(*args, **kw):
+        ts = time.time()
+        result = method(*args, **kw)
+        te = time.time()
+        if 'log_time' in kw:
+            name = kw.get('log_name', method.__name__.upper())
+            kw['log_time'][name] = int((te - ts) * 1000)
+        else:
+            print('%r  %2.2f ms' % (method.__name__, (te - ts) * 1000))
+        return result
+
+    return timed
+
+
+def timeitDecorator(method):
+    """calculate execution time of a function/method
+    """
+    def timed(*args, **kwds):
+        ts = time.time()
+        result = method(*args, **kwds)
+        te = time.time()
+        final = te - ts
+        m = 'Execution time for %r: %.3f ms'
+        print(m % (method.__name__, final))
+        return result
+
+    return timed
 
 
 def debugEnter(verbosityLevel=Logging.DEBUG1):
@@ -500,6 +566,7 @@ def debug3Leave():
 # testing
 #==========================================================================================================================
 
+
 if __name__ == '__main__':
 
     def func(par, *args, flag=False, **kwds):
@@ -527,12 +594,6 @@ if __name__ == '__main__':
                 pStrings.append('{0!s}={1!r}'.format(pName, pValue))
 
         print(', '.join(pStrings))
-
-
-    # logCommand('myPrefix.')
-
-    def func2(**axisCodeEqValueKwds):
-        pass
 
 
     func('test', 1, 2, myPar='myValue')

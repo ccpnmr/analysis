@@ -4,21 +4,23 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = ""
-__credits__ = ""
-__licence__ = ("")
-__reference__ = ("")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: geertenv $"
-__dateModified__ = "$dateModified$"
-__version__ = "$Revision$"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:36 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
-# Created:
+# Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date$"
+__date__ = "$Date: 2021-02-04 11:28:53 +0000 (Thu, February 04, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -39,7 +41,7 @@ from ccpn.framework.Application import getApplication
 
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.FileDialog import SpectrumFileDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
@@ -173,8 +175,8 @@ class PathRowABC(object):
     def _getDialog(self):
 
         dialogPath = self.getDialogPath()
-        dialog = FileDialog(parent=self.buttonWidget, text='Select path', directory=str(dialogPath),
-                            fileMode=self.dialogFileMode) #, acceptMode=0)
+        dialog = SpectrumFileDialog(parent=self.buttonWidget, text='Select path', directory=str(dialogPath),
+                                    fileMode=self.dialogFileMode) #, acceptMode=0)
         choices = dialog.selectedFiles()
         if choices is not None and len(choices) > 0 and len(choices[0]) > 0:
             newPath = choices[0]

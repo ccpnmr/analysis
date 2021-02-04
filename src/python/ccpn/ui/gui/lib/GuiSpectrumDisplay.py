@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 18:39:16 +0100 (Fri, October 23, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 # import importlib, os
-
+import numpy as np
 from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial
 from copy import deepcopy
@@ -57,6 +57,8 @@ from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResidu
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget
 from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidgetAxis, GuiNdWidgetAxis
+from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
+from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import ZPlaneNavigationModes
 from ccpn.util import Colour
@@ -71,7 +73,7 @@ from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, \
-    BlankedPartial, undoBlock, notificationEchoBlocking
+    BlankedPartial, undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar, undoStackRevert
 from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
@@ -196,7 +198,7 @@ class GuiSpectrumDisplay(CcpnModule):
     MAXPEAKLABELTYPES = 0
     MAXPEAKSYMBOLTYPES = 0
 
-    # overide in specific module implementations
+    # override in specific module implementations
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'left'
@@ -396,16 +398,23 @@ class GuiSpectrumDisplay(CcpnModule):
         self._phasingTraceScale = 1.0e-7
         self.stripScaleFactor = 1.0
 
-        self._spectrumRenameNotifier = self.setNotifier(self.project,
-                                                        [Notifier.RENAME],
-                                                        Spectrum.className,
-                                                        self._spectrumRenameChanged)
+        self._registerNotifiers()
 
-        # FIXME _toolbarNotifier is a nasty notifier.
-        self._toolbarNotifier = self.setNotifier(self.project,
-                                                 [Notifier.CHANGE],
-                                                 'SpectrumDisplay',
-                                                 self._toolbarChange)
+    def clearSpectra(self):
+        """
+        :return: remove all displayed spectra
+        """
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                for specView in self.spectrumViews:
+                    if specView.spectrum is not None:
+                        self.removeSpectrum(specView.spectrum)
+
+    def _registerNotifiers(self):
+        self._spectrumChangeNotifier = self.setNotifier(self.project,
+                                                        [Notifier.CHANGE, Notifier.RENAME],
+                                                        Spectrum.className,
+                                                        self._spectrumChanged)
 
         self._spectrumViewNotifier = self.setNotifier(self.project,
                                                       [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
@@ -437,12 +446,15 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        self._spectrumGroupChanged,
                                                        onceOnly=True)
 
-    # GWV 20181124:
-    # def _unRegisterNotifiers(self):
-    #     """Unregister notifiers
-    #     """
-    #     if self._spectrumViewNotifier:
-    #         self._spectrumViewNotifier.unRegister()
+    def _postInit(self):
+        """Method to be called as last item during spectrumDisplay creation
+        Called from _newSpectrumDisplay/_createSpectrumDisplay
+        """
+        self.setToolbarButtons()
+        try:
+            self.strips[0]._CcpnGLWidget.initialiseAxes(strip=self.strips[0])
+        except:
+            getLogger().debugGL('OpenGL widget not instantiated')
 
     def _setFloatingAxes(self, xUnits, yUnits, aspectRatioMode, aspectRatios):
         """Set the aspectRatio and units for the floating axes
@@ -476,10 +488,57 @@ class GuiSpectrumDisplay(CcpnModule):
             elif strip.header.handle == handle:
                 strip.header.headerVisible = False
 
-    def _spectrumRenameChanged(self, data):
-        """Respond to a change on the name of a spectrum
+    def getSpectrumViewFromSpectrum(self, spectrum):
+        """Get the local spectrumView linked to the spectrum
         """
-        self.spectrumToolBar._spectrumRename(data)
+        specViews = [specView for specView in self.spectrumViews if specView.spectrum == spectrum]
+        if len(specViews) == 1:
+            return specViews[0]
+
+    def _refreshSpectrumView(self, spectrum):
+        specView = self.getSpectrumViewFromSpectrum(spectrum)
+        specView.buildContours = True
+
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        # fire refresh event to repaint the screen
+        GLSignals = GLNotifier(parent=spectrum)
+        targets = [objList for objList in spectrum.peakLists] + [objList for objList in spectrum.multipletLists]
+        GLSignals.emitEvent(targets=targets, triggers=[GLNotifier.GLPEAKLISTS,
+                                                       GLNotifier.GLPEAKLISTLABELS,
+                                                       GLNotifier.GLMULTIPLETLISTS,
+                                                       GLNotifier.GLMULTIPLETLISTLABELS
+                                                       ])
+
+    def _spectrumChanged(self, data):
+        """Handle notifier for changes to spectrum
+        This can also be used after creation of new spectrumView
+        """
+        # NOTE:ED - this needs a better system to determine which notifiers affect the screen
+
+        trigger = data[Notifier.TRIGGER]
+        spectrum = data[Notifier.OBJECT]
+
+        if trigger == Notifier.CHANGE:
+            specView = self.getSpectrumViewFromSpectrum(spectrum)
+            if not specView:
+                return
+
+            action = self.spectrumActionDict.get(spectrum)
+            if action:
+                # update toolbar button name
+                action.setText(spectrum.name)
+                setWidgetFont(action, size='SMALL')
+
+            # check the visibleAliasing here and update planeToolbar
+            for strip in self.strips:
+                strip._checkAliasingRange(spectrum)
+                strip._checkVisibleAliasingRange(spectrum)
+
+            self._refreshSpectrumView(spectrum)
+
+        elif trigger == Notifier.RENAME:
+            self.spectrumToolBar._spectrumRename(data)
 
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
@@ -488,11 +547,30 @@ class GuiSpectrumDisplay(CcpnModule):
             strip._updateVisibility()
         self._updateAxesVisibilty()
 
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+        spectrumView = data[Notifier.OBJECT]
+        trigger = data[Notifier.TRIGGER]
+        spectrum = spectrumView.spectrum
 
-        GLSignals = GLNotifier(parent=None)
-        if len(self.strips)>0:
-            GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict={})
+        # respond to the create/delete notifiers
+        if trigger == Notifier.CREATE:
+
+            if not self.is1D:
+                for strip in self.strips:
+                    strip._setZWidgets()
+
+            if spectrumView in self.spectrumViews:
+                self._spectrumChanged({Notifier.TRIGGER: Notifier.CHANGE,
+                                       Notifier.OBJECT : spectrum})
+
+        elif trigger == Notifier.DELETE:
+
+            if not self.is1D:
+                for strip in self.strips:
+                    strip._setZWidgets(ignoreSpectrumView=spectrumView)
+
+        elif trigger == Notifier.CHANGE:
+            if spectrumView in self.spectrumViews:
+                _spectrumViewHasChanged({Notifier.OBJECT: spectrumView})
 
     def _spectrumGroupChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
@@ -501,6 +579,7 @@ class GuiSpectrumDisplay(CcpnModule):
             trigger = data[Notifier.TRIGGER]
             if trigger == Notifier.RENAME:
                 self.spectrumGroupToolBar._spectrumGroupRename(data)
+
             elif trigger == Notifier.CHANGE:
 
                 spectrumGroup = data[Notifier.OBJECT]
@@ -508,6 +587,8 @@ class GuiSpectrumDisplay(CcpnModule):
                 if spectrumGroup.pid not in spectrumGroups:
                     return
                 self._colourChanged(spectrumGroup)
+
+                _spectrumGroupViewHasChanged({Notifier.OBJECT: spectrumGroup})
 
     def _colourChanged(self, spectrumGroup):
         if self.is1D:
@@ -632,7 +713,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         # set the new stripDirection, and redraw
         self.stripArrangement = newDirection
-        self._redrawLayout(self)
+        self._redrawLayout()
 
     def _listViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
@@ -691,7 +772,6 @@ class GuiSpectrumDisplay(CcpnModule):
             raise ValueError("stripArrangement must be either 'X', 'Y' or 'T'")
 
         AbstractWrapperObject.setParameter(self, SPECTRUMDISPLAY, STRIPARRANGEMENT, value)
-        # leave the _wrappedData as it's initialised value
 
         self.setVisibleAxes()
 
@@ -739,6 +819,12 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self.stripFrame.update()
         self._stripFrameScrollArea._updateAxisWidgets()
+
+    def setZWidgets(self):
+        """Update the widgets in the planeToolbar
+        """
+        for strip in self.strips:
+            strip._setZWidgets()
 
     def _stripRange(self):
         """Return the bounds for the tilePositions of the strips
@@ -851,40 +937,6 @@ class GuiSpectrumDisplay(CcpnModule):
         self.setColumnStretches(stretchValue=True, widths=False)
         super().resizeEvent(ev)
 
-    def _toolbarAddSpectrum(self, data):
-        """Respond to a new spectrum being added to the spectrumDisplay; add new toolbar Icon
-        """
-        # print('>>>_toolbarAddSpectrum')
-
-        trigger = data[Notifier.TRIGGER]
-        spectrum = data[Notifier.OBJECT]
-        # self.spectrumToolBar._addSpectrumViewToolButtons(spectrum.spectrumViews[0])
-
-    def _toolbarChange(self, data):
-        """Respond to a change in the spectrum Icon toolbar denoting that clicked or spectrum created/deleted
-        """
-        # FIXME this is called 1000s when dropping more spectra then usual
-        trigger = data[Notifier.TRIGGER]
-        if trigger == Notifier.CHANGE:
-            # self.spectrumToolBar._toolbarChange(self.strips[0].orderedSpectrumViews())
-
-            if data[Notifier.OBJECT] == self:
-                strips = data[Notifier.OBJECT].strips
-                if len(strips) > 0:
-                    specViews = strips[0].spectrumViews
-                    self.spectrumToolBar._toolbarChange(self.orderedSpectrumViews(specViews))
-
-                    # flag that the listViews need to be updated
-                    for strip in self.strips:
-                        strip._updateVisibility()
-                    self._updateAxesVisibilty()
-
-                    # spawn a redraw of the GL windows
-                    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-                    GLSignals = GLNotifier(parent=None)
-                    GLSignals.emitPaintEvent()
-
     def _hoverEvent(self, event):
         event.accept()
 
@@ -930,19 +982,12 @@ class GuiSpectrumDisplay(CcpnModule):
                     showWarning('Forbidden drop', 'A Single spectrum cannot be dropped onto grouped displays.')
                     return success
 
-                with undoBlock():
-                    self.displaySpectrum(obj)
+                self.displaySpectrum(obj)
 
                 if strip in self.strips:
                     self.current.strip = strip
                 elif self.current.strip not in self.strips:
                     self.current.strip = self.strips[0]
-
-                # spawn a redraw of the GL windows
-                from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-                GLSignals = GLNotifier(parent=None)
-                GLSignals.emitPaintEvent()
 
                 success = True
             elif obj is not None and isinstance(obj, PeakList):
@@ -1230,21 +1275,18 @@ class GuiSpectrumDisplay(CcpnModule):
             self.vTraceAction = False
 
             if not self.phasingFrame.pivotsSet:
-                inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints \
-                    = self.spectrumViews[0]._getTraceParams((0.0, 0.0))
-
-                self.phasingFrame.setInitialPivots((xDataDim.primaryDataDimRef.pointToValue((xMinFrequency + xMaxFrequency) / 2.0), 0.0))
+                pivot = np.mean(self.spectrumViews[0].spectrum.spectrumLimits[0])
+                self.phasingFrame.setInitialPivots((pivot, 0.0))
 
         else:
             self.hTraceAction = self.current.strip.hTraceAction.isChecked()
             self.vTraceAction = self.current.strip.vTraceAction.isChecked()
 
             if not self.phasingFrame.pivotsSet:
-                inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
-                    = self.spectrumViews[0]._getTraceParams((0.0, 0.0))
-
-                self.phasingFrame.setInitialPivots((xDataDim.primaryDataDimRef.pointToValue((xMinFrequency + xMaxFrequency) / 2.0),
-                                                    yDataDim.primaryDataDimRef.pointToValue((yMinFrequency + yMaxFrequency) / 2.0)))
+                specView = self.spectrumViews[0]
+                limits = specView.spectrum.getByAxisCodes('spectrumLimits', axisCodes=specView.strip.axisCodes)
+                pivot = [np.mean(lim) for lim in limits[:2]]
+                self.phasingFrame.setInitialPivots(pivot)
 
         for strip in self.strips:
             if isVisible:
@@ -1325,213 +1367,120 @@ class GuiSpectrumDisplay(CcpnModule):
     def _removeIndexStrip(self, value):
         self.deleteStrip(self.strips[value])
 
-    def _redrawLayout(self, spectrumDisplay):
+    def _redrawLayout(self):
         """Redraw the stripFrame with the new stripDirection
         """
-        layout = spectrumDisplay.stripFrame.getLayout()
+        layout = self.stripFrame.getLayout()
 
         if layout and layout.count() > 0:
-            spectrumDisplay.stripFrame.blockSignals(True)
-            spectrumDisplay.stripFrame.setUpdatesEnabled(False)
 
-            # clear the layout and rebuild
-            _widgets = []
+            with self.stripFrame.blockWidgetSignals():
+                # clear the layout and rebuild
+                _widgets = []
 
-            # need to be removed if not using QObjectCleanupHandler before creating new layout
-            while layout.count():
-                _widgets.append(layout.takeAt(0).widget())
+                # need to be removed if not using QObjectCleanupHandler before creating new layout
+                while layout.count():
+                    _widgets.append(layout.takeAt(0).widget())
 
-            # remember necessary layout info and create a new layout - ensures clean for new widgets
-            margins = layout.getContentsMargins()
-            space = layout.spacing()
-            QtWidgets.QWidget().setLayout(layout)
-            layout = QtWidgets.QGridLayout()
-            spectrumDisplay.stripFrame.setLayout(layout)
-            layout.setContentsMargins(*margins)
-            layout.setSpacing(space)
-
-            # reinsert strips in new order - reset minimum widths
-            if spectrumDisplay.stripArrangement == 'Y':
-
-                # horizontal strip layout
-                for m, widgStrip in enumerate(_widgets):
-                    # layout.addWidget(widgStrip, 0, m)
-
-                    tilePosition = widgStrip.tilePosition
-                    if True:  #tilePosition is None:
-                        layout.addWidget(widgStrip, 0, m)
-                        widgStrip.tilePosition = (0, m)
-                    else:
-                        layout.addWidget(widgStrip, tilePosition[0], tilePosition[1])
-
-            elif spectrumDisplay.stripArrangement == 'X':
-
-                # vertical strip layout
-                for m, widgStrip in enumerate(_widgets):
-                    # layout.addWidget(widgStrip, m, 0)
-
-                    tilePosition = widgStrip.tilePosition
-                    if True:  #tilePosition is None:
-                        layout.addWidget(widgStrip, m, 0)
-                        widgStrip.tilePosition = (0, m)
-                    else:
-                        layout.addWidget(widgStrip, tilePosition[1], tilePosition[0])
-
-            elif spectrumDisplay.stripArrangement == 'T':
-
-                # NOTE:ED - Tiled plots not fully implemented yet
-                getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(spectrumDisplay.pid))
-
-            else:
-                getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(spectrumDisplay.pid))
-
-            spectrumDisplay.stripFrame.setUpdatesEnabled(True)
-            spectrumDisplay.stripFrame.blockSignals(False)
+                self._rebuildStrip(_widgets, layout)
 
             self.showAxes()
             self.setColumnStretches(stretchValue=True)
 
-    def _removeStripFromLayout(self, spectrumDisplay, strip):
+    def _rebuildStrip(self, _widgets, layout):
+        """Rebuild the strip and insert the widgets
+        """
+        # remember necessary layout info and create a new layout - ensures clean for new widgets
+        margins = layout.getContentsMargins()
+        space = layout.spacing()
+        QtWidgets.QWidget().setLayout(layout)
+        layout = QtWidgets.QGridLayout()
+        self.stripFrame.setLayout(layout)
+        layout.setContentsMargins(*margins)
+        layout.setSpacing(space)
+        # reinsert strips in new order - reset minimum widths
+        if self.stripArrangement == 'Y':
+
+            # horizontal strip layout
+            for m, widgStrip in enumerate(_widgets):
+                # layout.addWidget(widgStrip, 0, m)
+
+                tilePosition = widgStrip.tilePosition
+                if True:  #tilePosition is None:
+                    layout.addWidget(widgStrip, 0, m)
+                    widgStrip.tilePosition = (0, m)
+                else:
+                    layout.addWidget(widgStrip, tilePosition[0], tilePosition[1])
+
+        elif self.stripArrangement == 'X':
+
+            # vertical strip layout
+            for m, widgStrip in enumerate(_widgets):
+                # layout.addWidget(widgStrip, m, 0)
+
+                tilePosition = widgStrip.tilePosition
+                if True:  #tilePosition is None:
+                    layout.addWidget(widgStrip, m, 0)
+                    widgStrip.tilePosition = (0, m)
+                else:
+                    layout.addWidget(widgStrip, tilePosition[1], tilePosition[0])
+
+        elif self.stripArrangement == 'T':
+
+            # NOTE:ED - Tiled plots not fully implemented yet
+            getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(self.pid))
+
+        else:
+            getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.pid))
+
+    def _removeStripFromLayout(self, strip):
         """Remove the current strip from the layout
         CCPN Internal
         """
-        layout = spectrumDisplay.stripFrame.getLayout()
+        layout = self.stripFrame.getLayout()
 
         if layout and layout.count() > 1:
-            spectrumDisplay.stripFrame.blockSignals(True)
-            spectrumDisplay.stripFrame.setUpdatesEnabled(False)
 
-            # clear the layout and rebuild
-            _widgets = []
+            with self.stripFrame.blockWidgetSignals():
+                # clear the layout and rebuild
+                _widgets = []
 
-            # need to be removed if not using QObjectCleanupHandler before creating new layout
-            while layout.count():
-                _widgets.append(layout.takeAt(0).widget())
-            _widgets.remove(strip)
-            strip.hide()
-            strip.setParent(None)  # set widget parent to None to hide,
-            # was previously handled by addWidget to tempStore
+                # need to be removed if not using QObjectCleanupHandler before creating new layout
+                while layout.count():
+                    _widgets.append(layout.takeAt(0).widget())
+                _widgets.remove(strip)
+                strip.hide()
+                strip.setParent(None)  # set widget parent to None to hide,
+                # was previously handled by addWidget to tempStore
 
-            # remember necessary layout info and create a new layout - ensures clean for new widgets
-            margins = layout.getContentsMargins()
-            space = layout.spacing()
-            QtWidgets.QWidget().setLayout(layout)
-            layout = QtWidgets.QGridLayout()
-            spectrumDisplay.stripFrame.setLayout(layout)
-            layout.setContentsMargins(*margins)
-            layout.setSpacing(space)
+                self._rebuildStrip(_widgets, layout)
 
-            # reinsert strips in new order - reset minimum widths
-            if spectrumDisplay.stripArrangement == 'Y':
-
-                # horizontal strip layout
-                for m, widgStrip in enumerate(_widgets):
-                    #     layout.addWidget(widgStrip, 0, m)
-
-                    tilePosition = widgStrip.tilePosition
-                    if True:  #tilePosition is None:
-                        layout.addWidget(widgStrip, 0, m)
-                        widgStrip.tilePosition = (0, m)
-                    else:
-                        layout.addWidget(widgStrip, tilePosition[0], tilePosition[1])
-
-            elif spectrumDisplay.stripArrangement == 'X':
-
-                # vertical strip layout
-                for m, widgStrip in enumerate(_widgets):
-                    #     layout.addWidget(widgStrip, m, 0)
-
-                    tilePosition = widgStrip.tilePosition
-                    if True:  #tilePosition is None:
-                        layout.addWidget(widgStrip, m, 0)
-                        widgStrip.tilePosition = (0, m)
-                    else:
-                        layout.addWidget(widgStrip, tilePosition[1], tilePosition[0])
-
-            elif spectrumDisplay.stripArrangement == 'T':
-
-                # NOTE:ED - Tiled plots not fully implemented yet
-                getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(spectrumDisplay.pid))
-
-            else:
-                getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(spectrumDisplay.pid))
-
-            spectrumDisplay.stripFrame.setUpdatesEnabled(True)
-            spectrumDisplay.stripFrame.blockSignals(False)
         else:
             raise RuntimeError('Error, stripFrame layout in invalid state')
 
-    def _restoreStripToLayout(self, spectrumDisplay, strip, currentIndex):
+    def _restoreStripToLayout(self, strip, currentIndex):
         """Restore the current strip to the layout
         CCPN Internal
         """
-        layout = spectrumDisplay.stripFrame.layout()
-        # print(spectrumDisplay, strip, currentIndex)
-
+        layout = self.stripFrame.layout()
         if layout:
-            spectrumDisplay.stripFrame.setUpdatesEnabled(False)
-            spectrumDisplay.stripFrame.blockSignals(True)
 
-            # clear the layout and rebuild
-            # need to be removed if not using QObjectCleanupHandler before creating new layout
-            _widgets = []
-            while layout.count():
-                _widgets.append(layout.takeAt(0).widget())
-            _widgets.insert(currentIndex, strip)
-            strip.show()
+            with self.stripFrame.blockWidgetSignals():
 
-            # remember necessary layout info and create a new layout - ensures clean for new widgets
-            margins = layout.getContentsMargins()
-            space = layout.spacing()
-            QtWidgets.QWidget().setLayout(layout)
-            layout = QtWidgets.QGridLayout()
-            spectrumDisplay.stripFrame.setLayout(layout)
-            layout.setContentsMargins(*margins)
-            layout.setSpacing(space)
+                # clear the layout and rebuild
+                # need to be removed if not using QObjectCleanupHandler before creating new layout
+                _widgets = []
+                while layout.count():
+                    _widgets.append(layout.takeAt(0).widget())
+                _widgets.insert(currentIndex, strip)
+                strip.show()
 
-            # reinsert strips in new order - reset minimum widths
-            if spectrumDisplay.stripArrangement == 'Y':
+                self._rebuildStrip(_widgets, layout)
 
-                # horizontal strip layout
-                for m, widgStrip in enumerate(_widgets):
-                    # layout.addWidget(widgStrip, 0, m)
+                if strip not in self.strips:
+                    for order, cStrip in enumerate(_widgets):
+                        cStrip._setStripIndex(order)
 
-                    tilePosition = widgStrip.tilePosition
-                    if True:  #tilePosition is None:
-                        layout.addWidget(widgStrip, 0, m)
-                        widgStrip.tilePosition = (0, m)
-                    else:
-                        layout.addWidget(widgStrip, tilePosition[0], tilePosition[1])
-
-            elif spectrumDisplay.stripArrangement == 'X':
-
-                # vertical strip layout
-                for m, widgStrip in enumerate(_widgets):
-                    # layout.addWidget(widgStrip, m, 0)
-
-                    tilePosition = widgStrip.tilePosition
-                    if True:  #tilePosition is None:
-                        layout.addWidget(widgStrip, m, 0)
-                        widgStrip.tilePosition = (0, m)
-                    else:
-                        layout.addWidget(widgStrip, tilePosition[1], tilePosition[0])
-
-            elif spectrumDisplay.stripArrangement == 'T':
-
-                # NOTE:ED - Tiled plots not fully implemented yet
-                getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(spectrumDisplay.pid))
-
-            else:
-                getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(spectrumDisplay.pid))
-
-            # put ccpnStrip back into strips using the api
-            # if self not in ccpnStrip.spectrumDisplay.strips:
-            if self not in spectrumDisplay.strips:
-                for order, cStrip in enumerate(_widgets):
-                    cStrip._setStripIndex(order)
-
-            spectrumDisplay.stripFrame.blockSignals(False)
-            spectrumDisplay.stripFrame.setUpdatesEnabled(True)
         else:
             raise RuntimeError('Error, stripFrame layout in invalid state')
 
@@ -1575,13 +1524,13 @@ class GuiSpectrumDisplay(CcpnModule):
 
                     # add layout handling to the undo stack
                     addUndoItem(undo=partial(self._redrawAxes, index))
-                    addUndoItem(undo=partial(self._restoreStripToLayout, self, strip, index),
-                                redo=partial(self._removeStripFromLayout, self, strip))
+                    addUndoItem(undo=partial(self._restoreStripToLayout, strip, index),
+                                redo=partial(self._removeStripFromLayout, strip))
                     # add notifier handling for the strip
                     addUndoItem(undo=partial(strip.setBlankingAllNotifiers, False),
                                 redo=partial(strip.setBlankingAllNotifiers, True))
 
-                    self._removeStripFromLayout(self, strip)
+                    self._removeStripFromLayout(strip)
                     strip.setBlankingAllNotifiers(True)
 
                     #EJB 20181213: old style delete notifiers
@@ -1704,6 +1653,7 @@ class GuiSpectrumDisplay(CcpnModule):
         if hasattr(self, '_bottomGLAxis'):
             self._bottomGLAxis.redrawAxes()
 
+    @logCommand(get='self')
     def increaseTraceScale(self):
         # self.mainWindow.traceScaleUp(self.mainWindow)
         if not self.is1D:
@@ -1714,6 +1664,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 # spawn a redraw of the strip
                 strip._updatePivot()
 
+    @logCommand(get='self')
     def decreaseTraceScale(self):
         # self.mainWindow.traceScaleDown(self.mainWindow)
         if not self.is1D:
@@ -1863,17 +1814,6 @@ class GuiSpectrumDisplay(CcpnModule):
                     addUndoItem(undo=self._redrawAxes,
                                 redo=self._redrawAxesAddMode)
 
-                    #EJB 20181213: old style delete notifiers
-                    # result = self.strips[index]._clone()
-                    # if not isinstance(result, GuiStrip):
-                    #     raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))
-                    # apiObjectsCreated = result._getApiObjectTree()
-                    # # add object delete/undelete to the undo stack
-                    # addUndoItem(undo=partial(Undo._deleteAllApiObjects, apiObjectsCreated),
-                    #             redo=partial(result._wrappedData.root._unDelete,
-                    #                          apiObjectsCreated, (result._wrappedData.topObject,))
-                    #             )
-
                     with notificationBlanking():
                         # get the visibility of strip to be copied
                         copyVisible = self.strips[index].header.headerVisible
@@ -1884,6 +1824,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
                         if not isinstance(result, GuiStrip):
                             raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))
+
                     result._finaliseAction('create')
 
                     # copy the strip Header if needed
@@ -1909,8 +1850,8 @@ class GuiSpectrumDisplay(CcpnModule):
                                 redo=partial(result.setBlankingAllNotifiers, False))
 
                     # add layout handling to the undo stack
-                    addUndoItem(undo=partial(self._removeStripFromLayout, self, result),
-                                redo=partial(self._restoreStripToLayout, self, result, index))
+                    addUndoItem(undo=partial(self._removeStripFromLayout, result),
+                                redo=partial(self._restoreStripToLayout, result, index))
                     addUndoItem(redo=partial(self._redrawAxes, index),
                                 undo=self._redrawAxesAddMode)
 
@@ -2294,32 +2235,83 @@ class GuiSpectrumDisplay(CcpnModule):
         if not isinstance(spectrum, Spectrum):
             raise TypeError('spectrum is not of type Spectrum')
 
-        with undoBlock():
-            oldIndex = self.getOrderedSpectrumViewsIndex()
+        # check not already here
+        _spectra = [specView.spectrum for specView in self.spectrumViews]
+        if spectrum in _spectra:
+            getLogger().warning(f'displaySpectrum: Spectrum {spectrum.pid} already in this display')
+            return
 
-            # need set ordering here on undo
-            # with undoStackBlocking() as addUndoItem:
-            #     addUndoItem(undo=partial(self._listViewChanged, {}))
-            #     addUndoItem(undo=partial(self.setOrderedSpectrumViewsIndex, tuple(oldIndex)))
+        _oldOrdering = self.getOrderedSpectrumViewsIndex()
 
-            newSpectrum = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
-            if newSpectrum:
-                # index = self.getOrderedSpectrumViewsIndex()
-                # self.setOrderedSpectrumViewsIndex(tuple(index))
+        with undoStackRevert(self.application) as revertStack:
+            with undoBlockWithoutSideBar(self.application):
+                # push/pop ordering
+                with undoStackBlocking(self.application) as addUndoItem:
+                    addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))
 
-                # original old code seems to be okay?
-                newInd = self.spectrumViews.index(newSpectrum)
-                index = self.getOrderedSpectrumViewsIndex()
-                index = tuple((ii + 1) if (ii >= newInd) else ii for ii in index)
-                index += (newInd,)
-                self.setOrderedSpectrumViewsIndex(tuple(index))
+                newSpectrumView = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
 
-    def _removeSpectrum(self, spectrum):
-        try:
-            # self._orderedSpectra.remove(spectrum)
-            self._orderedSpectrumViews.removeSpectrumView(spectrum)
-        except:
-            getLogger().warning('Error, %s does not exist' % spectrum)
+                if newSpectrumView:
+                    # push/pop ordering
+                    with undoStackBlocking(self.application) as addUndoItem:
+                        # add the spectrum to the end of the spectrum ordering in the toolbar
+                        index = self.getOrderedSpectrumViewsIndex()
+                        newInd = self.spectrumViews.index(newSpectrumView)
+                        index = tuple((ii + 1) if (ii >= newInd) else ii for ii in index)
+                        index += (newInd,)
+
+                        self.setToolbarButtons(tuple(index))
+                        addUndoItem(redo=partial(self.setToolbarButtons, tuple(index)))
+                else:
+                    # notify the stack to revert to the pre-context manager stack
+                    revertStack(True)
+
+    @logCommand(get='self')
+    def removeSpectrum(self, spectrum):
+        """Remove a spectrum from the spectrumDisplay
+        """
+        spectrum = self.project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
+        if not isinstance(spectrum, Spectrum):
+            raise TypeError('spectrum must be of type Spectrum/str')
+
+        sv = [(spectrum, specView) for specView in self.spectrumViews if specView.spectrum == spectrum]
+        if len(sv) == 1:
+
+            _, specView = sv[0]
+
+            # explicitly change the ordering
+            _oldOrdering = self.getOrderedSpectrumViewsIndex()
+            _index = self.spectrumViews.index(specView)
+            _newOrdering = [od if od < _index else od - 1 for ii, od in enumerate(_oldOrdering) if od != _index]
+
+            # need undo block stuff here
+            with undoBlockWithoutSideBar(self.application):
+
+                # push/pop ordering
+                with undoStackBlocking(self.application) as addUndoItem:
+                    addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))
+
+                # delete the spectrumView
+                specView._delete()
+
+                # push/pop ordering
+                with undoStackBlocking(self.application) as addUndoItem:
+                    self.setToolbarButtons(tuple(_newOrdering))
+                    addUndoItem(redo=partial(self.setToolbarButtons, tuple(_newOrdering)))
+        else:
+            getLogger().warning('No spectrumView found')
+
+    def setToolbarButtons(self, order=None):
+        """Setup the buttons in the toolbar for each spectrum
+        If order is a tuple of integers, then the ordering is based on the new order
+
+        :param order: None or tuple
+        """
+
+        if not self.isGrouped:
+            if order:
+                self.setOrderedSpectrumViewsIndex(order)
+            self.spectrumToolBar.setButtonsFromSpectrumViews(self.orderedSpectrumViews(self.spectrumViews))
 
     @logCommand(get='self')
     def makeStripPlot(self, peaks=None, nmrResidues=None,
@@ -2396,6 +2388,8 @@ class GuiSpectrumDisplay(CcpnModule):
     def _hideWidget(self, widget):
         """ A decorator to hide/show the widget
         """
+        # store visibility
+        _visible = widget.isVisible()
         widget.setVisible(False)
         try:
             # transfer control to the calling function
@@ -2405,7 +2399,7 @@ class GuiSpectrumDisplay(CcpnModule):
             raise es
 
         finally:
-            widget.setVisible(True)
+            widget.setVisible(_visible)
 
     def attachZPlaneWidgets(self):
         """Attach the strip zPlane navigation widgets for the strips to the correct containers
@@ -2500,64 +2494,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
 
 #=========================================================================================
-
-# def _deletedPeak(peak: Peak):
-#     """Function for notifiers.
-#     #CCPNINTERNAL
-#     """
-#
-#     for spectrumView in peak.peakList.spectrum.spectrumViews:
-#         spectrumView.strip.spectrumDisplay._deletedPeak(peak)
-
-
-def _spectrumHasChanged(data):
-    spectrum = data[Notifier.OBJECT]
-
-    project = spectrum.project
-    apiDataSource = spectrum._wrappedData
-    for spectrumDisplay in project.spectrumDisplays:
-        action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
-        if action:  # spectrum might not be in all displays
-            # update toolbar button name
-            action.setText(spectrum.name)
-            setWidgetFont(action, size='SMALL')
-
-        # check the visibleAliasing here and update planeToolbar
-        for strip in spectrumDisplay.strips:
-            strip._checkAliasingRange(spectrum)
-            strip._checkVisibleAliasingRange(spectrum)
-
-    # force redraw of the spectra
-    for specView in spectrum.spectrumViews:
-        specView.buildContours = True
-
-    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-    # fire refresh event to repaint the screen
-    GLSignals = GLNotifier(parent=spectrum)
-    targets = [objList for objList in spectrum.peakLists] + [objList for objList in spectrum.multipletLists]
-    GLSignals.emitEvent(targets=targets, triggers=[GLNotifier.GLPEAKLISTS,
-                                                   GLNotifier.GLPEAKLISTLABELS,
-                                                   GLNotifier.GLMULTIPLETLISTS,
-                                                   GLNotifier.GLMULTIPLETLISTLABELS
-                                                   ])
-
-
-def _deletedSpectrumView(project: Project, apiSpectrumView):
-    """tear down SpectrumDisplay when new SpectrumView is deleted - for notifiers"""
-    spectrumDisplay = project._data2Obj[apiSpectrumView.spectrumDisplay]
-    apiDataSource = apiSpectrumView.dataSource
-
-    # remove toolbar action (button)
-    # NBNB TBD FIXME get rid of API object from code
-    action = spectrumDisplay.spectrumActionDict.get(apiDataSource)  # should always be not None
-    if action:
-        spectrumDisplay.spectrumToolBar.removeAction(action)
-        del spectrumDisplay.spectrumActionDict[apiDataSource]
-
-    if not spectrumDisplay.is1D:
-        for strip in spectrumDisplay.strips:
-            strip._setZWidgets(ignoreSpectrumView=apiSpectrumView)
 
 
 GuiSpectrumDisplay.processSpectrum = GuiSpectrumDisplay.displaySpectrum  # ejb - from SpectrumDisplay

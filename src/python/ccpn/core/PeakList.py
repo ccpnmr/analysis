@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-15 18:35:35 +0100 (Tue, September 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
-import math
 from typing import Sequence, List, Optional
 
 from ccpn.util.Common import percentage
@@ -38,7 +37,7 @@ from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.util.Logging import getLogger
-from ccpn.core.PMIListABC import PMIListABC
+from ccpn.core._implementation.PMIListABC import PMIListABC
 
 
 GAUSSIANMETHOD = 'gaussian'
@@ -98,13 +97,14 @@ class PeakList(PMIListABC):
     def _finaliseAction(self, action: str):
         """Subclassed to notify changes to associated peakListViews
         """
-        super()._finaliseAction(action=action)
+        if not super()._finaliseAction(action):
+            return
 
         # this is a can-of-worms for undelete at the minute
         try:
             if action in ['change']:
                 for plv in self.peakListViews:
-                    plv._finaliseAction(action=action)
+                    plv._finaliseAction(action)
         except Exception as es:
             raise RuntimeError('Error _finalising peakListViews: %s' % str(es))
 
@@ -526,7 +526,7 @@ class PeakList(PMIListABC):
         # divide by 2 to get the double-width tolerance, i.e. the width of the region - CHECK WITH GEERTEN
         tolerances = tuple(tol / 2 for tol in self.spectrum.assignmentTolerances)
 
-        limits = self.spectrum.spectrumLimits
+        limits = sorted(self.spectrum.spectrumLimits)
         selectedRegion = []
         minDropFactor = self.project._appBase.preferences.general.peakDropFactor
 
@@ -560,7 +560,7 @@ class PeakList(PMIListABC):
     #     spectrumView = self.findSpectrumView(peakList.spectrum)
     #     if spectrumView is None:
     #         return False
-    #     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+    #     displayIndices = spectrumView.dimensionOrdering
     #     orderedAxes = self.orderedAxes[2:]
     #
     #     for ii, displayIndex in enumerate(displayIndices[2:]):

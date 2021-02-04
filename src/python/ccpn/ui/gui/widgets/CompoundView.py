@@ -5,7 +5,7 @@ Credits to Tim Stevens, University of Cambridge December 2010-2012
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:37 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,7 +30,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, QtSvg, QtPrintSupport
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
 from math import atan2, sin, cos, sqrt, degrees, radians, hypot, pi
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USEREXPORTPDFPATH
+from ccpn.ui.gui.widgets.FileDialog import PDFFileDialog
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 
 
@@ -494,10 +494,7 @@ class CompoundView(QGraphicsView, Base):
             printer.setResolution(newRes)
 
             fType = 'PDF (*.pdf)'
-            dialog = FileDialog(self, acceptMode=1, fileMode=0, filter=fType,
-                                preferences=self.preferences,
-                                initialPath=self.preferences.general.userWorkingPath,
-                                pathID=USEREXPORTPDFPATH)
+            dialog = PDFFileDialog(parent=self, acceptMode='export', fileFilter=fType)
             dialog._show()
             filePaths = dialog.selectedFiles()
             if filePaths and len(filePaths) > 0:
@@ -791,7 +788,7 @@ class CompoundView(QGraphicsView, Base):
 
 
 # def getAddPoint(self):
-#     ''' Set the compound on the specific position on the graphic scene. '''
+#     """ Set the compound on the specific position on the graphic scene. """
 #     compoundView = CompoundView
 #     globalPos = QtGui.QCursor.pos()
 #     pos = compoundView.mapFromGlobal(globalPos)
@@ -3411,7 +3408,7 @@ def importSmiles(smilesString, compoundName='Unnamed', project=None):
 
 
 def setCompound(self, compound, replace=True):
-    ''' Set the compound on the graphic scene. '''
+    """ Set the compound on the graphic scene. """
     if compound is not self.compound:
 
         if replace or not self.compound:

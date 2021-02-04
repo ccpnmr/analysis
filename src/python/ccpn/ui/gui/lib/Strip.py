@@ -4,7 +4,7 @@ Module Documentation.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-06 19:17:39 +0000 (Fri, November 06, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -74,7 +74,7 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
         if positions[ii]:
             _setStripAxisPosition(strip, axisIndex=stripAxisIndex, position=positions[ii], update=True)
 
-        if widths:# is not None:      # and strip._CcpnGLWidget.aspectRatioMode == 0:
+        if widths:  # is not None:      # and strip._CcpnGLWidget.aspectRatioMode == 0:
             try:
                 if widths[ii]:
 
@@ -85,7 +85,7 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
                     elif isinstance(widths[ii], str):
                         # if the list item is a str with value, full, reset the corresponding axis
                         if widths[ii] == 'full':
-                            _setStripRange(strip, axisIndex=stripAxisIndex, update=True)
+                            _setStripToLimits(strip, axisIndex=stripAxisIndex, update=True)
 
                         elif widths[ii] == 'default' and stripAxisIndex < 2:
                             # if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H
@@ -121,9 +121,9 @@ def _setStripAxisWidth(strip, axisIndex, width, update=True):
         strip.orderedAxes[axisIndex].width = width
 
 
-def _setStripRange(strip, axisIndex, update=True):
-    range = strip.getAxisRange(axisIndex)
-    strip.setAxisRange(axisIndex=axisIndex, range=range, update=update)
+def _setStripToLimits(strip, axisIndex, update=True):
+    range = strip.getAxisLimits(axisIndex)
+    strip.setAxisRegion(axisIndex=axisIndex, range=range, update=update)
 
 
 def copyStripPosition(self, toStrip):
@@ -182,7 +182,7 @@ def isPositionWithinfBounds(strip: GuiStrip, shift: ChemicalShift, axis: object)
     axisIndex = strip.axisOrder.index(axis.code)
 
     for spectrumView in strip.spectrumViews:
-        spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+        spectrumIndices = spectrumView.dimensionOrdering
         index = spectrumIndices[axisIndex]
         if index:
             minima.append(spectrumView.spectrum.aliasingLimits[index][0])

@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-06 19:17:39 +0000 (Fri, November 06, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -218,8 +218,6 @@ class GuiStrip(Frame):
         self.showActivePhaseTrace = True
         self.pivotLine = None
         self._lastClickedObjects = None
-
-        # self._CcpnGLWidget._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
 
         # initialise the notifiers
         self.setStripNotifiers()
@@ -444,6 +442,11 @@ class GuiStrip(Frame):
             peak = peaks[-1]
             peakTableModule = self.application.showPeakTable(peakList=peak.peakList)
 
+    def setStackingMode(self, value):
+        pass
+
+    def getStackingMode(self):
+        pass
 
     def _updateStripLabel(self, callbackDict):
         """Update the striplabel if it represented a NmrResidue that has changed its id.
@@ -1101,33 +1104,8 @@ class GuiStrip(Frame):
             if spec.zPlaneFrame and _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.value:
                 spec.zPlaneFrame.removeZPlaneWidgets()
 
-    # GWV 20181127: moved to a single notifier in GuiMainWindow
-    # def _highlightCurrentStrip(self, data):
-    #     "Callback to highlight the axes of current strip"
-    #     # self.plotWidget.highlightAxes(self is self.current.strip)
-    #     pass
-    #
-    #     try:
-    #         # Only do something in case of the old and new current strip
-    #         previousStrip = data[Notifier.PREVIOUSVALUE]
-    #         if self is previousStrip:
-    #             self._CcpnGLWidget.highlightCurrentStrip(False)
-    #         elif self is self.current.strip:
-    #             self._CcpnGLWidget.highlightCurrentStrip(True)
-    #
-    #         # # spawn a redraw of the GL windows
-    #         # from ccpn.util.CcpnOpenGL import GLNotifier
-    #         # GLSignals = GLNotifier(parent=None)
-    #         # GLSignals.emitPaintEvent()
-    #
-    #     except Exception as es:
-    #         getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
-
     def _newPhasingTrace(self):
-        try:
-            self._CcpnGLWidget.newTrace()
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        self._CcpnGLWidget.newTrace()
 
     def _setPhasingPivot(self):
 
@@ -1150,20 +1128,14 @@ class GuiStrip(Frame):
         self._updatePivot()
 
     def removePhasingTraces(self):
-        try:
-            self._CcpnGLWidget.clearStaticTraces()
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        self._CcpnGLWidget.clearStaticTraces()
 
     def _updatePivot(self):
         # this is called if pivot entry at bottom of display is updated and then "return" key used
 
         # update the static traces from the phasing console
         # redraw should update the display
-        try:
-            self._CcpnGLWidget.rescaleStaticTraces()
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        self._CcpnGLWidget.rescaleStaticTraces()
 
     def setTraceScale(self, traceScale):
         for spectrumView in self.spectrumViews:
@@ -1354,58 +1326,40 @@ class GuiStrip(Frame):
         phasingFrame.slider1.setValue(vals[1])
         phasingFrame.pivotEntry.set(vals[2])
 
-        try:
-            self._CcpnGLWidget.clearStaticTraces()
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        self._CcpnGLWidget.clearStaticTraces()
 
         # for spectrumView in self.spectrumViews:
         #     spectrumView._changedPhasingDirection()
 
     def _updatePhasing(self):
-        try:
-            if self.spectrumDisplay.phasingFrame.isVisible():
-                colour = getColours()[GUISTRIP_PIVOT]
-                self._CcpnGLWidget.setInfiniteLineColour(self.pivotLine, colour)
-                self._CcpnGLWidget.rescaleStaticTraces()
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated', spectrumDisplay=self.spectrumDisplay, strip=self)
+        if self.spectrumDisplay.phasingFrame.isVisible():
+            colour = getColours()[GUISTRIP_PIVOT]
+            self._CcpnGLWidget.setInfiniteLineColour(self.pivotLine, colour)
+            self._CcpnGLWidget.rescaleStaticTraces()
 
     def _toggleShowActivePhaseTrace(self):
         """Toggles whether the active phasing trace is visible.
         """
-        try:
-            self.showActivePhaseTrace = not self.showActivePhaseTrace
-            self._CcpnGLWidget.showActivePhaseTrace = self.showActivePhaseTrace
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        self.showActivePhaseTrace = not self.showActivePhaseTrace
+        self._CcpnGLWidget.showActivePhaseTrace = self.showActivePhaseTrace
 
     def _toggleShowSpectraOnPhasing(self):
         """Toggles whether spectraOnPhasing is visible.
         """
-        try:
-            self.showSpectraOnPhasing = not self.showSpectraOnPhasing
-            self._CcpnGLWidget.showSpectraOnPhasing = self.showSpectraOnPhasing
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        self.showSpectraOnPhasing = not self.showSpectraOnPhasing
+        self._CcpnGLWidget.showSpectraOnPhasing = self.showSpectraOnPhasing
 
     def _showSpectraOnPhasing(self):
         """Displays spectraOnPhasing in strip.
         """
-        try:
-            self.showSpectraOnPhasing = True
-            self._CcpnGLWidget.showSpectraOnPhasing = True
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        self.showSpectraOnPhasing = True
+        self._CcpnGLWidget.showSpectraOnPhasing = True
 
     def _hideSpectraOnPhasing(self):
         """Hides spectraOnPhasing in strip.
         """
-        try:
-            self.showSpectraOnPhasing = False
-            self._CcpnGLWidget.showSpectraOnPhasing = False
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        self.showSpectraOnPhasing = False
+        self._CcpnGLWidget.showSpectraOnPhasing = False
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # symbolLabelling
@@ -1696,14 +1650,6 @@ class GuiStrip(Frame):
             getLogger().warning('Error setting mark at current cursor position')
             raise (es)
 
-    # # TODO: remove apiRuler (when notifier at bottom of module gets rid of it)
-    # def _initRulers(self):
-    #
-    #     for mark in self._project.marks:
-    #         apiMark = mark._wrappedData
-    #         for apiRuler in apiMark.rulers:
-    #             self.plotWidget._addRulerLine(apiRuler)
-
     def getObjectsUnderMouse(self):
         """Get the selected objects currently under the mouse
         """
@@ -1726,18 +1672,12 @@ class GuiStrip(Frame):
             format = "%s: %.3f  %s: %.4g"
 
     def autoRange(self):
-        try:
-            self._CcpnGLWidget.autoRange()
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+        self._CcpnGLWidget.autoRange()
 
     def zoom(self, xRegion: typing.Tuple[float, float], yRegion: typing.Tuple[float, float]):
         """Zooms strip to the specified region.
         """
-        try:
-            self._CcpnGLWidget.zoom(xRegion, yRegion)
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
+        self._CcpnGLWidget.zoom(xRegion, yRegion)
 
     def zoomX(self, x1: float, x2: float):
         """
@@ -1828,36 +1768,24 @@ class GuiStrip(Frame):
         """
         Zooms x/y axes to maximum of data.
         """
-        try:
-            self._CcpnGLWidget.resetAllZoom()
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+        self._CcpnGLWidget.resetAllZoom()
 
     def _resetYZoom(self):
         """
         Zooms y axis to maximum of data.
         """
-        try:
-            self._CcpnGLWidget.resetYZoom()
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+        self._CcpnGLWidget.resetYZoom()
 
     def _resetXZoom(self):
         """
         Zooms x axis to maximum value of data.
         """
-        try:
-            self._CcpnGLWidget.resetXZoom()
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+        self._CcpnGLWidget.resetXZoom()
 
     def _storeZoom(self):
         """Adds current region to the zoom stack for the strip.
         """
-        try:
-            self._CcpnGLWidget.storeZoom()
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+        self._CcpnGLWidget.storeZoom()
 
     @property
     def zoomState(self):
@@ -1882,26 +1810,17 @@ class GuiStrip(Frame):
     def _restoreZoom(self, zoomState=None):
         """Restores last saved region to the zoom stack for the strip.
         """
-        try:
-            self._CcpnGLWidget.restoreZoom(zoomState)
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+        self._CcpnGLWidget.restoreZoom(zoomState)
 
     def _previousZoom(self):
         """Changes to the previous zoom for the strip.
         """
-        try:
-            self._CcpnGLWidget.previousZoom()
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+        self._CcpnGLWidget.previousZoom()
 
     def _nextZoom(self):
         """Changes to the next zoom for the strip.
         """
-        try:
-            self._CcpnGLWidget.nextZoom()
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+        self._CcpnGLWidget.nextZoom()
 
     def _setZoomPopup(self):
         from ccpn.ui.gui.popups.ZoomPopup import ZoomPopup
@@ -1909,45 +1828,29 @@ class GuiStrip(Frame):
         popup = ZoomPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
         popup.exec_()
 
+    @logCommand(get='self')
     def resetZoom(self):
-        try:
-            self._CcpnGLWidget.resetZoom()
-            self.pythonConsole.writeConsoleCommand("strip.resetZoom()", strip=self)
-            getLogger().info("strip = application.getByGid('%s')\nstrip.resetZoom()" % self.pid)
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+        self._CcpnGLWidget.resetZoom()
 
     def _zoomIn(self):
         """Zoom in to the strip.
         """
-        try:
-            self._CcpnGLWidget.zoomIn()
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+        self._CcpnGLWidget.zoomIn()
 
     def _zoomOut(self):
         """Zoom out of the strip.
         """
-        try:
-            self._CcpnGLWidget.zoomOut()
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+        self._CcpnGLWidget.zoomOut()
 
     def _panSpectrum(self, direction: str = 'up'):
         """Pan the spectrum with the cursor keys
         """
-        try:
-            self._CcpnGLWidget._panSpectrum(direction)
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+        self._CcpnGLWidget._panSpectrum(direction)
 
     def _movePeaks(self, direction: str = 'up'):
         """Move the peaks with the cursors
         """
-        try:
-            self._CcpnGLWidget._movePeaks(direction)
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+        self._CcpnGLWidget._movePeaks(direction)
 
     def _resetRemoveStripAction(self):
         """Update interface when a strip is created or deleted.
@@ -2365,6 +2268,28 @@ class GuiStrip(Frame):
         """
         self._CcpnGLWidget.setAxisWidth(axisIndex, width, rescale=rescale, update=update)
 
+    def getAxisRegion(self, axisIndex):
+        """Return the region currently displayed in the strip as tuple(min, max) for given axis.
+        axisIndex is the screen axis; X is 0, Y is 1
+        """
+        return self._CcpnGLWidget.getAxisRegion(axisIndex)
+
+    def setAxisRegion(self, axisIndex, width, rescale=True, update=True):
+        """Set the axis region for the strip.
+        if rescale is False, the symbols, etc., must explicitly be refreshed
+        """
+        self._CcpnGLWidget.setAxisRegion(axisIndex, width, rescale=rescale, update=update)
+
+    def getAxisRegions(self) -> typing.Tuple[typing.Tuple, ...]:
+        """Return a tuple if tuples for the regions ((min, max), ...)
+        Visible direction of axes is not preserved
+        """
+        regions = []
+        for axis, position, width in zip(self.orderedAxes, self.positions, self.widths):
+            regions.append((position - width / 2.0, position + width / 2.0))
+
+        return tuple(regions)
+
 
 # Notifiers:
 def _updateDisplayedMarks(data):
@@ -2445,7 +2370,6 @@ def _axisRegionChanged(cDict):
         finally:
             strip.beingUpdated = False
 
-
 # NB The following two notifiers could be replaced by wrapper notifiers on
 # Mark, 'change'. But it would be rather more clumsy, so leave it as it is.
 
@@ -2461,19 +2385,3 @@ def _axisRegionChanged(cDict):
 #     """Notifier function for deleting rulers"""
 #     for strip in project.strips:
 #         strip.plotWidget._removeRulerLine(apiRuler)
-
-
-# Add notifier functions to Project
-
-
-# NB This notifier must be implemented as an API postInit notifier,
-# As it relies on Axs that are not yet created when 'created' notifiers are executed
-def _setupGuiStrip(project: Project, apiStrip):
-    """Set up graphical parameters for completed strips - for notifiers.
-    """
-    strip = project._data2Obj[apiStrip]
-    try:
-        strip._CcpnGLWidget.initialiseAxes(strip=strip)
-        # strip._CcpnGLWidget._resetAxisRange()
-    except:
-        getLogger().debugGL('OpenGL widget not instantiated')

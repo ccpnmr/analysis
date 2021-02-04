@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-13 09:51:39 +0100 (Tue, October 13, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:36 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,53 +25,39 @@ __date__ = "$Date: 2020-05-04 17:15:05 +0000 (Mon, May 04, 2020) $"
 # Start of code
 #=========================================================================================
 
-import json
 import os
 from functools import partial
 from collections import OrderedDict as OD
 from ccpn.util.Common import PrintFormatter
-from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
-from ccpn.util.FrozenDict import FrozenDict
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERNEFPATH
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from PyQt5 import QtGui, QtWidgets, QtCore
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ImportTreeCheckBoxes, RENAMEACTION, BADITEMACTION
-from ccpn.ui.gui.popups.ExportDialog import ExportDialog
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
+from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.nef import StarIo
 from ccpn.core.lib import CcpnNefIo
-from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, catchExceptions
+from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.core.Project import Project
 from ccpn.util.nef import NefImporter as Nef
-from ccpn.util.AttrDict import AttrDict
-from ccpn.ui.gui.widgets.Frame import ScrollableFrame
-from ccpn.ui.gui.widgets.Tabs import Tabs
-from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.TextEditor import PlainTextEditor
 from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.Base import SignalBlocking
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.framework.PathsAndUrls import nefValidationPath
 
 
 INVALIDTEXTROWCHECKCOLOUR = QtGui.QColor('crimson')
 INVALIDTEXTROWNOCHECKCOLOUR = QtGui.QColor('darkorange')
-INVALIDBUTTONCHECKCOLOUR = QtGui.QColor('lightpink')              # button background
-INVALIDBUTTONNOCHECKCOLOUR = QtGui.QColor('navajowhite')              # button background
-# INVALIDTABLEFILLSELECTCOLOUR = QtGui.QColor('salmon')
+INVALIDBUTTONCHECKCOLOUR = QtGui.QColor('lightpink')
+INVALIDBUTTONNOCHECKCOLOUR = QtGui.QColor('navajowhite')
 INVALIDTABLEFILLCHECKCOLOUR = QtGui.QColor('lightpink')
 INVALIDTABLEFILLNOCHECKCOLOUR = QtGui.QColor('navajowhite')
 
@@ -290,7 +276,7 @@ class NefDictFrame(Frame):
         self._optionsSplitter.addWidget(self._optionsFrame)
 
         self._frameOptionsNested = Frame(self._optionsFrame, setLayout=True, showBorder=False, grid=(1, 0))
-        self.frameOptionsFrame = Frame(self._frameOptionsNested, setLayout=True, showBorder=False, grid=(1, 0))#, vAlign='t')
+        self.frameOptionsFrame = Frame(self._frameOptionsNested, setLayout=True, showBorder=False, grid=(1, 0))  #, vAlign='t')
         self.fileFrame = Frame(self._optionsFrame, setLayout=True, showBorder=False, grid=(2, 0))
         self._filterLogFrame = MoreLessFrame(self._optionsFrame, name='Filter Log', showMore=False, grid=(3, 0), gridSpan=(1, 1))
         self._treeSplitter.addWidget(self._filterLogFrame)
@@ -333,7 +319,7 @@ class NefDictFrame(Frame):
         """Fill the treeView from the nef dictionary
         """
         if self.project:
-            with self.blockWidgetSignals(projectBlanking=False):
+            with self.blockWidgetSignals():
                 if self._nefLoader:
                     # populate from the _nefLoader
                     self.nefTreeView.fillTreeView(self._nefLoader._nefDict)
@@ -642,7 +628,6 @@ class NefDictFrame(Frame):
 
             row = 0
             if self._renameValid(item=item, saveFrame=saveFrame):
-
                 # editFrame = Frame(self.frameOptionsFrame, setLayout=True, grid=(row, 0), showBorder=False)
                 Label(self.frameOptionsFrame, text=singular, grid=(row, 0))
                 saveFrameData = LineEdit(self.frameOptionsFrame, text=str(itemName), grid=(row, 1))
@@ -857,10 +842,10 @@ class NefDictFrame(Frame):
                                                       tableColourFunc=None)
 
     handleSaveFrames['nef_peak_restraint_links'] = partial(handle_treeView_selection,
-                                                              prefix='nef_peak_restraint_',
-                                                              mappingCode='nef_peak_restraint_links',
-                                                              errorCode='nef_peak_restraint_links',
-                                                              tableColourFunc=None)
+                                                           prefix='nef_peak_restraint_',
+                                                           mappingCode='nef_peak_restraint_links',
+                                                           errorCode='nef_peak_restraint_links',
+                                                           tableColourFunc=None)
 
     handleSaveFrames['ccpn_sample'] = partial(handle_treeView_selection,
                                               prefix='ccpn_sample_component_',
@@ -961,10 +946,10 @@ class NefDictFrame(Frame):
                                                        tableColourFunc=None)
 
     _setBadSaveFrames['nef_peak_restraint_links'] = partial(_set_bad_saveframe,
-                                                               prefix='nef_peak_restraint_',
-                                                               mappingCode='nef_peak_restraint_links',
-                                                               errorCode='nef_peak_restraint_links',
-                                                               tableColourFunc=None)
+                                                            prefix='nef_peak_restraint_',
+                                                            mappingCode='nef_peak_restraint_links',
+                                                            errorCode='nef_peak_restraint_links',
+                                                            tableColourFunc=None)
 
     _setBadSaveFrames['ccpn_sample'] = partial(_set_bad_saveframe,
                                                prefix='ccpn_sample_component_',
@@ -1059,9 +1044,9 @@ class NefDictFrame(Frame):
                                                      )
 
     applyCheckBoxes['nef_peak_restraint_links'] = partial(apply_checkBox_item,
-                                                             prefix='nef_peak_restraint_',
-                                                             mappingCode='nef_peak_restraint_links',
-                                                             )
+                                                          prefix='nef_peak_restraint_',
+                                                          mappingCode='nef_peak_restraint_links',
+                                                          )
 
     applyCheckBoxes['ccpn_sample'] = partial(apply_checkBox_item,
                                              prefix='ccpn_sample_component_',
@@ -1116,9 +1101,9 @@ class NefDictFrame(Frame):
                                                 )
 
     applyCheckBoxes['nef_peak_restraint_link'] = partial(apply_checkBox_item,
-                                                prefix='nef_peak_restraint_',
-                                                mappingCode='nef_peak_restraint_link',
-                                                )
+                                                         prefix='nef_peak_restraint_',
+                                                         mappingCode='nef_peak_restraint_link',
+                                                         )
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1174,7 +1159,7 @@ class NefDictFrame(Frame):
                 self._nefTables = {}
                 frame, table = self._addTableToFrame(_data, _name.upper())
                 self._tableSplitter.addWidget(frame)
-                self._nefWidgets = [frame,]
+                self._nefWidgets = [frame, ]
 
                 # get the group name add fetch the correct mapping
                 mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
@@ -1398,7 +1383,7 @@ class ImportNefPopup(CcpnDialogMainWidget):
                                                                           (ll - 1) if ll > 1 else ''))
 
     def getActiveNefReader(self):
-        """Get teh current active nef reader for the dialog
+        """Get the current active nef reader for the dialog
         """
         return list(self._nefWindows.values())[self._activeImportWindow]._nefReader
 
@@ -1518,6 +1503,7 @@ if __name__ == '__main__':
 
     from ccpn.util.nef import NefImporter as Nef
 
+
     # load the file and the validate dict
     _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
     _loader.loadFile(TESTNEF)
@@ -1560,11 +1546,7 @@ if __name__ == '__main__':
     name = _loader.getName()
     project = application.newProject(name or DEFAULTNAME)
 
-    project._wrappedData.shiftAveraging = False
-    # with suspendSideBarNotifications(project=self.project):
-
-    from ccpn.core.lib import CcpnNefIo
-
+    project.shiftAveraging = False
 
     nefReader = CcpnNefIo.CcpnNefReader(application)
     _loader._attachVerifier(nefReader.verifyProject)
@@ -1606,7 +1588,7 @@ if __name__ == '__main__':
     val = dialog.exec_()
     print('>>> dialog exit {}'.format(val))
 
-    import ccpn.util.nef.nef as Nef
+    import ccpn.util.nef.nef as NefModule
 
     # NOTE:ED - by default pidList=None selects everything in the project
     # from ccpn.core.Chain import Chain
@@ -1660,5 +1642,5 @@ if __name__ == '__main__':
 
     nefWriter = CcpnNefIo.CcpnNefWriter(project)
     localNefDict = nefWriter.exportProject(expandSelection=True, pidList=None)
-    result = Nef.compareDataBlocks(_loader._nefDict, localNefDict, options)
-    # Nef.printCompareList(result, 'LOADED', 'local', options)
+    result = NefModule.compareDataBlocks(_loader._nefDict, localNefDict, options)
+    # NefModule.printCompareList(result, 'LOADED', 'local', options)

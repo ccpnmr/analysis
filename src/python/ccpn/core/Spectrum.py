@@ -40,7 +40,7 @@ See doc strings of these methods for detailed documentation
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-03 10:01:40 +0000 (Thu, December 03, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -192,6 +192,7 @@ class Spectrum(AbstractWrapperObject):
 
     # Internal NameSpace
     _AdditionalAttribute = 'AdditionalAttribute'
+    _ReferenceSubstancesPids = '_ReferenceSubstancesPids'
 
     _referenceSpectrumHit = None
     _snr = None
@@ -926,6 +927,20 @@ class Spectrum(AbstractWrapperObject):
         else:
             raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
+    @property
+    @_includeInDimensionalCopy
+    def blockSizes(self) -> Tuple[int, ...]:
+        """BlockSizes -  per dimension"""
+        return tuple(self._apiDataStore.blockSizes)
+
+    @blockSizes.setter
+    def blockSizes(self, value: Sequence):
+        apiDataSource = self._wrappedData
+        if len(value) == apiDataSource.numDim:
+            self._apiDataStore.blockSizes = value
+        else:
+            raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
+
     #TODO: add setter for dimensionTypes
     @property
     def dimensionTypes(self) -> Tuple[str, ...]:
@@ -1254,6 +1269,45 @@ class Spectrum(AbstractWrapperObject):
         self._setDataDimRefAttribute('refValue', value)
 
     @property
+    def referenceSubstances(self):
+        """
+        :return: a list of substances
+        """
+        pids = self._ccpnInternalData.get(self._ReferenceSubstancesPids) or []
+        objs = [self.project.getByPid(pid) for pid in pids if pid is not None]
+        return objs
+
+    @referenceSubstances.setter
+    def referenceSubstances(self, substances):
+        """
+        """
+        from ccpn.core.Substance import Substance
+
+        pids = [su.pid for su in substances if isinstance(su, Substance)]
+        if isinstance(self._ccpnInternalData, dict):
+            tempCcpn = self._ccpnInternalData.copy()
+            tempCcpn[self._ReferenceSubstancesPids] = pids
+            self._ccpnInternalData = tempCcpn
+        else:
+            raise ValueError("Substance linked spectra CCPN internal must be a dictionary")
+
+    @property
+    def referenceSubstance(self):
+        """
+        Deprecated. See referenceSubstances
+        """
+        getLogger().warning('spectrum.referenceSubstance is deprecated. Use referenceSubstances instead. ')
+        substance = None
+        if len(self.referenceSubstances) > 0:
+            substance = self.referenceSubstances[-1]
+        return substance
+
+    @referenceSubstance.setter
+    def referenceSubstance(self, substance):
+        getLogger().warning('spectrum.referenceSubstance is deprecated. Use referenceSubstances instead. ')
+        self.referenceSubstances = [substance]
+
+    @property
     @_includeInDimensionalCopy
     def assignmentTolerances(self) -> Tuple[Optional[float], ...]:
         """Assignment tolerance in axis unit (ppm), per dimension."""
@@ -1334,15 +1388,24 @@ class Spectrum(AbstractWrapperObject):
     def spectrumLimits(self) -> Tuple[Tuple[Optional[float], Optional[float]], ...]:
         """\- (*(float,float)*)\*dimensionCount
 
-        tuple of tuples of (lowerLimit, higherLimit) for spectrum
+        tuple of tuples of (ppmPoint(1), ppmPoint(n+1)) for each spectrum axis
+        direction of axis is preserved
         """
         ll = []
         for ii, ddr in enumerate(self._mainDataDimRefs()):
             if ddr is None:
                 ll.append((None, None))
             else:
-                ll.append(tuple(sorted((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints + 1)))))
+                ll.append((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints + 1)))
         return tuple(ll)
+
+    @property
+    @_includeInDimensionalCopy
+    def axesReversed(self) -> Tuple[Optional[bool], ...]:
+        """Return whether any of the axes are reversed
+        May contain None for undefined axes
+        """
+        return tuple((x and x.isAxisReversed) for x in self._mainExpDimRefs())
 
     @property
     def magnetisationTransfers(self) -> Tuple[MagnetisationTransferTuple, ...]:
@@ -1451,7 +1514,7 @@ class Spectrum(AbstractWrapperObject):
     def intensities(self, value: np.ndarray):
         self._intensities = value
 
-        # # temporary hack for showing straight the result of intensities change
+        # NOTE:ED - temporary hack for showing straight the result of intensities change
         for spectrumView in self.spectrumViews:
             spectrumView.refreshData()
 
@@ -1464,11 +1527,7 @@ class Spectrum(AbstractWrapperObject):
             return np.array([])
 
         if self._positions is None:
-            spectrumLimits = self.spectrumLimits[0]
-            pointCount = self.pointCounts[0]
-            # WARNING: below assumes that spectrumLimits are "backwards" (as is true for ppm)
-            scale = (spectrumLimits[0] - spectrumLimits[1]) / pointCount
-            self._positions = spectrumLimits[1] + scale * np.arange(pointCount, dtype='float32')
+            self._positions = self.getPpmArray(dimension=1)
 
         return self._positions
 
@@ -1477,7 +1536,7 @@ class Spectrum(AbstractWrapperObject):
         # self._scaleChanged = True
         self._positions = value
 
-        # # temporary hack for showing straight the result of intensities change
+        # NOTE:ED - temporary hack for showing straight the result of intensities change
         for spectrumView in self.spectrumViews:
             spectrumView.refreshData()
 
@@ -1659,7 +1718,7 @@ class Spectrum(AbstractWrapperObject):
                 if sg.pid in items:
                     series += (items[sg.pid],)
                 else:
-                    series += (None, )
+                    series += (None,)
             return series
 
     @_seriesItems.setter
@@ -1737,7 +1796,6 @@ class Spectrum(AbstractWrapperObject):
         """
         seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
         if oldPid in (seriesItems if seriesItems else ()):
-
             # insert new items with the new pid
             oldItems = seriesItems[oldPid]
             del seriesItems[oldPid]
@@ -1770,7 +1828,6 @@ class Spectrum(AbstractWrapperObject):
         # useful for storing an item
         seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
         if id in seriesItems:
-
             del seriesItems[id]
             self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, seriesItems)
 
@@ -1857,7 +1914,7 @@ class Spectrum(AbstractWrapperObject):
         if dimension is None or dimension < 1 or dimension > self.dimensionCount:
             raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
-        return self.spectrumReferences[dimension-1].valueToPoint(value)
+        return self.spectrumReferences[dimension - 1].valueToPoint(value)
 
     def point2ppm(self, value, axisCode=None, dimension=None):
         """Convert point value to ppm for axis corresponding to to either axisCode or
@@ -1874,7 +1931,7 @@ class Spectrum(AbstractWrapperObject):
         if dimension is None or dimension < 1 or dimension > self.dimensionCount:
             raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
-        return self.spectrumReferences[dimension-1].pointToValue(value)
+        return self.spectrumReferences[dimension - 1].pointToValue(value)
 
     def getPpmArray(self, axisCode=None, dimension=None):
         """Return a numpy array with ppm values of the grid points along axisCode or dimension
@@ -1890,8 +1947,12 @@ class Spectrum(AbstractWrapperObject):
         if dimension is None or dimension < 1 or dimension > self.dimensionCount:
             raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
-        result = numpy.linspace(self.spectrumLimits[dimension-1][0], self.spectrumLimits[dimension-1][1],
-                                self.pointCounts[dimension-1])
+        spectrumLimits = self.spectrumLimits[dimension - 1]
+        axisReversed = self.axesReversed[dimension -1]
+        valuePerPoint = self.valuesPerPoint[dimension - 1] * (-1.0 if axisReversed else 1.0)
+
+        result = np.linspace(spectrumLimits[0], spectrumLimits[1] - valuePerPoint, self.pointCounts[dimension - 1])
+
         return result
 
     def getDefaultOrdering(self, axisOrder):
@@ -2672,24 +2733,26 @@ class Spectrum(AbstractWrapperObject):
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated spectrumViews instances
         """
-        super()._finaliseAction(action=action)
+        if not super()._finaliseAction(action):
+            return
 
         # notify peak/integral/multiplet list
         if action in ['create', 'delete']:
             for peakList in self.peakLists:
-                peakList._finaliseAction(action=action)
+                peakList._finaliseAction(action)
             for multipletList in self.multipletLists:
-                multipletList._finaliseAction(action=action)
+                multipletList._finaliseAction(action)
             for integralList in self.integralLists:
-                integralList._finaliseAction(action=action)
+                integralList._finaliseAction(action)
 
         # propagate the rename to associated spectrumViews
         if action in ['change']:
             for specView in self.spectrumViews:
-                if self._scaleChanged:
-                    # force a rebuild of the contours/etc.
-                    specView.buildContoursOnly = True
-                specView._finaliseAction(action=action)
+                if specView:
+                    if self._scaleChanged:
+                        # force a rebuild of the contours/etc.
+                        specView.buildContoursOnly = True
+                    specView._finaliseAction(action)
 
             if self._scaleChanged:
                 self._scaleChanged = False
@@ -2697,13 +2760,13 @@ class Spectrum(AbstractWrapperObject):
                 # notify peaks/multiplets/integrals that the scale has changed
                 for peakList in self.peakLists:
                     for peak in peakList.peaks:
-                        peak._finaliseAction(action=action)
+                        peak._finaliseAction(action)
                 for multipletList in self.multipletLists:
                     for multiplet in multipletList.multiplets:
-                        multiplet._finaliseAction(action=action)
+                        multiplet._finaliseAction(action)
                 for integralList in self.integralLists:
                     for integral in integralList.integrals:
-                        integral._finaliseAction(action=action)
+                        integral._finaliseAction(action)
 
             # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
             #

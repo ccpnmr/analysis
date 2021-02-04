@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:35 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -92,7 +92,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     _storedState = {}
 
     def __init__(self, parent=None, windowTitle='', setLayout=False,
-                 orientation=HORIZONTAL, size=None, **kwds):
+                 orientation=HORIZONTAL, size=None, minimumSize=None, **kwds):
 
         super().__init__(parent)
         Base._init(self, setLayout=setLayout, **kwds)
@@ -110,6 +110,12 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             self._size = QtCore.QSize(*size) if size else None
         except Exception as es:
             raise TypeError('bad size {}'.format(size))
+
+        # get the initial size as a QSize
+        try:
+            self._minimumSize = QtCore.QSize(*minimumSize) if minimumSize else None
+        except Exception as es:
+            raise TypeError('bad minimumSize {}'.format(size))
 
         # set up the mainWidget area
         self.mainWidget = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
@@ -185,11 +191,28 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
         _size = QtCore.QSize(size.width() if size else self.sizeHint().width(),
                              size.height() if size else self.sizeHint().height())
+
+        # get the initial minimumSize as a QSize
+        try:
+            minimumSize = self._minimumSize if isinstance(self._minimumSize, QtCore.QSize) else QtCore.QSize(*self._minimumSize) if self._minimumSize else None
+        except Exception as es:
+            raise TypeError('bad minimumSize {}'.format(self._minimumSize))
+
+        _minimumSize = QtCore.QSize(minimumSize.width() if minimumSize else self.sizeHint().width(),
+                             minimumSize.height() if minimumSize else self.sizeHint().height())
+
         # set the fixed sized policies as required
         if self.FIXEDWIDTH:
             self.setFixedWidth(_size.width())
+        elif minimumSize:
+            # set minimumSize from settings
+            self.setMinimumWidth(_minimumSize.width())
+        
         if self.FIXEDHEIGHT:
             self.setFixedHeight(_size.height())
+        elif minimumSize:
+            # set minimumSize from settings
+            self.setMinimumHeight(_minimumSize.height())
 
         self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Fixed if self.FIXEDWIDTH else QtWidgets.QSizePolicy.Preferred,
                                       QtWidgets.QSizePolicy.Fixed if self.FIXEDHEIGHT else QtWidgets.QSizePolicy.Preferred, )

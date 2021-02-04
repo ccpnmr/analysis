@@ -11,7 +11,7 @@ from __future__ import unicode_literals
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-23 10:34:51 +0000 (Mon, November 23, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:39 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -819,6 +819,31 @@ def _SortByMatch(item):
     """
     return -item[2]  # sort from high to low
 
+def _atoi(text):
+    return int(text) if text.isdigit() else text
+
+def _naturalKeyObjs(obj, theProperty='name'):
+    text = getattr(obj, theProperty)
+    return [_atoi(c) for c in re.split(r'(\d+)', text) ]
+
+def naturalSortList(ll, reverse=True):
+    """
+    :param ll: a list of strings
+    :return: a sorted list by natural sort
+    """
+    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    alphanumKey = lambda key:[convert(c) for c in re.split('([0-9]+)', key)]
+    return sorted(ll, key=alphanumKey, reverse=reverse)
+
+def sortObjectByName(objs, reverse=True):
+    """
+    :param objs: list of objects that contains the property name. E.g. sample.name
+    :param reverse: bool. False: descending order.
+                          True: ascending order.
+    :return: None
+    Sorts the objects by digit if present in the name, otherwise alphabetically.
+    """
+    objs.sort(key=_naturalKeyObjs, reverse=reverse)
 
 def getAxisCodeMatch(axisCodes, refAxisCodes, exactMatch=False, allMatches=False) -> OrderedDict:
     """Return an OrderedDict containing the mapping from the refAxisCodes to axisCodes

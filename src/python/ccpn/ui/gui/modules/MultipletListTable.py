@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:32:50 +0100 (Tue, September 22, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:35 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -258,10 +258,10 @@ class MultipletListTableWidget(GuiTable):
         self._handleDroppedItems(pids, MultipletList, self.mLwidget)
 
     def _getTableColumns(self, multipletList):
-        '''Add default columns  plus the ones according with multipletList.spectrum dimension
+        """Add default columns  plus the ones according with multipletList.spectrum dimension
          format of column = ( Header Name, value, tipText, editOption)
          editOption allows the user to modify the value content by doubleclick
-         '''
+         """
 
         columnDefs = []
 
@@ -326,13 +326,13 @@ class MultipletListTableWidget(GuiTable):
         self._updateTable()
 
     def _updateAllModule(self, data=None):
-        '''Updates the table and the settings widgets'''
+        """Updates the table and the settings widgets"""
         # self.peakListTable.clear()
         self._updateTable()
 
     def _updateTable(self, ):
-        '''Display the multiplets on the table for the selected MultipletList.
-        Obviously, If the multiplet has not been previously deleted and flagged isDeleted'''
+        """Display the multiplets on the table for the selected MultipletList.
+        Obviously, If the multiplet has not been previously deleted and flagged isDeleted"""
 
         # self.setObjectsAndColumns(objects=[], columns=[]) #clear current table first
         self._selectedMultipletList = self.project.getByPid(self.mLwidget.getText())
@@ -399,7 +399,7 @@ class MultipletListTableWidget(GuiTable):
     #     self._updateTable(multiplets=multipletList.multiplets)
 
     def _actionCallback(self, data, *args):
-        ''' If current strip contains the double clicked multiplet will navigateToPositionInStrip '''
+        """ If current strip contains the double clicked multiplet will navigateToPositionInStrip """
         from ccpn.core.PeakList import PeakList
         from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 
@@ -454,7 +454,7 @@ class MultipletListTableWidget(GuiTable):
                     self.peakListTable._updateTable(useSelectedPeakList=False, peaks=peaks, peakList=peakList)
 
     def _populateMultipletPeaksOnTable(self):
-        '''populates a dedicate peak table containing peaks of the current multiplet '''
+        """populates a dedicate peak table containing peaks of the current multiplet """
 
         peaks = OrderedSet()
         [peaks.add(peak) for mt in self.current.multiplets for peak in mt.peaks]

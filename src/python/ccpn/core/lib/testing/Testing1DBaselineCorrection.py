@@ -1,7 +1,7 @@
 from ccpn.core.lib.SpectrumLib import arPLS_Implementation, als, WhittakerSmooth, arPLS, airPLS, polynomialFit, nmrGlueBaselineCorrector
 import numpy as np
 
-'''
+"""
 
 Run Examples
 
@@ -14,7 +14,7 @@ arPLS_Spectrum = project.spectra[-1]
 airPLS_Spectrum = project.spectra[-1]
 polynomialFitSpectrum = project.spectra[-1]
 
-'''
+"""
 
 
 def runExample_arPLS_Implementation(spectrum, lambdaValue=5.e4, maxValue=1e6, minValue=-1e6, itermax=10, interpolate=True):
@@ -28,7 +28,7 @@ def runExample_arPLS_Implementation(spectrum, lambdaValue=5.e4, maxValue=1e6, mi
 
 
 def runExample_als(spectrum, lam=10 ** 2, p=0.001, nIter=10):
-    ''' default parameters: lam=10**2, p=0.001, nIter=10 '''
+    """ default parameters: lam=10**2, p=0.001, nIter=10 """
     xOriginal, yOriginal, spectrumName = spectrum.positions, spectrum.intensities, spectrum.name
     baselineAls = als(yOriginal, lam, p, nIter)
     yNew = yOriginal - baselineAls

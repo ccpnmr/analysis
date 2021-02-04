@@ -4,7 +4,7 @@ GUI Display Strip class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -38,7 +38,6 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlock, newObject
 
 
-# SV_TITLE = '_Strip'
 STRIPTILING = 'stripTiling'
 STRIPTILEPOSITION = 'stripTilePosition'
 
@@ -162,91 +161,6 @@ class Strip(AbstractWrapperObject):
         pids = self.spectrumDisplay._getSpectrumGroups()
         return tuple(self.project.getByPid(x) for x in pids)
 
-    # def _retrieveOrderedSpectrumViews(self, pid):
-    #   for dd in self.project.dataSets:
-    #     if dd.title == SV_TITLE:
-    #       for dt in dd.data:
-    #         if dt.name == SV_SPECTRA:
-    #           if pid in dt.parameters:
-    #             return dt.parameters[self.pid]
-    #   return None
-    #
-    # def _storeOrderedSpectrumViews(self, spectra):
-    #   for dd in self.project.dataSets:
-    #     if dd.title == SV_TITLE:
-    #       for dt in dd.data:
-    #         if dt.name == SV_SPECTRA:
-    #           dt.setParameter(self.pid, spectra)
-    #           setattr(self, SV_SPECTRA, spectra)
-    #           return
-    #       dt = dd.newData(name=SV_SPECTRA)
-    #       dt.setParameter(self.pid, spectra)
-    #       setattr(self, SV_SPECTRA, spectra)
-    #       return
-    #   dd = self.project.newDataSet(title=SV_TITLE)
-    #   dt = dd.newData(name=SV_SPECTRA)
-    #   dt.setParameter(self.pid, spectra)
-    #   setattr(self, SV_SPECTRA, spectra)
-    #
-    #   self.spectrumDisplay._ccpnInternalData[SV_SPECTRA] = spectra
-    #
-    # def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
-    #   """The spectra attached to the strip (ordered)"""
-    #
-    #   if hasattr(self, SV_SPECTRA):
-    #     return tuple(x.spectrum for x in getattr(self, SV_SPECTRA) if 'Deleted' not in x.pid)
-    #   else:
-    #     # create a dataset with the spectrumViews attached (will be alphabetical) if doesn't exist
-    #     # store by pids
-    #
-    #     values = self._retrieveOrderedSpectrumViews(self.pid)
-    #     if values is None:
-    #       self._storeOrderedSpectrumViews(tuple(x.pid for x in self.spectrumViews))
-    #       values = tuple(x for x in self.spectrumViews)
-    #     else:
-    #       values = tuple(self.project.getByPid(x) for x in values if self.project.getByPid(x))
-    #
-    #     setattr(self, SV_SPECTRA, values)
-    #     return tuple(x.spectrum for x in values)
-    #
-    # def orderedSpectrumViews(self, includeDeleted=False) -> Optional[Tuple]:
-    #   """The spectra attached to the strip (ordered)"""
-    #
-    #   if hasattr(self, SV_SPECTRA):
-    #     return getattr(self, SV_SPECTRA)
-    #   else:
-    #     # create a dataset with the spectrumViews attached (will be alphabetical) if doesn't exist
-    #     # store by pid
-    #     values = self._retrieveOrderedSpectrumViews(self.pid)
-    #     if values is None:
-    #       self._storeOrderedSpectrumViews(tuple(x.pid for x in self.spectrumViews))
-    #       values = tuple(x for x in self.spectrumViews)
-    #     else:
-    #       values = tuple(self.project.getByPid(x) for x in values if self.project.getByPid(x))
-    #
-    #     setattr(self, SV_SPECTRA, values)
-    #     return values
-    #
-    # def appendSpectrumView(self, spectrumView):
-    #   # retrieve the list from the dataset
-    #   # append to the end
-    #   # write back to the dataset
-    #   if hasattr(self, SV_SPECTRA):
-    #     spectra = (getattr(self, SV_SPECTRA), (spectrumView,))
-    #     spectra = tuple(j for i in spectra for j in i)
-    #   else:
-    #     spectra = tuple(spectrumView,)
-    #
-    #   self._storeOrderedSpectrumViews(tuple(x.pid for x in spectra))
-    #   self.spectrumDisplay._ccpnInternalData[SV_SPECTRA] = tuple(x.pid for x in spectra)
-    #
-    #   values = tuple(x for x in spectra)
-    #   setattr(self, SV_SPECTRA, values)
-    #
-    # def removeSpectrumView(self, spectrumView):
-    #   # TODO:ED handle deletion - may not need anything here
-    #   pass
-
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -260,7 +174,8 @@ class Strip(AbstractWrapperObject):
     def _finaliseAction(self, action: str):
         """Spawn _finaliseAction notifiers for spectrumView tree attached to this strip.
         """
-        super()._finaliseAction(action)
+        if not super()._finaliseAction(action):
+            return
 
         if action in ['create', 'delete']:
             for sv in self.spectrumViews:
@@ -412,7 +327,7 @@ class Strip(AbstractWrapperObject):
 
     @logCommand(get='self')
     def displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = ()):
-        self._displaySpectrum(spectrum, axisOrder)
+        return self._displaySpectrum(spectrum, axisOrder)
 
     def _displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = (), useUndoBlock=True):
         """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
@@ -485,72 +400,6 @@ class Strip(AbstractWrapperObject):
             result = self._project._data2Obj[apiStrip.findFirstStripSpectrumView(spectrumView=obj)]
 
         return result
-
-    # def peakIsInPlane(self, peak: Peak) -> bool:
-    #     """Is peak in currently displayed planes for strip?
-    #     """
-    #     spectrumView = self.findSpectrumView(peak.peakList.spectrum)
-    #     if spectrumView is None:
-    #         return False
-    #     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
-    #     orderedAxes = self.orderedAxes[2:]
-    #
-    #     for ii, displayIndex in enumerate(displayIndices[2:]):
-    #         if displayIndex is not None:
-    #             # If no axis matches the index may be None
-    #             zPosition = peak.position[displayIndex]
-    #             if not zPosition:
-    #                 return False
-    #
-    #             # zPlaneSize = 0.
-    #             # zRegion = orderedAxes[ii].region
-    #             # if zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize:
-    #             #     return False
-    #
-    #     return True
-
-        # apiSpectrumView = self._wrappedData.findFirstSpectrumView(
-        #   dataSource=peak._wrappedData.peakList.dataSource)
-        #
-        # if apiSpectrumView is None:
-        #   return False
-        #
-        #
-        # orderedAxes = self.orderedAxes
-        # for ii,zDataDim in enumerate(apiSpectrumView.orderedDataDims[2:]):
-        #   if zDataDim:
-        #     zPosition = peak.position[zDataDim.dimensionIndex]
-        #     # NBNB W3e do not think this should add anything - the region should be set correctly.
-        #     # RHF, WB
-        #     # zPlaneSize = zDataDim.getDefaultPlaneSize()
-        #     zPlaneSize = 0.
-        #     zRegion = orderedAxes[2+ii].region
-        #     if zPosition < zRegion[0]-zPlaneSize or zPosition > zRegion[1]+zPlaneSize:
-        #       return False
-        # #
-        # return True
-
-    # def peakIsInFlankingPlane(self, peak: Peak) -> bool:
-    #     """Is peak in planes flanking currently displayed planes for strip?
-    #     """
-    #     spectrumView = self.findSpectrumView(peak.peakList.spectrum)
-    #     if spectrumView is None:
-    #         return False
-    #     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
-    #     orderedAxes = self.orderedAxes[2:]
-    #
-    #     for ii, displayIndex in enumerate(displayIndices[2:]):
-    #         if displayIndex is not None:
-    #             # If no axis matches the index may be None
-    #             zPosition = peak.position[displayIndex]
-    #             if not zPosition:
-    #                 return False
-    #             zRegion = orderedAxes[ii].region
-    #             zWidth = orderedAxes[ii].width
-    #             if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
-    #                 return True
-    #
-    #     return False
 
     @logCommand(get='self')
     def peakPickPosition(self, inPosition) -> Tuple[Tuple[Peak, ...], Tuple[PeakList, ...]]:
@@ -866,24 +715,3 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
 
 SpectrumDisplay.copyStrip = _copyStrip
 del _copyStrip
-
-# #TODO:RASMUS: if this is a SpectrumDisplay thing, it should not be here
-# # SpectrumDisplay.orderedStrips property
-# def getter(self) -> Tuple[Strip, ...]:
-#     ff = self._project._data2Obj.get
-#     return tuple(ff(x) for x in self._wrappedData.orderedStrips)
-#
-#
-# def setter(self, value: Sequence):
-#     value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
-#     self._wrappedData.orderedStrips = tuple(x._wrappedData for x in value)
-#
-#
-# SpectrumDisplay.orderedStrips = property(getter, setter, None,
-#                                          "ccpn.Strips in displayed order ")
-# del getter
-# del setter
-
-# SHOULD NOT BE HERE like this
-# Drag-n-drop functions:
-#Strip.processSpectrum = Strip.displaySpectrum

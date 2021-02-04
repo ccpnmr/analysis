@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-16 17:29:24 +0000 (Mon, March 16, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:28 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,7 +30,7 @@ from scipy import signal
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import IntegralList as ApiIntegralList
 from ccpn.core.Spectrum import Spectrum
-from ccpn.core.PMIListABC import PMIListABC
+from ccpn.core._implementation.PMIListABC import PMIListABC
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D, estimateNoiseLevel1D, _filterROI1Darray
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.decorators import logCommand
@@ -39,15 +39,15 @@ from ccpn.util.Logging import getLogger
 
 # moved on peakUtil ####################################################################
 def _createIntersectingLine(x, y):
-    '''create a straight line with x values like the original spectrum and y value from the estimated noise level'''
+    """create a straight line with x values like the original spectrum and y value from the estimated noise level"""
     return [_oldEstimateNoiseLevel1D(x, y)] * len(x)
 
 
 def _getIntersectionPoints(x, y, line):
-    '''
+    """
     :param line: x points of line to intersect y points
     :return: list of intersecting points
-    '''
+    """
     z = y - line
     dx = x[1:] - x[:-1]
     cross = np.sign(z[:-1] * z[1:])
@@ -67,8 +67,8 @@ def _pairIntersectionPoints(intersectionPoints):
 
 
 def _getPeaksLimits(x, y, intersectingLine=None):
-    '''Get the limits of each peak of the spectrum given an intersecting line. If
-     intersectingLine is None, it is calculated by the STD of the spectrum'''
+    """Get the limits of each peak of the spectrum given an intersecting line. If
+     intersectingLine is None, it is calculated by the STD of the spectrum"""
     if intersectingLine is None:
         intersectingLine = _createIntersectingLine(x, y)
     limits = _getIntersectionPoints(x, y, intersectingLine)
@@ -130,13 +130,13 @@ class IntegralList(PMIListABC):
     def _finaliseAction(self, action: str):
         """Subclassed to notify changes to associated integralListViews
         """
-        super()._finaliseAction(action=action)
+        if not super()._finaliseAction(action):
+            return
 
-        # this is a can-of-worms for undelete at the minute
         try:
             if action in ['change']:
                 for ilv in self.integralListViews:
-                    ilv._finaliseAction(action=action)
+                    ilv._finaliseAction(action)
         except Exception as es:
             raise RuntimeError('Error _finalising integralListViews: %s' % str(es))
 

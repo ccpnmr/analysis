@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:36 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,7 +31,7 @@ from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.framework.PathsAndUrls import ccpn2Url
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Entry import Entry
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERMACROSPATH
+from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
@@ -86,11 +86,7 @@ class SubmitMacroPopup(CcpnDialogMainWidget):
     def _selectMacro(self):
 
         parent = self.getParent()
-        preferences = parent.application.preferences
-        dialog = FileDialog(parent=parent, fileMode=FileDialog.ExistingFile, text='Select Macro',
-                            preferences=preferences,
-                            initialPath=preferences.general.userMacroPath,
-                            pathID=USERMACROSPATH)
+        dialog = MacrosFileDialog(parent=parent, acceptMode='select')
         dialog._show()
         path = dialog.selectedFile()
         if path:

@@ -4,7 +4,7 @@ Test code for NmrResidue
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-09-20 11:04:13 +0100 (Wed, September 20, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:30 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -762,13 +762,13 @@ class NmrStretchTest(WrapperTesting):
 
 class NmrResidueTest(WrapperTesting):
     # Path of project to load (None for new project
-    projectPath = 'CcpnCourse2c'
+    projectPath = 'V3ProjectForTests.ccpn'
 
     def test_reassign_attributes(self):
         nchain = self.project.getByPid('NC:A')
         nchain0 = self.project.getByPid('NC:@-')
 
-        nr1, nr2 = sorted(nchain.nmrResidues)[8:10]
+        nr1, nr2 = sorted(nchain.nmrResidues)[3:5]
         res1 = nr1.residue
         res2 = nr2.residue
         res3 = sorted(self.project.chains[0].residues)[2]
@@ -778,64 +778,64 @@ class NmrResidueTest(WrapperTesting):
         nr2.deassign()
 
         # self.assertEqual(nr2.longPid, "NmrResidue:A.@2.ARG")
-        self.assertEqual(nr2.longPid, "NmrResidue:A.@2.")
+        self.assertEqual(nr2.longPid, "NmrResidue:A.@15.")
 
-        target = self.project.getByPid('NR:A.2.LYS')
-        target.rename('.LYS')
-        self.assertEqual(target.longPid, "NmrResidue:A.@11.LYS")
+        target = self.project.getByPid('NR:A.2.GLU')
+        target.rename('.GLU')
+        self.assertEqual(target.longPid, "NmrResidue:A.@12.GLU")
         newNr = nchain0.newNmrResidue()
-        self.assertEqual(newNr.longPid, "NmrResidue:@-.@89.")
+        self.assertEqual(newNr.longPid, "NmrResidue:@-.@21.")
         nr3.moveToNmrChain(nchain0)
-        self.assertEqual(nr3.longPid, "NmrResidue:@-.3.GLU")
+        self.assertEqual(nr3.longPid, "NmrResidue:@-.3.SER")
 
         # newNr.residue = res3
         nchain0.assignSingleResidue(newNr, res3)
 
-        self.assertEqual(newNr.longPid, "NmrResidue:A.3.GLU")
+        self.assertEqual(newNr.longPid, "NmrResidue:A.3.SER")
         nchain.rename('X')
         self.assertEqual(nchain.longPid, "NmrChain:X")
-        self.assertEqual(nr2.longPid, "NmrResidue:X.@2.")
+        self.assertEqual(nr2.longPid, "NmrResidue:X.@15.")
 
         newNr.rename(None)
-        self.assertEqual(newNr.longPid, "NmrResidue:X.@89.")
+        self.assertEqual(newNr.longPid, "NmrResidue:X.@21.")
         self.undo.undo()
-        self.assertEqual(newNr.longPid, "NmrResidue:X.3.GLU")
+        self.assertEqual(newNr.longPid, "NmrResidue:X.3.SER")
         self.undo.redo()
-        self.assertEqual(newNr.longPid, "NmrResidue:X.@89.")
+        self.assertEqual(newNr.longPid, "NmrResidue:X.@21.")
 
     def test_rename(self):
         nchain = self.project.getByPid('NC:A')
-        nr1, nr2 = sorted(nchain.nmrResidues)[8:10]
-        self.assertEqual(nr1.id, "A.10.TYR")
+        nr1, nr2 = sorted(nchain.nmrResidues)[3:5]
+        self.assertEqual(nr1.id, "A.4.THR")
         nr1.deassign()
-        self.assertEqual(nr1.id, "A.@1.")
+        self.assertEqual(nr1.id, "A.@14.")
         nr1.rename('999')
         self.assertEqual(nr1.id, "A.999.")
         nr1.rename('999.ALA')
         self.assertEqual(nr1.id, "A.999.ALA")
         nr1.rename('998.VAL')
         self.assertEqual(nr1.id, "A.998.VAL")
-        nr1.rename('.TYR')
-        self.assertEqual(nr1.id, "A.@1.TYR")
+        nr1.rename('.THR')
+        self.assertEqual(nr1.id, "A.@14.THR")
         nr1.rename('997')
         nr1.moveToNmrChain()
         # Undo and redo all operations
         self.undo.undo()
         self.undo.undo()
-        self.assertEqual(nr1.id, "A.@1.TYR")
+        self.assertEqual(nr1.id, "A.@14.THR")
         self.undo.redo()
         self.undo.redo()
         self.assertEqual(nr1.id, "@-.997.")
 
     def test_reassign(self):
         nchain = self.project.getByPid('NC:A')
-        nr1, nr2 = sorted(nchain.nmrResidues)[8:10]
-        self.assertEqual(nr1.id, "A.10.TYR")
+        nr1, nr2 = sorted(nchain.nmrResidues)[3:5]
+        self.assertEqual(nr1.id, "A.4.THR")
         nr1 = nr1.assignTo(chainCode='A', sequenceCode=999)
-        self.assertEqual(nr1.id, "A.999.TYR")
+        self.assertEqual(nr1.id, "A.999.THR")
         nr1 = nr1.assignTo()
         # This is a no-op
-        self.assertEqual(nr1.id, "A.999.TYR")
+        self.assertEqual(nr1.id, "A.999.THR")
 
         # TODO:ED this does not raise an error now!
         # with self.assertRaises(ValueError):

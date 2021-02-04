@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-28 12:46:05 +0100 (Tue, July 28, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:28 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,7 +32,7 @@ from ccpn.core.Project import Project
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpn.core.lib import Pid
+from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Shift
 from ccpn.core.lib.ContextManagers import newObject
 
 
@@ -108,7 +108,7 @@ class ChemicalShift(AbstractWrapperObject):
         self._wrappedData.error = value
 
     @property
-    def figureOfMerit(self) -> str:
+    def figureOfMerit(self) -> float:
         """Figure of Merit for ChemicalShift, between 0.0 and 1.0 inclusive."""
         return self._wrappedData.figOfMerit
 
@@ -153,6 +153,13 @@ class ChemicalShift(AbstractWrapperObject):
             self._resetIds()
         else:
             raise RuntimeError('ChemicalShift {} has no associated nmrAtom'.format(self))
+
+    def recalculateShiftValue(self):
+        """Recalculate the chemicalShift when peak ppmPositions have changed
+        """
+        # NOTE - This is calling the recalculate module that is used by the api
+        #       and called when peak ppmPositions have changed
+        Shift.recalculateValue(self._wrappedData)
 
     #===========================================================================================
     # new'Object' and other methods

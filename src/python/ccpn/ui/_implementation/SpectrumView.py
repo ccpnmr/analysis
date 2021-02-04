@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,14 +28,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import operator
 from typing import Tuple
 from functools import partial
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
+from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, deleteWrapperWithoutSideBar
 from ccpn.ui._implementation.Strip import Strip
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, newObject, undoStackBlocking
 
 
 class SpectrumView(AbstractWrapperObject):
@@ -82,32 +82,16 @@ class SpectrumView(AbstractWrapperObject):
 
     strip = _parent
 
-    # @deleteObject() - doesn't work here as works on _wrappedData.delete()
     def delete(self):
-        """Delete SpectrumView for all strips.
+        """trap this delete
         """
-        with undoBlockWithoutSideBar():
-            # self._finaliseAction('delete')
-            # with notificationBlanking():
+        raise RuntimeError('Please use spectrumDisplay.removeSpectrum()')
 
-            index = self._parent.spectrumViews.index(self)
-            parent = self._parent
-
-            self._finaliseAction('delete')
-            # with notificationBlanking():
-            self._wrappedData.spectrumView.delete()
-
-            parent._removeOrderedSpectrumViewIndex(index)
-
-    #EJB 20181122: why????
-    # @property
-    # def experimentType(self) -> str:
-    #     """Experiment type of attached experiment - used for reconnecting to correct spectrum"""
-    #     return self._wrappedData.spectrumView.experimentType
-    #
-    # @experimentType.setter
-    # def experimentType(self, value: str):
-    #     self._wrappedData.spectrumView.experimentType = value
+    @deleteWrapperWithoutSideBar()
+    def _delete(self):
+        """Delete SpectrumView from strip, should be unique.
+        """
+        self._wrappedData.spectrumView.delete()
 
     @property
     def isDisplayed(self) -> bool:
@@ -371,18 +355,17 @@ class SpectrumView(AbstractWrapperObject):
         return self._project._data2Obj.get(self._wrappedData.spectrumView.dataSource)
 
     @property
-    def _displayOrderSpectrumDimensionIndices(self) -> Tuple[int, ...]:
+    def dimensionOrdering(self) -> Tuple[int, ...]:
         """Indices of spectrum dimensions in display order (x, y, Z1, ...)"""
         apiStripSpectrumView = self._wrappedData
-        apiStrip = apiStripSpectrumView.strip
-
-        axisCodes = apiStrip.axisCodes
+        axisCodes = self.strip.axisCodes
+        axisOrder = self.strip.axisOrder
 
         # DimensionOrdering is one-origin (first dim is dim 1)
         dimensionOrdering = apiStripSpectrumView.spectrumView.dimensionOrdering
 
         # Convert to zero-origin (for indices) and return
-        ll = tuple(dimensionOrdering[axisCodes.index(x)] for x in apiStrip.axisOrder)
+        ll = tuple(dimensionOrdering[axisCodes.index(x)] for x in axisOrder)
         return tuple(None if not x else x - 1 for x in ll)
 
     #=========================================================================================
@@ -397,7 +380,8 @@ class SpectrumView(AbstractWrapperObject):
                       key=operator.attrgetter('spectrumView.spectrumName'))
 
     def _finaliseAction(self, action: str):
-        super(SpectrumView, self)._finaliseAction(action)
+        if not super()._finaliseAction(action):
+            return
 
         # all are attached to the same click
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier

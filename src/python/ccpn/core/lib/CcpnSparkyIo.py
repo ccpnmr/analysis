@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-04 18:52:33 +0000 (Wed, November 04, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:30 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1029,9 +1029,9 @@ class CcpnSparkyReader:
         return pd.read_table(input_path, delim_whitespace=True, )
 
     def _splitAssignmentColumn(self, dataFrame):
-        ''' parses the assignment column.
+        """ parses the assignment column.
         Splits the column assignment in  four columns: ResidueName ResidueCode AtomName1 AtomName2.
-        '''
+        """
         assignments = [re.findall('\d+|\D+', s) for s in dataFrame.iloc[:, 0]]
         assignmentsColumns = []
         for a in assignments:
@@ -1047,17 +1047,17 @@ class CcpnSparkyReader:
         return pd.DataFrame(assignmentsColumns, columns=self.columns)
 
     def _mergeDataFrames(self, generalDF, assignmentDF):
-        '''
+        """
         :param generalDF: first dataframe with assignments all in on column
         :param assignmentDF: assignments dataframe  in  4 columns
         :return: new dataframe with four assignment columns + the original without the first column
-        '''
+        """
         partialDf = generalDF.drop(generalDF.columns[0], axis=1)
         return pd.concat([assignmentDF, partialDf], axis=1, join_axes=[partialDf.index])
 
     def _correctChainResidueCodes(self, chain, ccpnDataFrame):
-        ''' renames Chain residueCodes correctly according with the dataFrame, if duplicates, deletes them.
-        '''
+        """ renames Chain residueCodes correctly according with the dataFrame, if duplicates, deletes them.
+        """
         for residue, resNumber, in zip(chain.residues, ccpnDataFrame.ResidueCode):
             try:
                 residue.rename(str(resNumber))
@@ -1066,8 +1066,8 @@ class CcpnSparkyReader:
         return chain
 
     def _createCcpnChain(self, project, ccpnDataFrame):
-        '''makes a chain from the ResidueTypes.
-        CCPN wants a long list of  one Letter Codes without spaces'''
+        """makes a chain from the ResidueTypes.
+        CCPN wants a long list of  one Letter Codes without spaces"""
         residueTypes = ''.join([i for i in ccpnDataFrame.ResidueType])
         newChain = project.createChain(residueTypes, molType='protein')
         self._correctChainResidueCodes(newChain, ccpnDataFrame)

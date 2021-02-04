@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:33 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:30 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,31 +32,33 @@ from ccpn.util import Common as commonUtil
 
 class StringifierTest(WrapperTesting):
     # Path of project to load (None for new project
-    projectPath = 'CcpnCourse2c'
+    projectPath = 'V3ProjectForTests.ccpn'
 
     def test_defaultFormatting(self):
-        spectrum = self.project.getSpectrum('T2a-216')
-        peak = spectrum.peaks[0]
+        spectrum = self.project.getSpectrum('15NNoesy_182')
+        peak = spectrum.peaks[2]
         toString = commonUtil.stringifier('serial', 'peakList', 'height', 'volume', 'className',
                                           'axisCodes', 'position', 'positionError', 'assignedNmrAtoms',
                                           'dimensionNmrAtoms')
-        self.assertEquals(toString(peak), "<PK:T2a-216.1.1062| serial=1062, peakList=<PL:T2a-216.1>, "
-                                          "height=4.93752e+06, volume=4.12035e+07, className='Peak', "
-                                          "axisCodes=('Hn', 'Nh', 'delay'), "
-                                          "position=(7.90695, 122.516, 3), "
+        self.assertEquals(toString(peak), "<PK:15NNoesy_182.1.3| serial=3, peakList=<PL:15NNoesy_182.1>, "
+                                          "height=3.35816e+06, volume=2.50861e+11, className='Peak', "
+                                          "axisCodes=('H', 'H1', 'N'), "
+                                          "position=(9.36823, 3.82816, 118.269), "
                                           "positionError=(None, None, None), "
-                                          "assignedNmrAtoms=((<NA:A.56.ALA.H>, <NA:A.56.ALA.N>, None),),"
-                                          " dimensionNmrAtoms=((<NA:A.56.ALA.H>,), (<NA:A.56.ALA.N>,), ())>")
+                                          "assignedNmrAtoms=((<NA:A.4.THR.H>, None, <NA:A.4.THR.N>),),"
+                                          " dimensionNmrAtoms=((<NA:A.4.THR.H>,), (), (<NA:A.4.THR.N>,))>")
+
 
     def test_userFormatting(self):
-        spectrum = self.project.getSpectrum('HSQC-115')
+        spectrum = self.project.getSpectrum('hsqc_115')
         peak = spectrum.peaks[0]
         toString = commonUtil.stringifier('serial', 'peakList', 'height', 'volume', 'className',
                                           'axisCodes', 'position', 'positionError', 'assignedNmrAtoms',
                                           'dimensionNmrAtoms', floatFormat='.3f')
         self.assertEquals(toString(peak),
-                          "<PK:HSQC-115.1.1| serial=1, peakList=<PL:HSQC-115.1>, height=142260384.000,"
-                          " volume=1314892194.000, className='Peak', axisCodes=('Hn', 'Nh'), "
-                          "position=(8.062, 124.933), positionError=(None, None), "
-                          "assignedNmrAtoms=((<NA:A.93.SER.H>, <NA:A.93.SER.N>),), "
-                          "dimensionNmrAtoms=((<NA:A.93.SER.H>,), (<NA:A.93.SER.N>,))>")
+                          "<PK:hsqc_115.1.1| serial=1, peakList=<PL:hsqc_115.1>, height=16455916.000,"
+                          " volume=4620582801.830, className='Peak', axisCodes=('H', 'N'), "
+                          "position=(9.437, 121.039), positionError=(None, None), "
+                          "assignedNmrAtoms=((<NA:A.2.GLU.H>, <NA:A.2.GLU.N>),), "
+                          "dimensionNmrAtoms=((<NA:A.2.GLU.H>,), (<NA:A.2.GLU.N>,))>")
+

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:22 +0100 (Tue, September 22, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,15 +34,9 @@ from ccpn.core.lib.Notifiers import Notifier
 from typing import Optional, Tuple
 
 
-SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoint',
-                                                                   'totalPointCount',
-                                                                   'pointCount',
-                                                                   'minAliasedFrequency',
-                                                                   'maxAliasedFrequency',
-                                                                   'dataDim',
-                                                                   'minSpectrumFrequency',
-                                                                   'maxSpectrumFrequency',
-                                                                   ))
+SpectrumViewParams = collections.namedtuple('SpectrumViewParams', 'valuePerPoint pointCount minAliasedFrequency maxAliasedFrequency '
+                                                                  'minSpectrumFrequency maxSpectrumFrequency')
+TraceParameters = collections.namedtuple('TraceParameters', 'inRange pointPosition startPoint, endPoint')
 
 
 class GuiSpectrumView(QtWidgets.QGraphicsObject):
@@ -55,14 +49,11 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
             (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
         """
 
-        QtWidgets.QGraphicsItem.__init__(self)  #, scene=self.strip.plotWidget.scene())
-        # self.scene = self.strip.plotWidget.scene
-        # self._currentBoundingRect = self.strip.plotWidget.sceneRect()
+        QtWidgets.QGraphicsItem.__init__(self)
 
-        self._apiDataSource = self._wrappedData.spectrumView.dataSource
         self.spectrumGroupsToolBar = None
 
-        action = self.strip.spectrumDisplay.spectrumActionDict.get(self._apiDataSource)
+        action = self.strip.spectrumDisplay.spectrumActionDict.get(self.spectrum)
         if action and not action.isChecked():
             self.setVisible(False)
 
@@ -88,7 +79,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
     #     return self._currentBoundingRect
 
     # Earlier versions too large value (~1400,1000);
-    # i.e larger then inital MainWIndow size; reduced to (900, 700); but (100, 150) appears
+    # i.e larger then initial MainWindow size; reduced to (900, 700); but (100, 150) appears
     # to give less flicker in Scrolled Strips.
 
     # override of Qt setVisible
@@ -96,8 +87,9 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         QtWidgets.QGraphicsItem.setVisible(self, visible)
         try:
             if self:  # ejb - ?? crashes on table update otherwise
-                action = self.strip.spectrumDisplay.spectrumActionDict.get(self._apiDataSource)
-                action.setChecked(visible)
+                action = self.strip.spectrumDisplay.spectrumActionDict.get(self.spectrum)
+                if action:
+                    action.setChecked(visible)
                 # for peakListView in self.peakListViews:
                 #   peakListView.setVisible(visible)
         except:
@@ -113,89 +105,41 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         # notify that the spectrumView has changed
         self._finaliseAction('change')
 
-    # def setDimMapping(self, dimMapping=None):
-    #
-    #   dimensionCount = self.spectrum.dimensionCount
-    #   if dimMapping is None:
-    #     dimMapping = {}
-    #     for i in range(dimensionCount):
-    #       dimMapping[i] = i
-    #   self.dimMapping = dimMapping
-    #
-    #   xDim = yDim = None
-    #   inverseDimMapping = {}
-    #   for dim in dimMapping:
-    #     inverseDim = dimMapping[dim]
-    #     if inverseDim == 0:
-    #       xDim = inverseDim
-    #     elif inverseDim == 1:
-    #       yDim = inverseDim
-    #
-    #   if xDim is not None:
-    #     assert 0 <= xDim < dimensionCount, 'xDim = %d, dimensionCount = %d' % (xDim, dimensionCount)
-    #
-    #   if yDim is not None:
-    #     assert 0 <= yDim < dimensionCount, 'yDim = %d, dimensionCount = %d' % (yDim, dimensionCount)
-    #     assert xDim != yDim, 'xDim = yDim = %d' % xDim
-    #
-    #   self.xDim = xDim
-    #   self.yDim = yDim
-
     def _getSpectrumViewParams(self, axisDim: int) -> Optional[Tuple]:
         """Get position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency
         for axisDimth axis (zero-origin)"""
 
-        # axis = self.strip.orderedAxes[axisDim]
-        dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[axisDim]
+        ii = self.dimensionOrdering[axisDim]
+        if ii is not None:
+            minAliasedFrequency, maxAliasedFrequency = (self.spectrum.aliasingLimits)[ii]
+            minSpectrumFrequency, maxSpectrumFrequency = sorted(self.spectrum.spectrumLimits[ii])
+            pointCount = (self.spectrum.pointCounts)[ii]
+            valuePerPoint = (self.spectrum.valuesPerPoint)[ii]
 
-        # map self.spectrum.axisCodes onto self.axisCodes
+            return SpectrumViewParams(valuePerPoint, pointCount,
+                                      minAliasedFrequency, maxAliasedFrequency,
+                                      minSpectrumFrequency, maxSpectrumFrequency)
 
-        if not dataDim:
+    def getTraceParameters(self, position, dim):
+        # dim  = spectrumView index, i.e. 0 for X, 1 for Y
+
+        _indices = self.dimensionOrdering
+        index = _indices[dim]
+        if index is None:
+            getLogger().warning('getTraceParameters: bad index')
             return
 
-        # totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, 'numPointsOrig')
-        #                    else dataDim.numPoints)
-        # pointCount = (dataDim.numPointsValid if hasattr(dataDim, 'numPointsValid')
-        #               else dataDim.numPoints)
-        # numPoints = dataDim.numPoints
+        pointCount = self.spectrum.pointCounts[index]
+        minSpectrumFrequency, maxSpectrumFrequency = sorted(self.spectrum.spectrumLimits[index])
 
-        for ii, dd in enumerate(dataDim.dataSource.sortedDataDims()):
-            # Must be done this way as dataDim.dim may not be in order 1,2,3 (e.g. for projections)
-            if dd is dataDim:
-                minAliasedFrequency, maxAliasedFrequency = (self.spectrum.aliasingLimits)[ii]
-                minSpectrumFrequency, maxSpectrumFrequency = (self.spectrum.spectrumLimits)[ii]
-                totalPointCount = (self.spectrum.totalPointCounts)[ii]
-                pointCount = (self.spectrum.pointCounts)[ii]
-                valuePerPoint = (self.spectrum.valuesPerPoint)[ii]
-                break
-        else:
-            minAliasedFrequency = maxAliasedFrequency = dataDim = None
-            minSpectrumFrequency = maxSpectrumFrequency = None
-            totalPointCount = pointCount = None
-            valuePerPoint = None
+        inRange = (minSpectrumFrequency <= position[index] <= maxSpectrumFrequency)
+        pointPos = (self.spectrum.ppm2point(position[index], dimension=index + 1) - 1) % pointCount
 
-        # if hasattr(dataDim, 'primaryDataDimRef'):
-        #     # FreqDataDim - get ppm valuePerPoint
-        #     ddr = dataDim.primaryDataDimRef
-        #     valuePerPoint = ddr and ddr.valuePerPoint
-        # elif hasattr(dataDim, 'valuePerPoint'):
-        #     # FidDataDim - get time valuePerPoint
-        #     valuePerPoint = dataDim.valuePerPoint
-        # else:
-        #     # Sampled DataDim - return None
-        #     valuePerPoint = None
-
-        # return axis.position, axis.width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim
-        return SpectrumViewParams(valuePerPoint, totalPointCount, pointCount,
-                                  minAliasedFrequency, maxAliasedFrequency, dataDim,
-                                  minSpectrumFrequency, maxSpectrumFrequency)
+        return TraceParameters(inRange, pointPos, 0, pointCount - 1)
 
     def _getColour(self, colourAttr, defaultColour=None):
 
         colour = getattr(self, colourAttr)
-        # if not colour:
-        #   colour = getattr(self.spectrum, colourAttr)
-
         if not colour:
             colour = defaultColour
 
@@ -219,10 +163,9 @@ def _spectrumViewHasChanged(data):
         return
 
     spectrumDisplay = self.strip.spectrumDisplay
-    apiDataSource = self.spectrum._wrappedData
 
-    # Update action icol colour
-    action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
+    # Update action icon colour
+    action = spectrumDisplay.spectrumActionDict.get(self.spectrum)
     if action:
         # add spectrum action for non-grouped action
         _addActionIcon(action, self, spectrumDisplay)
@@ -287,19 +230,3 @@ def _addActionIcon(action, self, spectrumDisplay):
         pix.fill(QtGui.QColor('gray'))
 
     action.setIcon(QtGui.QIcon(pix))
-
-
-def _createdSpectrumView(data):
-    """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers.
-    This function adds the spectra buttons to the spectrumToolBar.
-    """
-    self = data[Notifier.OBJECT]
-
-    spectrumDisplay = self.strip.spectrumDisplay
-
-    # Set Z widgets for nD strips
-    strip = self.strip
-    if not spectrumDisplay.is1D:
-        strip._setZWidgets()
-
-    spectrumDisplay.spectrumToolBar._addSpectrumViewToolButtons(self)

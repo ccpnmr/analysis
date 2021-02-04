@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -427,6 +427,7 @@ class OpenItemABC():
                                   partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False, defaultItems=spectra),
                                           self.mainWindow, self.getObj(), self.node))
 
+        contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
         contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
         canBeCloned = True
         for obj in objs:
@@ -448,15 +449,32 @@ class OpenItemABC():
     def _deleteItemObject(self, objs):
         """Delete items from the project.
         """
-        try:
-            with undoBlock():
-                for obj in objs:
-                    if obj:
-                        # just delete the object
-                        obj.delete()
 
+        try:
+            if len(objs)>0:
+                getLogger().info('Deleting: %s' % ', '.join(map(str, objs)))
+                project = objs[-1].project
+                with undoBlockWithoutSideBar():
+                    with notificationEchoBlocking():
+                        project.deleteObjects(*objs)
+            # with undoBlock():
+            #     for obj in objs:
+            #         if obj:
+            #             # just delete the object
+            #             obj.delete()
         except Exception as es:
             showWarning('Delete', str(es))
+
+    def _copyPidsToClipboard(self, objs):
+        """
+        :param objs:
+        Copy to clipboard quoted pids
+        """
+        import pandas as pd
+        pids = [str(obj.pid) for obj in objs]
+        text = '{}'.format(', '.join(["'{}'".format(item) for item in pids]))
+        df = pd.DataFrame([text])
+        df.to_clipboard(index=False, header=False)
 
 
 class _openItemChemicalShiftListTable(OpenItemABC):
@@ -561,14 +579,13 @@ class _openItemSampleDisplay(OpenItemABC):
             with notificationEchoBlocking():
                 if len(sample.spectra) > 0:
                     if len(spectrumDisplay.strips)>0:
-                        strip = spectrumDisplay.strips[0]
-
+                        spectrumDisplay.clearSpectra()
                         for sampleComponent in sample.sampleComponents:
                             if sampleComponent.substance is not None:
                                 for spectrum in sampleComponent.substance.referenceSpectra:
-                                    strip._displaySpectrum(spectrum, useUndoBlock = False)
+                                    spectrumDisplay.displaySpectrum(spectrum)
                         for spectrum in sample.spectra:
-                            strip._displaySpectrum(spectrum, useUndoBlock = False)
+                            spectrumDisplay.displaySpectrum(spectrum)
                         if autoRange:
                             spectrumDisplay.autoRange()
 
@@ -606,39 +623,9 @@ class _openItemSpectrumDisplay(OpenItemABC):
         from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
         checkSpectraToOpen(mainWindow, [spectrum])
 
-        # with undoBlockWithoutSideBar():
-
         spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum, position=position, relativeTo=relativeTo)
-        if len(spectrumDisplay.strips) > 0:
+        if spectrumDisplay and len(spectrumDisplay.strips) > 0:
             mainWindow.current.strip = spectrumDisplay.strips[0]
-
-            # with undoStackBlocking() as addUndoItem:
-            #     # disable all notifiers in spectrumDisplays
-            #     addUndoItem(undo=partial(_setSpectrumDisplayNotifiers, spectrumDisplay, True))
-            #
-            # if len(spectrumDisplay.strips) > 0:
-            #     mainWindow.current.strip = spectrumDisplay.strips[0]
-            #     # if spectrum.dimensionCount == 1:
-            #     spectrumDisplay.autoRange()
-            #     # mainWindow.current.strip.plotWidget.autoRange()
-            #
-            # mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
-            #
-            # with undoStackBlocking() as addUndoItem:
-            #     # disable all notifiers in spectrumDisplays
-            #     addUndoItem(redo=partial(_setSpectrumDisplayNotifiers, spectrumDisplay, False))
-            #
-            #     # add/remove spectrumDisplay from module Area
-            #     addUndoItem(undo=partial(mainWindow._hiddenModules.addModule, spectrumDisplay),
-            #                 redo=partial(mainWindow.moduleArea.addModule, spectrumDisplay, position=position, relativeTo=relativeTo))
-
-
-        # # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
-        # # This routine can then be omitted and the call above replaced by the one remaining line
-        # mainWindow.pythonConsole.writeConsoleCommand(
-        #         "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
-        # getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
-        # getLogger().info('application.createSpectrumDisplay(spectrum)')
 
         return spectrumDisplay
 
@@ -661,25 +648,22 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
             # check whether a new spectrumDisplay is needed, and check axisOrdering
             from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
             checkSpectraToOpen(mainWindow, [spectrumGroup])
-
             spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0], position=position, relativeTo=relativeTo, isGrouped=True)
             # set the spectrumView colours
             # spectrumDisplay._colourChanged(spectrumGroup)
             if len(spectrumDisplay.strips)>0:
-                strip = spectrumDisplay.strips[0]
 
                 with undoBlockWithoutSideBar():
                     with notificationEchoBlocking():
                         for spectrum in spectrumGroup.spectra[1:]:  # Add the other spectra
-                            strip._displaySpectrum(spectrum, useUndoBlock=False)
+                            spectrumDisplay.displaySpectrum(spectrum)
                         # update the spectrumView colours
                         spectrumDisplay._colourChanged(spectrumGroup)
                         # spectrumDisplay.isGrouped = True
                         spectrumDisplay.spectrumToolBar.hide()
                         spectrumDisplay.spectrumGroupToolBar.show()
                         spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
-
-                mainWindow.application.current.strip = strip
+                mainWindow.application.current.strip = spectrumDisplay.strips[0]
             # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
             spectrumDisplay.autoRange()
             return spectrumDisplay
@@ -780,30 +764,24 @@ def _openItemObjects(mainWindow, objs, **kwds):
     """
     spectrumDisplay = None
     with undoBlockWithoutSideBar():
-        if spectrumDisplay:
-            spectrumDisplay.spectrumToolBar.increaseSpectrumToolBarBlocking()
-            # FIXME STOP TOOLBAR REBUILDING EVERY SPECTRUM DROPPED
         for obj in objs:
             if obj:
-                # try:
-                    if obj.__class__ in OpenObjAction:
 
-                        # if a spectrum object has already been opened then attach to that spectrumDisplay
-                        if isinstance(obj, (Spectrum, SpectrumGroup)) and spectrumDisplay:
-                            spectrumDisplay._handlePids([obj.pid])
+                if obj.__class__ in OpenObjAction:
 
-                        else:
-                            # process objects to open
-                            func = OpenObjAction[obj.__class__](useNone=True, **kwds)
-                            returnObj = func._execOpenItem(mainWindow, obj)
-
-                            # if the first spectrum then set the spectrumDisplay
-                            if isinstance(obj, (Spectrum, SpectrumGroup)):
-                                spectrumDisplay = returnObj
+                    # if a spectrum object has already been opened then attach to that spectrumDisplay
+                    if isinstance(obj, (Spectrum, SpectrumGroup)) and spectrumDisplay:
+                        spectrumDisplay._handlePids([obj.pid])
 
                     else:
-                        info = showInfo('Not implemented yet!',
-                                        'This function has not been implemented in the current version')
-                # except Exception as e:
-                #     getLogger().warning('Error: %s' % e)
-                    # raise e
+                        # process objects to open
+                        func = OpenObjAction[obj.__class__](useNone=True, **kwds)
+                        returnObj = func._execOpenItem(mainWindow, obj)
+
+                        # if the first spectrum then set the spectrumDisplay
+                        if isinstance(obj, (Spectrum, SpectrumGroup)):
+                            spectrumDisplay = returnObj
+
+                else:
+                    showInfo('Not implemented yet!',
+                                    'This function has not been implemented in the current version')

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:32 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:30 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,12 +27,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import collections
 import inspect
-import os
 from typing import Optional
 from ccpn.core.lib import Pid
 from ccpn.core import _coreClassMap
-from ccpn.core._implementation import AbstractWrapperObject
-from ccpn.util.Path import joinPath
 
 
 def pid2PluralName(pid: str) -> str:
@@ -98,118 +95,8 @@ AtomIdTuple = collections.namedtuple('AtomIdTuple', ['chainCode', 'sequenceCode'
                                                      'residueType', 'atomName', ])
 
 
-# def _fetchDataUrl(memopsRoot, nameStore, filePath):
-#     """Get or create DataUrl that matches fullPath, prioritising insideData, alongsideDta, remoteData
-#     and existing dataUrls"""
-#     from memops.api.Implementation import Url
-#     from memops.universal import Io as uniIo
-#     import os
-#
-#     standardStore = memopsRoot.findFirstDataLocationStore(name='standard')
-#
-#     # standardStore = (memopsRoot.findFirstDataLocationStore(name='standard')
-#     #                  or memopsRoot.newDataLocationStore(name='standard'))
-#
-#     # [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
-#     # [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
-#
-#     if standardStore is None:
-#         raise TypeError("Coding error - standard DataLocationStore has not been set")
-#
-#     stores = set([(store, store.dataUrl) for store in standardStore.sortedDataStores() if store.path == filePath])
-#
-#     if stores and len(stores) > 1:
-#         raise ValueError("Too many stores")
-#
-#     for store, dataUrl in stores:
-#         directoryPath = os.path.join(dataUrl.url.path, '')
-#
-#         # print('>>>_fetchDataUrl', filePath, directoryPath)
-#
-#         if filePath.startswith(directoryPath):
-#             return store.fullPath
-#         else:
-#             return store.fullPath
-#
-#
-#     # # for dataUrl in standardStore.sortedDataUrls():
-#     # #     if dataUrl.name is nameStore:
-#     #
-#     #
-#     # # fullPath = uniIo.normalisePath(fullPath, makeAbsolute=True)
-#     # standardTags = ('insideData', 'alongsideData', 'remoteData')
-#     # # Check standard DataUrls first
-#     # checkUrls = [standardStore.findFirstDataUrl(name=tag) for tag in standardTags]
-#     # # Then check other existing DataUrls
-#     # checkUrls += [x for x in standardStore.sortedDataUrls() if x.name not in standardTags]
-#     # for dataUrl in checkUrls:
-#     #     if dataUrl is not None and dataUrl.name is nameStore:
-#     #
-#     #         directoryPath = os.path.join(dataUrl.url.path, '')
-#     #         if filePath.startswith(directoryPath):
-#     #             break
-#     # else:
-#     #     # No matches found, make a new one
-#     #     dirName, path = os.path.split(filePath)
-#     #     dataUrl = standardStore.newDataUrl(url=Url(path=dirName))
-#     # #
-#     # return dataUrl
-
-# def expandDollarFilePath(project: 'Project', spectrum, filePath: str) -> str:
-#     """Expand paths that start with $REPOSITORY to full path.
-#
-#     NBNB Should be moved to ccpnmodel.ccpncore.lib.ccp.general.DataLocation.DataLocationstore"""
-#
-#     # Convert from custom repository names to full names
-#     stdRepositoryNames = {
-#         '$INSIDE/'   : 'insideData',
-#         '$ALONGSIDE/': 'alongsideData',
-#         '$DATA/'     : 'remoteData',
-#         }
-#
-#     if not filePath.startswith('$'):
-#         # Nothing to expand
-#         return filePath
-#
-#     dataLocationStore = project._wrappedData.root.findFirstDataLocationStore(name='standard')
-#
-#     if dataLocationStore is None:
-#         raise TypeError("Coding error - standard DataLocationStore has not been set")
-#
-#     for prefix, dataUrlName in stdRepositoryNames.items():
-#         if filePath.startswith(prefix):
-#
-#             apiDataStore = spectrum._apiDataSource.dataStore
-#             if not apiDataStore:
-#                 return filePath
-#
-#             elif apiDataStore.dataLocationStore.name == 'standard':
-#
-#                 # this fails on the first loading of V2 projects - ordering issue?
-#                 spectrumDataUrlName = apiDataStore.dataUrl.name
-#
-#                 if spectrumDataUrlName == dataUrlName:
-#                     return os.path.join(apiDataStore.dataUrl.url.dataLocation, filePath[len(prefix):])
-#
-#                 # if dataUrlName == 'insideData':
-#                 #     pathData.setText('$INSIDE/%s' % apiDataStore.path)
-#                 # elif dataUrlName == 'alongsideData':
-#                 #     pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
-#                 # elif dataUrlName == 'remoteData':
-#                 #     pathData.setText('$DATA/%s' % apiDataStore.path)
-#             else:
-#                 # pathData.setText(apiDataStore.fullPath)
-#                 return filePath
-#
-#             # dataUrl = dataLocationStore.findFirstDataUrl(name=dataUrlName)
-#             # if dataUrl is not None:
-#             #     return os.path.join(dataUrl.url.dataLocation, filePath[len(prefix):])
-#
-#     return filePath
-
-
 def commandParameterString(*params, values: dict = None, defaults: dict = None):
-    """Make  parameter string to insert into function call string.
+    """Make parameter string to insert into function call string.
 
     params are positional parameters in order, values are keyword parameters.
     If the defaults dictionary is passed in,
@@ -257,7 +144,7 @@ def commandParameterString(*params, values: dict = None, defaults: dict = None):
 
 
 def commandParameterStringValues(*params, values: dict = None, defaults: dict = None):
-    """Make  parameter string to insert into function call string.
+    """Make parameter string to insert into function call string.
 
     params are positional parameters in order, values are keyword parameters.
     If the defaults dictionary is passed in,
@@ -314,35 +201,3 @@ def funcCaller() -> Optional[str]:
         return inspect.stack()[1][3]
     except:
         return None
-
-
-def callList(fn):
-    """
-    Wrapper to give the call stack for then current function
-    Add callList=None, callStr=None to the parameter list for the function
-    """
-
-    def inner(*args, **kwargs):
-        stack = inspect.stack()
-        minStack = len(stack)  # min(stack_size, len(stack))
-        modules = [(index, inspect.getmodule(stack[index][0]))
-                   for index in range(1, minStack)]
-        callers = [(0, fn.__module__, fn.__name__)]
-        for index, module in modules:
-            try:
-                name = module.__name__
-            except:
-                name = '<NOT_FOUND>'
-            callers.append((index, name, stack[index][3]))
-
-        s = '{index:>5} : {module:^%i} : {name}' % 20
-        printStr = []
-        for i in range(0, len(callers)):
-            printStr.append(s.format(index=callers[i][0], module=callers[i][1], name=callers[i][2]))
-
-        kwargs['callList'] = callers
-        kwargs['callStr'] = '\n'.join(printStr)
-
-        fn(*args, **kwargs)
-
-    return inner

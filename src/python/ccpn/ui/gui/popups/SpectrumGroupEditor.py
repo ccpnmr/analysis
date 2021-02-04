@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 16:30:46 +0100 (Fri, October 23, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:36 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,6 +31,7 @@ from ast import literal_eval
 from typing import Tuple, Any
 from collections import OrderedDict, Iterable
 from ccpn.util.Common import _compareDict
+from ccpn.util.Common import makeIterableList, _getObjectsByPids, _getPidsFromObjects
 from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.core.lib.ContextManagers import queueStateChange
@@ -45,26 +46,28 @@ from ccpn.ui.gui.widgets.TextEditor import PlainTextEditor
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import ColourTab, ContoursTab, Colour1dFrame, ColourNdFrame
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Constants import ALL_UNITS
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
-
+import traceback
 
 DEFAULTSPACING = (3, 3)
 TABMARGINS = (1, 10, 1, 5)  # l, t, r, b
 INVALIDROWCOLOUR = QtGui.QColor('lightpink')
 SPECTRATABNUM = 0
-GENERAL1DTABNUM = 1
-GENERALNDTABNUM = 2
+GENERAL1DTABNUM = 2
+GENERALNDTABNUM = 1
 SERIESTABNUM = 3
 NUMTABS = 4
 SPECTRA_LABEL = 'Spectra'
 GENERALTAB1D_LABEL = 'General 1d'
 GENERALTABND_LABEL = 'General Nd'
 SERIES_LABEL = 'Series'
-
+MAX_WIDGET_COUNT = 50 # For severe speed issues. If a SG contains more Spectra than this value, widgets are not created.
+TAB_WARNING_MSG ='This option is not available for Spectrum Groups containing more than %s spectra.' %MAX_WIDGET_COUNT
 
 class SpectrumGroupEditor(_GroupEditorPopupABC):
     """
@@ -81,19 +84,19 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
       i.e. Menu Spectrum->Edit SpectrumGroup...
 
     """
-    KLASS = SpectrumGroup
-    KLASS_ITEM_ATTRIBUTE = 'spectra'  # Attribute in KLASS containing items
-    KLASS_PULLDOWN = SpectrumGroupPulldown
+    _class = SpectrumGroup
+    _classItemAttribute = 'spectra'  # Attribute in _class containing items
+    _classPulldown = SpectrumGroupPulldown
 
-    PROJECT_NEW_METHOD = 'newSpectrumGroup'  # Method of Project to create new KLASS instance
-    PROJECT_ITEM_ATTRIBUTE = 'spectra'  # Attribute of Project containing items
-    PLURAL_GROUPED_NAME = 'Spectrum Groups'
-    SINGULAR_GROUP_NAME = 'Spectrum Group'
+    _projectNewMethod = 'newSpectrumGroup'  # Method of Project to create new _class instance
+    _projectItemAttribute = 'spectra'  # Attribute of Project containing items
+    _pluralGroupName = 'Spectrum Groups'
+    _singularGroupName = 'Spectrum Group'
 
-    GROUP_PID_KEY = 'SG'
-    ITEM_PID_KEY = 'SP'
+    _groupPidKey = 'SG'
+    _itemPidKey = 'SP'
 
-    SETREVERTBUTTON = False
+    _setRevertButton = False
 
     def _applyChanges(self):
         """
@@ -253,11 +256,11 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                 except Exception as es:
                     raise es
 
-    GROUPEDITOR_INIT_METHOD = _groupInit
+    _groupEditorInitMethod = _groupInit
 
     # make this a tabbed dialog, with the default widget going into tab 0
-    USE_TAB = 0
-    NUMBER_TABS = 4  # create the first tab
+    _useTab = 0
+    _numberTabs = 4  # create the first tab
 
     def __init__(self, parent=None, mainWindow=None, editMode=True, obj=None, defaultItems=None, size=(700, 550), **kwds):
         """
@@ -266,8 +269,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         super().__init__(parent=parent, mainWindow=mainWindow, editMode=editMode, obj=obj, defaultItems=defaultItems, size=size, **kwds)
 
         self.TAB_NAMES = ((SPECTRA_LABEL, self._initSpectraTab),
-                          (GENERALTAB1D_LABEL, self._initGeneralTab1d),
                           (GENERALTABND_LABEL, self._initGeneralTabNd),
+                          (GENERALTAB1D_LABEL, self._initGeneralTab1d),
                           (SERIES_LABEL, self._initSeriesTab))
 
         if obj and editMode:
@@ -303,7 +306,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             if tabFunc:
                 tabFunc()
 
-        self._populate()
+        self._populate() # is not needed to populate again all.
         self.setDefaultButton(None)
 
         self.connectSignals()
@@ -334,19 +337,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         thisTab = self.spectraTab
         thisTab._changes = ChangeDict()
 
-    def _initGeneralTab1d(self):
-        thisTab = self.generalTab1d
-
-        self._group1dColours = Colour1dFrame(parent=thisTab, mainWindow=self.mainWindow, container=self, editMode=self.editMode, spectrumGroup=self.obj,
-                                             grid=(0, 0), setLayout=True)
-
-        self._colourTabs1d = Tabs(thisTab, grid=(1, 0))
-
-        self._group1dColours.setContentsMargins(5, 5, 5, 5)
-        thisTab.setContentsMargins(0, 0, 0, 0)
-
-        # remember the state when switching tabs
-        self.copyCheckBoxState = []
+    def _init1DColourTabs(self):
 
         spectra1d = [spec for spec in (self.currentSpectra or []) if spec.dimensionCount == 1]
         for specNum, thisSpec in enumerate(spectra1d):
@@ -361,12 +352,37 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
         self._colourTabs1d.setTabClickCallback(self._tabClicked1d)
         self._colourTabs1d.tabCloseRequested.connect(self._closeColourTab1d)
-        self._oldTabs = OrderedDict()
-
         index = self._tabWidget.indexOf(self._generalTabWidget1d)
         if self._colourTabs1d.count() == 0:
             if (0 <= index < NUMTABS):
                 self._tabWidget.removeTab(index)
+
+    def _initGeneralTab1d(self):
+        thisTab = self.generalTab1d
+
+        self._group1dColours = Colour1dFrame(parent=thisTab, mainWindow=self.mainWindow, container=self, editMode=self.editMode, spectrumGroup=self.obj,
+                                             grid=(0, 0), setLayout=True)
+
+        self._colourDisabledFrame = Frame(thisTab, setLayout=True, showBorder=False,
+                                  grid=(1, 0),  vAlign='t')
+        iconLabel = Label(self._colourDisabledFrame, icon=Icon('icons/exclamation_small'), grid=(0, 0), hAlign='l')
+        tabWarningLabel = Label(self._colourDisabledFrame, text=TAB_WARNING_MSG, grid=(0, 1), hAlign='l', )
+        self._colourDisabledFrame.hide()
+
+        self._colourTabs1d = Tabs(thisTab, grid=(2, 0))
+        self._oldTabs = OrderedDict()
+
+        self._group1dColours.setContentsMargins(5, 5, 5, 5)
+        thisTab.setContentsMargins(0, 0, 0, 0)
+
+        # remember the state when switching tabs
+        self.copyCheckBoxState = []
+
+        if len(self.currentSpectra) > MAX_WIDGET_COUNT:
+            self._setDisabledColourTab()
+        else:
+            self._init1DColourTabs()
+
 
     def _initGeneralTabNd(self):
         thisTab = self.generalTabNd
@@ -395,7 +411,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
 
         self._colourTabsNd.setTabClickCallback(self._tabClickedNd)
         self._colourTabsNd.tabCloseRequested.connect(self._closeColourTabNd)
-        self._oldTabs = OrderedDict()
+
 
         index = self._tabWidget.indexOf(self._generalTabWidgetNd)
         if self._colourTabsNd.count() == 0:
@@ -405,7 +421,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
     def _initSeriesTab(self):
         thisTab = self.seriesTab
         thisTab._changes = ChangeDict()
-        thisTab._populate()
+        thisTab._populateSeries()
 
     def _fillPullDowns(self):
         for colourTab in (self._colourTabs1d, self._colourTabsNd):
@@ -424,7 +440,8 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
     def _populate(self):
         """Populate the widgets in the tabs
         """
-        # NOTE:ED - check that the list widgets are populated correctly - may be called twice
+        ## NOTE:ED - check that the  widgets are populated correctly - may be called exponentially from not
+        ## blocking the notification-change
         super()._populate()
         with self.seriesTab._changes.blockChanges():
             self._spectraChanged()
@@ -443,9 +460,9 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         except:
             pass
 
-        with self.blockWidgetSignals():
+        with self.blockWidgetSignals(): # we already filled when calling _spectraChanged
             self.seriesTab._fillSeriesFrame(self._defaultSpectra, spectrumGroup=self.obj)
-        self.seriesTab._populate()
+        self.seriesTab._populateSeries()
 
     def _getChangeState(self):
         """Get the change state from the _changes dict
@@ -487,10 +504,14 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             if aTabs and hasattr(aTabs[index], '_populateCheckBoxes'):
                 aTabs[index]._populateCheckBoxes()
 
+
     def _getSpectraFromList(self):
         """Get the list of spectra from the list
         """
-        return [spec for spec in [self.project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum for spectrum in self._groupedObjects] if spec]
+        # spectra = _getObjectsByPids()
+        spectra = [self.project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum for spectrum in self._groupedObjects]
+
+        return [spec for spec in spectra if spec]
 
     def _cleanColourTab(self, spectrum):
         """Remove the unwanted queue items from spectra reomved from the spectrumQueue
@@ -531,11 +552,18 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         self._spectraChangedNd()
         # call the series frame as this contains code for updating _changes
         self.seriesTab._queueChangeSpectrumList()
-        self.seriesTab._populate()
+        self.seriesTab._fillSeriesFrame(self.currentSpectra, spectrumGroup=self.obj)
 
     def _spectraChanged1d(self):
         self._newSpectra = self._getSpectraFromList()
 
+        if len(self._newSpectra)>MAX_WIDGET_COUNT:
+            self._setDisabledColourTab()
+            self.seriesTab._setDisabledSeriesTab()
+            return
+        self._colourTabs1d.show()
+        self._colourDisabledFrame.hide()
+        self.seriesTab._seriesEnabled = True
         deleteSet = (set(self.currentSpectra) - set(self._newSpectra))
         newSet = (set(self.currentSpectra) - set(self._newSpectra))
 
@@ -547,8 +575,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             # remove tab widget
             self._cleanColourTab(spec)
             if spec in self.seriesTab._currentSeriesValues:
-                del self.seriesTab._currentSeriesValues[spec]
-
+                del self.seriesTab._currentSeriesValues[spec] # why this del here
         # remove all in reverse order, keep old ones
         for ii in range(self._colourTabs1d.count() - 1, -1, -1):
             tab = self._colourTabs1d.widget(ii)
@@ -570,7 +597,7 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                                             showCopyOptions=True if len(spectra1d) > 1 else False,
                                             copyToSpectra=spectra1d)
 
-                self._colourTabs1d.addTab(contoursTab, spec.name)
+                self._colourTabs1d.addTab(contoursTab, spec.name) #this indent looks wrong
                 contoursTab.setContentsMargins(*TABMARGINS)
                 contoursTab._populateColour()
 
@@ -582,8 +609,6 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
         else:
             if not (0 <= index < NUMTABS):
                 self._tabWidget.insertTab(1, self._generalTabWidget1d, GENERALTAB1D_LABEL)
-
-        self.seriesTab._fillSeriesFrame(self._newSpectra, spectrumGroup=self.obj)
 
         # update the current list
         self.currentSpectra = self._newSpectra
@@ -638,8 +663,6 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
             if not (0 <= index < NUMTABS):
                 self._tabWidget.insertTab(self._tabWidget.count() - 1, self._generalTabWidgetNd, GENERALTABND_LABEL)
 
-        self.seriesTab._fillSeriesFrame(self._newSpectra, spectrumGroup=self.obj)
-
         # update the current list
         self.currentSpectra = self._newSpectra
 
@@ -654,9 +677,17 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                 for aTab in [tab for tab in colourTabs if tab != fromSpectrumTab and tab.spectrum in toSpectra]:
                     aTab._copySpectrumAttributes(fromSpectrumTab)
 
+    def _setDisabledColourTab(self):
+        self._colourTabs1d.hide()
+        self._colourDisabledFrame.show()
+        for sp in self.currentSpectra:
+            self._cleanColourTab(sp)
+
+
+
 
 class SeriesFrame(Frame):
-    EDITMODE = False
+    _editMode = False
 
     def __init__(self, parent=None, mainWindow=None, spectrumGroup=None, editMode=False,
                  showCopyOptions=False, defaultItems=None):
@@ -667,8 +698,8 @@ class SeriesFrame(Frame):
         self.mainWindow = mainWindow
         self.application = mainWindow.application
         self.preferences = self.application.preferences
-        self.EDITMODE = editMode
-
+        self._editMode = editMode
+        self._seriesEnabled = True
         # check that the spectrum and the copyToSpectra list are correctly defined
         getByPid = self.application.project.getByPid
         self.spectrumGroup = getByPid(spectrumGroup) if isinstance(spectrumGroup, str) else spectrumGroup
@@ -689,54 +720,63 @@ class SeriesFrame(Frame):
         self._editors = OrderedDict()
         self._currentSeriesValues = OrderedDict()
 
-        if self.EDITMODE:
+        if self._editMode:
             self.defaultObject = spectrumGroup
         else:
             # create a dummy object that SHOULD contain the required attributes
             self.defaultObject = _SpectrumGroupContainer()
             self.defaultObject.spectra = defaultItems
 
-        row = 0
-        col = 0
-        # seriesLabel = Label(self, text="Spectrum SeriesValues", grid=(row, col), gridSpan=(1, 3), hAlign='l')
+        self._row = 0
+        self._col = 0
+        # seriesLabel = Label(self, text="Spectrum SeriesValues", grid=(self._row, self._col), gridSpan=(1, 3), hAlign='l')
         # seriesLabel.setFixedHeight(30)
         # seriesLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         Spacer(self, 10, 10, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-               grid=(row, col))
+               grid=(self._row, self._col))
 
-        row += 1
-        seriesTypeLabel = Label(self, text='Series Type', grid=(row, col), hAlign='l')
-        self.seriesType = RadioButtons(self, texts=[str(val.description) for val in SeriesTypes],
-                                       grid=(row, col + 1), gridSpan=(1, 2), hAlign='l',
+        self._row += 1
+
+        self._seriesDisabledFrame = Frame(self, setLayout=True, showBorder=False,
+                                  grid=(self._row, self._col),  vAlign='t')
+        iconLabel = Label(self._seriesDisabledFrame, icon=Icon('icons/exclamation_small'), grid=(0, 0), hAlign='l')
+        tabWarningLabel = Label(self._seriesDisabledFrame, text=TAB_WARNING_MSG, grid=(0, 1), hAlign='l', )
+        self._seriesDisabledFrame.hide()
+
+        self._seriesOptionsFrame = Frame(self, setLayout=True, showBorder=False,
+                                         grid=(self._row, self._col), vAlign='t')
+        self.seriesTypeLabel = Label(self._seriesOptionsFrame, text='Series Type', grid=(self._row, self._col), hAlign='l')
+        self.seriesType = RadioButtons(self._seriesOptionsFrame, texts=[str(val.description) for val in SeriesTypes],
+                                       grid=(self._row, self._col + 1), gridSpan=(1, 2), hAlign='l',
                                        callback=partial(self._queueChangeSeriesType, self.defaultObject))
 
-        row += 1
-        self._seriesFrameRow = row
-        self._seriesFrameCol = col
-
+        self._row += 1
+        self._seriesFrameRow = self._row
+        self._seriesFrameCol = self._col
         # self._seriesFrame = Frame(self, setLayout=True, showBorder=False, grid=(self._seriesFrameRow, self._seriesFrameCol), gridSpan=(1, 3))
         self._seriesFrame = None
-        self._fillSeriesFrame(defaultItems=defaultItems, spectrumGroup=self.defaultObject)
 
-        row += 1
-        # unitsLabel = Label(self, text='Series Units', grid=(row, col), hAlign='l')
-        # self.unitsEditor = LineEdit(self, grid=(row, col + 1))
+
+        self._row += 1
+        # unitsLabel = Label(self, text='Series Units', grid=(self._row, self._col), hAlign='l')
+        # self.unitsEditor = LineEdit(self, grid=(self._row, self._col + 1))
         # unitsLabel.setFixedHeight(30)
-        # reorderLabel = Label(self, text='Reorder spectra by series', grid=(row, col), hAlign='l')
-        # self._orderButtons = ButtonList(self, texts=['Ascending','Descending'],
-        #                                 icons=[Icon('icons/sort-up'),Icon('icons/sort-down')],
-        #                                 callbacks=[partial(self._reorderSpectraBySeries, False),
-        #                                            partial(self._reorderSpectraBySeries, True)],
-        #                                 grid=(row, col + 1))
-        # row += 1
-        self.unitsEditor = PulldownListCompoundWidget(self, labelText='Series Units', grid=(row, col), gridSpan=(1, 3), hAlign='l',
+        reorderLabel = Label(self, text='Reorder spectra by series', grid=(self._row, self._col), hAlign='l')
+        self._orderButtons = ButtonList(self, texts=['Ascending','Descending'],
+                                        icons=[Icon('icons/sort-up'),Icon('icons/sort-down')],
+                                        callbacks=[partial(self._reorderSpectraBySeries, False),
+                                                   partial(self._reorderSpectraBySeries, True)],
+                                        grid=(self._row, self._col + 1))
+        self._row += 1
+
+        self.unitsEditor = PulldownListCompoundWidget(self._seriesOptionsFrame, labelText='Series Units', grid=(self._row, self._col), gridSpan=(1, 3), hAlign='l',
                                                       editable=True, sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents)
         self.unitsEditor.pulldownList.pulldownTextEdited.connect(partial(self._queueChangeSeriesUnits, self.unitsEditor, self.defaultObject))
         self.unitsEditor.pulldownList.pulldownTextReady.connect(partial(self._updateSeriesUnitsPulldown, self.unitsEditor, self.defaultObject))
         self._pulldownData = ALL_UNITS
 
-        row += 1
-        self._errorFrameSeriesValues = Frame(self, setLayout=True, grid=(row, col), gridSpan=(1, 3), hAlign='l')
+        self._row += 1
+        self._errorFrameSeriesValues = Frame(self._seriesOptionsFrame, setLayout=True, grid=(self._row, self._col), gridSpan=(1, 3), hAlign='l')
 
         # add a frame containing an error message if the series values are not all the same type
         self.errorIcon = Icon('icons/exclamation_small')
@@ -749,8 +789,8 @@ class SeriesFrame(Frame):
             label = Label(self._errorFrameSeriesValues, error, grid=(i, 1))
         self._errorFrameSeriesValues.hide()
 
-        row += 1
-        self._errorFrameDict = Frame(self, setLayout=True, grid=(row, col), gridSpan=(1, 3), hAlign='l')
+        self._row += 1
+        self._errorFrameDict = Frame(self._seriesOptionsFrame, setLayout=True, grid=(self._row, self._col), gridSpan=(1, 3), hAlign='l')
 
         # add a frame containing an error message if the dicts do not contain the same keys
         self.errorIcon = Icon('icons/exclamation_small')
@@ -763,31 +803,53 @@ class SeriesFrame(Frame):
             label = Label(self._errorFrameDict, error, grid=(i, 1))
         self._errorFrameDict.hide()
 
-        row += 1
-        Spacer(self, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-               grid=(row, col + 2))
-        self.getLayout().setRowStretch(row, 10)
+        self._row += 1
+        Spacer(self._seriesOptionsFrame, 1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+               grid=(self._row, self._col + 2))
+        self._seriesOptionsFrame.getLayout().setRowStretch(self._row, 10)
 
         # set the background to transparent so matches the colour of the tab
         self.setAutoFillBackground(False)
         self.setStyleSheet('Frame { background: transparent; }')
 
+        if len(defaultItems) > MAX_WIDGET_COUNT:
+            self._setDisabledSeriesTab()
+
+        if self._seriesEnabled:
+            self._fillSeriesFrame(defaultItems=defaultItems, spectrumGroup=self.defaultObject)
+
+
         # get colours from the lineEdit and copy to the plainTextEdit
         # yourWidget.palette().highlight().color().name()?
 
-    # def _reorderSpectraBySeries(self, reverse=True):
-    #     idx = self.seriesType.getIndex()
-    #     if idx == SeriesTypes.FLOAT.value or idx == SeriesTypes.INTEGER.value:
-    #         dd = OrderedDict((k, v.get()) for k, v in sorted(self._editors.items(), key=lambda item: float(item[1].get()), reverse=reverse))
-    #         self._parent._groupedObjects = [i.pid for i in dd.keys()]
-    #         for v, e in zip(dd.values(), self._editors.values()):
-    #             e.set(v)
-    #     self.seriesType.setIndex(idx)
+    def _reorderSpectraBySeries(self, reverse=True):
+        idx = self.seriesType.getIndex()
+        ll = sorted(self._editors.items(), key=lambda item: item[1].get(), reverse=reverse)
+        dd = OrderedDict((k, v.get()) for k, v in ll)
+        self._parent._groupedObjects = [i.pid for i in dd.keys()]
+        for v, e in zip(dd.values(), self._editors.values()):
+            e.set(v)
+        self.seriesType.setIndex(idx)
+
+    def _setDisabledSeriesTab(self):
+
+        self._seriesDisabledFrame.show()
+        self._seriesEnabled = False
+        if self._seriesFrame:
+            self._seriesFrame.hide()
+            self._seriesFrame.deleteLater()
+        self._seriesOptionsFrame.hide()
+
 
     def _fillSeriesFrame(self, defaultItems, spectrumGroup=None):
         """Reset the contents of the series frame for changed spectrum list
         """
+        if not self._seriesEnabled:
+            return
         # remove previous editor values
+        # print(traceback.print_stack())
+        self._seriesDisabledFrame.hide()
+        self._seriesOptionsFrame.show()
         for spec, editor in self._editors.items():
             editor.textChanged.disconnect()
             self._currentSeriesValues[spec] = editor.get()
@@ -805,7 +867,7 @@ class SeriesFrame(Frame):
             self._seriesFrame = Frame(self, setLayout=True, showBorder=False,
                                       grid=(self._seriesFrameRow, self._seriesFrameCol), gridSpan=(1, 3),
                                       vAlign='t')
-
+            self.getLayout().setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
             # add new editors with the new values
             for sRow, spec in enumerate(defaultItems):
                 seriesLabel = Label(self._seriesFrame, text=spec.pid, grid=(sRow, 0), vAlign='t')
@@ -821,6 +883,7 @@ class SeriesFrame(Frame):
                 seriesEditor.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
                 if spec in self._currentSeriesValues and self._currentSeriesValues[spec] is not None:
+                    # print('filling seriesEditor value: %s' % self._currentSeriesValues[spec])
                     seriesEditor.set(self._currentSeriesValues[spec])
 
                 # add the callback after setting the initial values
@@ -832,9 +895,11 @@ class SeriesFrame(Frame):
 
         self._seriesFrame.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
 
-    def _populate(self):
+    def _populateSeries(self):
         """Populate the texteditors - seriesValues and seriesUnits for the spectrumGroup
         """
+        if not self._seriesEnabled:
+            return
         if self.defaultObject:
             with self._changes.blockChanges():
                 self.seriesType.setIndex(int(self.defaultObject.seriesType or 0))
@@ -858,6 +923,7 @@ class SeriesFrame(Frame):
                         except Exception as es:
                             textEditor.set('')
                         else:
+                            # print('populating textEditor value: %s' % seriesValue)
                             textEditor.set(str(seriesValue))
 
                 if self.defaultObject.seriesUnits is not None and self.defaultObject.seriesUnits not in self._pulldownData:

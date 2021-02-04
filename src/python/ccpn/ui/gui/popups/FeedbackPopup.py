@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:36 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,9 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import os
 import random
-from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.framework.PathsAndUrls import ccpn2Url
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -35,10 +33,10 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.Font import getFontHeight
-from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpn.util import Logging
 from ccpn.util import Register
 from ccpn.util import Url
+from ccpn.util.Path import aPath
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 
 
@@ -69,8 +67,8 @@ class FeedbackPopup(CcpnDialogMainWidget):
 
         for key in ('name', 'organisation', 'email'):
             row += 1
-            label = Label(self.mainWidget, text='%s: ' % metaUtil.upperFirst(key), grid=(row, 0))
-            label = Label(self.mainWidget, text=self._registrationDict.get(key), grid=(row, 1))
+            Label(self.mainWidget, text='%s: ' % key.capitalize(), grid=(row, 0))
+            Label(self.mainWidget, text=self._registrationDict.get(key), grid=(row, 1))
 
         row += 1
         label = Label(self.mainWidget, text='Include: ', grid=(row, 0))
@@ -103,15 +101,17 @@ class FeedbackPopup(CcpnDialogMainWidget):
             # cannot use tempfile because that always hands back open object and tarfile needs actual path
             filePrefix = 'feedback%s' % random.randint(1, 10000000)
             project = application.project
-            projectPath = project.path
-            directory = os.path.dirname(projectPath)
-            filePrefix = os.path.join(directory, filePrefix)
-            fileName = apiIo.packageProject(project._wrappedData.parent, filePrefix, includeBackups=True, includeLogs=includeLog)
+            projectPath = aPath(project.path)
+            directory = projectPath.parent
+            filePrefix = directory / filePrefix
+
+            fileName = project.packageProject(filePrefix, includeBackups=True, includeLogs=includeLog)
+
         elif includeLog:
             logger = Logging.getLogger()
             if not hasattr(logger, 'logPath'):
                 return
-            fileName = logger.logPath
+            fileName = aPath(logger.logPath)
         else:
             fileName = None
 
@@ -127,7 +127,7 @@ class FeedbackPopup(CcpnDialogMainWidget):
                 response = Url.uploadFile(SCRIPT_URL, fileName, data)
             finally:
                 if includeProject:
-                    os.remove(fileName)
+                    fileName.removeFile()
         else:
             try:
                 response = Url.fetchUrl(SCRIPT_URL, data)
@@ -141,20 +141,22 @@ class FeedbackPopup(CcpnDialogMainWidget):
             title = 'Failure'
             msg = 'Problem submitting feedback'
 
-        info = MessageDialog.showInfo(title, msg)
-
-        #print(response)
-        self.hide()
+        MessageDialog.showInfo(title, msg)
+        self.accept()
 
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
 
 
+    _modal = True
     app = TestApplication()
     popup = FeedbackPopup()
 
     popup.show()
-    popup.raise_()
 
-    app.start()
+    if _modal:
+        app.exec_()
+    else:
+        popup.raise_()
+        app.start()

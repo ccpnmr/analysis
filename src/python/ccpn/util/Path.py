@@ -6,7 +6,7 @@ Includes extensions of sys.path functions and CCPN-specific functionality
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Wayne Boucher $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:59 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:39 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -72,6 +72,11 @@ class Path(_Path_):
         """the name of self without any suffixes
         """
         return self.name.split('.')[0]
+
+    @property
+    def filepath(self):
+        """Return the folder without the filename"""
+        return self if self.is_dir() else self.parent
 
     def addTimeStamp(self):
         """Return a Path instance with path.timeStamp.suffix profile
@@ -166,13 +171,21 @@ class Path(_Path_):
         self.unlink()
 
     def assureSuffix(self, suffix):
-        """Return Path instance with an assured suffix; adds suffic if not present.
-        NB: does not change suffix if there is one (like with_suffix does)
+        """Return Path instance with an assured suffix; adds suffix if not present.
+        .prefix to suffix is ignored if present.
+        Does not change suffix if there is one (like with_suffix does).
         """
+        if not isinstance(suffix, str):
+            raise TypeError('suffix %s must be a str' % str(suffix))
+
+        # strip leading .'s e.g. suffix is '.zip'
+        suffix = suffix.lstrip('.')
         if self.suffix != suffix:
-            return self + suffix
-        else:
-            return self
+            if self.name and self.name != '.':
+                _name = '.'.join([str(self.stem), str(suffix)])
+                return aPath(os.path.join(str(self.parent), _name))
+
+        return self
 
     def withoutSuffix(self):
         """Return self without suffix

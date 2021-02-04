@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-08-05 18:43:26 +0100 (Wed, August 05, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:32 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,26 +26,20 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import Sequence, Tuple, Optional
-
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.lib import Pid
+from ccpn.core.lib.OrderedSpectrumViews import OrderedSpectrumViews
+from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, undoBlock, deleteObject
 from ccpn.ui._implementation.Window import Window
 from ccpn.util import Common as commonUtil
-from ccpn.core.lib import Pid
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
-from ccpn.core.lib.OrderedSpectrumViews import OrderedSpectrumViews
-from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, undoBlock, deleteObject
 from ccpn.util.Logging import getLogger
-
-
-# _ccpnInternalData references
-# SV_TITLE = className  # may not be needed
 
 
 class SpectrumDisplay(AbstractWrapperObject):
@@ -257,7 +251,28 @@ class SpectrumDisplay(AbstractWrapperObject):
         return self._orderedSpectrumViews.getOrderedSpectrumViewsIndex()
 
     def _rescaleSpectra(self):
-        self._spectrumViewChanged({})
+        """Reorder the buttons and spawn a redraw event
+        """
+        self.spectrumToolBar.reorderButtons(self.orderedSpectrumViews(self.spectrumViews))
+
+        # spawn the required event to reordered the spectrumViews in openGL
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        GLSignals = GLNotifier(parent=None)
+        GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict={})
+
+    def moveSpectrumByIndex(self, startInd, endInd):
+        """Move spectrum in spectrumDisplay list from index startInd to endInd
+        startInd/endInd are the order as seen in the spectrumToolbar
+        """
+        _order = self.getOrderedSpectrumViewsIndex()
+        _newOrder = list(_order)
+
+        _last = _newOrder.pop(startInd)
+        _newOrder.insert(endInd, _last)
+
+        self.setOrderedSpectrumViewsIndex(_newOrder)
+        self._rescaleSpectra()
 
     @logCommand(get='self')
     def setOrderedSpectrumViewsIndex(self, spectrumIndex: Tuple[int]):
@@ -278,6 +293,7 @@ class SpectrumDisplay(AbstractWrapperObject):
             if not self._orderedSpectrumViews:
                 self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
             self._orderedSpectrumViews.setOrderedSpectrumViewsIndex(spectrumIndex=spectrumIndex)
+            self._rescaleSpectra()
 
             # rebuild the display when the ordering has changed
             with undoStackBlocking() as addUndoItem:
@@ -620,14 +636,8 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                                                             stripSerial=stripSerial, dataSource=dataSource,
                                                             dimensionOrdering=dimensionOrdering)
 
-    try:
-        strip = display.strips[0]
-        strip._CcpnGLWidget.initialiseAxes(strip=strip)
-
-    except Exception as es:
-        logger = getLogger()
-        logger.debugGL('OpenGL widget not instantiated')
-        logger.warning('OpenGL widget not instantiated')
+    # call any post initialise routines for the spectrumDisplay here
+    display._postInit()
 
     return display
 
@@ -680,6 +690,3 @@ Project._apiNotifiers.extend(
           'setSpectrumDisplays'),
          )
         )
-
-# Drag-n-drop functions:
-# SpectrumDisplay.processSpectrum = SpectrumDisplay.displaySpectrum     # ejb moved to GuiSpectrumDisplay

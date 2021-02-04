@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-27 09:43:02 +0000 (Tue, October 27, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -296,7 +296,7 @@ def propagateAssignments(peaks: typing.List[Peak] = None, referencePeak: Peak = 
         for i, axisCode in enumerate(peak.peakList.spectrum.axisCodes):
 
             if axisCode not in shiftRanges:
-                shiftMin, shiftMax = peak.peakList.spectrum.spectrumLimits[i]
+                shiftMin, shiftMax = sorted(peak.peakList.spectrum.spectrumLimits[i])
                 shiftRanges[axisCode] = (shiftMin, shiftMax)
 
             else:
@@ -743,10 +743,10 @@ def copyPeakAssignments(refPeak, peaks):
 
 def nmrAtomsForPeaks(peaks: typing.List[Peak], nmrAtoms: typing.List[NmrAtom],
                      intraResidual: bool = False, doubleTolerance: bool = False):
-    '''Get a set of nmrAtoms that fit to the dimensions of the
+    """Get a set of nmrAtoms that fit to the dimensions of the
        peaks.
 
-    '''
+    """
 
     selected = matchingNmrAtomsForPeaks(peaks, nmrAtoms, doubleTolerance=doubleTolerance)
     if intraResidual:
@@ -755,13 +755,13 @@ def nmrAtomsForPeaks(peaks: typing.List[Peak], nmrAtoms: typing.List[NmrAtom],
 
 
 def filterIntraResidual(nmrAtomsForDimensions: typing.List[NmrAtom]):
-    '''Takes a N-list of lists of nmrAtoms, where N
+    """Takes a N-list of lists of nmrAtoms, where N
        is the number of peak dimensions and only returns
        those which belong to residues that show up in
        at least to of the dimensions (This is the behaviour
        in v2, if I am correct).
 
-    '''
+    """
 
     nmrResiduesForDimensions = []
     allNmrResidues = set()
@@ -792,12 +792,12 @@ def filterIntraResidual(nmrAtomsForDimensions: typing.List[NmrAtom]):
 
 def matchingNmrAtomsForPeaks(peaks: typing.List[Peak], nmrAtoms: typing.List[NmrAtom],
                              doubleTolerance: bool = False):
-    '''Get a set of nmrAtoms that fit to the dimensions of the
+    """Get a set of nmrAtoms that fit to the dimensions of the
        peaks. This function does the actual calculation and does
        not involve filtering like in nmrAtoms_for_peaks, where
        more filters can be specified in the future.
 
-    '''
+    """
 
     dimensionCount = [len(peak.position) for peak in peaks]
     #All peaks should have the same number of dimensions.
@@ -825,9 +825,9 @@ def matchingNmrAtomsForPeaks(peaks: typing.List[Peak], nmrAtoms: typing.List[Nmr
 
 def matchingNmrAtomsForPeakDimension(peak: Peak, dim: int, nmrAtoms: typing.List[NmrAtom],
                                      doubleTolerance: bool = False):
-    '''Just finds the nmrAtoms that fit a dimension of one peak.
+    """Just finds the nmrAtoms that fit a dimension of one peak.
 
-    '''
+    """
 
     fitting_nmrAtoms = set()
     # shiftList = getShiftlistForPeak(peak)
@@ -853,11 +853,11 @@ def matchingNmrAtomsForPeakDimension(peak: Peak, dim: int, nmrAtoms: typing.List
 
 
 def withinTolerance(nmrAtom: NmrAtom, position: float, shiftList: ChemicalShiftList, tolerance: float):
-    '''Decides whether the shift of the nmrAtom is
+    """Decides whether the shift of the nmrAtom is
        within the tolerance to be assigned to the
        peak dimension.
 
-    '''
+    """
     shift = shiftList.getChemicalShift(nmrAtom.id)
     #delta = delta_shift(nmrAtom, position, shiftList)
     if shift and abs(position - shift.value) < tolerance:
@@ -866,9 +866,9 @@ def withinTolerance(nmrAtom: NmrAtom, position: float, shiftList: ChemicalShiftL
 
 
 def peaksAreOnLine(peaks: typing.List[Peak], dim: int):
-    '''Returns True when multiple peaks are located
+    """Returns True when multiple peaks are located
        on a line in the given dimensions.
-    '''
+    """
 
     if not sameAxisCodes(peaks, dim):
         return False
@@ -892,9 +892,9 @@ def peaksAreOnLine(peaks: typing.List[Peak], dim: int):
 
 
 def sameAxisCodes(peaks: typing.List[Peak], dim: int):
-    '''Checks whether all peaks have the same axisCode
+    """Checks whether all peaks have the same axisCode
        for in the given dimension.
-    '''
+    """
 
     spectra = set(peak.peakList.spectrum for peak in peaks)
     if len(spectra) > 1:
@@ -926,8 +926,8 @@ def refitPeaks(peaks: Sequence[Peak], fitMethod: str = GAUSSIANMETHOD, singularM
 
 
 def _assignNmrResiduesToPeaks(peaks, nmrResidues):
-    ''' CCPN Internal. Used to assign via Drag and drop.
-    Searches for matches of peak Axis code to the nmrAtoms Names of all residues if any will do the assignment'''
+    """ CCPN Internal. Used to assign via Drag and drop.
+    Searches for matches of peak Axis code to the nmrAtoms Names of all residues if any will do the assignment"""
 
     for peak in peaks:
         for axisCode in peak.axisCodes:
@@ -959,8 +959,8 @@ def _assignNmrResiduesToPeaks(peaks, nmrResidues):
 
 
 def _assignNmrAtomsToPeaks(peaks, nmrAtoms):
-    ''' CCPN Internal. Used to assign via Drag and drop and atom selector Module.
-    Searches for matches of peak Axis code to the nmrAtoms Names if any will do the assignment'''
+    """ CCPN Internal. Used to assign via Drag and drop and atom selector Module.
+    Searches for matches of peak Axis code to the nmrAtoms Names if any will do the assignment"""
 
     for peak in peaks:
         for axisCode in peak.axisCodes:

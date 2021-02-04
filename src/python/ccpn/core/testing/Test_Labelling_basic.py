@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:33 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:30 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -72,7 +72,7 @@ class TestLabellingBasic_setUp(WrapperTesting):
 
     def checkNumComponents(self, num: int):
         """
-        Test that sampleComponent and sjubstance are the required length.
+        Test that sampleComponent and substance are the required length.
         :param num:
         """
         self.assertEqual(len(self.project.sampleComponents), num)
@@ -154,15 +154,19 @@ class TestLabellingBasic_setUp(WrapperTesting):
 
     def test_SampleComponentLabelling_ES(self):
         """
-        Test that creating a new SampleComponent with Labelling as empty string raises an error
-        and no component is added.
+        Test that creating a new SampleComponent with Labelling as empty string still creates a
+        valid sample component.
         """
         # with self.assertRaisesRegexp(ApiError, 'Empty string not allowed'):
         #   self.sample.newSampleComponent('ValidSampleComponent', '')
         #
-        with self.assertRaisesRegexp(ValueError, "SampleComponent 'labelling' name must be set"):
-            self.sample.newSampleComponent('ValidSampleComponent', '')
-        self.checkNumComponents(0)
+        #with self.assertRaisesRegexp(ValueError, "SampleComponent 'labelling' name must be set"):
+        #    self.sample.newSampleComponent('ValidSampleComponent', '')
+        #self.checkNumComponents(0)
+
+        self.sample.newSampleComponent('ValidSampleComponent', '')
+        self.checkNumComponents(1)
+
 
     def test_SampleComponentLabelling_Badname(self):
         """
@@ -185,6 +189,6 @@ class TestLabellingBasic_setUp(WrapperTesting):
         # with self.assertRaisesRegexp(TypeError, 'not iterable'):
         #   self.sample.newSampleComponent('ValidSampleComponent', 42)
         #
-        with self.assertRaisesRegexp(TypeError, "SampleComponent 'labelling' name must be a string"):
+        with self.assertRaisesRegexp(TypeError, "must be a string"):
             self.sample.newSampleComponent('ValidSampleComponent', 42)
         self.checkNumComponents(0)

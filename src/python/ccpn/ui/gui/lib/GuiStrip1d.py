@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 18:39:16 +0100 (Fri, October 23, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -154,7 +154,7 @@ class GuiStrip1d(GuiStrip):
 
         # a large(ish) unbound widget to contain the text - may need more rows
         self._frameGuide = OpenGLOverlayFrame(self, setLayout=True)
-        self._frameGuide.setFixedSize(400, 400)
+        # self._frameGuide.setFixedSize(400, 400)
 
         # add spacer to the top left corner
         self._frameGuide.addSpacer(8, 8, grid=(1, 0))
@@ -462,6 +462,13 @@ class GuiStrip1d(GuiStrip):
         """
         Changes the position of the z axis of the strip by number of planes or a ppm position, depending
         on which is specified.
+        """
+        # Not implemented for 1d strips
+        pass
+
+    def _setZWidgets(self, ignoreSpectrumView=None):
+        """
+        # CCPN INTERNAL - Sets values for the widgets in the plane toolbar.
         """
         # Not implemented for 1d strips
         pass

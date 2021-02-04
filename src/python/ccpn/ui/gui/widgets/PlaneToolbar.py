@@ -7,7 +7,7 @@ The NmrResidueLabel allows drag and drop of the ids displayed in them
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 16:09:00 +0000 (Tue, December 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:38 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -153,7 +153,7 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
         if self._lastClick == SINGLECLICK:
             mouseDict = getMouseEventDict(event)
 
-            # set up a singleshot event, but a bit quicker than the normal interval (which seems a little long)
+            # set up a singleShot event, but a bit quicker than the normal interval (which seems a little long)
             QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval() // 2,
                                      partial(self._handleMouseClicked, mouseDict))
 
@@ -246,8 +246,8 @@ class PlaneSelectorWidget(Frame):
     """
 
     def __init__(self, qtParent, mainWindow=None, strip=None, axis=None, **kwds):
-        "Setup the buttons and callbacks for axis"
-
+        """Setup the buttons and callbacks for axis
+        """
         super().__init__(parent=qtParent, setLayout=True, **kwds)
 
         self.mainWindow = mainWindow
@@ -259,32 +259,27 @@ class PlaneSelectorWidget(Frame):
         self._linkedPlaneCount = None
 
         _size = getFontHeight(size='MEDIUM')
-        # height = _size
 
         self._mainWidget = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
 
         self.previousPlaneButton = Button(parent=self._mainWidget, text='<', grid=(0, 0),
                                           callback=self._previousPlane)
-        # self.previousPlaneButton.setFixedWidth(_size)
-        # self.previousPlaneButton.setFixedHeight(height)
 
         self.spinBox = DoubleSpinbox(parent=self._mainWidget, showButtons=False, grid=(0, 1), decimals=3,
-                                     callback=self._spinBoxChanged, objectName='PlaneSelectorWidget_planeDepth')
+                                     objectName='PlaneSelectorWidget_planeDepth',
+                                     )
         self.spinBox.setFixedWidth(_size * 5)
-        # self.spinBox.setFixedHeight(height)
-        self.spinBox.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+
+        self.spinBox.returnPressed.connect(self._spinBoxChanged)
+        self.spinBox.wheelChanged.connect(self._spinBoxChanged)
 
         self.nextPlaneButton = Button(parent=self._mainWidget, text='>', grid=(0, 2),
                                       callback=self._nextPlane)
-        # self.nextPlaneButton.setFixedWidth(_size)
-        # self.nextPlaneButton.setFixedHeight(height)
 
         self.planeCountSpinBox = Spinbox(parent=self._mainWidget, showButtons=False, grid=(0, 3), min=1, max=1000,
                                          objectName='PlaneSelectorWidget_planeCount'
                                          )
         self.planeCountSpinBox.setFixedWidth(_size * 2.5)
-        # self.planeCountSpinBox.setFixedHeight(height)
-        self.planeCountSpinBox.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         self.planeCountSpinBox.returnPressed.connect(self._planeCountChanged)
         self.planeCountSpinBox.wheelChanged.connect(self._planeCountChanged)
@@ -313,30 +308,26 @@ class PlaneSelectorWidget(Frame):
         self._callbacks = callbacks
 
     def _planeCountChanged(self, value: int = 1):
-        """
-        Changes the number of planes displayed simultaneously.
+        """Changes the number of planes displayed simultaneously.
         """
         if self.strip:
             self._callbacks[3](value)
 
     def _nextPlane(self, *args):
-        """
-        Increases axis ppm position by one plane
+        """Increases axis ppm position by one plane
         """
         self.project._buildWithProfile = False
         if self.strip:
             self._callbacks[2](*args)
 
     def _previousPlane(self, *args):
-        """
-        Decreases axis ppm position by one plane
+        """Decreases axis ppm position by one plane
         """
         if self.strip:
             self._callbacks[0](*args)
 
     def _spinBoxChanged(self, value: float):
-        """
-        Sets the value of the axis plane position box if the specified value is within the displayable limits.
+        """Sets the value of the axis plane position box if the specified value is within the displayable limits.
         """
         if self.strip:
             self._callbacks[1](value)
@@ -370,14 +361,13 @@ class PlaneSelectorWidget(Frame):
     def setPlaneValues(self, minZPlaneSize=None, minAliasedFrequency=None, maxAliasedFrequency=None, ppmPosition=None):
         """Set new values for the plane selector
         """
-        with self.blockWidgetSignals():
-
+        with self.blockWidgetSignals(root=self._mainWidget):
+            # block signals while setting contents
             self.spinBox.setSingleStep(minZPlaneSize)
             if maxAliasedFrequency is not None:
                 self.spinBox.setMaximum(maxAliasedFrequency)
             if minAliasedFrequency is not None:
                 self.spinBox.setMinimum(minAliasedFrequency)
-
             self.spinBox.setValue(ppmPosition)
 
     def getPlaneValues(self):
@@ -857,84 +847,6 @@ class ZPlaneToolbar(Frame):
                 # reattach the widget to the in strip container
                 pl._attachButton('_axisSelector')
                 pl._hideAxisSelector()
-
-
-# class PlaneToolbar(Frame):
-#     #TODO: undocumented and needs refactoring ;
-#     # GWV: Does not work as a Widget!?
-#     def __init__(self, qtParent, strip, callbacks, stripArrangement=None,
-#                  containers=None, **kwds):
-#
-#         super().__init__(parent=qtParent, setLayout=True, **kwds)
-#
-#         self.strip = strip
-#         self.planeLabels = []
-#         self.planeCounts = []
-#         row = 0
-#         for i in range(len(strip.orderedAxes) - 2):
-#             if not containers:
-#                 _toolbar = ToolBar(self, grid=(0, row))
-#             else:
-#                 cFrame, cWidgets = list(containers.items())[i]
-#                 _toolbar = ToolBar(cFrame, grid=(0, 3))
-#
-#                 # add the new toolbar to the popup display
-#                 cWidgets += (_toolbar,)
-#                 cWidgets[2].setVisible(False)
-#                 cWidgets[3].setVisible(False)
-#
-#                 # set the axisCode
-#                 cWidgets[0].setText(str(strip.axisCodes[i + 2]) + ":")
-#
-#             self.prevPlaneButton = Button(_toolbar, '<', callback=partial(callbacks[0], i))
-#             self.prevPlaneButton.setFixedWidth(19)
-#             self.prevPlaneButton.setFixedHeight(19)
-#             planeLabel = DoubleSpinbox(_toolbar, showButtons=False, objectName="PlaneToolbar_planeLabel" + str(i),
-#                                        )
-#             planeLabel.setToolTip(str(strip.axisCodes[i + 2]))
-#
-#             # planeLabel.setFixedHeight(19)
-#
-#             # force the minimum width of the planeLabel
-#             planeLabel.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
-#                                      QtWidgets.QSizePolicy.MinimumExpanding)
-#             planeLabel.setMinimumWidth(55)
-#
-#             # below does not work because it allows wheel events to behave but not manual text entry (some Qt stupidity)
-#             # so instead use a wheelEvent to deal with the wheel events and editingFinished (in GuiStripNd) to do text
-#             #planeLabel.valueChanged.connect(partial(callbacks[2], i))
-#             if callbacks[2]:
-#                 planeLabel.wheelEvent = partial(self._wheelEvent, i)
-#                 self.prevPlaneCallback = callbacks[0]
-#                 self.nextPlaneCallback = callbacks[1]
-#             self.nextPlaneButton = Button(_toolbar, '>', callback=partial(callbacks[1], i))
-#             self.nextPlaneButton.setFixedWidth(19)
-#             self.nextPlaneButton.setFixedHeight(19)
-#             planeCount = Spinbox(_toolbar, showButtons=False, hAlign='c')
-#             planeCount.setMinimum(1)
-#             planeCount.setMaximum(1000)
-#             planeCount.setValue(1)
-#             planeCount.oldValue = 1
-#             planeCount.returnPressed.connect(partial(callbacks[3], i))
-#             planeCount.wheelChanged.connect(partial(callbacks[3], i))
-#
-#             _toolbar.addWidget(self.prevPlaneButton)
-#             _toolbar.addWidget(planeLabel)
-#             _toolbar.addWidget(self.nextPlaneButton)
-#             _toolbar.addWidget(planeCount)
-#             self.planeLabels.append(planeLabel)
-#             self.planeCounts.append(planeCount)
-#             row += 1
-#
-#     def _wheelEvent(self, n, event):
-#         if event.angleDelta().y() > 0:  # note that in Qt5 this becomes angleDelta().y()
-#             if self.prevPlaneCallback:
-#                 self.prevPlaneCallback(n)
-#         else:
-#             if self.nextPlaneCallback:
-#                 self.nextPlaneCallback(n)
-#
-#         self.strip._rebuildStripContours()
 
 
 STRIPCONNECT_LEFT = 'isLeft'
@@ -1419,6 +1331,8 @@ class StripLabelWidget(_OpenGLFrameABC):
         self._resize()
 
     def setLabelColour(self, colour=DEFAULTCOLOUR):
+        """Set the colour for stripLabel
+        """
         self.show()
         self._setStyle(self._stripLabel, foregroundColour=colour)
         self._setPositionParameter(STRIPCOLOUR, colour)

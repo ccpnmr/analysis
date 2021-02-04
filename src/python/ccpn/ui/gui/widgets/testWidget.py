@@ -1,8 +1,8 @@
 
 if False:
-    '''
+    """
     Use this to test new widgets in a popup. 
-    '''
+    """
     if __name__ == '__main__':
         from ccpn.ui.gui.widgets.Application import TestApplication
         from ccpn.ui.gui.popups.Dialog import CcpnDialog

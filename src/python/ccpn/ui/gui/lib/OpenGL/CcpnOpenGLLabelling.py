@@ -5,7 +5,7 @@ Currently this is peaks and multiplets
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 23:02:32 +0000 (Tue, December 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -88,13 +88,13 @@ class GLLabelling():
     LENSQ4 = GLDefs.LENSQ4
     POINTCOLOURS = GLDefs.POINTCOLOURS
 
-    def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
+    def __init__(self, parent=None, strip=None, name=None, enableResize=False):
         """Initialise the class
         """
         self._GLParent = parent
         self.strip = strip
         self.name = name
-        self.resizeGL = resizeGL
+        self._resizeEnabled = enableResize
         self._threads = {}
         self._threadupdate = False
         self.current = self.strip.current if self.strip else None
@@ -110,8 +110,16 @@ class GLLabelling():
 
         self.autoColour = self._GLParent.SPECTRUMPOSCOLOUR
 
+    def enableResize(self, value):
+        """enable resizing for labelling
+        """
+        if not isinstance(value, bool):
+            raise TypeError('enableResize must be a bool')
+
+        self._resizeEnabled = value
+
     def rescale(self):
-        if self.resizeGL:
+        if self._resizeEnabled:
             for pp in self._GLSymbols.values():
                 pp.renderMode = GLRENDERMODE_RESCALE
             for pp in self._GLLabels.values():

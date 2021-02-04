@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-08 12:32:29 +0100 (Tue, September 08, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:38 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,44 +25,63 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-import json
-import re
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-import pandas as pd
-from pyqtgraph import TableWidget
-import os
-from ccpn.core.lib.CcpnSorting import universalSortKey
-from ccpn.core.lib.CallBack import CallBack
-from ccpn.core.lib.DataFrameObject import DataFrameObject
-from ccpn.ui.gui.widgets.Base import Base
+from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.TableFilter import ObjectTableFilter
-from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
-from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
-from ccpn.core.lib.Notifiers import Notifier
 from functools import partial
-from collections import OrderedDict
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.util.Logging import getLogger
-
+import operator as op
 
 VISIBLESEARCH = '<Visible Table>'
+
+GreaterThan = '>'
+LessThan = '<'
+GreaterThanInclude = '>='
+LessThanInclude = '<='
+Equal = 'Equal'
+Include = 'Include'
+
+
+SearchConditionsDict = {
+                        Equal: op.eq,
+                        Include: op.contains,
+                        GreaterThan: op.gt,
+                        GreaterThanInclude: op.ge,
+                        LessThan: op.lt,
+                        LessThanInclude: op.le,
+                        }
+
+def _compareKeys(a, b, condition):
+    """
+    :param a: first value
+    :param b: second value
+    :param condition: Any key of SearchConditionsDict.
+    :return:
+    """
+    if not condition in list(SearchConditionsDict.keys()):
+        getLogger().debug('Condition %s  not available  for GuiTable filters.' %condition)
+    try:
+        if condition == Equal:
+            return SearchConditionsDict.get(Equal)(a, b)
+        if condition == Include:
+            return SearchConditionsDict.get(Include)(a, b)
+        else:
+            a,b, = float(a), float(b)
+            return SearchConditionsDict.get(condition)(a,b)
+    except Exception as ex:
+        getLogger().debug('Error in comparing values for GuiTable filters.', ex)
+    return False
+
+
 
 
 class GuiTableFilter(ScrollArea):
@@ -86,14 +105,8 @@ class GuiTableFilter(ScrollArea):
 
         self.columnOptions.setMinimumWidth(40)
 
-        # self.searchLabel = Label(self,'Search for')
-        # self.searchLabel.setIcon(Icon('icons/disconnectPrevious'))
-
-        self.edit = LineEdit(self._widget, grid=(0, 0), gridSpan=(1, 5), backgroundText='Search Item')
-
-        # self.searchLabel = Label(self._widget, grid=(0,0))
-        # thisIcon = Icon('icons/edit-find')
-        # self.searchLabel.setPixmap(thisIcon.pixmap(thisIcon.actualSize(QtCore.QSize(24,24))))
+        self.conditionWidget = PulldownList(self._widget, texts=list(SearchConditionsDict.keys()), grid=(0, 0))
+        self.edit = LineEdit(self._widget, grid=(0, 1), gridSpan=(1, 5), backgroundText='Search Item')
         self.searchLabel = Button(self._widget, grid=(0, 4), icon=Icon('icons/edit-find'),
                                   callback=partial(self.findOnTable, self.table))
         self.searchLabel.setFlat(True)
@@ -102,11 +115,6 @@ class GuiTableFilter(ScrollArea):
                                         callbacks=[partial(self.restoreTable, self.table),
                                                    self.hideSearch],
                                         grid=(1, 3), gridSpan=(1, 2))
-        # self.searchButtons = ButtonList(self._widget, texts=['Search', 'Reset', 'Close'], tipTexts=['Search', 'Restore Table', 'Close Search'],
-        #                                 callbacks=[partial(self.findOnTable, self.table),
-        #                                            partial(self.restoreTable, self.table),
-        #                                            self.hideSearch],
-        #                                 grid=(1, 3), gridSpan=(1,2))
 
         Spacer(self._widget, 5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
                grid=(0, 2), gridSpan=(1, 1))
@@ -122,13 +130,7 @@ class GuiTableFilter(ScrollArea):
         self.searchLabel.setFixedWidth(self.searchLabel.sizeHint().width())
         self.searchButtons.setFixedWidth(self.searchButtons.sizeHint().width())
 
-        # self.widgetLayout = QtWidgets.QHBoxLayout()
-        # self.setLayout(self.widgetLayout)
-        # ws = [labelColumn, self.columnOptions, self.searchLabel, self.edit, self.searchButtons]
-        # for w in ws:
-        #     self.widgetLayout.addWidget(w)
         self.setColumnOptions()
-        # self.widgetLayout.setContentsMargins(0, 0, 0, 0)
 
         self.setContentsMargins(0, 0, 0, 0)
 
@@ -234,12 +236,14 @@ class GuiTableFilter(ScrollArea):
             for column in range(self.table.columnCount()):
                 if self.table.horizontalHeaderItem(column).text() in visHeadings:
                     item = table.item(row, column)
+                    cellText =  item.data(QtCore.Qt.DisplayRole)
+                    condition = self.conditionWidget.getText()
+                    match = _compareKeys(cellText, text, condition)
 
-                    if matchExactly:
-                        match = item and (text == item.data(QtCore.Qt.DisplayRole))
-                    else:
-                        match = item and (text in item.data(QtCore.Qt.DisplayRole))
-
+                    # if matchExactly:
+                    #     match = item and (text == item.data(QtCore.Qt.DisplayRole))
+                    # else:
+                    #     match = item and (text in item.data(QtCore.Qt.DisplayRole))
                     if match:
                         if self._listRows is not None:
                             rows.add(list(self._listRows)[item.index])
@@ -277,15 +281,6 @@ def attachSearchWidget(parent, table):
     """
     returnVal = False
     try:
-        # if table._parent is not None:
-        #   parentLayout = None
-        #   if isinstance(table._parent, Base):
-        #     if hasattr(table.parent, 'getLayout'):
-        #       parentLayout = table._parent.getLayout()
-        #     else:
-        #       # TODO Add the search widget somewhere. Popup?
-        #       return False
-
         parentLayout = table.parent().getLayout()
 
         if isinstance(parentLayout, QtWidgets.QGridLayout):
@@ -296,12 +291,10 @@ def attachSearchWidget(parent, table):
                     row, column, rowSpan, columnSpan = location
                     table.searchWidget = GuiTableFilter(parent=parent, table=table, vAlign='b')
                     parentLayout.addWidget(table.searchWidget, row + 1, column, 1, columnSpan)
-                    # table.searchWidget.setFixedHeight(30)
                     table.searchWidget.hide()
 
-                    # TODO:ED move this to the tables
-                    # parentLayout.setVerticalSpacing(0)
                 returnVal = True
+
     except Exception as es:
         getLogger().warning('Error attaching search widget: %s' % str(es))
     finally:

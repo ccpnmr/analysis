@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-28 17:00:32 +0100 (Tue, April 28, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:39 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,6 +35,7 @@ from ccpn.util import Sorting
 from ccpn.util.ListFromString import listFromString
 from functools import partial
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, notificationBlanking
+
 
 # Pid.IDSEP - but we do not want to import from ccpn.core here
 IDSEP = '.'
@@ -289,15 +290,12 @@ class EnsembleData(pd.DataFrame):
     #   super().drop(labels, axis, level, inplace, errors)
     #   # self.reset_index(drop=True, inplace=True)
 
-    def _finaliseStructureEnsemble(self, action:str):
+    def _finaliseStructureEnsemble(self, action: str):
         """finalise an action on the containing structureEnsemble.
         """
         structureEnsemble = self._structureEnsemble
         if structureEnsemble is not None:
             structureEnsemble._finaliseAction(action)
-
-    def _finaliseAction(self, action: str):
-        super()._finaliseAction(action)
 
     def selector(self, index=None, chainCodes=None, residueNames=None, sequenceIds=None,
                  atomNames=None, modelNumbers=None, ids=None,
@@ -542,7 +540,6 @@ class EnsembleData(pd.DataFrame):
 
                 self._finaliseStructureEnsemble('change')  # spawn a change event in StructureEnsemble
 
-    # @logCommand(get='self')
     def deleteSelectedRows(self, **kwargs):
         """
         Delete rows identified by selector.
@@ -579,7 +576,7 @@ class EnsembleData(pd.DataFrame):
 
             self.drop(self[rowSelector].index, inplace=True)
             self.reset_index(drop=True, inplace=True)
-            
+
             self._finaliseStructureEnsemble('change')
 
         else:
@@ -655,7 +652,6 @@ class EnsembleData(pd.DataFrame):
                 self.sort_index(inplace=True)  # and re-sort the table
 
                 self._finaliseStructureEnsemble('change')
-
 
     def deleteRow(self, rowNumber: None):  # ejb - *args, **kwargs):
         """
@@ -738,7 +734,6 @@ class EnsembleData(pd.DataFrame):
 
                 self._finaliseStructureEnsemble('change')
 
-    # @logCommand(get='self')
     def deleteCol(self, columnName=None):  # ejb - , *args, **kwargs):
         """
         Delete a named column from the table, the columnName must be a string and exist in the table.
@@ -776,7 +771,6 @@ class EnsembleData(pd.DataFrame):
 
                 self._finaliseStructureEnsemble('change')
 
-    # @logCommand(get='self')
     def setValues(self, accessor: typing.Union[int, 'EnsembleData', pd.Series], **kwargs) -> None:
         """
         Allows you to easily set values (in place) for fields in the EnsembleData
@@ -983,7 +977,6 @@ class EnsembleData(pd.DataFrame):
 
         pass
 
-    # @logCommand(get='self')
     def ccpnSort(self, *columns: str):
         """Custom sort. Sorts mixed-type columns by type, sorting None and NaN at the start
 

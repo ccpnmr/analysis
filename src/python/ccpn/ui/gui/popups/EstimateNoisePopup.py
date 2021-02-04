@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-03 10:01:42 +0000 (Thu, December 03, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:35 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,25 +25,20 @@ __date__ = "$Date: 2017-07-04 09:28:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-import numpy as np
+from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise, DEFAULTLEVELS, DEFAULTMULTIPLIER
+from ccpn.core.lib.SpectrumLib import getNoiseEstimate, getNoiseEstimateFromRegion
+from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.util.OrderedSet import OrderedSet
-from ccpn.util.Common import getAxisCodeMatchIndices
-from collections import OrderedDict
-from ccpn.ui.gui.guiSettings import getColours, SOFTDIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise, DEFAULTLEVELS, DEFAULTMULTIPLIER, DEFAULTCONTOURBASE
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, ScientificSpinBoxCompoundWidget, \
-    RadioButtonsCompoundWidget, PulldownListCompoundWidget, SpinBoxCompoundWidget, TextEditorCompoundWidget
-from ccpn.core.lib.SpectrumLib import getNoiseEstimate
+from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, RadioButtonsCompoundWidget
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
+from ccpn.ui.gui.guiSettings import getColours, SOFTDIVIDER
 
 
 COL_WIDTH = 140
@@ -140,16 +135,13 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
 
     def _setInfoWidgets(self):
         row = 0
-        # NOTE:ED - this is not very good or generic, needs possibly a plugin type methods
+        # NOTE:ED - this is not very good or generic, needs possibly plugin type methods
 
         texts = ['Visible Area', 'Random Sampling']
         tipTexts = ['Estimate the noise from the visible plane',
                     'Estimate the noise from a random sampling of the whole spectrum']
 
         self.estimateOption = RadioButtonsCompoundWidget(self.infoFrame, labelText='Estimation method',
-                                                         # callback=self._selectionButtonCallback,
-                                                         # direction='h',
-                                                         # tipTexts=None,
                                                          grid=(row, 0), gridSpan=(1, 2),
                                                          compoundKwds={'direction': 'h',
                                                                        # 'selectedInd': 0,
@@ -161,8 +153,6 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
         # checkbox to recalculate on first popup - False to start
         self.autoCalculate = CheckBoxCompoundWidget(self.commonFrame,
                                                     grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                                                    #minimumWidths=(colwidth, 0),
-                                                    # fixedWidths=(30, None),
                                                     orientation='right',
                                                     labelText='Automatically estimate noise on popup',
                                                     checked=False)
@@ -251,8 +241,8 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
                                                                  }
         else:
             EstimateNoisePopup._storedState[ESTIMATECONTOURS].update({ESTIMATEMETHOD: self.estimateOption.getIndex(),
-                                                                 ESTIMATEAUTO  : self.autoCalculate.isChecked()
-                                                                 })
+                                                                      ESTIMATEAUTO  : self.autoCalculate.isChecked()
+                                                                      })
 
         if not self.strip.spectrumDisplay.is1D:
             EstimateNoisePopup._storedState[ESTIMATECONTOURS].update({ESTIMATEPOSITIVE  : self.setPositiveContours.isChecked(),
@@ -306,7 +296,7 @@ class NoiseTab(Widget):
         row = 0
 
         self.axisCodeLabels = []
-        for ii, axis in enumerate(self.spectrum.axisCodes):
+        for ii, axis in enumerate(self.strip.axisCodes):
             Label(self, text=axis, grid=(row, 0), vAlign='t', hAlign='l')
             self.axisCodeLabels.append(Label(self, text=NONE_TEXT, grid=(row, 1), gridSpan=(1, 2), vAlign='t', hAlign='l'))
             row += 1
@@ -340,7 +330,8 @@ class NoiseTab(Widget):
             self.currentNoiseLabel.setText(f'{self.spectrum.noiseLevel:.3f}')
 
     def _setFromCurrentCursor(self):
-        "Add the initial spinbox value  from  the current cursor position. Implemented only for 1D."
+        """Add the initial spinbox value from the current cursor position. Implemented only for 1D.
+        """
         if self.mainWindow.current is not None:
             if self.spectrum.dimensionCount == 1:
                 if self.current.cursorPosition:
@@ -355,85 +346,17 @@ class NoiseTab(Widget):
             self._estimateFromRandomSamples()
 
     def _estimateFromRegion(self):
-        # calculate the region over which to estimate the noise
-        selectedRegion = [[self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR],
-                          [self.strip._CcpnGLWidget.axisB, self.strip._CcpnGLWidget.axisT]]
-        for n in self.strip.orderedAxes[2:]:
-            selectedRegion.append((n.region[0], n.region[1]))
-        sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]  # GWV: Not sure why this is needed?
+        # get the noise estimate for the region displayed in the strip
+        noise = getNoiseEstimateFromRegion(self.spectrum, self.strip)
 
-        indices = self.spectrum.getByAxisCodes('indices', self.strip.axisCodes)
+        if noise:
+            regions = self.strip.getAxisRegions()
 
-        regionDict = {}
-        for idx, ac, region in zip(indices, self.strip.axisCodes, sortedSelectedRegion):
-            regionDict[ac] = tuple(region)
+            # populate the widgets
+            for ii, region in enumerate(regions):
+                self.axisCodeLabels[ii].setText('(' + ','.join(['%.3f' % rr for rr in region]) + ')')
 
-        # get the data
-        dataArray = self.spectrum.getRegion(**regionDict)
-
-        # calculate the noise values
-        flatData = dataArray.flatten()
-
-        self.SD = np.std(flatData)
-        self.max = np.max(flatData)
-        self.min = np.min(flatData)
-        self.mean = np.mean(flatData)
-        self.noiseLevel = abs(self.mean) + 3.0 * self.SD
-
-                    # populate the widgets
-                    for ii, ind in enumerate(indices):
-                        self.axisCodeLabels[ii].setText('(' + ','.join(['%6.2f' % rr for rr in sortedSelectedRegion[ind]]) + ')')
-
-                    self._setLabels(self.mean, self.SD, self.min, self.max, self.noiseLevel)
-
-
-        # # get indexing for spectrum onto strip.axisCodes
-        # indices = getAxisCodeMatchIndices(self.spectrum.axisCodes, self.strip.axisCodes)
-        #
-        # if None in indices:
-        #     return
-        #
-        # # map the spectrum selectedRegions to the strip
-        # axisCodeDict = OrderedDict((code, sortedSelectedRegion[indices[ii]])
-        #                            for ii, code in enumerate(self.spectrum.axisCodes) if indices[ii] is not None)
-        #
-        # # add an exclusion buffer to ensure that getRegionData always returns a region,
-        # # otherwise region may be 1 plain thick which will contradict error trapping for peak fitting
-        # # (which requires at least 3 points in each dimension)
-        # # exclusionBuffer = [1] * self.spectrum.dimensionCount
-        # # however, this shouldn't be needed of the range is > valuePrePoint in each dimension
-        #
-        # foundRegions = self.spectrum.getRegionData(minimumDimensionSize=1, **axisCodeDict)
-        #
-        # if foundRegions:
-        #
-        #     # just use the first region
-        #     for region in foundRegions[:1]:
-        #         dataArray, intRegion, *rest = region
-        #
-        #         if dataArray.size:
-        #             # calculate the noise values
-        #             flatData = dataArray.flatten()
-        #
-        #             self.SD = np.std(flatData)
-        #             self.max = np.max(flatData)
-        #             self.min = np.min(flatData)
-        #             self.mean = np.mean(flatData)
-        #             self.noiseLevel = abs(self.mean) + 3.0 * self.SD
-        #
-        #             # populate the widgets
-        #             for ii, ind in enumerate(indices):
-        #                 self.axisCodes[ii].setText('(' + ','.join(['%.3f' % rr for rr in sortedSelectedRegion[ind]]) + ')')
-        #
-        #             self.meanLabel.setText(str(self.mean))
-        #             self.SDLabel.setText(str(self.SD))
-        #             self.maxLabel.setText(str(self.max))
-        #             self.minLabel.setText(str(self.min))
-        #             self.noiseLevelSpinBox.setValue(self.noiseLevel)
-        #
-        # else:
-        #     # no regions so just put the current noise level back into the spinBox
-        #     self.noiseLevelSpinBox.setValue(self.spectrum.noiseLevel)
+            self._setLabels(noise.mean, noise.std, noise.min, noise.max, noise.noiseLevel)
 
     def _estimateFromRandomSamples(self):
         # populate the widgets
@@ -456,9 +379,9 @@ class NoiseTab(Widget):
     def _setNoiseLevel(self):
         """Apply the current noiseLevel to the spectrum
         """
-        value =  float(self.noiseLevelSpinBox.value())
+        value = float(self.noiseLevelSpinBox.value())
         self.spectrum.noiseLevel = value
-        self.spectrum.negativeNoiseLevel = -value if value > 0 else value*2
+        self.spectrum.negativeNoiseLevel = -value if value > 0 else value * 2
         self._populate()
 
     def _storeWidgetState(self):

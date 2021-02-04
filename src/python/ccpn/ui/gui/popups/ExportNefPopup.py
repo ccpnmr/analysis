@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-20 13:05:54 +0100 (Wed, May 20, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:35 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,12 +25,12 @@ __date__ = "$Date: 2017-07-06 15:51:11 +0000 (Thu, July 06, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERNEFPATH
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ProjectTreeCheckBoxes
-from ccpn.ui.gui.popups.ExportDialog import ExportDialog
+from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
+from ccpn.ui.gui.widgets.MessageDialog import showError
 
 
 CHAINS = 'chains'
@@ -41,23 +41,25 @@ SKIPPREFIXES = 'skipPrefixes'
 EXPANDSELECTION = 'expandSelection'
 
 
-class ExportNefPopup(ExportDialog):
+class ExportNefPopup(ExportDialogABC):
+    """
+    Class to handle exporting Nef files
+    """
+
     def __init__(self, parent=None, mainWindow=None, title='Export to File',
-                 fileMode=FileDialog.AnyFile,
-                 text='Export File',
-                 acceptMode=FileDialog.AcceptSave,
-                 preferences=None,
+                 fileMode='anyFile',
+                 acceptMode='export',
                  selectFile=None,
-                 filter='*',
+                 fileFilter='*.nef',
                  **kwds):
-
-        super(ExportNefPopup, self).__init__(parent=parent, mainWindow=mainWindow, title=title,
-                                             fileMode=fileMode, text=text, acceptMode=acceptMode,
-                                             preferences=preferences, selectFile=selectFile,
-                                             filter=filter, pathID=USERNEFPATH,
-                                             **kwds)
-
-        self.setMinimumSize(self.sizeHint())
+        """
+        Initialise the widget
+        """
+        super().__init__(parent=parent, mainWindow=mainWindow, title=title,
+                         fileMode=fileMode, acceptMode=acceptMode,
+                         selectFile=selectFile,
+                         fileFilter=fileFilter,
+                         **kwds)
 
     def initialise(self, userFrame):
         self.buttonCCPN = CheckBox(userFrame, checked=True,
@@ -69,7 +71,15 @@ class ExportNefPopup(ExportDialog):
         self.spacer = Spacer(userFrame, 3, 3,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(2, 0), gridSpan=(1, 1))
-        self.treeView = ProjectTreeCheckBoxes(userFrame, project=self.project, grid=(3, 0), includeProject=True)
+        self.treeView = ProjectTreeCheckBoxes(userFrame, project=None, grid=(3, 0), includeProject=True)
+
+    def populate(self, userframe):
+        """Populate the widgets with project
+        """
+        try:
+            self.treeView.populate(self.project)
+        except Exception as es:
+            showError('{} Error' % self._dialogAcceptMode.capitalize(), str(es))
 
     def buildParameters(self):
         """build parameters dict from the user widgets, to be passed to the export method.
@@ -88,14 +98,14 @@ class ExportNefPopup(ExportDialog):
 
         # return the parameters
         params = {'filename': self.exitFilename,
-                  'flags': self.flags,
-                  'pidList': self.newList}
+                  'flags'   : self.flags,
+                  'pidList' : self.newList}
         return params
 
     def exportToFile(self, filename=None, params=None):
         """Export to file
         :param filename: filename to export
-        :param params: dict - user defined paramters for export
+        :param params: dict - user defined parameters for export
         """
 
         # this is empty because the writing is down after
@@ -106,42 +116,52 @@ if __name__ == '__main__':
     # from sandbox.Geerten.Refactored.framework import Framework
     # from sandbox.Geerten.Refactored.programArguments import Arguments
 
-    from ccpn.framework.Framework import Framework
-    from ccpn.framework.Framework import Arguments
+    # from ccpn.framework.Framework import Framework
+    # from ccpn.framework.Framework import Arguments
+    #
+    # _makeMainWindowVisible = False
+    #
+    #
+    # class MyProgramme(Framework):
+    #     """My first app"""
+    #     pass
+    #
+    #
+    # myArgs = Arguments()
+    # myArgs.interface = 'NoUi'
+    # myArgs.debug = True
+    # myArgs.darkColourScheme = False
+    # myArgs.lightColourScheme = True
+    #
+    # application = MyProgramme('MyProgramme', '3.0.1', args=myArgs)
+    # ui = application.ui
+    # ui.initialize(ui.mainWindow)  # ui.mainWindow not needed for refactored?
+    #
+    # if _makeMainWindowVisible:
+    #     # ui.mainWindow._updateMainWindow(newProject=True)
+    #     ui.mainWindow.show()
+    #     QtWidgets.QApplication.setActiveWindow(ui.mainWindow)
+    #
+    # # register the programme
+    # from ccpn.framework.Application import ApplicationContainer
+    #
+    #
+    # container = ApplicationContainer()
+    # container.register(application)
+    # application.useFileLogger = True
+    #
+    # app = QtWidgets.QApplication(['testApp'])
+    # # run the dialog
+    # dialog = ExportNefPopup(parent=ui.mainWindow, mainWindow=ui.mainWindow)
+    # result = dialog.exec_()
 
-    _makeMainWindowVisible = False
+    from ccpn.ui.gui.widgets.Application import newTestApplication
+    from ccpn.framework.Application import getApplication
 
 
-    class MyProgramme(Framework):
-        "My first app"
-        pass
+    app = newTestApplication(interface='NoUi')
+    application = getApplication()
 
+    dialog = ExportNefPopup(parent=application.ui.mainWindow if application else None)
 
-    myArgs = Arguments()
-    myArgs.interface = 'NoUi'
-    myArgs.debug = True
-    myArgs.darkColourScheme = False
-    myArgs.lightColourScheme = True
-
-    application = MyProgramme('MyProgramme', '3.0.1', args=myArgs)
-    ui = application.ui
-    ui.initialize(ui.mainWindow)  # ui.mainWindow not needed for refactored?
-
-    if _makeMainWindowVisible:
-        ui.mainWindow._updateMainWindow(newProject=True)
-        ui.mainWindow.show()
-        QtWidgets.QApplication.setActiveWindow(ui.mainWindow)
-
-    # register the programme
-    from ccpn.framework.Application import ApplicationContainer
-
-
-    container = ApplicationContainer()
-    container.register(application)
-    application.useFileLogger = True
-
-    app = QtWidgets.QApplication(['testApp'])
-    # run the dialog
-    dialog = ExportNefPopup(parent=ui.mainWindow, mainWindow=ui.mainWindow)
     result = dialog.exec_()
-

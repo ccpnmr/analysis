@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-03 10:01:40 +0000 (Thu, December 03, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -86,6 +86,9 @@ class Substance(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiRefComponent._metaclass.qualifiedName()
+
+    # CCPN internal
+    _linkedSpectraPids = '_linkedSpectraPids'
 
     # CCPN properties
     @property
@@ -525,24 +528,18 @@ class Substance(AbstractWrapperObject):
 
     @property
     def referenceSpectra(self) -> typing.Tuple[Spectrum, ...]:
-        """Reference Spectra acquired for Substance.
-        There should be only one reference spectrum for each experiment type"""
-
-        name = self.name
-        data2Obj = self._project._data2Obj
-        return tuple(sorted(data2Obj[y] for x in self._project._apiNmrProject.experiments
-                            for y in x.dataSources
-                            if x.refComponentName == name))
+        """Reference Spectra acquired for Substance"""
+        _referenceSpectra = []
+        for spectum in self.project.spectra:
+            if self in spectum.referenceSubstances:
+                _referenceSpectra.append(spectum)
+        return _referenceSpectra
 
     @referenceSpectra.setter
-    def referenceSpectra(self, value):
-        name = self.name
-        if not value:
-            for spectrum in self.referenceSpectra:
-                spectrum._apiDataSource.experiment.refComponentName = None
-        for spectrum in value:
-            if isinstance(spectrum, Spectrum):
-                spectrum._apiDataSource.experiment.refComponentName = name
+    def referenceSpectra(self, spectra):
+
+        for spectrum in spectra:
+            spectrum.referenceSubstances = [self]
 
     @property
     def _molecule(self):
@@ -566,14 +563,15 @@ class Substance(AbstractWrapperObject):
     def _finaliseAction(self, action: str):
         """Subclassed to notify changes to associated integralListViews
         """
-        super()._finaliseAction(action=action)
+        if not super()._finaliseAction(action):
+            return
 
         try:
             if action in ['rename']:
                 for sampleComponent in self.sampleComponents:
                     for spectrumHit in sampleComponent.spectrumHits:
-                        spectrumHit._finaliseAction(action=action)
-                    sampleComponent._finaliseAction(action=action)
+                        spectrumHit._finaliseAction(action)
+                    sampleComponent._finaliseAction(action)
 
         except Exception as es:
             raise RuntimeError('Error _finalising Substance.spectrumHits: %s' % str(es))
@@ -1023,26 +1021,30 @@ SampleComponent.substance = property(getter, None, None,
                                      "Substance corresponding to SampleComponent")
 
 
-def getter(self: Spectrum) -> Substance:
-    apiRefComponent = self._apiDataSource.experiment.refComponent
-    # return apiRefComponent and self._project._data2Obj[apiRefComponent]
+####### Moved to spectrum as referenceSubstances.
+####### ReferenceSubstance is Deprecated from 3.0.3.
 
-    return None if apiRefComponent is None else self._project._data2Obj.get(apiRefComponent)
-
-
-def setter(self: Spectrum, value: Substance):
-    # apiRefComponent = value and value._apiSubstance
-
-    apiRefComponent = None if value is None else value._apiSubstance
-
-    self._apiDataSource.experiment.refComponent = apiRefComponent
-
-
+# def getter(self: Spectrum) -> Substance:
+#     apiRefComponent = self._apiDataSource.experiment.refComponent
+#     # return apiRefComponent and self._project._data2Obj[apiRefComponent]
 #
-Spectrum.referenceSubstance = property(getter, setter, None,
-                                       "Substance that has this Spectrum as a reference spectrum")
-del getter
-del setter
+#     return None if apiRefComponent is None else self._project._data2Obj.get(apiRefComponent)
+#
+#
+# def setter(self: Spectrum, value: Substance):
+#     # apiRefComponent = value and value._apiSubstance
+#
+#     apiRefComponent = None if value is None else value._apiSubstance
+#
+#     self._apiDataSource.experiment.refComponent = apiRefComponent
+#
+#
+# #
+# Spectrum.referenceSubstance = property(getter, setter, None,
+#                                        "Substance that has this Spectrum as a reference spectrum")
+# del getter
+# del setter
+####### End referenceSubstance link ####
 
 # Notifiers:
 

@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:31 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -62,12 +62,30 @@ class TestSubstanceCreation(WrapperTesting):
 
     def test_newSubstance_Int0(self):
         """
-        Test that creating a new Substance with 42 (non-string) creates a substance with the name '42'
+        Test that creating a new Substance with 0 (non-string) creates a substance with the name '0'
         """
         s = self.project.newSubstance(0)
         self.assertEqual(len(self.project.substances), 1)
         self.assertIs(self.project.substances[0], s)
         self.assertEqual(s.pid, 'SU:0.')
+
+    def test_newSubstance_None(self):
+        """
+        Test that creating a new Substance with None creates a substance with name 'mySubstance_1'.
+        """
+        s = self.project.newSubstance(None)
+        self.assertEqual(len(self.project.substances), 1)
+        self.assertIs(self.project.substances[0], s)
+        self.assertEqual(s.pid, 'SU:mySubstance_1.')
+
+    def test_newSubstance_WithoutName(self):
+        """
+        Test that creating a new Substance with no parameter creates a substance with name 'mySubstance_1'.
+        """
+        s = self.project.newSubstance()
+        self.assertEqual(len(self.project.substances), 1)
+        self.assertIs(self.project.substances[0], s)
+        self.assertEqual(s.pid, 'SU:mySubstance_1.')
 
     #=========================================================================================
     # test_newSubstance_bad_name        invalid names
@@ -88,22 +106,6 @@ class TestSubstanceCreation(WrapperTesting):
         """
         with self.assertRaisesRegexp(TypeError, 'must be a string'):
             s = self.project.newSubstance(42.0)
-        self.assertEqual(len(self.project.substances), 0)
-
-    def test_newSubstance_WithoutName(self):
-        """
-        Test that creating a new Substance with no parameter raises TypeError.
-        """
-        with self.assertRaisesRegexp(ValueError, 'must be set'):
-            self.project.newSubstance()
-        self.assertEqual(len(self.project.substances), 0)
-
-    def test_newSubstance_None(self):
-        """
-        Test that creating a new Substance with None raises ValueError.
-        """
-        with self.assertRaisesRegexp(ValueError, 'must be set'):
-            self.project.newSubstance(None)
         self.assertEqual(len(self.project.substances), 0)
 
     def test_newSubstance_EmptyName(self):
@@ -482,7 +484,7 @@ class Test_MoleculeSubstance(WrapperTesting):
 
     def test_MoleculeSubstanceWithLabellingProperties_None(self):
         """
-        Test that the labelling property of Substance can be set
+        Test that the labelling property of Substance can be set to None
         """
         s = self.project.newSubstance('test substance',
                                       substanceType='Molecule',
@@ -491,13 +493,12 @@ class Test_MoleculeSubstance(WrapperTesting):
 
     def test_MoleculeSubstanceWithLabellingProperties_ES(self):
         """
-        Test that Substance can be set with labelling
+        Test that Substance can be set with labelling as empty string
         """
-        with self.assertRaisesRegexp(ValueError, 'must be set'):
-            s = self.project.newSubstance('test substance',
-                                          substanceType='Molecule',
-                                          labelling='')
-        self.assertEqual(len(self.project.substances), 0)
+        s = self.project.newSubstance('test substance',
+                                      substanceType='Molecule',
+                                      labelling='')
+        self.assertEqual(s.labelling, None)
 
     def test_MoleculeSubstanceWithLabellingProperties_Badname(self):
         """
@@ -724,7 +725,7 @@ class Test_PolymerSubstance(WrapperTesting):
 
     def test_PolymerSubstanceWithLabellingProperties_None(self):
         """
-        Test that the labelling property of Substance can be set.
+        Test that the labelling property of Substance can be set as None.
         """
         s = self.project.createPolymerSubstance('acd',
                                                 name='test polymer substance',
@@ -742,14 +743,14 @@ class Test_PolymerSubstance(WrapperTesting):
 
     def test_PolymerSubstanceWithLabellingProperties_ES(self):
         """
-        Test that the labelling property of Substance can be set.
+        Test that the labelling property of Substance can be set as empty string.
         """
-        with self.assertRaisesRegexp(ValueError, 'must be set'):
-            s = self.project.createPolymerSubstance('acd',
-                                                    name='test polymer substance',
-                                                    molType='protein',
-                                                    labelling='')
-        self.assertEqual(len(self.project.substances), 0)
+        s = self.project.createPolymerSubstance('acd',
+                                                name='test polymer substance',
+                                                molType='protein',
+                                                labelling='')
+        self.assertEqual(s.labelling, None)
+        self.assertEqual(len(self.project.substances), 1)
 
     def test_PolymerSubstanceWithLabellingProperties_Badname(self):
         """

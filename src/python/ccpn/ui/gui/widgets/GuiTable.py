@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:37 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,7 +40,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.FileDialog import FileDialog, USERTABLESPATH
+from ccpn.ui.gui.widgets.FileDialog import TablesFileDialog
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
@@ -149,16 +149,10 @@ def exportTableDialog(dataFrame, columns=None, path='~/table.xlsx'):
     from ccpn.util.Path import aPath
 
     path = aPath(path)
-
-    saveDialog = FileDialog(selectFile=str(path),  # default saving name    #directory=str(path.parent),
-                            fileMode=FileDialog.AnyFile,
-                            filter=".xlsx;; .csv;; .tsv;; .json ",
-                            text='Save as ',
-                            acceptMode=FileDialog.AcceptSave,
-                            preferences=None,
-                            initialPath=path,
-                            pathID=USERTABLESPATH)
+    saveDialog = TablesFileDialog(parent=None, acceptMode='save', selectFile=path, directory=path.parent,
+                                  fileFilter=".xlsx;; .csv;; .tsv;; .json ")
     saveDialog._show()
+
     path = saveDialog.selectedFile()
     filterType = saveDialog.selectedNameFilter()
     if path:
@@ -1216,6 +1210,7 @@ GuiTable::item::selected {
     def _setContextMenu(self, enableExport=True, enableDelete=True):
         self.tableMenu = QtWidgets.QMenu()
         setWidgetFont(self.tableMenu, )
+        self.tableMenu.addAction("Copy clicked cell value", self._copySelectedCell)
         if enableExport:
             self.tableMenu.addAction("Export Visible Table", partial(self.exportTableDialog, exportAll=False))
         if enableExport:
@@ -1266,6 +1261,13 @@ GuiTable::item::selected {
     def showSearchSettings(self):
         if self.searchWidget is not None:
             self.searchWidget.show()
+
+    def _copySelectedCell(self):
+        i = self.currentItem()
+        if i is not None:
+            text = i.text()
+            df = pd.DataFrame([text])
+            df.to_clipboard(index=False, header=False)
 
     def deleteObjFromTable(self):
         selected = self.getSelectedObjects()
@@ -1686,24 +1688,8 @@ GuiTable::item::selected {
 
     def _exportTableDialog(self, dataFrame, rowList=None, colList=None):
 
-        if self.application and self.application.preferences:
-            preferences = self.application.preferences
-            workingPath = preferences.general.userWorkingPath
-        elif self.project:
-            preferences = None
-            workingPath = self.project.path
-        else:
-            preferences = None
-            workingPath = '~'
-
-        self.saveDialog = FileDialog(selectFile='ccpnTable.xlsx',  # default saving name
-                                     fileMode=FileDialog.AnyFile,
-                                     filter=".xlsx;; .csv;; .tsv;; .json ",
-                                     text='Save as ',
-                                     acceptMode=FileDialog.AcceptSave,
-                                     preferences=preferences,
-                                     initialPath=workingPath,
-                                     pathID=USERTABLESPATH)
+        self.saveDialog = TablesFileDialog(parent=None, acceptMode='save', selectFile='ccpnTable.xlsx',
+                                      fileFilter=".xlsx;; .csv;; .tsv;; .json ")
         self.saveDialog._show()
         path = self.saveDialog.selectedFile()
         if path:
@@ -1768,12 +1754,12 @@ GuiTable::item::selected {
             return data
 
     def getSelectedObjects(self, fromSelection=None):
-        '''
+        """
 
         :param fromSelection:
         :return: get a list of table objects. If the table has a header called pid, the object is a ccpn Core obj like Peak,
          otherwise is a Pandas series object corresponding to the selected row(s).
-        '''
+        """
 
         model = self.selectionModel()
         # selects all the items in the row

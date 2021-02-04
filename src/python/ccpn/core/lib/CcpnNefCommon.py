@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-03 10:01:41 +0000 (Thu, December 03, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -433,6 +433,13 @@ nef2CcpnMap = {
         ('ccpn_multiplet', _isALoop),
         ('ccpn_multiplet_peaks', _isALoop),
         ('ccpn_spectrum_hit', _isALoop),
+        ('ccpn_spectrum_reference_substances', _isALoop),
+        )),
+
+    'ccpn_spectrum_reference_substances'         : OD((
+        ('serial', None),
+        ('name', 'name'),
+        ('labelling', 'labelling'),
         )),
 
     'nef_spectrum_dimension'         : OD((
@@ -485,6 +492,9 @@ nef2CcpnMap = {
         ('symbol_colour', 'symbolColour'),
         ('symbol_style', 'symbolStyle'),
         ('text_colour', 'textColour'),
+        ('meritColour', 'meritColour'),
+        ('meritEnabled', 'meritEnabled'),
+        ('meritThreshold', 'meritThreshold'),
         )),
     # NOTE:ED - added for older nef when no peakList information in the spectrum saveFrame
     'ccpn_no_peak_list'              : OD((
@@ -784,7 +794,12 @@ nef2CcpnMap = {
         ('log_partition_coefficient', 'logPartitionCoefficient'),
         ('comment', 'comment'),
         ('ccpn_substance_synonym', _isALoop),
+        ('ccpn_substance_reference_spectra', _isALoop)
         )),
+
+    'ccpn_substance_reference_spectra': OD((
+        ('nmr_spectrum_id', None),
+    )),
 
     'ccpn_substance_synonym'         : OD((
         ('synonym', None),

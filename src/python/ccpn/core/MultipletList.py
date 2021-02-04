@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:28 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,11 +31,9 @@ from typing import Tuple, Sequence, Union
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
-from ccpn.core.PMIListABC import PMIListABC
+from ccpn.core._implementation.PMIListABC import PMIListABC
 
 
-# LINECOLOUR = 'lineColour'
-# DEFAULTLINECOLOUR = '#7a7a7a'
 MULTIPLETSETTINGS = 'multipletSettings'
 MULTIPLETAVERAGING = 'multipletAveraging'
 MULTIPLETAVERAGE = 'Average'
@@ -117,13 +115,13 @@ class MultipletList(PMIListABC):
     def _finaliseAction(self, action: str):
         """Subclassed to notify changes to associated peakListViews
         """
-        super()._finaliseAction(action=action)
+        if not super()._finaliseAction(action):
+            return
 
-        # this is a can-of-worms for undelete at the minute
         try:
             if action in ['change']:
                 for mlv in self.multipletListViews:
-                    mlv._finaliseAction(action=action)
+                    mlv._finaliseAction(action)
         except Exception as es:
             raise RuntimeError('Error _finalising multipletListViews: %s' % str(es))
 

@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 16:10:54 +0000 (Tue, December 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:37 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -101,7 +101,7 @@ class GuiNdWidget(CcpnGLWidget):
 
                     peakList = peakListView.peakList
 
-                    spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+                    spectrumIndices = spectrumView.dimensionOrdering
                     xAxis = spectrumIndices[0]
                     yAxis = spectrumIndices[1]
 
@@ -151,7 +151,7 @@ class GuiNdWidget(CcpnGLWidget):
 
                     multipletList = multipletListView.multipletList
 
-                    spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+                    spectrumIndices = spectrumView.dimensionOrdering
                     xAxis = spectrumIndices[0]
                     yAxis = spectrumIndices[1]
 
@@ -208,7 +208,7 @@ class GuiNdWidget(CcpnGLWidget):
                 self._spectrumLabelling.removeString(specView)
 
         # make a list of the visible and not-deleted spectrumViews
-        visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+        # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
         visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
 
         self._visibleOrdering = visibleSpectrumViews
@@ -222,6 +222,7 @@ class GuiNdWidget(CcpnGLWidget):
 
         minList = [self._spectrumSettings[sp][SPECTRUM_VALUEPERPOINT] if SPECTRUM_VALUEPERPOINT in self._spectrumSettings[sp] else None
                    for sp in self._ordering if sp in self._spectrumSettings]
+
         minimumValuePerPoint = None
 
         # check the length of the min values, may have lower dimension spectra overlaid
@@ -271,6 +272,57 @@ class GuiNdWidget(CcpnGLWidget):
                 p0[ind] += deltaPosition[ii]
 
         movePeak(peak, p0, updateHeight=True)
+
+    def _tracesNeedUpdating(self, spectrumView=None):
+        """Check if traces need updating on _lastTracePoint, use spectrumView to see
+        if cursor has moved sufficiently far to warrant an update of the traces
+        """
+
+        cursorCoordinate = self.getCurrentCursorCoordinate()
+        if spectrumView not in self._lastTracePoint:
+            numDim = len(spectrumView.strip.axes)
+            self._lastTracePoint[spectrumView] = [-1] * numDim
+
+        lastTrace = self._lastTracePoint[spectrumView]
+
+        ppm2point = spectrumView.spectrum.ppm2point
+
+        # get the correct ordering for horizontal/vertical
+        planeDims = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+
+        point = [0] * len(cursorCoordinate)
+        for n in range(2):
+            point[planeDims[n]] = ppm2point(cursorCoordinate[n], dimension=planeDims[n] + 1) - 1
+
+        point = [round(p) for p in point]
+
+        if None in planeDims:
+            getLogger().warning(f'bad planeDims {planeDims}')
+            return
+        if None in point:
+            getLogger().warning(f'bad point {point}')
+            return
+
+        # numPoints = spectrumView.spectrum.pointCounts
+        # xNumPoints, yNumPoints = numPoints[planeDims[0]], numPoints[planeDims[1]]
+        # if point[planeDims[0]] >= xNumPoints or point[planeDims[1]] >= yNumPoints:
+        #     # Extra check whether the new point is out of range if numLimits
+        #     return False
+
+        if self._updateHTrace and not self._updateVTrace and point[planeDims[1]] == lastTrace[planeDims[1]]:
+            # Only HTrace, an y-point has not changed
+            return False
+        elif not self._updateHTrace and self._updateVTrace and point[planeDims[0]] == lastTrace[planeDims[0]]:
+            # Only VTrace and x-point has not changed
+            return False
+        elif self._updateHTrace and self._updateVTrace and point[planeDims[0]] == lastTrace[planeDims[0]] \
+                and point[planeDims[1]] == lastTrace[planeDims[1]]:
+            # both HTrace and Vtrace, both x-point an y-point have not changed
+            return False
+        # We need to update; save this point as the last point
+        self._lastTracePoint[spectrumView] = point
+
+        return True
 
 
 class Gui1dWidget(CcpnGLWidget):
@@ -364,8 +416,7 @@ class Gui1dWidget(CcpnGLWidget):
 
         return multiplets
 
-    def _newStatic1DTraceData(self, spectrumView, tracesDict,
-                              point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, position,
+    def _newStatic1DTraceData(self, spectrumView, tracesDict, positionPixel,
                               ph0=None, ph1=None, pivot=None):
         """Create a new static 1D phase trace
         """
@@ -375,26 +426,13 @@ class Gui1dWidget(CcpnGLWidget):
                 if spectrumView == thisTrace.spectrumView:
                     return
 
-            pointInt = [1 + int(pnt + 0.5) for pnt in point]
-            # data = spectrumView.spectrum.getSliceData()
-            # data = spectrumView.spectrum.get1dSpectrumData()
-
-            # TODO:ED this does not change the data model
             data = spectrumView.spectrum.intensities
-
-            preData = data
-
             if ph0 is not None and ph1 is not None and pivot is not None:
                 preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
+            else:
+                preData = data
 
-            # x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency)])
             x = spectrumView.spectrum.positions
-
-            # y = np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
-
-            # y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * \
-            #     np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
-
             colour = spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
             colR = int(colour.strip('# ')[0:2], 16) / 255.0
             colG = int(colour.strip('# ')[2:4], 16) / 255.0
@@ -419,25 +457,15 @@ class Gui1dWidget(CcpnGLWidget):
                 hSpectrum.colors = np.array((colR, colG, colB, 1.0) * numVertices, dtype=np.float32)
 
             hSpectrum.vertices = np.empty(hSpectrum.numVertices * 2, dtype=np.float32)
-
-            # x = np.append(x, [xDataDim.primaryDataDimRef.pointToValue(xMaxFrequency + 1),
-            #                   xDataDim.primaryDataDimRef.pointToValue(xMinFrequency)])
-            # # y = np.append(y, [positionPixel[1], positionPixel[1]])
-            # hSpectrum.colors = np.append(hSpectrum.colors, ((colR, colG, colB, 1.0),
-            #                                       (colR, colG, colB, 1.0)))
-
             hSpectrum.vertices[::2] = x
             hSpectrum.vertices[1::2] = preData
 
             # store the pre-phase data
             hSpectrum.data = data
-            hSpectrum.values = [spectrumView, point, xDataDim,
-                                xMinFrequency, xMaxFrequency,
-                                xNumPoints, positionPixel, position]
+            hSpectrum.positionPixel = positionPixel
             hSpectrum.spectrumView = spectrumView
 
         except Exception as es:
-            # print('>>>', str(es))
             tracesDict = []
 
     @property
@@ -591,6 +619,13 @@ class Gui1dWidget(CcpnGLWidget):
 
         peak.height = peak.peakList.spectrum.getIntensity(p0[:1])
         peak.position = p0
+
+    def _tracesNeedUpdating(self, spectrumView=None):
+        """Check if traces need updating on _lastTracePoint, use spectrumView to see
+        if cursor has moved sufficiently far to warrant an update of the traces
+        """
+        # for 1d spectra, traces never need updating, they never move with the cursor
+        return False
 
 
 class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
@@ -1212,7 +1247,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         self._spectrumSettings[spectrumView] = {}
 
-        self._spectrumValues = spectrumView._getValues()
+        self._spectrumValues = spectrumView.getVisibleState()
 
         # set defaults for undefined spectra
         if not self._spectrumValues[0].pointCount:
@@ -1322,44 +1357,23 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_SPINNINGRATE] = spectrumView.spectrum.spinningRate
 
-        # indices = getAxisCodeMatchIndices(spectrumView.spectrum.axisCodes, self.strip.axisCodes)
         indices = getAxisCodeMatchIndices(self.spectrumDisplay.axisCodes, spectrumView.spectrum.axisCodes)
 
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
 
         if len(self._spectrumValues) > 2:
-            # store a list for the extra dimensions
+            # store a list for the extra dimensions - should only be one per spectrumDisplay really
+            # needed so that the planeDepth is calculated correctly for visible spectra
             vPP = ()
-            dDim = ()
-            vTP = ()
             for dim in range(2, len(self._spectrumValues)):
                 specVal = self._spectrumValues[dim]
-                specDataDim = specVal.dataDim
-
                 vPP = vPP + (specVal.valuePerPoint,)
-                dDim = dDim + (specDataDim,)
-
-                # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = specVal.valuePerPoint
-                # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = specVal.dataDim
-
-                if hasattr(specDataDim, 'primaryDataDimRef'):
-                    ddr = specDataDim.primaryDataDimRef
-                    valueToPoint = ddr and ddr.valueToPoint
-                else:
-                    valueToPoint = specDataDim.valueToPoint
-
-                vTP = vTP + (valueToPoint,)
-                # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUETOPOINT] = valueToPoint
 
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = vPP
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = dDim
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUETOPOINT] = vTP
 
         else:
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = None
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DATADIM] = None
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUETOPOINT] = None
 
         self._maxX = max(self._maxX, fx0)
         self._minX = min(self._minX, fx1)

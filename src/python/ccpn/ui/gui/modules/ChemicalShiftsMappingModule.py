@@ -58,7 +58,7 @@ Module Documentation
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -68,8 +68,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:22 +0100 (Tue, September 22, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -496,7 +496,7 @@ class ChemicalShiftsMapping(CcpnModule):
       # scriptPath = os.path.join(getScriptsDirectoryPath(self.project),'pymol')
       scriptPath = self.application.pymolScriptsPath
     self.pathPDB = LineEditButtonDialog(self.mvWidgetContents, textDialog='Select PDB File',
-                                        filter="PDB files (*.pdb)", directory=scriptPath, grid=(0, 1))
+                                        fileFilter="PDB files (*.pdb)", directory=scriptPath, grid=(0, 1))
     i += 1
     self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self._updateModule,
                                grid=(i, 1))
@@ -1176,9 +1176,9 @@ class ChemicalShiftsMapping(CcpnModule):
   #     self._updateModule()
 
   def _checkBoxCallback(self, data):
-    '''
+    """
     Callback from checkboxes inside a table
-    '''
+    """
     objs = data[Notifier.OBJECT]
 
     itemSelection = data['rowItem']
@@ -1227,11 +1227,11 @@ class ChemicalShiftsMapping(CcpnModule):
         nmrR._colour = colour
 
   def _updateModule(self, silent=False):
-    '''
+    """
 
     :param silent: if silent does not update the module!
     :return: deltas
-    '''
+    """
 
     mode = self.modeButtons.getSelectedText()
     if not mode in MODES:
@@ -1571,7 +1571,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
   @CcpnModule.widgetsState.getter
   def widgetsState(self):
-    '''return  {"variableName":"value"}  of all gui Variables  '''
+    """return  {"variableName":"value"}  of all gui Variables  """
     widgetsState = super().widgetsState
     widgetsState[RelativeContribuitions] = self.relativeContribuitions
     widgetsState[SelectedNmrAtomNames] = self.selectedNmrAtomNames
@@ -1597,7 +1597,7 @@ class _BackCompatibility():
   
   @staticmethod
   def _spectraToSpectrumGroup(guiModule, **widgetsState):
-    '''
+    """
     A small helper to create spectrumGroups from spectra if opening a project with a CSM module saved in a layout
     before version 3.0.3.
     Up to Version 3.0.3 multiple spectra could be selected from the settings as input data.
@@ -1609,7 +1609,7 @@ class _BackCompatibility():
     :param guiModule: 
     :param widgetsState: 
     :return: 
-    '''
+    """
 
     isSpectraSelected = widgetsState.get('Spectra')
     isSGSelected = widgetsState.get('Groups')

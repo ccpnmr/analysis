@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-04 17:16:40 +0000 (Wed, November 04, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -229,6 +229,26 @@ class Project(AbstractWrapperObject):
     @property
     def application(self):
         return self._appBase
+
+    @property
+    def isNew(self):
+        """Return true if the project is new
+        """
+        # NOTE:ED - based on original check in _initProject
+        return self._wrappedData.root.isModified
+
+    @property
+    def isTemporary(self):
+        """Return true if the project is temporary, i.e., not saved or updated.
+        """
+        apiProject = self._wrappedData.root
+        return hasattr(apiProject, '_temporaryDirectory')
+
+    @property
+    def isModified(self):
+        """Return true if any part of the project has been modified
+        """
+        return self._wrappedData.root.isProjectModified()
 
     def _initialiseProject(self):
         """Complete initialisation of project,
@@ -508,6 +528,21 @@ class Project(AbstractWrapperObject):
             self._implExperimentTypeMap = result
         #
         return result
+
+    @property
+    def shiftAveraging(self):
+        """Return shiftAveraging
+        """
+        return self._wrappedData.shiftAveraging
+
+    @shiftAveraging.setter
+    def shiftAveraging(self, value):
+        """Set shiftAveraging
+        """
+        if not isinstance(value, bool):
+            raise TypeError('shiftAveraging must be True/False')
+
+        self._wrappedData.shiftAveraging = value
 
     #===========================================================================================
     #  Notifiers system
@@ -1374,9 +1409,9 @@ class Project(AbstractWrapperObject):
         return chains
 
     def _loadStructure(self, path: str, subType: str):
-        '''
+        """
         Load Structure ensemble(s) from file into Wrapper project
-        '''
+        """
 
         from ccpn.util.StructureData import averageStructure
 
@@ -1591,6 +1626,30 @@ class Project(AbstractWrapperObject):
     #             setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
     #                                       setPositiveContours=True, setNegativeContours=True,
     #                                       useSameMultiplier=True)
+
+    def getCcpCodeData(self, ccpCode, molType=None, atomType=None):
+        """Get the CcpCode for molType/AtomType
+        """
+        from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getCcpCodeData
+
+        return getCcpCodeData(self._apiNmrProject, ccpCode, molType='protein', atomType=atomType)
+
+    def packageProject(self, filePrefix, includeBackups=True, includeLogs=True):
+        """Package the project
+        """
+        from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+
+        return apiIo.packageProject(self._wrappedData.parent, filePrefix,
+                                    includeBackups=includeBackups, includeLogs=includeLogs)
+
+    def getExperimentClassifications(self) -> dict:
+        """Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.
+        """
+        # NOTE:ED - better than being in spectrumLib but still needs moving
+
+        from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
+
+        return getExpClassificationDict(self._wrappedData)
 
     #===========================================================================================
     # new'Object' and other methods

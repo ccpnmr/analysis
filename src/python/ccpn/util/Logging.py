@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:58 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:39 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,13 +30,15 @@ import functools
 import logging
 import os
 import time
-from inspect import stack
+import inspect
+from ccpn.util.Path import aPath
 
 
 DEBUG1 = logging.DEBUG  # = 10
 DEBUG2 = 9
 DEBUG3 = 8
 INFO = logging.INFO
+WARNING = logging.WARNING
 
 defaultLogLevel = logging.INFO
 # defaultLogLevel = logging.DEBUG
@@ -53,6 +55,7 @@ defaultLogLevel = logging.INFO
 # the default logger
 
 MAX_LOG_FILE_DAYS = 7
+LOG_FIELD_WIDTH = 90
 
 logger = None
 
@@ -72,41 +75,34 @@ def getLogger():
     return logger
 
 
-def _debugGLError(logger, msg, *args, **kwargs):
-    stk = stack()
+def _logCaller(logger, fmsg):
+    # create the postfix to the error message as (Module:function:lineNo)
+    # this replaces the formatting which contains the wrong information for decorated functions
+    _file, _line, _func, _ = logger.findCaller(stack_info=False)
+    _fileLine = f'({aPath(_file).basename}.{_func}:{_line})'
+    _msg = '; '.join(fmsg)
+    return f'{_msg:<{LOG_FIELD_WIDTH}}    {_fileLine}'
+
+
+def _debugGLError(MESSAGE, logger, msg, *args, **kwargs):
+    # inspect.stack can be very slow - but needs more stack info than below
+    stk = inspect.stack()
     stk = [stk[st][3] for st in range(min(3, len(stk)), 0, -1)]
     fmsg = ['[' + '/'.join(stk) + '] ' + msg]
     if args: fmsg.append(', '.join([str(arg) for arg in args]))
     if kwargs: fmsg.append(', '.join([str(ky) + '=' + str(kwargs[ky]) for ky in kwargs.keys()]))
-    logger.log(DEBUG1, '; '.join(fmsg))
+    _msg = _logCaller(logger, fmsg)
+    # increase the stack level to account for the partial wrapper
+    logger.log(MESSAGE, _msg, stacklevel=2)
 
 
-def _debug1(logger, msg, *args, **kwargs):
+def _message(MESSAGE, logger, msg, includeInspection=True, *args, **kwargs):
     fmsg = [msg]
     if args: fmsg.append(', '.join([str(arg) for arg in args]))
     if kwargs: fmsg.append(', '.join([str(ky) + '=' + str(kwargs[ky]) for ky in kwargs.keys()]))
-    logger.log(DEBUG1, '; '.join(fmsg))
-
-
-def _debug2(logger, msg, *args, **kwargs):
-    fmsg = [msg]
-    if args: fmsg.append(', '.join([str(arg) for arg in args]))
-    if kwargs: fmsg.append(', '.join([str(ky) + '=' + str(kwargs[ky]) for ky in kwargs.keys()]))
-    logger.log(DEBUG2, '; '.join(fmsg))
-
-
-def _debug3(logger, msg, *args, **kwargs):
-    fmsg = [msg]
-    if args: fmsg.append(', '.join([str(arg) for arg in args]))
-    if kwargs: fmsg.append(', '.join([str(ky) + '=' + str(kwargs[ky]) for ky in kwargs.keys()]))
-    logger.log(DEBUG3, '; '.join(fmsg))
-
-
-def _info(logger, msg, *args, **kwargs):
-    fmsg = [msg]
-    if args: fmsg.append(', '.join([str(arg) for arg in args]))
-    if kwargs: fmsg.append(', '.join([str(ky) + '=' + str(kwargs[ky]) for ky in kwargs.keys()]))
-    logger.log(INFO, '; '.join(fmsg))
+    _msg = _logCaller(logger, fmsg) if includeInspection else '; '.join(fmsg)
+    # increase the stack level to account for the partial wrapper
+    logger.log(MESSAGE, _msg, stacklevel=2)
 
 
 def createLogger(loggerName, memopsRoot, stream=None, level=None, mode='a',
@@ -164,13 +160,14 @@ def createLogger(loggerName, memopsRoot, stream=None, level=None, mode='a',
         handler = logging.StreamHandler(stream)
         _setupHandler(handler, level)
 
-    # logger.debug1 = logger.debug
-    logger.info = functools.partial(_info, logger)
-    logger.debug1 = functools.partial(_debug1, logger)
+    logger.debugGL = functools.partial(_debugGLError, DEBUG1, logger)
+    logger.echoInfo = functools.partial(_message, INFO, logger, includeInspection=False)
+    logger.info = functools.partial(_message, INFO, logger)
+    logger.debug1 = functools.partial(_message, DEBUG1, logger)
     logger.debug = logger.debug1
-    logger.debug2 = functools.partial(_debug2, logger)
-    logger.debug3 = functools.partial(_debug3, logger)
-    logger.debugGL = functools.partial(_debugGLError, logger)
+    logger.debug2 = functools.partial(_message, DEBUG2, logger)
+    logger.debug3 = functools.partial(_message, DEBUG3, logger)
+    logger.warning = functools.partial(_message, WARNING, logger)
 
     logging.addLevelName(DEBUG2, 'DEBUG2')
     logging.addLevelName(DEBUG3, 'DEBUG3')
@@ -179,35 +176,23 @@ def createLogger(loggerName, memopsRoot, stream=None, level=None, mode='a',
 
 
 def _setupHandler(handler, level):
-    """Add a stream handler for this logger."""
+    """Add a stream handler for this logger.
+    """
 
-    # handler = logging.StreamHandler(stream)
     handler.setLevel(level)
 
-    #format = '%(levelname)s: %(module)s:%(funcName)s:%(asctime)s:%(message)s'
-    #format = '%(levelname)-7s: %(module)s.%(funcName)s : %(message)s'
-    format = '%(levelname)-7s: %(message)-90s    (%(module)s.%(funcName)s:%(lineno)s)'
+    # define a simple logging message, extra information is inserted in _logCaller
+    _format = '%(levelname)-7s: %(message)s'
 
-    formatter = logging.Formatter(format)
+    formatter = logging.Formatter(_format)
     handler.setFormatter(formatter)
 
     logger.addHandler(handler)
 
 
-# def _addStreamHandler(logger, stream, level=logging.WARNING):
-#   """Add a stream handler for this logger."""
-#
-#   handler = logging.StreamHandler(stream)
-#   handler.setLevel(level)
-#
-#   format = '%(levelname)s:%(module)s:%(funcName)s:%(asctime)s:%(message)s'
-#   formatter = logging.Formatter(format)
-#   handler.setFormatter(formatter)
-#
-#   logger.addHandler(handler)
-
 def _removeOldLogFiles(logPath, removeOldLogsDays=MAX_LOG_FILE_DAYS):
-    """Remove old log files."""
+    """Remove old log files.
+    """
 
     logDirectory = os.path.dirname(logPath)
     logFiles = [os.path.join(logDirectory, x) for x in os.listdir(logDirectory)]
@@ -216,14 +201,14 @@ def _removeOldLogFiles(logPath, removeOldLogsDays=MAX_LOG_FILE_DAYS):
     currentTime = time.time()
     removeTime = currentTime - removeOldLogsDays * 24 * 3600
     for logFile in logFiles:
-        # print ('### checking', logFile)
         mtime = os.path.getmtime(logFile)
         if mtime < removeTime:
             os.remove(logFile)
 
 
 def setLevel(logger, level=logging.INFO):
-    """Set the logger level (including for the handlers)"""
+    """Set the logger level (including for the handlers)
+    """
 
     logger.setLevel(level)
     for handler in logger.handlers:

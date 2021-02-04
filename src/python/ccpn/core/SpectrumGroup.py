@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,15 +25,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import Tuple, Any
-
+import numpy as np
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SpectrumGroup as ApiSpectrumGroup
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SpectrumGroup as ApiSpectrumGroup
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameObject
+from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
 from ccpn.util.LabelledEnum import LabelledEnum
 
@@ -268,7 +268,7 @@ class SpectrumGroup(AbstractWrapperObject):
 
     @property
     def seriesPeakHeightForPosition(self):
-        '''
+        """
         return: Pandas DataFrame with the following structure:
                 Index: multiIndex => axisCodes as levels;
                 Columns => NR_ID: ID for the nmrResidue(s) assigned to the peak if available
@@ -280,13 +280,13 @@ class SpectrumGroup(AbstractWrapperObject):
            -------------+-------- +-----------+-----------+---------
             7.5  104.3  | A.1.ARG |    10     |  100      | 1000
 
-            '''
+            """
         from ccpn.core.lib.peakUtils import getSpectralPeakHeights
         return getSpectralPeakHeights(self.spectra)
 
     @property
     def seriesPeakHeightForNmrResidue(self):
-        '''
+        """
         return: Pandas DataFrame with the following structure:
                 Index:  ID for the nmrResidue(s) assigned to the peak ;
                 Columns => Spectrum series values sorted by ascending values, if series values are not set, then the
@@ -297,12 +297,11 @@ class SpectrumGroup(AbstractWrapperObject):
            ------------+-----------+-----------+-----------+---------
             A.1.ARG    |    10     |  100      | 1000
 
-            '''
+            """
         from ccpn.core.lib.peakUtils import getSpectralPeakHeightForNmrResidue
         return getSpectralPeakHeightForNmrResidue(self.spectra)
 
     def sortSpectraBySeries(self, reverse=True):
-        import numpy as np
         if not None in self.series:
             series = np.array(self.series)
             if reverse:
@@ -311,6 +310,12 @@ class SpectrumGroup(AbstractWrapperObject):
                 ind = series.argsort()
             self.spectra = list(np.array(self.spectra)[ind])
             self.series = list(series[ind])
+
+    def sortSpectraByName(self, reverse=True):
+        from ccpn.util.Common import sortObjectByName
+        spectra = list(self.spectra)
+        sortObjectByName(spectra, reverse=reverse)
+        self.spectra = spectra
 
     def clone(self):
         # name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
@@ -349,7 +354,8 @@ class SpectrumGroup(AbstractWrapperObject):
         """Subclassed to handle associated seriesValues instances
         """
         oldPid = self.pid
-        super()._finaliseAction(action=action)
+        super()._finaliseAction(action)
+
         # propagate the rename to associated seriesValues
         if action in ['rename']:
             # rename the items in _seriesValues as they are referenced by pid

@@ -5,7 +5,7 @@
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:34 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:30 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,10 +32,10 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 class PeakTest(WrapperTesting):
     # Path of project to load (None for new project
-    projectPath = 'CcpnCourse1b'
+    projectPath = 'V3ProjectForTests.ccpn'
 
     def test_assignPeak(self):
-        spectrum = self.project.getSpectrum('HSQC-115')
+        spectrum = self.project.getSpectrum('hsqc_115')
         shiftList = self.project.newChemicalShiftList()
         spectrum.chemicalShiftList = shiftList
         nmrResidue = self.project.nmrChains[0].fetchNmrResidue()
@@ -57,7 +57,7 @@ class PeakTest(WrapperTesting):
 
 class PeakTest2(WrapperTesting):
     # Path of project to load (None for new project
-    projectPath = 'CCPN_H1GI_clean_extended.nef'
+    projectPath = 'V3ProjectForTests.ccpn'
 
     singleValueTags = ['height', 'volume', 'heightError', 'volumeError', 'figureOfMerit',
                        'annotation', 'comment']
@@ -66,8 +66,8 @@ class PeakTest2(WrapperTesting):
     # NBNB TODO We still need a case where axisCodes are not in the same order (e.g. HNC<->HCN)
 
     def test_Peak_copy_exo_1(self):
-        peakList1 = self.project.getPeakList('3dNOESY-182.3')
-        peak1 = peakList1.getPeak(1110)
+        peakList1 = self.project.getPeakList('15NNoesy_182.1')
+        peak1 = peakList1.getPeak(2)
         peak2 = peak1.copyTo(peakList1)
 
         self.project._wrappedData.root.checkAllValid(complete=True)
@@ -79,12 +79,12 @@ class PeakTest2(WrapperTesting):
 
         for tag in tags:
             self.assertEquals((tag, getattr(peak1, tag)), (tag, getattr(peak2, tag)))
-        self.assertEquals(('serial', peak2.serial), ('serial', 1131))
+        self.assertEquals(('serial', peak2.serial), ('serial', 11))
 
     def test_Peak_copy_exo_2(self):
-        peakList1 = self.project.getPeakList('3dNOESY-182.3')
-        peakList2 = self.project.getPeakList('3dTOCSY-181.1')
-        peak1 = peakList1.getPeak(1110)
+        peakList1 = self.project.getPeakList('15NNoesy_182.1')
+        peakList2 = self.project.getPeakList('15NTocsy_181.1')
+        peak1 = peakList1.getPeak(2)
         peak3 = peak1.copyTo(peakList2)
 
         tags = self.singleValueTags + self.dimensionValueTags

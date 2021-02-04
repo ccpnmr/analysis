@@ -35,9 +35,9 @@ def loadPipeSysModules(paths):
 
 
 def _fetchUserPipesPath(application=None):
-    '''
+    """
     get the userPipesPath from preferences if defined, otherwise it creates a dir in the .ccpn dir
-    '''
+    """
 
     defaultDirName = 'pipes'
     preferencesPipesTag = 'userPipesPath'
@@ -56,10 +56,10 @@ def _fetchUserPipesPath(application=None):
 
 
 def _fetchDemoPipe():
-    '''
+    """
     copy template pipes from pipeline dir to a user dir
 
-    '''
+    """
     from ccpn.framework.PathsAndUrls import pipeTemplates
     from shutil import copyfile
     destDir = _fetchUserPipesPath()

@@ -4,7 +4,7 @@ Module Documentation Here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:37 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -49,11 +49,11 @@ class BarGraph(pg.BarGraphItem):
     def __init__(self, application=None, viewBox=None, xValues=None, yValues=None,
                  objects=None, brush=None, drawLabels=True, labelDistanceRatio=0.1, **kwds):
         super().__init__(**kwds)
-        '''
+        """
         This class allows top draw bars with or without objects.It Needs only xValues and yValues.
         The bar width is by default set to 1.
         The objects are linked to the bars through the label annotations (with setData).
-        '''
+        """
         # TODO:
         # setObjects in a more general way. Initially implemented only for NmrResidues objects.
 
@@ -66,7 +66,6 @@ class BarGraph(pg.BarGraphItem):
         self.clicked = None
         self.objects = objects or []
         self.application = application
-        # self.application = QtCore.QCoreApplication.instance()._ccpnApplication
 
         self.opts = dict(  # setting for BarGraphItem
                 x=self.xValues,
@@ -175,12 +174,12 @@ class BarGraph(pg.BarGraphItem):
         event.accept()
 
     def drawLabels(self, ratio=0.5):
-        '''
+        """
 
         The label Text is the str of the x values and is used to find and set an object to it.
         NB, changing the text to any other str may not set the objects correctly!
 
-        '''
+        """
         self.allLabelsShown = True
         for key, value in self.allValues.items():
             label = CustomLabel(text=str(key))
@@ -210,7 +209,6 @@ class CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
         self.isBelowThreshold = False
 
         self.customObject = self.data(int(self.text()))
-        # self.application = QtCore.QCoreApplication.instance()._ccpnApplication
 
         self.application = application
 
@@ -497,7 +495,7 @@ class CustomViewBox(pg.ViewBox):
             print('NOT FOUND')
 
     def selectAboveThreshold(self):
-        '''Reimplement this in the module subclass'''
+        """Reimplement this in the module subclass"""
 
         pass
 

@@ -25,29 +25,35 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
+#Only testing 1D Integral lists for the time being. Still need to decide on the fate of ND ones
+class IntegralListTest(WrapperTesting):
+    # Path of project to load (None for new project)
+    projectPath = None
 
-class ChemicalShiftTest(WrapperTesting):
-    # Path of project to load (None for new project
-    projectPath = 'V3ProjectForTests.ccpn'
+    def setUp(self):
+        with self.initialSetup():
+            self.spectrum = self.project.createDummySpectrum(axisCodes=('H'), name='H1D-tst')
 
-    def test_rename_list(self):
-        self.project._wrappedData.root.checkAllValid(complete=True)
+    def test_new1dIntegralList(self):
+        self.assertEqual(len(self.spectrum.integralLists), 0)
 
-        shiftList = self.project.chemicalShiftLists[0]
+        integralList = self.spectrum.newIntegralList()
 
-        self.assertEqual(shiftList.pid, 'CL:default')
-        self.assertEqual(sorted(shiftList.chemicalShifts)[20].pid, 'CS:default.A.2.GLU.H')
-        shiftList.rename('RenamedList')
-        self.assertEqual(shiftList.pid, 'CL:RenamedList')
-        self.assertEqual(sorted(shiftList.chemicalShifts)[20].pid, 'CS:RenamedList.A.2.GLU.H')
+        self.assertEqual(len(self.spectrum.integralLists), 1)
+        self.assertEqual(integralList.className, 'IntegralList')
+        self.assertIs(self.spectrum.integralLists[0], integralList)
 
-        # Undo and redo all operations
+    def test_new1dIntegralList_UndoRedo(self):
+        integralList = self.spectrum.newIntegralList()
+
+        self.assertEqual(len(self.spectrum.integralLists), 1)
         self.undo.undo()
-        self.assertEqual(shiftList.pid, 'CL:default')
-        self.assertEqual(sorted(shiftList.chemicalShifts)[20].pid, 'CS:default.A.2.GLU.H')
+        self.assertEqual(len(self.spectrum.integralLists), 0)
 
         self.undo.redo()
-        self.assertEqual(shiftList.pid, 'CL:RenamedList')
-        self.assertEqual(sorted(shiftList.chemicalShifts)[20].pid, 'CS:RenamedList.A.2.GLU.H')
+        self.assertEqual(len(self.spectrum.integralLists), 1)
+        self.assertIs(self.spectrum.integralLists[0], integralList)
+

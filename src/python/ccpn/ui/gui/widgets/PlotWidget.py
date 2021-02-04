@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,14 +13,15 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:55 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:38 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister"
 __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
+__date__ = "$Date: 2020-12-03 18:45:05 +0000 (Thu, December 03, 2020) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -230,7 +231,7 @@ class PlotWidget(pg.PlotWidget):
             if spectrum.showDoubleCrosshair:
                 #if strip.spectrumDisplay.mainWindow.application.preferences.general.doubleCrossHair:
                 offsets = spectrum.doubleCrosshairOffsets
-                displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+                displayIndices = spectrumView.dimensionOrdering
                 xOffset = offsets[displayIndices[0]]
                 yOffset = offsets[displayIndices[1]]
                 if xPos is None or xOffset == 0:

@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-08 17:20:08 +0000 (Tue, December 08, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:30 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,30 +28,21 @@ import collections
 import math
 import random
 import numpy as np
-from ccpn.core.Project import Project
-from ccpn.util.Common import percentage
-from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
-from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+from ccpn.util.Common import percentage, getAxisCodeMatchIndices
+from ccpn.util.Logging import getLogger
 
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
 
 
-def getExperimentClassifications(project: Project) -> dict:
-    """
-    Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.
-    """
-    return getExpClassificationDict(project._wrappedData)
-
-
 # def _oldEstimateNoiseLevel1D(x, y, factor=3):
-#   '''
+#   """
 #   :param x,y:  spectrum.positions, spectrum.intensities
 #   :param factor: optional. Increase factor to increase the STD and therefore the noise level threshold
 #   :return: float of estimated noise threshold
-#   '''
+#   """
 #
 #   data = np.array([x, y])
 #   dataStd = np.std(data)
@@ -62,11 +53,11 @@ def getExperimentClassifications(project: Project) -> dict:
 
 
 def _oldEstimateNoiseLevel1D(y, factor=0.5):
-    '''
+    """
     Estimates the noise threshold based on the max intensity of the first portion of the spectrum where
     only noise is present. To increase the threshold value: increase the factor.
     return:  float of estimated noise threshold
-    '''
+    """
     if y is not None:
         # print('_oldEstimateNoiseLevel1D',max(y[:int(len(y)/20)]) * factor, 'STD, ')
         return max(y[:int(len(y) / 20)]) * factor
@@ -174,7 +165,7 @@ def align2HSQCs(refSpectrum, querySpectrum, refPeakListIdx=-1, queryPeakListIdx=
 
 
 def _estimate1DSpectrumSNR(spectrum, engine='max'):
-    '''
+    """
 
     :param spectrum:
     :type spectrum:
@@ -182,7 +173,7 @@ def _estimate1DSpectrumSNR(spectrum, engine='max'):
     :type engine:
     :return:
     :rtype:
-    '''
+    """
     engines = {'max': np.max, 'mean': np.mean, 'std': np.std}
 
     if engine in engines:
@@ -258,7 +249,7 @@ def _getProjection(spectrum: 'Spectrum', axisCodes: tuple,
 ###################################################################################################
 
 
-'''
+"""
 14/2/2017
 
 Baseline Correction for 1D spectra.
@@ -276,16 +267,16 @@ NB: Yet To be tested the newest algorithm found in literature based on machine l
 Bayesian regularized artificial neural networks. Abolfazl Valadkhani et al.
 Analytica Chimica Acta. September 2016 DOI: 10.1016/j.aca.2016.08.046
 
-'''
+"""
 
 from scipy.sparse import csc_matrix, eye, diags
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
 
 
-'''
+"""
 Asl algorithm
-'''
+"""
 
 
 def als(y, lam=10 ** 2, p=0.001, nIter=10):
@@ -314,13 +305,13 @@ def als(y, lam=10 ** 2, p=0.001, nIter=10):
 ###################################################################################################
 
 
-'''
+"""
 Whittaker Smooth algorithm
-'''
+"""
 
 
 def WhittakerSmooth(y, w, lambda_, differences=1):
-    '''
+    """
     no licence, source from web
     Penalized least squares algorithm for background fitting
 
@@ -332,7 +323,7 @@ def WhittakerSmooth(y, w, lambda_, differences=1):
 
     output
         the fitted background vector
-    '''
+    """
     X = np.matrix(y)
     m = X.size
     i = np.arange(0, m)
@@ -347,13 +338,13 @@ def WhittakerSmooth(y, w, lambda_, differences=1):
 
 ###################################################################################################
 
-'''
+"""
 airPLS algorithm
-'''
+"""
 
 
 def airPLS(y, lambda_=100, porder=1, itermax=15):
-    '''
+    """
     no licence, source from web
     Adaptive iteratively reweighted penalized least squares for baseline fitting
 
@@ -364,7 +355,7 @@ def airPLS(y, lambda_=100, porder=1, itermax=15):
 
     output
         the fitted background vector
-    '''
+    """
     m = y.shape[0]
     w = np.ones(m)
     for i in range(1, itermax + 1):
@@ -384,18 +375,18 @@ def airPLS(y, lambda_=100, porder=1, itermax=15):
 ###################################################################################################
 
 
-'''
+"""
 polynomial Fit algorithm
-'''
+"""
 
 
 def polynomialFit(x, y, order: int = 3):
-    '''
+    """
     :param x: x values
     :param y: y values
     :param order: polynomial order
     :return: fitted baseline
-    '''
+    """
     fit = np.polyval(np.polyfit(x, y, deg=order), x)
     return fit
 
@@ -403,9 +394,9 @@ def polynomialFit(x, y, order: int = 3):
 ###################################################################################################
 
 
-'''
+"""
 arPLS algorithm
-'''
+"""
 
 
 def arPLS(y, lambda_=5.e5, ratio=1.e-6, itermax=50):
@@ -493,9 +484,9 @@ def arPLS(y, lambda_=5.e5, ratio=1.e-6, itermax=50):
 ###################################################################################################
 
 
-'''
+"""
 Implementation of the  arPLS algorithm
-'''
+"""
 
 
 def arPLS_Implementation(y, lambdaValue=5.e4, maxValue=1e6, minValue=-1e6, itermax=10, interpolate=True):
@@ -531,13 +522,13 @@ def arPLS_Implementation(y, lambdaValue=5.e4, maxValue=1e6, minValue=-1e6, iterm
 
 
 def lowess(x, y):
-    '''
+    """
     LOWESS (Locally Weighted Scatterplot Smoothing).
     A lowess function that outs smoothed estimates of endog
     at the given exog values from points (exog, endog)
     To use this, you need to install statsmodels in your miniconda:
      - conda install statsmodels or pip install --upgrade --no-deps statsmodels
-    '''
+    """
 
     from scipy.interpolate import interp1d
     import statsmodels.api as sm
@@ -761,7 +752,7 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
         raise NotImplementedError("setContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
 
     # get specLimits for all dimensions
-    specLimits = list(spectrum.spectrumLimits)
+    specLimits = sorted(spectrum.spectrumLimits)
     dims = spectrum.dimensionCount
     valsPerPoint = spectrum.valuesPerPoint
 
@@ -895,7 +886,7 @@ def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
         raise NotImplementedError("getContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
 
     # get specLimits for all dimensions
-    specLimits = list(spectrum.spectrumLimits)
+    specLimits = sorted(spectrum.spectrumLimits)
     dims = spectrum.dimensionCount
     valsPerPoint = spectrum.valuesPerPoint
 
@@ -972,6 +963,63 @@ def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
     return [None] * 6
 
 
+def getNoiseEstimateFromRegion(spectrum, strip):
+    """
+    Get the noise estimate from the visible region of the strip
+
+    :param spectrum:
+    :param strip:
+    :return:
+    """
+
+    # calculate the region over which to estimate the noise
+    selectedRegion = [strip.getAxisRegion(0), strip.getAxisRegion(1)]
+    for n in strip.orderedAxes[2:]:
+        selectedRegion.append((n.region[0], n.region[1]))
+    sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
+
+    # get indexing for spectrum onto strip.axisCodes
+    indices = getAxisCodeMatchIndices(spectrum.axisCodes, strip.axisCodes)
+
+    if None in indices:
+        return
+
+    # map the spectrum selectedRegions to the strip
+    axisCodeDict = collections.OrderedDict((code, sortedSelectedRegion[indices[ii]])
+                                           for ii, code in enumerate(spectrum.axisCodes) if indices[ii] is not None)
+
+    # add an exclusion buffer to ensure that getRegionData always returns a region,
+    # otherwise region may be 1 plain thick which will contradict error trapping for peak fitting
+    # (which requires at least 3 points in each dimension)
+    # exclusionBuffer = [1] * spectrum.dimensionCount
+    # however, this shouldn't be needed of the range is > valuePrePoint in each dimension
+
+    foundRegions = spectrum.getRegionData(minimumDimensionSize=1, **axisCodeDict)
+
+    if foundRegions:
+
+        # just use the first region
+        for region in foundRegions[:1]:
+            dataArray, intRegion, *rest = region
+
+            if dataArray.size:
+                # calculate the noise values
+                flatData = dataArray.flatten()
+
+                std = np.std(flatData)
+                max = np.max(flatData)
+                min = np.min(flatData)
+                mean = np.mean(flatData)
+
+                value = NoiseEstimateTuple(mean=mean,
+                                           std=std * 1.1 if std != 0 else 1.0,
+                                           min=min, max=max,
+                                           noiseLevel=None)
+
+                # noise function is defined here, but needs cleaning up
+                return _noiseFunc(value)
+
+
 def getSpectrumNoise(spectrum):
     """
     Get the noise level for a spectrum. If the noise level is not already set it will
@@ -985,7 +1033,6 @@ def getSpectrumNoise(spectrum):
 
     Float
     """
-    # apiDataSource = spectrum._apiDataSource
     noise = spectrum.noiseLevel
     if noise is None:
         noise = getNoiseEstimate(spectrum)
@@ -1024,9 +1071,9 @@ def getNoiseEstimate(spectrum):
 def _noiseFunc(value):
     # take the 'value' NoiseEstimateTuple and add the noiseLevel
     return NoiseEstimateTuple(mean=value.mean,
-                               std=value.std,
-                               min=value.min, max=value.max,
-                               noiseLevel=abs(value.mean) + 3.0 * value.std)
+                              std=value.std,
+                              min=value.min, max=value.max,
+                              noiseLevel=abs(value.mean) + 3.0 * value.std)
 
 
 def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
@@ -1078,7 +1125,7 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     if good == 0:
         getLogger().warning(f'Spectrum {spectrum} contains all bad points')
         return NoiseEstimateTuple(mean=None, std=None, min=None, max=None, noiseLevel=1.0)
-    elif good < 10: # arbitrary number of bad points
+    elif good < 10:  # arbitrary number of bad points
         getLogger().warning(f'Spectrum {spectrum} contains minimal data')
         maxValue = max([abs(x) for x in data])
         if maxValue > 0:

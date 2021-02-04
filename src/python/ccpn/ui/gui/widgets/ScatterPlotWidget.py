@@ -4,7 +4,7 @@ Module Documentation Here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:29 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:38 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -106,14 +106,14 @@ def _getPointsWithinLimits(points, limits):
     return []
 
 class _ItemBC(object):
-    ''' '''
+    """ """
 
     def __init__(self, headerValueName, **kwargs):
-        '''
+        """
         Used to set the points/axis in the plot
         :param kwargs:
 
-        '''
+        """
         self.kwargs = {
                        _SELECTORNAME      : headerValueName,
                        _VALUEHEADER       : headerValueName,
@@ -348,10 +348,10 @@ class ScatterPlot(Widget):
         self.dataSelectedSignal.emit(data)
 
     def setAxesDefinitions(self, defs:od, updateWidgets=True):
-        '''
+        """
         :param defs: orderedDict key: visible label to appear in the pulldown, value: the dataframe column header name.
         if None, they will be used the  header names as they appear in the original dataframe.
-        '''
+        """
         if isinstance(defs, dict):
             self.axesDefinitions = defs
         if defs is None:
@@ -360,19 +360,19 @@ class ScatterPlot(Widget):
             self.setAxesWidgets()
 
     def setAxesWidgets(self):
-        '''
+        """
         Set from the axesDefinitions. If None, uses the dataFrame column names.
-        '''
+        """
         pulldownTexts = list(self.axesDefinitions.keys())
         self.xAxisSelector.setData(list(pulldownTexts))
         self.yAxisSelector.setData(list(pulldownTexts))
 
     def selectAxes(self, xHeader=None, yHeader=None):
-        '''
+        """
         :param x: str, header as appears in the selection Pulldown
         :param y: str, header as appears in the selection Pulldown
         if None is given, it keeps the current value.
-        '''
+        """
         if xHeader:
             self.xAxisSelector.select(xHeader)
         if yHeader:

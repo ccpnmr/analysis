@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:31 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -48,32 +48,6 @@ class TestSampleComponentCreation(WrapperTesting):
     # test_newSampleComponent_bad_name
     #=========================================================================================
 
-    def test_newSampleComponent(self):
-        """
-        Test that creating a new SampleComponent with no parameter raises an error and
-        no component is added.
-        """
-        # with self.assertRaisesRegexp(TypeError, 'required positional argument'):
-        #   self.sample.newSampleComponent()
-        #
-        with self.assertRaisesRegexp(TypeError, 'must be a string'):
-            self.sample.newSampleComponent()
-        self.assertEqual(len(self.project.sampleComponents), 0)
-        self.assertEqual(len(self.project.substances), 0)
-
-    def test_newSampleComponent_ES(self):
-        """
-        Test that creating a new SampleComponent with an empty string raises an error and
-        no component is added.
-        """
-        # with self.assertRaisesRegexp(ApiError, 'Empty string not allowed'):
-        #   self.sample.newSampleComponent('')
-        #
-        with self.assertRaisesRegexp(ValueError, 'must be set'):
-            self.sample.newSampleComponent('')
-        self.assertEqual(len(self.project.sampleComponents), 0)
-        self.assertEqual(len(self.project.substances), 0)
-
     def test_newSampleComponent_Badname(self):
         """
         Test that creating a new SampleComponent '^Badname' raises an error and
@@ -82,19 +56,6 @@ class TestSampleComponentCreation(WrapperTesting):
         """
         with self.assertRaisesRegexp(ValueError, 'Character'):
             self.sample.newSampleComponent('^Badname')
-        self.assertEqual(len(self.project.sampleComponents), 0)
-        self.assertEqual(len(self.project.substances), 0)
-
-    def test_newSampleComponent_None(self):
-        """
-        Test that creating a new SampleComponent with None raises an error and
-        no component is added.
-        """
-        # with self.assertRaisesRegexp(ApiError, 'Line input is not of a valid type'):
-        #   self.sample.newSampleComponent(None)
-        #
-        with self.assertRaisesRegexp(TypeError, 'must be a string'):
-            self.sample.newSampleComponent(None)
         self.assertEqual(len(self.project.sampleComponents), 0)
         self.assertEqual(len(self.project.substances), 0)
 
@@ -126,6 +87,36 @@ class TestSampleComponentCreation(WrapperTesting):
         newSC = self.sample.newSampleComponent('Valid SampleComponent')
 
         self.assertEqual(newSC.pid, 'SC:ValidSample.Valid SampleComponent.')
+        self.assertEqual(len(self.project.sampleComponents), 1)
+        self.assertEqual(len(self.project.substances), 1)
+        self.assertIs(self.project.sampleComponents[0], newSC)
+
+    def test_newSampleComponent(self):
+        """
+        Test that creating a new SampleComponent with no parameter gives the standard new name.
+        """
+        newSC = self.sample.newSampleComponent()
+        self.assertEqual(newSC.pid, 'SC:ValidSample.mySampleComponent_1.')
+        self.assertEqual(len(self.project.sampleComponents), 1)
+        self.assertEqual(len(self.project.substances), 1)
+        self.assertIs(self.project.sampleComponents[0], newSC)
+
+    def test_newSampleComponent_ES(self):
+        """
+        Test that creating a new SampleComponent with an empty string gives the standard new name.
+        """
+        newSC = self.sample.newSampleComponent('')
+        self.assertEqual(newSC.pid, 'SC:ValidSample.mySampleComponent_1.')
+        self.assertEqual(len(self.project.sampleComponents), 1)
+        self.assertEqual(len(self.project.substances), 1)
+        self.assertIs(self.project.sampleComponents[0], newSC)
+
+    def test_newSampleComponent_None(self):
+        """
+        Test that creating a new SampleComponent with None gives the standard new name.
+        """
+        newSC = self.sample.newSampleComponent(None)
+        self.assertEqual(newSC.pid, 'SC:ValidSample.mySampleComponent_1.')
         self.assertEqual(len(self.project.sampleComponents), 1)
         self.assertEqual(len(self.project.substances), 1)
         self.assertIs(self.project.sampleComponents[0], newSC)

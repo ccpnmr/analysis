@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-30 16:09:18 +0100 (Wed, September 30, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -355,9 +355,9 @@ class GuiWindow():
             AssignmentLib.refitPeaks(peaks, fitMethod=fitMethod, singularMode=singularMode)
 
     def recalculateCurrentPeakHeights(self):
-        '''
+        """
         Recalculates the peak height without changing the ppm position
-        '''
+        """
         getLogger().info('Recalculating peak height(s).')
 
         current = self.application.current
@@ -421,7 +421,7 @@ class GuiWindow():
                 popup.exec_()
 
     def selectAllPeaks(self, strip=None):
-        '''selects all peaks in the strip or current strip if any and if the spectrum is toggled on'''
+        """selects all peaks in the strip or current strip if any and if the spectrum is toggled on"""
         if strip is None:
             if self.application.current.strip:
                 strip = self.application.current.strip
@@ -570,14 +570,6 @@ class GuiWindow():
         # toggle crosshairs for the spectrum displays in this window
         for spectrumDisplay in self.spectrumDisplays:
             spectrumDisplay.toggleDoubleCrosshair()
-
-        # self.application.preferences.general.showDoubleCrosshair = not self.application.preferences.general.showDoubleCrosshair
-        #
-        # # repaint all windows
-        # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-        #
-        # GLSignals = GLNotifier(parent=self)
-        # GLSignals.emitPaintEvent()
 
     def estimateNoise(self):
         """estimate the noise in the visible region of the current strip
@@ -756,7 +748,7 @@ class GuiWindow():
         Snaps selected peaks. If more then one, pops up a Yes/No.
         Uses the minDropFactor from the preferences, and applies a parabolic fit to give first-estimate of lineWidths
         """
-        peaks = self.current.peaks
+        peaks = list(self.current.peaks)
         if not peaks:
             return
 
@@ -778,6 +770,7 @@ class GuiWindow():
                 if MessageDialog.showYesNo(title, msg, parent):
                     with progressManager(self, 'Snapping peaks to extrema'):
                         for peak in peaks:
+                            peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
                             peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
                                                 minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
             else:

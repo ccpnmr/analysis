@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 12:56:14 +0100 (Fri, October 23, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:28 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -46,6 +46,7 @@ from ccpn.util.Constants import SCALETOLERANCE
 
 ALIASINGCHANGED = '_aliasingChanged'
 DIMENSIONNMRATOMSCHANGED = '_dimensionNmrAtomsChanged'
+RECALCULATESHIFTVALUE = '_recalculateShiftValue'
 
 
 class Peak(AbstractWrapperObject):
@@ -99,6 +100,11 @@ class Peak(AbstractWrapperObject):
             if self._wrappedData.peakList in self._project._data2Obj else None
 
     peakList = _parent
+
+    @property
+    def spectrum(self):
+        """Convenience property to get the spectrum, equivalent to peak.peakList.spectrum"""
+        return self.peakList.spectrum
 
     @property
     def height(self) -> Optional[float]:
@@ -230,8 +236,20 @@ class Peak(AbstractWrapperObject):
         return self._wrappedData.figOfMerit
 
     @figureOfMerit.setter
+    @ccpNmrV3CoreSetter()
     def figureOfMerit(self, value: float):
         self._wrappedData.figOfMerit = value
+
+        # recalculate the shifts
+        assigned = set(makeIterableList(self.assignments))
+        shifts = set([cs for nmr in assigned for cs in nmr.chemicalShifts if cs and not (cs.isDeleted or cs._flaggedForDelete)])
+        for cs in shifts:
+            cs.recalculateShiftValue()
+
+        # set the attribute to trigger the _finaliseAction for the shifts that have changed
+        if shifts:
+            # notify that the shifts have also changed
+            setattr(self, RECALCULATESHIFTVALUE, shifts)
 
     @property
     def annotation(self) -> Optional[str]:
@@ -262,16 +280,29 @@ class Peak(AbstractWrapperObject):
         # call api changes
         currentAlias = []
         newAlias = []
+        assigned = set()
+        ff = self._project._data2Obj.get
+
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             currentAlias.append(peakDim.numAliasing)
+
+            _old = peakDim.position # the current pointPosition, quick to get
             peakDim.value = value[ii]
             peakDim.realValue = None
             newAlias.append(peakDim.numAliasing)
+
+            # log any peak assignments that have moved in this axis
+            if peakDim.position != _old:
+                assigned |= set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
 
         # aliasing may have changed here
         if currentAlias != newAlias:
             self._checkAliasing()
             setattr(self, ALIASINGCHANGED, True)
+
+        # set the attribute to trigger the _finaliseAction for the positions that have changed
+        if assigned:
+            setattr(self, DIMENSIONNMRATOMSCHANGED, assigned)
 
     ppmPositions = position
 
@@ -312,15 +343,28 @@ class Peak(AbstractWrapperObject):
     def pointPosition(self, value: Sequence):
         currentAlias = []
         newAlias = []
+        assigned = set()
+        ff = self._project._data2Obj.get
+
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             currentAlias.append(peakDim.numAliasing)
+
+            _old = peakDim.position # the current pointPosition
             peakDim.position = value[ii]
             newAlias.append(peakDim.numAliasing)
+
+            # log any peak assignments that have moved in this axis
+            if peakDim.position != _old:
+                assigned |= set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
 
         # aliasing may have changed here
         if currentAlias != newAlias:
             self._checkAliasing()
             setattr(self, ALIASINGCHANGED, True)
+
+        # set the attribute to trigger the _finaliseAction for the positions that have changed
+        if assigned:
+            setattr(self, DIMENSIONNMRATOMSCHANGED, assigned)
 
     @property
     def boxWidths(self) -> Tuple[Optional[float], ...]:
@@ -606,13 +650,14 @@ class Peak(AbstractWrapperObject):
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated multiplets
         """
-        super()._finaliseAction(action=action)
+        if not super()._finaliseAction(action):
+            return
 
         # if this peak is changed or deleted then it's multiplets/integral need to CHANGE
         # create required as undo may return peak to a multiplet list
         if action in ['change', 'create', 'delete']:
             for mt in self.multiplets:
-                mt._finaliseAction(action='change')
+                mt._finaliseAction('change')
             # NOTE:ED does integral need to be notified? - and reverse notifiers in multiplet/integral
 
         if action in ['change']:
@@ -620,20 +665,40 @@ class Peak(AbstractWrapperObject):
             # check whether the peak aliasing has changed and notify containing spectrum
             if getattr(self, ALIASINGCHANGED, None):
                 self._aliasingChanged = False
-                self.peakList.spectrum._finaliseAction(action=action)
+                self.peakList.spectrum._finaliseAction(action)
 
-            # if the assignedNmrAtoms have changed then notifier the nmrAtoms
+            # if the assignedNmrAtoms have changed then notify
             # This contains the pre-post set to handle updating the chemicalShift table
             nmrAtoms = getattr(self, DIMENSIONNMRATOMSCHANGED, None)
             if nmrAtoms:
                 for nmrAtom in nmrAtoms:
                     if not (nmrAtom.isDeleted or nmrAtom._flaggedForDelete):
-                        nmrAtom._finaliseAction(action=action)
+                        nmrAtom._finaliseAction(action)
             setattr(self, DIMENSIONNMRATOMSCHANGED, None)
+
+            # if the chemicalShifts have changed then notify, handles chemicalShift table
+            shifts = getattr(self, RECALCULATESHIFTVALUE, None)
+            if shifts:
+                for cs in shifts:
+                    if not (cs.isDeleted or cs._flaggedForDelete):
+                        cs._finaliseAction(action)
+            setattr(self, RECALCULATESHIFTVALUE, None)
 
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
+
+    # def delete(self):
+    #     """Delete object, with all contained objects and underlying data.
+    #     """
+    #     with undoBlock():
+    #         print('>>> delete peak')
+    #         nmrAtoms = makeIterableList(self.assignedNmrAtoms)
+    #         print('>>> ', nmrAtoms)
+    #
+    #         super().delete()
+    #
+    #         # need to delete any chemShifts that have no
 
     def isPartlyAssigned(self):
         """Whether peak is partly assigned."""

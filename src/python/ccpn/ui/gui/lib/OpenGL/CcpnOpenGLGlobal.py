@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,7 +40,7 @@ except ImportError:
     sys.exit(1)
 
 from ccpn.util.decorators import singleton
-from ccpn.framework.PathsAndUrls import fontsPath
+from ccpn.framework.PathsAndUrls import openGLFontsPath
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgramABC
 
@@ -48,8 +48,6 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgramABC
 GLFONT_DEFAULT = 'OpenSans-Regular'
 GLFONT_SUBSTITUTE = 'OpenSans-Regular'
 GLFONT_DEFAULTSIZE = 13  # moved to preferences.appearance
-# GLFONT_DEFAULTSCALE = 1
-# GLFONT_SCALES = (1, 2)
 _OLDGLFONT_SIZES = [10, 11, 12, 13, 14, 16, 18, 20, 22, 24]
 GLFONT_DICT = {}
 
@@ -59,8 +57,7 @@ GLFONT_SIZE = 2
 GLFONT_SCALE = 3
 
 GLFONT_TRANSPARENT = 'Transparent'
-GLFONT_PATH = 'Fonts'
-
+GLFONT_DEFAULTFONTFILE = 'glAllFonts.fnt'
 GLPIXELSHADER = 'GLPixelShader'
 GLTEXTSHADER = 'GLTextShader'
 
@@ -101,7 +98,7 @@ class GLGlobalData(QtWidgets.QWidget):
     def loadFonts(self):
         """Load all the necessary GLFonts
         """
-        self.fonts[GLFONT_DEFAULT] = CcpnGLFont(os.path.join(fontsPath, GLFONT_PATH, 'glAllFonts.fnt'), activeTexture=0, scale=1.0)
+        self.fonts[GLFONT_DEFAULT] = CcpnGLFont(openGLFontsPath / GLFONT_DEFAULTFONTFILE, activeTexture=0, scale=1.0)
 
         _foundFonts = self.fonts[GLFONT_DEFAULT].fontGlyph
 
@@ -124,7 +121,6 @@ class GLGlobalData(QtWidgets.QWidget):
             _new = _shader()
             self.shaders[_new.name] = _new
 
-        # NOTE:ED - put into the original attributes for the minute
         self._shaderProgram1 = self.shaders['pixelShader']
         self._shaderProgramTex = self.shaders['textShader']
 

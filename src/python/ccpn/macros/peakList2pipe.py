@@ -1,7 +1,7 @@
 """
 This macro writes an NmrPipe-like file using some of the CcpNmr peak properties.
 
-Copy this macro inside the Macro Editor module and amend it as necessary.
+Copy this macro inside the Macro Editor module and amend it as necessary (Main Menu -> Macro -> New).
 Post your changes/improvements on the Ccpn Forum!
 
 If guessClusterId is set to True, it will add a cluster id for each peak.

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:35 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 16:32:06 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-07-04 09:28:16 +0000 (Tue, July 04, 2017) $"
 #=========================================================================================
 
 from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise, DEFAULTLEVELS, DEFAULTMULTIPLIER
-from ccpn.core.lib.SpectrumLib import getNoiseEstimate, getNoiseEstimateFromRegion
+from ccpn.core.lib.SpectrumLib import getNoiseEstimate, getNoiseEstimateFromRegion, getClippedRegion
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -350,7 +350,7 @@ class NoiseTab(Widget):
         noise = getNoiseEstimateFromRegion(self.spectrum, self.strip)
 
         if noise:
-            regions = self.strip.getAxisRegions()
+            regions = getClippedRegion(self.spectrum, self.strip)
 
             # populate the widgets
             for ii, region in enumerate(regions):

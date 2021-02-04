@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 14:50:37 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 16:32:06 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -963,6 +963,36 @@ def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
     return [None] * 6
 
 
+def getClippedRegion(spectrum, strip, sort=False):
+    """
+    Return the clipped region, bounded by the (ppmPoint(1), ppmPoint(n)) in visible order
+
+    If sorting is True, returns a tuple(tuple(minPpm, maxPpm), ...) for each region
+    else returns tuple(tuple(ppmLeft, ppmRight), ...)
+
+    :param spectrum:
+    :param strip:
+    :return:
+    """
+
+    # calculate the visible region
+    selectedRegion = [strip.getAxisRegion(0), strip.getAxisRegion(1)]
+    for n in strip.orderedAxes[2:]:
+        selectedRegion.append((n.region[0], n.region[1]))
+
+    # use the ppmArrays to get the first/last point of the data
+    if spectrum.dimensionCount == 1:
+        ppmArrays = [spectrum.getPpmArray(dimension=1)]
+    else:
+        ppmArrays = [spectrum.getPpmArray(dimension=dim) for dim in spectrum.getByAxisCodes('dimensions', strip.axisCodes)]
+
+    # clip to the ppmArrays, not taking aliased regions into account
+    if sort:
+        return tuple(tuple(sorted(np.clip(region, np.min(limits), np.max(limits)))) for region, limits in zip(selectedRegion, ppmArrays))
+    else:
+        return tuple(tuple(np.clip(region, np.min(limits), np.max(limits))) for region, limits in zip(selectedRegion, ppmArrays))
+
+
 def getNoiseEstimateFromRegion(spectrum, strip):
     """
     Get the noise estimate from the visible region of the strip
@@ -973,12 +1003,9 @@ def getNoiseEstimateFromRegion(spectrum, strip):
     """
 
     # calculate the region over which to estimate the noise
-    selectedRegion = [strip.getAxisRegion(0), strip.getAxisRegion(1)]
-    for n in strip.orderedAxes[2:]:
-        selectedRegion.append((n.region[0], n.region[1]))
-    sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
+    sortedSelectedRegion = getClippedRegion(spectrum, strip, sort=True)
 
-    if strip.spectrumDisplay.is1D:
+    if spectrum.dimensionCount == 1:
         indices = [1]
     else:
         indices = spectrum.getByAxisCodes('dimensions', strip.axisCodes)

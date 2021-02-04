@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:30 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 13:19:48 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -978,46 +978,33 @@ def getNoiseEstimateFromRegion(spectrum, strip):
         selectedRegion.append((n.region[0], n.region[1]))
     sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
 
-    # get indexing for spectrum onto strip.axisCodes
-    indices = getAxisCodeMatchIndices(spectrum.axisCodes, strip.axisCodes)
+    if strip.spectrumDisplay.is1D:
+        indices = [1]
+    else:
+        indices = spectrum.getByAxisCodes('dimensions', strip.axisCodes)
 
-    if None in indices:
-        return
+    regionDict = {}
+    for idx, ac, region in zip(indices, strip.axisCodes, sortedSelectedRegion):
+        regionDict[ac] = tuple(region)
 
-    # map the spectrum selectedRegions to the strip
-    axisCodeDict = collections.OrderedDict((code, sortedSelectedRegion[indices[ii]])
-                                           for ii, code in enumerate(spectrum.axisCodes) if indices[ii] is not None)
+    # get the data
+    dataArray = spectrum.getRegion(**regionDict)
 
-    # add an exclusion buffer to ensure that getRegionData always returns a region,
-    # otherwise region may be 1 plain thick which will contradict error trapping for peak fitting
-    # (which requires at least 3 points in each dimension)
-    # exclusionBuffer = [1] * spectrum.dimensionCount
-    # however, this shouldn't be needed of the range is > valuePrePoint in each dimension
+    # calculate the noise values
+    flatData = dataArray.flatten()
 
-    foundRegions = spectrum.getRegionData(minimumDimensionSize=1, **axisCodeDict)
+    std = np.std(flatData)
+    max = np.max(flatData)
+    min = np.min(flatData)
+    mean = np.mean(flatData)
 
-    if foundRegions:
+    value = NoiseEstimateTuple(mean=mean,
+                               std=std * 1.1 if std != 0 else 1.0,
+                               min=min, max=max,
+                               noiseLevel=None)
 
-        # just use the first region
-        for region in foundRegions[:1]:
-            dataArray, intRegion, *rest = region
-
-            if dataArray.size:
-                # calculate the noise values
-                flatData = dataArray.flatten()
-
-                std = np.std(flatData)
-                max = np.max(flatData)
-                min = np.min(flatData)
-                mean = np.mean(flatData)
-
-                value = NoiseEstimateTuple(mean=mean,
-                                           std=std * 1.1 if std != 0 else 1.0,
-                                           min=min, max=max,
-                                           noiseLevel=None)
-
-                # noise function is defined here, but needs cleaning up
-                return _noiseFunc(value)
+    # noise function is defined here, but needs cleaning up
+    return _noiseFunc(value)
 
 
 def getSpectrumNoise(spectrum):

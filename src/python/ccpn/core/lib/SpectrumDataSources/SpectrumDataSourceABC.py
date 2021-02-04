@@ -82,18 +82,18 @@ Example 3 (using Spectrum instance to make a hdf5 duplicate):
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:33:14 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-04 14:50:37 +0000 (Thu, February 04, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1424,7 +1424,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         fractions = [p-float(int(p)) for p in position]
         # get the nD slice data around position; i.e. if position=(324.4, 120.9, 33.7),
         # get ( (324,325), (120,121), (33,34) )
-        sliceTuples = tuple(slice(int(p), int(p)+1) for p in position)
+        sliceTuples = tuple((int(p), int(p)+1) for p in position)
         pointData = self.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliaisingFlags)
 
         for f in fractions:

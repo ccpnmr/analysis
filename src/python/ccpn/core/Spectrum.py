@@ -50,7 +50,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 14:50:37 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2250,10 +2250,10 @@ class Spectrum(AbstractWrapperObject):
             raise ValueError('ppmPositions values must be floats')
 
         pointPosition = [self.ppm2point(p, dimension=idx+1) for idx, p in enumerate(ppmPosition)]
-        return self.getPointvalue(pointPosition)
+        return self.getPointValue(pointPosition)
 
     @logCommand(get='self')
-    def getPointvalue(self, pointPosition):
+    def getPointValue(self, pointPosition):
         """Return the value interpolated at the position given in points (1-based, float values).
         """
         if len(pointPosition) != self.dimensionCount:

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 13:19:48 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 14:50:37 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1098,9 +1098,9 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
         raise ValueError('fraction must be i the range (0, 1]')
 
     # create a list of random points in the spectrum, get only points that are not nan/inf
-    # getPositionValue is the slow bit
-    allPts = [[min(n - 2, int(n * random.random())) for n in npts] for i in range(nsamples)]
-    _list = np.array([spectrum.getPositionValue(pt) for pt in allPts], dtype=np.float32)
+    # getPointValue is the slow bit
+    allPts = [[min(n - 1, int(n * random.random()) + 1) for n in npts] for i in range(nsamples)]
+    _list = np.array([spectrum.getPointValue(pt) for pt in allPts], dtype=np.float32)
     data = _list[np.isfinite(_list)]
     fails = nsamples - len(data)
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-02 13:02:36 +0000 (Tue, February 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 15:28:20 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -655,7 +655,7 @@ def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
         applyChanges = changeState and applyState
         revertChanges = changeState or revertState
         if okButton:
-            okButton.setEnabled(applyChanges or not self.EDITMODE)
+            okButton.setEnabled(applyChanges or not popup.EDITMODE)
         if applyButton:
             applyButton.setEnabled(applyChanges)
         if revertButton:

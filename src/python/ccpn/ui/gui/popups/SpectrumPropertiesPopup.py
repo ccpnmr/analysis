@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-03 10:22:41 +0000 (Wed, February 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 15:28:21 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -967,59 +967,46 @@ class DimensionsTab(Widget):
             self.minAliasingPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t', )
             self.minAliasingPullDowns[i].activated.connect(partial(self._queueSetMinAliasing, spectrum, self.minAliasingPullDowns[i].getText, i))
 
-        row += 1
-        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
-        hLine.setContentsMargins(5, 0, 0, 0)
+        if spectrum.dimensionCount > 1:
+            row += 1
+            hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
+            hLine.setContentsMargins(5, 0, 0, 0)
 
-        row += 1
-        self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Preferred Axis Order",
-                                                                     grid=(row, 0), gridSpan=(1, dimensions + 1), vAlign='t')
-        self.preferredAxisOrderPulldown.pulldownList.setCallback(partial(self._queueSetSpectrumOrderingComboIndex, spectrum))
+            row += 1
+            self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Preferred Axis Order",
+                                                                         grid=(row, 0), gridSpan=(1, dimensions + 1), vAlign='t')
+            self.preferredAxisOrderPulldown.pulldownList.setCallback(partial(self._queueSetSpectrumOrderingComboIndex, spectrum))
 
         row += 1
         Spacer(self, 5, 5, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(row, dimensions + 1), gridSpan=(1, 1))
 
-    def _fillPreferredWidget(self):
-        """Fill the pullDown with the currently available permutations of the axis codes
-        """
-        specOrder = tuple(self.spectrum.preferredAxisOrdering) if self.spectrum.preferredAxisOrdering is not None else None
-
-        ll = ['<None>']
-        axisPerms = []
-        axisOrder = []
-        if self.mainWindow:
-            # add permutations for the axes
-            axisPerms = permutations([axisCode for axisCode in self.spectrum.axisCodes])
-            axisOrder = tuple(permutations(list(range(len(self.spectrum.axisCodes)))))
-            ll += [" ".join(ax for ax in perm) for perm in axisPerms]
-
-        self.preferredAxisOrderPulldown.pulldownList.setData(ll)
-
-        if specOrder is not None and self.mainWindow:
-            specIndex = axisOrder.index(specOrder) + 1
-            self.preferredAxisOrderPulldown.setIndex(specIndex)
-
     def _fillPreferredWidgetFromAxisTexts(self):
+        """Fill the pullDown during preSelect
+        """
+        with self.blockWidgetSignals(self.preferredAxisOrderPulldown):
+            self._populatePreferredOrder()
+
+    def _populatePreferredOrder(self):
         """Fill the pullDown with the currently available permutations of the axis codes
         """
         specOrder = tuple(self.spectrum.preferredAxisOrdering) if self.spectrum.preferredAxisOrdering is not None else None
 
         axisCodeTexts = tuple([ss.text() for ss in self.axisCodeEdits])
         ll = ['<None>']
-        axisPerms = []
-        axisOrder = []
-        if self.mainWindow:
-            # add permutations for the axes
-            axisPerms = permutations([axisCode for axisCode in axisCodeTexts])
-            axisOrder = tuple(permutations(list(range(len(axisCodeTexts)))))
-            ll += [" ".join(ax for ax in perm) for perm in axisPerms]
+
+        # add permutations for the axes
+        axisPerms = permutations([axisCode for axisCode in axisCodeTexts])
+        axisOrder = tuple(permutations(list(range(len(axisCodeTexts)))))
+        ll += [" ".join(ax for ax in perm) for perm in axisPerms]
 
         self.preferredAxisOrderPulldown.pulldownList.setData(ll)
 
-        if specOrder is not None and self.mainWindow:
+        if specOrder is not None:
             specIndex = axisOrder.index(specOrder) + 1
             self.preferredAxisOrderPulldown.setIndex(specIndex)
+        else:
+            self.preferredAxisOrderPulldown.setIndex(0)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetSpectrumOrderingComboIndex(self, spectrum, item):
@@ -1106,7 +1093,9 @@ class DimensionsTab(Widget):
                     index = aliasMinRange.index(aliasLim[i][0])
                     self.minAliasingPullDowns[i].setIndex(index)
 
-            self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
+            if self.spectrum.dimensionCount > 1:
+                self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
+                self._populatePreferredOrder()
 
     def _getChangeState(self):
         """Get the change state from the parent widget

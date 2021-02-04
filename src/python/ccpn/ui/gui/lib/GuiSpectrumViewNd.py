@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-03 18:11:37 +0000 (Wed, February 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 12:50:37 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -32,13 +32,11 @@ from PyQt5 import QtCore
 from ccpn.util import Colour
 from ccpnc.contour import Contourer2d
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
-from ccpn.util.Logging import getLogger
-from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
 
 
 _NEWCOMPILEDCONTOURS = True
 
-AxisPlaneData = namedtuple('AxisPlaneData', 'startPoint endPoint pointCount pointOffset')
+AxisPlaneData = namedtuple('AxisPlaneData', 'startPoint endPoint pointCount')
 
 
 #TODO:RASMUS: why is this function here when the wrapper has positiveLevels and negativeLevels
@@ -174,11 +172,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     def _buildGLContours(self, glList, firstShow=True):
         """Build the contour arrays
         """
-        if not self.spectrum.noiseLevel and firstShow:
-            getLogger().info("estimating noise level for spectrum %s" % str(self.spectrum.pid))
-            setContourLevelsFromNoise(self.spectrum, setNoiseLevel=True,
-                                      setPositiveContours=True, setNegativeContours=True,
-                                      useSameMultiplier=True)
+        # GWV 02122020: Should always have been set on newObject or restored object
+
+        # if not self.spectrum.noiseLevel and firstShow:
+        #     getLogger().info("estimating noise level for spectrum %s" % str(self.spectrum.pid))
+        #     setContourLevelsFromNoise(self.spectrum, setNoiseLevel=True,
+        #                               setPositiveContours=True, setNegativeContours=True,
+        #                               useSameMultiplier=True)
 
         if self.spectrum.positiveContourBase is None or self.spectrum.positiveContourBase == 0.0:
             raise RuntimeError('Positive Contour Base is not defined')
@@ -444,7 +444,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
             position = dimensionCount * [1]
             for z in range(axisData.startPoint, axisData.endPoint):
-                position[dimIndices[2]] = ((z % axisData.pointCount) - axisData.pointOffset) + 1
+                position[dimIndices[2]] = (z % axisData.pointCount) + 1
                 planeData = spectrum.getPlaneData(position, xDim=xDim + 1, yDim=yDim + 1)
                 yield position, planeData
 
@@ -467,7 +467,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 # get the axis position and put into the position vector
                 for dim, pos in enumerate(_plane):
                     _axis = axes[dim]
-                    position[dimIndices[dim + _offset]] = ((pos % axes[dim].pointCount) - axes[dim].pointOffset) + 1
+                    position[dimIndices[dim + _offset]] = (pos % axes[dim].pointCount) + 1
 
                 # get the plane data
                 planeData = spectrum.getPlaneData(position, xDim=xDim + 1, yDim=yDim + 1)
@@ -487,7 +487,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         # get the ppm range
         zPointCount = (self.spectrum.pointCounts)[index]
-        zPointOffset = (self.spectrum.pointOffsets)[index]
         zRegionValue = (zPosition + 0.5 * width, zPosition - 0.5 * width)  # Note + and - (axis backwards)
 
         # convert ppm- to point-range
@@ -509,7 +508,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             zPointInt0 = 0
             zPointInt1 = zPointCount
 
-        return AxisPlaneData(zPointInt0, zPointInt1, zPointCount, zPointOffset)
+        return AxisPlaneData(zPointInt0, zPointInt1, zPointCount)
 
     def _getVisiblePlaneList(self, firstVisible=None, minimumValuePerPoint=None):
 
@@ -539,7 +538,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             planeCount = self.strip.planeAxisBars[dim - 2].planeCount  #   .planeToolbar.planeCounts[dim - 2].value()
 
             zPointCount = (self.spectrum.pointCounts)[index]
-            zPointOffset = (self.spectrum.pointOffsets)[index]
             zValuePerPoint = (self.spectrum.valuesPerPoint)[index]
             # minSpectrumFrequency, maxSpectrumFrequency = (self.spectrum.spectrumLimits)[index]
 
@@ -565,9 +563,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 else:
                     zPointInt1 += 1
 
-            planeList = planeList + ((tuple((zz % zPointCount) - zPointOffset
-                                            for zz in range(zPointInt0, zPointInt1)),
-                                      zPointOffset, zPointCount),)
+            planeList = planeList + ((tuple((zz % zPointCount) for zz in range(zPointInt0, zPointInt1)),
+                                      0, zPointCount),)
 
             # need to add 0.5 for the indexing in the api
             planePointValues = ()

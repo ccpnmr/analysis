@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-28 12:58:51 +0000 (Thu, January 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-05 14:19:03 +0000 (Fri, February 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -373,6 +373,11 @@ class FileDialogABC(QtWidgets.QFileDialog):
 # Define the subclasses for each dialog
 
 class ProjectFileDialog(FileDialogABC):
+    _fileMode = 'directory'
+    _text = '{} Project'
+
+
+class ProjectSaveFileDialog(FileDialogABC):
     # _fileMode = 'directory'
     _text = '{} Project'
 

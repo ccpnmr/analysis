@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-02 15:50:50 +0000 (Tue, February 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-05 14:19:03 +0000 (Fri, February 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -63,7 +63,8 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog, DataFileDialog, NefFileDialog, \
-    ArchivesFileDialog, MacrosFileDialog, LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog
+    ArchivesFileDialog, MacrosFileDialog, LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog, \
+    ProjectSaveFileDialog
 from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
@@ -3132,7 +3133,7 @@ class Framework(NotifierBase):
 def getSaveDirectory(parent, preferences=None):
     """Opens save Project as dialog box and gets directory specified in the file dialog."""
 
-    dialog = ProjectFileDialog(parent=parent, acceptMode='save')
+    dialog = ProjectSaveFileDialog(parent=parent, acceptMode='save')
     dialog._show()
     newPath = dialog.selectedFile()
 

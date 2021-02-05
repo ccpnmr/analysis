@@ -30,6 +30,7 @@ __date__ = "$Date: 2021-01-13 10:28:41 +0000 (Wed, Jan 13, 2021) $"
 from collections import OrderedDict
 
 from ccpn.core.Spectrum import Spectrum
+from ccpn.core.lib.peakUtils import peakParabolicInterpolation
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 from ccpn.util.Logging import getLogger
 
@@ -39,28 +40,25 @@ class SimplePeak(object):
     """
     currentIndx = 0
 
-    def __init__(self, points, height, volume=None):
+    def __init__(self, points, height, lineWidths=None, volume=None, clusterId=None):
         """
         :param points: list/tuple of points (0-based); z,y,x ordered in case of nD (i.e. numpy ordering)
         :param height: height of the peak
-        :param volume: volume of the peak (optional)
+        :param lineWidths: list/tuple with lineWidths of the peak for each dimension (in points), optional, None if not defined
+        :param volume: volume of the peak; optional, None if not defined
+        :param clusterId: id of the peak cluster (i.e. a group of peaks in close proximity); optional, None if not defined
         """
-        self.points = tuple(points)
-        self.height = height
-        self.volume = volume
         self.indx = SimplePeak.currentIndx
         SimplePeak.currentIndx += 1
 
-    def __str__(self):
-        if self.volume is not None:
-            return '<SimplePeak %s: %r, height=%.1e, volume=%.1e>' % (
-                self.indx, self.points, self.height, self.volume
-            )
-        else:
-           return '<SimplePeak %s: %r, height=%.1e, volume=%s>' % (
-                self.indx, self.points, self.height, self.volume
-           )
+        self.points = tuple(points)
+        self.height = height
+        self.lineWidths = lineWidths
+        self.volume = volume
+        self.clusterId = clusterId
 
+    def __str__(self):
+        return '<SimplePeak %s: %r, height=%.1e>' % (self.indx, self.points, self.height)
 
 
 class PeakPickerABC(object):
@@ -83,7 +81,7 @@ class PeakPickerABC(object):
     _peakPickers = OrderedDict()
 
     @classmethod
-    def _register(cls):
+    def register(cls):
         "register cls.peakPickerType"
         if cls.peakPickerType in PeakPickerABC._peakPickers:
             raise RuntimeError('PeakPicker "%s" was already registered' % cls.peakPickerType)
@@ -91,7 +89,7 @@ class PeakPickerABC(object):
 
     #=========================================================================================
 
-    def __init__(self, spectrum):
+    def __init__(self, spectrum, autoFit=False):
         """Initialise the instance and associate with spectrum
         """
         if self.peakPickerType is None:
@@ -104,10 +102,11 @@ class PeakPickerABC(object):
 
         if spectrum.dimensionCount > 1 and self.onlyFor1D:
             raise ValueError('%s only works for 1D spectra' % self.__class__.__name__)
-
         self.spectrum = spectrum
         self.dimensionCount = spectrum.dimensionCount
         self.pointExtension = self.defaultPointExtension
+
+        self.autoFit = autoFit
 
         self.lastPickedPeaks = None
         self.sliceTuples = None
@@ -125,8 +124,9 @@ class PeakPickerABC(object):
         """find the peaks in data (type numpy-array) and return as a list of SimplePeak instances
         note that SimplePeak.points are ordered z,y,x for nD, in accordance with the numpy nD data array
 
-        called from pickPeaks()
-        any required parameters this method needs should be initialised/set before using the
+        called from the pickPeaks() method
+
+        any required parameters taht findPeaks method needs should be initialised/set before using the
         setParameters() method; i.e.:
                 myPeakPicker = PeakPicker(spectrum=mySpectrum)
                 myPeakPicker.setParameters(dropFactor=0.2, positiveThreshold=1e6, negativeThreshold=None)
@@ -182,8 +182,13 @@ class PeakPickerABC(object):
                 raise RuntimeError('%s: invalid dimensionality of points attribute' % pk)
             # correct the peak.points for "offset" (the slice-positions taken) and ordering (i.e. inverse)
             pointPosition = [float(p)+float(self.sliceTuples[idx][0]) for idx,p in enumerate(pk.points[::-1])]
-            result = peakList.newPeak(pointPosition=pointPosition, height=pk.height, volume=pk.volume)
-            corePeaks.append(result)
+            if pk.height is None:
+                # height was not defined; get the interpolated value from the data
+                pk.height = self.spectrum.dataSource.getPointValue(pointPosition)
+            cPeak = peakList.newPeak(pointPosition=pointPosition, height=pk.height, volume=pk.volume)
+            if self.autoFit:
+                peakParabolicInterpolation(cPeak, update=True)
+            corePeaks.append(cPeak)
         return corePeaks
 
     def __str__(self):

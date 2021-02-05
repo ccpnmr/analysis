@@ -483,6 +483,7 @@ def lowess(x, y):
     """
 
     from scipy.interpolate import interp1d
+    #FIXME: invalid import
     import statsmodels.api as sm
 
     # introduce some floats in our x-values

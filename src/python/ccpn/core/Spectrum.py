@@ -720,6 +720,12 @@ class Spectrum(AbstractWrapperObject):
         """
         return (self.dataSource is not None)
 
+    def checkValidPath(self):
+        """Checks for valid path and raise RuntimeError if not
+        """
+        if not self.hasValidPath():
+            raise RuntimeError('%s: No valid spectral dataSource defined' % self)
+
     def isEmptySpectrum(self):
         """Return True if instance refers to an empty spectrum; i.e. as in without actual spectral data"
         """
@@ -2571,8 +2577,7 @@ class Spectrum(AbstractWrapperObject):
         :param axisDict: dict of (axisCode, (startPpm,stopPpm)) key,value pairs
         :return: numpy array
         """
-        if not self.hasValidPath():
-            raise RuntimeError('No valid spectral datasource defined')
+        self.checkValidPath()
         sliceTuples = self._axisDictToSliceTuples(axisDict)
         return self.dataSource.getRegionData(sliceTuples)
 
@@ -2640,9 +2645,7 @@ class Spectrum(AbstractWrapperObject):
         if axisDims[0] == axisDims[1]:
             raise ValueError('Invalid axisCodes %s; identical' % axisCodes)
 
-        if not self.hasValidPath():
-            raise RuntimeError('No valid spectral datasource defined')
-
+        self.checkValidPath()
         return self.dataSource.allPlanes(xDim=axisDims[0], yDim=axisDims[1])
 
     def allSlices(self, axisCode, exactMatch=True):
@@ -2650,10 +2653,7 @@ class Spectrum(AbstractWrapperObject):
         positions are 1-based
         """
         sliceDim = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)[0]
-
-        if self.hasValidPath():
-            raise RuntimeError('No valid spectral datasource defined')
-
+        self.checkValidPath()
         return self.dataSource.allSlices(sliceDim=sliceDim)
 
     #-----------------------------------------------------------------------------------------

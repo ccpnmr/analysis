@@ -92,7 +92,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 14:50:37 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-05 17:08:23 +0000 (Fri, February 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1424,7 +1424,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         fractions = [p-float(int(p)) for p in position]
         # get the nD slice data around position; i.e. if position=(324.4, 120.9, 33.7),
         # get ( (324,325), (120,121), (33,34) )
-        sliceTuples = tuple((int(p), int(p)+1) for p in position)
+        sliceTuples = [(int(p), int(p)+1) for p in position]
         pointData = self.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliaisingFlags)
 
         for f in fractions:

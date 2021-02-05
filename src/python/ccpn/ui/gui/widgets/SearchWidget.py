@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-25 12:40:30 +0000 (Mon, January 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-05 16:46:48 +0000 (Fri, February 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -100,18 +100,18 @@ class GuiTableFilter(ScrollArea):
         self.setWidget(self._widget)
         self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 
-        labelColumn = Label(self._widget, 'Search in', grid=(1, 0), gridSpan=(1, 2))
+        labelColumn = Label(self._widget, 'Filter in', grid=(1, 0), gridSpan=(1, 2))
         self.columnOptions = PulldownList(self._widget, grid=(1, 2))
 
         self.columnOptions.setMinimumWidth(40)
 
         self.conditionWidget = PulldownList(self._widget, texts=list(SearchConditionsDict.keys()), grid=(0, 0))
-        self.edit = LineEdit(self._widget, grid=(0, 1), gridSpan=(1, 5), backgroundText='Search Item')
+        self.edit = LineEdit(self._widget, grid=(0, 1), gridSpan=(1, 5), backgroundText='Filter by Item')
         self.searchLabel = Button(self._widget, grid=(0, 4), icon=Icon('icons/edit-find'),
                                   callback=partial(self.findOnTable, self.table))
         self.searchLabel.setFlat(True)
 
-        self.searchButtons = ButtonList(self._widget, texts=['Reset', 'Close'], tipTexts=['Restore Table', 'Close Search'],
+        self.searchButtons = ButtonList(self._widget, texts=['Reset', 'Close'], tipTexts=['Restore Table', 'Close Filter'],
                                         callbacks=[partial(self.restoreTable, self.table),
                                                    self.hideSearch],
                                         grid=(1, 3), gridSpan=(1, 2))

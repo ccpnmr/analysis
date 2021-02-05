@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-25 12:56:19 +0000 (Mon, January 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-05 16:46:48 +0000 (Fri, February 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1238,7 +1238,7 @@ GuiTable::item::selected {
 
         if self._enableSearch and self.searchWidget is None:
             if not attachSearchWidget(self._parent, self):
-                getLogger().warning('Search option not available')
+                getLogger().warning('Filter option not available')
 
         pos = QtCore.QPoint(pos.x(), pos.y() + 10)  #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
 
@@ -1247,7 +1247,7 @@ GuiTable::item::selected {
         columnsSettings = self.headerContextMenumenu.addAction("Column Settings...")
         searchSettings = None
         if self._enableSearch and self.searchWidget is not None:
-            searchSettings = self.headerContextMenumenu.addAction("Search")
+            searchSettings = self.headerContextMenumenu.addAction("Filter...")
         action = self.headerContextMenumenu.exec_(self.mapToGlobal(pos))
 
         if action == columnsSettings:

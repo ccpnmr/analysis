@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-05 14:19:03 +0000 (Fri, February 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-05 15:55:03 +0000 (Fri, February 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -167,6 +167,8 @@ class FileDialogABC(QtWidgets.QFileDialog):
             # not sure why I put this flag in
             self._setDirectory = True
 
+        self._directory = directory
+
         _txt = self._text.format(acceptMode) if '{}' in self._text else self._text
         _txt = _txt[0].capitalize() + _txt[1:]
         super().__init__(parent, caption=_txt, directory=str(directory), **kwds)
@@ -286,7 +288,7 @@ class FileDialogABC(QtWidgets.QFileDialog):
             _fm = FILEMODESDICT.get(self._fileMode)
             funcName = STATICFUNCTIONDICT[(self._acceptMode, _fm)]
 
-            self.result = getattr(self, funcName)(caption=self._text, directory=str(self._selectFile), **self._kwds)
+            self.result = getattr(self, funcName)(caption=self._text, directory=str(self._directory), **self._kwds)
             if isinstance(self.result, tuple):
                 self.result = self.result[0]
         else:

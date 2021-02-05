@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-05 16:30:15 +0000 (Fri, February 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-05 17:05:43 +0000 (Fri, February 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -96,28 +96,6 @@ def singleton(cls):
     cls.__init_original__ = cls.__init__
     cls.__init__ = object.__init__
     return cls
-
-
-def profile(func):
-    """Profile the wrapped function to file
-    """
-
-    @functools.wraps(func)
-    def profileWrapper(*args, **kwargs):
-        # path = ''
-        profiler = cProfile.Profile()
-        try:
-            profiler.enable()
-            ret = func(*args, **kwargs)
-            profiler.disable()
-            return ret
-        finally:
-            filename = os.path.expanduser(os.path.join('~', func.__name__ + '.pstat'))
-            filename = getSafeFilename(filename, 'w')
-            profiler.dump_stats(filename)
-
-    return profileWrapper
-
 
 def pstatToText(pstatPath, outPath=None):
     """

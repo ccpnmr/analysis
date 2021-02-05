@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-05 16:30:15 +0000 (Fri, February 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -701,7 +701,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 dy = -1.0 if self.INVERTYAXIS else -1.0  # dy = self.sign(self.axisT - self.axisB)
 
                 if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:
-                    fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
+                    fy0 = float(np.max(spectrumView.spectrum.intensities))
+                    fy1 = float(np.min(spectrumView.spectrum.intensities))
                 else:
                     fy0, fy1 = 0.0, 0.0
 
@@ -1271,10 +1272,10 @@ class CcpnGLWidget(QOpenGLWidget):
             height = (self.h - self.AXIS_MOUSEYOFFSET) if self._drawBottomAxis else self.h
 
         if width > height:
-            dy = abs(height * delta[0] * ax1 / (ax0 * width)) * np.sign(delta[1])
+            dy = abs(height * delta[0] * ax1 / (ax0 * width)) * self.sign(delta[1])
             return (delta[0], dy)
         else:
-            dx = abs(width * delta[1] * ax0 / (ax1 * height)) * np.sign(delta[0])
+            dx = abs(width * delta[1] * ax0 / (ax1 * height)) * self.sign(delta[0])
             return (dx, delta[1])
 
     def _rescaleXAxis(self, rescale=True, update=True):
@@ -2646,9 +2647,9 @@ class CcpnGLWidget(QOpenGLWidget):
                     dx = self._startCoordinate[0] - self._endCoordinate[0]  # deltaX
                     dy = self._startCoordinate[1] - self._endCoordinate[1]  # deltaY
                     _delta = self._getSelectionBoxRatio((dx, dy))
-                    dx = _delta[0]  #* np.sign(dx)
-                    dy = _delta[1]  #* np.sign(dy)
-                    # dx = abs(dy * self.pixelX / self.pixelY) * np.sign(dx)
+                    dx = _delta[0]  #* self.sign(dx)
+                    dy = _delta[1]  #* self.sign(dy)
+                    # dx = abs(dy * self.pixelX / self.pixelY) * self.sign(dx)
                     self._endCoordinate[0] = self._startCoordinate[0] - dx
                     self._endCoordinate[1] = self._startCoordinate[1] - dy
                 else:
@@ -5111,7 +5112,8 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 dy = self.sign(self.axisT - self.axisB)
                 if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:
-                    fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
+                    fy0 = float(np.max(spectrumView.spectrum.intensities))
+                    fy1 = float(np.min(spectrumView.spectrum.intensities))
                 else:
                     fy0, fy1 = 0.0, 0.0
 

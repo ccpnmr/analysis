@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:37 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-05 16:30:15 +0000 (Fri, February 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1300,7 +1300,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 dy = -1.0 if self.INVERTYAXIS else -1.0  # dy = self.sign(self.axisT - self.axisB)
 
                 if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:
-                    fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
+                    fy0 = float(np.max(spectrumView.spectrum.intensities))
+                    fy1 = float(np.min(spectrumView.spectrum.intensities))
                 else:
                     fy0, fy1 = 0.0, 0.0
 
@@ -2463,29 +2464,29 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if xRange < self._minXRange and self._rangeXDefined and self._applyXLimit:
             if setLimits:
                 xMid = (self.axisR + self.axisL) / 2.0
-                self.axisL = xMid - self._minXRange * np.sign(self.pixelX)
-                self.axisR = xMid + self._minXRange * np.sign(self.pixelX)
+                self.axisL = xMid - self._minXRange * self.sign(self.pixelX)
+                self.axisR = xMid + self._minXRange * self.sign(self.pixelX)
             self._minXReached = True
 
         if yRange < self._minYRange and self._rangeYDefined and self._applyYLimit:
             if setLimits:
                 yMid = (self.axisT + self.axisB) / 2.0
-                self.axisT = yMid + self._minYRange * np.sign(self.pixelY)
-                self.axisB = yMid - self._minYRange * np.sign(self.pixelY)
+                self.axisT = yMid + self._minYRange * self.sign(self.pixelY)
+                self.axisB = yMid - self._minYRange * self.sign(self.pixelY)
             self._minYReached = True
 
         if xRange > self._maxXRange and self._rangeXDefined and self._applyXLimit:
             if setLimits:
                 xMid = (self.axisR + self.axisL) / 2.0
-                self.axisL = xMid - self._maxXRange * np.sign(self.pixelX)
-                self.axisR = xMid + self._maxXRange * np.sign(self.pixelX)
+                self.axisL = xMid - self._maxXRange * self.sign(self.pixelX)
+                self.axisR = xMid + self._maxXRange * self.sign(self.pixelX)
             self._maxXReached = True
 
         if yRange > self._maxYRange and self._rangeYDefined and self._applyYLimit:
             if setLimits:
                 yMid = (self.axisT + self.axisB) / 2.0
-                self.axisT = yMid + self._maxYRange * np.sign(self.pixelY)
-                self.axisB = yMid - self._maxYRange * np.sign(self.pixelY)
+                self.axisT = yMid + self._maxYRange * self.sign(self.pixelY)
+                self.axisB = yMid - self._maxYRange * self.sign(self.pixelY)
             self._maxYReached = True
 
         self._minReached = self._minXReached or self._minYReached

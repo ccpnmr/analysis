@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-05 16:30:14 +0000 (Fri, February 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -526,7 +526,7 @@ class PeakList(PMIListABC):
         # divide by 2 to get the double-width tolerance, i.e. the width of the region - CHECK WITH GEERTEN
         tolerances = tuple(tol / 2 for tol in self.spectrum.assignmentTolerances)
 
-        limits = sorted(self.spectrum.spectrumLimits)
+        limits = [sorted(lims) for lims in self.spectrum.spectrumLimits]
         selectedRegion = []
         minDropFactor = self.project._appBase.preferences.general.peakDropFactor
 
@@ -656,8 +656,8 @@ class PeakList(PMIListABC):
         dataSource = spectrum._apiDataSource
         numDim = dataSource.numDim
 
-        assert fitMethod in PICKINGMETHODS, 'pickPeaksRegion: fitMethod = %s, must be one of ("gaussian", "lorentzian", "parabolic")' % fitMethod
-        assert (minDropFactor >= 0.0) and (minDropFactor <= 1.0), 'pickPeaksRegion: minDropFactor %f not in range [0.0, 1.0]' % minDropFactor
+        # assert fitMethod in PICKINGMETHODS, 'pickPeaksRegion: fitMethod = %s, must be one of ("gaussian", "lorentzian", "parabolic")' % fitMethod
+        # assert (minDropFactor >= 0.0) and (minDropFactor <= 1.0), 'pickPeaksRegion: minDropFactor %f not in range [0.0, 1.0]' % minDropFactor
         # method = PICKINGMETHODS.index(fitMethod)
 
         peaks = []

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:39 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-05 16:30:15 +0000 (Fri, February 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -139,6 +139,34 @@ def pstatToText(pstatPath, outPath=None):
         f.write(s.getvalue())
     return ps
 
+def profile(dirPath='~', asText=False):
+    """
+    Get the stats of all related calls firing from inside a specific function/method.
+    Add on top of a function/method to profile it. E.g.:
+
+        @profile(dirPath='/myDesktopPath/')
+        def my function(*args): ...
+
+    :param dirPath: str, dir where to dump the pstat file.
+    :param asText: bool. Make a pstat copy as a human readable text file.
+    """
+    def _profile(func):
+        @functools.wraps(func)
+        def profileWrapper(*args, **kwargs):
+            profiler = cProfile.Profile()
+            try:
+                profiler.enable()
+                result = func(*args, **kwargs)
+                profiler.disable()
+                return result
+            finally:
+                filename = aPath(dirPath).joinpath(func.__name__ + '.pstat')
+                filename = getSafeFilename(filename, 'w')
+                profiler.dump_stats(filename)
+                if asText:
+                    pstatToText(str(filename))
+        return profileWrapper
+    return _profile
 
 def notify(trigger, preExecution=False):
     """A decorator wrap a method around a notification blanking with explicit notification pre- or post-execution

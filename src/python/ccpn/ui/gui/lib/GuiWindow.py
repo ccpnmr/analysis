@@ -70,6 +70,7 @@ class GuiWindow():
         addShortCut("e, n", self, self.estimateNoise, context=context)
         addShortCut("g, s", self, self.toggleGridAll, context=context)
         addShortCut("Del", self, partial(self.deleteSelectedItems), context=context)
+        addShortCut("Backspace", self, partial(self.deleteSelectedItems), context=context)
         addShortCut("m, k", self, self.createMark, context=context)
         addShortCut("m, c", self, self.clearMarks, context=context)
         addShortCut("m, x", self, partial(self.createMark, 0), context=context)

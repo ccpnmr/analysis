@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-02-08 18:18:50 +0000 (Mon, February 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-08 18:47:05 +0000 (Mon, February 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,8 @@ RUN:
     - From Macro Editor:
         * Main Menu -> Macro -> New
         * Copy this macro inside the Macro Editor module
-        * define a spectrum Name and the output path, any other values as required.
+        * Define a spectrumName and the outputPath varialbles, (and any other available as required).
+        * Click run (Green 'play' button) 
     
     - From Python Console
          * Copy this macro in a new text file and add the extension '.py'
@@ -82,7 +83,6 @@ clusterByLWs = False             # cluster peaks with overlapping lineWidths. If
 increaseLWByNpercent = 50        # increase (on-the-fly) the lw by n% value for finding overlaps. No data is modified. (Optional)
 
 
-
 ##############################    Start of the code      #################################
 
 import numpy as np
@@ -125,7 +125,7 @@ def getLineWidthsPnt(peak):
     return tuple(_hzLW2pnt(lwHz,sp.spectralWidthsHz[i],sp.totalPointCounts[i]) for i,lwHz in enumerate(peak.lineWidths))
 
 def getPeakPositionHz(peak):
-    return [peak.position[i] * peak.peakList.spectrum.spectrometerFrequencies[i] for i, ppm in enumerate(peak.position)]
+    return tuple([peak.position[i]*peak.peakList.spectrum.spectrometerFrequencies[i] for i,v in enumerate(peak.position)])
 
 ############################## Guess peak clusters    #################################
 
@@ -337,8 +337,6 @@ def dfToTab(df):
     string += df.to_string(header=False, index=False) # formats are already defined when building the dataframe.
     return string
 
-
-
 def runMacro():
 
     args = getArgs().parse_args()
@@ -390,7 +388,6 @@ def runMacro():
                 with open(fileName, 'w') as f:
                     f.write(string)
                     print('File saved in: %s.' % fileName)
-
 
 if __name__ == '__main__':
     runMacro()

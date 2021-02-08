@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-02-08 18:47:05 +0000 (Mon, February 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-08 19:23:47 +0000 (Mon, February 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -247,7 +247,8 @@ def _getAssignmentLabel(peak):
     for nr, nas in dd.items():
         l1 = ''.join([nr.residueType, nr.sequenceCode, '_', *nas])
         labels.append(l1)
-    return '-'.join(labels)
+    if len(labels)>0:
+        return '-'.join(labels)
 
 VARS = ['INDEX', 'X_AXIS', 'Y_AXIS', 'DX',     'DY',   'X_PPM', 'Y_PPM', 'X_HZ',  'Y_HZ',  'XW',    'YW',    'XW_HZ', 'YW_HZ', 'X1',  'X3',   'Y1', 'Y3',  'HEIGHT', 'DHEIGHT', 'VOL', 'PCHI2', 'TYPE', 'ASS', 'CLUSTID', 'MEMCNT']
 FORMAT = ['%5d', '%9.3f',   '%9.3f', '%6.3f', '%6.3f', '%8.3f', '%8.3f', '%9.3f', '%9.3f', '%7.3f', '%7.3f', '%8.3f', '%8.3f', '%4d', '%4d', '%4d', '%4d', '%+e',    '%+e',     '%+e', '%.5f',   '%d',  '%s',  '%4d',      '%4d']
@@ -312,7 +313,7 @@ VarsDict = {
         VOL     : lambda x: VFdict.get(VOL) % (x.volume if x.volume else NULLVALUE),
         PCHI2   : lambda x: VFdict.get(PCHI2) % (PCHI2Default),
         TYPE    : lambda x: VFdict.get(TYPE) % (TYPEDefault),
-        ASS     : lambda x: VFdict.get(ASS) % (_getAssignmentLabel(x)),
+        ASS     : lambda x: VFdict.get(ASS) % (_getAssignmentLabel(x) if _getAssignmentLabel(x) else NULLSTRING),
         CLUSTID : lambda x: VFdict.get(CLUSTID) % (_getClustID(x) if _getClustID(x) else NULLVALUE),
         MEMCNT  : lambda x: VFdict.get(MEMCNT) % (UNKNOWN), # this is filled afterwards, if clusters
         }

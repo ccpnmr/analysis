@@ -94,7 +94,9 @@
         "moduleFont"                           : "Helvetica,12,-1,5,50,0,0,0,0,0,Regular",
         "messageFont"                          : "Helvetica,12,-1,5,50,0,0,0,0,0,Regular",
         "checkUpdatesAtStartup"                : true,
-        "zPlaneNavigationMode"                 : 0
+        "zPlaneNavigationMode"                 : 0,
+        "traceColour"                          : null,
+        "traceIncludeNegative"                 : false
     },
     "proxySettings"    : {
         "verifySSL"        : true,

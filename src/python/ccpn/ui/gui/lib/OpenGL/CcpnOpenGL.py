@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-05 16:30:15 +0000 (Fri, February 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-09 16:44:31 +0000 (Tue, February 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -4774,8 +4774,15 @@ class CcpnGLWidget(QOpenGLWidget):
             hSpectrum.vertices[::2] = x
             hSpectrum.vertices[1::2] = y
             hSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+
             # colour the negative points - gives a nice fade
-            # hSpectrum.colors[dataY < 0] = [colRn, colGn, colBn, 1.0]
+            if self._preferences.traceIncludeNegative:
+                _negColour = spectrumView.negColours[0]
+                _negCol = [*_negColour[0:3], 1.0]
+                mask = np.nonzero(data < 0.0)
+                for mm in mask[0]:
+                    m4 = mm * 4
+                    hSpectrum.colors[m4:m4+4] = _negCol
 
         except Exception as es:
             tracesDict[spectrumView].clearArrays()
@@ -4817,11 +4824,35 @@ class CcpnGLWidget(QOpenGLWidget):
             vSpectrum.vertices[::2] = x
             vSpectrum.vertices[1::2] = y
             vSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+
             # colour the negative points - gives a nice fade
-            # vSpectrum.colors[dataX < 0] = [colRn, colGn, colBn, 1.0]
+            if self._preferences.traceIncludeNegative:
+                _negColour = spectrumView.negColours[0]
+                _negCol = [*_negColour[0:3], 1.0]
+                mask = np.nonzero(data < 0.0)
+                for mm in mask[0]:
+                    m4 = mm * 4
+                    vSpectrum.colors[m4:m4+4] = _negCol
 
         except Exception as es:
             tracesDict[spectrumView].clearArrays()
+
+    # NOTE:ED - remember these for later, may create larger vertex arrays for symbols, but should be quicker
+    #       --
+    #       x = np.array([1, 2, 3, -1, 5, 0, 3, 4, 4, 7, 3, 5, 9, 0, 5, 4, 3], dtype=np.uint32)
+    #       seems to be the fastest way of getting masked values
+    #           SKIPINDEX = np.uint32(-1) = 4294967295
+    #           i.e. max index number, use as fill
+    #           timeit.timeit('import numpy as np; x = np.array([1, 2, 3, -1, 5, 0, 3, 4, 4, 7, 3, 5, 9, 0, 5, 4, 3], dtype=np.uint32); x[np.where(x != 3)]', number=200000)
+    #       fastest way to create filled arrays
+    #           *** timeit.timeit('import numpy as np; x = np.array([1, 2, 3, -1, 5, 0, 3, 4, 4, 7, 3, 5, 9, 0, 5, 4, 3], dtype=np.uint32); a = x[x != SKIPINDEX]', number=200000)
+    #               timeit.timeit('import numpy as np; x = np.array([1, 2, 3, -1, 5, 0, 3, 4, 4, 7, 3, 5, 9, 0, 5, 4, 3], dtype=np.uint32); mx = np.full(200000, SKIPINDEX, dtype=np.uint32)', number=20000)
+    #       --
+    #       np.take(x, np.where(x != 3))
+    #       mx = np.ma.masked_values(x, 3)
+    #       a = x[np.where(x != 3)]
+    #       *** a = x[x != SKIPINDEX]
+    #       np.where(data < 0)[0] * 4
 
     def updateTraces(self):
         if self.strip.isDeleted:
@@ -6576,6 +6607,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
             for n in self._orderedAxes[2:]:
                 selectedRegion.append((n.region[0], n.region[1]))
+
+            # selectedRegion is tuple((xL, xR), (yB, yT), ...) - from display
+            # ... is other Nd axes
 
             peaks = self.strip.peakPickRegion(selectedRegion)
             self.current.peaks = peaks

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:28 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-09 16:43:39 +0000 (Tue, February 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -286,7 +286,7 @@ class Peak(AbstractWrapperObject):
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             currentAlias.append(peakDim.numAliasing)
 
-            _old = peakDim.position # the current pointPosition, quick to get
+            _old = peakDim.position  # the current pointPosition, quick to get
             peakDim.value = value[ii]
             peakDim.realValue = None
             newAlias.append(peakDim.numAliasing)
@@ -349,7 +349,7 @@ class Peak(AbstractWrapperObject):
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             currentAlias.append(peakDim.numAliasing)
 
-            _old = peakDim.position # the current pointPosition
+            _old = peakDim.position  # the current pointPosition
             peakDim.position = value[ii]
             newAlias.append(peakDim.numAliasing)
 
@@ -381,7 +381,7 @@ class Peak(AbstractWrapperObject):
 
     @property
     def lineWidths(self) -> Tuple[Optional[float], ...]:
-        """Full-width-half-height of peak for each dimension, in Hz."""
+        """Full-width-half-height of peak for each dimension, in Hz/ppm."""
         return tuple(x.lineWidth for x in self._wrappedData.sortedPeakDims())
 
     @lineWidths.setter
@@ -390,6 +390,36 @@ class Peak(AbstractWrapperObject):
     def lineWidths(self, value: Sequence):
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             peakDim.lineWidth = value[ii]
+
+    # @property
+    # def ppmLineWidths(self) -> Tuple[Optional[float], ...]:
+    #     """Full-width-half-height of peak for each dimension, in ppm."""
+    #     return tuple(peakDim.lineWidth * peakDim.dataDim.valuePerPoint if peakDim.lineWidth is not None else None
+    #                  for peakDim in self._wrappedData.sortedPeakDims())
+    #
+    # @ppmLineWidths.setter
+    # @logCommand(get='self', isProperty=True)
+    # @ccpNmrV3CoreSetter()
+    # def ppmLineWidths(self, value: Sequence):
+    #     for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+    #         peakDim.lineWidth = value[ii] / peakDim.dataDim.valuePerPoint if value[ii] is not None else None
+
+    ppmLineWidths = lineWidths
+
+    @property
+    def pointLineWidths(self) -> Tuple[Optional[float], ...]:
+        """Full-width-half-height of peak for each dimension, in points."""
+        # currrently assumes that internal storage is in ppms
+        lineWidths = (x.lineWidth for x in self._wrappedData.sortedPeakDims())
+        valuesPerPoint = self.spectrum.valuesPerPoint
+        return tuple(lw / vpp if None not in [lw, vpp] else None for lw, vpp in zip(lineWidths, valuesPerPoint))
+
+    @pointLineWidths.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
+    def pointLineWidths(self, value: Sequence):
+        for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+            peakDim.lineWidth = value[ii] * peakDim.dataDim.valuePerPoint if value[ii] is not None else None
 
     @property
     def aliasing(self) -> Tuple[Optional[float], ...]:
@@ -782,7 +812,6 @@ class Peak(AbstractWrapperObject):
                                 minDropFactor=minDropFactor, fitMethod=fitMethod,
                                 searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit)
 
-
     # def fitPositionHeightLineWidths(self):
     #     """Set the position, height and lineWidth of the Peak."""
     #     LibPeak.fitPositionHeightLineWidths(self._apiPeak)
@@ -891,7 +920,7 @@ class Peak(AbstractWrapperObject):
         lim = volumeIntegralLimit * FWHM / 2.0
         xxSig = np.linspace(0, lim, numPoints)
         vals = make_gauss(xxSig, sigmaX, mu, height)
-        area = 2.0*np.trapz(vals, xxSig)
+        area = 2.0 * np.trapz(vals, xxSig)
 
         # note that negative height will give negative volume
         vol = 1.0
@@ -904,7 +933,7 @@ class Peak(AbstractWrapperObject):
         # do I need to set the volume error?
         # self.volumeError = 1e-8
 
-    def fit(self, fitMethod = None, halfBoxSearchWidth = 2, keepPosition=False, iterations=10):
+    def fit(self, fitMethod=None, halfBoxSearchWidth=2, keepPosition=False, iterations=10):
         """
         Fit the peak to recalculate position and lineWidths.
         Use peak.estimateVolume to recalculate the volume.
@@ -931,7 +960,7 @@ class Peak(AbstractWrapperObject):
         originalPosition = peak.position
         lastLWsFound = []
         consecutiveSameLWsCount = 0
-        maxSameLWsCount = 3 # if the same values are found in the last x iterations, then it breaks the loop.
+        maxSameLWsCount = 3  # if the same values are found in the last x iterations, then it breaks the loop.
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
                 while iterations > 0 and consecutiveSameLWsCount <= maxSameLWsCount:
@@ -946,7 +975,7 @@ class Peak(AbstractWrapperObject):
                         consecutiveSameLWsCount = 0
                     lastLWsFound = peak.lineWidths
                     iterations -= 1
-        getLogger().info('Peak fit completed for %s' %peak)
+        getLogger().info('Peak fit completed for %s' % peak)
         return
 
     def _checkAliasing(self):
@@ -973,7 +1002,8 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
              figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
              ppmPositions: Sequence[float] = (), position: Sequence[float] = None, positionError: Sequence[float] = (),
              pointPosition: Sequence[float] = (), boxWidths: Sequence[float] = (),
-             lineWidths: Sequence[float] = (), serial: int = None) -> Peak:
+             lineWidths: Sequence[float] = (), ppmLineWidths: Sequence[float] = (), pointLineWidths: Sequence[float] = (),
+             serial: int = None) -> Peak:
     """Create a new Peak within a peakList
 
     NB you must create the peak before you can assign it. The assignment attributes are:
@@ -1022,19 +1052,33 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.value = ppmPositions[ii]
     elif pointPosition:
+
+        pointCounts = result.spectrum.pointCounts
         for ii, peakDim in enumerate(apiPeakDims):
-            peakDim.position = pointPosition[ii]
+            alias = int(divmod(pointPosition[ii] - 1, pointCounts[ii])[0])
+            pos = float(pointPosition[ii] + 0 - alias * pointCounts[ii])  # API position starts at 1
+            peakDim.numAliasing = alias
+            peakDim.position = pos
+
     if positionError:
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.valueError = positionError[ii]
     if boxWidths:
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.boxWidth = boxWidths[ii]
+
+    # currently lineWidths/ppmLineWidths are both in Hz/ppm
     if lineWidths:
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.lineWidth = lineWidths[ii]
+    elif ppmLineWidths:
+        for ii, peakDim in enumerate(apiPeakDims):
+            peakDim.lineWidth = ppmLineWidths[ii]
+    elif pointLineWidths:
+        for peakDim, pointLineWidth in zip(apiPeakDims, pointLineWidths):
+            peakDim.lineWidth = (pointLineWidth * peakDim.dataDim.valuePerPoint) if pointLineWidth else None
 
-    result.height = height          # use the method to store the unit-scaled value
+    result.height = height  # use the method to store the unit-scaled value
     result.volume = volume
     result.heightError = heightError
     result.volumeError = volumeError

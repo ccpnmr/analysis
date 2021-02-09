@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-09 16:43:39 +0000 (Tue, February 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -282,7 +282,7 @@ class GLLabelling():
         objPos = obj.position
         if not objPos:
             return
-        objLineWidths = obj.lineWidths
+        objLineWidths = obj.ppmLineWidths
 
         spectrum = spectrumView.spectrum
         spectrumFrequency = spectrum.spectrometerFrequencies
@@ -291,7 +291,7 @@ class GLLabelling():
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
         p0 = (objPos[pIndex[0]], objPos[pIndex[1]])
-        lineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
+        ppmLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
         frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
 
         if None in p0:
@@ -303,9 +303,9 @@ class GLLabelling():
         stringOffset = None
         if symbolType in (1, 2):
             # put to the top-right corner of the lineWidth
-            if lineWidths[0] and lineWidths[1]:
-                r = GLDefs.STRINGSCALE * (0.5 * lineWidths[0] / frequency[0])
-                w = GLDefs.STRINGSCALE * (0.5 * lineWidths[1] / frequency[1])
+            if ppmLineWidths[0] and ppmLineWidths[1]:
+                r = GLDefs.STRINGSCALE * (0.5 * ppmLineWidths[0] / frequency[0])
+                w = GLDefs.STRINGSCALE * (0.5 * ppmLineWidths[1] / frequency[1])
                 stringOffset = (r, w)
             else:
                 r = GLDefs.STRINGSCALE * r
@@ -355,11 +355,11 @@ class GLLabelling():
         objPos = obj.position
         if not objPos:
             return
-        objLineWidths = obj.lineWidths
+        objLineWidths = obj.ppmLineWidths
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
         p0 = (objPos[pIndex[0]], objPos[pIndex[1]])
-        lineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
+        ppmLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
         frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
 
         if None in p0:
@@ -370,9 +370,9 @@ class GLLabelling():
 
         stringOffset = None
         if symbolType in (1, 2):
-            if lineWidths[0] and lineWidths[1]:
-                r = GLDefs.STRINGSCALE * (0.5 * lineWidths[0] / frequency[0])
-                w = GLDefs.STRINGSCALE * (0.5 * lineWidths[1] / frequency[1])
+            if ppmLineWidths[0] and ppmLineWidths[1]:
+                r = GLDefs.STRINGSCALE * (0.5 * ppmLineWidths[0] / frequency[0])
+                w = GLDefs.STRINGSCALE * (0.5 * ppmLineWidths[1] / frequency[1])
                 stringOffset = (r, w)
             else:
                 r = GLDefs.STRINGSCALE * r
@@ -554,9 +554,9 @@ class GLLabelling():
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
 
         objPos = obj.position
-        objLineWidths = obj.lineWidths
+        objLineWidths = obj.ppmLineWidths
         p0 = (objPos[pIndex[0]], objPos[pIndex[1]])
-        lineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
+        ppmLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
         frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
 
         if None in p0:
@@ -587,10 +587,10 @@ class GLLabelling():
 
             elif symbolType == 1:  # draw an ellipse at lineWidth
 
-                if lineWidths[0] and lineWidths[1]:
+                if ppmLineWidths[0] and ppmLineWidths[1]:
                     # draw 24 connected segments
-                    r = 0.5 * lineWidths[0] / frequency[0]
-                    w = 0.5 * lineWidths[1] / frequency[1]
+                    r = 0.5 * ppmLineWidths[0] / frequency[0]
+                    w = 0.5 * ppmLineWidths[1] / frequency[1]
                     numPoints = 24
                     angPlus = 2.0 * np.pi
                     skip = 1
@@ -670,7 +670,7 @@ class GLLabelling():
                 drawList.colors[2 * vertexPtr:2 * vertexPtr + 4 * np2 + 20] = (*cols, fade) * (np2 + 5)
                 drawList.attribs[vertexPtr:vertexPtr + 2 * np2 + 10] = (p0[0], p0[1]) * (np2 + 5)
                 # drawList.offsets[vertexPtr:vertexPtr + 2 * np2 + 10] = (p0[0]+r, p0[1]+w) * (np2 + 5)
-                # drawList.lineWidths = (0, 0)
+                # drawList.ppmLineWidths = (0, 0)
 
                 # add extra vertices
                 extraVertices = 0  #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
@@ -690,10 +690,10 @@ class GLLabelling():
 
             elif symbolType == 2:  # draw a filled ellipse at lineWidth
 
-                if lineWidths[0] and lineWidths[1]:
+                if ppmLineWidths[0] and ppmLineWidths[1]:
                     # draw 24 connected segments
-                    r = 0.5 * lineWidths[0] / frequency[0]
-                    w = 0.5 * lineWidths[1] / frequency[1]
+                    r = 0.5 * ppmLineWidths[0] / frequency[0]
+                    w = 0.5 * ppmLineWidths[1] / frequency[1]
                     numPoints = 24
                     angPlus = 2 * np.pi
                     skip = 1
@@ -733,7 +733,7 @@ class GLLabelling():
                 drawList.colors[2 * vertexPtr:2 * vertexPtr + 4 * np2 + 20] = (*cols, fade) * (np2 + 5)
                 drawList.attribs[vertexPtr:vertexPtr + 2 * np2 + 10] = (p0[0], p0[1]) * (np2 + 5)
                 # drawList.offsets[vertexPtr:vertexPtr + 2 * np2 + 10] = (p0[0]+r, p0[1]+w) * (np2 + 5)
-                # drawList.lineWidths = (0, 0)
+                # drawList.ppmLineWidths = (0, 0)
 
                 # add extra vertices for the multiplet
                 extraVertices = 0  #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
@@ -833,14 +833,14 @@ class GLLabelling():
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
 
         objPos = obj.position
-        objLineWidths = obj.lineWidths
+        objLineWidths = obj.ppmLineWidths
 
         if not objPos or not objLineWidths:
             getLogger().debug('Object %s contains undefined position' % str(obj.pid))
             return
 
         p0 = (objPos[pIndex[0]], objPos[pIndex[1]])
-        lineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
+        ppmLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
         frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
 
         if None in p0:
@@ -869,10 +869,10 @@ class GLLabelling():
 
             elif symbolType == 1:  # draw an ellipse at lineWidth
 
-                if lineWidths[0] and lineWidths[1]:
+                if ppmLineWidths[0] and ppmLineWidths[1]:
                     # draw 24 connected segments
-                    r = 0.5 * lineWidths[0] / frequency[0]
-                    w = 0.5 * lineWidths[1] / frequency[1]
+                    r = 0.5 * ppmLineWidths[0] / frequency[0]
+                    w = 0.5 * ppmLineWidths[1] / frequency[1]
                     numPoints = 24
                     angPlus = 2.0 * np.pi
                     skip = 1
@@ -919,7 +919,7 @@ class GLLabelling():
                 drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * (np2 + 5), dtype=np.float32))
                 drawList.attribs = np.append(drawList.attribs, np.array((p0[0], p0[1]) * (np2 + 5), dtype=np.float32))
                 # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * (np2 + 5))
-                # drawList.lineWidths = (0, 0)
+                # drawList.ppmLineWidths = (0, 0)
 
                 # add extra vertices for the multiplet
                 extraVertices = 0  #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
@@ -940,10 +940,10 @@ class GLLabelling():
 
             elif symbolType == 2:  # draw a filled ellipse at lineWidth
 
-                if lineWidths[0] and lineWidths[1]:
+                if ppmLineWidths[0] and ppmLineWidths[1]:
                     # draw 24 connected segments
-                    r = 0.5 * lineWidths[0] / frequency[0]
-                    w = 0.5 * lineWidths[1] / frequency[1]
+                    r = 0.5 * ppmLineWidths[0] / frequency[0]
+                    w = 0.5 * ppmLineWidths[1] / frequency[1]
                     numPoints = 24
                     angPlus = 2 * np.pi
                     skip = 1
@@ -987,7 +987,7 @@ class GLLabelling():
                 drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * (np2 + 5), dtype=np.float32))
                 drawList.attribs = np.append(drawList.attribs, np.array((p0[0], p0[1]) * (np2 + 5), dtype=np.float32))
                 # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * (np2 + 5))
-                # drawList.lineWidths = (0, 0)
+                # drawList.ppmLineWidths = (0, 0)
 
                 # add extra vertices for the multiplet
                 extraVertices = 0  #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
@@ -1461,7 +1461,7 @@ class GLLabelling():
 
         elif symbolType == 1:  # draw an ellipse at lineWidth
 
-            if obj.lineWidths[0] and obj.lineWidths[1]:
+            if obj.ppmLineWidths[0] and obj.ppmLineWidths[1]:
                 numPoints = 24
             else:
                 numPoints = 12
@@ -1475,7 +1475,7 @@ class GLLabelling():
 
         elif symbolType == 2:  # draw a filled ellipse at lineWidth
 
-            if obj.lineWidths[0] and obj.lineWidths[1]:
+            if obj.ppmLineWidths[0] and obj.ppmLineWidths[1]:
                 numPoints = 24
             else:
                 numPoints = 12

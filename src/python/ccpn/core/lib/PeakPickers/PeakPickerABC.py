@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-02 17:38:19 +0000 (Tue, February 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-09 16:47:07 +0000 (Tue, February 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -126,7 +126,7 @@ class PeakPickerABC(object):
 
         called from the pickPeaks() method
 
-        any required parameters taht findPeaks method needs should be initialised/set before using the
+        any required parameters that findPeaks method needs should be initialised/set before using the
         setParameters() method; i.e.:
                 myPeakPicker = PeakPicker(spectrum=mySpectrum)
                 myPeakPicker.setParameters(dropFactor=0.2, positiveThreshold=1e6, negativeThreshold=None)
@@ -155,6 +155,13 @@ class PeakPickerABC(object):
                                (self.__class__.__name__, self.spectrum))
 
         self.sliceTuples = self.spectrum._axisDictToSliceTuples(axisDict)
+
+        if self.defaultPointExtension:
+            # add default points to extend pick region
+            self.sliceTuples = [(sLeft - self.defaultPointExtension, sRight + self.defaultPointExtension) if sLeft < sRight else
+                                (sLeft + self.defaultPointExtension, sRight - self.defaultPointExtension)
+                                for sLeft, sRight in self.sliceTuples]
+
         # TODO: use Spectrum aliasing definitions once defined
         data = self.spectrum.dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1]*self.spectrum.dimensionCount)
 
@@ -185,11 +192,17 @@ class PeakPickerABC(object):
             if pk.height is None:
                 # height was not defined; get the interpolated value from the data
                 pk.height = self.spectrum.dataSource.getPointValue(pointPosition)
-            cPeak = peakList.newPeak(pointPosition=pointPosition, height=pk.height, volume=pk.volume)
+            cPeak = peakList.newPeak(pointPosition=pointPosition, height=pk.height, volume=pk.volume, pointLineWidths=pk.lineWidths)
             if self.autoFit:
                 peakParabolicInterpolation(cPeak, update=True)
             corePeaks.append(cPeak)
         return corePeaks
+
+    def _checkParameters(self):
+        """
+        Check whether the parameters are the correct types
+        """
+        pass
 
     def __str__(self):
         return '<%s for %r>' % (self.__class__.__name__, self.spectrum.name)

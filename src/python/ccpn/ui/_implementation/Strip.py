@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-09 16:47:07 +0000 (Tue, February 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -603,42 +603,81 @@ class Strip(AbstractWrapperObject):
         minDropFactor = self.application.preferences.general.peakDropFactor
         fitMethod = self.application.preferences.general.peakFittingMethod
 
-        # sort each of the regions
-        sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
+        # sort each of the regions [[minPpm, maxPpm], ...]
+        sortedSelectedRegion = list(sorted(x) for x in selectedRegion)
 
         with undoBlock():
+
             for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
 
+                spectrum = spectrumView.spectrum
+
                 # create a peakList if there isn't one
-                if not spectrumView.spectrum.peakLists:
-                    spectrumView.spectrum.newPeakList()
+                if not spectrum.peakLists:
+                    spectrum.newPeakList()
 
+                # get the visible peakLists to pick in
                 validPeakListViews = (pp for pp in spectrumView.peakListViews if pp.isVisible())
-                indices = getAxisCodeMatchIndices(spectrumView.spectrum.axisCodes, self.axisCodes)
 
-                # map the spectrum selectedRegions to the strip
-                axisCodeDict = OrderedDict((code, sortedSelectedRegion[indices[ii]])
-                                           for ii, code in enumerate(spectrumView.spectrum.axisCodes) if indices[ii] is not None)
+                #~~~~~~~~~~~~~~~~
 
-                for thisPeakListView in validPeakListViews:
+                validPeakLists = (pp.peakList for pp in spectrumView.peakListViews if pp.isVisible())
 
-                    peakList = thisPeakListView.peakList
+                if validPeakListViews:
 
-                    if spectrumView.spectrum.dimensionCount > 1:
-                        # axisCodeDict = self._getAxisCodeDict(spectrumView.spectrum, selectedRegion)
-
-                        newPeaks = peakList.pickPeaksRegion(axisCodeDict,
-                                                            doPos=spectrumView.displayPositiveContours,
-                                                            doNeg=spectrumView.displayNegativeContours,
-                                                            fitMethod=fitMethod, minDropFactor=minDropFactor)
-
+                    # get the correct axis codes
+                    if spectrum.dimensionCount == 1:
+                        axisCodes = spectrum.axisCodes[0]
                     else:
-                        peakFactor1D = self.application.preferences.general.peakFactor1D
-                        selectedRegion = [[min(ss), max(ss)] for ss in selectedRegion]
-                        newPeaks = peakList.pickPeaks1d(*selectedRegion, peakFactor1D=peakFactor1D)
+                        axisCodes = spectrum.getByAxisCodes('axisCodes', self.axisCodes)
 
-                    if newPeaks:
-                        result.extend(newPeaks)
+                    from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
+
+                    myPeakPicker = PeakPickerNd(spectrum=spectrum)
+                    myPeakPicker.setParameters(dropFactor=minDropFactor,
+                                               positiveThreshold=spectrum.positiveContourBase if spectrumView.displayPositiveContours else None,
+                                               negativeThreshold=spectrum.negativeContourBase if spectrumView.displayNegativeContours else None,
+                                               fitMethod=fitMethod
+                                               )
+
+                    axisDict = {}
+                    for ac, region in zip(axisCodes, sortedSelectedRegion):
+                        axisDict[ac] = tuple(region)
+
+                    for peakList in validPeakLists:
+                        # apply the peak picker
+                        newPeaks = myPeakPicker.pickPeaks(axisDict=axisDict, peakList=peakList)
+                        if newPeaks:
+                            result.extend(newPeaks)
+
+                #~~~~~~~~~~~~~~~~
+
+
+                # indices = getAxisCodeMatchIndices(spectrumView.spectrum.axisCodes, self.axisCodes)
+                #
+                # # map the spectrum selectedRegions to the strip
+                # axisCodeDict = OrderedDict((code, sortedSelectedRegion[indices[ii]])
+                #                            for ii, code in enumerate(spectrumView.spectrum.axisCodes) if indices[ii] is not None)
+                #
+                # for thisPeakListView in validPeakListViews:
+                #
+                #     peakList = thisPeakListView.peakList
+                #
+                #     if spectrumView.spectrum.dimensionCount > 1:
+                #         # axisCodeDict = self._getAxisCodeDict(spectrumView.spectrum, selectedRegion)
+                #
+                #         newPeaks = peakList.pickPeaksRegion(axisCodeDict,
+                #                                             doPos=spectrumView.displayPositiveContours,
+                #                                             doNeg=spectrumView.displayNegativeContours,
+                #                                             fitMethod=fitMethod, minDropFactor=minDropFactor)
+                #
+                #     else:
+                #         peakFactor1D = self.application.preferences.general.peakFactor1D
+                #         selectedRegion = [[min(ss), max(ss)] for ss in selectedRegion]
+                #         newPeaks = peakList.pickPeaks1d(*selectedRegion, peakFactor1D=peakFactor1D)
+                #
+                #     if newPeaks:
+                #         result.extend(newPeaks)
 
         return tuple(result)
 

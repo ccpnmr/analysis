@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-09 17:45:10 +0000 (Tue, February 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -65,7 +65,6 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 from ccpn.util.Common import uniquify, camelCaseToString
 from ccpn.util import Logging
 from ccpn.util import Path
-from ccpn.util.Path import aPath
 from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
@@ -584,6 +583,15 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         #         project._mainWindow.show()
         #         QtWidgets.QApplication.setActiveWindow(project._mainWindow)
         #         return project
+
+    def showNefPopup(self, path=None):
+        """
+        Opens the Nef import popup
+        If path specified then opens popup to the file otherwise opens load dialog
+        """
+        path = Path.aPath(path) if path else None
+
+        self.application._importNef(path)
 
     def loadProject(self, projectDir=None):
         """

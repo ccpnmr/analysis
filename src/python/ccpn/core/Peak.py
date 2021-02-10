@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-09 16:43:39 +0000 (Tue, February 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-10 12:14:07 +0000 (Wed, February 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -410,9 +410,8 @@ class Peak(AbstractWrapperObject):
     def pointLineWidths(self) -> Tuple[Optional[float], ...]:
         """Full-width-half-height of peak for each dimension, in points."""
         # currrently assumes that internal storage is in ppms
-        lineWidths = (x.lineWidth for x in self._wrappedData.sortedPeakDims())
-        valuesPerPoint = self.spectrum.valuesPerPoint
-        return tuple(lw / vpp if None not in [lw, vpp] else None for lw, vpp in zip(lineWidths, valuesPerPoint))
+        return tuple(peakDim.lineWidth / peakDim.dataDim.valuePerPoint if peakDim.lineWidth is not None else None
+                     for peakDim in self._wrappedData.sortedPeakDims())
 
     @pointLineWidths.setter
     @logCommand(get='self', isProperty=True)

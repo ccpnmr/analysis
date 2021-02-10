@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-10 16:45:05 +0000 (Wed, February 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -584,6 +584,15 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         #         project._mainWindow.show()
         #         QtWidgets.QApplication.setActiveWindow(project._mainWindow)
         #         return project
+
+    def showNefPopup(self, path=None):
+        """
+        Opens the Nef import popup
+        If path specified then opens popup to the file otherwise opens load dialog
+        """
+        path = Path.aPath(path) if path else None
+
+        self.application._importNef(path)
 
     def loadProject(self, projectDir=None):
         """

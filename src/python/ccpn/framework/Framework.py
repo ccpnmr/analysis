@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-05 16:30:15 +0000 (Fri, February 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-10 16:45:05 +0000 (Wed, February 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ import tarfile
 import tempfile
 import re
 import subprocess
+from typing import Union
 from PyQt5 import QtWidgets
 from distutils.dir_util import copy_tree
 from functools import partial
@@ -1823,21 +1824,24 @@ class Framework(NotifierBase):
         self._getUndo().markSave()
         return successful
 
-    def _importNef(self):
-        filter = '*.nef'
-        dialog = NefFileDialog(parent=self.ui.mainWindow, acceptMode='import', fileFilter=filter)
-
-        dialog._show()
-        path = dialog.selectedFile()
+    def _importNef(self, path=None):
         if not path:
-            return
+            filter = '*.nef'
+            dialog = NefFileDialog(parent=self.ui.mainWindow, acceptMode='import', fileFilter=filter)
+
+            dialog._show()
+            path = dialog.selectedFile()
+            if not path:
+                return
+
+        path = Path.aPath(path)
 
         with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s'):
             with undoBlockWithoutSideBar():
                 self._importNefFile(path=path, makeNewProject=False)
             self.ui.mainWindow.sideBar.buildTree(self.project)
 
-    def _importNefFile(self, path: str, makeNewProject=True) -> Project:
+    def _importNefFile(self, path: Union[str, Path.aPath], makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup"""
 
         from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
@@ -1864,7 +1868,7 @@ class Framework(NotifierBase):
                                              NEFFRAMEKEY_ENABLERENAME     : True,
                                              NEFFRAMEKEY_ENABLEFILTERFRAME: True,
                                              NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
-                                             NEFFRAMEKEY_PATHNAME         : path,
+                                             NEFFRAMEKEY_PATHNAME         : str(path),
                                              })
                                 )
         dialog.fillPopup()

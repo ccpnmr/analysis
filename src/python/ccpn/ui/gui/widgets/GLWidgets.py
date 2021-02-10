@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-05 13:35:05 +0000 (Fri, February 05, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-02-10 18:09:05 +0000 (Wed, February 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -599,25 +599,10 @@ class Gui1dWidget(CcpnGLWidget):
     def _movePeak(self, peak, deltaPosition):
         """Move the peak to new position
         """
-        indices = getAxisCodeMatchIndices(self.axisCodes, peak.axisCodes)
-
-        # get the correct coordinates based on the axisCodes
-        p0 = list(peak.position)
-        for ii, ind in enumerate(indices[:2]):
-            if ind is not None:
-                p0[ind] += deltaPosition[ii]
-
-        # # update height - taken from peakPickPosition
-        # spectrum = peak.peakList.spectrum
-        # pp = spectrum.mainSpectrumReferences[0].valueToPoint(p0[0])
-        # frac = pp % 1
-        # if spectrum.intensities is not None and spectrum.intensities.size != 0:
-        #     # need to interpolate between pp-1, and pp
-        #     peak.height = spectrum.intensities[int(pp) - 1] + \
-        #                   frac * (spectrum.intensities[int(pp)] - spectrum.intensities[int(pp) - 1])
-
-        peak.height = peak.peakList.spectrum.getIntensity(p0[:1])
-        peak.position = p0
+        peak.height += deltaPosition[1]
+        position = peak.position[0]
+        position += deltaPosition[0]
+        peak.position = [position]
 
     def _tracesNeedUpdating(self, spectrumView=None):
         """Check if traces need updating on _lastTracePoint, use spectrumView to see

@@ -51,8 +51,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-03 17:51:41 +0000 (Wed, February 03, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-02-10 18:09:05 +0000 (Wed, February 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -220,9 +220,6 @@ class Spectrum(AbstractWrapperObject):
     # Internal NameSpace
     _AdditionalAttribute = 'AdditionalAttribute'
     _ReferenceSubstancesPids = '_ReferenceSubstancesPids'
-
-    _referenceSpectrumHit = None
-    _snr = None
 
     MAXDIM = 4  # Maximum dimensionality
 
@@ -2512,49 +2509,27 @@ assignmentTolerances
     # data access functions
     #=========================================================================================
 
-    # @logCommand(get='self')
-    def getIntensity(self, ppmPositions):
-        """Returns the interpolated height at the ppm position
-        """
-        # The height below is not derived from any fitting
-        # but is a weighted average of the values at the neighbouring grid points
-
-        if self.dimensionCount != 1:
-            raise ValueError('getIntensity only valid for 1d spectra')
-        if len(ppmPositions) != 1:
-            raise ValueError('Length of {} must be 1.'.format(ppmPositions))
-        if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPositions):
-            raise ValueError('ppmPositions values must be floats.')
-
-        ref = self.mainSpectrumReferences[0]
-        pp = ref.valueToPoint(ppmPositions[0])
-        frac = pp % 1
-
-        if self._intensities is not None and self._intensities.size != 0:
-            # need to interpolate between pp-1, and pp
-            try:
-                height = self._intensities[int(pp) - 1] + \
-                         frac * (self._intensities[int(pp)] - self._intensities[int(pp) - 1])
-            except IndexError as ie:
-                height = 0
-                getLogger().warning('Intensity not found found at the ppm position: %s' %
-                                    ', '.join(map(str, ppmPositions)))
-
-            # don't need to scale as _intensities is already scaled
-            return height
-
     @logCommand(get='self')
     def getHeight(self, ppmPositions):
         """Returns the interpolated height at the ppm position
         """
-        ref = self.mainSpectrumReferences
+        refs = self.mainSpectrumReferences
+        if self.dimensionCount == 1:
+            pp = refs[0].valueToPoint(ppmPositions[0])
+            hs = self._intensities
+            try:
+                height = hs[int(pp) - 1] + (pp % 1) * (hs[int(pp)] - hs[int(pp) - 1])
+            except IndexError:
+                getLogger().warning('Height not found found at ppm position: (%s)'% ', '.join(map(str, ppmPositions)))
+                height = None # should it be None?
+            return height
 
         if len(ppmPositions) != self.dimensionCount:
             raise ValueError('Length of %s does not match number of dimensions.' % str(ppmPositions))
         if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPositions):
             raise ValueError('ppmPositions values must be floats.')
 
-        pointPosition = tuple(ref[dim].valueToPoint(ppm) for dim, ppm in enumerate(ppmPositions))
+        pointPosition = tuple(refs[dim].valueToPoint(ppm) for dim, ppm in enumerate(ppmPositions))
         return self.getPositionValue(pointPosition)
 
     @logCommand(get='self')

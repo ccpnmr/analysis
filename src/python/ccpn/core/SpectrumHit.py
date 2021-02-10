@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:22 +0000 (Sun, January 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-10 18:09:05 +0000 (Wed, February 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -36,90 +36,6 @@ from ccpn.util.Logging import getLogger
 import numpy as np
 from ccpn.util.Common import makeIterableList
 
-SpectrumHitPeakList = 'SpectrumHitPeakList'
-
-from collections import OrderedDict as od
-
-defaultScoring = od((
-                    ('A (Highest)',     100),
-                    ('B (Very High)',    80),
-                    ('C (High)',         60),
-                    ('D (Moderate)',     40),
-                    ('E (Low)',          30),
-                    ('F (Very low)',     10),
-                    ('G (Dubious)',       1),
-                    ('H (Unlikely)',      0),
-                    ))
-
-
-def _grade(i):
-    for k,v in defaultScoring.items():
-        if i>=v: return k
-
-def _getReferenceLevel(referenceSpectrum):
-    """
-
-    :return:int  the hit level based on  how many experiment type the reference has appeared to be a hit.
-    EG. STD only -- Grade:1
-    EG. STD and Wlogsy -- Grade:2 etc
-
-
-
-    """
-
-    if referenceSpectrum is None:
-        return 0, []
-
-    experimentTypes = []
-    levelHit = 1
-    for spectrumHit in referenceSpectrum.project.spectrumHits:
-        if referenceSpectrum in spectrumHit._linkedReferenceSpectra:
-            experimentTypes.append(spectrumHit._parent.experimentType)
-    levelHit = set(experimentTypes)
-
-    return len(levelHit), list(experimentTypes)
-
-def scoreHit(heights, snr):
-    score = 0
-    try:
-        totHeights= np.sum(heights)
-        count = len(heights)
-        score = (snr/totHeights)*count
-    except Exception as err:
-        print('Hit Scoring Error:', err)
-    return abs(score)
-
-def scoreHit_tot(heights, snr, shifts):
-    score = 0
-    try:
-        totHeights= np.sum(heights)
-        maxShift = np.max(np.absolute(shifts))
-        count = len(shifts)
-        score = (totHeights*snr*count)/maxShift
-    except Exception as err:
-        print('Hit Scoring Error:', err)
-    return abs(score)
-
-def _norm(x):
-    z = None
-    try:
-        z = (x-np.min(x))/(np.max(x)-np.min(x))
-    except ZeroDivisionError:
-        print('Normalisation Error')
-    return z
-
-
-def _scoreHits(vv):
-    """score = median(deltas) * len(deltas).
-    if len(deltas) <=2 than is only the min
-    """
-    d = abs(np.array(vv))
-    c = len(d)
-    if c <=2:
-        return np.min(d)
-    D = np.median(d)
-    s = D*c
-    return s
 
 class SpectrumHit(AbstractWrapperObject):
     """Used in screening and metabolomics implementations to describe
@@ -150,9 +66,6 @@ class SpectrumHit(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiSpectrumHit._metaclass.qualifiedName()
 
-    # link To a reference Spectrum #LM needed for screening hit analysis
-    _linkedReferenceSpectra = []
-    _peakListsHit = []
 
     # CCPN properties
     @property

@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-02-10 13:00:15 +0000 (Wed, February 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-10 18:13:32 +0000 (Wed, February 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -122,7 +122,7 @@ def _hzLW2pnt(lwHz, sw, npoints):
 
 def getLineWidthsPnt(peak):
     sp = peak.peakList.spectrum
-    return tuple(_hzLW2pnt(lwHz,sp.spectralWidthsHz[i],sp.totalPointCounts[i]) for i,lwHz in enumerate(peak.lineWidths))
+    return tuple(_hzLW2pnt(lwHz,sp.spectralWidthsHz[i],sp.pointCounts[i]) for i,lwHz in enumerate(peak.lineWidths))
 
 def getPeakPositionHz(peak):
     return tuple([peak.position[i]*peak.peakList.spectrum.spectrometerFrequencies[i] for i,v in enumerate(peak.position)])

@@ -17,7 +17,7 @@ def TSA(spectrumCluster):
   return tsa
 
 def getSpectrumCluster(spectra):
-  pointCount = spectra[0].totalPointCounts[0]
+  pointCount = spectra[0].pointCounts[0]
   array1 = np.empty([len(spectra), pointCount])
   for i in range(len(spectra)):
     array1[i] = spectra[i].getSliceData()

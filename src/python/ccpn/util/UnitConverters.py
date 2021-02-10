@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-02-03 19:42:09 +0000 (Wed, February 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-10 18:13:32 +0000 (Wed, February 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -109,7 +109,7 @@ def _getSpUnitConversionArguments(spectrum):
     :param spectrum:
     :return: tuple of tuples containing the spectrum properties needed for unit conversions
     """
-    npoints = spectrum.totalPointCounts
+    npoints = spectrum.pointCounts
     sf = spectrum.spectrometerFrequencies
     sw = spectrum.spectralWidthsHz
     refppm = spectrum.referenceValues

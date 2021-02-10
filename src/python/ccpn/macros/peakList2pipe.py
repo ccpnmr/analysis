@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-02-08 19:23:47 +0000 (Mon, February 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-10 13:00:15 +0000 (Wed, February 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ RUN:
     - From Macro Editor:
         * Main Menu -> Macro -> New
         * Copy this macro inside the Macro Editor module
-        * Define a spectrumName and the outputPath varialbles, (and any other available as required).
+        * Define a spectrumName and the outputPath variables, (and any other available as required).
         * Click run (Green 'play' button) 
     
     - From Python Console

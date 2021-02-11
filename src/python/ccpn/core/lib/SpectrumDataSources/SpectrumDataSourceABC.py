@@ -545,7 +545,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return (None if self.dataFile is None else aPath(self.dataFile))
 
     def setPath(self, path, substituteSuffix=False):
-        """define valid path to a (binary) data file, if needed appends or substitutes the suffix (if defined).
+        """define valid path to a (binary) data file, if needed appends or substitutes
+        the suffix (if defined).
 
         return self or None on error
         """

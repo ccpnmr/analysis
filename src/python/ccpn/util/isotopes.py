@@ -160,7 +160,7 @@ class Nucleus(str):
 class Field(dict):
     """Class to hold the frequencies of various nuclei for a given field
     """
-    validRange = (-1.0, 0.3)  # Variation in spectrometer frequences (MHz); accommodate Agilent/Varian and Bruker
+    validRange = (-1.0, 0.5)  # Variation in spectrometer frequences (MHz); accommodate Agilent/Varian and Bruker
 
     def __init__(self, field):
         super().__init__()

@@ -222,13 +222,21 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             self.baseDimensionality = 3
 
     def _guessTemplate(self):
-        """Guess and return the template based on self.path and dimensionality or None if unsuccessful
+        """Guess and return the template based on self.path and dimensionality
+        Return None if not applicable or unsuccessful
         """
         logger = getLogger()
 
         directory, fileName, suffix = self.path.split3()
 
-        if self.dimensionCount == 3 and self.nFiles > 1:
+        # enumerate all possibilities
+        if self.dimensionCount == 2:
+            pass
+
+        elif self.dimensionCount == 3 and self.nFiles == 1:
+            pass
+
+        elif self.dimensionCount == 3 and self.nFiles > 1:
             # 3D's stored as series of 2D's
             templates = (re.sub('\d\d\d\d', '%04d', fileName),
                          re.sub('\d\d\d',   '%03d', fileName),
@@ -270,7 +278,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                     if path.exists():
                         return str(Path(directory) / (template) + suffix)
 
-        logger.debug('NmrPipeSpectrumDataSource._guessTemplate: Unable to guess from "%s"', self.path)
+        logger.debug('NmrPipeSpectrumDataSource._guessTemplate: Unable to guess from "%s"' % self.path)
         return None
 
     def _getPathAndOffset(self, position):

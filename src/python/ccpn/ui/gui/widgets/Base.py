@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-25 16:07:52 +0000 (Mon, January 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-11 13:37:58 +0000 (Thu, February 11, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -93,7 +93,7 @@ class SignalBlocking():
         """
         return self._widgetSignalBlockingLevel > 0
 
-    def _blockEvents(self, root, widgetState, recursive=True):
+    def _blockEvents(self, root, widgetState, recursive=True, additionalWidgets=None):
         """Block all updates/signals in the widget and children.
         """
         # block all signals on first entry, each instance stores it's own blocking level
@@ -109,6 +109,9 @@ class SignalBlocking():
             if recursive:
                 # add all the child widgets
                 widgetState.signalBlockers += [QtCore.QSignalBlocker(_child) for _child in root.findChildren(QtWidgets.QWidget)]
+            if additionalWidgets:
+                # add any other widgets
+                widgetState.signalBlockers += [QtCore.QSignalBlocker(_child) for _child in additionalWidgets]
 
         self._widgetSignalBlockingLevel += 1
 
@@ -130,7 +133,7 @@ class SignalBlocking():
             raise RuntimeError('Error: Widget signal blocking already at 0')
 
     @contextmanager
-    def blockWidgetSignals(self, root=None, recursive=True):
+    def blockWidgetSignals(self, root=None, recursive=True, additionalWidgets=None):
         """Block all signals for the widget.
 
         root is the widget to be blocked, if no widget specified then self is assumed.
@@ -144,7 +147,7 @@ class SignalBlocking():
         # local widgetState is kept private
         _widgetState = AttrDict()
         _root = root or self
-        self._blockEvents(_root, _widgetState, recursive=recursive)
+        self._blockEvents(_root, _widgetState, recursive=recursive, additionalWidgets=additionalWidgets)
         try:
             yield  # yield control to the calling process
 

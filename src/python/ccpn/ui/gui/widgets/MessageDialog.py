@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:38 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-11 11:10:04 +0000 (Thu, February 11, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ import textwrap
 from PyQt5 import QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Font import setWidgetFont
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from PyQt5.QtCore import QEvent
 
 # from ccpn.ui.gui.guiSettings import messageFont, messageFontBold
 
@@ -165,6 +166,59 @@ class MessageDialog(QtWidgets.QMessageBox):
             self.setIconPixmap(scaledImage)
 
         # self.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+
+    def event(self, event):
+        """
+        handler to make dialogs proely modal but at the sametime accept the correct keys for default actions
+        """
+
+        # accepted events apple-delete, apple-c apple-v, esc, return, spacebar, command period, apple-z apple-y,
+        # apple-shift-z  apple-h, apple-option-h, control tab, tab, shift tab, arrow keys, contol arrow keys
+        # control-shift-arrows, apple-a
+
+        ACCEPTED_MODAL_KEYS = (
+            (Qt.NoModifier, Qt.Key_Space,),
+            (Qt.ControlModifier, Qt.Key_Delete),
+            (Qt.ControlModifier, Qt.Key_Backspace),
+            (Qt.ControlModifier, Qt.Key_C),
+            (Qt.ControlModifier, Qt.Key_V),
+            (Qt.NoModifier, Qt.Key_Escape,),
+            (Qt.NoModifier, Qt.Key_Return,),
+            (Qt.NoModifier, Qt.Key_Space,),
+            (Qt.ControlModifier, Qt.Key_Period),
+            (Qt.ControlModifier, Qt.Key_Z),
+            (Qt.ControlModifier, Qt.Key_Y),
+            (Qt.ControlModifier | Qt.ShiftModifier, Qt.Key_Z),
+            (Qt.ControlModifier, Qt.Key_H),
+            (Qt.ControlModifier | Qt.AltModifier, Qt.Key_H),
+            (Qt.MetaModifier, Qt.Key_Tab),
+            (Qt.NoModifier, Qt.Key_Tab,),
+            (Qt.ShiftModifier, Qt.Key_Tab),
+            (Qt.NoModifier, Qt.Key_Left,),
+            (Qt.NoModifier, Qt.Key_Right,),
+            (Qt.NoModifier, Qt.Key_Up,),
+            (Qt.NoModifier, Qt.Key_Down,),
+            (Qt.MetaModifier, Qt.Key_Left),
+            (Qt.MetaModifier, Qt.Key_Right),
+            (Qt.MetaModifier, Qt.Key_Up),
+            (Qt.MetaModifier, Qt.Key_Down),
+            (Qt.MetaModifier | Qt.ShiftModifier, Qt.Key_Left),
+            (Qt.MetaModifier | Qt.ShiftModifier, Qt.Key_Right),
+            (Qt.MetaModifier | Qt.ShiftModifier, Qt.Key_Up),
+            (Qt.MetaModifier | Qt.ShiftModifier, Qt.Key_Down),
+            (Qt.ControlModifier, Qt.Key_A)
+        )
+
+        result = False
+        if event.type() == QEvent.ShortcutOverride:
+            test = (event.modifiers(), event.key())
+            if test in ACCEPTED_MODAL_KEYS:
+                event.accept()
+                result = True
+        else:
+            result = super(MessageDialog, self).event(event)
+
+        return result
 
     def resizeEvent(self, ev):
         """
@@ -374,7 +428,6 @@ def showMessage(title, message, parent=None, iconPath=None):
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtCore import Qt
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Label import Label
 from contextlib import contextmanager

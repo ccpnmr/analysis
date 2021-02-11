@@ -175,7 +175,7 @@ class PathRowABC(object):
     def _getDialog(self):
 
         dialogPath = self.getDialogPath()
-        dialog = SpectrumFileDialog(parent=self.buttonWidget, text='Select path', directory=str(dialogPath),
+        dialog = SpectrumFileDialog(parent=self.buttonWidget, directory=str(dialogPath),
                                     fileMode=self.dialogFileMode) #, acceptMode=0)
         choices = dialog.selectedFiles()
         if choices is not None and len(choices) > 0 and len(choices[0]) > 0:
@@ -291,9 +291,11 @@ class PathRowABC(object):
 class SpectrumValidator(ValidatorABC):
 
     def isValid(self, value):
-        "return True is value is valid"
-        ds = DataStore.newFromPath(value, autoRedirect=False)
-        return ds.exists()
+        """return True is value is valid;
+        """
+        # ds = DataStore.newFromPath(value, autoRedirect=False)
+        # return ds.exists()
+        return self.obj.hasValidPath()
 # end class
 
 

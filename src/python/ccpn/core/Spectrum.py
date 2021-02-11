@@ -720,12 +720,6 @@ class Spectrum(AbstractWrapperObject):
         """
         return (self.dataSource is not None)
 
-    def checkValidPath(self):
-        """Checks for valid path and raise RuntimeError if not
-        """
-        if not self.hasValidPath():
-            raise RuntimeError('%s: No valid spectral dataSource defined' % self)
-
     def isEmptySpectrum(self):
         """Return True if instance refers to an empty spectrum; i.e. as in without actual spectral data"
         """
@@ -2577,7 +2571,8 @@ class Spectrum(AbstractWrapperObject):
         :param axisDict: dict of (axisCode, (startPpm,stopPpm)) key,value pairs
         :return: numpy array
         """
-        self.checkValidPath()
+        if not self.hasValidPath():
+            raise RuntimeError('No valid spectral datasource defined')
         sliceTuples = self._axisDictToSliceTuples(axisDict)
         return self.dataSource.getRegionData(sliceTuples)
 
@@ -2645,7 +2640,9 @@ class Spectrum(AbstractWrapperObject):
         if axisDims[0] == axisDims[1]:
             raise ValueError('Invalid axisCodes %s; identical' % axisCodes)
 
-        self.checkValidPath()
+        if not self.hasValidPath():
+            raise RuntimeError('No valid spectral datasource defined')
+
         return self.dataSource.allPlanes(xDim=axisDims[0], yDim=axisDims[1])
 
     def allSlices(self, axisCode, exactMatch=True):
@@ -2653,7 +2650,10 @@ class Spectrum(AbstractWrapperObject):
         positions are 1-based
         """
         sliceDim = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)[0]
-        self.checkValidPath()
+
+        if self.hasValidPath():
+            raise RuntimeError('No valid spectral datasource defined')
+
         return self.dataSource.allSlices(sliceDim=sliceDim)
 
     #-----------------------------------------------------------------------------------------
@@ -2767,6 +2767,11 @@ class Spectrum(AbstractWrapperObject):
                 for integralList in self.integralLists:
                     for integral in integralList.integrals:
                         integral._finaliseAction(action)
+
+            # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+            #
+            # GLSignals = GLNotifier(parent=self)
+            # GLSignals.emitPaintEvent()
 
             # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
             #

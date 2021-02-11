@@ -223,17 +223,16 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
     def _guessTemplate(self):
         """Guess and return the template based on self.path and dimensionality
-        Return None if not applicable or unsuccessful
+        Return None if unsuccessful or not applicable
         """
         logger = getLogger()
 
         directory, fileName, suffix = self.path.split3()
 
-        # enumerate all possibilities
         if self.dimensionCount == 2:
             pass
 
-        elif self.dimensionCount == 3 and self.nFiles == 1:
+        elif self.dimensionCount in [3,4] and self.nFiles == 1:
             pass
 
         elif self.dimensionCount == 3 and self.nFiles > 1:

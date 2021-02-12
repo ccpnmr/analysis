@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-12 10:32:58 +0000 (Fri, February 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,13 +25,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import collections
+from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpn.util.StructureData import EnsembleData
-from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
+from ccpn.util.StructureData import EnsembleData
+from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
 from ccpn.util import Common as commonUtil
 
@@ -192,6 +192,7 @@ class StructureEnsemble(AbstractWrapperObject):
 
         return _newModel(self, label=label, comment=comment, **kwds)
 
+
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
@@ -209,6 +210,8 @@ def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, d
     :param serial: optional serial number.
     :return: a new StructureEnsemble instance.
     """
+    # stop circular import
+    from ccpn.core.Model import Model
 
     if not name:
         name = StructureEnsemble._nextAvailableName(StructureEnsemble, self)
@@ -243,13 +246,14 @@ def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, d
         result.data = data
         data._containingObject = result
         for modelNumber in sorted(data['modelNumber'].unique()):
-            result.newModel(serial=modelNumber, label='Model_%s' % modelNumber)
+            # _validateName
+            _label = 'my%s_%s' % (Model.className, modelNumber)
+            result.newModel(serial=modelNumber, label=_label)
 
         # for model in result.models:           ?
         #     model._finaliseAction('create')
 
     return result
-
 
 #EJB 20181204: moved to Project
 # Project.newStructureEnsemble = _newStructureEnsemble

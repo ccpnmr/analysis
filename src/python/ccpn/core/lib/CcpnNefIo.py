@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-03 17:17:13 +0000 (Wed, February 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-12 10:31:34 +0000 (Fri, February 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -6492,7 +6492,7 @@ def _exportToNef(path: str, skipPrefixes: Sequence[str] = ()):
 
     path = os.path.normpath(os.path.abspath(path))
     time1 = time.time()
-    application = createFramework()
+    application = createFramework(_skipUpdates=True)
     application.loadProject(path)
     project = application.project
     time2 = time.time()
@@ -6561,7 +6561,7 @@ def _testNefIo(path: str, skipPrefixes: Sequence[str] = ()):
         raise ValueError("File name does not end in '.nef': %s" % path)
 
     time1 = time.time()
-    application = createFramework()
+    application = createFramework(_skipUpdates=True)
     application.nefReader.testing = True
     application.loadProject(path)
 

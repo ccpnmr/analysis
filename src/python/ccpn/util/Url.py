@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-27 12:09:33 +0100 (Mon, July 27, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-02-12 11:01:03 +0000 (Fri, February 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -187,7 +187,7 @@ def checkInternetConnection():
 ## testing
 if __name__ == '__main__':
     from ccpn.util.UserPreferences import UserPreferences, USEPROXY, USEPROXYPASSWORD, PROXYADDRESS, \
-        PROXYPORT, PROXYUSERNAME, PROXYPASSWORD, USESYSTEMPROXY
+        PROXYPORT, PROXYUSERNAME, PROXYPASSWORD, USESYSTEMPROXY, VERIFYSSL
 
     # bad urls certificates from  https://badssl.com/dashboard/
     expiredCertificate = 'https://expired.badssl.com'
@@ -198,7 +198,8 @@ if __name__ == '__main__':
                     PROXYPORT:'3128',
                     PROXYUSERNAME:'',
                     # PROXYPASSWORD:'admin',
-                    USEPROXY:True
+                    USEPROXY:True,
+                    VERIFYSSL:True,
                     }
 
 

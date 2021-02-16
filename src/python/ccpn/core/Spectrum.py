@@ -50,7 +50,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 14:50:37 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-16 13:01:27 +0000 (Tue, February 16, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2247,31 +2247,41 @@ class Spectrum(AbstractWrapperObject):
         return self.getHeight(ppmPositions)
 
     @logCommand(get='self')
-    def getHeight(self, ppmPosition):
+    def getHeight(self, ppmPositions):
         """Returns the interpolated height at the ppm position
         """
-        if len(ppmPosition) != self.dimensionCount:
-            raise ValueError('Length of %s does not match number of dimensions' % str(ppmPosition))
-        if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPosition):
+        if len(ppmPositions) != self.dimensionCount:
+            raise ValueError('Length of %s does not match number of dimensions' % str(ppmPositions))
+        if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPositions):
             raise ValueError('ppmPositions values must be floats')
 
-        pointPosition = [self.ppm2point(p, dimension=idx+1) for idx, p in enumerate(ppmPosition)]
-        return self.getPointValue(pointPosition)
+        pointPositions = [self.ppm2point(p, dimension=idx+1) for idx, p in enumerate(ppmPositions)]
+        return self.getPointValue(pointPositions)
 
     @logCommand(get='self')
-    def getPointValue(self, pointPosition):
+    def getPointValue(self, pointPositions):
         """Return the value interpolated at the position given in points (1-based, float values).
         """
-        if len(pointPosition) != self.dimensionCount:
-            raise ValueError('Length of %s does not match number of dimensions.' % str(pointPosition))
-        if not all(isinstance(dimVal, (int, float)) for dimVal in pointPosition):
+        if len(pointPositions) != self.dimensionCount:
+            raise ValueError('Length of %s does not match number of dimensions.' % str(pointPositions))
+        if not all(isinstance(dimVal, (int, float)) for dimVal in pointPositions):
             raise ValueError('position values must be floats.')
 
         if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zero' % self)
             return 0.0
 
-        value = self.dataSource.getPointValue(pointPosition)
+        # need to check folding/circular/±sign
+
+        # pointPositions = []
+        # aliasing = []
+        # for idx, (p, np) in enumerate(zip(ppmPos, spectrum.pointCounts)):
+        #     pp = spectrum.ppm2point(p, dimension=idx + 1)
+        #     pointPositions.append(((pp - 1) % np) + 1)
+        #     aliasing.append((pp - 1) // np)
+
+        aliasingFlags = [1] * self.dimensionCount
+        value = self.dataSource.getPointValue(pointPositions, aliasingFlags=aliasingFlags)
         return value * self.scale
 
     @logCommand(get='self')
@@ -3343,6 +3353,7 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
                 outPosition = [position[inverseIndexMap[p]] for p in output.axes]
                 # print('>>>', position, outPosition)
                 output.setSliceData(data, outPosition, writeSliceDim)
+
     # copy/set some more parameters (e.g. noiseLevel)
     spectrum._copyNonDimensionalParameters(newSpectrum)
     newSpectrum._updateParameterValues()

@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:39 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-16 13:01:27 +0000 (Tue, February 16, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -287,7 +287,7 @@ class ViewBox(pg.ViewBox):
             #   peak = peakList.newPeak(ppmPositions=position)
             #   # note, the height below is not derived from any fitting
             #   # but is a weighted average of the values at the neighbouring grid points
-            #   peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
+            #   peak.height = spectrumView.spectrum.getPositionValue(peak.pointPositions)
             #   #self.current.addPeak(peak)
             #   # peak.isSelected = True
             #   peaks.append(peak)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-16 13:01:27 +0000 (Tue, February 16, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -413,7 +413,7 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLLabelling):  #, GLpeakNdL
                 type of outofplane - currently 0/1/2 indicating whether normal, infront or behind
                 fade for colouring
         """
-        pntPos = multiplet.pointPosition
+        pntPos = multiplet.pointPositions
         if not pntPos:
             return False, False, 0, 1.0
 

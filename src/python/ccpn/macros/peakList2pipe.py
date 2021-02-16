@@ -124,9 +124,9 @@ def _getOverlapsByLineWidths(peaks, tolDim1=0.01, tolDim2=0.01, increaseByNperce
         if not all(list(peakA.lineWidths) + list(peakB.lineWidths)):
             warning('LineWidths is set to None for some peaks. Peaks skipped: %s' % ''.join(map(str, pair)))
             continue
-        pos1A, pos2A = [peakA.pointPosition[i] for i in range(sp.dimensionCount)]
+        pos1A, pos2A = [peakA.pointPositions[i] for i in range(sp.dimensionCount)]
         lw1A, lw2A = [lw + percentage(increaseByNpercent, lw) for lw in getLineWidthsPnt(peakA)]
-        pos1B, pos2B = [peakB.pointPosition[i] for i in range(sp.dimensionCount)]
+        pos1B, pos2B = [peakB.pointPositions[i] for i in range(sp.dimensionCount)]
         lw1B, lw2B = [lw + percentage(increaseByNpercent, lw) for lw in getLineWidthsPnt(peakB)]
         dim1a, dim2a = np.linspace(pos1A-(lw1A/2), pos1A+(lw1A/2),500), np.linspace(pos2A-(lw2A/2),pos2A+(lw2A/2),500)
         dim1b, dim2b = np.linspace(pos1B-(lw1B/2), pos1B+(lw1B/2),500), np.linspace(pos2B-(lw2B/2),pos2B+(lw2B/2),500)
@@ -146,8 +146,8 @@ def _getOverlapPairsByPositions(peaks, tolDim1=10, tolDim2=10):
     """
     overlaps = []
     for pair in itertools.combinations(peaks, 2):
-        dim1a, dim2a = np.array(pair[0].pointPosition[0]), np.array(pair[0].pointPosition[1])
-        dim1b, dim2b = np.array(pair[1].pointPosition[0]), np.array(pair[1].pointPosition[1])
+        dim1a, dim2a = np.array(pair[0].pointPositions[0]), np.array(pair[0].pointPositions[1])
+        dim1b, dim2b = np.array(pair[1].pointPositions[0]), np.array(pair[1].pointPositions[1])
         if (np.abs(dim1a - dim1b) < tolDim1) and (np.abs(dim2a - dim2b) < tolDim2):
             overlaps.append(pair)
     return overlaps
@@ -167,8 +167,8 @@ def setClusterIDs(peaks, guessClustID=True):
             overlappedPeaks = _getOverlapPairsByPositions(peaks, tolDim1=tolDim1, tolDim2=tolDim2)
         else:
             overlappedPeaks = _getOverlapsByLineWidths(peaks, increaseByNpercent=increaseLWByNpercent)
-        positions = [pk.pointPosition for pk in peaks]
-        overlappedPositions = [(pair[0].pointPosition, pair[1].pointPosition) for pair in overlappedPeaks]
+        positions = [pk.pointPositions for pk in peaks]
+        overlappedPositions = [(pair[0].pointPositions, pair[1].pointPositions) for pair in overlappedPeaks]
         result = clusterOverlaps(positions, overlappedPositions)
         with undoBlockWithoutSideBar():
             allClusters = []
@@ -176,7 +176,7 @@ def setClusterIDs(peaks, guessClustID=True):
                 peakCluster = []
                 for peak in peaks:
                     for j in group:
-                        if j == peak.pointPosition:
+                        if j == peak.pointPositions:
                             peakCluster.append(peak)
                             peak.annotation = str(i)
                 allClusters.append(peakCluster)
@@ -230,8 +230,8 @@ VarsDict = {
         Y_PPM   : lambda x: VFdict.get(Y_PPM) % x.position[1] if x.position[1] else NULLVALUE,
         X_HZ    : lambda x: NULLVALUE, #VFdict.get(X_HZ) % NULLVALUE,
         Y_HZ    : lambda x: NULLVALUE, #VFdict.get(Y_HZ) % NULLVALUE,
-        X_AXIS  : lambda x: VFdict.get(X_AXIS) % x.pointPosition[0] if x.pointPosition[0] else NULLVALUE,
-        Y_AXIS  : lambda x: VFdict.get(Y_AXIS) % x.pointPosition[1] if x.pointPosition[1] else NULLVALUE,
+        X_AXIS  : lambda x: VFdict.get(X_AXIS) % x.pointPositions[0] if x.pointPositions[0] else NULLVALUE,
+        Y_AXIS  : lambda x: VFdict.get(Y_AXIS) % x.pointPositions[1] if x.pointPositions[1] else NULLVALUE,
         XW      : lambda x: VFdict.get(XW) % getLineWidthsPnt(x)[0] if getLineWidthsPnt(x)[0] else NULLVALUE,
         YW      : lambda x: VFdict.get(YW) % getLineWidthsPnt(x)[1] if getLineWidthsPnt(x)[1] else NULLVALUE,
         XW_HZ   : lambda x: VFdict.get(XW_HZ) % x.lineWidths[0] if x.lineWidths[0] else NULLVALUE,
@@ -287,7 +287,7 @@ def runMacro():
             continue
 
         peaks = spectrum.peakLists[peakListIndex].peaks
-        peaks.sort(key=lambda x: x.pointPosition[0], reverse=False)
+        peaks.sort(key=lambda x: x.pointPositions[0], reverse=False)
         setClusterIDs(peaks, guessClusterId)
         df = buildDataFrame(peaks)
         if export:

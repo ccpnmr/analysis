@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-10 12:14:07 +0000 (Wed, February 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-16 13:01:27 +0000 (Tue, February 16, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -286,7 +286,7 @@ class Peak(AbstractWrapperObject):
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             currentAlias.append(peakDim.numAliasing)
 
-            _old = peakDim.position  # the current pointPosition, quick to get
+            _old = peakDim.position  # the current pointPositions, quick to get
             peakDim.value = value[ii]
             peakDim.realValue = None
             newAlias.append(peakDim.numAliasing)
@@ -333,14 +333,14 @@ class Peak(AbstractWrapperObject):
             peakDim.valueError = value[ii]
 
     @property
-    def pointPosition(self) -> Tuple[float, ...]:
+    def pointPositions(self) -> Tuple[float, ...]:
         """Peak position in points."""
         return tuple(x.position for x in self._wrappedData.sortedPeakDims())
 
-    @pointPosition.setter
+    @pointPositions.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
-    def pointPosition(self, value: Sequence):
+    def pointPositions(self, value: Sequence):
         currentAlias = []
         newAlias = []
         assigned = set()
@@ -349,7 +349,7 @@ class Peak(AbstractWrapperObject):
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             currentAlias.append(peakDim.numAliasing)
 
-            _old = peakDim.position  # the current pointPosition
+            _old = peakDim.position  # the current pointPositions
             peakDim.position = value[ii]
             newAlias.append(peakDim.numAliasing)
 
@@ -1000,7 +1000,7 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
              heightError: float = None, volumeError: float = None,
              figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
              ppmPositions: Sequence[float] = (), position: Sequence[float] = None, positionError: Sequence[float] = (),
-             pointPosition: Sequence[float] = (), boxWidths: Sequence[float] = (),
+             pointPositions: Sequence[float] = (), boxWidths: Sequence[float] = (),
              lineWidths: Sequence[float] = (), ppmLineWidths: Sequence[float] = (), pointLineWidths: Sequence[float] = (),
              serial: int = None) -> Peak:
     """Create a new Peak within a peakList
@@ -1018,10 +1018,10 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     :param figureOfMerit:
     :param annotation:
     :param comment: optional comment string
-    :param ppmPositions: peak position in ppm for each dimension (related attributes: positionError, pointPosition)
-    :param position: OLD: peak position in ppm for each dimension (related attributes: positionError, pointPosition)
+    :param ppmPositions: peak position in ppm for each dimension (related attributes: positionError, pointPositions)
+    :param position: OLD: peak position in ppm for each dimension (related attributes: positionError, pointPositions)
     :param positionError:
-    :param pointPosition:
+    :param pointPositions:
     :param boxWidths:
     :param lineWidths:
     :param serial: optional serial number.
@@ -1050,12 +1050,12 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     if ppmPositions:
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.value = ppmPositions[ii]
-    elif pointPosition:
+    elif pointPositions:
 
         pointCounts = result.spectrum.pointCounts
         for ii, peakDim in enumerate(apiPeakDims):
-            alias = int(divmod(pointPosition[ii] - 1, pointCounts[ii])[0])
-            pos = float(pointPosition[ii] + 0 - alias * pointCounts[ii])  # API position starts at 1
+            alias = int(divmod(pointPositions[ii] - 1, pointCounts[ii])[0])
+            pos = float(pointPositions[ii] + 0 - alias * pointCounts[ii])  # API position starts at 1
             peakDim.numAliasing = alias
             peakDim.position = pos
 
@@ -1093,7 +1093,7 @@ def _newPickedPeak(self: PeakList, pointPositions: Sequence[float] = None, heigh
     See the Peak class for details.
 
     :param height: height of the peak (related attributes: volume, volumeError, lineWidths)
-    :param pointPositions: peak position in points for each dimension (related attributes: positionError, pointPosition)
+    :param pointPositions: peak position in points for each dimension (related attributes: positionError, pointPositions)
     :param fitMethod: type of curve fitting
     :param lineWidths:
     :param serial: optional serial number.

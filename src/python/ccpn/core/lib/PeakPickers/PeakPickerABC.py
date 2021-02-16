@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-09 16:47:07 +0000 (Tue, February 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-16 13:01:27 +0000 (Tue, February 16, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -188,21 +188,39 @@ class PeakPickerABC(object):
             if len(pk.points) != self.dimensionCount:
                 raise RuntimeError('%s: invalid dimensionality of points attribute' % pk)
             # correct the peak.points for "offset" (the slice-positions taken) and ordering (i.e. inverse)
-            pointPosition = [float(p)+float(self.sliceTuples[idx][0]) for idx,p in enumerate(pk.points[::-1])]
-            if pk.height is None:
-                # height was not defined; get the interpolated value from the data
-                pk.height = self.spectrum.dataSource.getPointValue(pointPosition)
-            cPeak = peakList.newPeak(pointPosition=pointPosition, height=pk.height, volume=pk.volume, pointLineWidths=pk.lineWidths)
-            if self.autoFit:
-                peakParabolicInterpolation(cPeak, update=True)
-            corePeaks.append(cPeak)
+            pointPositions = [float(p)+float(self.sliceTuples[idx][0]) for idx,p in enumerate(pk.points[::-1])]
+
+            # check whether a peak already exists at pointPositions in the peakList
+            if self._validatePointPeak(pointPositions, peakList):
+
+                if pk.height is None:
+                    # height was not defined; get the interpolated value from the data
+                    pk.height = self.spectrum.dataSource.getPointValue(pointPositions)
+                cPeak = peakList.newPeak(pointPositions=pointPositions, height=pk.height, volume=pk.volume, pointLineWidths=pk.lineWidths)
+                if self.autoFit:
+                    peakParabolicInterpolation(cPeak, update=True)
+                corePeaks.append(cPeak)
+
         return corePeaks
 
     def _checkParameters(self):
         """
         Check whether the parameters are the correct types
         """
+        # This can check the common parameters, subclassing can check local
         pass
+
+    def _validatePointPeak(self, pointPositions, peakList):
+        """
+        Check whether a peak already exists at this position
+        :param pointPositions:
+        :param peakList:
+        :return: true if pointPositions is valid
+        """
+        intPositions = [int(pp) for pp in pointPositions]
+        existingPositions = [[int(pp) for pp in pk.pointPositions] for pk in peakList.peaks]
+
+        return intPositions not in existingPositions
 
     def __str__(self):
         return '<%s for %r>' % (self.__class__.__name__, self.spectrum.name)

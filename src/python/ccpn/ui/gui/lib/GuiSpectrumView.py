@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-16 13:01:27 +0000 (Tue, February 16, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from typing import Optional, Tuple
 
 SpectrumViewParams = collections.namedtuple('SpectrumViewParams', 'valuePerPoint pointCount minAliasedFrequency maxAliasedFrequency '
                                                                   'minSpectrumFrequency maxSpectrumFrequency')
-TraceParameters = collections.namedtuple('TraceParameters', 'inRange pointPosition startPoint, endPoint')
+TraceParameters = collections.namedtuple('TraceParameters', 'inRange pointPositions startPoint, endPoint')
 
 
 class GuiSpectrumView(QtWidgets.QGraphicsObject):

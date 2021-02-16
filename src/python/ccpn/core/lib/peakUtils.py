@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 14:50:37 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-16 13:01:27 +0000 (Tue, February 16, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -75,7 +75,7 @@ def getMultipletPosition(multiplet, dim, unit='ppm'):
 
         #  NOT implemented for multiplets
         # elif unit == 'point':
-        #   value = multiplet.pointPosition[dim]
+        #   value = multiplet.pointPositions[dim]
 
         elif unit == 'Hz':
             value = multiplet.position[dim] * multiplet.multipletList.spectrum.spectrometerFrequencies[dim]
@@ -114,7 +114,7 @@ def getPeakPosition(peak, dim, unit='ppm'):
             value = peak.position[dim]
 
         elif unit == 'point':
-            value = peak.pointPosition[dim]
+            value = peak.pointPositions[dim]
 
         elif unit == 'Hz':
             value = peak.position[dim] * peak.peakList.spectrum.spectrometerFrequencies[dim]
@@ -864,7 +864,7 @@ def peakParabolicInterpolation(peak: 'Peak', update=False):
     spectrum.checkValidPath()
 
     # get the position as the nearest grid point
-    position = [int(p+0.5) for p in peak.pointPosition]
+    position = [int(p+0.5) for p in peak.pointPositions]
     # get the data +/-1 point along each axis
     sliceTuples = [(p-1, p+1) for p in position] # nb: sliceTuples run [1,n] with n inclusive
     #TODO get this via spectrum rather than datasource (once Spectrum.getRegionData is functional again)
@@ -887,7 +887,7 @@ def peakParabolicInterpolation(peak: 'Peak', update=False):
     height = float(numpy.average(arr))
     heightError = arr.max() - arr.min()
     if update:
-        peak.pointPosition = newPosition
+        peak.pointPositions = newPosition
         peak.height = height
         peak.heightError = heightError
     return newPosition, height, heightError

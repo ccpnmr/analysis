@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-16 13:01:27 +0000 (Tue, February 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-16 13:22:59 +0000 (Tue, February 16, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -158,7 +158,7 @@ class PeakPickerABC(object):
 
         if self.defaultPointExtension:
             # add default points to extend pick region
-            self.sliceTuples = [(sLeft - self.defaultPointExtension, sRight + self.defaultPointExtension) if sLeft < sRight else
+            self.sliceTuples = [(sLeft - self.defaultPointExtension, sRight + self.defaultPointExtension) if sLeft <= sRight else
                                 (sLeft + self.defaultPointExtension, sRight - self.defaultPointExtension)
                                 for sLeft, sRight in self.sliceTuples]
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-09 16:47:07 +0000 (Tue, February 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-16 13:22:59 +0000 (Tue, February 16, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -89,6 +89,9 @@ class PeakPickerNd(PeakPickerABC):
                                      minLinewidth,
                                      excludedRegionsList, excludedDiagonalDimsList, excludedDiagonalTransformList)
 
+        # the above can be replaced with the peak list for
+        # refit peaks, etc.
+
         # get the peak maxima from pointPeaks
         pointPeaks = [(np.array(position), height) for position, height in pointPeaks]
 
@@ -99,7 +102,7 @@ class PeakPickerNd(PeakPickerABC):
         allRegionArrays = []
         regionArray = None
 
-        # get eh offset of the bottom left of the slice region
+        # get the offset of the bottom left of the slice region
         startPoint = np.array([pp[0] for pp in self.sliceTuples])
         endPoint = np.array([pp[1] for pp in self.sliceTuples])
         numPointInt = (endPoint - startPoint) + 1
@@ -123,7 +126,7 @@ class PeakPickerNd(PeakPickerABC):
             # numpy arrays need tweaking to pass to the c code
             peakArray = position.reshape((1, self.dimensionCount))
             peakArray = peakArray.astype(np.float32)
-            regionArray = np.array((bLeftAll, tRightAll))
+            regionArray = np.array((bLeftAll, tRightAll), dtype=np.int32)
 
             if allPeaksArray is None:
                 allPeaksArray = peakArray

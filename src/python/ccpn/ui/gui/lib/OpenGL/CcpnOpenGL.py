@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-09 16:44:31 +0000 (Tue, February 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-16 13:02:17 +0000 (Tue, February 16, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -6145,11 +6145,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
         cursorCoordinate = self.getCurrentCursorCoordinate()
         mousePosition = (cursorCoordinate[0], cursorCoordinate[1])
-        position = [mousePosition[0], mousePosition[1]]
+        ppmPositions = [mousePosition[0], mousePosition[1]]
         for orderedAxis in self._orderedAxes[2:]:
-            position.append(orderedAxis.position)
+            ppmPositions.append(orderedAxis.position)
 
-        newPeaks, peakLists = self.strip.peakPickPosition(position)
+        self.strip.peakPickPosition(ppmPositions)
 
     def _clearIntegralRegions(self):
         """Clear the integral regions

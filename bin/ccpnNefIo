@@ -5,4 +5,4 @@ export CCPNMR_TOP_DIR
 NEFIO="${CCPNMR_TOP_DIR}"/src/python/ccpn/core/lib/CcpnNefIo.py
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
-"${ANACONDA3}"/bin/python -W ignore "${NEFIO}" $*
+"${CONDA}"/bin/python -W ignore "${NEFIO}" $*

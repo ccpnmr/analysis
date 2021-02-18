@@ -5,4 +5,4 @@ export CCPNMR_TOP_DIR
 COMPARENEFIO="${CCPNMR_TOP_DIR}"/src/python/ccpn/util/nef/CompareNef.py
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
-"${ANACONDA3}"/bin/python -W ignore "${COMPARENEFIO}" $*
+"${CONDA}"/bin/python -W ignore "${COMPARENEFIO}" $*

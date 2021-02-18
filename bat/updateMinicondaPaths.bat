@@ -3,12 +3,12 @@ setlocal
 set CCPNMR_TOP_DIR=%~dp0\..
 call "%~dp0\paths"
 
-set ENTRYMODULE=%CCPNMR_TOP_DIR%\src\python\ccpn\util\convertPaths.py
-set ROOT=%HOME%\%RELEASE%\%CCPNMRPATH%\miniconda
-set PATHFROM=%ANACONDA3%
-set PATHTO=%HOME%\%RELEASE%\%CCPNMRPATH%\miniconda
+set ENTRY_MODULE=%CCPNMR_TOP_DIR%\src\python\ccpn\util\convertPaths.py
+set ROOT=%HOME%\%RELEASE%\%CCPNMR_PATH%\miniconda
+set PATHFROM=%CONDA%
+set PATHTO=%HOME%\%RELEASE%\%CCPNMR_PATH%\miniconda
 
-"%ANACONDA3%"\python -i -O -W ignore "%ENTRYMODULE%" "%ROOT%" "%PATHFROM%" "%PATHTO%"
+"%CONDA%"\python -i -O -W ignore "%ENTRY_MODULE%" "%ROOT%" "%PATHFROM%" "%PATHTO%"
 endlocal
 
 PAUSE

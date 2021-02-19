@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-12 10:31:34 +0000 (Fri, February 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-19 18:15:48 +0000 (Fri, February 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2514,16 +2514,20 @@ class CcpnNefReader(CcpnNefContent):
                 else:
                     # NB - newObject may be project, for some saveframes.
 
-                    _restraintLinks = False
-                    if str(saveFrameName).startswith('nef_peak_restraint_link'):
-                        getLogger().debug2('>>>      -- bypass {}'.format(saveFrameName))
-                        _restraintLinks = True
+                    # _restraintLinks = False
+                    # if str(saveFrameName).startswith('nef_peak_restraint_link'):
+                    #     getLogger().debug2('>>>      -- bypass {}'.format(saveFrameName))
+                    #     _restraintLinks = True
+                    #
+                    # if not (self._importAll or self._importDict.get(saveFrame.name) or _restraintLinks):
+                    #     # skip items not in the selection list
+                    #     getLogger().debug2('>>>  -- skip import {}'.format(saveFrameName))
+                    #     continue
+                    # getLogger().debug2('>>> loading saveframe {}'.format(saveFrameName))
 
-                    if not (self._importAll or self._importDict.get(saveFrame.name) or _restraintLinks):
+                    if not (self._importAll or self._importDict.get(saveFrame.name)):
                         # skip items not in the selection list
-                        getLogger().debug2('>>>  -- skip import {}'.format(saveFrameName))
                         continue
-                    getLogger().debug2('>>> loading saveframe {}'.format(saveFrameName))
 
                     result = importer(self, project, saveFrame)
                     if isinstance(result, AbstractWrapperObject):
@@ -5130,6 +5134,7 @@ class CcpnNefReader(CcpnNefContent):
     def load_nef_peak_restraint_links(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """load nef_peak_restraint_links saveFrame"""
 
+        print('>>>> LOAD RESTRAINTS')
         mapping = nef2CcpnMap.get('nef_peak_restraint_links') or {}
         for tag, ccpnTag in mapping.items():
             if ccpnTag == _isALoop:
@@ -5188,7 +5193,19 @@ class CcpnNefReader(CcpnNefContent):
                 peakListSerial = peakListObject.serial if peakListObject else None
                 _spectrum = peakListObject.spectrum if peakListObject else None
                 if not _spectrum:
-                    continue
+                    # spectrum not found in a saveframe so try and load from project
+                    _frameID = _getNameFromCategory('nef_nmr_spectrum', _spectrumPidFrame)
+                    if _frameID:
+                        framecode, frameName, subName, prefix, postfix, preSerial, postSerial, category = _frameID
+
+                        _spectrum = project.getSpectrum(subName)
+                        if _spectrum is not None:
+                            # find the peakList in the project
+                            _serial = postSerial or 1
+                            peakListId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (subName, _serial))
+                            peakList = project.getObjectsByPartialId(className='PeakList', idStartsWith=peakListId)
+                            if peakList:
+                                peakListSerial = _serial
 
                 _lastPeakListNum = _spectrum.peakLists[-1].serial if _spectrum.peakLists else None
 
@@ -5197,24 +5214,24 @@ class CcpnNefReader(CcpnNefContent):
                     continue
 
                 _restraintPid = row.get('restraint_list_id')
-                # dataSetSerial = self._frameCodeToSpectra.get(_restraintPid)
-                # _dataSet = project.getDataSet('dataset_{}'.format(dataSetSerial))
-                # if _dataSet is not None:
-                #     for prefix in ['nef_distance_restraint_list',
-                #                          'nef_dihedral_restraint_list',
-                #                          'nef_rdc_restraint_list',
-                #                          'ccpn_restraint_list']:
-                #         if _restraintPid.startswith(prefix):
-                #             _name = _restraintPid[len(prefix)+1:]
-                #             restraintList = _dataSet.getRestraintList(_name)
-                #             break
-                #     else:
-                #         continue
-                #     if not restraintList:
-                #         continue
                 restraintList = self.frameCode2Object.get(_restraintPid)
                 if not restraintList:
+                    # restraintList not found in a saveframe so try and load from project
+                    dataSetSerial = self._frameCodeToSpectra.get(_restraintPid)
+                    _dataSet = project.getDataSet('myDataSet_{}'.format(dataSetSerial))
+                    if _dataSet is not None:
+                        for prefix in ['nef_distance_restraint_list',
+                                             'nef_dihedral_restraint_list',
+                                             'nef_rdc_restraint_list',
+                                             'ccpn_restraint_list']:
+                            if _restraintPid.startswith(prefix):
+                                _name = _restraintPid[len(prefix)+1:]
+                                restraintList = _dataSet.getRestraintList(_name)
+                                if restraintList:
+                                    break
+                if not restraintList:
                     continue
+
                 peakList = _spectrum.getPeakList(peakListNum)
                 if not peakList:
                     continue

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-22 16:37:50 +0000 (Mon, February 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-22 16:41:38 +0000 (Mon, February 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,6 @@ from ccpn.util.Logging import getLogger
 
 from ccpn.framework.Application import getApplication
 
-
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.FileDialog import SpectrumFileDialog
@@ -56,7 +55,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
 VALID_ROWCOLOUR = QtGui.QColor('palegreen')
-VALID_CHANGED_ROWCOLOUR =  QtGui.QColor('darkseagreen')
+VALID_CHANGED_ROWCOLOUR = QtGui.QColor('darkseagreen')
 WARNING_ROWCOLOUR = QtGui.QColor('orange')
 INVALID_ROWCOLOUR = QtGui.QColor('lightpink')
 INVALID_CHANGED_ROWCOLOUR = QtGui.QColor('red')
@@ -85,7 +84,7 @@ class ValidatorABC(QtGui.QValidator):
         return state, p_str, p_int
 
     def isValid(self, value):
-        "return True is value is valid; should be subclassed"
+        """return True is value is valid; should be subclassed"""
         raise NotImplementedError('Implement %s.isValid' % self.__class__.__name__)
 
 
@@ -100,7 +99,7 @@ class PathRowABC(object):
 
     def __init__(self, parentWidget, row, labelText, obj, enabled=True, callback=None):
         """
-        :param parent:
+        :param parentWidget:
         :param labelText:
         :param row:
         :param obj: object being displayed
@@ -112,10 +111,10 @@ class PathRowABC(object):
         self.labelText = labelText
         self.obj = obj
         self.enabled = enabled
-        self.callback = callback    # callback for this row upon change of value /validate()
-                                    # if defined called as: callback(self)
+        self.callback = callback  # callback for this row upon change of value /validate()
+        # if defined called as: callback(self)
 
-        self.row= None  # Undefined
+        self.row = None  # Undefined
         self.isValid = True
         self.validator = None  # validator instance of type self.validatorClass
         self.initialValue = None
@@ -129,7 +128,7 @@ class PathRowABC(object):
 
     @property
     def text(self):
-        "Return the text content of the dataWidget"
+        """Return the text content of the dataWidget"""
         return self.getText()
 
     @text.setter
@@ -139,7 +138,7 @@ class PathRowABC(object):
     @property
     def hasChanged(self):
         """Return True if the text value has changed"""
-        return (self.initialValue != self.text) #and not self._firstTime
+        return (self.initialValue != self.text)  #and not self._firstTime
 
     @property
     def isNotValid(self):
@@ -155,7 +154,7 @@ class PathRowABC(object):
         self.dataWidget = LineEdit(widget, textAlignment='left', grid=(row, 1))
 
         if self.enabled:
-            self.validator = self.validatorClass(obj=self.obj, parent=self.dataWidget, callback= self._validatorCallback)
+            self.validator = self.validatorClass(obj=self.obj, parent=self.dataWidget, callback=self._validatorCallback)
             self.dataWidget.setValidator(self.validator)
         else:
             # set to italic/grey
@@ -186,12 +185,12 @@ class PathRowABC(object):
                 self._setDataInWidget(newPath)
 
     def _setDataInWidget(self, path):
-        "Populate the dataWidget and validate"
+        """Populate the dataWidget and validate"""
         self.setText(path)
         self.validate()
 
     def setEnabled(self, enable):
-        " Enable or disable the row"
+        """Enable or disable the row"""
         if self.labelWidget is None:
             raise RuntimeError('No row widgets defined')
         self.enabled = enable
@@ -200,38 +199,38 @@ class PathRowABC(object):
         self.buttonWidget.setVisible(self.enabled)
 
     def setLabel(self, text):
-        "Set the labelWidget to text"
+        """Set the labelWidget to text"""
         if self.labelWidget is None:
             raise RuntimeError('No row widgets defined')
         self.labelWidget.setText(text)
 
     def getText(self):
-        "Get the textWidget text"
+        """Get the textWidget text"""
         if self.dataWidget is None:
             raise RuntimeError('No row widgets defined')
         return self.dataWidget.text()
 
     def setText(self, text):
-        "Set the textWidget to text"
+        """Set the textWidget to text"""
         if self.dataWidget is None:
             raise RuntimeError('No row widgets defined')
         self.dataWidget.setText(text)
 
     def setPath(self, path):
-        "Set the path name of the object; requires subclassing"
+        """Set the path name of the object; requires subclassing"""
         pass
 
     def getPath(self) -> str:
-        "Get the path name from the object to edit; requires subclassing"
+        """Get the path name from the object to edit; requires subclassing"""
         pass
 
     def getDialogPath(self) -> str:
-        "Get the directory path to start the selection dialog; optionally can be subclassed"
+        """Get the directory path to start the selection dialog; optionally can be subclassed"""
         dirPath = Path.home()
         return str(dirPath)
 
     def update(self):
-        "Call self.path with current value"
+        """Call self.path with current value"""
         self.setPath(self.getText())
 
     def _validatorCallback(self, validator):
@@ -239,7 +238,7 @@ class PathRowABC(object):
         Also call self.callback (if defined)
         """
         self.isValid = validator._isValid
-        if self.isValid and self.initDone:     # This avoids setting on initialisation
+        if self.isValid and self.initDone:  # This avoids setting on initialisation
             self.update()
         self.colourRow()
 
@@ -247,15 +246,15 @@ class PathRowABC(object):
             self.callback(self)
 
     def validate(self):
-        "Validate the row, return True if valid"
+        """Validate the row, return True if valid"""
         if self.validator is not None:
             self.validator.validate(self.text, 0)
             self.isValid = self.validator._isValid
         return self.isValid
 
     def setColour(self, colour):
-        "Set the (base) colour of the dataWidget"
-        if isinstance(colour,str):
+        """Set the (base) colour of the dataWidget"""
+        if isinstance(colour, str):
             colour = QtGui.QColor(colour)
         if not isinstance(colour, QtGui.QColor):
             raise ValueError('Invalid colour ("%s"' % colour)
@@ -281,19 +280,23 @@ class PathRowABC(object):
                 self.setColour(INVALID_ROWCOLOUR)
 
     def setVisible(self, visible):
-        "set visibilty of row"
+        """set visibilty of row"""
         self.labelWidget.setVisible(visible)
         self.dataWidget.setVisible(visible)
         self.buttonWidget.setVisible(visible)
+
+
 # end class
 
 
 class SpectrumValidator(ValidatorABC):
 
     def isValid(self, value):
-        "return True is value is valid"
+        """return True is value is valid"""
         ds = DataStore.newFromPath(value, autoRedirect=False)
         return ds.exists()
+
+
 # end class
 
 
@@ -304,22 +307,25 @@ class SpectrumPathRow(PathRowABC):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     dialogFileMode = 1
     validatorClass = SpectrumValidator
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def getPath(self) -> str:
-        "Get the filePath from spectrum"
+        """Get the filePath from spectrum"""
         return str(self.obj.filePath)
 
     def setPath(self, path):
-        "set the filePath of Spectrum"
+        """set the filePath of Spectrum"""
         # For speed reasons, we check if it any different from before, or was not valid to start with
         oldPath = self.getPath()
         if path != oldPath or not self.obj.hasValidPath():
             self.obj.filePath = path
 
     def getDialogPath(self) -> str:
-        "Get the directory path to start the selection"
+        """Get the directory path to start the selection"""
         return str(self.obj.path.parent)
+
+
 # end class
 
 
@@ -358,14 +364,18 @@ class RedirectPathRow(PathRowABC):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     dialogFileMode = 2
+
+
     # validatorClass = DataUrlValidator
 
     class validatorClass(ValidatorABC):
-        "Validator implementation"
+        """Validator implementation"""
+
         def isValid(self, value):
-            "return True is value is valid"
+            """return True is value is valid"""
             filePath = aPath(value)
             return filePath.exists() and filePath.is_dir()
+
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -374,6 +384,8 @@ class RedirectPathRow(PathRowABC):
 
     def setPath(self, path):
         self.obj.path = aPath(path)
+
+
 # end class
 
 
@@ -409,10 +421,9 @@ class ValidateSpectraPopup(CcpnDialog):
         self.defaultSelected = buttons.index(defaultSelected) \
             if defaultSelected in buttons else buttons.index(ALL_SPECTRA)
 
-
         self.redirectData = OrderedDict()  # dict with (redirection, RedirectPathRow) tuples
         self.spectrumData = OrderedDict()  # dict with (spectrum, SpectrumPathRow) tuples
-        self.dataRow = None # remember the $DATA row
+        self.dataRow = None  # remember the $DATA row
 
         # TODO I think there is a QT bug here - need to set a dummy button first otherwise a click is emitted, will investigate
         rogueButton = Button(self, grid=(0, 0))
@@ -438,7 +449,7 @@ class ValidateSpectraPopup(CcpnDialog):
         for idx, redirect in enumerate(PathRedirections()):
             _row = RedirectPathRow(parentWidget=self.dataUrlScrollAreaWidgetContents, row=scrollRow,
                                    obj=redirect,
-                                   labelText=redirect.identifier, enabled=(idx==0),
+                                   labelText=redirect.identifier, enabled=(idx == 0),
                                    callback=self._dataRowCallback)
             if idx == 0: self.dataRow = _row  # remember the row for $DATA
             self.redirectData[redirect] = _row
@@ -464,7 +475,7 @@ class ValidateSpectraPopup(CcpnDialog):
                                  vAlign='top', hAlign='left')
         self.showValidLabel = Label(self.buttonFrame, text="Show spectra: ", vAlign='t', grid=(0, 0), bold=True)
         self.showValid = RadioButtons(self.buttonFrame,
-                                      texts=['%s  '%b for b in buttons], # hack to add some space!
+                                      texts=['%s  ' % b for b in buttons],  # hack to add some space!
                                       selectedInd=self.defaultSelected,
                                       callback=self._radiobuttonsCallback,
                                       direction='h',
@@ -473,7 +484,7 @@ class ValidateSpectraPopup(CcpnDialog):
                                       )
         specRow += 1
 
-        self._spectrumFrame.addSpacer(5,10, grid=(specRow,0))
+        self._spectrumFrame.addSpacer(5, 10, grid=(specRow, 0))
         specRow += 1
 
         # set up a scroll area
@@ -501,13 +512,13 @@ class ValidateSpectraPopup(CcpnDialog):
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(scrollRow, 1), gridSpan=(1, 1))
 
-        self._spectrumFrame.addSpacer(5,10, grid=(specRow,0))
-        specRow  += 1
+        self._spectrumFrame.addSpacer(5, 10, grid=(specRow, 0))
+        specRow += 1
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         row = 1
-        self.splitter = Splitter(self, grid=(row, 0), setLayout=True, horizontal=False, gridSpan=(1,3))
+        self.splitter = Splitter(self, grid=(row, 0), setLayout=True, horizontal=False, gridSpan=(1, 3))
         self.splitter.addWidget(self.dataUrlScrollArea)
         self.splitter.addWidget(self._spectrumFrame)
         self.getLayout().addWidget(self.splitter, row, 0, 1, 3)
@@ -532,7 +543,7 @@ class ValidateSpectraPopup(CcpnDialog):
     #     try:
     #         super().exec_()
     #     except Exception as es:
-    #         showWarning('An error occured', str(es), parent=self)
+    #         showWarning('An error occurred', str(es), parent=self)
     #         raise es
 
     def _radiobuttonsCallback(self):
@@ -547,13 +558,13 @@ class ValidateSpectraPopup(CcpnDialog):
         """
         doShow = True
         if hasattr(self, 'showValid') and self.showValid is not None:  # just checking that the widget exist
-                                                                       # (not the case on initialisation!)
+            # (not the case on initialisation!)
             ind = self.showValid.getIndex()
             if ind == buttons.index(VALID_SPECTRA) and not row.isValid:  # show only valid
                 doShow = False
-            elif ind == buttons.index(INVALID_SPECTRA) and row.isValid: # show only invalid
+            elif ind == buttons.index(INVALID_SPECTRA) and row.isValid:  # show only invalid
                 doShow = False
-            elif ind == buttons.index(CHANGED_SPECTRA) and not row.hasChanged: # show only changed
+            elif ind == buttons.index(CHANGED_SPECTRA) and not row.hasChanged:  # show only changed
                 doShow = False
             else:  # show all
                 doShow = True
@@ -568,9 +579,9 @@ class ValidateSpectraPopup(CcpnDialog):
 
         # Special case: set WARNING colour of the rows starting with $DATA if not correct
         if row.text.startswith(DataRedirection().identifier) \
-            and self.dataRow is not None and self.dataRow.isNotValid \
-            and row.isNotValid:
-                row.setColour(WARNING_ROWCOLOUR)
+                and self.dataRow is not None and self.dataRow.isNotValid \
+                and row.isNotValid:
+            row.setColour(WARNING_ROWCOLOUR)
 
         self._showRow(row)
 

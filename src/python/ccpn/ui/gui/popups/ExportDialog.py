@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-22 16:19:38 +0000 (Mon, February 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-22 17:00:13 +0000 (Mon, February 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -54,6 +54,7 @@ class ExportDialogABC(CcpnDialogMainWidget):
 
     ACCEPTTEXT = 'Select'
     REJECTTEXT = None
+    PATHTEXT = 'Filename'
 
     def __init__(self, parent=None, mainWindow=None, title='Export to File',
                  fileMode='anyFile',
@@ -107,7 +108,7 @@ class ExportDialogABC(CcpnDialogMainWidget):
         self.saveFrame = Frame(self.mainWidget, setLayout=True, grid=(3, 0))
 
         self.openPathIcon = Icon('icons/directory')
-        self.saveLabel = Label(self.saveFrame, text=' Path: ', grid=(0, 0), hAlign='c')
+        self.saveLabel = Label(self.saveFrame, text=f'{self.PATHTEXT}', grid=(0, 0), hAlign='c')
         self.saveText = LineEdit(self.saveFrame, grid=(0, 1), textAlignment='l')
         self.saveText.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.saveText.setDisabled(False)

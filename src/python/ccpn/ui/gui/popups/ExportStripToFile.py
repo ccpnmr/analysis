@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:50 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-22 16:19:38 +0000 (Mon, February 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -136,6 +136,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                          labelText='Strip/SpectrumDisplay',
                                                          callback=self._changePulldown
                                                          )
+        # self.objectPulldown.modifyTexts(sorted([ky for ky in self.objects.keys()]))
 
         # add a spacer to separate from the common save widgets
         row += 1
@@ -192,11 +193,17 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                         # value=300,
                                                         decimals=0, step=5, range=(36, 2400))
         row += 1
-        userFrame.addSpacer(0, 10, grid=(row, 0))
-        Spacer(userFrame, 5, 5, vPolicy='minimum', grid=(row, 3))
+        # userFrame.addSpacer(0, 10, grid=(row, 3), expandX=True, expandY=False)
+        # Spacer(userFrame, 0, 0, hPolicy='fixed', vPolicy='fixed', grid=(row, 3))
+
+        # _spacer.getLayout().setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
 
         row += 1
         self.treeView = PrintTreeCheckBoxes(userFrame, project=None, grid=(row, 0), gridSpan=(1, 4))
+        Spacer(userFrame, 0, 0, hPolicy='expanding', vPolicy='expanding', grid=(row, 3))
+
+        # self.treeView.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        # userFrame.getLayout().setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
 
     def populate(self, userframe):
         """Populate the widgets with project
@@ -230,7 +237,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             pulldownLabel = 'Current Strip:'
 
         self.objectPulldown.setLabelText(pulldownLabel)
-        self.objectPulldown.modifyTexts(sorted([ky for ky in self.objects.keys()]))
+        self.objectPulldown.pulldownList.setData(sorted([ky for ky in self.objects.keys()]))
 
         # set the page types
         self.exportType.set(EXPORTPDF)
@@ -510,6 +517,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             lastPath.assureSuffix(ext)
             self._dialogFilter = filt
             self.updateDialog()
+            self._updateButtonText()
             self.updateFilename(lastPath)
 
         else:
@@ -628,8 +636,8 @@ class ExportStripToFilePopup(ExportDialogABC):
 
     def actionButtons(self):
         self.setOkButton(callback=self._saveAndCloseDialog, text='Save and Close', tipText='Export the strip and close the dialog')
-        self.setCancelButton(callback=self._rejectDialog, text='Close', tipText='Export the strip and close the dialog')
-        self.setCloseButton(callback=self._saveDialog, text='Save', tipText='Export the strip and close the dialog')
+        self.setCancelButton(callback=self._rejectDialog, text='Close', tipText='Close the dialog')
+        self.setCloseButton(callback=self._saveDialog, text='Save', tipText='Export the strip')
         self.setDefaultButton(ExportDialogABC.CANCELBUTTON)
 
         # self.buttonFrame.addSpacer(0, 10, grid=(0, 1))

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-12 10:31:34 +0000 (Fri, February 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-22 16:19:37 +0000 (Mon, February 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1421,10 +1421,10 @@ class Project(AbstractWrapperObject):
 
         try:
             apiDataSource = self._wrappedData.loadDataSource(
-                    filePath=path, dataFileFormat=subType, name=name
+                    filePath=str(path), dataFileFormat=subType, name=name
                     )
         except Exception as es:
-            getLogger().warning(es)
+            getLogger().warning(str(es))
             traceback.print_exc()
             # raise es # why do we need this? This can be called in a loop, keep the program rolling!
             return []

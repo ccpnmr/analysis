@@ -51,8 +51,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-02-10 18:09:05 +0000 (Wed, February 10, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-22 16:19:37 +0000 (Mon, February 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1417,7 +1417,6 @@ assignmentTolerances
         return tuple(ll)
 
     @property
-    @_includeInDimensionalCopy
     def axesReversed(self) -> Tuple[Optional[bool], ...]:
         """Return whether any of the axes are reversed
         May contain None for undefined axes
@@ -2864,10 +2863,14 @@ assignmentTolerances
             _saveNmrPipe2DHeader(self._wrappedData, fp, xDim, yDim)
             projectedData.tofile(fp)
 
-        newSpectrum = self.project.loadSpectrum(path, subType=Formats.NMRPIPE)[0]
-        newSpectrum.axisCodes = axisCodes  # to override the loadSpectrum routine
-        self.copyParameters(axisCodes=axisCodes, target=newSpectrum)
-        return newSpectrum
+        _spectraLoaded = self.project.loadSpectrum(path, subType=Formats.NMRPIPE)
+        if _spectraLoaded and len(_spectraLoaded) == 1:
+            newSpectrum = _spectraLoaded[0]
+            newSpectrum.axisCodes = axisCodes  # to override the loadSpectrum routine
+            self.copyParameters(axisCodes=axisCodes, target=newSpectrum)
+            return newSpectrum
+        else:
+            raise TypeError('No spectra created')
 
     def _addDataStore(self, filePath, **kwds):
         """Add a new dataStore to the spectrum

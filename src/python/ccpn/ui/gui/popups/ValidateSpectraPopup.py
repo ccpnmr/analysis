@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:36 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-22 16:37:50 +0000 (Mon, February 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -174,9 +174,9 @@ class PathRowABC(object):
 
     def _getDialog(self):
 
-        dialogPath = self.getDialogPath()
-        dialog = SpectrumFileDialog(parent=self.buttonWidget, text='Select path', directory=str(dialogPath),
-                                    fileMode=self.dialogFileMode) #, acceptMode=0)
+        dialog = SpectrumFileDialog(parent=self.buttonWidget, acceptMode='select')
+        dialog._show()
+
         choices = dialog.selectedFiles()
         if choices is not None and len(choices) > 0 and len(choices[0]) > 0:
             newPath = choices[0]

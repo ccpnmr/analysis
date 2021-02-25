@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-22 16:18:39 +0000 (Mon, February 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-02-25 10:47:54 +0000 (Thu, February 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2648,17 +2648,18 @@ class CcpnNefReader(CcpnNefContent):
                 loop = saveFrame.get(tag)
                 if loop:
                     saveFrame._rowErrors[loop.name] = OrderedSet()
-                    verify = self.verifiers[tag]
-                    if addLoopAttribs:
-                        dd = []
-                        for name in addLoopAttribs:
-                            dd.append(saveFrame.get(name))
+                    verify = self.verifiers.get(tag)
+                    if verify:
+                        if addLoopAttribs:
+                            dd = []
+                            for name in addLoopAttribs:
+                                dd.append(saveFrame.get(name))
 
-                        # if loop and hasattr(loop, 'data'):
-                        verify(self, project, loop, saveFrame, *dd, **kwds)
-                    else:
-                        # if loop and hasattr(loop, 'data'):
-                        verify(self, project, loop, saveFrame, **kwds)
+                            # if loop and hasattr(loop, 'data'):
+                            verify(self, project, loop, saveFrame, *dd, **kwds)
+                        else:
+                            # if loop and hasattr(loop, 'data'):
+                            verify(self, project, loop, saveFrame, **kwds)
 
     def _noLoopVerify(self, project: Project, loop: StarIo.NmrLoop, *arg, **kwds):
         """Verify the contents of the loop

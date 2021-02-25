@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-02-11 16:56:19 +0000 (Thu, February 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-25 10:47:54 +0000 (Thu, February 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -567,7 +567,7 @@ class Framework(NotifierBase):
 
     def _savePreferences(self):
         "Save the preferences to file"
-        with catchExceptions(application=self, errorStringTemplate='Error saving preferences; "%s"'):
+        with catchExceptions(application=self, errorStringTemplate='Error saving preferences; "%s"',printTraceBack=True):
             directory = os.path.dirname(userPreferencesPath)
             if not os.path.exists(directory):
                 os.makedirs(directory)
@@ -1416,7 +1416,7 @@ class Framework(NotifierBase):
 
     def createNewProject(self):
         "Callback for creating new project"
-        with catchExceptions(application=self, errorStringTemplate='Error creating new project:'):
+        with catchExceptions(application=self, errorStringTemplate='Error creating new project:', printTraceBack=True):
             okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
                                                                  phrase='create a new')
             if okToContinue:
@@ -1567,7 +1567,7 @@ class Framework(NotifierBase):
 
         with undoBlock():
             with notificationEchoBlocking():
-                with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s'):
+                with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s', printTraceBack=True):
                     # need datablock selector here, with subset selection dependent on datablock type
 
                     self.nefReader.importNewProject(self.project, dataBlock)
@@ -1646,7 +1646,7 @@ class Framework(NotifierBase):
         # with suspendSideBarNotifications(project=self.project):
         with undoBlock():
             with notificationEchoBlocking():
-                with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s'):
+                with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s',printTraceBack=True):
                     self.sparkyReader.importSparkyProject(self.project, dataBlock)
 
         # with undoBlock():
@@ -1828,7 +1828,7 @@ class Framework(NotifierBase):
 
         path = Path.aPath(path)
 
-        with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s'):
+        with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s', printTraceBack=True):
             with undoBlockWithoutSideBar():
                 self._importNefFile(path=path, makeNewProject=False)
             self.ui.mainWindow.sideBar.buildTree(self.project)
@@ -1880,7 +1880,7 @@ class Framework(NotifierBase):
 
             with undoBlock():
                 with notificationEchoBlocking():
-                    with catchExceptions(application=self, errorStringTemplate='Error importing Nef file: %s'):
+                    with catchExceptions(application=self, errorStringTemplate='Error importing Nef file: %s', printTraceBack=True):
                         # need datablock selector here, with subset selection dependent on datablock type
 
                         _nefReader.importNewProject(self.project, _loader._nefDict, selection)

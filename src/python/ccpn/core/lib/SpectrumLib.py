@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-03 17:17:13 +0000 (Wed, February 03, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-02-25 17:11:48 +0000 (Thu, February 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ import numpy as np
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.util.Common import percentage, getAxisCodeMatchIndices
 from ccpn.util.Logging import getLogger
-
+from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeTransfers
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
@@ -1256,3 +1256,133 @@ def _filtered1DArray(data, ignoredRegions):
     fullmask = [all(mask) for mask in zip(*masks)]
     newArray = (np.ma.MaskedArray(data, mask=np.logical_not((fullmask, fullmask))))
     return newArray
+
+
+def initExpBoundResonances(experiment):
+    """
+    Refresh the covalently bound status for any resonances connected
+    via peaks in a given experiment.
+
+    """
+    resonances = {}
+    for spectrum in experiment.dataSources:
+        for peakList in spectrum.peakLists:
+            for peak in peakList.peaks:
+                for peakDim in peak.peakDims:
+                    for contrib in peakDim.peakDimContribs:
+                        resonances[contrib.resonance] = None
+    for resonance in resonances.keys():
+        _getBoundResonances(resonance, recalculate=True)
+
+def _initExpTransfers(experiment, overwrite=True):
+    """
+    Set up the ExpTransfers for an experiment using available refExperiment
+    information. Boolean option to remove any existing transfers.
+    List of Nmr.ExpTransfers
+    """
+
+    if not experiment.refExperiment:
+        for expTransfer in experiment.expTransfers:
+            expTransfer.delete()
+
+        initExpBoundResonances(experiment)
+        return
+
+    if experiment.expTransfers:
+        if not overwrite:
+            return list(experiment.expTransfers)
+        else:
+            for expTransfer in experiment.expTransfers:
+                expTransfer.delete()
+
+    visibleSites = {}
+    for expDim in experiment.expDims:
+        for expDimRef in expDim.expDimRefs:
+            if not expDimRef.refExpDimRef:
+                continue
+
+            measurement = expDimRef.refExpDimRef.expMeasurement
+            if measurement.measurementType in ('Shift', 'shift', 'MQShift'):
+                for atomSite in measurement.atomSites:
+                    if atomSite not in visibleSites:
+                        visibleSites[atomSite] = []
+
+                    visibleSites[atomSite].append(expDimRef)
+
+    transferDict = {}
+    for atomSite in visibleSites:
+        expDimRefs = visibleSites[atomSite]
+
+        for expTransfer in atomSite.expTransfers:
+            atomSiteA, atomSiteB = expTransfer.atomSites
+
+            if (atomSiteA in visibleSites) and (atomSiteB in visibleSites):
+                if transferDict.get(expTransfer) is None:
+                    transferDict[expTransfer] = []
+                transferDict[expTransfer].extend(expDimRefs)
+
+    # Indirect transfers, e.g. Ch_hC.NOESY or H_hC.NOESY
+    indirectTransfers = set()
+    for expGraph in experiment.refExperiment.nmrExpPrototype.expGraphs:
+        for expTransfer in expGraph.expTransfers:
+            if (expTransfer not in transferDict) and \
+                    (expTransfer.transferType in longRangeTransfers):
+                atomSiteA, atomSiteB = expTransfer.atomSites
+
+                if atomSiteA not in visibleSites:
+                    for expTransferA in atomSiteA.expTransfers:
+                        if expTransferA.transferType != 'onebond':
+                            continue
+
+                        atomSites = list(expTransferA.atomSites)
+                        atomSites.remove(atomSiteA)
+                        atomSiteC = atomSites[0]
+
+                        if atomSiteC in visibleSites:
+                            atomSiteA = atomSiteC
+                            break
+
+                if atomSiteB not in visibleSites:
+                    for expTransferB in atomSiteB.expTransfers:
+                        if expTransferB.transferType != 'onebond':
+                            continue
+
+                        atomSites = list(expTransferB.atomSites)
+                        atomSites.remove(atomSiteB)
+                        atomSiteD = atomSites[0]
+
+                        if atomSiteD in visibleSites:
+                            atomSiteB = atomSiteD
+                            break
+
+                if (atomSiteA in visibleSites) and (atomSiteB in visibleSites):
+                    expDimRefsA = visibleSites[atomSiteA]
+                    expDimRefsB = visibleSites[atomSiteB]
+                    transferDict[expTransfer] = expDimRefsA + expDimRefsB
+                    indirectTransfers.add(expTransfer)
+
+    expTransfers = []
+    for refTransfer in transferDict.keys():
+        expDimRefs = frozenset(transferDict[refTransfer])
+        if len(expDimRefs) == 2:
+            transferType = refTransfer.transferType
+            expTransfer = experiment.findFirstExpTransfer(expDimRefs=expDimRefs)
+
+            if expTransfer:
+                # normally this would not need setting
+                # but we renamed NOESY to through-space so this catches that situation
+                expTransfer.transferType = transferType
+            else:
+                expTransfer = experiment.newExpTransfer(transferType=transferType,
+                                                        expDimRefs=expDimRefs)
+
+            if refTransfer in indirectTransfers:
+                isDirect = False
+            else:
+                isDirect = True
+
+            expTransfer.isDirect = isDirect
+            expTransfers.append(expTransfer)
+
+    initExpBoundResonances(experiment)
+    return expTransfers

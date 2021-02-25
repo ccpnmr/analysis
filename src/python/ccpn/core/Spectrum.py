@@ -51,8 +51,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-22 16:19:37 +0000 (Mon, February 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-02-25 17:11:48 +0000 (Thu, February 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -583,11 +583,14 @@ assignmentTolerances
 
     @experimentType.setter
     def experimentType(self, value: str):
+        from ccpn.core.lib.SpectrumLib import _initExpTransfers
         for nmrExpPrototype in self._wrappedData.root.sortedNmrExpPrototypes():
             for refExperiment in nmrExpPrototype.sortedRefExperiments():
                 if value == refExperiment.name:
                     # refExperiment matches name string - set it
                     self._wrappedData.experiment.refExperiment = refExperiment
+                    # init
+                    _initExpTransfers(self._wrappedData.experiment)
                     synonym = refExperiment.synonym
                     if synonym:
                         self.experimentName = synonym

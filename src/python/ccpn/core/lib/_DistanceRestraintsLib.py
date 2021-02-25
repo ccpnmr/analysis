@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-02-25 13:21:38 +0000 (Thu, February 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-25 17:18:51 +0000 (Thu, February 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -319,6 +319,12 @@ def _getDataDimRefFromPeakDim(peakDim):
                 return dataDimRef
     return dataDimRef
 
+def _setPeakDataDimRef(peak):
+    for peakDim in peak.peakDims:
+        if not peakDim.dataDimRef:
+            peakDim.dataDimRef = _getDataDimRefFromPeakDim(peakDim)
+
+
 def _getBoundResonances(resonance, recalculate=False, contribs=None, doWarning=False,
                         recursiveCall=False):
     """
@@ -375,9 +381,11 @@ def _getBoundResonances(resonance, recalculate=False, contribs=None, doWarning=F
     for contrib in contribs:
         peakDim = contrib.peakDim
         if not peakDim.dataDimRef:
-            expDimRef1 = _getDataDimRefFromPeakDim(peakDim)
+            dataDimRef = _getDataDimRefFromPeakDim(peakDim)
+            expDimRef1 = dataDimRef.expDimRef
         else:
             expDimRef1 = peakDim.dataDimRef.expDimRef
+
         expTransfers = expDimRef1.expTransfers
 
         for expTransfer in expTransfers:
@@ -392,7 +400,8 @@ def _getBoundResonances(resonance, recalculate=False, contribs=None, doWarning=F
                 if expDimRef2:
                     for peakDim2 in peakDim.peak.peakDims:
                         if not peakDim2.dataDimRef:
-                            _expDimRef2 = _getDataDimRefFromPeakDim(peakDim2)
+                            _dataDimRef = _getDataDimRefFromPeakDim(peakDim2)
+                            _expDimRef2 = _dataDimRef.expDimRef
                         else:
                             _expDimRef2 = peakDim2.dataDimRef.expDimRef
 
@@ -663,11 +672,11 @@ def _findPeakConstraintPairs(peak, residueRanges=None, distDataDims=None, distIn
   peakDims = peak.sortedPeakDims()
 
   if peakDims[distIndices[0]].peakDimContribs and peakDims[distIndices[1]].peakDimContribs:
-
     peakDim0 = peakDims[distIndices[0]]
     for contrib in peakDim0.peakDimContribs:
       resonance = contrib.resonance
       if resonance.resonanceSet:
+        print('>> Here', resonance.resonanceSet)
         if residueRanges:
           residue = resonance.resonanceSet.findFirstAtomSet().findFirstAtom().residue
           if _isResidueInRange(residue, residueRanges, distDim0):
@@ -1528,7 +1537,6 @@ def _newDistanceRestraintsFromPeakList(peakList,
             for dataDim in dataDims:
                 expDimRef = dataDim.expDim.sortedExpDimRefs()[0]
                 indirectDims[dataDim.dim] = isotopesDict[expDimRef]
-
     _constraints = []
     for peak in workingPeaks:
         if peak.figOfMerit < minMerit:
@@ -1537,10 +1545,11 @@ def _newDistanceRestraintsFromPeakList(peakList,
         if not intensity:
             continue
         intensityValue = abs(intensity)
-
+        _setPeakDataDimRef(peak)
         resonances0, resonances1 = _findPeakConstraintPairs(peak, residueRanges, distDataDims, distIndices, indirectDims)
-        if resonances0 and resonances1:
+        # print('>> resonances0', resonances0, resonances1)
 
+        if resonances0 and resonances1:
             peakDims = peak.sortedPeakDims()
             peakDim0 = peakDims[distIndices[0]]
             peakDim1 = peakDims[distIndices[1]]
@@ -1555,7 +1564,7 @@ def _newDistanceRestraintsFromPeakList(peakList,
                             if contrib1.peakDim is peakDim1:
                                 resonancesF = (contrib0.resonance, contrib1.resonance)
                                 contribFilter.add(resonancesF)
-
+            # print('>> if contribFilter', contribFilter)
             peakMean = scaleDict.get(peak)
             if peakMean is None:
                 if peak in scaleDict:  # in this case the peak is in the dict but with a value of None
@@ -1714,6 +1723,8 @@ def _makeAmbigDistConstraints(peakList, tolerances, chemShiftRanges, constraintS
 
     workingPeaks = []
     for peak in peakList.sortedPeaks():
+        # make sure there is datadimRef
+        _setPeakDataDimRef(peak)
         # filter out diagonals
         if ignoreDiagonals:
             peakDims = peak.sortedPeakDims()
@@ -2186,7 +2197,7 @@ def _newV3AmbigDistRestraints(v3PeakList,
                             minTolerances = (0.1, 0.1, 0.1),
                             maxTolerances = (0.1, 0.1, 0.1),
                             chemShiftRangesDim1 = ((-4.0, 20.0)),
-                            chemShiftRangesDim2 = ((-4.0, 4.85), (4.85, 20)),
+                            chemShiftRangesDim2 = ((-4.0, 4.85)),
                             chemShiftRangesDim3 = ((0, 250.0)),
                             toleranceFactor = 1,
                             intensityType='height',
@@ -2241,3 +2252,18 @@ def _newV3AmbigDistRestraints(v3PeakList,
                     assignments = ['.'.join(ss) for ss in _assignments]
                     rc.addRestraintItem(assignments)
             project.deleteObjects(*[tempV3Dataset]) # delete the temp ConstrainList
+
+
+def _newAtomAndResonanceSets(project):
+    """
+    testing only. Currently we don't have tools to create  newAtomSet, newResonanceSet
+    These are necessary for making distance constraints.
+    """
+    for i in project.nmrAtoms:
+        nmrProject = project._wrappedData
+        v3Atom = i.atom
+        resonance = i._wrappedData
+        if v3Atom:
+            atom = v3Atom._wrappedData
+            atomSet = nmrProject.newAtomSet(name=atom.name, atoms=[atom])
+            resonanceSet = nmrProject.newResonanceSet(resonances=[resonance], atomSets=[atomSet])

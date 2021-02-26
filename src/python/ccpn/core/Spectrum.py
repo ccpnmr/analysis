@@ -50,7 +50,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-16 13:01:27 +0000 (Tue, February 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-26 10:06:16 +0000 (Fri, February 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -574,7 +574,7 @@ class Spectrum(AbstractWrapperObject):
     @property
     @_includeInCopy
     def negativeNoiseLevel(self) -> float:
-        """ Negative noise level value. Stored in Internal"""
+        """Negative noise level value. Stored in Internal"""
         propertyName = sys._getframe().f_code.co_name
         value = self.getParameter(self._AdditionalAttribute, propertyName)
         return value
@@ -1676,8 +1676,6 @@ class Spectrum(AbstractWrapperObject):
     @_includeInDimensionalCopy
     def aliasingRange(self) -> Optional[Tuple[Tuple, ...]]:
         """Return a tuple of the aliasing range in each dimension, or None of not set
-        Note, this is an attribute, not a property;
-        to get the property use spectrum._getAliasingRange, or peakList._getAliasingRange
         """
         alias = self.getParameter(SPECTRUMALIASING, ALIASINGRANGE)
         if alias is not None:

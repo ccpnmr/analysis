@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-25 16:07:52 +0000 (Mon, January 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-26 11:18:39 +0000 (Fri, February 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -423,7 +423,14 @@ class SpectrumToolBar(ToolBar):
         spectrumName = spectrum.name
 
         # create new action
-        action = self.addAction(spectrumName)
+        _actions = [action for action in self.actions() if action and action.objectName() == spectrum.pid]
+        if len(_actions) > 1:
+            raise RuntimeError('Too many toolbar actions with the same name')
+        if len(_actions) == 1:
+            action = _actions[0]
+        else:
+            action = self.addAction(spectrumName)
+
         action.setObjectName(spectrum.pid)
 
         action.setCheckable(True)
@@ -446,8 +453,16 @@ class SpectrumToolBar(ToolBar):
 
         # if spectrumDisplay.is1D:
         #     action.toggled.connect(spectrumView.plot.setVisible)
-        action.toggled.connect(spectrumView.setVisible)
+        # action.toggled.connect(spectrumView.setVisible)
+        action.toggled.connect(partial(self._toggleSpectrumViews, spectrum))
         setWidgetFont(action, size='SMALL')
+
+    def _toggleSpectrumViews(self, spectrum, visible):
+        """Toggle visibility of spectrumViews attached to this spectrum in the same spectrumDisplay
+        """
+        specViews = [sv for sv in self.widget.spectrumViews if sv.spectrum == spectrum]
+        for sv in specViews:
+            sv.setVisible(visible)
 
     def _addSpectrumViewToolButtons(self, spectrumView):
         spectrumDisplay = spectrumView.strip.spectrumDisplay

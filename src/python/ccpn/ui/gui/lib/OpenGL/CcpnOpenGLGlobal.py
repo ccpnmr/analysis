@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-26 10:14:16 +0000 (Fri, February 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -68,32 +68,23 @@ class GLGlobalData(QtWidgets.QWidget):
     Class to handle the common information between all the GL widgets
     """
 
-    def __init__(self, parent=None, mainWindow=None):  #, strip=None, spectrumDisplay=None):
+    def __init__(self, parent=None, mainWindow=None):
         """
         Initialise the global data
 
         :param parent:
         :param mainWindow:
-        :param strip:
-        :param spectrumDisplay:
         """
 
         super(GLGlobalData, self).__init__()
         self._parent = parent
         self.mainWindow = mainWindow
-        # self.strip = strip
-        # self._spectrumDisplay = spectrumDisplay
 
         self.fonts = {}
         self.loadFonts()
-
         self.shaders = None
-        self.initialiseShaders()
-        self._glClientIndex = 0
 
-    def getNextClientIndex(self):
-        self._glClientIndex += 1
-        return 1  #self._glClientIndex
+        self.initialiseShaders()
 
     def loadFonts(self):
         """Load all the necessary GLFonts
@@ -117,17 +108,18 @@ class GLGlobalData(QtWidgets.QWidget):
         """
         # add some shaders to the global data
         self.shaders = {}
-        for _shader in (PixelShader, TextShader):
+        for _shader in (PixelShader, TextShader, AliasedPixelShader):
             _new = _shader()
             self.shaders[_new.name] = _new
 
         self._shaderProgram1 = self.shaders['pixelShader']
         self._shaderProgramTex = self.shaders['textShader']
+        self._shaderProgramAlias = self.shaders['aliasedPixelShader']
 
 
 class PixelShader(ShaderProgramABC):
     """
-    Main pixel shader
+    Pixel shader for contour plotting
 
     A very simple shader, uses the projection/viewport matrices to calculate the gl_Position,
     and passes through the gl_Color to set the pixel.
@@ -136,7 +128,6 @@ class PixelShader(ShaderProgramABC):
     name = 'pixelShader'
     CCPNSHADER = True
 
-    # simple shader for standard plotting of contours
     # vertex shader to determine the co-ordinates
     vertexShader = """
         #version 120
@@ -166,10 +157,13 @@ class PixelShader(ShaderProgramABC):
         }
         """
 
-    # attribute list for main shader
+    # attribute list for shader
     attributes = {'pMatrix' : (16, np.float32),
                   'mvMatrix': (16, np.float32),
                   }
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # methods available for shader
 
     def setPMatrix(self, matrix):
         """Set the contents of projection pMatrix
@@ -182,6 +176,147 @@ class PixelShader(ShaderProgramABC):
         :param matrix: consisting of 16 float32 elements
         """
         self.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, matrix)
+
+
+class AliasedPixelShader(ShaderProgramABC):
+    """
+    Pixel shader for aliased peak plotting
+
+    Uses the projection/viewport matrices to calculate the gl_Position,
+    and passes through the gl_Color to set the pixel.
+    gl_Color is modified for peaks at different aliased positions
+    """
+
+    name = 'aliasedPixelShader'
+    CCPNSHADER = True
+
+    # vertex shader to determine the co-ordinates
+    vertexShader = """
+        #version 120
+
+        uniform   mat4  pMatrix;
+        uniform   mat4  mvMatrix;
+        attribute float alias;
+        uniform   float aliasPosition;
+        varying   float _aliased;
+        varying   vec4  _FC;
+        
+        void main()
+        {
+          // calculate the position, set sahding value
+          gl_Position = pMatrix * mvMatrix * vec4(gl_Vertex.xy, 1, 1);
+          _FC = gl_Color;
+          _aliased = (aliasPosition - alias);
+        }
+        """
+
+    # fragment shader to set the colour
+    fragmentShader = """
+        #version 120
+
+        uniform vec4  background;
+        uniform float aliasShade;
+        uniform int   aliasEnabled;
+        varying vec4  _FC;
+        varying float _aliased;
+        
+        void main()
+        {
+          // set the pixel colour
+          if (abs(_aliased) < 0.5) {
+            gl_FragColor = _FC;
+          }
+          else if (aliasEnabled != 0) {
+            // set the colour if aliasEnabled (could use this method or set the alpha)
+            gl_FragColor = (aliasShade * _FC) + (1 - aliasShade) * background;
+            //gl_FragColor = vec4(_FC.xyz, _FC.w * aliasShade);
+          }
+          else {
+            // skip the pixel
+            discard;
+          }
+        }
+        """
+
+    # attribute list for shader
+    attributes = {'pMatrix'      : (16, np.float32),
+                  'mvMatrix'     : (16, np.float32),
+                  'aliasPosition': (1, np.float32),
+                  'background'   : (4, np.float32),
+                  'aliasShade'   : (1, np.float32),
+                  'aliasEnabled' : (1, np.uint32),
+                  }
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # methods available for shader
+
+    def setPMatrix(self, matrix):
+        """Set the contents of projection pMatrix
+        :param matrix: consisting of 16 float32 elements
+        """
+        self.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, matrix)
+
+    def setMVMatrix(self, matrix):
+        """Set the contents of viewport mvMatrix
+        :param matrix: consisting of 16 float32 elements
+        """
+        self.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, matrix)
+
+    def setAliasPosition(self, aliasX, aliasY):
+        """Set the alias position:
+        Used to calculate whether the current peak is in the aliased region
+        :param aliasX: X alias region
+        :param aliasY: Y alias region
+        """
+        self.setGLUniform1f('aliasPosition', getAliasSetting(aliasX, aliasY))
+
+    def setBackground(self, colour):
+        """Set the background colour, for use with the solid text
+        colour is tuple/list of 4 float/np.float32 elements in range 0.0-1.0
+        values outside range will be clipped
+        :param colour: tuple/list
+        """
+        if len(colour) != 4 and not isinstance(colour, (list, tuple, type(np.array))):
+            raise TypeError('colour must tuple/list/numpy.array of 4 elements')
+        if not all(isinstance(col, (float, np.float32)) for col in colour):
+            raise TypeError('colour must be tuple/list/numpy.array of float/np.float32')
+
+        self.setGLUniform4fv('background', 1, np.clip(colour, [0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0]))
+
+    def setAliasShade(self, aliasShade):
+        """Set the alias shade: a single float in range [0.0, 1.0]
+        Used to determine visibility of aliased peaks, 0.0 -> background colour
+        :param value: single float32
+        """
+        if not isinstance(aliasShade, (float, np.float32)):
+            raise TypeError('aliasShade must be a float')
+        value = float(np.clip(aliasShade, 0.0, 1.0))
+
+        self.setGLUniform1f('aliasShade', value)
+
+    def setAliasEnabled(self, aliasEnabled):
+        """Set the alias enabled: bool True/False
+        Used to determine visibility of aliased peaks, using aliasShade
+        False = disable visibility of aliased peaks
+        :param aliasEnabled: bool
+        """
+        if not isinstance(aliasEnabled, bool):
+            raise TypeError('aliasEnabled must be a bool')
+        value = 1 if aliasEnabled else 0
+
+        self.setGLUniform1i('aliasEnabled', value)
+
+
+def getAliasSetting(aliasX, aliasY):
+    """Return the alias setting for alias value (aliasX, aliasY) for insertion into shader
+    """
+    if not isinstance(aliasX, int):
+        raise TypeError('aliasX must be an int')
+    if not isinstance(aliasY, int):
+        raise TypeError('aliasY must be an int')
+
+    # arbitrary value to pack into a single float
+    return (256 * aliasX) + aliasY
 
 
 class TextShader(ShaderProgramABC):
@@ -246,6 +381,7 @@ class TextShader(ShaderProgramABC):
         }
         """
 
+    # attribute list for shader
     attributes = {'pTexMatrix'  : (16, np.float32),
                   'axisScale'   : (4, np.float32),
                   'stackOffset' : (2, np.float32),
@@ -254,6 +390,9 @@ class TextShader(ShaderProgramABC):
                   'blendEnabled': (1, np.uint32),
                   'alpha'       : (1, np.float32),
                   }
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # methods available for shader
 
     def setPTexMatrix(self, matrix):
         """Set the contents of projection pTexMatrix
@@ -265,12 +404,22 @@ class TextShader(ShaderProgramABC):
         """Set the axisScale values
         :param axisScale: consisting of 4 float32 elements
         """
+        if len(axisScale) != 4 and not isinstance(axisScale, (list, tuple, type(np.array))):
+            raise TypeError('axisScale must tuple/list/numpy.array of 4 elements')
+        if not all(isinstance(val, (float, np.float32)) for val in axisScale):
+            raise TypeError('axisScale must be tuple/list/numpy.array of float/np.float32')
+
         self.setGLUniform4fv('axisScale', 1, axisScale)
 
     def setStackOffset(self, stackOffset):
         """Set the stacking value for the 1d widget
         :param stackOffset: consisting of 2 float32 elements, the stacking offset in thje X, Y dimensions
         """
+        if len(stackOffset) != 2 and not isinstance(stackOffset, (list, tuple, type(np.array))):
+            raise TypeError('stackOffset must tuple/list/numpy.array of 2 elements')
+        if not all(isinstance(val, (float, np.float32)) for val in stackOffset):
+            raise TypeError('stackOffset must be tuple/list/numpy.array of float/np.float32')
+
         self.setGLUniform2fv('stackOffset', 1, stackOffset)
 
     def setTextureID(self, textureID):
@@ -283,6 +432,11 @@ class TextShader(ShaderProgramABC):
         """Set the background colour, for use with the solid text
         :param colour: consisting of 4 float32 elements
         """
+        if len(colour) != 4 and not isinstance(colour, (list, tuple, type(np.array))):
+            raise TypeError('colour must tuple/list/numpy.array of 4 elements')
+        if not all(isinstance(col, (float, np.float32)) for col in colour):
+            raise TypeError('colour must be tuple/list/numpy.array of float/np.float32')
+
         self.setGLUniform4fv('background', 1, colour)
 
     def setBlendEnabled(self, blendEnabled):
@@ -290,10 +444,19 @@ class TextShader(ShaderProgramABC):
         surrounded with a solid background block
         :param blendEnabled: single uint32
         """
-        self.setGLUniform1i('blendEnabled', blendEnabled)
+        if not isinstance(blendEnabled, bool):
+            raise TypeError('blendEnabled must be a bool')
+        value = 1 if blendEnabled else 0
+
+        self.setGLUniform1i('blendEnabled', value)
 
     def setAlpha(self, alpha):
         """Set the alpha value, a multiplier to the transparency 0 - completely transparent; 1 - solid
+        alpha to clipped to value [0.0, 1.0]
         :param alpha: single float32
         """
-        self.setGLUniform1f('alpha', alpha)
+        if not isinstance(alpha, (float, np.float32)):
+            raise TypeError('value must be a float')
+        value = float(np.clip(alpha, 0.0, 1.0))
+
+        self.setGLUniform1f('alpha', value)

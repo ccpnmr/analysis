@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-26 10:15:39 +0000 (Fri, February 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -68,7 +68,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLFULLLIST, GLEXTENDEDLIST, GLCURSORS, GLDIAGONALLINE, GLDIAGONALSIDEBANDS, \
     MAINVIEW, MAINVIEWFULLHEIGHT, MAINVIEWFULLWIDTH, \
     RIGHTAXIS, RIGHTAXISBAR, FULLRIGHTAXIS, FULLRIGHTAXISBAR, \
-    BOTTOMAXIS, BOTTOMAXISBAR, FULLBOTTOMAXIS, FULLBOTTOMAXISBAR, FULLVIEW, BLANKVIEW
+    BOTTOMAXIS, BOTTOMAXISBAR, FULLBOTTOMAXIS, FULLBOTTOMAXISBAR, FULLVIEW, BLANKVIEW, \
+    GLALIASENABLED, GLALIASSHADE
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPNG

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:36 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-26 10:15:39 +0000 (Fri, February 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -222,6 +222,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
                     strip.spectrumBordersVisible = self.application.preferences.general.showSpectrumBorder
 
+                    strip.aliasEnabled = self.application.preferences.general.aliasEnabled
+                    strip.aliasShade = self.application.preferences.general.aliasShade
+
                 strip._frameGuide.resetColourTheme()
 
     def _updateDisplay(self, updateColourScheme, updateSpectrumDisplays):
@@ -378,7 +381,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.restoreLayoutOnOpeningLabel = Label(parent, text="Restore Layout On Opening", grid=(row, 0))
-        self.restoreLayoutOnOpeningBox = CheckBox(parent, grid=(row, 1))  #,
+        self.restoreLayoutOnOpeningBox = CheckBox(parent, grid=(row, 1))
         self.restoreLayoutOnOpeningBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'restoreLayoutOnOpening'))
 
         row += 1
@@ -663,7 +666,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.symbol.setIndex(self.preferences.general.symbolType)
         self.symbolSizePixelData.setValue(int('%i' % self.preferences.general.symbolSizePixel))
         self.symbolThicknessData.setValue(int(self.preferences.general.symbolThickness))
+        self.aliasEnabledData.setChecked(self.preferences.general.aliasEnabled)
+        self.aliasShadeData.setValue(self.preferences.general.aliasShade)
         self.contourThicknessData.setValue(int(self.preferences.general.contourThickness))
+
         self.autoCorrectBox.setChecked(self.preferences.general.autoCorrectColours)
         _setColourPulldown(self.marksDefaultColourBox, self.preferences.general.defaultMarksColour)
         self.showSideBandsData.setValue(int(self.preferences.general.numSideBands))
@@ -1000,6 +1006,18 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                            min=1, max=20, grid=(row, 1), hAlign='l')
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         self.symbolThicknessData.valueChanged.connect(self._queueSetSymbolThickness)
+
+        row += 1
+        self.aliasEnabledLabel = Label(parent, text="Show Aliased Peaks", grid=(row, 0))
+        self.aliasEnabledData = CheckBox(parent, grid=(row, 1))
+        self.aliasEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'aliasEnabled'))
+
+        row += 1
+        self.aliasShadeLabel = Label(parent, text="Aliased Peak Visibility", grid=(row, 0))
+        self.aliasShadeData = DoubleSpinbox(parent, step=0.05,
+                                            min=0, max=1.0, grid=(row, 1), hAlign='l')
+        self.aliasShadeData.setMinimumWidth(LineEditsMinimumWidth)
+        self.aliasShadeData.valueChanged.connect(self._queueSetAliasShade)
 
         row += 1
         self.contourThicknessLabel = Label(parent, text="Contour Thickness (points)", grid=(row, 0))
@@ -1474,6 +1492,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Set the Thickness of the peak contours (ppm)
         """
         self.preferences.general.contourThickness = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetAliasShade(self):
+        value = self.aliasShadeData.get()
+        if value != self.preferences.general.aliasShade:
+            return partial(self._setAliasShade, value)
+
+    def _setAliasShade(self, value):
+        """Set the aliased peaks Shade 0.0->1.0; 0.0 is invisible
+        """
+        self.preferences.general.aliasShade = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetZPlaneNavigationMode(self):

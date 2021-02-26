@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-26 10:15:39 +0000 (Fri, February 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ import sys, os
 from imageio import imread
 from PyQt5 import QtWidgets
 import numpy as np
+import math
 from collections import namedtuple
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray, GLRENDERMODE_DRAW
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import LEFTBORDER, RIGHTBORDER, TOPBORDER, BOTTOMBORDER
@@ -127,8 +128,8 @@ class CcpnGLFont():
                         GL.GL_ALPHA, GL.GL_UNSIGNED_BYTE, self._fontArray)
 
         # nearest is the quickest gl plotting and gives a slightly brighter image
-        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)
-        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+        GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
 
         # the following 2 lines generate a multitexture mipmap - shouldn't need here
         # GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR )
@@ -235,6 +236,25 @@ class GLString(GLVertexArray):
                  angle=0.0, width=None, height=None,
                  GLContext=None, blendMode=True,
                  clearArrays=False, serial=None, pixelScale=None):
+        """
+        Create a GLString object for drawing text to the GL window
+        :param text:
+        :param font:
+        :param obj:
+        :param colour:
+        :param x:
+        :param y:
+        :param ox:
+        :param oy:
+        :param angle: angle in degrees, negative is anti-clockwise
+        :param width:
+        :param height:
+        :param GLContext:
+        :param blendMode:
+        :param clearArrays:
+        :param serial:
+        :param pixelScale:
+        """
         super().__init__(renderMode=GLRENDERMODE_DRAW, blendMode=blendMode,
                          GLContext=GLContext, drawMode=GL.GL_TRIANGLES,
                          dimension=2, clearArrays=clearArrays)
@@ -248,7 +268,7 @@ class GLString(GLVertexArray):
         self.colour = colour
         self._position = (x, y)
         self._offset = (ox, oy)
-
+        self._angle = (3.1415926535 / 180) * angle
         self._scale = pixelScale or GLContext.viewports.devicePixelRatio
         self.buildString()
 
@@ -282,7 +302,8 @@ class GLString(GLVertexArray):
         penY = 0  # offset the string from (0, 0) and use (x, y) in shader
         prev = None
 
-        # cs, sn = math.cos(angle), math.sin(angle)
+        if self._angle != 0.0:
+            cs, sn = math.cos(self._angle), math.sin(self._angle)
         # rotate = np.matrix([[cs, sn], [-sn, cs]])
 
         i = 0
@@ -306,18 +327,22 @@ class GLString(GLVertexArray):
                 v0 = glyph.GlyphTY0
                 u1 = glyph.GlyphTX1
                 v1 = glyph.GlyphTY1
-
-                # # apply rotation to the text - not required
-                # xbl, ybl = x0 * cs + y0 * sn, -x0 * sn + y0 * cs
-                # xtl, ytl = x0 * cs + y1 * sn, -x0 * sn + y1 * cs
-                # xtr, ytr = x1 * cs + y1 * sn, -x1 * sn + y1 * cs
-                # xbr, ybr = x1 * cs + y0 * sn, -x1 * sn + y0 * cs
-
                 i4 = i * 4
                 i6 = i * 6
                 i8 = i * 8
 
-                self.vertices[i8:i8 + 8] = (x0, y0, x0, y1, x1, y1, x1, y0)  # pixel coordinates in string
+                if self._angle == 0.0:
+                    # horizontal text
+                    self.vertices[i8:i8 + 8] = (x0, y0, x0, y1, x1, y1, x1, y0)  # pixel coordinates in string
+                else:
+                    # apply rotation to the text
+                    xbl, ybl = x0 * cs + y0 * sn, -x0 * sn + y0 * cs
+                    xtl, ytl = x0 * cs + y1 * sn, -x0 * sn + y1 * cs
+                    xtr, ytr = x1 * cs + y1 * sn, -x1 * sn + y1 * cs
+                    xbr, ybr = x1 * cs + y0 * sn, -x1 * sn + y0 * cs
+
+                    self.vertices[i8:i8 + 8] = (xbl, ybl, xtl, ytl, xtr, ytr, xbr, ybr)  # pixel coordinates in string
+
                 self.indices[i6:i6 + 6] = (i4, i4 + 1, i4 + 2, i4, i4 + 2, i4 + 3)
                 self.texcoords[i8:i8 + 8] = (u0, v0, u0, v1, u1, v1, u1, v0)
 

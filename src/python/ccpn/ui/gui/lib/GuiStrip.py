@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-26 10:15:39 +0000 (Fri, February 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ from ccpn.util.Common import ZPlaneNavigationModes
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISASPECTRATIOS, AXISASPECTRATIOMODE, \
-    BOTTOMAXIS, RIGHTAXIS
+    BOTTOMAXIS, RIGHTAXIS, ALIASENABLED, ALIASSHADE
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
     notificationBlanking, undoBlockWithoutSideBar
 from ccpn.util.decorators import logCommand
@@ -172,6 +172,8 @@ class GuiStrip(Frame):
             self.symbolType = min(_firstStrip.symbolType, self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
             self.symbolSize = _firstStrip.symbolSize
             self.symbolThickness = _firstStrip.symbolThickness
+            self.aliasEnabled = _firstStrip.aliasEnabled
+            self.aliasShade = _firstStrip.aliasShade
 
             self.gridVisible = _firstStrip.gridVisible
             self.crosshairVisible = _firstStrip.crosshairVisible
@@ -191,6 +193,8 @@ class GuiStrip(Frame):
             self.symbolType = min(self._preferences.symbolType, self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
             self.symbolSize = self._preferences.symbolSizePixel
             self.symbolThickness = self._preferences.symbolThickness
+            self.aliasEnabled = self._preferences.aliasEnabled
+            self.aliasShade = self._preferences.aliasShade
 
             self.gridVisible = self._preferences.showGrid
             self.crosshairVisible = self._preferences.showCrosshair
@@ -1412,6 +1416,8 @@ class GuiStrip(Frame):
                                                                      ANNOTATIONTYPES: self.symbolLabelling,
                                                                      SYMBOLSIZE     : self.symbolSize,
                                                                      SYMBOLTHICKNESS: self.symbolThickness,
+                                                                     ALIASENABLED   : self.aliasEnabled,
+                                                                     ALIASSHADE     : self.aliasShade,
                                                                      # GRIDVISIBLE           : self.gridVisible,
                                                                      # CROSSHAIRVISIBLE      : self.crosshairVisible,
                                                                      # DOUBLECROSSHAIRVISIBLE: self.doubleCrosshairVisible,
@@ -1479,6 +1485,8 @@ class GuiStrip(Frame):
         annotationsType = aDict[ANNOTATIONTYPES]
         symbolSize = aDict[SYMBOLSIZE]
         symbolThickness = aDict[SYMBOLTHICKNESS]
+        aliasEnabled = aDict[ALIASENABLED]
+        aliasShade = aDict[ALIASSHADE]
 
         if self.isDeleted:
             return
@@ -1497,6 +1505,14 @@ class GuiStrip(Frame):
 
             elif symbolThickness != self.symbolThickness:
                 self.symbolThickness = symbolThickness
+                self._setSymbolsPaintEvent()
+
+            elif aliasEnabled != self.aliasEnabled:
+                self.aliasEnabled = aliasEnabled
+                self._setSymbolsPaintEvent()
+
+            elif aliasShade != self.aliasShade:
+                self.aliasShade = aliasShade
                 self._setSymbolsPaintEvent()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1542,6 +1558,52 @@ class GuiStrip(Frame):
 
         oldValue = self._CcpnGLWidget._symbolThickness
         self._CcpnGLWidget._symbolThickness = value if (value and value >= 0) else oldValue
+        if value != oldValue:
+            self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # aliasEnabled
+
+    @property
+    def aliasEnabled(self):
+        """Get aliasEnabled for the strip
+        """
+        return self._CcpnGLWidget._aliasEnabled
+
+    @aliasEnabled.setter
+    def aliasEnabled(self, value):
+        """Set aliasEnabled for the strip
+        """
+        if not isinstance(value, bool):
+            raise TypeError('Error: aliasEnabled not a bool')
+
+        oldValue = self._CcpnGLWidget._aliasEnabled
+        self._CcpnGLWidget._aliasEnabled = value
+        if value != oldValue:
+            self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # aliasShade
+
+    @property
+    def aliasShade(self):
+        """Get aliasShade for the strip
+        """
+        return self._CcpnGLWidget._aliasShade
+
+    @aliasShade.setter
+    def aliasShade(self, value):
+        """Set aliasShade for the strip
+        """
+        if not isinstance(value, (int, float)):
+            raise TypeError('Error: aliasShade not an (int, float)')
+
+        oldValue = self._CcpnGLWidget._aliasShade
+        self._CcpnGLWidget._aliasShade = value if (value and value >= 0) else oldValue
         if value != oldValue:
             self._setSymbolLabelling()
             if self.spectrumViews:

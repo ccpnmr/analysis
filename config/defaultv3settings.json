@@ -96,7 +96,9 @@
         "checkUpdatesAtStartup"                : true,
         "zPlaneNavigationMode"                 : 0,
         "traceColour"                          : null,
-        "traceIncludeNegative"                 : false
+        "traceIncludeNegative"                 : false,
+        "aliasEnabled"                         : true,
+        "aliasShade"                           : 0.2
     },
     "proxySettings"    : {
         "verifySSL"        : true,

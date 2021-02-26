@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-16 13:01:27 +0000 (Tue, February 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-26 10:05:48 +0000 (Fri, February 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -409,7 +409,7 @@ class Peak(AbstractWrapperObject):
     @property
     def pointLineWidths(self) -> Tuple[Optional[float], ...]:
         """Full-width-half-height of peak for each dimension, in points."""
-        # currrently assumes that internal storage is in ppms
+        # currently assumes that internal storage is in ppms
         return tuple(peakDim.lineWidth / peakDim.dataDim.valuePerPoint if peakDim.lineWidth is not None else None
                      for peakDim in self._wrappedData.sortedPeakDims())
 
@@ -425,7 +425,15 @@ class Peak(AbstractWrapperObject):
         """Aliasing for the peak in each dimension.
         Defined as integer number of spectralWidths added or subtracted along each dimension
         """
-        return tuple(-1 * x.numAliasing for x in self._wrappedData.sortedPeakDims())
+        aliasing = []
+        for peakDim in self._wrappedData.sortedPeakDims():
+            axisReversed = -1
+            expDimRef = peakDim.dataDim.expDim.findFirstExpDimRef(serial=1)
+            if expDimRef:
+                axisReversed = -1 if expDimRef.isAxisReversed else 1
+            aliasing.append(axisReversed * peakDim.numAliasing)
+        return tuple(aliasing)
+        # return tuple((-1 if peakDim.dataDim.expDim.findFirstExpDimRef(serial=1)) * peakDim.numAliasing for peakDim in self._wrappedData.sortedPeakDims())
 
     @aliasing.setter
     @logCommand(get='self', isProperty=True)
@@ -440,7 +448,11 @@ class Peak(AbstractWrapperObject):
         newAlias = []
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             currentAlias.append(peakDim.numAliasing)
-            peakDim.numAliasing = -1 * value[ii]
+            axisReversed = -1
+            expDimRef = peakDim.dataDim.expDim.findFirstExpDimRef(serial=1)
+            if expDimRef:
+                axisReversed = -1 if expDimRef.isAxisReversed else 1
+            peakDim.numAliasing = axisReversed * value[ii]
             newAlias.append(peakDim.numAliasing)
 
         # aliasing may/may not have changed here

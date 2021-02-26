@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-02-25 17:18:51 +0000 (Thu, February 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-26 14:59:54 +0000 (Fri, February 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -22,7 +22,9 @@ __date__ = "$Date: 2021-02-22 15:44:00 +0000 (Mon, February 22, 2021) $"
 # Start of code
 #=========================================================================================
 
-# WARNING Many routines are directly imported from V2 (ccpnmr2.5/python/ccpnmr/analysis/core/ConstraintBasic.py).
+###### WARNING: Private routines
+##     Many routines are directly imported from V2 (ccpnmr2.5/python/ccpnmr/analysis/core/ConstraintBasic.py)
+##     and intput/output API objects.
 
 import re, operator
 import uuid
@@ -1116,10 +1118,11 @@ def _areAtomsBound(atom1, atom2):
                                 isBound = False
 
             else:
-                for chemBond in atom1.chemAtom.chemBonds:
-                    if atom2.chemAtom in chemBond.chemAtoms:
-                        isBound = True
-                        break
+                if atom1.chemAtom is not None:
+                    for chemBond in atom1.chemAtom.chemBonds:
+                        if atom2.chemAtom in chemBond.chemAtoms:
+                            isBound = True
+                            break
 
     atom1.isAtomBound[atom2] = isBound
     atom2.isAtomBound[atom1] = isBound

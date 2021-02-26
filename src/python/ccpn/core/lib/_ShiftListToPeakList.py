@@ -1,11 +1,38 @@
-"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-02-26 14:59:54 +0000 (Fri, February 26, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
+__date__ = "$Date: 2021-02-22 15:44:00 +0000 (Mon, February 22, 2021) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
 
-WARNING:
-        These routines have been ported from Version 2.4.
-        They still need to be converted to the "V3-nomenclature" and fully tested.
 
-"""
+###### WARNING: Private routines
+##     Many routines are directly ported from V2 and intput/output API objects.
+
+
+
 import re, operator
+from ccpn.core.lib._DistanceRestraintsLib import _getDataDimRefFromPeakDim, _areAtomsBound, \
+    _getBoundAtoms, _getBoundResonances, _pnt2ppm, _ppm2pnt, _hz2pnt, _pnt2hz, unit_converter, _areResonancesBound, \
+    longRangeTransfers, _newAtomAndResonanceSets
+
 
 DEFAULT_ISOTOPES = {'H':'1H','C':'13C','N':'15N','P':'31P','Si':'29Si',
                     'F':'19F','O':'16O'}
@@ -18,362 +45,6 @@ DNA_MOLTYPE = 'DNA'
 RNA_MOLTYPE = 'RNA'
 DNARNA_MOLTYPE = 'DNA/RNA'
 
-
-def _areAtomsBound(atom1, atom2):
-    
-    """
-    This routine has been ported from Version 2.4 (.python.ccp.lib.MoleculeQuery.areAtomsBound)
-    Dertemine whether two atoms are bonded together
-    .. describe:: Input
-  
-    MolSystem.Atom, MolSystem.Atom
-  
-    .. describe:: Output
-  
-    Boolean
-    """
-
-    if not hasattr(atom1, 'isAtomBound'):
-        atom1.isAtomBound = {}
-    elif atom1.isAtomBound.get(atom2):
-        return atom1.isAtomBound[atom2]
-
-    if not hasattr(atom2, 'isAtomBound'):
-        atom2.isAtomBound = {}
-    elif atom2.isAtomBound.get(atom1):
-        return atom2.isAtomBound[atom1]
-
-    isBound = False
-
-    if atom1 is not atom2:
-        residue1 = atom1.residue
-        residue2 = atom2.residue
-
-        if residue2.chain is residue1.chain:
-            if residue2 is not residue1:
-
-                linkEnd1 = residue1.chemCompVar.findFirstLinkEnd(boundChemAtom=atom1.chemAtom)
-                if not linkEnd1:
-                    isBound = False
-
-                else:
-                    linkEnd2 = residue2.chemCompVar.findFirstLinkEnd(boundChemAtom=atom2.chemAtom)
-                    if not linkEnd2:
-                        isBound = False
-
-                    else:
-                        molResLinkEnd1 = residue1.molResidue.findFirstMolResLinkEnd(linkEnd=linkEnd1)
-                        if not molResLinkEnd1:
-                            isBound = False
-
-                        else:
-                            molResLinkEnd2 = residue2.molResidue.findFirstMolResLinkEnd(linkEnd=linkEnd2)
-                            if not molResLinkEnd2:
-                                isBound = False
-
-                            elif molResLinkEnd2 in molResLinkEnd1.molResLink.molResLinkEnds:
-                                isBound = True
-
-                            else:
-                                isBound = False
-
-            else:
-                for chemBond in atom1.chemAtom.chemBonds:
-                    if atom2.chemAtom in chemBond.chemAtoms:
-                        isBound = True
-                        break
-
-    atom1.isAtomBound[atom2] = isBound
-    atom2.isAtomBound[atom1] = isBound
-
-    return isBound
-
-def _getBoundAtoms(atom):
-
-    """
-    This routine has been ported from Version 2.4 (.python.ccp.lib.MoleculeQuery.getBoundAtoms)
-
-    Get a list of atoms bound to a given atom..
-    .. describe:: Input
-
-    MolSystem.Atom
-
-    .. describe:: Output
-
-    List of MolSystem.Atoms
-    """
-
-    if hasattr(atom, 'boundAtoms'):
-        return atom.boundAtoms
-
-    atoms = []
-    chemAtom = atom.chemAtom
-    residue = atom.residue
-
-    chemAtomDict = {}
-    for atom2 in residue.atoms:
-        # Only atoms specific to ChemCompVar :-)
-        chemAtomDict[atom2.chemAtom] = atom2
-
-    for chemBond in chemAtom.chemBonds:
-        for chemAtom2 in chemBond.chemAtoms:
-            if chemAtom2 is not chemAtom:
-                atom2 = chemAtomDict.get(chemAtom2)
-                if atom2:
-                    atoms.append(atom2)
-
-    linkEnd = residue.chemCompVar.findFirstLinkEnd(boundChemAtom=chemAtom)
-    if linkEnd:
-        molResLinkEnd = residue.molResidue.findFirstMolResLinkEnd(linkEnd=linkEnd)
-
-        if molResLinkEnd:
-            molResLink = molResLinkEnd.molResLink
-
-            if molResLink:
-                for molResLinkEnd2 in molResLink.molResLinkEnds:
-                    if molResLinkEnd2 is not molResLinkEnd:
-                        residue2 = residue.chain.findFirstResidue(molResidue=molResLinkEnd2.molResidue)
-
-                        if residue2:
-                            chemAtom2 = molResLinkEnd2.linkEnd.boundChemAtom
-                            atom2 = residue2.findFirstAtom(chemAtom=chemAtom2)
-
-                            if atom2:
-                                atoms.append(atom2)
-
-                        break
-
-    atom.boundAtoms = atoms
-    return atoms
-
-def _getBoundResonances(resonance, recalculate=False, contribs=None, doWarning=False,
-                       recursiveCall=False):
-    """
-    This routine has been ported from Version 2.4 (.python.ccpnmr.analysis.core.AssignmentBasic.getBoundResonances)
-
-    Find all resonances that have a single bond connection to the input resonance
-    Option to recalculate given assignment status (e.g. if something changes)
-    Option to specify peakDimContribs to search
-  
-    .. describe:: Input
-  
-    Nmr.Resonance, Boolean, List of Nmr.PeakDimContribs
-  
-    .. describe:: Output
-  
-    List of Nmr.Resonances
-    """
-
-    if (not recalculate) and resonance.covalentlyBound:
-        return list(resonance.covalentlyBound)
-
-    resonances = set()  # Linked by bound atoms irrespective of spectra
-    pairResonances = set()  # prochiral or other pairs that can not be determined imemdiately
-    resonanceSet = resonance.resonanceSet
-
-    funnyResonances = set()
-
-    if resonanceSet:
-        # residue  = resonanceSet.findFirstAtomSet().findFirstAtom().residue
-        atomSets = resonanceSet.atomSets
-
-        for atomSet in atomSets:
-            # for atom in atomSet.atoms:
-            atom = atomSet.findFirstAtom()
-
-            for atom2 in _getBoundAtoms(atom):
-                atomSet2 = atom2.atomSet
-
-                if atomSet2 and atomSet2.resonanceSets:
-
-                    usePaired = False
-                    if len(atomSets) > 1:
-                        chemAtomSet = atom2.chemAtom.chemAtomSet
-                        if chemAtomSet:
-                            usePaired = (chemAtomSet.isProchiral or
-                                         (chemAtomSet.chemAtomSet and chemAtomSet.chemAtomSet.isProchiral))
-
-                    for resonanceSet2 in atomSet2.resonanceSets:
-                        for resonance2 in resonanceSet2.resonances:
-                            if resonance2 is resonance:  # should not happen
-                                if resonance not in funnyResonances:
-                                    print('WARNING: in _getBoundResonances(): resonance %d tried to be linked to itself' % resonance.serial)
-                                    funnyResonances.add(resonance)
-                            elif usePaired:
-                                pairResonances.add(resonance2)
-                            else:
-                                resonances.add(resonance2)
-
-    if not contribs:
-        contribs = resonance.peakDimContribs
-
-    expResonances = set()
-    foundBothPaired = False
-    for contrib in contribs:
-        peakDim = contrib.peakDim
-        expDimRef1 = peakDim.dataDimRef.expDimRef
-        expTransfers = expDimRef1.expTransfers
-
-        for expTransfer in expTransfers:
-            if expTransfer.transferType in ('onebond', 'CP'):
-                expDimRef2 = None
-
-                for expDimRef in expTransfer.expDimRefs:
-                    if expDimRef is not expDimRef1:
-                        expDimRef2 = expDimRef
-                        break
-
-                if expDimRef2:
-                    for peakDim2 in peakDim.peak.peakDims:
-                        if peakDim2.dataDimRef and (peakDim2.dataDimRef.expDimRef is expDimRef2):
-                            expBound = set()
-
-                            for contrib2 in peakDim2.peakDimContribs:
-                                if (not contrib.peakContribs) and (not contrib2.peakContribs):
-                                    resonance2 = contrib2.resonance
-
-                                    if resonance is not resonance2:
-                                        expBound.add(resonance2)
-
-                                else:
-                                    for peakContrib in contrib.peakContribs:
-                                        if peakContrib in contrib2.peakContribs:
-                                            resonance2 = contrib2.resonance
-
-                                            if resonance is not resonance2:
-                                                expBound.add(resonance2)
-
-                                            break
-
-                            if len(expBound) > 1:
-                                # Ambiguity
-                                for bound in expBound:
-                                    # Leave the covalently bound one
-                                    if bound in resonances:
-                                        break
-
-                                else:
-                                    aSet = set(x for x in expBound if x in resonance.covalentlyBound)
-                                    if aSet and aSet != pairResonances:
-                                        # Resonances found. Previously linked.
-                                        # Not the pairResonances. Use them
-                                        expResonances.update(aSet)
-
-                                    else:
-                                        # check presence of prochiral pairs
-                                        ll = [x for x in pairResonances if x in expBound]
-                                        if len(pairResonances) == 2 and len(ll) == 2:
-                                            foundBothPaired = True
-                                        elif ll:
-                                            # found some prochiral pair resonances - use them
-                                            expResonances.update(ll)
-                            else:
-                                expResonances.update(expBound)
-
-    if foundBothPaired and not [x for x in expResonances if x in pairResonances]:
-        # particular special case. 
-        # Resonnce is bound to both prochiral altrnatives but always as a pair.
-
-        if recursiveCall:
-            # This was called from elsewhere. We could resolve nothing, so send back to caller
-            pass
-
-        else:
-            # call for sister resonances and see
-            resons = resonanceSet.sortedResonances()
-            newResonances = set()
-            if len(resons) > 1:
-                # there are sister resonances
-                resons.remove(resonance)
-                for reson in resons:
-                    boundResons = _getBoundResonances(reson, recalculate=True, contribs=contribs,
-                                                     doWarning=False, recursiveCall=True)
-                    ll = [x for x in pairResonances if x not in boundResons]
-                    if not ll:
-                        # One sister was bound to both. Incorrect data. Bind to both here too
-                        newResonances.update(pairResonances)
-                        break
-                    elif len(ll) < len(pairResonances):
-                        # Some resonances were taken. Use the free ones.
-                        newResonances.update(ll)
-
-            if newResonances:
-                expResonances.update(newResonances)
-            else:
-                # No data anywhere to resolve which is which. Match on serials
-                pairResonList = list(sorted(pairResonances, key=operator.attrgetter('serial')))
-                rr = pairResonList[resonanceSet.sortedResonances().index(resonance)]
-                expResonances.add(rr)
-
-    resonances.update(expResonances)
-
-    # if doWarning and (resonance.isotopeCode == '1H') and (len(resonances) > 1):
-    #  pass
-
-    if resonances:
-        resonance.setCovalentlyBound(resonances)
-    else:
-        resonance.setCovalentlyBound([])
-
-    return list(resonances)
-
-def _areResonancesBound(resonance1, resonance2):
-    """
-    This routine has been ported from Version 2.4 (.python.ccp.lib.MoleculeQuery._areResonancesBound)
-    
-    Determine whether two resonances are assigned to directly bonded atoms
-  
-    .. describe:: Input
-  
-    Nmr.Resonance, Nmr.Resonance
-  
-    .. describe:: Output
-  
-    Boolean
-    """
-
-    if resonance1 is resonance2:
-        return False
-
-    resonanceSet1 = resonance1.resonanceSet
-    resonanceSet2 = resonance2.resonanceSet
-
-    if resonanceSet1 and resonanceSet2:
-
-        atomSets1 = resonanceSet1.atomSets
-        atomSets2 = resonanceSet2.atomSets
-
-        bound1 = resonance1.covalentlyBound
-        bound2 = resonance2.covalentlyBound
-
-        # Have to look through everything to get the right equiv
-        # & prochiral pair - Val CGa HGb: check both atomSets for each
-        # Phe Ce* He*: check both atoms (only one atomSet each)
-        for atomSet1 in atomSets1:
-            for atom1 in atomSet1.atoms:
-                for atomSet2 in atomSets2:
-                    for atom2 in atomSet2.atoms:
-                        if _areAtomsBound(atom1, atom2):
-                            # Val Cgb - Hgb* can appear bound,
-                            # so check resonance links
-                            if (resonance1.isotopeCode == '1H') and (len(atomSets2) > 1):
-                                if bound1 and resonance2 not in bound1:
-                                    continue
-
-                            elif (resonance2.isotopeCode == '1H') and (len(atomSets1) > 1):
-                                if bound2 and resonance1 not in bound2:
-                                    continue
-
-                            return True
-
-        return False
-
-    resonances = _getBoundResonances(resonance1)
-    if resonance2 in resonances:
-        return True
-
-    else:
-        return False
 
 
 def _getIsotopomerSingleAtomFractions(isotopomers, atomName, subType=1):
@@ -804,73 +475,6 @@ def _getPrimaryDataDimRef(freqDataDim):
         return ll[0][1]
     else:
         return None
-
-def _ppm2pnt(ppm, dataDimRef):
-
-  freqDataDim = dataDimRef.dataDim
-
-  npoints = freqDataDim.numPointsOrig
-  sw = freqDataDim.spectralWidthOrig
-  sf = dataDimRef.expDimRef.sf
-  refpt = dataDimRef.refPoint
-  refppm = dataDimRef.refValue
-
-  t = - npoints * sf / float(sw)
-  pnt = t*(ppm - refppm) + refpt
-
-  return pnt
-
-def _pnt2ppm(pnt, dataDimRef):
-
-  freqDataDim = dataDimRef.dataDim
-
-  npoints = freqDataDim.numPointsOrig
-  sw = freqDataDim.spectralWidthOrig
-  sf = dataDimRef.expDimRef.sf
-  refpt = dataDimRef.refPoint
-  refppm = dataDimRef.refValue
-
-  t = - npoints * sf / float(sw)
-  ppm = (pnt - refpt)/t + refppm
-
-  return ppm
-
-def _hz2pnt(hz, dataDimRef):
-
-  freqDataDim = dataDimRef.dataDim
-
-  npoints = freqDataDim.numPointsOrig
-  sw = freqDataDim.spectralWidthOrig
-  sf = dataDimRef.expDimRef.sf
-  refpt = dataDimRef.refPoint
-  refppm = dataDimRef.refValue
-
-  t = - npoints / float(sw)
-  pnt = t*(hz - sf*refppm) + refpt
-
-  return pnt
-
-def _pnt2hz(pnt, dataDimRef):
-
-  freqDataDim = dataDimRef.dataDim
-
-  npoints = freqDataDim.numPointsOrig
-  sw = freqDataDim.spectralWidthOrig
-  sf = dataDimRef.expDimRef.sf
-  refpt = dataDimRef.refPoint
-  refppm = dataDimRef.refValue
-
-  t = - npoints / float(sw)
-  hz = (pnt - refpt)/t + sf*refppm
-
-  return hz
-
-unit_converter = {}
-unit_converter[('ppm', 'point')] = _ppm2pnt
-unit_converter[('point', 'ppm')] = _pnt2ppm
-unit_converter[('Hz', 'point')] = _hz2pnt
-unit_converter[('point', 'Hz')] = _pnt2hz
-longRangeTransfers = ('through-space',)
 
 
 def _getDataDimRefFullRange(dataDimRef):
@@ -2194,14 +1798,16 @@ def makePeakListFromShifts(spectrum, chemicalShiftList, useUnassigned=True, chai
 
 
 # Move this to the spectrum core class or anyother more direct object ....:
-#     def newPeakListFromChemicalShiftList(self, chemicalShiftList, useUnassigned=True, chain=None,
-#                                                   bondLimit=6, residueLimit=1):
-#         from ccpn.core.lib.ChemicalShiftListLib import makePeakListFromShifts
-#         with undoBlock():
-#             with notificationEchoBlocking():
-#                 peakList = makePeakListFromShifts(self, chemicalShiftList,
-#                                                   useUnassigned=useUnassigned, chain=chain,
-#                                                   bondLimit=bondLimit, residueLimit=residueLimit)
-#                 return peakList
-#
-#
+def newPeakListFromChemicalShiftList(self, chemicalShiftList, useUnassigned=True, chain=None,
+                                              bondLimit=6, residueLimit=1):
+    # from ccpn.core.lib.ChemicalShiftListLib import makePeakListFromShifts
+    # As now to get this working we need to set AtomAndResonanceSets: _newAtomAndResonanceSets
+    # needs to have a nmrChain assigned to a chain
+    with undoBlock():
+        with notificationEchoBlocking():
+            peakList = makePeakListFromShifts(self, chemicalShiftList,
+                                              useUnassigned=useUnassigned, chain=chain,
+                                              bondLimit=bondLimit, residueLimit=residueLimit)
+            return peakList
+
+

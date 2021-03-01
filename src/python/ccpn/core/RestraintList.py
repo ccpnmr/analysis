@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:49 +0000 (Mon, March 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:38:48 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,6 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList 
 from ccpn.util.Tensor import Tensor
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
-from ccpn.util.Common import _incrementObjectName, _validateName
 
 
 class RestraintList(AbstractWrapperObject):

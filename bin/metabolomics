@@ -5,4 +5,4 @@ export CCPNMR_TOP_DIR
 ANALYSIS="${CCPNMR_TOP_DIR}"/src/python/ccpn/AnalysisMetabolomics
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
-"${ANACONDA3}"/bin/python -W ignore "${ANALYSIS}" $*
+"${CONDA}"/bin/python -W ignore "${ANALYSIS}" $*

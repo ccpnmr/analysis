@@ -1,14 +1,14 @@
 @echo off
-set ANACONDA3=%CCPNMR_TOP_DIR%\miniconda
+set CONDA=%CCPNMR_TOP_DIR%\miniconda
 set PYTHONPATH=%CCPNMR_TOP_DIR%\src\python;%CCPNMR_TOP_DIR%\src\c
-set QT_PLUGIN_PATH=%ANACONDA3%\Library\plugins
-set PATH=%ANACONDA3%\lib\site-packages\numpy\.libs;^
-%ANACONDA3%;^
-%ANACONDA3%\Library\mingw-w64\bin;^
-%ANACONDA3%\Library\usr\bin;^
-%ANACONDA3%\Library\bin;^
-%ANACONDA3%\Scripts;^
-%ANACONDA3%\bin;^
+set QT_PLUGIN_PATH=%CONDA%\Library\plugins
+set PATH=%CONDA%\lib\site-packages\numpy\.libs;^
+%CONDA%;^
+%CONDA%\Library\mingw-w64\bin;^
+%CONDA%\Library\usr\bin;^
+%CONDA%\Library\bin;^
+%CONDA%\Scripts;^
+%CONDA%\bin;^
 %CCPNMR_TOP_DIR%\bin;%PATH%
-set LD_LIBRARY_PATH=%ANACONDA3%\lib
+set LD_LIBRARY_PATH=%CONDA%\lib
 set QT_LOGGING_RULES=*=false

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 16:32:06 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:50 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ import numpy as np
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.util.Common import percentage, getAxisCodeMatchIndices
 from ccpn.util.Logging import getLogger
-
+from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeTransfers
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
@@ -1225,3 +1225,333 @@ def _filtered1DArray(data, ignoredRegions):
     fullmask = [all(mask) for mask in zip(*masks)]
     newArray = (np.ma.MaskedArray(data, mask=np.logical_not((fullmask, fullmask))))
     return newArray
+
+
+def _initExpBoundResonances(experiment):
+    """
+    # CCPNInternal  - API Level routine -
+    Refresh the covalently bound status for any resonances connected
+    via peaks in a given experiment.
+    """
+    resonances = {}
+    for spectrum in experiment.dataSources:
+        for peakList in spectrum.peakLists:
+            for peak in peakList.peaks:
+                for peakDim in peak.peakDims:
+                    for contrib in peakDim.peakDimContribs:
+                        resonances[contrib.resonance] = None
+    for resonance in resonances.keys():
+        _getBoundResonances(resonance, recalculate=True)
+
+def _setApiExpTransfers(experiment, overwrite=True):
+    """
+    # CCPNInternal  - API Level routine -
+    Set up the ExpTransfers for an experiment using available refExperiment
+    information. Boolean option to remove any existing transfers.
+    List of Nmr.ExpTransfers
+    """
+
+    if not experiment.refExperiment:
+        for expTransfer in experiment.expTransfers:
+            expTransfer.delete()
+
+        _initExpBoundResonances(experiment)
+        return
+
+    if experiment.expTransfers:
+        if not overwrite:
+            return list(experiment.expTransfers)
+        else:
+            for expTransfer in experiment.expTransfers:
+                expTransfer.delete()
+
+    visibleSites = {}
+    for expDim in experiment.expDims:
+        for expDimRef in expDim.expDimRefs:
+            if not expDimRef.refExpDimRef:
+                continue
+
+            measurement = expDimRef.refExpDimRef.expMeasurement
+            if measurement.measurementType in ('Shift', 'shift', 'MQShift'):
+                for atomSite in measurement.atomSites:
+                    if atomSite not in visibleSites:
+                        visibleSites[atomSite] = []
+
+                    visibleSites[atomSite].append(expDimRef)
+
+    transferDict = {}
+    for atomSite in visibleSites:
+        expDimRefs = visibleSites[atomSite]
+
+        for expTransfer in atomSite.expTransfers:
+            atomSiteA, atomSiteB = expTransfer.atomSites
+
+            if (atomSiteA in visibleSites) and (atomSiteB in visibleSites):
+                if transferDict.get(expTransfer) is None:
+                    transferDict[expTransfer] = []
+                transferDict[expTransfer].extend(expDimRefs)
+
+    # Indirect transfers, e.g. Ch_hC.NOESY or H_hC.NOESY
+    indirectTransfers = set()
+    for expGraph in experiment.refExperiment.nmrExpPrototype.expGraphs:
+        for expTransfer in expGraph.expTransfers:
+            if (expTransfer not in transferDict) and \
+                    (expTransfer.transferType in longRangeTransfers):
+                atomSiteA, atomSiteB = expTransfer.atomSites
+
+                if atomSiteA not in visibleSites:
+                    for expTransferA in atomSiteA.expTransfers:
+                        if expTransferA.transferType != 'onebond':
+                            continue
+
+                        atomSites = list(expTransferA.atomSites)
+                        atomSites.remove(atomSiteA)
+                        atomSiteC = atomSites[0]
+
+                        if atomSiteC in visibleSites:
+                            atomSiteA = atomSiteC
+                            break
+
+                if atomSiteB not in visibleSites:
+                    for expTransferB in atomSiteB.expTransfers:
+                        if expTransferB.transferType != 'onebond':
+                            continue
+
+                        atomSites = list(expTransferB.atomSites)
+                        atomSites.remove(atomSiteB)
+                        atomSiteD = atomSites[0]
+
+                        if atomSiteD in visibleSites:
+                            atomSiteB = atomSiteD
+                            break
+
+                if (atomSiteA in visibleSites) and (atomSiteB in visibleSites):
+                    expDimRefsA = visibleSites[atomSiteA]
+                    expDimRefsB = visibleSites[atomSiteB]
+                    transferDict[expTransfer] = expDimRefsA + expDimRefsB
+                    indirectTransfers.add(expTransfer)
+
+    expTransfers = []
+    for refTransfer in transferDict.keys():
+        expDimRefs = frozenset(transferDict[refTransfer])
+        if len(expDimRefs) == 2:
+            transferType = refTransfer.transferType
+            expTransfer = experiment.findFirstExpTransfer(expDimRefs=expDimRefs)
+
+            if expTransfer:
+                # normally this would not need setting
+                # but we renamed NOESY to through-space so this catches that situation
+                expTransfer.transferType = transferType
+            else:
+                expTransfer = experiment.newExpTransfer(transferType=transferType,
+                                                        expDimRefs=expDimRefs)
+
+            if refTransfer in indirectTransfers:
+                isDirect = False
+            else:
+                isDirect = True
+
+            expTransfer.isDirect = isDirect
+            expTransfers.append(expTransfer)
+
+    _initExpBoundResonances(experiment)
+    return expTransfers
+
+
+def _getAcqRefExpDimRef(refExperiment):
+    """
+    # CCPNInternal  - API Level routine -
+    RefExpDimRef that corresponds to acquisition dimension
+    """
+
+    # get acquisition measurement
+    expGraph = refExperiment.nmrExpPrototype.findFirstExpGraph()
+    # even if there are several the acquisition dimension should be common.
+    ll = [(expStep.stepNumber, expStep) for expStep in expGraph.expSteps]
+    expSteps = [x[1] for x in sorted(ll)]
+    if refExperiment.isReversed:
+        acqMeasurement = expSteps[0].expMeasurement
+    else:
+        acqMeasurement = expSteps[-1].expMeasurement
+
+    # get RefExpDimRef that fits measurement
+    ll = []
+    for refExpDim in refExperiment.sortedRefExpDims():
+        for refExpDimRef in refExpDim.sortedRefExpDimRefs():
+            if refExpDimRef.expMeasurement is acqMeasurement:
+                ll.append(refExpDimRef)
+
+    if len(ll) == 1:
+        return ll[0]
+    else:
+        raise RuntimeError("%s has no unambiguous RefExpDimRef for acqMeasurement (%s)"
+                       % (refExperiment, acqMeasurement))
+
+
+def _getAcqExpDim(experiment, ignorePreset=False):
+    """
+    # CCPNInternal  - API Level routine -
+    ExpDim that corresponds to acquisition dimension. NB uses heuristics
+    """
+
+    ll = experiment.findAllExpDims(isAcquisition=True)
+    if len(ll) == 1 and not ignorePreset:
+        # acquisition dimension set - return it
+        result = ll.pop()
+
+    else:
+        # no reliable acquisition dimension set
+        result = None
+
+        dataSources = experiment.sortedDataSources()
+        if dataSources:
+            dataSource = dataSources[0]
+            for ds in dataSources[1:]:
+                # more than one data source. Pick one of the largest.
+                if ds.numDim > dataSource.numDim:
+                    dataSource = ds
+
+            # Take dimension with most points
+            useDim = None
+            currentVal = -1
+            for dd in dataSource.sortedDataDims():
+                if hasattr(dd, 'numPointsOrig'):
+                    val = dd.numPointsOrig
+                else:
+                    val = dd.numPoints
+                if val > currentVal:
+                    currentVal = val
+                    useDim = dd
+
+            if useDim is not None:
+                result = useDim.expDim
+
+        if result is None:
+            # no joy so far - just take first ExpDim
+            ll = experiment.sortedExpDims()
+            if ll:
+                result = ll[0]
+
+    return result
+
+
+def _setApiRefExperiment(experiment, refExperiment):
+    """
+    # CCPNInternal  - API Level routine -
+    Sets the reference experiment for an existing experiment
+    and tries to map the ExpDims to RefExpDims appropriately.
+    :param experiment: v2 experiment
+    :param refExperiment: v2 refExperiment
+    :return:
+    """
+
+    for expDim in experiment.expDims:
+        # TODO FIXME:  this property is missing from V2 API. and the correspondent setRefExpDim. Add or use internal?
+        if not hasattr(expDim, 'refExpDim'):
+            setattr(expDim, 'refExpDim', None)
+            if expDim.refExpDim:
+                for expDimRef in expDim.expDimRefs:
+                    if expDimRef.refExpDimRef:
+                        expDimRef.setRefExpDimRef(None)
+
+                expDim.setRefExpDim(None)
+
+    experiment.setRefExperiment(refExperiment)
+    if refExperiment is None:
+        return
+
+    refExpDims = refExperiment.sortedRefExpDims()
+    if not refExpDims:
+        # Something is wrong with the reference data
+        return
+
+    expDims = experiment.sortedExpDims()
+    if not expDims:
+        # Something is wrong with the experiment
+        return
+
+    acqRefExpDim = _getAcqRefExpDimRef(refExperiment).refExpDim
+    acqExpDim = _getAcqExpDim(experiment, ignorePreset=True)
+
+    if ((refExpDims.index(acqRefExpDim) * 2 < len(refExpDims)) !=
+            (expDims.index(acqExpDim) * 2 < len(expDims))):
+        # acqRefExpDim and acqExpDim are at opposite ends of their
+        # respective lists. reverse refExpDims so that acquisition
+        # dimensions will more likely get mapped to each other.
+        refExpDims.reverse()
+
+    # Rasmus 12/7/12. Must be set to None, as otherwise it is never reset below.
+    # We do not want the heuristic _getAcqExpDim to override everything else.
+    acqExpDim = None
+
+    for expDim in expDims:
+        expData = []
+
+        for expDimRef in expDim.expDimRefs:
+            isotopes = frozenset(expDimRef.isotopeCodes)
+
+            if isotopes:
+                mType = expDimRef.measurementType.lower()
+                expData.append((mType, isotopes))
+
+        if not expData:
+            continue
+
+        for refExpDim in refExpDims:
+            refData = []
+
+            for refExpDimRef in refExpDim.refExpDimRefs:
+                expMeasurement = refExpDimRef.expMeasurement
+                isotopes = frozenset([x.isotopeCode for x in expMeasurement.atomSites])
+                mType = expMeasurement.measurementType.lower()
+                refData.append((mType, isotopes))
+
+            if expData == refData:
+                expDim.refExpDim = refExpDim # not in the v3 API ?
+                refExpDims.remove(refExpDim)
+
+                if refExpDim is acqRefExpDim:
+                    if not acqExpDim:
+                        expDim.isAcquisition = True
+                        acqExpDim = expDim
+
+                break
+    for expDim in expDims:
+        if not expDim.expDimRefs:
+            continue
+
+        if not expDim.refExpDim:
+            expDim.refExpDim = refExpDims.pop(0)
+
+        # set reference data comparison list
+        refExpDimRefs = list(expDim.refExpDim.refExpDimRefs)
+        refData = []
+        for refExpDimRef in refExpDimRefs:
+            expMeasurement = refExpDimRef.expMeasurement
+            atomSites = expMeasurement.atomSites
+            refData.append((frozenset(x.isotopeCode for x in atomSites),
+                            expMeasurement.measurementType.lower(),
+                            frozenset(x.name for x in atomSites),
+                            refExpDimRef))
+
+        # set experiment data comparison list
+        inData = []
+        for expDimRef in expDim.expDimRefs:
+            inData.append((frozenset(expDimRef.isotopeCodes),
+                           expDimRef.measurementType.lower(),
+                           frozenset(((None),)),
+                           # frozenset(((expDimRef.displayName or expDimRef.name),)),
+                           expDimRef))
+
+        # match expDimRef to refExpDimRef. comparing isotopeCodes,
+        # if equal measurementTypes, if equal name/displayname
+        for end in (-1, -2, -3):
+            for ii in range(len(inData) - 1, -1, -1):
+                for jj in range(len(refData) - 1, -1, -1):
+                    if inData[ii][:end] == refData[jj][:end]:
+                        expDimRef = inData[ii][-1]
+                        expDimRef.refExpDimRef = refData[jj][-1]
+                        expDimRef.measurementType = refData[jj][-1].expMeasurement.measurementType
+                        del inData[ii]
+                        del refData[jj]
+                        break

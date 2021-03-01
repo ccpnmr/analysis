@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2274,7 +2274,8 @@ class GuiSpectrumDisplay(CcpnModule):
         if not isinstance(spectrum, Spectrum):
             raise TypeError('spectrum must be of type Spectrum/str')
 
-        sv = [(spectrum, specView) for specView in self.spectrumViews if specView.spectrum == spectrum]
+        # get the spectrumViews from the first strip
+        sv = [(spectrum, specView) for specView in self.strips[0].spectrumViews if specView.spectrum == spectrum]
         if len(sv) == 1:
 
             _, specView = sv[0]
@@ -2291,7 +2292,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 with undoStackBlocking(self.application) as addUndoItem:
                     addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))
 
-                # delete the spectrumView
+                # delete the spectrumView - for multiple strips will delete all spectrumViews attached to spectrum
                 specView._delete()
 
                 # push/pop ordering
@@ -2311,7 +2312,7 @@ class GuiSpectrumDisplay(CcpnModule):
         if not self.isGrouped:
             if order:
                 self.setOrderedSpectrumViewsIndex(order)
-            self.spectrumToolBar.setButtonsFromSpectrumViews(self.orderedSpectrumViews(self.spectrumViews))
+            self.spectrumToolBar.setButtonsFromSpectrumViews(self.orderedSpectrumViews(self.strips[0].spectrumViews))
 
     @logCommand(get='self')
     def makeStripPlot(self, peaks=None, nmrResidues=None,

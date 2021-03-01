@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:32 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:50 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -225,7 +225,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     def _getSpectra(self):
         if len(self.strips) > 0:  # strips
-            return [x.spectrum for x in self.orderedSpectrumViews(self.strips[-1].spectrumViews)]
+            return [x.spectrum for x in self.orderedSpectrumViews(self.strips[0].spectrumViews)]
 
     # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # # ejb - orderedSpectrumViews, orderedSpectra
@@ -239,7 +239,7 @@ class SpectrumDisplay(AbstractWrapperObject):
         """
         if not self._orderedSpectrumViews:
             self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-        return self._orderedSpectrumViews.orderedSpectrumViews((spectrumList or self.spectrumViews), includeDeleted=includeDeleted)
+        return self._orderedSpectrumViews.orderedSpectrumViews((spectrumList or self.strips[0].spectrumViews), includeDeleted=includeDeleted)
 
     def getOrderedSpectrumViewsIndex(self) -> Optional[Tuple]:
         """
@@ -253,7 +253,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     def _rescaleSpectra(self):
         """Reorder the buttons and spawn a redraw event
         """
-        self.spectrumToolBar.reorderButtons(self.orderedSpectrumViews(self.spectrumViews))
+        self.spectrumToolBar.reorderButtons(self.orderedSpectrumViews(self.strips[0].spectrumViews))
 
         # spawn the required event to reordered the spectrumViews in openGL
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier

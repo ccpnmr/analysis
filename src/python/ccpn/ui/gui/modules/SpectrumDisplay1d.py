@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:35 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -99,7 +99,7 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
     def adjustContours(self):
         # insert popup to modify contours
         popup = SpectrumDisplayPropertiesPopup1d(parent=self.mainWindow, mainWindow=self.mainWindow,
-                                                 orderedSpectrumViews=self.orderedSpectrumViews(self.spectrumViews))
+                                                 orderedSpectrumViews=self.orderedSpectrumViews(self.strips[0].spectrumViews))
         popup.exec_()
         popup.raise_()
 

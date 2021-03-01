@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-05 16:30:15 +0000 (Fri, February 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -3034,10 +3034,34 @@ class CcpnGLWidget(QOpenGLWidget):
         finally:
             GL.glDisable(GL.GL_MULTISAMPLE)
 
+    @contextmanager
+    def _enableLogicOp(self, logicOp=GL.GL_COPY):
+        """Enable logic operation for the contained routines
+        """
+        # valid values are: GL_CLEAR, GL_SET, GL_COPY, GL_COPY_INVERTED, GL_NOOP,
+        #                   GL_INVERT, GL_AND, GL_NAND, GL_OR, GL_NOR,
+        #                   GL_XOR, GL_EQUIV, GL_AND_REVERSE, GL_AND_INVERTED,
+        #                   GL_OR_REVERSE, and GL_OR_INVERTED.The
+        # initial value is GL_COPY
+
+        try:
+            GL.glEnable(GL.GL_COLOR_LOGIC_OP)
+            GL.glLogicOp(logicOp)
+
+            # NOTE:ED needed to cure that strange pyqt5 window-mask
+            GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_FALSE)
+
+            yield       # pass control to the calling function
+
+        finally:
+            GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
+            GL.glLogicOp(GL.GL_COPY)
+            GL.glDisable(GL.GL_COLOR_LOGIC_OP)
+
     def _paintGLMouseOnly(self):
         """paintGL event - paint only the mouse in Xor mode
         """
-        # reset the paint mode
+        # reset the paint mode - need to check the logic here
         # self._paintMode = PaintModes.PAINT_ALL
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
@@ -3049,18 +3073,12 @@ class CcpnGLWidget(QOpenGLWidget):
         with self._disableGLAliasing():
             currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
             currentShader.setPMatrix(self._uPMatrix)
-
-            GL.glEnable(GL.GL_COLOR_LOGIC_OP)
-            GL.glLogicOp(GL.GL_INVERT)
-
             self.buildCursors()
 
-            GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_FALSE)
-            self.drawLastCursors()
-            self.drawCursors()
-            GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
-
-            GL.glDisable(GL.GL_COLOR_LOGIC_OP)
+            with self._enableLogicOp(GL.GL_INVERT):
+                # enable invert mode so that only the cursor needs to be refreshed in the other viewports
+                self.drawLastCursors()
+                self.drawCursors()
 
     def _paintGL(self):
         w = self.w
@@ -3160,15 +3178,9 @@ class CcpnGLWidget(QOpenGLWidget):
             if self._successiveClicks:
                 self.drawDottedCursor()
 
-            GL.glEnable(GL.GL_COLOR_LOGIC_OP)
-            GL.glLogicOp(GL.GL_INVERT)
-
-            # NOTE:ED needed to cure that strange pyqt5 window-mask
-            GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_FALSE)
-            self.drawCursors()
-            GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
-
-            GL.glDisable(GL.GL_COLOR_LOGIC_OP)
+            with self._enableLogicOp(GL.GL_INVERT):
+                # enable invert mode so that only the cursor needs to be refreshed in the other viewports
+                self.drawCursors()
 
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
         self.enableTextClientState()

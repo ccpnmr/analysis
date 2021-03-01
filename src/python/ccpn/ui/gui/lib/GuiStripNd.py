@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -525,13 +525,14 @@ class GuiStripNd(GuiStrip):
                 if minZPlaneSize is None or _valuePerPoint < minZPlaneSize:
                     minZPlaneSize = _valuePerPoint
 
-            if minZPlaneSize is None:
-                minZPlaneSize = 1.0  # arbitrary
-            else:
-                # Necessary, otherwise it does not know what width it should have
-                zAxis.width = minZPlaneSize
+            if zAxis:
+                if minZPlaneSize is None:
+                    minZPlaneSize = 1.0  # arbitrary
+                else:
+                    # Necessary, otherwise it does not know what width it should have
+                    zAxis.width = minZPlaneSize
 
-            self.planeAxisBars[n].setPlaneValues(minZPlaneSize, minAliasedFrequency, maxAliasedFrequency, zAxis.position)
+                self.planeAxisBars[n].setPlaneValues(minZPlaneSize, minAliasedFrequency, maxAliasedFrequency, zAxis.position)
 
         self.haveSetupZWidgets = True
 

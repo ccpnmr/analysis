@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:30 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:49 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,6 @@ from collections import OrderedDict as OD, namedtuple
 # from collections import Counter
 from operator import attrgetter, itemgetter
 from typing import List, Union, Optional, Sequence, Tuple
-
 from ccpn.core.lib import Pid
 from ccpn.core import _coreImportOrder
 from ccpn.core.lib.CcpnNefCommon import nef2CcpnMap, saveFrameReadingOrder, _isALoop, \
@@ -1219,7 +1218,7 @@ class CcpnNefWriter:
                 data[neftag] = attrgetter(attrstring)(spectrum)
 
         data['folding'] = ['none' if x is None else x for x in spectrum.foldingModes]
-        data['value_first_point'] = [tt[1] for tt in sorted(spectrum.spectrumLimits)]
+        data['value_first_point'] = [tt[0] for tt in spectrum.spectrumLimits]
         # NBNB All CCPN peaks are in principle at the correct unaliased positions
         # Whether they are set correctly is another matter.
         data['absolute_peak_positions'] = spectrum.dimensionCount * [True]
@@ -2515,16 +2514,9 @@ class CcpnNefReader(CcpnNefContent):
                 else:
                     # NB - newObject may be project, for some saveframes.
 
-                    _restraintLinks = False
-                    if str(saveFrameName).startswith('nef_peak_restraint_link'):
-                        getLogger().debug2('>>>      -- bypass {}'.format(saveFrameName))
-                        _restraintLinks = True
-
-                    if not (self._importAll or self._importDict.get(saveFrame.name) or _restraintLinks):
+                    if not (self._importAll or self._importDict.get(saveFrame.name)):
                         # skip items not in the selection list
-                        getLogger().debug2('>>>  -- skip import {}'.format(saveFrameName))
                         continue
-                    getLogger().debug2('>>> loading saveframe {}'.format(saveFrameName))
 
                     result = importer(self, project, saveFrame)
                     if isinstance(result, AbstractWrapperObject):
@@ -2645,17 +2637,18 @@ class CcpnNefReader(CcpnNefContent):
                 loop = saveFrame.get(tag)
                 if loop:
                     saveFrame._rowErrors[loop.name] = OrderedSet()
-                    verify = self.verifiers[tag]
-                    if addLoopAttribs:
-                        dd = []
-                        for name in addLoopAttribs:
-                            dd.append(saveFrame.get(name))
+                    verify = self.verifiers.get(tag)
+                    if verify:
+                        if addLoopAttribs:
+                            dd = []
+                            for name in addLoopAttribs:
+                                dd.append(saveFrame.get(name))
 
-                        # if loop and hasattr(loop, 'data'):
-                        verify(self, project, loop, saveFrame, *dd, **kwds)
-                    else:
-                        # if loop and hasattr(loop, 'data'):
-                        verify(self, project, loop, saveFrame, **kwds)
+                            # if loop and hasattr(loop, 'data'):
+                            verify(self, project, loop, saveFrame, *dd, **kwds)
+                        else:
+                            # if loop and hasattr(loop, 'data'):
+                            verify(self, project, loop, saveFrame, **kwds)
 
     def _noLoopVerify(self, project: Project, loop: StarIo.NmrLoop, *arg, **kwds):
         """Verify the contents of the loop
@@ -5189,7 +5182,19 @@ class CcpnNefReader(CcpnNefContent):
                 peakListSerial = peakListObject.serial if peakListObject else None
                 _spectrum = peakListObject.spectrum if peakListObject else None
                 if not _spectrum:
-                    continue
+                    # spectrum not found in a saveframe so try and load from project
+                    _frameID = _getNameFromCategory('nef_nmr_spectrum', _spectrumPidFrame)
+                    if _frameID:
+                        framecode, frameName, subName, prefix, postfix, preSerial, postSerial, category = _frameID
+
+                        _spectrum = project.getSpectrum(subName)
+                        if _spectrum is not None:
+                            # find the peakList in the project
+                            _serial = postSerial or 1
+                            peakListId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (subName, _serial))
+                            peakList = project.getObjectsByPartialId(className='PeakList', idStartsWith=peakListId)
+                            if peakList:
+                                peakListSerial = _serial
 
                 _lastPeakListNum = _spectrum.peakLists[-1].serial if _spectrum.peakLists else None
 
@@ -5198,24 +5203,24 @@ class CcpnNefReader(CcpnNefContent):
                     continue
 
                 _restraintPid = row.get('restraint_list_id')
-                # dataSetSerial = self._frameCodeToSpectra.get(_restraintPid)
-                # _dataSet = project.getDataSet('dataset_{}'.format(dataSetSerial))
-                # if _dataSet is not None:
-                #     for prefix in ['nef_distance_restraint_list',
-                #                          'nef_dihedral_restraint_list',
-                #                          'nef_rdc_restraint_list',
-                #                          'ccpn_restraint_list']:
-                #         if _restraintPid.startswith(prefix):
-                #             _name = _restraintPid[len(prefix)+1:]
-                #             restraintList = _dataSet.getRestraintList(_name)
-                #             break
-                #     else:
-                #         continue
-                #     if not restraintList:
-                #         continue
                 restraintList = self.frameCode2Object.get(_restraintPid)
                 if not restraintList:
+                    # restraintList not found in a saveframe so try and load from project
+                    dataSetSerial = self._frameCodeToSpectra.get(_restraintPid)
+                    _dataSet = project.getDataSet('myDataSet_{}'.format(dataSetSerial))
+                    if _dataSet is not None:
+                        for prefix in ['nef_distance_restraint_list',
+                                             'nef_dihedral_restraint_list',
+                                             'nef_rdc_restraint_list',
+                                             'ccpn_restraint_list']:
+                            if _restraintPid.startswith(prefix):
+                                _name = _restraintPid[len(prefix)+1:]
+                                restraintList = _dataSet.getRestraintList(_name)
+                                if restraintList:
+                                    break
+                if not restraintList:
                     continue
+
                 peakList = _spectrum.getPeakList(peakListNum)
                 if not peakList:
                     continue
@@ -5627,7 +5632,7 @@ class CcpnNefReader(CcpnNefContent):
             else:
                 nmrChain = creatorFunc(**parameters)
             try:
-                nmrChain(row['serial'])
+                nmrChain.resetSerial(row['serial'])
             except Exception as es:
                 pass
             nmrChains[parameters['shortName']] = nmrChain
@@ -5863,7 +5868,7 @@ class CcpnNefReader(CcpnNefContent):
             serial = row.get('serial')
             if serial is not None:
                 try:
-                    obj.resetSerial (serial)
+                    obj.resetSerial(serial)
                 except:
                     pass
         #
@@ -6493,7 +6498,7 @@ def _exportToNef(path: str, skipPrefixes: Sequence[str] = ()):
 
     path = os.path.normpath(os.path.abspath(path))
     time1 = time.time()
-    application = createFramework()
+    application = createFramework(_skipUpdates=True)
     application.loadProject(path)
     project = application.project
     time2 = time.time()
@@ -6562,7 +6567,7 @@ def _testNefIo(path: str, skipPrefixes: Sequence[str] = ()):
         raise ValueError("File name does not end in '.nef': %s" % path)
 
     time1 = time.time()
-    application = createFramework()
+    application = createFramework(_skipUpdates=True)
     application.nefReader.testing = True
     application.loadProject(path)
 

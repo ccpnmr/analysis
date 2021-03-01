@@ -50,7 +50,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 14:50:37 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:49 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -606,11 +606,16 @@ class Spectrum(AbstractWrapperObject):
 
     @experimentType.setter
     def experimentType(self, value: str):
+        from ccpn.core.lib.SpectrumLib import _setApiExpTransfers, _setApiRefExperiment
         for nmrExpPrototype in self._wrappedData.root.sortedNmrExpPrototypes():
             for refExperiment in nmrExpPrototype.sortedRefExperiments():
                 if value == refExperiment.name:
                     # refExperiment matches name string - set it
                     self._wrappedData.experiment.refExperiment = refExperiment
+                    # set API RefExperiment and ExpTransfer
+                    _setApiRefExperiment(self._wrappedData.experiment, refExperiment)
+                    _setApiExpTransfers(self._wrappedData.experiment)
+
                     synonym = refExperiment.synonym
                     if synonym:
                         self.experimentName = synonym
@@ -1406,7 +1411,6 @@ class Spectrum(AbstractWrapperObject):
         return tuple(ll)
 
     @property
-    @_includeInDimensionalCopy
     def axesReversed(self) -> Tuple[Optional[bool], ...]:
         """Return whether any of the axes are reversed
         May contain None for undefined axes

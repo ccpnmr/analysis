@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-11 11:10:04 +0000 (Thu, February 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -427,7 +427,7 @@ class GuiWindow():
             if self.application.current.strip:
                 strip = self.application.current.strip
         if strip and not strip.isDeleted:
-            spectra = [spectrumView.spectrum for spectrumView in strip.spectrumDisplay.spectrumViews
+            spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews
                        if spectrumView.isVisible()]
             listOfPeaks = [peakList.peaks for spectrum in spectra for peakList in spectrum.peakLists]
 
@@ -440,7 +440,7 @@ class GuiWindow():
         with undoBlock():
             if strip and strip.spectrumDisplay:
                 spectra = [spectrumView.spectrum for spectrumView in
-                           strip.spectrumDisplay.spectrumViews if spectrumView.isVisible()]
+                           strip.spectrumViews if spectrumView.isVisible()]
                 for spectrum in spectra:
                     if len(spectrum.multipletLists) < 1:
                         multipletList = spectrum.newMultipletList()

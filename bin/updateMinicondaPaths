@@ -6,8 +6,8 @@ export CCPNMR_TOP_DIR
 CONVERT="${CCPNMR_TOP_DIR}"/src/python/ccpn/util/convertPaths.py
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 
-ROOT="${HOME}/${RELEASE}/${CCPNMRPATH}/miniconda"
-PATHFROM=${ANACONDA3}
-PATHTO="${HOME}/${RELEASE}/${CCPNMRPATH}/miniconda"
+ROOT="${HOME}/${RELEASE}/${CCPNMR_PATH}/miniconda"
+PATHFROM=${CONDA}
+PATHTO="${HOME}/${RELEASE}/${CCPNMR_PATH}/miniconda"
 
-"${ANACONDA3}"/bin/python "${CONVERT}" "${ROOT}" "${PATHFROM}" "${PATHTO}"
+"${CONDA}"/bin/python "${CONVERT}" "${ROOT}" "${PATHFROM}" "${PATHTO}"

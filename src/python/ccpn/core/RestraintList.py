@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:49 +0000 (Mon, March 01, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,6 +35,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList 
 from ccpn.util.Tensor import Tensor
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
+from ccpn.util.Common import _incrementObjectName, _validateName
 
 
 class RestraintList(AbstractWrapperObject):
@@ -73,7 +74,10 @@ class RestraintList(AbstractWrapperObject):
         self._wrappedData = wrappedData
         self._project = project
 
-        namePrefix = self._wrappedData.constraintType[:3].capitalize() + '-'
+        try:
+            namePrefix = self._wrappedData.constraintType[:3].capitalize() + '-'
+        except:
+            namePrefix = 'myRestraintList_'
         defaultName = ('%s%s' % (namePrefix, wrappedData.serial))
         self._setUniqueStringKey(defaultName)
         super().__init__(project, wrappedData)

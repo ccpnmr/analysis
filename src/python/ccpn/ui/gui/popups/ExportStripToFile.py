@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:36 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -191,12 +191,10 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                         labelText='Image dpi',
                                                         # value=300,
                                                         decimals=0, step=5, range=(36, 2400))
-        row += 1
-        userFrame.addSpacer(0, 10, grid=(row, 0))
-        Spacer(userFrame, 5, 5, vPolicy='minimum', grid=(row, 3))
 
         row += 1
         self.treeView = PrintTreeCheckBoxes(userFrame, project=None, grid=(row, 0), gridSpan=(1, 4))
+        Spacer(userFrame, 0, 0, hPolicy='expanding', vPolicy='expanding', grid=(row, 3))
 
     def populate(self, userframe):
         """Populate the widgets with project
@@ -230,7 +228,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             pulldownLabel = 'Current Strip:'
 
         self.objectPulldown.setLabelText(pulldownLabel)
-        self.objectPulldown.modifyTexts(sorted([ky for ky in self.objects.keys()]))
+        self.objectPulldown.pulldownList.setData(sorted([ky for ky in self.objects.keys()]))
 
         # set the page types
         self.exportType.set(EXPORTPDF)
@@ -510,6 +508,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             lastPath.assureSuffix(ext)
             self._dialogFilter = filt
             self.updateDialog()
+            self._updateButtonText()
             self.updateFilename(lastPath)
 
         else:
@@ -628,8 +627,8 @@ class ExportStripToFilePopup(ExportDialogABC):
 
     def actionButtons(self):
         self.setOkButton(callback=self._saveAndCloseDialog, text='Save and Close', tipText='Export the strip and close the dialog')
-        self.setCancelButton(callback=self._rejectDialog, text='Close', tipText='Export the strip and close the dialog')
-        self.setCloseButton(callback=self._saveDialog, text='Save', tipText='Export the strip and close the dialog')
+        self.setCancelButton(callback=self._rejectDialog, text='Close', tipText='Close the dialog')
+        self.setCloseButton(callback=self._saveDialog, text='Save', tipText='Export the strip')
         self.setDefaultButton(ExportDialogABC.CANCELBUTTON)
 
         # self.buttonFrame.addSpacer(0, 10, grid=(0, 1))

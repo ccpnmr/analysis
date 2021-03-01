@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:35 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,10 +25,11 @@ __date__ = "$Date: 2017-07-06 15:51:11 +0000 (Thu, July 06, 2017) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtCore
 from typing import Optional
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.ui.gui.widgets.FileDialog import NefFileDialog
+from ccpn.ui.gui.widgets.FileDialog import ExportFileDialog
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -50,6 +51,10 @@ class ExportDialogABC(CcpnDialogMainWidget):
     FIXEDWIDTH = False
 
     _pathHistory = {}
+
+    ACCEPTTEXT = 'Select'
+    REJECTTEXT = None
+    PATHTEXT = 'Filename'
 
     def __init__(self, parent=None, mainWindow=None, title='Export to File',
                  fileMode='anyFile',
@@ -103,7 +108,7 @@ class ExportDialogABC(CcpnDialogMainWidget):
         self.saveFrame = Frame(self.mainWidget, setLayout=True, grid=(3, 0))
 
         self.openPathIcon = Icon('icons/directory')
-        self.saveLabel = Label(self.saveFrame, text=' Path: ', grid=(0, 0), hAlign='c')
+        self.saveLabel = Label(self.saveFrame, text=f'{self.PATHTEXT}', grid=(0, 0), hAlign='c')
         self.saveText = LineEdit(self.saveFrame, grid=(0, 1), textAlignment='l')
         self.saveText.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.saveText.setDisabled(False)
@@ -124,11 +129,15 @@ class ExportDialogABC(CcpnDialogMainWidget):
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0), gridSpan=(1, 1))
 
+        # initialise the user frame
+        self.initialise(self.options)
+
         # setup and enable buttons
         self.actionButtons()
         self.__postInit__()
 
         self.updateDialog()
+        self._updateButtonText()
         self.setSave(self._dialogSelectFile)
 
         if self._dialogSelectFile is not None:
@@ -136,8 +145,8 @@ class ExportDialogABC(CcpnDialogMainWidget):
         else:
             self.setSaveTextWidget('')
 
-        # initialise the user frame
-        self.initialise(self.options)
+        # # initialise the user frame
+        # self.initialise(self.options)
         # populate the user frame
         self.populate(self.options)
 
@@ -193,12 +202,23 @@ class ExportDialogABC(CcpnDialogMainWidget):
                 raise RuntimeError('Path must be a file')
 
     def updateDialog(self):
-        self.fileSaveDialog = NefFileDialog(self,
+        """Create the dialog for the file button
+        To be subclassed as required.
+        """
+        self.fileSaveDialog = ExportFileDialog(self,
                                             acceptMode='export',
                                             selectFile=self._dialogSelectFile,
                                             fileFilter=self._dialogFilter,
                                             confirmOverwrite=False
                                             )
+
+    def _updateButtonText(self):
+        """Change the text of the accept button
+        """
+        if self.ACCEPTTEXT is not None:
+            self.fileSaveDialog.setLabelText(self.fileSaveDialog.Accept, self.ACCEPTTEXT)
+        if self.REJECTTEXT is not None:
+            self.fileSaveDialog.setLabelText(self.fileSaveDialog.Reject, self.REJECTTEXT)
 
     def initialise(self, userFrame):
         """Initialise the frame containing the user widgets
@@ -289,6 +309,7 @@ class ExportDialogABC(CcpnDialogMainWidget):
         """
         # set the path, it may have been edited
         self.fileSaveDialog._selectFile = self._dialogSelectFile
+        self.fileSaveDialog.selectFile(str(self._dialogSelectFile))
 
         self.fileSaveDialog._show()
         _filePath = self.fileSaveDialog.selectedFile()
@@ -322,6 +343,7 @@ class ExportDialogABC(CcpnDialogMainWidget):
 
     def setPathHistory(self, filename: Path):
         if filename:
+            filename = aPath(filename)
             if filename.basename:
                 ExportDialogABC._pathHistory[self.title] = filename.basename
             else:

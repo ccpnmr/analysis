@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-10 16:45:05 +0000 (Wed, February 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:50 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -568,7 +568,7 @@ class Framework(NotifierBase):
 
     def _savePreferences(self):
         "Save the preferences to file"
-        with catchExceptions(application=self, errorStringTemplate='Error saving preferences; "%s"'):
+        with catchExceptions(application=self, errorStringTemplate='Error saving preferences; "%s"',printTraceBack=True):
             directory = os.path.dirname(userPreferencesPath)
             if not os.path.exists(directory):
                 os.makedirs(directory)
@@ -1421,7 +1421,7 @@ class Framework(NotifierBase):
 
     def createNewProject(self):
         "Callback for creating new project"
-        with catchExceptions(application=self, errorStringTemplate='Error creating new project:'):
+        with catchExceptions(application=self, errorStringTemplate='Error creating new project:', printTraceBack=True):
             okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
                                                                  phrase='create a new')
             if okToContinue:
@@ -1575,7 +1575,7 @@ class Framework(NotifierBase):
 
         with undoBlock():
             with notificationEchoBlocking():
-                with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s'):
+                with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s', printTraceBack=True):
                     # need datablock selector here, with subset selection dependent on datablock type
 
                     self.nefReader.importNewProject(self.project, dataBlock)
@@ -1654,7 +1654,7 @@ class Framework(NotifierBase):
         # with suspendSideBarNotifications(project=self.project):
         with undoBlock():
             with notificationEchoBlocking():
-                with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s'):
+                with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s',printTraceBack=True):
                     self.sparkyReader.importSparkyProject(self.project, dataBlock)
 
         # with undoBlock():
@@ -1836,7 +1836,7 @@ class Framework(NotifierBase):
 
         path = Path.aPath(path)
 
-        with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s'):
+        with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s', printTraceBack=True):
             with undoBlockWithoutSideBar():
                 self._importNefFile(path=path, makeNewProject=False)
             self.ui.mainWindow.sideBar.buildTree(self.project)
@@ -1888,7 +1888,7 @@ class Framework(NotifierBase):
 
             with undoBlock():
                 with notificationEchoBlocking():
-                    with catchExceptions(application=self, errorStringTemplate='Error importing Nef file: %s'):
+                    with catchExceptions(application=self, errorStringTemplate='Error importing Nef file: %s', printTraceBack=True):
                         # need datablock selector here, with subset selection dependent on datablock type
 
                         _nefReader.importNewProject(self.project, _loader._nefDict, selection)
@@ -2582,6 +2582,7 @@ class Framework(NotifierBase):
             relativeTo = mainWindow.moduleArea  # ejb
         residueModule = ResidueInformation(mainWindow=mainWindow)
         mainWindow.moduleArea.addModule(residueModule, position=position, relativeTo=relativeTo)
+        return residueModule
 
     @logCommand('application.')
     def showReferenceChemicalShifts(self, position='left', relativeTo=None):
@@ -2593,6 +2594,7 @@ class Framework(NotifierBase):
             relativeTo = mainWindow.moduleArea
         refChemShifts = ReferenceChemicalShifts(mainWindow=mainWindow)
         mainWindow.moduleArea.addModule(refChemShifts, position=position, relativeTo=relativeTo)
+        return refChemShifts
 
     ###################################################################################################################
     ## MENU callbacks:  VIEW
@@ -2614,6 +2616,7 @@ class Framework(NotifierBase):
                                                             chemicalShiftList=chemicalShiftList, selectFirstItem=selectFirstItem)
 
         mainWindow.moduleArea.addModule(chemicalShiftTableModule, position=position, relativeTo=relativeTo)
+        return chemicalShiftTableModule
 
     @logCommand('application.')
     def showNmrResidueTable(self, position='bottom', relativeTo=None,
@@ -2629,6 +2632,7 @@ class Framework(NotifierBase):
                                                       nmrChain=nmrChain, selectFirstItem=selectFirstItem)
 
         mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
+        return nmrResidueTableModule
 
     @logCommand('application.')
     def showResidueTable(self, position='bottom', relativeTo=None,
@@ -2644,6 +2648,7 @@ class Framework(NotifierBase):
                                                 chain=chain, selectFirstItem=selectFirstItem)
 
         mainWindow.moduleArea.addModule(residueTableModule, position=position, relativeTo=relativeTo)
+        return residueTableModule
 
     @logCommand('application.')
     def showPeakTable(self, position: str = 'left', relativeTo: CcpnModule = None,
@@ -2659,6 +2664,7 @@ class Framework(NotifierBase):
                                           peakList=peakList, selectFirstItem=selectFirstItem)
 
         mainWindow.moduleArea.addModule(peakTableModule, position=position, relativeTo=relativeTo)
+        return peakTableModule
 
     @logCommand('application.')
     def showMultipletTable(self, position: str = 'left', relativeTo: CcpnModule = None,
@@ -2674,6 +2680,7 @@ class Framework(NotifierBase):
                                                     multipletList=multipletList, selectFirstItem=selectFirstItem)
 
         mainWindow.moduleArea.addModule(multipletTableModule, position=position, relativeTo=relativeTo)
+        return multipletTableModule
 
     @logCommand('application.')
     def showIntegralTable(self, position: str = 'left', relativeTo: CcpnModule = None,
@@ -2689,6 +2696,7 @@ class Framework(NotifierBase):
                                                   integralList=integralList, selectFirstItem=selectFirstItem)
 
         mainWindow.moduleArea.addModule(integralTableModule, position=position, relativeTo=relativeTo)
+        return integralTableModule
 
     @logCommand('application.')
     def showRestraintTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
@@ -2704,6 +2712,7 @@ class Framework(NotifierBase):
                                                     restraintList=restraintList, selectFirstItem=selectFirstItem)
 
         mainWindow.moduleArea.addModule(restraintTableModule, position=position, relativeTo=relativeTo)
+        return restraintTableModule
 
     @logCommand('application.')
     def showStructureTable(self, position='bottom', relativeTo=None,
@@ -2719,6 +2728,7 @@ class Framework(NotifierBase):
                                                     structureEnsemble=structureEnsemble, selectFirstItem=selectFirstItem)
 
         mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
+        return structureTableModule
 
     @logCommand('application.')
     def showNotesEditor(self, position: str = 'bottom', relativeTo: CcpnModule = None,
@@ -2734,6 +2744,7 @@ class Framework(NotifierBase):
                                               note=note, selectFirstItem=selectFirstItem)
 
         mainWindow.moduleArea.addModule(notesEditorModule, position=position, relativeTo=relativeTo)
+        return notesEditorModule
 
     def showPrintSpectrumDisplayPopup(self):
         """Show the print spectrumDisplay dialog
@@ -2867,6 +2878,7 @@ class Framework(NotifierBase):
             relativeTo = mainWindow.moduleArea
         cs = ChemicalShiftsMapping(mainWindow=mainWindow)
         mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
+        return cs
 
     #################################################################################################
     ## MENU callbacks:  Macro
@@ -2880,6 +2892,7 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         self.editor = MacroEditor(mainWindow=mainWindow)
         mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
+        return self.editor
 
     def openMacroOnEditor(self):
         """
@@ -2902,6 +2915,7 @@ class Framework(NotifierBase):
         self.editor = MacroEditor(mainWindow=mainWindow)
         mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
         self.editor._openMacroFile()
+        return self.editor
 
     def defineUserShortcuts(self):
 

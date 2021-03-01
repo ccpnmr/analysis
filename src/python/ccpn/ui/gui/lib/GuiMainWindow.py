@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-11 11:10:04 +0000 (Thu, February 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1239,6 +1239,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             dataType, subType, usePath = ioFormats.analyseUrl(url)
             if subType == ioFormats.NMRSTAR:  # NMRStar file is available only as import of metadata not as stand alone project
                 self.application._loadNMRStarFile(url)
+                return objs
+
+            if subType == ioFormats.NEF and self.application.preferences.appearance.openImportPopupOnDroppedNef:
+                self.application._importNef(url)
                 return objs
 
             if dataType == 'Project' and subType in (ioFormats.CCPN,

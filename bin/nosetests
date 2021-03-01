@@ -4,7 +4,7 @@ CCPNMR_TOP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit; pwd)"
 export CCPNMR_TOP_DIR
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 
-NOSETESTS="${ANACONDA3}"/bin/nosetests
+NOSETESTS="${CONDA}"/bin/nosetests
 
 FILENAME=$*
 FILENAME=${FILENAME##*/};FILENAME=${FILENAME%.*}

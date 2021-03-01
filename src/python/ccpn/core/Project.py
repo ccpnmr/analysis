@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:49 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -870,20 +870,23 @@ class Project(AbstractWrapperObject):
 
         # get object
         obj = self._data2Obj.get(wrappedData)
-        pid = obj.pid
+        if not obj:
+            # NOTE:ED - it shouldn't get here but occasionally it does :|
+            getLogger().warning(f'_finaliseApiDelete: no V3 object for {wrappedData}')
 
-        # obj._finaliseAction('delete')  # GWV: 20181127: now as notify('delete') decorator on delete method
+        else:
+            # obj._finaliseAction('delete')  # GWV: 20181127: now as notify('delete') decorator on delete method
 
-        # remove from wrapped2Obj
-        del self._data2Obj[wrappedData]
+            # remove from wrapped2Obj
+            del self._data2Obj[wrappedData]
 
-        # remove from pid2Obj
-        del self._pid2Obj[obj.shortClassName][obj._id]
+            # remove from pid2Obj
+            del self._pid2Obj[obj.shortClassName][obj._id]
 
-        # Mark object as obviously deleted, and set up for undeletion
-        obj._id += '-Deleted'
-        wrappedData._oldWrapperObject = obj
-        obj._wrappedData = None
+            # Mark object as obviously deleted, and set up for undeletion
+            obj._id += '-Deleted'
+            wrappedData._oldWrapperObject = obj
+            obj._wrappedData = None
 
     def _finaliseApiUnDelete(self, wrappedData):
         """restore undeleted wrapper object, and call creation notifiers,
@@ -1414,6 +1417,7 @@ class Project(AbstractWrapperObject):
         """
 
         from ccpn.util.StructureData import averageStructure
+        from ccpn.core.Model import Model
 
         if subType == 'PDB':
             name, ensemble = self._loadPdbStructure(path)
@@ -1422,6 +1426,13 @@ class Project(AbstractWrapperObject):
         se = self.newStructureEnsemble()
         se.data = ensemble
         se.rename(name)
+
+        ensemble._containingObject = se
+        for modelNumber in sorted(ensemble['modelNumber'].unique()):
+            # _validateName
+            _label = 'my%s_%s' % (Model.className, modelNumber)
+
+            se.newModel(serial=modelNumber, label=_label)
 
         ds = self.newDataSet(title=name)
         d = ds.newData(name='Derived')

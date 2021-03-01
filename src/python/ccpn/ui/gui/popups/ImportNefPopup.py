@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:36 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1137,7 +1137,7 @@ class NefDictFrame(Frame):
         itemName = item.data(0, 0)
         saveFrame = item.data(1, 0)
         if saveFrame and hasattr(saveFrame, '_content'):
-            with self._tableSplitter.blockWidgetSignals():
+            with self._tableSplitter.blockWidgetSignals(recursive=False):
                 self._tableSplitter.setVisible(False)
 
                 for widg in self._nefWidgets:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -84,7 +84,6 @@ class GuiSpectrumView1d(GuiSpectrumView):
             self.hPhaseTrace.setVisible(False)
 
     def refreshData(self):
-        # self.spectrum._intensities = None  # UGLY, but need to force data to be reloaded
         self.data = self.spectrum.positions, self.spectrum.intensities
 
         # spawn a rebuild in the openGL strip

@@ -4,5 +4,5 @@ CCPNMR_TOP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit; pwd)"
 export CCPNMR_TOP_DIR
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
 
-echo "${ANACONDA3}"/bin/python
-"${ANACONDA3}"/bin/python $*
+echo "${CONDA}"/bin/python
+"${CONDA}"/bin/python $*

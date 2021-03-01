@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:35 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ProjectTreeCheckBoxes
 from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
+from ccpn.ui.gui.widgets.FileDialog import NefFileDialog
 from ccpn.ui.gui.widgets.MessageDialog import showError
 
 
@@ -60,6 +61,10 @@ class ExportNefPopup(ExportDialogABC):
                          selectFile=selectFile,
                          fileFilter=fileFilter,
                          **kwds)
+
+        # update the button toolTips
+        self.getButton(self.OKBUTTON).setToolTip('Export Nef to File')
+        self.getButton(self.CANCELBUTTON).setToolTip('Cancel')
 
     def initialise(self, userFrame):
         self.buttonCCPN = CheckBox(userFrame, checked=True,
@@ -101,6 +106,16 @@ class ExportNefPopup(ExportDialogABC):
                   'flags'   : self.flags,
                   'pidList' : self.newList}
         return params
+
+    def updateDialog(self):
+        """Create the Nef dialog
+        """
+        self.fileSaveDialog = NefFileDialog(self,
+                                            acceptMode='export',
+                                            selectFile=self._dialogSelectFile,
+                                            fileFilter=self._dialogFilter,
+                                            confirmOverwrite=False
+                                            )
 
     def exportToFile(self, filename=None, params=None):
         """Export to file

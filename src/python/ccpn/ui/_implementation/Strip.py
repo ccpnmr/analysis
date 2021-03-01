@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:50 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -451,10 +451,8 @@ class Strip(AbstractWrapperObject):
                         # peak.height = spectrumView.spectrum.getHeight(ppmPositions=position)
                     else:
                         # 1d position with height
-
-                        _height = spectrumView.spectrum.getIntensity(ppmPositions=position[:1])
+                        _height = position[-1] # Don't use the interp height, pick where you click like nD.
                         peak = peakList.newPeak(ppmPositions=position, height=_height)
-                        # peak.height = spectrumView.spectrum.getIntensity(ppmPositions=position)
 
                     result.append(peak)
                     peakLists.append(peakList)

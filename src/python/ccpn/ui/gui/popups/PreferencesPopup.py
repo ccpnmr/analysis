@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:36 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-01 11:22:52 +0000 (Mon, March 01, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -526,6 +526,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
+        row += 1
+        self.useImportNefPopupLabel = Label(parent, text="Show Import Popup\n    on dropped Nef Files", grid=(row, 0))
+        self.useImportNefPopupBox = CheckBox(parent, grid=(row, 1))
+        self.useImportNefPopupBox.toggled.connect(partial(self._queueToggleAppearanceOptions, 'openImportPopupOnDroppedNef'))
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+
         # NOTE:ED - testing new font loader
         row += 1
         self._fontsLabel = Label(parent, text="Fonts (requires restart)", grid=(row, 0))
@@ -556,6 +564,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useNativeFileBox.setChecked(self.preferences.general.useNative)
         self.useNativeMenus.setChecked(self.preferences.general.useNativeMenus)
         self.useNativeWebBox.setChecked(self.preferences.general.useNativeWebbrowser)
+        self.useImportNefPopupBox.setChecked(self.preferences.appearance.openImportPopupOnDroppedNef)
 
         for fontNum, fontName in enumerate(FONTLIST):
             value = self.preferences.appearance[FONTPREFS.format(fontNum)]

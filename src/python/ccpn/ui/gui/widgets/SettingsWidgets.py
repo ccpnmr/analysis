@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:02 +0000 (Tue, March 02, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,6 +39,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont, getFontHeight
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.Slider import Slider
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER, SOFTDIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, SpectrumDisplayPulldown, ChemicalShiftListPulldown
@@ -47,8 +48,10 @@ from ccpn.ui._implementation.SpectrumView import SpectrumView
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
-    SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES, AXISASPECTRATIOS, AXISASPECTRATIOMODE
+    SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES, AXISASPECTRATIOS, \
+    AXISASPECTRATIOMODE, ALIASENABLED, ALIASSHADE
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.Base import SignalBlocking
 from ccpn.core.Chain import Chain
@@ -77,6 +80,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                  xAxisUnits=0, xTexts=[], showXAxis=True,
                  yAxisUnits=0, yTexts=[], showYAxis=True,
                  symbolType=0, annotationType=0, symbolSize=9, symbolThickness=2,
+                 aliasEnabled=True, aliasShade=20,
                  stripArrangement=0,
                  _baseAspectRatioAxisCode='H', _aspectRatios={},
                  _aspectRatioMode=0,
@@ -268,6 +272,24 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.stripArrangementButtons.radioButtons[2].setVisible(False)
 
         row += 1
+        self.aliasEnabledLabel = Label(parent, text="Show Aliased Peaks", grid=(row, 0))
+        self.aliasEnabledData = CheckBox(parent, checked=aliasEnabled, grid=(row, 1), objectName='SDS_aliasEnabled')
+        self.aliasEnabledData.clicked.connect(self._symbolsChanged)
+
+        row += 1
+        self.aliasShadeLabel = Label(parent, text="    Opacity", grid=(row, 0))
+        # self.aliasShadeData = DoubleSpinbox(parent, step=0.05,
+        #                                    min=0.0, max=1.0, grid=(row, 1), hAlign='l', objectName='SDS_aliasShade')
+        _sliderBox = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l')
+        # self.aliasShadeData = Slider(parent, grid=(row, 1), hAlign='l', objectName='SDS_aliasShade')
+        self.aliasShadeData = Slider(_sliderBox, grid=(0, 1), hAlign='l')
+        Label(_sliderBox, text="0", grid=(0, 0), hAlign='l')
+        Label(_sliderBox, text="100%", grid=(0, 2), hAlign='l')
+        self.aliasShadeData.setMinimumWidth(LineEditsMinimumWidth)
+        self.aliasShadeData.set(aliasShade)
+        self.aliasShadeData.valueChanged.connect(self._symbolsChanged)
+
+        row += 1
         self._spacer = Spacer(parent, 5, 5,
                               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                               grid=(row, 4), gridSpan=(1, 1))
@@ -295,7 +317,9 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 SYMBOLTYPES        : self.symbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
                 ANNOTATIONTYPES    : self.annotationsData.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
                 SYMBOLSIZE         : int(self.symbolSizePixelData.text()),
-                SYMBOLTHICKNESS    : int(self.symbolThicknessData.text())
+                SYMBOLTHICKNESS    : int(self.symbolThicknessData.text()),
+                ALIASENABLED       : self.aliasEnabledData.isChecked(),
+                ALIASSHADE         : int(self.aliasShadeData.get())
                 }
 
     def _aspectRatioModeChanged(self):
@@ -380,9 +404,11 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             # only update if Nd
             self.symbol.setIndex(values[SYMBOLTYPES])
             self.annotationsData.setIndex(values[ANNOTATIONTYPES])
-
             self.symbolSizePixelData.set(values[SYMBOLSIZE])
             self.symbolThicknessData.set(values[SYMBOLTHICKNESS])
+            self.aliasEnabledData.set(values[ALIASENABLED])
+            self.aliasShadeData.set(values[ALIASSHADE])
+
             self.blockSignals(False)
 
     def _stripArrangementChanged(self):

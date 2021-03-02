@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 14:37:53 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -169,6 +169,8 @@ class GLVertexArray():
             vertices:       (x, y) * vertices
             colors:         (R, G, B, a) * vertices
             indices:        array of indexes into vertex list
+            _
+            attribs:        array of float for defining aliasPosition
         """
         # getLogger().info('>>> defineIndexVBO')
 
@@ -180,7 +182,7 @@ class GLVertexArray():
 
         # create the VBOs if they don't exist - reusing will just rewrite the buffers
         if self.VBOs is None:
-            self.VBOs = GL.glGenBuffers(3)
+            self.VBOs = GL.glGenBuffers(5)
 
         self._defineIndexVBO()
 
@@ -272,6 +274,154 @@ class GLVertexArray():
             GL.glDisable(GL.GL_BLEND)
 
     def drawIndexArrayNoColor(self):
+        """Draw the vertex buffers in indexed array mode. Arrays are copied from main memory each time.
+        Indexed mode using only vertices, no colour.
+        """
+        # getLogger().info('>>>drawIndexArrayNoColor')
+
+        if self.blendMode:
+            GL.glEnable(GL.GL_BLEND)
+        if self.fillMode is not None:
+            GL.glPolygonMode(GL.GL_FRONT_AND_BACK, self.fillMode)
+
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+
+        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
+        GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
+
+        GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+
+        if self.blendMode:
+            GL.glDisable(GL.GL_BLEND)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # indexed VBOs (vertex buffer objects)
+    # Index array - Indices/Vertices/Colour/attribs
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def defineAliasedIndexVBO(self):
+        """Define the buffers on the graphics card.
+        Indexed mode with vertices and colour.
+        If undefined, create new VBOs otherwise overwrite existing.
+
+        Includes:
+            vertices:       (x, y) * vertices
+            colors:         (R, G, B, a) * vertices
+            indices:        array of indexes into vertex list
+            _
+            attribs:        array of float for defining aliasPosition
+        """
+        # getLogger().info('>>> defineIndexVBO')
+
+        # print("OpenGL: " + str(GL.glGetString(GL.GL_VERSION)))
+        # print('glGenVertexArrays Available %s' % bool(GL.glGenVertexArrays))
+        # if not hasattr(self, 'VAOs'):
+        #     self.VAOs = GL.glGenVertexArrays(1)
+        # GL.glBindVertexArray(self.VAOs)                # define VAOs - doesn't work MacOS
+
+        # create the VBOs if they don't exist - reusing will just rewrite the buffers
+        if self.VBOs is None:
+            self.VBOs = GL.glGenBuffers(5)
+
+        self._defineAliasedIndexVBO()
+
+    def _defineAliasedIndexVBO(self):
+        """Push Indices/Colours/Vertices/attribs to graphics card
+        """
+        sizeVertices = self.vertices.size * self.vertices.itemsize
+        sizeColors = self.colors.size * self.colors.itemsize
+        sizeIndices = self.indices.size * self.indices.itemsize
+        sizeAttribs = self.attribs.size * self.attribs.itemsize
+
+        # bind to the buffers
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[VERTEX_PTR])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices, self.vertices, GL.GL_DYNAMIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[COLOR_PTR])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, self.colors, GL.GL_DYNAMIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[INDEX_PTR])
+        GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, sizeIndices, self.indices, GL.GL_DYNAMIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[ATTRIB_PTR])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeAttribs, self.attribs, GL.GL_DYNAMIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+
+    def updateAliasedIndexVBO(self):
+        """Update the buffers on the graphics card.
+        Indexed mode with vertices and colour.
+        """
+        # getLogger().info('>>> updateIndexVBO')
+
+        # check the VBOs, if they don't exist raise error
+        if self.VBOs is None:
+            raise RuntimeError('OpenGL Error: cannot update indexVBO: %s' % self)
+
+        self._defineAliasedIndexVBO()
+
+    def updateAliasedIndexVBOIndices(self):
+        """Update the buffers on the graphics card.
+        Only the index array.
+        """
+        # getLogger().info('>>> updateIndexVBOIndices')
+
+        # check the VBOs, if they don't exist raise error
+        if self.VBOs is None:
+            raise RuntimeError('OpenGL Error: cannot update indexArray: %s' % self)
+
+        sizeIndices = self.indices.size * self.indices.itemsize
+
+        # bind to the buffers
+        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[INDEX_PTR])
+        GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, sizeIndices, self.indices, GL.GL_DYNAMIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
+
+    def drawAliasedIndexVBO(self):
+        """Draw the vertex buffers in indexed array mode. Arrays are drawn from buffers already bound to graphics card memory.
+        Indexed mode with vertices and colour.
+        """
+        # getLogger().info('>>> drawIndexVBO')
+
+        if not self.indices.size:
+            return
+        if self.VBOs is None:
+            raise RuntimeError('OpenGL Error: cannot draw IndexVBO: %s' % self)
+
+        if self.blendMode:
+            GL.glEnable(GL.GL_BLEND)
+        if self.fillMode is not None:
+            GL.glPolygonMode(GL.GL_FRONT_AND_BACK, self.fillMode)
+
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+        GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+        GL.glEnableVertexAttribArray(1)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[VERTEX_PTR])
+        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[COLOR_PTR])
+        GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[ATTRIB_PTR])
+        GL.glVertexAttribPointer(1, 1, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
+
+        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[INDEX_PTR])
+        GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, None)
+
+        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+
+        GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+        GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+        GL.glDisableVertexAttribArray(1)
+
+        if self.blendMode:
+            GL.glDisable(GL.GL_BLEND)
+
+    def drawAliasedIndexArrayNoColor(self):
         """Draw the vertex buffers in indexed array mode. Arrays are copied from main memory each time.
         Indexed mode using only vertices, no colour.
         """
@@ -558,16 +708,18 @@ class GLVertexArray():
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
     # def enableTextClientState(self):
+    #     _attribArrayIndex = 1
     #     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     #     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
     #     GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
-    #     GL.glEnableVertexAttribArray(self._GLContext._glClientIndex)
+    #     GL.glEnableVertexAttribArray(_attribArrayIndex)
     #
     # def disableTextClientState(self):
+    #     _attribArrayIndex = 1
     #     GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
     #     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
     #     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-    #     GL.glDisableVertexAttribArray(self._GLContext._glClientIndex)
+    #     GL.glDisableVertexAttribArray(_attribArrayIndex)
 
     def drawTextArrayVBO(self, enableClientState=False, disableClientState=False):
         """Draw the texture buffers in indexed array mode. Arrays are drawn from buffers already bound to graphics card memory.
@@ -582,11 +734,12 @@ class GLVertexArray():
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
 
+        _attribArrayIndex = 1
         if enableClientState:
             GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
             GL.glEnableClientState(GL.GL_COLOR_ARRAY)
             GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
-            GL.glEnableVertexAttribArray(self._GLContext._glClientIndex)
+            GL.glEnableVertexAttribArray(_attribArrayIndex)
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[VERTEX_PTR])
         GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
@@ -598,7 +751,7 @@ class GLVertexArray():
         GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, None)
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[ATTRIB_PTR])
-        GL.glVertexAttribPointer(self._GLContext._glClientIndex, 2, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
+        GL.glVertexAttribPointer(_attribArrayIndex, 2, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[INDEX_PTR])
         GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, None)
@@ -610,7 +763,7 @@ class GLVertexArray():
             GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
             GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
             GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-            GL.glDisableVertexAttribArray(self._GLContext._glClientIndex)
+            GL.glDisableVertexAttribArray(_attribArrayIndex)
 
         if self.blendMode:
             GL.glDisable(GL.GL_BLEND)

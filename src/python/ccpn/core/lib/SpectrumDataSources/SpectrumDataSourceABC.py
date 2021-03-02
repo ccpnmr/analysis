@@ -92,7 +92,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-05 17:08:23 +0000 (Fri, February 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:00 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -107,6 +107,7 @@ import sys
 from typing import Sequence
 from contextlib import contextmanager
 from collections import OrderedDict
+from itertools import product
 
 import tempfile
 
@@ -1391,12 +1392,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
             data = self.getSliceData(position=position, sliceDim=1)
             return float(data[position[0]-1])
 
-    def getPointValue(self, position, aliaisingFlags=None):
+    def getPointValue(self, position, aliasingFlags=None):
         """Get interpolated value defined by position (1-based, float values), optionally aliased
         The result is calculated from a weighted average of the two values at the neighbouring
         grid points for each dimension
 
-        aliaisingFlags: Optionally allow for aliasing per dimension:
+        aliasingFlags: Optionally allow for aliasing per dimension:
             0: No aliasing
             1: aliasing with positive sign
            -1: aliasing with negative sign
@@ -1425,7 +1426,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         # get the nD slice data around position; i.e. if position=(324.4, 120.9, 33.7),
         # get ( (324,325), (120,121), (33,34) )
         sliceTuples = [(int(p), int(p)+1) for p in position]
-        pointData = self.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliaisingFlags)
+        pointData = self.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
 
         for f in fractions:
             pointData = interpolate(pointData, factor=f)
@@ -1435,7 +1436,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def checkForValidRegion(self, sliceTuples, aliasingFlags):
         """Checks if slicesTuples are valid
 
-        aliaisingFlags: Optionally allow for aliasing per dimension:
+        aliasingFlags: Optionally allow for aliasing per dimension:
             0: No aliasing
             1: aliasing with positive sign
            -1: aliasing with negative sign
@@ -1480,7 +1481,14 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # temp buffer for unpacking aliased data along sliceDim
         sliceData2 = numpy.zeros(sizes[sliceAxis], dtype=self.dataType)
-        nPoints = self.pointCounts[sliceAxis]
+        nPointCounts = self.pointCounts
+        nPoints = nPointCounts[sliceAxis]
+
+        # _slices = [(position, aliased) for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim])]
+        # print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        # print(f'{sizes}    {sliceAxis}     {nPointCounts}')
+        # for _slice in _slices:
+        #     print(_slice)
 
         for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim]):
 
@@ -1489,13 +1497,26 @@ class SpectrumDataSourceABC(CcpNmrJson):
             with notificationEchoBlocking():
                 sliceData = self.getSliceData(position=position, sliceDim=sliceDim)
 
-            # define the data slicing objects
-            dataSlices = [slice((p-1)-starts[idx], (p-1)-starts[idx]+1) for idx,p in enumerate(position)]
-            dataSlices[sliceAxis] = slice(0,sizes[sliceAxis])
-            # FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated;
-            # use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as
-            # an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-            dataSlices = tuple(dataSlices)
+            # # define the data slicing objects
+            # # offset to the origin of regionData - mod to the pointCounts of the data
+            # dataSlices = [slice((p - 1) - starts[idx], (p - 1) - starts[idx] + 1) for idx, p in enumerate(position)]
+            # dataSlices[sliceAxis] = slice(0,sizes[sliceAxis])
+            # # FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated;
+            # # use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as
+            # # an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+            # dataSlices = tuple(dataSlices)
+
+            # dataSlices = [slice(((p-1)-start) % np, (((p-1)-start) % np) + 1) for start, p, np in zip(starts, position, nPointCounts)]
+            # define the set of dataSlices in a range bigger than the dataSet in any axis,
+            # e.g., a long region across aliased spectrum
+            #       if data is (100, 50) and region is (125, 5) then this will need 2 tiles ((0, 0), (1, 0))
+            _its = [range(((size - 1) // np) + 1) for size, np in zip(sizes, nPointCounts)]
+            allDataSlices = [
+                [slice(al * np + ((p-1)-start) % np, al * np + (((p-1)-start) % np) + 1) for start, p, np, al in zip(starts, position, nPointCounts, alias)]
+                for alias in [it for it in product(*_its)]
+                ]
+            for _slice in allDataSlices:
+                _slice[sliceAxis] = slice(0,sizes[sliceAxis])
 
             # get aliasing factor determined by dimensions other than sliceDim
             factor = 1.0
@@ -1505,8 +1526,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
             if not aliased[sliceAxis]:
                 # There are no aliased points along sliceDim
-                # copy the relevant section of the sliceData into the (nD) data array
-                regionData[dataSlices[::-1]] = factor * sliceData[starts[sliceAxis]:stops[sliceAxis]] # dimensions run in ..,z,y,x order
+                for dataSlices in allDataSlices:
+                    # copy the relevant section of the sliceData into the (nD) data array
+                    regionData[tuple(dataSlices[::-1])] = factor * sliceData[starts[sliceAxis]:stops[sliceAxis]] # dimensions run in ..,z,y,x order
             else:
                 # copy the relevant points from sliceData to sliceData2 array; aliasing where needed
                 for idx, p in zip( range(0,sizes[sliceAxis]), range(starts[sliceAxis],stops[sliceAxis]) ):
@@ -1516,8 +1538,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
                     while p >= nPoints:
                         p -= nPoints
                     sliceData2[idx] = factor * pointFactor * sliceData[p]
-                # copy the sliceData2 into the (nD) data array
-                regionData[dataSlices[::-1]] = sliceData2[:] # dimensions run in ..,z,y,x order
+                for dataSlices in allDataSlices:
+                    # copy the sliceData2 into the (nD) data array
+                    regionData[tuple(dataSlices[::-1])] = sliceData2[:] # dimensions run in ..,z,y,x order
 
         return regionData
 
@@ -1528,7 +1551,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         sliceTuples are 1-based; sliceTuple stop values are inclusive (i.e. different
         from the python slice object)
 
-        aliaisingFlags: Optionally allow for aliasing per dimension:
+        aliasingFlags: Optionally allow for aliasing per dimension:
             0: No aliasing
             1: aliasing with positive sign
            -1: aliasing with negative sign
@@ -1585,7 +1608,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             if dim < 1 or dim > self.dimensionCount:
                 raise ValueError('invalid dimension "%s" in excludeDimensions' % dim)
 
-        # get dimensions to interate over
+        # get dimensions to iterate over
         iterDims = list(set(self.dimensions) - set(excludeDimensions))
 
         # get relevant iteration parameters
@@ -1594,7 +1617,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         iterData = list(zip(iterDims, slices, indices))
 
         def _nextPosition(currentPosition):
-            "Return a (done, position) tuple derived from currentPosition"
+            """Return a (done, position) tuple derived from currentPosition"""
             for dim, sliceTuple, idx in iterData:
                 start = sliceTuple[0]
                 stop = sliceTuple[1]
@@ -1610,16 +1633,19 @@ class SpectrumDataSourceABC(CcpNmrJson):
         done = False
         while not done:
             # get position list within the [1,pointCounts] range and an aliased True/False list
-            position = []
-            aliased = []
-            for idx, p in enumerate(loopPosition):
-                aliased.append( (p<1) or p>self.pointCounts[idx] )
-                # Aliase onto 1, pointCounts range
-                while p < 1:
-                    p += self.pointCounts[idx]
-                while p > self.pointCounts[idx]:
-                    p -= self.pointCounts[idx]
-                position.append(p)
+            # position = []
+            # aliased = []
+            # for idx, p in enumerate(loopPosition):
+            #     aliased.append( (p<1) or p>self.pointCounts[idx] )
+            #     # Alias onto 1, pointCounts range
+            #     while p < 1:
+            #         p += self.pointCounts[idx]
+            #     while p > self.pointCounts[idx]:
+            #         p -= self.pointCounts[idx]
+            #     position.append(p)
+
+            position = [((p - 1) % np) + 1 for p, np in zip(loopPosition, self.pointCounts)]
+            aliased = [(p - 1) // np for p, np in zip(loopPosition, self.pointCounts)]
 
             yield position, aliased
             done, loopPosition = _nextPosition(loopPosition)

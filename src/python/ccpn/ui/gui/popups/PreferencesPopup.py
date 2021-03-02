@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 14:37:54 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:02 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Slider import Slider
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST
 from ccpn.framework.Translation import languages
 from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
@@ -222,6 +223,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
                     strip.spectrumBordersVisible = self.application.preferences.general.showSpectrumBorder
 
+                    strip.aliasEnabled = self.application.preferences.general.aliasEnabled
+                    strip.aliasShade = self.application.preferences.general.aliasShade
+
                 strip._frameGuide.resetColourTheme()
 
     def _updateDisplay(self, updateColourScheme, updateSpectrumDisplays):
@@ -378,7 +382,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.restoreLayoutOnOpeningLabel = Label(parent, text="Restore Layout On Opening", grid=(row, 0))
-        self.restoreLayoutOnOpeningBox = CheckBox(parent, grid=(row, 1))  #,
+        self.restoreLayoutOnOpeningBox = CheckBox(parent, grid=(row, 1))
         self.restoreLayoutOnOpeningBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'restoreLayoutOnOpening'))
 
         row += 1
@@ -672,7 +676,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.symbol.setIndex(self.preferences.general.symbolType)
         self.symbolSizePixelData.setValue(int('%i' % self.preferences.general.symbolSizePixel))
         self.symbolThicknessData.setValue(int(self.preferences.general.symbolThickness))
+        self.aliasEnabledData.setChecked(self.preferences.general.aliasEnabled)
+        self.aliasShadeData.setValue(self.preferences.general.aliasShade)
         self.contourThicknessData.setValue(int(self.preferences.general.contourThickness))
+
         self.autoCorrectBox.setChecked(self.preferences.general.autoCorrectColours)
         _setColourPulldown(self.marksDefaultColourBox, self.preferences.general.defaultMarksColour)
         self.showSideBandsData.setValue(int(self.preferences.general.numSideBands))
@@ -1009,6 +1016,23 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                            min=1, max=20, grid=(row, 1), hAlign='l')
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         self.symbolThicknessData.valueChanged.connect(self._queueSetSymbolThickness)
+
+        row += 1
+        self.aliasEnabledLabel = Label(parent, text="Show Aliased Peaks", grid=(row, 0))
+        self.aliasEnabledData = CheckBox(parent, grid=(row, 1))
+        self.aliasEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'aliasEnabled'))
+
+        row += 1
+        self.aliasShadeLabel = Label(parent, text="    Opacity", grid=(row, 0))
+        # self.aliasShadeData = DoubleSpinbox(parent, step=0.05,
+        #                                     min=0.0, max=1.0, grid=(row, 1), hAlign='l')
+        _sliderBox = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l')
+        # self.aliasShadeData = Slider(parent, grid=(row, 1), hAlign='l')
+        self.aliasShadeData = Slider(_sliderBox, grid=(0, 1), hAlign='l')
+        Label(_sliderBox, text="0", grid=(0, 0), hAlign='l')
+        Label(_sliderBox, text="100%", grid=(0, 2), hAlign='l')
+        self.aliasShadeData.setMinimumWidth(LineEditsMinimumWidth)
+        self.aliasShadeData.valueChanged.connect(self._queueSetAliasShade)
 
         row += 1
         self.contourThicknessLabel = Label(parent, text="Contour Thickness (points)", grid=(row, 0))
@@ -1483,6 +1507,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Set the Thickness of the peak contours (ppm)
         """
         self.preferences.general.contourThickness = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetAliasShade(self):
+        value = int(self.aliasShadeData.get())
+        if value != self.preferences.general.aliasShade:
+            return partial(self._setAliasShade, value)
+
+    def _setAliasShade(self, value):
+        """Set the aliased peaks Shade 0.0->1.0; 0.0 is invisible
+        """
+        self.preferences.general.aliasShade = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetZPlaneNavigationMode(self):

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:28 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:00 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -286,7 +286,7 @@ class Peak(AbstractWrapperObject):
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             currentAlias.append(peakDim.numAliasing)
 
-            _old = peakDim.position # the current pointPosition, quick to get
+            _old = peakDim.position  # the current pointPositions, quick to get
             peakDim.value = value[ii]
             peakDim.realValue = None
             newAlias.append(peakDim.numAliasing)
@@ -333,14 +333,14 @@ class Peak(AbstractWrapperObject):
             peakDim.valueError = value[ii]
 
     @property
-    def pointPosition(self) -> Tuple[float, ...]:
+    def pointPositions(self) -> Tuple[float, ...]:
         """Peak position in points."""
         return tuple(x.position for x in self._wrappedData.sortedPeakDims())
 
-    @pointPosition.setter
+    @pointPositions.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
-    def pointPosition(self, value: Sequence):
+    def pointPositions(self, value: Sequence):
         currentAlias = []
         newAlias = []
         assigned = set()
@@ -349,7 +349,7 @@ class Peak(AbstractWrapperObject):
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             currentAlias.append(peakDim.numAliasing)
 
-            _old = peakDim.position # the current pointPosition
+            _old = peakDim.position  # the current pointPositions
             peakDim.position = value[ii]
             newAlias.append(peakDim.numAliasing)
 
@@ -381,7 +381,7 @@ class Peak(AbstractWrapperObject):
 
     @property
     def lineWidths(self) -> Tuple[Optional[float], ...]:
-        """Full-width-half-height of peak for each dimension, in Hz."""
+        """Full-width-half-height of peak for each dimension, in Hz/ppm."""
         return tuple(x.lineWidth for x in self._wrappedData.sortedPeakDims())
 
     @lineWidths.setter
@@ -391,12 +391,49 @@ class Peak(AbstractWrapperObject):
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             peakDim.lineWidth = value[ii]
 
+    # @property
+    # def ppmLineWidths(self) -> Tuple[Optional[float], ...]:
+    #     """Full-width-half-height of peak for each dimension, in ppm."""
+    #     return tuple(peakDim.lineWidth * peakDim.dataDim.valuePerPoint if peakDim.lineWidth is not None else None
+    #                  for peakDim in self._wrappedData.sortedPeakDims())
+    #
+    # @ppmLineWidths.setter
+    # @logCommand(get='self', isProperty=True)
+    # @ccpNmrV3CoreSetter()
+    # def ppmLineWidths(self, value: Sequence):
+    #     for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+    #         peakDim.lineWidth = value[ii] / peakDim.dataDim.valuePerPoint if value[ii] is not None else None
+
+    ppmLineWidths = lineWidths
+
+    @property
+    def pointLineWidths(self) -> Tuple[Optional[float], ...]:
+        """Full-width-half-height of peak for each dimension, in points."""
+        # currently assumes that internal storage is in ppms
+        return tuple(peakDim.lineWidth / peakDim.dataDim.valuePerPoint if peakDim.lineWidth is not None else None
+                     for peakDim in self._wrappedData.sortedPeakDims())
+
+    @pointLineWidths.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
+    def pointLineWidths(self, value: Sequence):
+        for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+            peakDim.lineWidth = value[ii] * peakDim.dataDim.valuePerPoint if value[ii] is not None else None
+
     @property
     def aliasing(self) -> Tuple[Optional[float], ...]:
         """Aliasing for the peak in each dimension.
         Defined as integer number of spectralWidths added or subtracted along each dimension
         """
-        return tuple(-1 * x.numAliasing for x in self._wrappedData.sortedPeakDims())
+        aliasing = []
+        for peakDim in self._wrappedData.sortedPeakDims():
+            axisReversed = -1
+            expDimRef = peakDim.dataDim.expDim.findFirstExpDimRef(serial=1)
+            if expDimRef:
+                axisReversed = -1 if expDimRef.isAxisReversed else 1
+            aliasing.append(axisReversed * peakDim.numAliasing)
+        return tuple(aliasing)
+        # return tuple((-1 if peakDim.dataDim.expDim.findFirstExpDimRef(serial=1)) * peakDim.numAliasing for peakDim in self._wrappedData.sortedPeakDims())
 
     @aliasing.setter
     @logCommand(get='self', isProperty=True)
@@ -411,7 +448,11 @@ class Peak(AbstractWrapperObject):
         newAlias = []
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             currentAlias.append(peakDim.numAliasing)
-            peakDim.numAliasing = -1 * value[ii]
+            axisReversed = -1
+            expDimRef = peakDim.dataDim.expDim.findFirstExpDimRef(serial=1)
+            if expDimRef:
+                axisReversed = -1 if expDimRef.isAxisReversed else 1
+            peakDim.numAliasing = axisReversed * value[ii]
             newAlias.append(peakDim.numAliasing)
 
         # aliasing may/may not have changed here
@@ -782,7 +823,6 @@ class Peak(AbstractWrapperObject):
                                 minDropFactor=minDropFactor, fitMethod=fitMethod,
                                 searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit)
 
-
     # def fitPositionHeightLineWidths(self):
     #     """Set the position, height and lineWidth of the Peak."""
     #     LibPeak.fitPositionHeightLineWidths(self._apiPeak)
@@ -891,7 +931,7 @@ class Peak(AbstractWrapperObject):
         lim = volumeIntegralLimit * FWHM / 2.0
         xxSig = np.linspace(0, lim, numPoints)
         vals = make_gauss(xxSig, sigmaX, mu, height)
-        area = 2.0*np.trapz(vals, xxSig)
+        area = 2.0 * np.trapz(vals, xxSig)
 
         # note that negative height will give negative volume
         vol = 1.0
@@ -904,7 +944,7 @@ class Peak(AbstractWrapperObject):
         # do I need to set the volume error?
         # self.volumeError = 1e-8
 
-    def fit(self, fitMethod = None, halfBoxSearchWidth = 2, keepPosition=False, iterations=10):
+    def fit(self, fitMethod=None, halfBoxSearchWidth=2, keepPosition=False, iterations=10):
         """
         Fit the peak to recalculate position and lineWidths.
         Use peak.estimateVolume to recalculate the volume.
@@ -931,7 +971,7 @@ class Peak(AbstractWrapperObject):
         originalPosition = peak.position
         lastLWsFound = []
         consecutiveSameLWsCount = 0
-        maxSameLWsCount = 3 # if the same values are found in the last x iterations, then it breaks the loop.
+        maxSameLWsCount = 3  # if the same values are found in the last x iterations, then it breaks the loop.
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
                 while iterations > 0 and consecutiveSameLWsCount <= maxSameLWsCount:
@@ -946,7 +986,7 @@ class Peak(AbstractWrapperObject):
                         consecutiveSameLWsCount = 0
                     lastLWsFound = peak.lineWidths
                     iterations -= 1
-        getLogger().info('Peak fit completed for %s' %peak)
+        getLogger().info('Peak fit completed for %s' % peak)
         return
 
     def _checkAliasing(self):
@@ -972,8 +1012,9 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
              heightError: float = None, volumeError: float = None,
              figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
              ppmPositions: Sequence[float] = (), position: Sequence[float] = None, positionError: Sequence[float] = (),
-             pointPosition: Sequence[float] = (), boxWidths: Sequence[float] = (),
-             lineWidths: Sequence[float] = (), serial: int = None) -> Peak:
+             pointPositions: Sequence[float] = (), boxWidths: Sequence[float] = (),
+             lineWidths: Sequence[float] = (), ppmLineWidths: Sequence[float] = (), pointLineWidths: Sequence[float] = (),
+             serial: int = None) -> Peak:
     """Create a new Peak within a peakList
 
     NB you must create the peak before you can assign it. The assignment attributes are:
@@ -989,10 +1030,10 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     :param figureOfMerit:
     :param annotation:
     :param comment: optional comment string
-    :param ppmPositions: peak position in ppm for each dimension (related attributes: positionError, pointPosition)
-    :param position: OLD: peak position in ppm for each dimension (related attributes: positionError, pointPosition)
+    :param ppmPositions: peak position in ppm for each dimension (related attributes: positionError, pointPositions)
+    :param position: OLD: peak position in ppm for each dimension (related attributes: positionError, pointPositions)
     :param positionError:
-    :param pointPosition:
+    :param pointPositions:
     :param boxWidths:
     :param lineWidths:
     :param serial: optional serial number.
@@ -1021,20 +1062,35 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     if ppmPositions:
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.value = ppmPositions[ii]
-    elif pointPosition:
+    elif pointPositions:
+
+        pointCounts = result.spectrum.pointCounts
         for ii, peakDim in enumerate(apiPeakDims):
-            peakDim.position = pointPosition[ii]
+            # move the peak to the correct aliased position
+            alias = int((pointPositions[ii] - 1) // pointCounts[ii])
+            pos = float((pointPositions[ii] - 1) % pointCounts[ii]) + 1.0  # API position starts at 1
+            peakDim.numAliasing = alias
+            peakDim.position = pos
+
     if positionError:
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.valueError = positionError[ii]
     if boxWidths:
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.boxWidth = boxWidths[ii]
+
+    # currently lineWidths/ppmLineWidths are both in Hz/ppm
     if lineWidths:
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.lineWidth = lineWidths[ii]
+    elif ppmLineWidths:
+        for ii, peakDim in enumerate(apiPeakDims):
+            peakDim.lineWidth = ppmLineWidths[ii]
+    elif pointLineWidths:
+        for peakDim, pointLineWidth in zip(apiPeakDims, pointLineWidths):
+            peakDim.lineWidth = (pointLineWidth * peakDim.dataDim.valuePerPoint) if pointLineWidth else None
 
-    result.height = height          # use the method to store the unit-scaled value
+    result.height = height  # use the method to store the unit-scaled value
     result.volume = volume
     result.heightError = heightError
     result.volumeError = volumeError
@@ -1050,7 +1106,7 @@ def _newPickedPeak(self: PeakList, pointPositions: Sequence[float] = None, heigh
     See the Peak class for details.
 
     :param height: height of the peak (related attributes: volume, volumeError, lineWidths)
-    :param pointPositions: peak position in points for each dimension (related attributes: positionError, pointPosition)
+    :param pointPositions: peak position in points for each dimension (related attributes: positionError, pointPositions)
     :param fitMethod: type of curve fitting
     :param lineWidths:
     :param serial: optional serial number.

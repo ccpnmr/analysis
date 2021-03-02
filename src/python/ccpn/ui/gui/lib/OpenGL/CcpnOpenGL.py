@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 14:37:53 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -90,7 +90,7 @@ from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGR
     CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours, \
     CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA, \
     CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, \
-    CCPNGLWIDGET_HARDSHADE
+    CCPNGLWIDGET_HARDSHADE, CCPNGLWIDGET_BADAREA
 import ccpn.util.Phasing as Phasing
 from ccpn.ui.gui.lib.mouseEvents import \
     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
@@ -399,6 +399,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._symbolType = 0
         self._symbolSize = 0
         self._symbolThickness = 0
+        self._aliasEnabled = True
+        self._aliasShade = 0.0
 
         self._contourList = {}
 
@@ -460,7 +462,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self.viewports = None
 
         self._cursorFrameCounter = GLDefs.CursorFrameCounterModes.CURSOR_DEFAULT
-        self._glClientIndex = 0
         self._menuActive = False
 
     def close(self):
@@ -746,6 +747,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         indices = getAxisCodeMatchIndices(self.strip.axisCodes, spectrumView.spectrum.axisCodes)
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds, self._spectrumValues[1].regionBounds)
 
         if len(self._spectrumValues) > 2:
             # store a list for the extra dimensions - should only be one per spectrumDisplay really
@@ -1807,7 +1809,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # initialise a common to all OpenGL windows
         self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow)
-        self._glClientIndex = self.globalGL.getNextClientIndex()
 
         # initialise the arrays for the grid and axes
         self.gridList = []
@@ -1913,8 +1914,10 @@ class CcpnGLWidget(QOpenGLWidget):
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
 
         self.setBackgroundColour(self.background, silent=True)
-        self.globalGL._shaderProgramTex.setBlendEnabled(0)
-        self.globalGL._shaderProgramTex.setAlpha(1.0)
+        _shader = self.globalGL._shaderProgramTex
+        _shader.makeCurrent()
+        _shader.setBlendEnabled(False)
+        _shader.setAlpha(1.0)
 
         if self.strip:
             self.updateVisibleSpectrumViews()
@@ -2090,12 +2093,15 @@ class CcpnGLWidget(QOpenGLWidget):
         self.zoomAreaColour = self.colours[CCPNGLWIDGET_ZOOMAREA]
         self.pickAreaColour = self.colours[CCPNGLWIDGET_PICKAREA]
         self.selectAreaColour = self.colours[CCPNGLWIDGET_SELECTAREA]
+        self.badAreaColour = self.colours[CCPNGLWIDGET_BADAREA]
+
         self.zoomLineColour = self.colours[CCPNGLWIDGET_ZOOMLINE]
         self.mouseMoveLineColour = self.colours[CCPNGLWIDGET_MOUSEMOVELINE]
 
         self.zoomAreaColourHard = (*self.colours[CCPNGLWIDGET_ZOOMAREA][0:3], CCPNGLWIDGET_HARDSHADE)
         self.pickAreaColourHard = (*self.colours[CCPNGLWIDGET_PICKAREA][0:3], CCPNGLWIDGET_HARDSHADE)
         self.selectAreaColourHard = (*self.colours[CCPNGLWIDGET_SELECTAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.badAreaColourHard = (*self.colours[CCPNGLWIDGET_BADAREA][0:3], CCPNGLWIDGET_HARDSHADE)
 
     def _preferencesUpdate(self):
         """update GL values after the preferences have changed
@@ -2140,6 +2146,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.globalGL._shaderProgramTex.makeCurrent()
         self.globalGL._shaderProgramTex.setBackground(self.background)
+        self.globalGL._shaderProgramAlias.makeCurrent()
+        self.globalGL._shaderProgramAlias.setBackground(self.background)
+        self.globalGL._shaderProgramAlias.setAliasShade(0.25)
+        self.globalGL._shaderProgramAlias.setAliasEnabled(True)
         if not silent:
             self.update()
 
@@ -2201,7 +2211,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 if (minDiff < button[2]) and (maxDiff < button[3]):
                     button[4]()
-                    break
+                    return True
 
     def mousePressInLabel(self, mx, my, ty):
         """Check if the mouse has been pressed in the stripIDlabel
@@ -2397,6 +2407,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._mouseStart = (mx, my)
         self._startCoordinate = self.mouseTransform.dot([mx, my, 0.0, 1.0])
         self._startMiddleDrag = False
+        self._validRegionPick = False
 
         self._endCoordinate = self._startCoordinate
 
@@ -2432,6 +2443,46 @@ class CcpnGLWidget(QOpenGLWidget):
             if not self._dragRegions:
                 if not self.mousePressInRegion(self._externalRegions._regions):
                     self.mousePressInIntegralLists()
+
+        if int(ev.buttons() & Qt.LeftButton):
+            # find the bounds for the region that has currently been clicked
+
+            if (keyModifiers & (Qt.ShiftModifier | Qt.ControlModifier)):
+                # get the list of visible spectrumViews, or the first in the list
+                visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+                bounds = ([], [])
+                for specView in visibleSpectrumViews:
+                    specSettings = self._spectrumSettings[specView]
+
+                    pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
+                    if None in pIndex:
+                        continue
+
+                    for ii in range(2):
+                        bounds[ii].extend(list(specSettings[GLDefs.SPECTRUM_REGIONBOUNDS][ii]))
+
+                bounds = [sorted(bnd) for bnd in bounds]
+
+                mn = min(self.axisL, self.axisR)
+                mx = max(self.axisL, self.axisR)
+                bounds[0] = [mn] + [bnd for bnd in bounds[0] if mn < bnd < mx] + [mx]
+                mn = min(self.axisB, self.axisT)
+                mx = max(self.axisB, self.axisT)
+                bounds[1] = [mn] + [bnd for bnd in bounds[1] if mn < bnd < mx] + [mx]
+
+                self._minBounds = [None, None]
+                self._maxBounds = [None, None]
+
+                for jj in range(2):
+                    for minB, maxB in zip(bounds[jj], bounds[jj][1:]):
+                        if minB < self._startCoordinate[jj] < maxB:
+                            self._minBounds[jj] = minB
+                            self._maxBounds[jj] = maxB
+                            break
+
+                if None not in self._minBounds and None not in self._maxBounds:
+                    # not currently used, but available to set the region to red if required
+                    self._validRegionPick = True
 
         self.current.strip = self.strip
         self.update()
@@ -2625,8 +2676,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if (keyModifiers & Qt.ShiftModifier) and (keyModifiers & Qt.ControlModifier):
 
-                self._endCoordinate = cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
-                self._selectionMode = 3
+                # check for a valid region pick
+                if self._validRegionPick:
+                    self._endCoordinate = [np.clip(pos, mn, mx) for pos, mn, mx in zip(cursorCoordinate, self._minBounds, self._maxBounds)]
+                    self._selectionMode = 3
+                else:
+                    # in case bad picking needs to be shown to the user, shows a red box
+                    # awkward for overlaid spectra with different aliasing regions specified
+                    self._endCoordinate = [np.clip(pos, mn, mx) for pos, mn, mx in zip(cursorCoordinate, self._minBounds, self._maxBounds)]  #cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
+                    self._selectionMode = 4
+
                 self._drawSelectionBox = True
                 self._drawDeltaOffset = True
 
@@ -3106,10 +3165,26 @@ class CcpnGLWidget(QOpenGLWidget):
         self.drawSpectra()
         self.drawBoundingBoxes()
 
+        currentShader = self.globalGL._shaderProgramAlias.makeCurrent()
+        # set the scale to the axis limits, needs addressing correctly, possibly same as grid
+        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+                                        self.axisT, -1.0, 1.0)
+        currentShader.setPMatrix(self._uPMatrix)
+
+        # GL.glEnable(GL.GL_LINE_STIPPLE)
+        # if self.viewports.devicePixelRatio > 1:
+        #     # should really use the GLSL shader to do this
+        #     GL.glLineStipple(1, GLDefs.GLLINE_STYLES['short-dashed'])
+        # else:
+        #     GL.glLineStipple(1, GLDefs.GLLINE_STYLES['dotted'])
         self._GLPeaks.drawSymbols(self._spectrumSettings, shader=currentShader, stackingMode=self._stackingMode)
         self._GLMultiplets.drawSymbols(self._spectrumSettings, shader=currentShader, stackingMode=self._stackingMode)
+        # GL.glDisable(GL.GL_LINE_STIPPLE)
+
+        self.globalGL._shaderProgram1.makeCurrent()
+
         if not self._stackingMode:
-            if not (self.is1D and self.strip._isPhasingOn):  # other mouse buttons checeks needed here
+            if not (self.is1D and self.strip._isPhasingOn):  # other mouse buttons checks needed here
                 self._GLIntegrals.drawSymbols(self._spectrumSettings)
                 with self._disableGLAliasing():
                     self._GLIntegrals.drawSymbolRegions(self._spectrumSettings)
@@ -3143,12 +3218,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
         else:
             # make the overlay/axis solid
-            currentShader.setBlendEnabled(0)
+            currentShader = self.globalGL._shaderProgramTex.makeCurrent()
+            currentShader.setBlendEnabled(False)
             self._spectrumLabelling.drawStrings()
 
             # not fully implemented yet
             # self._legend.drawStrings()
-            currentShader.setBlendEnabled(1)
+            currentShader.setBlendEnabled(True)
 
         self.disableTextClientState()
 
@@ -3182,10 +3258,10 @@ class CcpnGLWidget(QOpenGLWidget):
             self.drawMouseCoords()
 
         # make the overlay/axis solid
-        currentShader.setBlendEnabled(0)
+        currentShader.setBlendEnabled(False)
         self.drawOverlayText()
         self.drawAxisLabels()
-        currentShader.setBlendEnabled(1)
+        currentShader.setBlendEnabled(True)
 
         self.disableTextClientState()
         self.disableTexture()
@@ -3258,16 +3334,18 @@ class CcpnGLWidget(QOpenGLWidget):
             self.rebuildTraces()
 
     def enableTextClientState(self):
+        _attribArrayIndex = 1
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
         GL.glEnableClientState(GL.GL_COLOR_ARRAY)
         GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
-        GL.glEnableVertexAttribArray(self._glClientIndex)
+        GL.glEnableVertexAttribArray(_attribArrayIndex)
 
     def disableTextClientState(self):
+        _attribArrayIndex = 1
         GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
         GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
         GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-        GL.glDisableVertexAttribArray(self._glClientIndex)
+        GL.glDisableVertexAttribArray(_attribArrayIndex)
 
     def drawSpectra(self):
         if self.strip.isDeleted:
@@ -3297,13 +3375,18 @@ class CcpnGLWidget(QOpenGLWidget):
                         if spectrumView.spectrum.displayFoldedContours:
                             specSettings = self._spectrumSettings[spectrumView]
 
-                            # should move this to buildSpectrumDSettings
+                            pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
+
+                            if None in pIndex:
+                                continue
+
+                            # should move this to buildSpectrumSettings
                             # and emit a signal when visibleAliasingRange or foldingModes are changed
 
                             fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
-                            fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
+                            # fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
                             fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
-                            fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
+                            # fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
                             dxAF = specSettings[GLDefs.SPECTRUM_DXAF]
                             dyAF = specSettings[GLDefs.SPECTRUM_DYAF]
                             xScale = specSettings[GLDefs.SPECTRUM_XSCALE]
@@ -3313,10 +3396,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
                             alias = spectrumView.spectrum.visibleAliasingRange
                             folding = spectrumView.spectrum.foldingModes
-                            pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
-
-                            if None in pIndex:
-                                continue
 
                             for ii in range(alias[pIndex[0]][0], alias[pIndex[0]][1] + 1, 1):
                                 for jj in range(alias[pIndex[1]][0], alias[pIndex[1]][1] + 1, 1):
@@ -3390,6 +3469,8 @@ class CcpnGLWidget(QOpenGLWidget):
         # build the bounding boxes
         index = 0
         drawList = self.boundingBoxes
+
+        # shouldn't need to build this every time :|
         drawList.clearArrays()
 
         # if self._preferences.showSpectrumBorder:
@@ -3402,36 +3483,60 @@ class CcpnGLWidget(QOpenGLWidget):
                 if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1 and spectrumView in self._spectrumSettings.keys():
                     specSettings = self._spectrumSettings[spectrumView]
 
-                    fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
+                    pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
+
+                    if None in pIndex:
+                        continue
+
+                    # fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
                     fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
-                    fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
+                    # fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
                     fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
+                    dxAF = specSettings[GLDefs.SPECTRUM_DXAF]
+                    dyAF = specSettings[GLDefs.SPECTRUM_DYAF]
 
                     _posColour = spectrumView.posColours[0]
                     col = (*_posColour[0:3], 0.5)
 
-                    # add lines to drawList
-                    drawList.indices = np.append(drawList.indices, np.array((index, index + 1,
-                                                                             index + 1, index + 2,
-                                                                             index + 2, index + 3,
-                                                                             index + 3, index), dtype=np.uint32))
-                    drawList.vertices = np.append(drawList.vertices, np.array((fx0, fy0, fx0, fy1, fx1, fy1, fx1, fy0), dtype=np.float32))
-                    drawList.colors = np.append(drawList.colors, np.array(col * 4, dtype=np.float32))
-                    drawList.numVertices += 4
-                    index += 4
+                    alias = spectrumView.spectrum.visibleAliasingRange
 
+                    # NOTE:ED - need to check the aliasLimits direction
+
+                    for ii in range(alias[pIndex[0]][0], alias[pIndex[0]][1] + 2, 1):
+                        # draw the vertical lines
+                        x0 = fx1 + (ii * dxAF)
+                        y0 = fy1 + (alias[pIndex[1]][0] * dyAF)
+                        y1 = fy1 + ((alias[pIndex[1]][1] + 1) * dyAF)
+                        drawList.indices = np.append(drawList.indices, np.array((index, index + 1), dtype=np.uint32))
+                        drawList.vertices = np.append(drawList.vertices, np.array((x0, y0, x0, y1), dtype=np.float32))
+                        drawList.colors = np.append(drawList.colors, np.array(col * 2, dtype=np.float32))
+                        drawList.numVertices += 2
+                        index += 2
+
+                    for jj in range(alias[pIndex[1]][0], alias[pIndex[1]][1] + 2, 1):
+                        # draw the horizontal lines
+                        y0 = fy1 + (jj * dyAF)
+                        x0 = fx1 + (alias[pIndex[0]][0] * dxAF)
+                        x1 = fx1 + ((alias[pIndex[0]][1] + 1) * dxAF)
+                        drawList.indices = np.append(drawList.indices, np.array((index, index + 1), dtype=np.uint32))
+                        drawList.vertices = np.append(drawList.vertices, np.array((x0, y0, x1, y0), dtype=np.float32))
+                        drawList.colors = np.append(drawList.colors, np.array(col * 2, dtype=np.float32))
+                        drawList.numVertices += 2
+                        index += 2
+
+            # define and draw the boundaries
             drawList.defineIndexVBO()
 
-        with self._disableGLAliasing():
-            GL.glEnable(GL.GL_BLEND)
+            with self._disableGLAliasing():
+                GL.glEnable(GL.GL_BLEND)
 
-            # use the viewports.devicePixelRatio for retina displays
-            GL.glLineWidth(self.strip._contourThickness * self.viewports.devicePixelRatio)
+                # use the viewports.devicePixelRatio for retina displays
+                GL.glLineWidth(self.strip._contourThickness * self.viewports.devicePixelRatio)
 
-            drawList.drawIndexVBO()
+                drawList.drawIndexVBO()
 
-            # reset lineWidth
-            GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
+                # reset lineWidth
+                GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
 
     def buildGrid(self):
         """Build the grids for the mainGrid and the bottom/right axes
@@ -4590,6 +4695,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 GL.glColor4f(*self.selectAreaColour)
             elif self._selectionMode == 3:  # cyan
                 GL.glColor4f(*self.pickAreaColour)
+            else:  # red
+                GL.glColor4f(*self.badAreaColour)
 
             GL.glBegin(GL.GL_QUADS)
             GL.glVertex2d(self._dragStart[0], self._dragStart[1])
@@ -4604,6 +4711,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 GL.glColor4f(*self.selectAreaColourHard)
             elif self._selectionMode == 3:  # cyan
                 GL.glColor4f(*self.pickAreaColourHard)
+            else:  # red
+                GL.glColor4f(*self.badAreaColourHard)
 
             GL.glBegin(GL.GL_LINE_STRIP)
             GL.glVertex2d(self._dragStart[0], self._dragStart[1])
@@ -4777,8 +4886,15 @@ class CcpnGLWidget(QOpenGLWidget):
             hSpectrum.vertices[::2] = x
             hSpectrum.vertices[1::2] = y
             hSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+
             # colour the negative points - gives a nice fade
-            # hSpectrum.colors[dataY < 0] = [colRn, colGn, colBn, 1.0]
+            if self._preferences.traceIncludeNegative:
+                _negColour = spectrumView.negColours[0]
+                _negCol = [*_negColour[0:3], 1.0]
+                mask = np.nonzero(data < 0.0)
+                for mm in mask[0]:
+                    m4 = mm * 4
+                    hSpectrum.colors[m4:m4 + 4] = _negCol
 
         except Exception as es:
             tracesDict[spectrumView].clearArrays()
@@ -4820,11 +4936,35 @@ class CcpnGLWidget(QOpenGLWidget):
             vSpectrum.vertices[::2] = x
             vSpectrum.vertices[1::2] = y
             vSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+
             # colour the negative points - gives a nice fade
-            # vSpectrum.colors[dataX < 0] = [colRn, colGn, colBn, 1.0]
+            if self._preferences.traceIncludeNegative:
+                _negColour = spectrumView.negColours[0]
+                _negCol = [*_negColour[0:3], 1.0]
+                mask = np.nonzero(data < 0.0)
+                for mm in mask[0]:
+                    m4 = mm * 4
+                    vSpectrum.colors[m4:m4 + 4] = _negCol
 
         except Exception as es:
             tracesDict[spectrumView].clearArrays()
+
+    # NOTE:ED - remember these for later, may create larger vertex arrays for symbols, but should be quicker
+    #       --
+    #       x = np.array([1, 2, 3, -1, 5, 0, 3, 4, 4, 7, 3, 5, 9, 0, 5, 4, 3], dtype=np.uint32)
+    #       seems to be the fastest way of getting masked values
+    #           SKIPINDEX = np.uint32(-1) = 4294967295
+    #           i.e. max index number, use as fill
+    #           timeit.timeit('import numpy as np; x = np.array([1, 2, 3, -1, 5, 0, 3, 4, 4, 7, 3, 5, 9, 0, 5, 4, 3], dtype=np.uint32); x[np.where(x != 3)]', number=200000)
+    #       fastest way to create filled arrays
+    #           *** timeit.timeit('import numpy as np; x = np.array([1, 2, 3, -1, 5, 0, 3, 4, 4, 7, 3, 5, 9, 0, 5, 4, 3], dtype=np.uint32); a = x[x != SKIPINDEX]', number=200000)
+    #               timeit.timeit('import numpy as np; x = np.array([1, 2, 3, -1, 5, 0, 3, 4, 4, 7, 3, 5, 9, 0, 5, 4, 3], dtype=np.uint32); mx = np.full(200000, SKIPINDEX, dtype=np.uint32)', number=20000)
+    #       --
+    #       np.take(x, np.where(x != 3))
+    #       mx = np.ma.masked_values(x, 3)
+    #       a = x[np.where(x != 3)]
+    #       *** a = x[x != SKIPINDEX]
+    #       np.where(data < 0)[0] * 4
 
     def updateTraces(self):
         if self.strip.isDeleted:
@@ -6117,11 +6257,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
         cursorCoordinate = self.getCurrentCursorCoordinate()
         mousePosition = (cursorCoordinate[0], cursorCoordinate[1])
-        position = [mousePosition[0], mousePosition[1]]
+        ppmPositions = [mousePosition[0], mousePosition[1]]
         for orderedAxis in self._orderedAxes[2:]:
-            position.append(orderedAxis.position)
+            ppmPositions.append(orderedAxis.position)
 
-        newPeaks, peakLists = self.strip.peakPickPosition(position)
+        self.strip.peakPickPosition(ppmPositions)
 
     def _clearIntegralRegions(self):
         """Clear the integral regions
@@ -6237,11 +6377,13 @@ class CcpnGLWidget(QOpenGLWidget):
         self.current.cursorPosition = (xPosition, yPosition)
 
         if getCurrentMouseMode() == PICK:
-            self._pickAtMousePosition(event)
+            if self._validRegionPick:
+                self._pickAtMousePosition(event)
 
         if controlShiftLeftMouse(event) or controlShiftRightMouse(event):
-            # Control-Shift-left-click: pick peak
-            self._pickAtMousePosition(event)
+            if self._validRegionPick:
+                # Control-Shift-left-click: pick peak
+                self._pickAtMousePosition(event)
 
         elif controlLeftMouse(event):
             # Control-left-click; (de-)select peak and add/remove to selection
@@ -6577,11 +6719,17 @@ class CcpnGLWidget(QOpenGLWidget):
             selectedRegion = [[round(self._startCoordinate[0], 3), round(self._endCoordinate[0], 3)],
                               [round(self._startCoordinate[1], 3), round(self._endCoordinate[1], 3)]]
 
-            for n in self._orderedAxes[2:]:
-                selectedRegion.append((n.region[0], n.region[1]))
+            if self._validRegionPick:
 
-            peaks = self.strip.peakPickRegion(selectedRegion)
-            self.current.peaks = peaks
+                # only pick if the region is inside the bounds
+                for n in self._orderedAxes[2:]:
+                    selectedRegion.append((n.region[0], n.region[1]))
+
+                # selectedRegion is tuple((xL, xR), (yB, yT), ...) - from display
+                # ... is other Nd axes
+
+                peaks = self.strip.peakPickRegion(selectedRegion)
+                self.current.peaks = peaks
 
         elif controlLeftMouse(event):
             # Control(Cmd)+left drag: selects peaks - purple box

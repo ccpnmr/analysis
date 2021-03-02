@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:50 +0000 (Mon, March 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -402,7 +402,7 @@ class Strip(AbstractWrapperObject):
         return result
 
     @logCommand(get='self')
-    def peakPickPosition(self, inPosition) -> Tuple[Tuple[Peak, ...], Tuple[PeakList, ...]]:
+    def peakPickPosition(self, ppmPositions) -> Tuple[Tuple[Peak, ...], Tuple[PeakList, ...]]:
         """Pick peak at position for all spectra currently displayed in strip.
         """
         _preferences = self.application.preferences.general
@@ -413,230 +413,120 @@ class Strip(AbstractWrapperObject):
         with undoBlock():
             for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
 
+                spectrum = spectrumView.spectrum
                 validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isVisible()]
 
-                for thisPeakListView in validPeakListViews:
-                    peakList = thisPeakListView.peakList
+                if spectrum.dimensionCount == 1:
+                    indices = [1]
+                else:
+                    indices = spectrum.getByAxisCodes('dimensions', self.axisCodes)
 
-                    height = None
-                    position = inPosition
-                    if spectrumView.spectrum.dimensionCount > 1:
-                        # sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
-                        spectrumAxisCodes = spectrumView.spectrum.axisCodes
-                        stripAxisCodes = self.axisCodes
+                # skip if no valid mapping
+                if None in indices:
+                    continue
 
-                        # position = [0] * spectrumView.spectrum.dimensionCount
-                        # remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-                        # if remapIndices:
-                        #     for n, axisCode in enumerate(spectrumAxisCodes):
-                        #         # idx = stripAxisCodes.index(axisCode)
-                        #
-                        #         idx = remapIndices[n]
-                        #         # sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
-                        #         position[n] = inPosition[idx]
-                        # else:
-                        #     position = inPosition
+                ppmPos = [ppmPositions[indx - 1] for indx in indices]
+                _height = spectrum.getHeight(ppmPos)
 
-                        indices = commonUtil.getAxisCodeMatchIndices(spectrumAxisCodes, stripAxisCodes)
+                for dim, pos in zip(indices, ppmPositions):
+                    # check that the picked peak lies in the bounded region of the spectrum
+                    minSpectrumFrequency, maxSpectrumFrequency = sorted(spectrum.spectrumLimits[dim - 1])
+                    visibleAlias = (spectrum.visibleAliasingRange)[dim - 1]
+                    regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
+                                    round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
 
-                        # skip if no valid mapping
-                        if None in indices:
-                            continue
+                    if not (regionBounds[0] <= pos <= regionBounds[1]):
+                        break
 
-                        # map position to the spectrum
-                        position = [inPosition[ind] for ii, ind in enumerate(indices)]
+                else:
+                    # get the list of existing peak pointPositions in this peakList
+                    pointCounts = spectrum.pointCounts
+                    intPositions = [int(((spectrum.ppm2point(pos, dimension=indx + 1)) - 1) % np) + 1
+                                    for indx, (pos, np) in enumerate(zip(ppmPos, pointCounts))]
 
-                        _height = spectrumView.spectrum.getHeight(ppmPositions=position)
-                        peak = peakList.newPeak(ppmPositions=position, height=_height)
-                        # peak.height = spectrumView.spectrum.getHeight(ppmPositions=position)
-                    else:
-                        # 1d position with height
-                        _height = position[-1] # Don't use the interp height, pick where you click like nD.
-                        peak = peakList.newPeak(ppmPositions=position, height=_height)
+                    for thisPeakListView in validPeakListViews:
+                        peakList = thisPeakListView.peakList
+                        existingPositions = [[int(pp) for pp in pk.pointPositions] for pk in peakList.peaks]
 
-                    result.append(peak)
-                    peakLists.append(peakList)
+                        if intPositions not in existingPositions:
+                            # add the new peak only if one doesn't exist at these pointPositions
+                            peak = peakList.newPeak(ppmPositions=ppmPos, height=_height)
+                            result.append(peak)
+                            peakLists.append(peakList)
 
             # add the new peak to the current.peaks
             self.current.peaks = result
 
         return tuple(result), tuple(peakLists)
 
-    # 20190510: ED removd these routines as there are far too many different ways to map axis codes
-    # def _getAxisCodeDict(self, spectrum, selectedRegion):
-    #     """Generate axisCode dict from the given selectedRegion ordered by strip axes, matched to spectrum.
-    #     """
-    #     sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
-    #
-    #     # map the limits to the correct axisCodes
-    #     axisCodeDict = {}
-    #     if spectrum.dimensionCount > 1:
-    #         spectrumAxisCodes = spectrum.axisCodes
-    #         stripAxisCodes = self.axisCodes
-    #
-    #         # get the ordering of the strip axisCodes in the spectrum
-    #         try:
-    #             indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
-    #         except Exception as es:
-    #
-    #             # spectrum possibly not compatible here, may be 2d overlaid onto Nd
-    #             indices = spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
-    #
-    #         # sort the axis limits by spectrum axis order
-    #         for ii, ind in enumerate(indices):
-    #             axisCodeDict[spectrumAxisCodes[ind]] = sortedSelectedRegion[ii]
-    #
-    #     else:
-    #         spectrumAxisCodes = spectrum.axisCodes
-    #         stripAxisCodes = self.axisCodes
-    #
-    #         # get the ordering of the strip axisCodes in the spectrum
-    #         indices = (0, 1)  #spectrum.getByAxisCodes('indices', stripAxisCodes)
-    #
-    #         # sort the axis limits by spectrum axis order
-    #         for n, axisCode in enumerate(spectrumAxisCodes):
-    #             axisCodeDict[axisCode] = sortedSelectedRegion[indices[n]]
-    #
-    #     return axisCodeDict
-
-    # def _getAxisCodeIndices(self, spectrum):
-    #     """Return axisCode indices matched to spectrum.
-    #     """
-    #     stripAxisCodes = self.axisCodes
-    #     if spectrum.dimensionCount > 1:
-    #         # get the ordering of the strip axisCodes in the spectrum
-    #         try:
-    #             indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
-    #         except Exception as es:
-    #             # spectrum possibly not compatible here, may be 2d overlaid onto Nd
-    #             # use another nested check and then use the code from settingsWidget
-    #             try:
-    #                 indices = spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
-    #
-    #             except Exception as es:
-    #
-    #                 # final try with the complicated method
-    #                 indices = self._getSpectrumAxisCodeIndexing(spectrum)
-    #
-    #
-    #     else:
-    #         # get the ordering of the strip axisCodes in the spectrum
-    #         indices = spectrum.getByAxisCodes('indices', stripAxisCodes)
-    #
-    #     return indices
-
-    # def _getSpectrumAxisCodeIndexing(self, spectrum):
-    #
-    #     from ccpn.util.Common import _axisCodeMapIndices, axisCodeMapping
-    #
-    #     maxLen = 0
-    #     refAxisCodes = None
-    #
-    #     if len(self.axisCodes) > maxLen:
-    #         maxLen = len(self.axisCodes)
-    #         refAxisCodes = list(self.axisCodes)
-    #
-    #     if not maxLen:
-    #         return
-    #
-    #     axisLabels = [set() for ii in range(maxLen)]
-    #
-    #     mappings = {}
-    #     matchAxisCodes = spectrum.axisCodes
-    #
-    #     mapping = axisCodeMapping(refAxisCodes, matchAxisCodes)
-    #     for k, v in mapping.items():
-    #         if v not in mappings:
-    #             mappings[v] = set([k])
-    #         else:
-    #             mappings[v].add(k)
-    #
-    #     mapping = axisCodeMapping(matchAxisCodes, refAxisCodes)
-    #     for k, v in mapping.items():
-    #         if v not in mappings:
-    #             mappings[v] = set([k])
-    #         else:
-    #             mappings[v].add(k)
-    #
-    #     # example of mappings dict
-    #     # ('Hn', 'C', 'Nh')
-    #     # {'Hn': {'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
-    #     # {'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
-    #     # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
-    #     # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
-    #
-    #     axisIndexing = {}
-    #
-    #     axisIndexing[spectrum] = [0 for ii in range(len(spectrum.axisCodes))]
-    #
-    #     # get the spectrum dimension axisCode, and see if is already there
-    #     for specDim, specAxis in enumerate(spectrum.axisCodes):
-    #
-    #         if specAxis in refAxisCodes:
-    #             axisIndexing[spectrum][specDim] = refAxisCodes.index(specAxis)
-    #             axisLabels[axisIndexing[spectrum][specDim]].add(specAxis)
-    #
-    #         else:
-    #             # if the axisCode is not in the reference list then find the mapping from the dict
-    #             for k, v in mappings.items():
-    #                 if specAxis in v:
-    #                     # refAxisCodes[dim] = k
-    #                     axisIndexing[spectrum][specDim] = refAxisCodes.index(k)
-    #                     axisLabels[refAxisCodes.index(k)].add(specAxis)
-    #
-    #     axisLabels = [', '.join(ax) for ax in axisLabels]
-    #     return list(axisIndexing.values())[0] if axisIndexing else None
-
     @logCommand(get='self')
-    def peakPickRegion(self, selectedRegion: List[List[float]]) -> Tuple[Peak]:
+    def peakPickRegion(self, selectedRegion: List[List[float]]) -> Tuple[Peak, ...]:
         """Peak pick all spectra currently displayed in strip in selectedRegion.
         """
-
-        from collections import OrderedDict
-        from ccpn.util.Common import getAxisCodeMatchIndices
-
+        # selectedRegion is rounded before-hand to 3 dp.
         result = []
 
-        project = self.project
         minDropFactor = self.application.preferences.general.peakDropFactor
         fitMethod = self.application.preferences.general.peakFittingMethod
 
-        # sort each of the regions
-        sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
+        # sort each of the regions [[minPpm, maxPpm], ...]
+        sortedSelectedRegion = list(sorted(x) for x in selectedRegion)
 
         with undoBlock():
+
             for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
 
+                spectrum = spectrumView.spectrum
+
                 # create a peakList if there isn't one
-                if not spectrumView.spectrum.peakLists:
-                    spectrumView.spectrum.newPeakList()
+                if not spectrum.peakLists:
+                    spectrum.newPeakList()
 
+                # get the visible peakLists
                 validPeakListViews = (pp for pp in spectrumView.peakListViews if pp.isVisible())
-                indices = getAxisCodeMatchIndices(spectrumView.spectrum.axisCodes, self.axisCodes)
+                validPeakLists = (pp.peakList for pp in spectrumView.peakListViews if pp.isVisible())
 
-                # map the spectrum selectedRegions to the strip
-                axisCodeDict = OrderedDict((code, sortedSelectedRegion[indices[ii]])
-                                           for ii, code in enumerate(spectrumView.spectrum.axisCodes) if indices[ii] is not None)
+                if validPeakListViews:
 
-                for thisPeakListView in validPeakListViews:
+                    # get the correct axis codes
+                    if spectrum.dimensionCount == 1:
+                        axisCodes = spectrum.axisCodes[0]
+                        indices = [1]
+                    else:
+                        axisCodes = spectrum.getByAxisCodes('axisCodes', self.axisCodes)
+                        indices = spectrum.getByAxisCodes('dimensions', self.axisCodes)
 
-                    peakList = thisPeakListView.peakList
+                    if None in indices:
+                        continue
 
-                    if spectrumView.spectrum.dimensionCount > 1:
-                        # axisCodeDict = self._getAxisCodeDict(spectrumView.spectrum, selectedRegion)
+                    axisDict = {}
+                    for ac, dim, region in zip(axisCodes, indices, sortedSelectedRegion):
+                        # check that the region to be picked lies in the bounded region of the spectrum
+                        minSpectrumFrequency, maxSpectrumFrequency = sorted(spectrum.spectrumLimits[dim - 1])
+                        visibleAlias = (spectrum.visibleAliasingRange)[dim - 1]
+                        regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
+                                        round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
 
-                        newPeaks = peakList.pickPeaksRegion(axisCodeDict,
-                                                            doPos=spectrumView.displayPositiveContours,
-                                                            doNeg=spectrumView.displayNegativeContours,
-                                                            fitMethod=fitMethod, minDropFactor=minDropFactor)
+                        if not all(regionBounds[0] <= bnd <= regionBounds[1] for bnd in region):
+                            break
+                        axisDict[ac] = tuple(region)
 
                     else:
-                        peakFactor1D = self.application.preferences.general.peakFactor1D
-                        selectedRegion = [[min(ss), max(ss)] for ss in selectedRegion]
-                        newPeaks = peakList.pickPeaks1d(*selectedRegion, peakFactor1D=peakFactor1D)
+                        # apply the peak picker
+                        from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
 
-                    if newPeaks:
-                        result.extend(newPeaks)
+                        myPeakPicker = PeakPickerNd(spectrum=spectrum)
+                        myPeakPicker.setParameters(dropFactor=minDropFactor,
+                                                   positiveThreshold=spectrum.positiveContourBase if spectrumView.displayPositiveContours else None,
+                                                   negativeThreshold=spectrum.negativeContourBase if spectrumView.displayNegativeContours else None,
+                                                   fitMethod=fitMethod
+                                                   )
+
+                        for peakList in validPeakLists:
+                            # do the pick
+                            newPeaks = myPeakPicker.pickPeaks(axisDict=axisDict, peakList=peakList)
+                            if newPeaks:
+                                result.extend(newPeaks)
 
         return tuple(result)
 

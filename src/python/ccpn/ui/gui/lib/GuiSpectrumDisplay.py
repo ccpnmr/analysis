@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 14:37:53 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -234,6 +234,8 @@ class GuiSpectrumDisplay(CcpnModule):
         symbolType = min(self.application.preferences.general.symbolType, self.MAXPEAKSYMBOLTYPES - 1)
         symbolSize = self.application.preferences.general.symbolSizePixel
         symbolThickness = self.application.preferences.general.symbolThickness
+        aliasEnabled = self.application.preferences.general.aliasEnabled
+        aliasShade = self.application.preferences.general.aliasShade
 
         # create settings widget
         if not self.is1D:
@@ -246,6 +248,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     _aspectRatioMode=self.application.preferences.general.aspectRatioMode,
                                                                     symbolType=symbolType, annotationType=annotationType,
                                                                     symbolSize=symbolSize, symbolThickness=symbolThickness,
+                                                                    aliasEnabled=aliasEnabled, aliasShade=aliasShade
                                                                     )
         else:
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
@@ -258,6 +261,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     _aspectRatioMode=self.application.preferences.general.aspectRatioMode,
                                                                     symbolType=symbolType, annotationType=annotationType,
                                                                     symbolSize=symbolSize, symbolThickness=symbolThickness,
+                                                                    aliasEnabled=aliasEnabled, aliasShade=aliasShade
                                                                     )
 
         self._spectrumDisplaySettings.settingsChanged.connect(self._settingsChanged)

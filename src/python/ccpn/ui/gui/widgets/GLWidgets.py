@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 14:37:54 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:02 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -262,7 +262,20 @@ class GuiNdWidget(CcpnGLWidget):
         p0 = list(peak.position)
         for ii, ind in enumerate(indices[:2]):
             if ind is not None:
+
+                # move to the aliased position in the bounded spectrum
                 p0[ind] += deltaPosition[ii]
+
+                visibleAlias = peak.spectrum.visibleAliasingRange
+                spectrumLimits = peak.spectrum.spectrumLimits
+
+                for dim, pos in enumerate(p0):
+                    # update the aliasing so that the peak stays within the bounds of the spectrum
+                    minSpectrumFrequency, maxSpectrumFrequency = sorted(spectrumLimits[dim])
+                    regionBounds = (minSpectrumFrequency + visibleAlias[dim][0] * (maxSpectrumFrequency - minSpectrumFrequency),
+                                    minSpectrumFrequency + (visibleAlias[dim][1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency))
+
+                    p0[dim] = (pos - regionBounds[0]) % (regionBounds[1] - regionBounds[0]) + regionBounds[0]
 
         movePeak(peak, p0, updateHeight=True)
 
@@ -1422,9 +1435,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._setViewPortFontScale()
 
         # make the overlay/axis solid
-        currentShader.setBlendEnabled(0)
+        currentShader.setBlendEnabled(False)
         self.drawAxisLabels()
-        currentShader.setBlendEnabled(1)
+        currentShader.setBlendEnabled(True)
 
         self.disableTextClientState()
         self.disableTexture()
@@ -1569,9 +1582,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._symbolType = 0
         self._symbolSize = 0
         self._symbolThickness = 0
+        self._aliasEnabled = True
+        self._aliasShade = 0.0
 
         self._contourList = {}
-
         self._hTraces = {}
         self._vTraces = {}
         self._staticHTraces = []
@@ -1628,7 +1642,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._visibleSpectrumViewsChange = False
         self._matchingIsotopeCodes = False
 
-        self._glClientIndex = 0
         self._menuActive = False
 
     def _setColourScheme(self):
@@ -2027,7 +2040,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # initialise a common to all OpenGL windows
         self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow)  #, strip=None, spectrumDisplay=self.spectrumDisplay)
-        self._glClientIndex = self.globalGL.getNextClientIndex()
 
         # initialise the arrays for the grid and axes
         self.gridList = []
@@ -2045,8 +2057,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # This is the correct blend function to ignore stray surface blending functions
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
         self.setBackgroundColour(self.background, silent=True)
-        self.globalGL._shaderProgramTex.setBlendEnabled(0)
-        self.globalGL._shaderProgramTex.setAlpha(1.0)
+        # _shader = self.globalGL._shaderProgramTex
+        # _shader.setBlendEnabled(0)
+        # _shader.setAlpha(1.0)
 
         self.updateVisibleSpectrumViews()
         self.initialiseAxes()
@@ -2259,24 +2272,28 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         GL.glClearColor(*col)
         self.background = np.array(col, dtype=np.float32)
 
-        # self.globalGL._shaderProgram1.makeCurrent()
-        # self.globalGL._shaderProgram1.setBackground(self.background)
         self.globalGL._shaderProgramTex.makeCurrent()
         self.globalGL._shaderProgramTex.setBackground(self.background)
+        self.globalGL._shaderProgramAlias.makeCurrent()
+        self.globalGL._shaderProgramAlias.setBackground(self.background)
+        self.globalGL._shaderProgramAlias.setAliasShade(0.25)
+        self.globalGL._shaderProgramAlias.setAliasEnabled(True)
         if not silent:
             self.update()
 
     def enableTextClientState(self):
+        _attribArrayIndex = 1
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
         GL.glEnableClientState(GL.GL_COLOR_ARRAY)
         GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
-        GL.glEnableVertexAttribArray(self._glClientIndex)
+        GL.glEnableVertexAttribArray(_attribArrayIndex)
 
     def disableTextClientState(self):
+        _attribArrayIndex = 1
         GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
         GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
         GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-        GL.glDisableVertexAttribArray(self._glClientIndex)
+        GL.glDisableVertexAttribArray(_attribArrayIndex)
 
     def _setViewPortFontScale(self):
         # set the scale for drawing the overlay text correctly

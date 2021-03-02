@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:00 +0000 (Tue, March 02, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -91,7 +91,7 @@ def _calculateCenterOfMassPoints(multiplet):
             dim = multiplet.multipletList.spectrum.dimensionCount
             if dim > 1:
                 for d in range(dim):
-                    peakPositions = [peak.pointPosition[d] for peak in _peaks]
+                    peakPositions = [peak.pointPositions[d] for peak in _peaks]
                     position += (sum(peakPositions) / _lenPeaks,)
             else:
                 position = (sum([peak.position[0] for peak in _peaks]) / _lenPeaks,
@@ -385,7 +385,7 @@ class Multiplet(AbstractWrapperObject):
         return tuple()  # tuple(x.valueError for x in self._wrappedData.sortedPeaks())
 
     @property
-    def pointPosition(self) -> Optional[Tuple[float, ...]]:
+    def pointPositions(self) -> Optional[Tuple[float, ...]]:
         """Multiplet position in points (or other relevant unit) in dimension order calculated as Center Of Mass.
         """
         return _calculateCenterOfMassPoints(self)
@@ -419,7 +419,39 @@ class Multiplet(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def lineWidths(self, value):
+        # NOTE:ED - check value is a tuple, etc.
         self._wrappedData.lineWidths = value
+
+    # check what the peak is doing
+    ppmLineWidths = lineWidths
+
+    @property
+    def pointLineWidths(self) -> Tuple[Optional[float], ...]:
+        """Full-width-half-height of peak for each dimension, in points."""
+        # currently assumes that internal storage is in ppms
+        result = tuple()
+        pks = self.peaks
+        pksWidths = [pp.pointLineWidths for pp in pks]
+        try:
+            result = tuple(sum(item) for item in zip(*pksWidths))
+        except Exception as es:
+            if pks:
+                result = list(pksWidths[0])
+                for otherPks in pksWidths[1:]:
+                    for ii in range(len(result)):
+                        result[ii] += otherPks[ii]
+            else:
+                result = self._wrappedData.lineWidths
+        finally:
+            return result
+
+    @property
+    def aliasing(self) -> Tuple[Optional[float], ...]:
+        """Aliasing."""
+        # Returns the aliasing for first connected peak
+        # quickest for the moment - need to imagine case where peaks are not from the same aliased region
+        if self.peaks:
+            return self.peaks[0].aliasing
 
     #=========================================================================================
     # Implementation functions

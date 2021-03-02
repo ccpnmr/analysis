@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:02 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -86,7 +86,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLWIDGET, GLPLOTBORDER, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, GLFOREGROUND, \
     GLCONTOURTHICKNESS, GLSHOWSPECTRAONPHASE, \
     GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, GLEXPORTDPI, \
-    GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS, GLDIAGONALSIDEBANDS
+    GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS, GLDIAGONALSIDEBANDS, GLALIASENABLED, GLALIASSHADE
 
 
 class ExportStripToFilePopup(ExportDialogABC):
@@ -570,6 +570,8 @@ class ExportStripToFilePopup(ExportDialogABC):
         baseThickness = self.baseThicknessBox.getValue()
         symbolThickness = self.application.preferences.general.symbolThickness
         contourThickness = self.application.preferences.general.contourThickness
+        aliasEnabled = self.application.preferences.general.aliasEnabled
+        aliasShade = self.application.preferences.general.aliasShade
         stripPadding = self.stripPaddingBox.getValue()
         exportDpi = self.exportDpiBox.getValue()
 
@@ -586,6 +588,8 @@ class ExportStripToFilePopup(ExportDialogABC):
                       GLBASETHICKNESS   : baseThickness,
                       GLSYMBOLTHICKNESS : symbolThickness,
                       GLCONTOURTHICKNESS: contourThickness,
+                      GLALIASENABLED    : aliasEnabled,
+                      GLALIASSHADE      : aliasShade,
                       GLSTRIPDIRECTION  : stripDirection,
                       GLSTRIPPADDING    : stripPadding,
                       GLEXPORTDPI       : exportDpi,

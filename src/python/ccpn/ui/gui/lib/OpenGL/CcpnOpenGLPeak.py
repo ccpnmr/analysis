@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:02 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -194,7 +194,7 @@ class GLpeakNdLabelling(GLpeakListMethods, GLLabelling):
 
     def _objIsInVisiblePlanes(self, spectrumView, peak, viewOutOfPlanePeaks=True):
 
-        pntPos = peak.pointPosition
+        pntPos = peak.pointPositions
         if not pntPos:
             return False, False, 0, 1.0
 

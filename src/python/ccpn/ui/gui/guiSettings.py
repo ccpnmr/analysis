@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -174,6 +174,7 @@ CCPNGLWIDGET_MULTIPLETLINK = 'CCPNGLWIDGET_MULTIPLETLINK'
 CCPNGLWIDGET_ZOOMAREA = 'CCPNGLWIDGET_ZOOMAREA'
 CCPNGLWIDGET_PICKAREA = 'CCPNGLWIDGET_PICKAREA'
 CCPNGLWIDGET_SELECTAREA = 'CCPNGLWIDGET_SELECTAREA'
+CCPNGLWIDGET_BADAREA = 'CCPNGLWIDGET_BADAREA'
 CCPNGLWIDGET_ZOOMLINE = 'CCPNGLWIDGET_ZOOMLINE'
 CCPNGLWIDGET_MOUSEMOVELINE = 'CCPNGLWIDGET_MOUSEMOVELINE'
 CCPNGLWIDGET_HARDSHADE = 0.9
@@ -268,6 +269,8 @@ colourSchemes = {
         CCPNGLWIDGET_ZOOMAREA            : (0.8, 0.9, 0.2, 0.3),
         CCPNGLWIDGET_PICKAREA            : (0.2, 0.5, 0.9, 0.3),
         CCPNGLWIDGET_SELECTAREA          : (0.8, 0.2, 0.9, 0.3),
+        CCPNGLWIDGET_BADAREA             : (0.9, 0.15, 0.1, 0.3),
+
         CCPNGLWIDGET_ZOOMLINE            : (0.6, 0.7, 0.2, 1.0),
         CCPNGLWIDGET_MOUSEMOVELINE       : (0.8, 0.2, 0.9, 1.0),
 

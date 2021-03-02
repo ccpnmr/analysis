@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-05 16:30:14 +0000 (Fri, February 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:00 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -507,7 +507,7 @@ class PeakList(PMIListABC):
                 if not _havePeakNearPosition(values1, tolerances, peaks2):
                     peakList3.newPeak(height=peak1.height, volume=peak1.volume, figureOfMerit=peak1.figureOfMerit,
                                       annotation=peak1.annotation, ppmPositions=peak1.position,
-                                      pointPosition=peak1.pointPosition)
+                                      pointPositions=peak1.pointPositions)
 
         return peakList3
 
@@ -554,7 +554,7 @@ class PeakList(PMIListABC):
     #   """Readable string representation"""
     #   return "<%s; #peaks:%d (isSimulated=%s)>" % (self.pid, len(self.peaks), self.isSimulated)
 
-    # def positionIsInPlane(self, peakList, pointPosition) -> bool:
+    # def positionIsInPlane(self, peakList, pointPositions) -> bool:
     #     """Is peak in currently displayed planes for strip?
     #     """
     #     spectrumView = self.findSpectrumView(peakList.spectrum)
@@ -566,7 +566,7 @@ class PeakList(PMIListABC):
     #     for ii, displayIndex in enumerate(displayIndices[2:]):
     #         if displayIndex is not None:
     #             # If no axis matches the index may be None
-    #             pp = pointPosition[displayIndex]
+    #             pp = pointPositions[displayIndex]
     #             zPosition = peakList.spectrum.mainSpectrumReferences[ii].valueToPoint(pp)
     #             if not zPosition:
     #                 return False
@@ -1144,7 +1144,7 @@ class PeakList(PMIListABC):
         - assignments (assignedNmrAtoms) - A tuple of all (e.g.) assignment triplets for a 3D spectrum
         - assignmentsByDimensions (dimensionNmrAtoms) - A tuple of tuples of assignments, one for each dimension
 
-        :param ppmPositions: peak position in ppm for each dimension (related attributes: positionError, pointPosition)
+        :param ppmPositions: peak position in ppm for each dimension (related attributes: positionError, pointPositions)
         :param height: height of the peak (related attributes: volume, volumeError, lineWidths)
         :param comment: optional comment string
         :return: a new Peak instance.
@@ -1166,7 +1166,7 @@ class PeakList(PMIListABC):
         Optional keyword arguments can be passed in; see Peak._newPickedPeak for details.
 
         :param height: height of the peak (related attributes: volume, volumeError, lineWidths)
-        :param pointPositions: peak position in points for each dimension (related attributes: positionError, pointPosition)
+        :param pointPositions: peak position in points for each dimension (related attributes: positionError, pointPositions)
         :param fitMethod: type of curve fitting
         :param lineWidths:
         :param serial: optional serial number.

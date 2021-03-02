@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 14:37:53 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -462,9 +462,12 @@ class CcpnGLWidgetABC(QOpenGLWidget):
 
         # This is the correct blend function to ignore stray surface blending functions
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
+
         self.setBackgroundColour(self.background)
-        self.globalGL._shaderProgramTex.setBlendEnabled(0)
-        self.globalGL._shaderProgramTex.setAlpha(1.0)
+        _shader = self.globalGL._shaderProgramTex
+        _shader.makeCurrent()
+        _shader.setBlendEnabled(False)
+        _shader.setAlpha(1.0)
 
         self.glReady = True
 
@@ -516,16 +519,16 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self.drawSelectionBox()
         self.drawCursors()
 
-        currentShader = self.globalGL._shaderProgramTex.makeCurrent()
+        self.globalGL._shaderProgramTex.makeCurrent()
 
         self._setViewPortFontScale()
         self.drawMouseCoords()
 
         # make the overlay/axis solid
-        self.globalGL._shaderProgramTex.setBlendEnabled(0)
+        self.globalGL._shaderProgramTex.setBlendEnabled(False)
         self.drawOverlayText()
         self.drawAxisLabels()
-        self.globalGL._shaderProgramTex.setBlendEnabled(1)
+        self.globalGL._shaderProgramTex.setBlendEnabled(True)
 
         self.disableTexture()
 
@@ -572,10 +575,12 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         GL.glClearColor(*col)
         self.background = col
 
-        # self.globalGL._shaderProgram1.makeCurrent()
-        # self.globalGL._shaderProgram1.setBackground(self.background)
         self.globalGL._shaderProgramTex.makeCurrent()
         self.globalGL._shaderProgramTex.setBackground(self.background)
+        self.globalGL._shaderProgramAlias.makeCurrent()
+        self.globalGL._shaderProgramAlias.setBackground(self.background)
+        self.globalGL._shaderProgramAlias.setAliasShade(0.25)
+        self.globalGL._shaderProgramAlias.setAliasEnabled(True)
         if not silent:
             self.update()
         self.doneCurrent()

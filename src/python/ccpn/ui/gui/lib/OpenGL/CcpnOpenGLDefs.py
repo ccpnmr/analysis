@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,7 @@ SPECTRUM_YSCALE = 'yScale'
 SPECTRUM_POINTINDEX = 'pointIndex'
 SPECTRUM_VALUEPERPOINT = 'valuePerPoint'
 SPECTRUM_SPINNINGRATE = 'spinningRate'
+SPECTRUM_REGIONBOUNDS = 'regionBounds'
 
 MAINVIEW = 'mainView'
 MAINVIEWFULLWIDTH = 'mainViewFullWidth'
@@ -60,9 +61,10 @@ AXISCORNER = 'axisCorner'
 BLANKVIEW = 'blankView'
 
 GLLINE_STYLES = {
-    'solid' : 0xFFFF,
-    'dashed': 0xF0F0,
-    'dotted': 0xAAAA
+    'solid'       : 0xFFFF,
+    'dashed'      : 0xF0F0,
+    'short-dashed': 0xCCCC,
+    'dotted'      : 0xAAAA
     }
 
 GLLINE_STYLES_ARRAY = {
@@ -145,6 +147,8 @@ GLBACKGROUND = 'Background Colour'
 GLBASETHICKNESS = 'Base Thickness'
 GLSYMBOLTHICKNESS = 'Symbol Thickness'
 GLCONTOURTHICKNESS = 'Contour Thickness'
+GLALIASENABLED = 'Alias Enabled'
+GLALIASSHADE = 'Alias Shade'
 GLSTRIPDIRECTION = 'Strip Direction'
 GLSTRIPPADDING = 'Strip Padding'
 GLEXPORTDPI = 'Image dpi'
@@ -241,7 +245,8 @@ GRIDVISIBLE = 'gridVisible'
 CROSSHAIRVISIBLE = 'crosshairVisible'
 DOUBLECROSSHAIRVISIBLE = 'doubleCrosshairVisible'
 SIDEBANDSVISIBLE = 'sideBandsVisible'
-
+ALIASENABLED = 'aliasEnabled'
+ALIASSHADE = 'aliasShade'
 STRINGSCALE = 0.7
 
 PEAKLABEL_MINIMAL = 'peaklabelMinimal'

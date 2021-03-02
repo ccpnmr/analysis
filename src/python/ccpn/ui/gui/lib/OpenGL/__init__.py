@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-01 19:14:38 +0000 (Mon, March 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 13:57:32 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -26,26 +26,32 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 
 from ccpn.util.Logging import getLogger
-from ctypes import util
 from PyQt5 import QtWidgets
 import sys
+from ctypes import util
 
-_OpenGLLibraryPathOSX = '/System/Library/Frameworks/%s.framework/%s'
+_OpenGLLibraryPathOSX11 = '/System/Library/Frameworks/%s.framework/%s'
+util_find_library_bk = util.find_library
 
-def patched_find_library(name):
-    res = util.find_library(name)
+def util_find_library_OSX11Patch(name):
+    res = util_find_library_bk(name)
     if res: return res
-    return _OpenGLLibraryPathOSX %(name, name)
+    return _OpenGLLibraryPathOSX11 % (name, name)
 
 try:
+    import OpenGL as ogl
     try:
         from OpenGL import GL, GLU, GLUT
         import OpenGL.arrays.vbo as VBO
     except ImportError:
-        # getLogger().warn('Error importing OpenGL libraries... Patching imports for OS X 11.x')
-        util.find_library = patched_find_library
+        # Patching for OS X 11.x
+        util_find_library_bk = util.find_library
+        util.find_library = util_find_library_OSX11Patch
+        # now do the imports
         from OpenGL import GL, GLU, GLUT
         import OpenGL.arrays.vbo as VBO
+        #  restore the util find_library
+        util.find_library = util_find_library_bk
 except ImportError:
     app = QtWidgets.QApplication(sys.argv)
     QtWidgets.QMessageBox.critical(None, "Error importing OpenGL.",

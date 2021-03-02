@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:37:54 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -57,13 +57,7 @@ from ccpn.util.AttrDict import AttrDict
 #       a = x[np.where(x != 3)]
 #       *** a = x[x != SKIPINDEX]
 
-try:
-    from OpenGL import GL, GLU, GLUT
-except ImportError:
-    app = QtWidgets.QApplication(sys.argv)
-    QtWidgets.QMessageBox.critical(None, "OpenGL CCPN",
-                                   "PyOpenGL must be installed to run this example.")
-    sys.exit(1)
+from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
 
 OBJ_ISINPLANE = 0
 OBJ_ISINFLANKINGPLANE = 1

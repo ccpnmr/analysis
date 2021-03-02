@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:52 +0000 (Mon, March 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:37:54 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -46,14 +46,7 @@ from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.peakUtils import movePeak
 
-
-try:
-    from OpenGL import GL, GLU, GLUT
-except ImportError:
-    app = QtWidgets.QApplication(sys.argv)
-    QtWidgets.QMessageBox.critical(None, "OpenGL CCPN",
-                                   "PyOpenGL must be installed to run this example.")
-    sys.exit(1)
+from ccpn.ui.gui.lib.OpenGL import GL
 
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
     CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_INTEGRALSHADE, \

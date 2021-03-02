@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:37:53 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -215,7 +215,7 @@ class GuiSpectrumDisplay(CcpnModule):
                               So for now add option below to have it turned off (False) or on (True).
         """
 
-        getLogger().debug('GuiSpectrumDisplay.__init__>> mainWindow, name: %s %s' % (mainWindow, name))
+        getLogger().debug('GuiSpectrumDisplay>> mainWindow, name: %s %s' % (mainWindow, name))
         super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=name,
                                                  size=(1100, 1300), autoOrientation=False
                                                  )
@@ -229,6 +229,12 @@ class GuiSpectrumDisplay(CcpnModule):
         # self.mainWidget will be the parent of all the subsequent widgets
         self.qtParent = self.mainWidget
 
+        # get the settings from preferences
+        annotationType = min(self.application.preferences.general.annotationType, self.MAXPEAKLABELTYPES - 1)
+        symbolType = min(self.application.preferences.general.symbolType, self.MAXPEAKSYMBOLTYPES - 1)
+        symbolSize = self.application.preferences.general.symbolSizePixel
+        symbolThickness = self.application.preferences.general.symbolThickness
+
         # create settings widget
         if not self.is1D:
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
@@ -237,7 +243,10 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     xTexts=AXISUNITS, yTexts=AXISUNITS,
                                                                     _baseAspectRatioAxisCode=self.application.preferences.general._baseAspectRatioAxisCode,
                                                                     _aspectRatios=self.application.preferences.general.aspectRatios.copy(),
-                                                                    _aspectRatioMode=self.application.preferences.general.aspectRatioMode)
+                                                                    _aspectRatioMode=self.application.preferences.general.aspectRatioMode,
+                                                                    symbolType=symbolType, annotationType=annotationType,
+                                                                    symbolSize=symbolSize, symbolThickness=symbolThickness,
+                                                                    )
         else:
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
                                                                     mainWindow=self.mainWindow, spectrumDisplay=self,
@@ -246,7 +255,10 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     showYAxis=False,
                                                                     _baseAspectRatioAxisCode=self.application.preferences.general._baseAspectRatioAxisCode,
                                                                     _aspectRatios=self.application.preferences.general.aspectRatios.copy(),
-                                                                    _aspectRatioMode=self.application.preferences.general.aspectRatioMode)
+                                                                    _aspectRatioMode=self.application.preferences.general.aspectRatioMode,
+                                                                    symbolType=symbolType, annotationType=annotationType,
+                                                                    symbolSize=symbolSize, symbolThickness=symbolThickness,
+                                                                    )
 
         self._spectrumDisplaySettings.settingsChanged.connect(self._settingsChanged)
         self.settingsWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)

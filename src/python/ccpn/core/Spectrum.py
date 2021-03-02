@@ -50,7 +50,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:49 +0000 (Mon, March 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:37:53 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -611,7 +611,7 @@ class Spectrum(AbstractWrapperObject):
             for refExperiment in nmrExpPrototype.sortedRefExperiments():
                 if value == refExperiment.name:
                     # refExperiment matches name string - set it
-                    self._wrappedData.experiment.refExperiment = refExperiment
+                    # self._wrappedData.experiment.refExperiment = refExperiment
                     # set API RefExperiment and ExpTransfer
                     _setApiRefExperiment(self._wrappedData.experiment, refExperiment)
                     _setApiExpTransfers(self._wrappedData.experiment)

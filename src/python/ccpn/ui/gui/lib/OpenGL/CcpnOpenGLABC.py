@@ -45,7 +45,7 @@ By Mouse button:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-15 16:10:53 +0000 (Tue, December 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-02 14:37:53 +0000 (Tue, March 02, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -88,15 +88,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLExternalRegion
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 from ccpn.ui.gui.guiSettings import getColours
-
-
-try:
-    from OpenGL import GL, GLU, GLUT
-except ImportError:
-    app = QtWidgets.QApplication(sys.argv)
-    QtWidgets.QMessageBox.critical(None, "OpenGL CCPN",
-                                   "PyOpenGL must be installed to run this example.")
-    sys.exit(1)
+from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
 
 UNITS_PPM = 'ppm'
 UNITS_HZ = 'Hz'

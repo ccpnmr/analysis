@@ -1,5 +1,5 @@
 from PyQt5 import QtGui, QtWidgets, QtCore
-from OpenGL import GL, GLU, GLUT
+# from OpenGL import GL, GLU, GLUT
 
 from .Base import Base
 

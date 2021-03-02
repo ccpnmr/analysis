@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:37:53 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -98,16 +98,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
     makeDragEvent
 
 
-try:
-    # used to test whether all the arrays are defined correctly
-    # os.environ.update({'PYOPENGL_ERROR_ON_COPY': 'true'})
-    from OpenGL import GL, GLU, GLUT
-except ImportError:
-    app = QtWidgets.QApplication(sys.argv)
-    QtWidgets.QMessageBox.critical(None, "OpenGL CCPN",
-                                   "PyOpenGL must be installed to run this example.")
-    sys.exit(1)
-
+from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT, VBO
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString

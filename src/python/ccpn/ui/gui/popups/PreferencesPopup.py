@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-12 15:07:29 +0000 (Fri, February 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:28:02 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -257,7 +257,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         applyToSDs = self.useApplyToSpectrumDisplaysBox.isChecked()
 
         allChanges = True if self._changes else False
-        if not (allChanges and applyToSDs):
+        if not allChanges:
             return True
 
         # handle clicking of the Apply/OK button

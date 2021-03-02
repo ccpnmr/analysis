@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-26 10:14:16 +0000 (Fri, February 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:16:14 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -283,7 +283,6 @@ class GLLabelling():
             pw = w
 
         return r, w, symbolType, symbolWidth, pr, pw
-
 
     def _appendLabel(self, spectrumView, objListView, stringList, obj):
         """Append a new label to the end of the list
@@ -706,8 +705,8 @@ class GLLabelling():
 
                 if pointLineWidths[0] and pointLineWidths[1]:
                     # draw 24 connected segments
-                    r = 0.5 * pointLineWidths[0] # / frequency[0]
-                    w = 0.5 * pointLineWidths[1] # / frequency[1]
+                    r = 0.5 * pointLineWidths[0]  # / frequency[0]
+                    w = 0.5 * pointLineWidths[1]  # / frequency[1]
                     numPoints = 24
                     angPlus = 2 * np.pi
                     skip = 1
@@ -887,8 +886,8 @@ class GLLabelling():
 
                 if pointLineWidths[0] and pointLineWidths[1]:
                     # draw 24 connected segments
-                    r = 0.5 * pointLineWidths[0] # / frequency[0]
-                    w = 0.5 * pointLineWidths[1] # / frequency[1]
+                    r = 0.5 * pointLineWidths[0]  # / frequency[0]
+                    w = 0.5 * pointLineWidths[1]  # / frequency[1]
                     numPoints = 24
                     angPlus = 2.0 * np.pi
                     skip = 1
@@ -957,8 +956,8 @@ class GLLabelling():
 
                 if pointLineWidths[0] and pointLineWidths[1]:
                     # draw 24 connected segments
-                    r = 0.5 * pointLineWidths[0] # / frequency[0]
-                    w = 0.5 * pointLineWidths[1] # / frequency[1]
+                    r = 0.5 * pointLineWidths[0]  # / frequency[0]
+                    w = 0.5 * pointLineWidths[1]  # / frequency[1]
                     numPoints = 24
                     angPlus = 2 * np.pi
                     skip = 1
@@ -1783,7 +1782,9 @@ class GLLabelling():
         lineThickness = self._GLParent._symbolThickness
         GL.glLineWidth(lineThickness * self._GLParent.viewports.devicePixelRatio)
         shader.setAliasEnabled(self._GLParent._aliasEnabled)
-        shader.setAliasShade(self._GLParent._aliasShade)
+
+        # change to correct value for shader
+        shader.setAliasShade(self._GLParent._aliasShade / 100.0)
 
         # # loop through the attached objListViews to the strip
         # for spectrumView in self._GLParent._ordering:  #self._parent.spectrumViews:

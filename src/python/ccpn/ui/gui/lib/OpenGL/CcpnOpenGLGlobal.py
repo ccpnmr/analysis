@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-26 10:14:16 +0000 (Fri, February 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:16:14 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -286,7 +286,7 @@ class AliasedPixelShader(ShaderProgramABC):
     def setAliasShade(self, aliasShade):
         """Set the alias shade: a single float in range [0.0, 1.0]
         Used to determine visibility of aliased peaks, 0.0 -> background colour
-        :param value: single float32
+        :param aliasShade: single float32
         """
         if not isinstance(aliasShade, (float, np.float32)):
             raise TypeError('aliasShade must be a float')

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:16:14 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -229,6 +229,14 @@ class GuiSpectrumDisplay(CcpnModule):
         # self.mainWidget will be the parent of all the subsequent widgets
         self.qtParent = self.mainWidget
 
+        # get the settings from preferences
+        annotationType = min(self.application.preferences.general.annotationType, self.MAXPEAKLABELTYPES - 1)
+        symbolType = min(self.application.preferences.general.symbolType, self.MAXPEAKSYMBOLTYPES - 1)
+        symbolSize = self.application.preferences.general.symbolSizePixel
+        symbolThickness = self.application.preferences.general.symbolThickness
+        aliasEnabled = self.application.preferences.general.aliasEnabled
+        aliasShade = self.application.preferences.general.aliasShade
+
         # create settings widget
         if not self.is1D:
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
@@ -237,7 +245,11 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     xTexts=AXISUNITS, yTexts=AXISUNITS,
                                                                     _baseAspectRatioAxisCode=self.application.preferences.general._baseAspectRatioAxisCode,
                                                                     _aspectRatios=self.application.preferences.general.aspectRatios.copy(),
-                                                                    _aspectRatioMode=self.application.preferences.general.aspectRatioMode)
+                                                                    _aspectRatioMode=self.application.preferences.general.aspectRatioMode,
+                                                                    symbolType=symbolType, annotationType=annotationType,
+                                                                    symbolSize=symbolSize, symbolThickness=symbolThickness,
+                                                                    aliasEnabled=aliasEnabled, aliasShade=aliasShade
+                                                                    )
         else:
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
                                                                     mainWindow=self.mainWindow, spectrumDisplay=self,
@@ -246,7 +258,11 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     showYAxis=False,
                                                                     _baseAspectRatioAxisCode=self.application.preferences.general._baseAspectRatioAxisCode,
                                                                     _aspectRatios=self.application.preferences.general.aspectRatios.copy(),
-                                                                    _aspectRatioMode=self.application.preferences.general.aspectRatioMode)
+                                                                    _aspectRatioMode=self.application.preferences.general.aspectRatioMode,
+                                                                    symbolType=symbolType, annotationType=annotationType,
+                                                                    symbolSize=symbolSize, symbolThickness=symbolThickness,
+                                                                    aliasEnabled=aliasEnabled, aliasShade=aliasShade
+                                                                    )
 
         self._spectrumDisplaySettings.settingsChanged.connect(self._settingsChanged)
         self.settingsWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)

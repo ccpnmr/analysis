@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-26 10:08:44 +0000 (Fri, February 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:16:14 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -90,7 +90,7 @@ from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGR
     CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours, \
     CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA, \
     CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, \
-    CCPNGLWIDGET_HARDSHADE
+    CCPNGLWIDGET_HARDSHADE, CCPNGLWIDGET_BADAREA
 import ccpn.util.Phasing as Phasing
 from ccpn.ui.gui.lib.mouseEvents import \
     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
@@ -756,6 +756,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         indices = getAxisCodeMatchIndices(self.strip.axisCodes, spectrumView.spectrum.axisCodes)
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds, self._spectrumValues[1].regionBounds)
 
         if len(self._spectrumValues) > 2:
             # store a list for the extra dimensions - should only be one per spectrumDisplay really
@@ -2101,12 +2102,15 @@ class CcpnGLWidget(QOpenGLWidget):
         self.zoomAreaColour = self.colours[CCPNGLWIDGET_ZOOMAREA]
         self.pickAreaColour = self.colours[CCPNGLWIDGET_PICKAREA]
         self.selectAreaColour = self.colours[CCPNGLWIDGET_SELECTAREA]
+        self.badAreaColour = self.colours[CCPNGLWIDGET_BADAREA]
+
         self.zoomLineColour = self.colours[CCPNGLWIDGET_ZOOMLINE]
         self.mouseMoveLineColour = self.colours[CCPNGLWIDGET_MOUSEMOVELINE]
 
         self.zoomAreaColourHard = (*self.colours[CCPNGLWIDGET_ZOOMAREA][0:3], CCPNGLWIDGET_HARDSHADE)
         self.pickAreaColourHard = (*self.colours[CCPNGLWIDGET_PICKAREA][0:3], CCPNGLWIDGET_HARDSHADE)
         self.selectAreaColourHard = (*self.colours[CCPNGLWIDGET_SELECTAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.badAreaColourHard = (*self.colours[CCPNGLWIDGET_BADAREA][0:3], CCPNGLWIDGET_HARDSHADE)
 
     def _preferencesUpdate(self):
         """update GL values after the preferences have changed
@@ -2216,7 +2220,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 if (minDiff < button[2]) and (maxDiff < button[3]):
                     button[4]()
-                    break
+                    return True
 
     def mousePressInLabel(self, mx, my, ty):
         """Check if the mouse has been pressed in the stripIDlabel
@@ -2412,6 +2416,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._mouseStart = (mx, my)
         self._startCoordinate = self.mouseTransform.dot([mx, my, 0.0, 1.0])
         self._startMiddleDrag = False
+        self._validRegionPick = False
 
         self._endCoordinate = self._startCoordinate
 
@@ -2447,6 +2452,46 @@ class CcpnGLWidget(QOpenGLWidget):
             if not self._dragRegions:
                 if not self.mousePressInRegion(self._externalRegions._regions):
                     self.mousePressInIntegralLists()
+
+        if int(ev.buttons() & Qt.LeftButton):
+            # find the bounds for the region that has currently been clicked
+
+            if (keyModifiers & (Qt.ShiftModifier | Qt.ControlModifier)):
+                # get the list of visible spectrumViews, or the first in the list
+                visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+                bounds = ([], [])
+                for specView in visibleSpectrumViews:
+                    specSettings = self._spectrumSettings[specView]
+
+                    pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
+                    if None in pIndex:
+                        continue
+
+                    for ii in range(2):
+                        bounds[ii].extend(list(specSettings[GLDefs.SPECTRUM_REGIONBOUNDS][ii]))
+
+                bounds = [sorted(bnd) for bnd in bounds]
+
+                mn = min(self.axisL, self.axisR)
+                mx = max(self.axisL, self.axisR)
+                bounds[0] = [mn] + [bnd for bnd in bounds[0] if mn < bnd < mx] + [mx]
+                mn = min(self.axisB, self.axisT)
+                mx = max(self.axisB, self.axisT)
+                bounds[1] = [mn] + [bnd for bnd in bounds[1] if mn < bnd < mx] + [mx]
+
+                self._minBounds = [None, None]
+                self._maxBounds = [None, None]
+
+                for jj in range(2):
+                    for minB, maxB in zip(bounds[jj], bounds[jj][1:]):
+                        if minB < self._startCoordinate[jj] < maxB:
+                            self._minBounds[jj] = minB
+                            self._maxBounds[jj] = maxB
+                            break
+
+                if None not in self._minBounds and None not in self._maxBounds:
+                    # not currently used, but available to set the region to red if required
+                    self._validRegionPick = True
 
         self.current.strip = self.strip
         self.update()
@@ -2640,8 +2685,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if (keyModifiers & Qt.ShiftModifier) and (keyModifiers & Qt.ControlModifier):
 
-                self._endCoordinate = cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
-                self._selectionMode = 3
+                # check for a valid region pick
+                if self._validRegionPick:
+                    self._endCoordinate = [np.clip(pos, mn, mx) for pos, mn, mx in zip(cursorCoordinate, self._minBounds, self._maxBounds)]
+                    self._selectionMode = 3
+                else:
+                    # in case bad picking needs to be shown to the user, shows a red box
+                    # awkward for overlaid spectra with different aliasing regions specified
+                    self._endCoordinate = [np.clip(pos, mn, mx) for pos, mn, mx in zip(cursorCoordinate, self._minBounds, self._maxBounds)]  #cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
+                    self._selectionMode = 4
+
                 self._drawSelectionBox = True
                 self._drawDeltaOffset = True
 
@@ -4639,6 +4692,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 GL.glColor4f(*self.selectAreaColour)
             elif self._selectionMode == 3:  # cyan
                 GL.glColor4f(*self.pickAreaColour)
+            else:  # red
+                GL.glColor4f(*self.badAreaColour)
 
             GL.glBegin(GL.GL_QUADS)
             GL.glVertex2d(self._dragStart[0], self._dragStart[1])
@@ -4653,6 +4708,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 GL.glColor4f(*self.selectAreaColourHard)
             elif self._selectionMode == 3:  # cyan
                 GL.glColor4f(*self.pickAreaColourHard)
+            else:  # red
+                GL.glColor4f(*self.badAreaColourHard)
 
             GL.glBegin(GL.GL_LINE_STRIP)
             GL.glVertex2d(self._dragStart[0], self._dragStart[1])
@@ -6317,11 +6374,13 @@ class CcpnGLWidget(QOpenGLWidget):
         self.current.cursorPosition = (xPosition, yPosition)
 
         if getCurrentMouseMode() == PICK:
-            self._pickAtMousePosition(event)
+            if self._validRegionPick:
+                self._pickAtMousePosition(event)
 
         if controlShiftLeftMouse(event) or controlShiftRightMouse(event):
-            # Control-Shift-left-click: pick peak
-            self._pickAtMousePosition(event)
+            if self._validRegionPick:
+                # Control-Shift-left-click: pick peak
+                self._pickAtMousePosition(event)
 
         elif controlLeftMouse(event):
             # Control-left-click; (de-)select peak and add/remove to selection
@@ -6657,14 +6716,17 @@ class CcpnGLWidget(QOpenGLWidget):
             selectedRegion = [[round(self._startCoordinate[0], 3), round(self._endCoordinate[0], 3)],
                               [round(self._startCoordinate[1], 3), round(self._endCoordinate[1], 3)]]
 
-            for n in self._orderedAxes[2:]:
-                selectedRegion.append((n.region[0], n.region[1]))
+            if self._validRegionPick:
 
-            # selectedRegion is tuple((xL, xR), (yB, yT), ...) - from display
-            # ... is other Nd axes
+                # only pick if the region is inside the bounds
+                for n in self._orderedAxes[2:]:
+                    selectedRegion.append((n.region[0], n.region[1]))
 
-            peaks = self.strip.peakPickRegion(selectedRegion)
-            self.current.peaks = peaks
+                # selectedRegion is tuple((xL, xR), (yB, yT), ...) - from display
+                # ... is other Nd axes
+
+                peaks = self.strip.peakPickRegion(selectedRegion)
+                self.current.peaks = peaks
 
         elif controlLeftMouse(event):
             # Control(Cmd)+left drag: selects peaks - purple box

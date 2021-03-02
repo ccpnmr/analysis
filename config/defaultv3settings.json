@@ -98,7 +98,7 @@
         "traceColour"                          : null,
         "traceIncludeNegative"                 : false,
         "aliasEnabled"                         : true,
-        "aliasShade"                           : 0.2
+        "aliasShade"                           : 20
     },
     "proxySettings"    : {
         "verifySSL"        : true,

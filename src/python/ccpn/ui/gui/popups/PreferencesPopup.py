@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-26 10:15:39 +0000 (Fri, February 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:16:14 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Slider import Slider
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST
 from ccpn.framework.Translation import languages
 from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
@@ -260,7 +261,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         applyToSDs = self.useApplyToSpectrumDisplaysBox.isChecked()
 
         allChanges = True if self._changes else False
-        if not (allChanges and applyToSDs):
+        if not allChanges:
             return True
 
         # handle clicking of the Apply/OK button
@@ -1013,9 +1014,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.aliasEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'aliasEnabled'))
 
         row += 1
-        self.aliasShadeLabel = Label(parent, text="Aliased Peak Visibility", grid=(row, 0))
-        self.aliasShadeData = DoubleSpinbox(parent, step=0.05,
-                                            min=0, max=1.0, grid=(row, 1), hAlign='l')
+        self.aliasShadeLabel = Label(parent, text="    Opacity", grid=(row, 0))
+        # self.aliasShadeData = DoubleSpinbox(parent, step=0.05,
+        #                                     min=0.0, max=1.0, grid=(row, 1), hAlign='l')
+        _sliderBox = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l')
+        # self.aliasShadeData = Slider(parent, grid=(row, 1), hAlign='l')
+        self.aliasShadeData = Slider(_sliderBox, grid=(0, 1), hAlign='l')
+        Label(_sliderBox, text="0", grid=(0, 0), hAlign='l')
+        Label(_sliderBox, text="100%", grid=(0, 2), hAlign='l')
         self.aliasShadeData.setMinimumWidth(LineEditsMinimumWidth)
         self.aliasShadeData.valueChanged.connect(self._queueSetAliasShade)
 
@@ -1495,7 +1501,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetAliasShade(self):
-        value = self.aliasShadeData.get()
+        value = int(self.aliasShadeData.get())
         if value != self.preferences.general.aliasShade:
             return partial(self._setAliasShade, value)
 

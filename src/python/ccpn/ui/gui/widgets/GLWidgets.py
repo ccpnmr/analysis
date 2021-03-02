@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-26 10:08:44 +0000 (Fri, February 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:16:14 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -269,7 +269,20 @@ class GuiNdWidget(CcpnGLWidget):
         p0 = list(peak.position)
         for ii, ind in enumerate(indices[:2]):
             if ind is not None:
+
+                # move to the aliased position in the bounded spectrum
                 p0[ind] += deltaPosition[ii]
+
+                visibleAlias = peak.spectrum.visibleAliasingRange
+                spectrumLimits = peak.spectrum.spectrumLimits
+
+                for dim, pos in enumerate(p0):
+                    # update the aliasing so that the peak stays within the bounds of the spectrum
+                    minSpectrumFrequency, maxSpectrumFrequency = sorted(spectrumLimits[dim])
+                    regionBounds = (minSpectrumFrequency + visibleAlias[dim][0] * (maxSpectrumFrequency - minSpectrumFrequency),
+                                    minSpectrumFrequency + (visibleAlias[dim][1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency))
+
+                    p0[dim] = (pos - regionBounds[0]) % (regionBounds[1] - regionBounds[0]) + regionBounds[0]
 
         movePeak(peak, p0, updateHeight=True)
 

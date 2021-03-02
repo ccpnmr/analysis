@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-16 13:22:59 +0000 (Tue, February 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:16:14 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -69,8 +69,8 @@ class PeakPickerABC(object):
     # to be subclassed
     #=========================================================================================
 
-    peakPickerType = None       # A unique string identifying the peak picker
-    defaultPointExtension = 1   # points to extend the region to pick on either side
+    peakPickerType = None  # A unique string identifying the peak picker
+    defaultPointExtension = 1  # points to extend the region to pick on either side
     onlyFor1D = False
 
     #=========================================================================================
@@ -163,11 +163,11 @@ class PeakPickerABC(object):
                                 for sLeft, sRight in self.sliceTuples]
 
         # TODO: use Spectrum aliasing definitions once defined
-        data = self.spectrum.dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1]*self.spectrum.dimensionCount)
+        data = self.spectrum.dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
 
         peaks = self.findPeaks(data)
         getLogger().debug('%s.pickPeaks: found %d peaks in spectrum %s; %r' %
-                         (self.__class__.__name__, len(peaks), self.spectrum, axisDict))
+                          (self.__class__.__name__, len(peaks), self.spectrum, axisDict))
 
         corePeaks = []
         if len(peaks) > 0:
@@ -188,7 +188,7 @@ class PeakPickerABC(object):
             if len(pk.points) != self.dimensionCount:
                 raise RuntimeError('%s: invalid dimensionality of points attribute' % pk)
             # correct the peak.points for "offset" (the slice-positions taken) and ordering (i.e. inverse)
-            pointPositions = [float(p)+float(self.sliceTuples[idx][0]) for idx,p in enumerate(pk.points[::-1])]
+            pointPositions = [float(p) + float(self.sliceTuples[idx][0]) for idx, p in enumerate(pk.points[::-1])]
 
             # check whether a peak already exists at pointPositions in the peakList
             if self._validatePointPeak(pointPositions, peakList):
@@ -217,7 +217,7 @@ class PeakPickerABC(object):
         :param peakList:
         :return: true if pointPositions is valid
         """
-        intPositions = [int(pp) for pp in pointPositions]
+        intPositions = [int((pos - 1) % pCount) + 1 for pos, pCount in zip(pointPositions, self.spectrum.pointCounts)]  # API position starts at 1
         existingPositions = [[int(pp) for pp in pk.pointPositions] for pk in peakList.peaks]
 
         return intPositions not in existingPositions

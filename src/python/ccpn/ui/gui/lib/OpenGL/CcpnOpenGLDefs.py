@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-26 10:15:39 +0000 (Fri, February 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:16:14 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,7 @@ SPECTRUM_YSCALE = 'yScale'
 SPECTRUM_POINTINDEX = 'pointIndex'
 SPECTRUM_VALUEPERPOINT = 'valuePerPoint'
 SPECTRUM_SPINNINGRATE = 'spinningRate'
+SPECTRUM_REGIONBOUNDS = 'regionBounds'
 
 MAINVIEW = 'mainView'
 MAINVIEWFULLWIDTH = 'mainViewFullWidth'
@@ -60,10 +61,10 @@ AXISCORNER = 'axisCorner'
 BLANKVIEW = 'blankView'
 
 GLLINE_STYLES = {
-    'solid' : 0xFFFF,
-    'dashed': 0xF0F0,
+    'solid'       : 0xFFFF,
+    'dashed'      : 0xF0F0,
     'short-dashed': 0xCCCC,
-    'dotted': 0xAAAA
+    'dotted'      : 0xAAAA
     }
 
 GLLINE_STYLES_ARRAY = {

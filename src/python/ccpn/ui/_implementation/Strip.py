@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-16 13:22:59 +0000 (Tue, February 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:16:14 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -425,23 +425,34 @@ class Strip(AbstractWrapperObject):
                 if None in indices:
                     continue
 
-                ppmPos = [ppmPositions[indx-1] for indx in indices]
+                ppmPos = [ppmPositions[indx - 1] for indx in indices]
                 _height = spectrum.getHeight(ppmPos)
 
-                for thisPeakListView in validPeakListViews:
-                    peakList = thisPeakListView.peakList
+                for dim, pos in zip(indices, ppmPositions):
+                    # check that the picked peak lies in the bounded region of the spectrum
+                    minSpectrumFrequency, maxSpectrumFrequency = sorted(spectrum.spectrumLimits[dim - 1])
+                    visibleAlias = (spectrum.visibleAliasingRange)[dim - 1]
+                    regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
+                                    round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
 
+                    if not (regionBounds[0] <= pos <= regionBounds[1]):
+                        break
+
+                else:
                     # get the list of existing peak pointPositions in this peakList
                     pointCounts = spectrum.pointCounts
-                    intPositions = [int(((spectrum.ppm2point(pos, dimension=indx+1)) - 1) % np) + 1
+                    intPositions = [int(((spectrum.ppm2point(pos, dimension=indx + 1)) - 1) % np) + 1
                                     for indx, (pos, np) in enumerate(zip(ppmPos, pointCounts))]
-                    existingPositions = [[int(pp) for pp in pk.pointPositions] for pk in peakList.peaks]
 
-                    if intPositions not in existingPositions:
-                        # add the new peak only if one doesn't exist at these pointPositions
-                        peak = peakList.newPeak(ppmPositions=ppmPos, height=_height)
-                        result.append(peak)
-                        peakLists.append(peakList)
+                    for thisPeakListView in validPeakListViews:
+                        peakList = thisPeakListView.peakList
+                        existingPositions = [[int(pp) for pp in pk.pointPositions] for pk in peakList.peaks]
+
+                        if intPositions not in existingPositions:
+                            # add the new peak only if one doesn't exist at these pointPositions
+                            peak = peakList.newPeak(ppmPositions=ppmPos, height=_height)
+                            result.append(peak)
+                            peakLists.append(peakList)
 
             # add the new peak to the current.peaks
             self.current.peaks = result
@@ -452,7 +463,7 @@ class Strip(AbstractWrapperObject):
     def peakPickRegion(self, selectedRegion: List[List[float]]) -> Tuple[Peak, ...]:
         """Peak pick all spectra currently displayed in strip in selectedRegion.
         """
-
+        # selectedRegion is rounded before-hand to 3 dp.
         result = []
 
         minDropFactor = self.application.preferences.general.peakDropFactor
@@ -480,27 +491,42 @@ class Strip(AbstractWrapperObject):
                     # get the correct axis codes
                     if spectrum.dimensionCount == 1:
                         axisCodes = spectrum.axisCodes[0]
+                        indices = [1]
                     else:
                         axisCodes = spectrum.getByAxisCodes('axisCodes', self.axisCodes)
+                        indices = spectrum.getByAxisCodes('dimensions', self.axisCodes)
 
-                    from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
-
-                    myPeakPicker = PeakPickerNd(spectrum=spectrum)
-                    myPeakPicker.setParameters(dropFactor=minDropFactor,
-                                               positiveThreshold=spectrum.positiveContourBase if spectrumView.displayPositiveContours else None,
-                                               negativeThreshold=spectrum.negativeContourBase if spectrumView.displayNegativeContours else None,
-                                               fitMethod=fitMethod
-                                               )
+                    if None in indices:
+                        continue
 
                     axisDict = {}
-                    for ac, region in zip(axisCodes, sortedSelectedRegion):
+                    for ac, dim, region in zip(axisCodes, indices, sortedSelectedRegion):
+                        # check that the region to be picked lies in the bounded region of the spectrum
+                        minSpectrumFrequency, maxSpectrumFrequency = sorted(spectrum.spectrumLimits[dim - 1])
+                        visibleAlias = (spectrum.visibleAliasingRange)[dim - 1]
+                        regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
+                                        round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
+
+                        if not all(regionBounds[0] <= bnd <= regionBounds[1] for bnd in region):
+                            break
                         axisDict[ac] = tuple(region)
 
-                    for peakList in validPeakLists:
+                    else:
                         # apply the peak picker
-                        newPeaks = myPeakPicker.pickPeaks(axisDict=axisDict, peakList=peakList)
-                        if newPeaks:
-                            result.extend(newPeaks)
+                        from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
+
+                        myPeakPicker = PeakPickerNd(spectrum=spectrum)
+                        myPeakPicker.setParameters(dropFactor=minDropFactor,
+                                                   positiveThreshold=spectrum.positiveContourBase if spectrumView.displayPositiveContours else None,
+                                                   negativeThreshold=spectrum.negativeContourBase if spectrumView.displayNegativeContours else None,
+                                                   fitMethod=fitMethod
+                                                   )
+
+                        for peakList in validPeakLists:
+                            # do the pick
+                            newPeaks = myPeakPicker.pickPeaks(axisDict=axisDict, peakList=peakList)
+                            if newPeaks:
+                                result.extend(newPeaks)
 
         return tuple(result)
 

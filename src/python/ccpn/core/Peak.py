@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-26 10:05:48 +0000 (Fri, February 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:16:13 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1066,8 +1066,9 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
 
         pointCounts = result.spectrum.pointCounts
         for ii, peakDim in enumerate(apiPeakDims):
-            alias = int(divmod(pointPositions[ii] - 1, pointCounts[ii])[0])
-            pos = float(pointPositions[ii] + 0 - alias * pointCounts[ii])  # API position starts at 1
+            # move the peak to the correct aliased position
+            alias = int((pointPositions[ii] - 1) // pointCounts[ii])
+            pos = float((pointPositions[ii] - 1) % pointCounts[ii]) + 1.0  # API position starts at 1
             peakDim.numAliasing = alias
             peakDim.position = pos
 

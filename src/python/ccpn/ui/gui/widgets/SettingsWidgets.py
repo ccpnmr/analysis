@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-26 10:15:39 +0000 (Fri, February 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-02 14:16:14 +0000 (Tue, March 02, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont, getFontHeight
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.Slider import Slider
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER, SOFTDIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, SpectrumDisplayPulldown, ChemicalShiftListPulldown
@@ -79,7 +80,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                  xAxisUnits=0, xTexts=[], showXAxis=True,
                  yAxisUnits=0, yTexts=[], showYAxis=True,
                  symbolType=0, annotationType=0, symbolSize=9, symbolThickness=2,
-                 aliasEnabled=True, aliasShade=0.2,
+                 aliasEnabled=True, aliasShade=20,
                  stripArrangement=0,
                  _baseAspectRatioAxisCode='H', _aspectRatios={},
                  _aspectRatioMode=0,
@@ -276,11 +277,16 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.aliasEnabledData.clicked.connect(self._symbolsChanged)
 
         row += 1
-        self.aliasShadeLabel = Label(parent, text="Aliased Peak Visibility", grid=(row, 0))
-        self.aliasShadeData = DoubleSpinbox(parent, step=0.05,
-                                           min=0, max=1.0, grid=(row, 1), hAlign='l', objectName='SDS_aliasShade')
+        self.aliasShadeLabel = Label(parent, text="    Opacity", grid=(row, 0))
+        # self.aliasShadeData = DoubleSpinbox(parent, step=0.05,
+        #                                    min=0.0, max=1.0, grid=(row, 1), hAlign='l', objectName='SDS_aliasShade')
+        _sliderBox = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l')
+        # self.aliasShadeData = Slider(parent, grid=(row, 1), hAlign='l', objectName='SDS_aliasShade')
+        self.aliasShadeData = Slider(_sliderBox, grid=(0, 1), hAlign='l')
+        Label(_sliderBox, text="0", grid=(0, 0), hAlign='l')
+        Label(_sliderBox, text="100%", grid=(0, 2), hAlign='l')
         self.aliasShadeData.setMinimumWidth(LineEditsMinimumWidth)
-        self.aliasShadeData.setValue(aliasShade)
+        self.aliasShadeData.set(aliasShade)
         self.aliasShadeData.valueChanged.connect(self._symbolsChanged)
 
         row += 1
@@ -313,7 +319,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 SYMBOLSIZE         : int(self.symbolSizePixelData.text()),
                 SYMBOLTHICKNESS    : int(self.symbolThicknessData.text()),
                 ALIASENABLED       : self.aliasEnabledData.isChecked(),
-                ALIASSHADE         : float(self.aliasShadeData.get())
+                ALIASSHADE         : int(self.aliasShadeData.get())
                 }
 
     def _aspectRatioModeChanged(self):

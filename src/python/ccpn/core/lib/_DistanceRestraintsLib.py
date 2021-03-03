@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-02-26 14:59:54 +0000 (Fri, February 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-03 18:16:09 +0000 (Wed, March 03, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -678,7 +678,6 @@ def _findPeakConstraintPairs(peak, residueRanges=None, distDataDims=None, distIn
     for contrib in peakDim0.peakDimContribs:
       resonance = contrib.resonance
       if resonance.resonanceSet:
-        print('>> Here', resonance.resonanceSet)
         if residueRanges:
           residue = resonance.resonanceSet.findFirstAtomSet().findFirstAtom().residue
           if _isResidueInRange(residue, residueRanges, distDim0):

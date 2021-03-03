@@ -51,6 +51,7 @@ ICON_DIR =  path.join(path.dirname(path.dirname(__file__)), 'icons')
 EXPANDING = QtWidgets.QSizePolicy.Expanding
 PREFERRED = QtWidgets.QSizePolicy.Preferred
 MINIMUM = QtWidgets.QSizePolicy.Minimum
+DeafultCcpnCode = 'std'
 
 ABOUT_TEXT = """
 CcpNmr ChemBuild version 1.0
@@ -1073,10 +1074,10 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     
     if self.compound:
       if not self.compound.ccpCode:
-        msg = 'Cannot export CCPN ChemComp XML file.\n'
-        msg += "'CCPN Code' not set. \n Right Panel > Compound Info tab > CCPN Code "
-        QtWidgets.QMessageBox.warning(self, "Abort", msg)
-        return
+        self.compound.ccpCode = DeafultCcpnCode
+        msg = "CCPN Code set to default. %s \nTo Change: Right Panel > Compound Info tab > CCPN Code " %DeafultCcpnCode
+        print(msg)
+
     
       ccpCode = str(self.compound.ccpCode).strip()
       if not ccpCode:
@@ -1129,13 +1130,19 @@ class ChemBuildMain(QtWidgets.QMainWindow):
           # Check for standard checm comp repos
           fileName = Util.getTopObjectFile(chemComp)
           streamPath = os.path.join(dirPath, fileName)
- 
-          stream = open(streamPath, 'w')
           try:
-            XmlIO.saveToStream(stream, chemComp)
-          finally:
-            stream.close()
- 
+            if not os.path.exists(dirPath):
+              os.makedirs(dirPath)
+            stream = open(streamPath, 'w')
+            try:
+              XmlIO.saveToStream(stream, chemComp)
+            finally:
+              stream.close()
+          except Exception as e:
+            print('Error in creating ChemComp file. %s' %e)
+            QtWidgets.QMessageBox.warning(self, "Error", 'File not exported')
+
+
           #XmlIO.save(dirPath, chemComp)
           msg = 'CCPN ChemComp XML file saved as "%s"' % fileName
           QtWidgets.QMessageBox.information(self, "Done", msg)

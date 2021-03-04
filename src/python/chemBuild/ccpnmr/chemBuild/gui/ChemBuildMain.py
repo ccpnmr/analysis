@@ -51,7 +51,7 @@ ICON_DIR =  path.join(path.dirname(path.dirname(__file__)), 'icons')
 EXPANDING = QtWidgets.QSizePolicy.Expanding
 PREFERRED = QtWidgets.QSizePolicy.Preferred
 MINIMUM = QtWidgets.QSizePolicy.Minimum
-DeafultCcpnCode = 'std'
+DeafultCcpCode = 'Ccp'
 
 ABOUT_TEXT = """
 CcpNmr ChemBuild version 1.0
@@ -1073,10 +1073,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     from memops.format.xml import Util
     
     if self.compound:
-      if not self.compound.ccpCode:
-        self.compound.ccpCode = DeafultCcpnCode
-        msg = "CCPN Code set to default. %s \nTo Change: Right Panel > Compound Info tab > CCPN Code " %DeafultCcpnCode
-        print(msg)
+      self._setDefaultCcpCode()
 
     
       ccpCode = str(self.compound.ccpCode).strip()
@@ -1350,12 +1347,20 @@ class ChemBuildMain(QtWidgets.QMainWindow):
         self.setCompound( Compound('Unnamed') )
       
       self.updateVars()  
-        
+
+  def _setDefaultCcpCode(self):
+    if self.compound:
+      if not self.compound.ccpCode:
+        self.compound.ccpCode = DeafultCcpCode
+        self.ccpCodeEdit.setText(self.compound.ccpCode)
+        msg = "CCPN Code set to default. %s \nTo Change: Right Panel > Compound Info tab > CCPN Code " % DeafultCcpCode
+        print(msg)
+
   def updateCompDetails(self):
     
     if self.compound:
       name = self.compound.name
-      ccpCode = self.compound.ccpCode or ''
+      ccpCode = self.compound.ccpCode or DeafultCcpCode
       molType = self.compound.ccpMolType or 'other'
       details = self.compound.details or ''
     else:

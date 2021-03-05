@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-03 18:16:09 +0000 (Wed, March 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-05 11:01:32 +0000 (Fri, March 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2256,11 +2256,21 @@ def _newV3AmbigDistRestraints(v3PeakList,
             project.deleteObjects(*[tempV3Dataset]) # delete the temp ConstrainList
 
 
-def _newAtomAndResonanceSets(project):
+
+# Temporary functions
+
+def _tempAtomAndResonanceSets(project):
     """
-    testing only. Currently we don't have tools to create  newAtomSet, newResonanceSet
-    These are necessary for making distance constraints.
+
+    AtomSets and resonanceSets are needed for the V2-DistanceRestraint Calculation machinery to work.
+    :param project:
+    :return: atomSets, resonanceSets from nmrAtom.atom
+    Use before calling _newV3DistanceRestraint.
     """
+    if project._wrappedData.resonanceSets: # already in the projects. Don't create new.
+        return [], []
+    atomSets  = []
+    resonanceSets = []
     for i in project.nmrAtoms:
         nmrProject = project._wrappedData
         v3Atom = i.atom
@@ -2268,4 +2278,17 @@ def _newAtomAndResonanceSets(project):
         if v3Atom:
             atom = v3Atom._wrappedData
             atomSet = nmrProject.newAtomSet(name=atom.name, atoms=[atom])
-            resonanceSet = nmrProject.newResonanceSet(resonances=[resonance], atomSets=[atomSet])
+            nrs = nmrProject.newResonanceSet(resonances=[resonance], atomSets=[atomSet])
+            atomSets.append(atomSet)
+            resonanceSets.append(nrs)
+    return atomSets, resonanceSets
+
+def _deleteTempAtomAndResonanceSets(project, atomSets, resonanceSets):
+    """
+    :param project:
+    :param atomSets: V2 objects
+    :param resonanceSets: V2 objects
+    :return:  removes the objects from the project. Called after creating distanceRestraints.
+    """
+    project.deleteObjects(*atomSets)
+    project.deleteObjects(*resonanceSets)

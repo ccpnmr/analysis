@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-03 18:16:09 +0000 (Wed, March 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-05 15:49:17 +0000 (Fri, March 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1502,10 +1502,12 @@ def _setApiRefExperiment(experiment, refExperiment):
     and tries to map the ExpDims to RefExpDims appropriately.
 
     This routine is very convoluted. Should be simplified/reimplemented.
+    We are only trying to make this link: expDimRef.refExpDimRef = refExpDimRef
 
-    :param experiment: v2 experiment
-    :param refExperiment: v2 refExperiment
-    :return:
+        experiment------ expDim(s)-------expDimRef(s)
+                                             *
+        refExperiment---refExpDim(s)----refExpDimRef(s)
+
     """
 
     _clearLinkToRefExp(experiment)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:02 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-05 19:15:58 +0000 (Fri, March 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -687,6 +687,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         multipletAveraging = self.preferences.general.multipletAveraging
         self.multipletAveraging.setIndex(MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0)
         self.singleContoursBox.setChecked(self.preferences.general.generateSinglePlaneContours)
+        self.negativeTraceColourBox.setChecked(self.preferences.general.traceIncludeNegative)
 
         # NOTE: ED this seems a little awkward
         self.aspectLabel = {}
@@ -1081,6 +1082,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.singleContoursLabel = Label(parent, text="Generate Single Contours\n   per Plane", grid=(row, 0))
         self.singleContoursBox = CheckBox(parent, grid=(row, 1))
         self.singleContoursBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'generateSinglePlaneContours'))
+
+        row += 1
+        self.negativeTraceColourLabel = Label(parent, text="Include Negative Colour\n    for Phasing Traces", grid=(row, 0))
+        self.negativeTraceColourBox = CheckBox(parent, grid=(row, 1))
+        self.negativeTraceColourBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'traceIncludeNegative'))
 
         # add spacer to stop columns changing width
         row += 1

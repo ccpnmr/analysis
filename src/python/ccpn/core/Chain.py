@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:22 +0000 (Sun, January 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-08 13:08:15 +0000 (Mon, March 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -549,6 +549,57 @@ def _getChainFromSubstance(self: Substance, shortName: str = None, role: str = N
 # Substance.createChain = _createChainFromSubstance
 # del _createChainFromSubstance
 
+
+def _fetchChemCompFromFile(project, filePath):
+    """
+    Load a ChemComp from an xml file if not already present in the project, otherwise return the one available.
+    :param project: v3 project object.
+    :param filePath: xml file path  for the chemcomp. Xml filename must contain the same strings as defined  in the
+    guid inside the file.
+    :return: The API chemComp object
+    """
+    from ccpnmodel.ccpncore.xml.memops.Implementation import loadFromStream
+    from ccpnmodel.ccpncore.lib import ApiPath
+    memopsRoot =  project._wrappedData.root
+    topObjId = ApiPath.getTopObjIdFromFileName(filePath)
+    chemComp = memopsRoot.findFirstChemComp(guid=topObjId) # Check if the chemcomp is already loaded
+    if not chemComp:
+        with open(filePath) as stream:
+            chemComp = loadFromStream(stream, topObject=memopsRoot, topObjId=topObjId,)
+    return chemComp
+
+def _newChainFromChemComp(project, chemComp, chainCode:str=None, includePseudoAtoms:bool=False):
+    """
+    :param project:
+    :param chemComp: the chemComp object. Use _fetchChemCompFromFile(project, chemCompFilePath)
+    :param chainCode: str. the code that will appear on sidebar.
+    :param includePseudoAtoms: Remove all atoms that are not included in the original chemComp file.
+                               These are created artificially and include pseudoAtoms such as: H%, MB etc
+    :return: A new chain containing only one residue corresponding to the small molecule and its atoms.
+            Atoms are named as defined in the chemComp file.
+            Residue name is set from the chemComp ccpCode.
+            Note. Also a substance will be added in the project.
+
+    """
+    from ccpn.util.Common import _incrementObjectName
+    if chemComp:
+        root = project._wrappedData.root
+        moleculeName = _incrementObjectName(root, 'molecules', chemComp.ccpCode)
+        molecule = project._wrappedData.root.newMolecule(name=moleculeName)
+        chemCompVar = (chemComp.findFirstChemCompVar(linking='none') or chemComp.findFirstChemCompVar())
+        molResidue = molecule.newMolResidue(seqCode=1, chemCompVar=chemCompVar)
+        refSampleComponentStore = project._wrappedData.sampleStore.refSampleComponentStore
+        mcompp = refSampleComponentStore.newMolComponent(name=moleculeName)
+        # will need to add to mcompp all possible info we can harvest from the chemcomp. This will appear in the substance
+        # create a v3 chain. which is not frozen to changes.
+        apiMolSystem = project._wrappedData.molSystem
+        chainCode = _incrementObjectName(project, Chain._pluralLinkName, chainCode)
+        newApiChain = apiMolSystem.newChain(molecule=molecule, code=chainCode)
+        chain = project._data2Obj[newApiChain]
+        if not includePseudoAtoms:
+            for residue in chain.residues:
+                residue._removePseudoAtoms() # We should not create them in first place them!
+        return chain
 
 def getter(self: Substance) -> Tuple[Chain, ...]:
     name = self.name

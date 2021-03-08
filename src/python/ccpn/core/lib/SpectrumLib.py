@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 14:37:53 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-08 16:27:01 +0000 (Mon, March 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1434,27 +1434,52 @@ def _getAcqExpDim(experiment, ignorePreset=False):
 
     return result
 
+def _getRefExpDim4ExpDim(expDim):
+    """
+    get the link between refExpDim and expDim through their children refExpDimRef and expDimRef.
+    """
+    refExpDim = None
+    for expDimRef in expDim.expDimRefs:
+        if expDimRef.refExpDimRef:
+            refExpDim = expDimRef.refExpDimRef.refExpDim
+            break
+    return refExpDim
+
+def _tempLinkRefExpDim2ExpDim(expDim, refExpDim):
+    """
+    Temporary link expDim and refExpDim through their sorted children refExpDimRefs and expDimRefs.
+    The match refExpDimRef-expDimRef will be redone by isotope code.
+    """
+    if len(expDim.sortedExpDimRefs()) ==  len(refExpDim.sortedRefExpDimRefs()):
+        for expDimRef, refExpDimRef in zip(expDim.sortedExpDimRefs(), refExpDim.sortedRefExpDimRefs()):
+            expDimRef.setRefExpDimRef(refExpDimRef)
+
+def _clearLinkToRefExp(experiment):
+    for expDim in experiment.expDims:
+        refExpDim = _getRefExpDim4ExpDim(expDim)
+        if refExpDim:
+            for expDimRef in expDim.expDimRefs:
+                if expDimRef is not None:
+                    if expDimRef.refExpDimRef:
+                        expDimRef.setRefExpDimRef(None)
+
 
 def _setApiRefExperiment(experiment, refExperiment):
     """
     # CCPNInternal  - API Level routine -
     Sets the reference experiment for an existing experiment
     and tries to map the ExpDims to RefExpDims appropriately.
-    :param experiment: v2 experiment
-    :param refExperiment: v2 refExperiment
-    :return:
+
+    This routine is very convoluted. Should be simplified/reimplemented.
+    We are only trying to make this link: expDimRef.refExpDimRef = refExpDimRef
+
+        experiment------ expDim(s)-------expDimRef(s)
+                                             *
+        refExperiment---refExpDim(s)----refExpDimRef(s)
+
     """
 
-    for expDim in experiment.expDims:
-        # TODO FIXME:  this property is missing from V2 API. and the correspondent setRefExpDim. Add or use internal?
-        if not hasattr(expDim, 'refExpDim'):
-            setattr(expDim, 'refExpDim', None)
-            if expDim.refExpDim:
-                for expDimRef in expDim.expDimRefs:
-                    if expDimRef.refExpDimRef:
-                        expDimRef.setRefExpDimRef(None)
-
-                expDim.setRefExpDim(None)
+    _clearLinkToRefExp(experiment)
 
     experiment.setRefExperiment(refExperiment)
     if refExperiment is None:
@@ -1507,7 +1532,8 @@ def _setApiRefExperiment(experiment, refExperiment):
                 refData.append((mType, isotopes))
 
             if expData == refData:
-                expDim.refExpDim = refExpDim # not in the v3 API ?
+                # expDim.refExpDim = refExpDim # this link is not anymore in the v3 API.  set refExpDimRefs and expDimRefs directly
+                _tempLinkRefExpDim2ExpDim(expDim, refExpDim)
                 refExpDims.remove(refExpDim)
 
                 if refExpDim is acqRefExpDim:
@@ -1520,11 +1546,13 @@ def _setApiRefExperiment(experiment, refExperiment):
         if not expDim.expDimRefs:
             continue
 
-        if not expDim.refExpDim:
-            expDim.refExpDim = refExpDims.pop(0)
+        if not _getRefExpDim4ExpDim(expDim):
+            refExpDim = refExpDims.pop(0)
+            _tempLinkRefExpDim2ExpDim(expDim, refExpDim)
 
         # set reference data comparison list
-        refExpDimRefs = list(expDim.refExpDim.refExpDimRefs)
+        _refExpDim = _getRefExpDim4ExpDim(expDim)
+        refExpDimRefs = list(_refExpDim.refExpDimRefs)
         refData = []
         for refExpDimRef in refExpDimRefs:
             expMeasurement = refExpDimRef.expMeasurement
@@ -1539,8 +1567,7 @@ def _setApiRefExperiment(experiment, refExperiment):
         for expDimRef in expDim.expDimRefs:
             inData.append((frozenset(expDimRef.isotopeCodes),
                            expDimRef.measurementType.lower(),
-                           frozenset(((None),)),
-                           # frozenset(((expDimRef.displayName or expDimRef.name),)), #FIXME uncomment out when expDimRef have name/displayName
+                           frozenset(((expDimRef.displayName),)),
                            expDimRef))
 
         # match expDimRef to refExpDimRef. comparing isotopeCodes,

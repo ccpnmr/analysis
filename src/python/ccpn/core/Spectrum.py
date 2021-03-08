@@ -50,7 +50,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:00 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-08 16:27:01 +0000 (Mon, March 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -606,17 +606,20 @@ class Spectrum(AbstractWrapperObject):
 
     @experimentType.setter
     def experimentType(self, value: str):
-        from ccpn.core.lib.SpectrumLib import _setApiExpTransfers, _setApiRefExperiment
+        from ccpn.core.lib.SpectrumLib import _setApiExpTransfers, _setApiRefExperiment, _clearLinkToRefExp
 
+        if value is None:
+            self._wrappedData.experiment.refExperiment = None
+            self.experimentName = None
+            _clearLinkToRefExp(self._wrappedData.experiment)
+            return
+        # nmrExpPrototype = self._wrappedData.root.findFirstNmrExpPrototype(name=value) # Why not findFirst instead of looping all sortedNmrExpPrototypes
         for nmrExpPrototype in self._wrappedData.root.sortedNmrExpPrototypes():
             for refExperiment in nmrExpPrototype.sortedRefExperiments():
-                if value == refExperiment.name:
-                    # refExperiment matches name string - set it
-                    # self._wrappedData.experiment.refExperiment = refExperiment
+                if refExperiment.name == value:
                     # set API RefExperiment and ExpTransfer
                     _setApiRefExperiment(self._wrappedData.experiment, refExperiment)
                     _setApiExpTransfers(self._wrappedData.experiment)
-
                     synonym = refExperiment.synonym
                     if synonym:
                         self.experimentName = synonym

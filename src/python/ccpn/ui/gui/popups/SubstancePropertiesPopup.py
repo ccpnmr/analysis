@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-08 16:27:02 +0000 (Mon, March 08, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -288,14 +288,18 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
     def _initialiseCompoundView(self):
         view = self.compoundView.compoundView
         if self.obj:
-            smiles = self.obj.smiles
-            if smiles is None:
-                smiles = 'H'
-            else:
-                smiles = smiles
+            chemComps = self.obj._getChemComps() # will take only if there is one. We don't want display a chain here!
+            if len(chemComps) == 1: # if chemComp give priority to the Smiles, as it preserves the atom nomenclature.
+                from ccpn.ui.gui.widgets.CompoundView import importChemComp
+                compound = importChemComp(chemComps[0])
+                view.setCompound(compound)
+                self.smiles.entry.setEnabled(False) # otherwise will override the chemComp
+                return
+            if self.obj.smiles is not None:
+                view.setSmiles(self.obj.smiles)
         else:
-            smiles = ''
-        view.setSmiles(smiles)
+            view.setSmiles('')
+
         # NOTE:ED - initial size has been moved to resizeEvent in compoundWidget
 
     def _smilesChanged(self, value):

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-08 16:27:01 +0000 (Mon, March 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -508,6 +508,20 @@ class Substance(AbstractWrapperObject):
 
         for atomId, dd in dictionary.items():
             self.setSpecificAtomLabelling(atomId, dd)
+
+    def _getChemComps(self):
+        """
+        CCPN internal
+        :param substance:
+        :return: a ChemComp Obj if available
+        """
+        chemComps = []
+        molecule = self._wrappedData.getMolecule()
+        if molecule:
+            for molResidue in molecule.findAllMolResidues():
+                if molResidue.chemComp:
+                    chemComps.append(molResidue.chemComp)
+        return chemComps
 
     @property
     def sampleComponents(self) -> typing.Tuple[SampleComponent, ...]:

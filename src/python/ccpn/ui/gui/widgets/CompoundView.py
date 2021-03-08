@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:37 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-08 16:27:02 +0000 (Mon, March 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -132,7 +132,8 @@ class CompoundView(QGraphicsView, Base):
             self.updateAll()
 
         self.smiles = smiles
-        self.setSmiles(self.smiles)
+        if smiles:
+            self.setSmiles(self.smiles)
         self._setFocusColour()
 
     def setSmiles(self, smiles):
@@ -194,6 +195,52 @@ class CompoundView(QGraphicsView, Base):
 
         self.editAtom = None
         self.editWidget.hide()
+        self.updateAll()
+
+    def setCompound(self, compound, variantInd=None, replace=True):
+        """ Set the compound on the graphic scene. """
+        if compound is not self.compound:
+
+            if replace or not self.compound:
+                self.compound = compound
+                if variantInd:
+                    variant = list(compound.variants)[variantInd]
+
+                else:
+                    variants = list(compound.variants)
+                    if variants:
+                        for variant2 in variants:
+                            if (variant2.polyLink == 'none') and (variant2.descriptor == 'neutral'):
+                                variant = variant2
+                                break
+                        else:
+                            for variant2 in variants:
+                                if variant2.polyLink == 'none':
+                                    variant = variant2
+                                    break
+                            else:
+                                variant = variants[0]
+                    else:
+                        variant = Variant(compound)
+
+                self.setVariant(variant)
+                variant.snapAtomsToGrid(ignoreHydrogens=False)
+                self.variant = variant
+                self.centerView()
+                self.resetView()
+                self.updateAll()
+                # self.show()
+
+            else:
+                variant = list(compound.variants)[0]
+                x, y = self.getAddPoint()
+                self.compound.copyVarAtoms(variant.varAtoms, (x, y))
+                self.centerView()
+                self.resetView()
+                self.updateAll()
+
+        self.centerView()
+        self.resetView()
         self.updateAll()
 
     def queryAtomName(self, atomLabel):
@@ -3407,45 +3454,6 @@ def importSmiles(smilesString, compoundName='Unnamed', project=None):
     return compound
 
 
-def setCompound(self, compound, replace=True):
-    """ Set the compound on the graphic scene. """
-    if compound is not self.compound:
-
-        if replace or not self.compound:
-            self.compound = compound
-            variants = list(compound.variants)
-            if variants:
-                for variant2 in variants:
-                    if (variant2.polyLink == 'none') and (variant2.descriptor == 'neutral'):
-                        variant = variant2
-                        break
-                else:
-                    for variant2 in variants:
-                        if variant2.polyLink == 'none':
-                            variant = variant2
-                            break
-                    else:
-                        variant = variants[0]
-            else:
-                variant = Variant(compound)
-            self.variant = variant
-            self.compoundView.centerView()
-            self.compoundView.resetView()
-            self.compoundView.updateAll()
-
-        else:
-            variant = list(compound.variants)[0]
-            x, y = self.getAddPoint()
-            self.compound.copyVarAtoms(variant.varAtoms, (x, y))
-            self.compoundView.centerView()
-            self.compoundView.resetView()
-            self.compoundView.updateAll()
-
-    self.compoundView.centerView()
-    self.compoundView.resetView()
-    self.compoundView.updateAll()
-
-
 class VarAtom:
 
     def __init__(self, variantA, atom, freeValences=None, chirality=None,
@@ -4265,7 +4273,7 @@ class VarAtom:
         branchLens = []
         for a in self.neighbours:
             branchLens.append([len(self.findAtomsInBranch(a)), a])
-        branchLens.sort()
+        branchLens = sorted(branchLens, key=lambda x: x[0])
 
         branches = [b[1] for b in branchLens]
 
@@ -6872,6 +6880,258 @@ class Compound:
                     Bond((varAtom, newAtom), autoVar=True)
 
         return hydrogens
+
+
+def importChemComp(chemComp, variantInd:int=0):
+    # Main Compound
+
+    ccpCode = chemComp.ccpCode
+    molType = chemComp.molType
+    memopsRoot = chemComp.root
+    chemCompCoord = memopsRoot.findFirstChemCompCoord(molType=molType, ccpCode=ccpCode)
+
+    name = chemComp.name or '%s:%s' % (molType, ccpCode)
+
+    compound = Compound(name)
+    compound.ccpCode = ccpCode
+    compound.ccpMolType = molType
+
+    # Main Atoms
+
+    atomMap = {}
+    aromaticAtoms = set()
+    for chemAtom in chemComp.chemAtoms:
+
+        if chemAtom.className == 'LinkAtom':
+            element = LINK
+
+            if ('prev' in chemAtom.name) or ('next' in chemAtom.name):
+                name = chemAtom.name
+
+            else:
+                linkEnd = chemAtom.boundLinkEnd
+                name = 'link_' + linkEnd.boundChemAtom.name
+
+        else:
+            element = chemAtom.chemElement.symbol
+            name = chemAtom.name
+
+        if name not in atomMap:
+            atom = Atom(compound, element, name)
+            atomMap[name] = atom
+
+    # Vars and VarAtoms
+    if chemCompCoord:
+        getVarCoord = chemCompCoord.findFirstChemCompVarCoord
+
+    for chemCompVar in chemComp.chemCompVars:
+        varAtomMap = {}
+        variant = Variant(compound)
+        variant.polyLink = chemCompVar.linking
+
+        if chemCompVar.isDefaultVar:
+            variant.setDefault(True)
+
+        descriptor = chemCompVar.descriptor
+        descs = descriptor.split(';')
+
+        varProts = set()
+        for desc in descs:
+            if 'prot' in desc:
+                hNames = desc.split(':')[1]
+                varProts.update(hNames.split(','))
+
+        if chemCompCoord:
+            chemCompVarCoord = getVarCoord(linking=chemCompVar.linking,
+                                           descriptor=chemCompVar.descriptor)
+            if not chemCompVarCoord:
+                chemCompVarCoord = getVarCoord(linking=chemCompVar.linking)
+
+            if not chemCompVarCoord:
+                chemCompVarCoord = getVarCoord()
+
+        else:
+            chemCompVarCoord = None
+
+        chemAtoms = chemCompVar.chemAtoms
+        for chemAtom in chemAtoms:
+            if chemAtom.className == 'LinkAtom':
+                labile = None
+                chirality = None
+
+                if ('prev' in chemAtom.name) or ('next' in chemAtom.name):
+                    name = chemAtom.name
+                else:
+                    linkEnd = chemAtom.boundLinkEnd
+                    name = 'link_' + linkEnd.boundChemAtom.name
+
+            else:
+                name = chemAtom.name
+                labile = chemAtom.waterExchangeable
+                chirality = chemAtom.chirality
+
+                if chirality == 'unknown':
+                    chirality = None
+
+                if not chirality:
+                    subTypes = chemComp.findAllChemAtoms(name=chemAtom.name)
+
+                    if len(subTypes) > 1:
+                        stereoTag = 'stereo_%d' % chemAtom.subType
+
+                        for tag in descs:
+                            if tag.startswith(stereoTag):
+
+                                if chemAtom.name in tag:
+
+                                    if (chemAtom.subType - 1) % 2 == 0:
+                                        chirality = 'a'
+                                    else:
+                                        chirality = 'b'
+
+                                break
+
+            coords = (0.0, 0.0, 0.0)
+            if chemCompVarCoord:
+                chemAtomCoord = chemCompVarCoord.findFirstChemAtomCoord(chemAtom=chemAtom)
+
+                if chemAtomCoord:
+                    coords = (chemAtomCoord.x * 50,
+                              chemAtomCoord.y * 50,
+                              chemAtomCoord.z * 50)
+
+            atom = atomMap[name]
+            if not atom.isVariable:
+                atom.isVariable = atom.name in varProts
+
+            varAtom = VarAtom(variant, atom, chirality=chirality,
+                              coords=coords, isLabile=labile)
+            varAtomMap[chemAtom] = varAtom
+
+        # Make bond for each var
+
+        for chemBond in chemComp.chemBonds:
+            varAtoms = [varAtomMap.get(a) for a in chemBond.chemAtoms]
+
+            if None in varAtoms:
+                # Bond only in different var
+                continue
+
+            bond = Bond(varAtoms, chemBond.bondType, autoVar=False)
+
+            if chemBond.bondType == 'aromatic':
+                atomsA = [atomMap[a.name] for a in chemBond.chemAtoms]
+                aromaticAtoms.update(atomsA)
+
+            if chemBond.bondType == 'dative':
+                if varAtoms[1].element in 'CNPOSFClI':
+                    bond.direction = varAtoms[0]
+                else:
+                    bond.direction = varAtoms[1]
+
+        variant.updateDescriptor()
+
+    # AtomGroups
+
+    # Simple first
+
+    for chemAtomSet in chemComp.chemAtomSets:
+        if chemAtomSet.chemAtomSets:
+            continue
+
+        chemAtomsB = chemAtomSet.chemAtoms
+        atoms = set([atomMap[ca.name] for ca in chemAtomsB])
+
+        for var in compound.variants:
+            varAtoms = set([var.atomDict.get(a) for a in atoms])
+
+            if None in varAtoms:
+                # This var cannot hold the group
+                continue
+
+            if chemAtomSet.isEquivalent is True:
+                groupType = EQUIVALENT
+            elif chemAtomSet.isProchiral:
+                groupType = NONSTEREO
+            elif chemAtomSet.isEquivalent is None:
+                groupType = EQUIVALENT
+            else:
+                continue
+
+            AtomGroup(compound, varAtoms, groupType)
+
+    # Compound second
+
+    for chemAtomSet in chemComp.chemAtomSets:
+        if not chemAtomSet.chemAtomSets:
+            continue
+
+        chemAtomsB = set()
+        for chemAtomSetB in chemAtomSet.chemAtomSets:
+            chemAtomsB.update(chemAtomSetB.chemAtoms)
+        atoms = set([atomMap[ca.name] for ca in chemAtomsB])
+
+        for var in compound.variants:
+            varAtoms = set([var.atomDict.get(a) for a in atoms])
+
+            if None in varAtoms:
+                # This var cannot hold the group
+                continue
+
+            if chemAtomSet.isEquivalent is True:
+                groupType = EQUIVALENT
+            elif chemAtomSet.isProchiral:
+                groupType = NONSTEREO
+            elif chemAtomSet.isEquivalent is None:
+                groupType = EQUIVALENT
+            else:
+                continue
+
+            # Automatically fills subGroups that were defined first
+            AtomGroup(compound, varAtoms, groupType)
+
+    # Curate charges and link names
+
+    for atom in compound.atoms:
+        elem = atom.element
+
+        if elem in (LINK, 'C', 'H'):
+            name = atom.name
+            if elem == LINK and 'prev' not in name and 'next' not in name:
+                if atom.varAtoms:
+                    varAtom = list(atom.varAtoms)[0]
+
+                    if varAtom.neighbours:
+                        bound = list(varAtom.neighbours)[0]
+                        atom.setName('link_' + bound.name)
+
+            continue
+
+        defaultVal = ELEMENT_DATA.get(elem, ELEMENT_DEFAULT)[0]
+
+        for varAtom in atom.varAtoms:
+
+            for varAtomB in varAtom.neighbours:
+                if varAtomB.freeValences:
+                    break
+
+            else:
+                nVal = sum([BOND_TYPE_VALENCES[b.bondType] for b in varAtom.bonds])
+                charge = nVal - defaultVal
+
+                if charge:
+                    varAtom.setCharge(charge, autoVar=False)
+
+    # Aromatics
+
+    if aromaticAtoms:
+        compound.setAromatic(aromaticAtoms)
+
+    compound.center((0.0, 0.0, 0.0))
+    for var in compound.variants:
+        var.checkBaseValences()
+
+    return compound
 
 
 if __name__ == '__main__':

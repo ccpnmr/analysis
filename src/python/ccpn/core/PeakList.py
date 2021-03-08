@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:00 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-08 16:27:01 +0000 (Mon, March 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -199,6 +199,10 @@ class PeakList(PMIListABC):
                 xR,yR = _1DregionsFromLimits(spectrum.positions, self.spectrum.intensities, dataRange)
                 noiseLevel = spectrum.noiseLevel
                 negativeNoiseLevel = spectrum.negativeNoiseLevel
+
+                if negativeNoiseLevel is None:
+                    negativeNoiseLevel = -spectrum.noiseLevel
+
                 if not noiseLevel and not negativeNoiseLevel:
                     noiseLevel, negativeNoiseLevel = estimateNoiseLevel1D(y)
                     spectrum.noiseLevel = noiseLevel

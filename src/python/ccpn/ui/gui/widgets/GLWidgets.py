@@ -1583,6 +1583,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._symbolThickness = 0
         self._aliasEnabled = True
         self._aliasShade = 0.0
+        self._aliasLabelsEnabled = True
         self._contourThickness = 0
 
         self._contourList = {}
@@ -2280,8 +2281,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.globalGL._shaderProgramTex.setBackground(self.background)
         self.globalGL._shaderProgramAlias.makeCurrent()
         self.globalGL._shaderProgramAlias.setBackground(self.background)
-        self.globalGL._shaderProgramAlias.setAliasShade(0.25)
-        self.globalGL._shaderProgramAlias.setAliasEnabled(True)
+        self.globalGL._shaderProgramTexAlias.makeCurrent()
+        self.globalGL._shaderProgramTexAlias.setBackground(self.background)
         if not silent:
             self.update()
 

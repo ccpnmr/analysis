@@ -428,7 +428,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        prefsGen.annotationType, prefsGen.stripArrangement,
                                                        prefsGen.symbolSizePixel, prefsGen.symbolThickness, prefsGen.symbolType,
                                                        prefsGen.xAxisUnits, prefsGen.yAxisUnits,
-                                                       prefsGen.aliasEnabled, prefsGen.aliasShade,
+                                                       prefsGen.aliasEnabled, prefsGen.aliasShade, prefsGen.aliasLabelsEnabled,
                                                        prefsGen.contourThickness,
                                                        prefsGen.zPlaneNavigationMode)
 

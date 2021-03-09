@@ -49,7 +49,7 @@ from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
     SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES, AXISASPECTRATIOS, \
-    AXISASPECTRATIOMODE, ALIASENABLED, ALIASSHADE, AXISASPECTRATIOMODE, CONTOURTHICKNESS
+    AXISASPECTRATIOMODE, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Common import getAxisCodeMatchIndices, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Base import SignalBlocking
@@ -81,6 +81,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                  yAxisUnits=0, yTexts=[], showYAxis=True,
                  symbolType=0, annotationType=0, symbolSize=0, symbolThickness=0,
                  aliasEnabled=False, aliasShade=0,
+                 aliasLabelsEnabled=False,
                  stripArrangement=0,
                  _baseAspectRatioAxisCode='H', _aspectRatios={},
                  _aspectRatioMode=0, contourThickness=0, zPlaneNavigationMode=0,
@@ -225,6 +226,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                                 grid=(row, 1), gridSpan=(1, 3), hAlign='l',
                                                 tipTexts=None,
                                                 )
+
         if self._spectrumDisplay.MAXPEAKSYMBOLTYPES:
             # if not self._spectrumDisplay.is1D:
             row += 1
@@ -301,6 +303,13 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.aliasEnabledData.clicked.connect(self._symbolsChanged)
 
         row += 1
+        self.aliasLabelsEnabledLabel = Label(parent, text="    Show Aliased Labels", grid=(row, 0))
+        self.aliasLabelsEnabledData = CheckBox(parent,
+                                               # checked=aliasLabelsEnabled,
+                                               grid=(row, 1), objectName='SDS_aliasLabelsEnabled')
+        self.aliasLabelsEnabledData.clicked.connect(self._symbolsChanged)
+
+        row += 1
         self.aliasShadeLabel = Label(parent, text="    Opacity", grid=(row, 0))
         _sliderBox = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l')
         self.aliasShadeData = Slider(_sliderBox, grid=(0, 1), hAlign='l', objectName='SDS_aliasShade')
@@ -332,7 +341,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
     def _populateWidgets(self, aspectRatioMode, aspectRatios, annotationType, stripArrangement,
                          symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits,
-                         aliasEnabled, aliasShade,
+                         aliasEnabled, aliasShade, aliasLabelsEnabled):
                          contourThickness, zPlaneNavigationMode):
         """Populate the widgets
         """
@@ -360,6 +369,9 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.stripArrangementButtons.setIndex(stripArrangement)
             self.aliasEnabledData.set(aliasEnabled)
             self.aliasShadeData.set(aliasShade)
+            self.aliasLabelsEnabledData.set(aliasLabelsEnabled)
+            self.aliasLabelsEnabledData.setEnabled(aliasEnabled)
+            self.aliasShadeData.setEnabled(aliasEnabled)
             self.zPlaneNavigationModeData.setIndex(zPlaneNavigationMode)
 
     def getValues(self):
@@ -381,7 +393,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 SYMBOLTHICKNESS    : int(self.symbolThicknessData.text()),
                 CONTOURTHICKNESS   : int(self.contourThicknessData.text()),
                 ALIASENABLED       : self.aliasEnabledData.isChecked(),
-                ALIASSHADE         : int(self.aliasShadeData.get())
+                ALIASSHADE         : int(self.aliasShadeData.get()),
+                ALIASLABELSENABLED : self.aliasLabelsEnabledData.isChecked(),
                 }
 
     def _aspectRatioModeChanged(self):
@@ -487,6 +500,10 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         """
         self.symbolsChanged.emit(self.getValues())
 
+        _enabled = self.aliasEnabledData.get()
+        self.aliasLabelsEnabledData.setEnabled(_enabled)
+        self.aliasShadeData.setEnabled(_enabled)
+
     @pyqtSlot(dict)
     def _symbolsChangedInDisplay(self, aDict):
         """Respond to an external change in symbol settings
@@ -504,6 +521,11 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.contourThicknessData.set(values[CONTOURTHICKNESS])
             self.aliasEnabledData.set(values[ALIASENABLED])
             self.aliasShadeData.set(values[ALIASSHADE])
+            self.aliasLabelsEnabledData.set(values[ALIASLABELSENABLED])
+
+            _enabled = self.aliasEnabledData.get()
+            self.aliasLabelsEnabledData.setEnabled(_enabled)
+            self.aliasShadeData.setEnabled(_enabled)
 
             self.mainWindow.statusBar().showMessage("Cycle Symbol Labelling: %s " %self.annotationsData.get())
 

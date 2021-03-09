@@ -232,6 +232,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
                     strip.aliasEnabled = self.application.preferences.general.aliasEnabled
                     strip.aliasShade = self.application.preferences.general.aliasShade
+                    strip.aliasLabelsEnabled = self.application.preferences.general.aliasLabelsEnabled
 
                 strip._frameGuide.resetColourTheme()
 
@@ -695,8 +696,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.symbol.setIndex(self.preferences.general.symbolType)
         self.symbolSizePixelData.setValue(int('%i' % self.preferences.general.symbolSizePixel))
         self.symbolThicknessData.setValue(int(self.preferences.general.symbolThickness))
-        self.aliasEnabledData.setChecked(self.preferences.general.aliasEnabled)
+
+        _enabled = self.preferences.general.aliasEnabled
+        self.aliasEnabledData.setChecked(_enabled)
         self.aliasShadeData.setValue(self.preferences.general.aliasShade)
+        self.aliasLabelsEnabledData.setChecked(self.preferences.general.aliasLabelsEnabled)
+        self.aliasLabelsEnabledData.setEnabled(_enabled)
+        self.aliasShadeData.setEnabled(_enabled)
+
         self.contourThicknessData.setValue(int(self.preferences.general.contourThickness))
 
         self.autoCorrectBox.setChecked(self.preferences.general.autoCorrectColours)
@@ -1020,6 +1027,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.aliasEnabledLabel = Label(parent, text="Show Aliased Peaks", grid=(row, 0))
         self.aliasEnabledData = CheckBox(parent, grid=(row, 1))
         self.aliasEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'aliasEnabled'))
+
+        row += 1
+        self.aliasLabelsEnabledLabel = Label(parent, text="    Show Aliased Labels", grid=(row, 0))
+        self.aliasLabelsEnabledData = CheckBox(parent, grid=(row, 1))
+        self.aliasLabelsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'aliasLabelsEnabled'))
 
         row += 1
         self.aliasShadeLabel = Label(parent, text="    Opacity", grid=(row, 0))
@@ -1453,6 +1465,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         in the internal updates dict
         """
         if checked != self.preferences.general[option]:
+            # change the enabled state of checkboxes as required
+            _enabled = self.aliasEnabledData.get()
+            self.aliasLabelsEnabledData.setEnabled(_enabled)
+            self.aliasShadeData.setEnabled(_enabled)
+
             return partial(self._toggleGeneralOptions, option, checked)
 
     def _toggleGeneralOptions(self, option, checked):

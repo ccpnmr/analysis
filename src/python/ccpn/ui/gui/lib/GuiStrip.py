@@ -43,7 +43,7 @@ from ccpn.util.Common import ZPlaneNavigationModes
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISASPECTRATIOS, AXISASPECTRATIOMODE, \
-    BOTTOMAXIS, RIGHTAXIS, ALIASENABLED, ALIASSHADE, CONTOURTHICKNESS
+    BOTTOMAXIS, RIGHTAXIS, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
     notificationBlanking, undoBlockWithoutSideBar
 from ccpn.util.decorators import logCommand
@@ -175,6 +175,7 @@ class GuiStrip(Frame):
             self.symbolThickness = _firstStrip.symbolThickness
             self.aliasEnabled = _firstStrip.aliasEnabled
             self.aliasShade = _firstStrip.aliasShade
+            self.aliasLabelsEnabled = _firstStrip.aliasLabelsEnabled
             self.contourThickness = _firstStrip.contourThickness
 
             self.gridVisible = _firstStrip.gridVisible
@@ -220,6 +221,7 @@ class GuiStrip(Frame):
             self.contourThickness = settings[CONTOURTHICKNESS]
             self.aliasEnabled = settings[ALIASENABLED]
             self.aliasShade = settings[ALIASSHADE]
+            self.aliasLabelsEnabled = settings[ALIASLABELSENABLED]
 
             self.spectrumDisplay._setFloatingAxes(xUnits=settings[AXISXUNITS],
                                                   yUnits=settings[AXISYUNITS],
@@ -1454,13 +1456,14 @@ class GuiStrip(Frame):
     def _emitSymbolChanged(self):
         # spawn a redraw of the GL windows
         self._CcpnGLWidget.GLSignals._emitSymbolsChanged(source=None, strip=self,
-                                                         symbolDict={SYMBOLTYPES     : self.symbolType,
-                                                                     ANNOTATIONTYPES : self.symbolLabelling,
-                                                                     SYMBOLSIZE      : self.symbolSize,
-                                                                     SYMBOLTHICKNESS : self.symbolThickness,
-                                                                     CONTOURTHICKNESS: self.contourThickness,
-                                                                     ALIASENABLED    : self.aliasEnabled,
-                                                                     ALIASSHADE      : self.aliasShade,
+                                                         symbolDict={SYMBOLTYPES       : self.symbolType,
+                                                                     ANNOTATIONTYPES   : self.symbolLabelling,
+                                                                     SYMBOLSIZE        : self.symbolSize,
+                                                                     SYMBOLTHICKNESS   : self.symbolThickness,
+                                                                     CONTOURTHICKNESS  : self.contourThickness,
+                                                                     ALIASENABLED      : self.aliasEnabled,
+                                                                     ALIASSHADE        : self.aliasShade,
+                                                                     ALIASLABELSENABLED: self.aliasLabelsEnabled,
                                                                      })
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1532,6 +1535,7 @@ class GuiStrip(Frame):
         symbolThickness = aDict[SYMBOLTHICKNESS]
         aliasEnabled = aDict[ALIASENABLED]
         aliasShade = aDict[ALIASSHADE]
+        aliasLabelsEnabled = aDict[ALIASLABELSENABLED]
         contourThickness = aDict[CONTOURTHICKNESS]
 
         if self.isDeleted:
@@ -1559,6 +1563,10 @@ class GuiStrip(Frame):
 
             elif aliasShade != self.aliasShade:
                 self.aliasShade = aliasShade
+                self._setSymbolsPaintEvent()
+
+            elif aliasLabelsEnabled != self.aliasLabelsEnabled:
+                self.aliasLabelsEnabled = aliasLabelsEnabled
                 self._setSymbolsPaintEvent()
 
             elif contourThickness != self.contourThickness:
@@ -1677,6 +1685,29 @@ class GuiStrip(Frame):
 
         oldValue = self._CcpnGLWidget._aliasShade
         self._CcpnGLWidget._aliasShade = value if (value and value >= 0) else oldValue
+        if value != oldValue:
+            self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # aliasLabelsEnabled
+
+    @property
+    def aliasLabelsEnabled(self):
+        """Get aliasLabelsEnabled for the strip
+        """
+        return self._CcpnGLWidget._aliasLabelsEnabled
+
+    @aliasLabelsEnabled.setter
+    def aliasLabelsEnabled(self, value):
+        """Set aliasLabelsEnabled for the strip
+        """
+        if not isinstance(value, bool):
+            raise TypeError('Error: aliasLabelsEnabled not a bool')
+
+        oldValue = self._CcpnGLWidget._aliasLabelsEnabled
+        self._CcpnGLWidget._aliasLabelsEnabled = value
         if value != oldValue:
             self._setSymbolLabelling()
             if self.spectrumViews:

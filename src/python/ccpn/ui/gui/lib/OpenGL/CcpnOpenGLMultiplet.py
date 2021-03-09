@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:02 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-09 19:13:27 +0000 (Tue, March 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -501,7 +501,7 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
         posList = p0
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
-            p1 = (peak.position[pIndex[0]], peak.height)
+            p1 = (peak.pointPositions[pIndex[0]] - 1, peak.height)
 
             if None in p1:
                 getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))
@@ -510,7 +510,7 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
                 posList += p1
 
         peakAlias = multiplet.peaks[0].aliasing
-        alias = getAliasSetting(peakAlias[pIndex[0]], peakAlias[pIndex[1]])
+        alias = getAliasSetting(peakAlias[pIndex[0]], 0)
 
         numVertices = len(multiplet.peaks) + 1
         drawList.vertices = np.append(drawList.vertices, np.array(posList, dtype=np.float32))
@@ -534,7 +534,7 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
 
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
-            p1 = (peak.position[pIndex], peak.height)
+            p1 = (peak.pointPositions[pIndex] - 1, peak.height)
 
             if None in p1:
                 getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))

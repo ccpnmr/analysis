@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 14:37:54 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-09 19:13:27 +0000 (Tue, March 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,6 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.util.Colour import hexToRgbRatio, colorSchemeTable, ERRORCOLOUR
 from ccpn.util.Logging import getLogger
-
 
 from . import GL
 
@@ -182,41 +181,48 @@ class GLSimpleStrings():
 
                 # lock to the correct axisCodes if exist - not tested yet
                 if obj.axisIndices[0] and obj.axisIndices[1]:
-                    offsets = [position[obj.axisIndices[0]], position[obj.axisIndices[1]]]
+                    offsets = [position[obj.axisIndices[0]], position[obj.axisIndices[1]], 0.0]
 
                 else:
-                    offsets = position
+                    offsets = [position[0],
+                               position[1],
+                               0.0]
 
             elif lock == GLDefs.LOCKSCREEN:
 
                 # fixed screen co-ordinates
                 offsets = [GLp.axisL + position[0] * GLp.pixelX,
-                           GLp.axisB + position[1] * GLp.pixelY]
+                           GLp.axisB + position[1] * GLp.pixelY,
+                           0.0]
 
             # not locking to an axisCode
             elif lock == GLDefs.LOCKLEFT:
 
                 # lock to the left margin
                 offsets = [GLp.axisL + 3.0 * GLp.pixelX,
-                           position[1]]
+                           position[1],
+                           0.0]
 
             elif lock == GLDefs.LOCKRIGHT:
 
                 # lock to the right margin
                 offsets = [GLp.axisR - (3.0 + obj.width) * GLp.pixelX,
-                           position[1]]
+                           position[1],
+                           0.0]
 
             elif lock == GLDefs.LOCKBOTTOM:
 
                 # lock to the bottom margin - updated in resize
                 offsets = [position[0],
-                           GLp.axisB + 3.0 * GLp.pixelY]
+                           GLp.axisB + 3.0 * GLp.pixelY,
+                           0.0]
 
             elif lock == GLDefs.LOCKTOP:
 
                 # lock to the top margin - updated in resize
                 offsets = [position[0],
-                           GLp.axisT - (3.0 + obj.height) * GLp.pixelY]
+                           GLp.axisT - (3.0 + obj.height) * GLp.pixelY,
+                           0.0]
 
             elif lock & GLDefs.LOCKAXIS:
 
@@ -230,13 +236,15 @@ class GLSimpleStrings():
 
                             # lock to the right margin
                             offsets = [GLp.axisR - (3.0 + obj.width) * GLp.pixelX,
-                                       position[1]]
+                                       position[1],
+                                       0.0]
 
                         else:
 
                             # lock to the left margin
                             offsets = [GLp.axisL + 3.0 * GLp.pixelX,
-                                       position[1]]
+                                       position[1],
+                                       0.0]
 
                     elif obj.axisIndices[0] == 0:
 
@@ -244,13 +252,15 @@ class GLSimpleStrings():
 
                             # lock to the top margin - updated in resize
                             offsets = [position[0],
-                                       GLp.axisT - (3.0 + obj.height) * GLp.pixelY]
+                                       GLp.axisT - (3.0 + obj.height) * GLp.pixelY,
+                                       0.0]
 
                         else:
 
                             # lock to the bottom margin - updated in resize
                             offsets = [position[0],
-                                       GLp.axisB + 3.0 * GLp.pixelY]
+                                       GLp.axisB + 3.0 * GLp.pixelY,
+                                       0.0]
 
                 else:
                     # can't match more than 1
@@ -387,7 +397,8 @@ class GLSimpleLegend(GLSimpleStrings):
 
             # fixed screen co-ordinates from top-left
             offsets = [GLp.axisL + position[0] * GLp.pixelX,
-                       GLp.axisB + position[1] * GLp.pixelY]
+                       GLp.axisB + position[1] * GLp.pixelY,
+                       0.0]
 
             # for pp in range(0, 2 * vertices, 2):
             #     stringObj.attribs[pp:pp + 2] = offsets

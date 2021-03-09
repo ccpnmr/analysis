@@ -401,6 +401,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._contourThickness = 0
         self._aliasEnabled = True
         self._aliasShade = 0.0
+        self._aliasLabelsEnabled = True
 
         self._contourList = {}
 
@@ -749,10 +750,11 @@ class CcpnGLWidget(QOpenGLWidget):
         # only need the axes for this spectrum
         indices = indices[:spectrumView.spectrum.dimensionCount]
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
-        if spectrumView.spectrum.dimensionCount > 1:
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds, self._spectrumValues[1].regionBounds)
+
+        if self.is1D:
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds, 0)
         else:
-            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds, )
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds, self._spectrumValues[1].regionBounds)
 
         if len(self._spectrumValues) > 2:
             # store a list for the extra dimensions - should only be one per spectrumDisplay really
@@ -1927,6 +1929,11 @@ class CcpnGLWidget(QOpenGLWidget):
         _shader.setBlendEnabled(False)
         _shader.setAlpha(1.0)
 
+        _shader = self.globalGL._shaderProgramTexAlias
+        _shader.makeCurrent()
+        _shader.setBlendEnabled(True)
+        _shader.setAlpha(1.0)
+
         if self.strip:
             self.updateVisibleSpectrumViews()
 
@@ -2156,8 +2163,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.globalGL._shaderProgramTex.setBackground(self.background)
         self.globalGL._shaderProgramAlias.makeCurrent()
         self.globalGL._shaderProgramAlias.setBackground(self.background)
-        self.globalGL._shaderProgramAlias.setAliasShade(0.25)
-        self.globalGL._shaderProgramAlias.setAliasEnabled(True)
+        self.globalGL._shaderProgramTexAlias.makeCurrent()
+        self.globalGL._shaderProgramTexAlias.setBackground(self.background)
         if not silent:
             self.update()
 
@@ -2861,14 +2868,15 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.stripIDString:
             smallFont = self.getSmallFont()
             offsets = [GLDefs.TITLEXOFFSET * smallFont.charWidth * self.deltaX,
-                       1.0 - (GLDefs.TITLEYOFFSET * smallFont.charHeight * self.deltaY)]
+                       1.0 - (GLDefs.TITLEYOFFSET * smallFont.charHeight * self.deltaY),
+                       0.0]
 
             self.stripIDString.attribs[:] = offsets * self.stripIDString.numVertices
             self.stripIDString.updateTextArrayVBOAttribs()
 
         if self._lockedStringTrue:
             dy = STRINGOFFSET * self.deltaY
-            offsets = [0, dy]
+            offsets = [0.0, dy, 0.0]
             self._lockedStringTrue.attribs[:] = offsets * self._lockedStringTrue.numVertices
             self._lockedStringTrue.updateTextArrayVBOAttribs()
 
@@ -2877,7 +2885,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._lockedStringFalse.updateTextArrayVBOAttribs()
             dx = self._lockedStringTrue.width * self.deltaX
 
-            offsets = [dx, dy]
+            offsets = [dx, dy, 0.0]
             if self._fixedStringFalse:
                 self._fixedStringFalse.attribs[:] = offsets * self._fixedStringFalse.numVertices
                 self._fixedStringFalse.updateTextArrayVBOAttribs()
@@ -2975,6 +2983,250 @@ class CcpnGLWidget(QOpenGLWidget):
             # re-enable notifiers
             self.application._decreaseNotificationBlocking()
             self.project.unblankNotification()
+
+    def drawAliasedSymbols(self):
+        """Draw all the symbols that require aliasing to multiple regions
+        """
+        _shader = self.globalGL._shaderProgramAlias.makeCurrent()
+        # set the scale to the axis limits, needs addressing correctly, possibly same as grid
+        _shader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+                                  self.axisT, -1.0, 1.0)
+        _shader.setPMatrix(self._uPMatrix)
+
+        lineThickness = self._symbolThickness
+        GL.glLineWidth(lineThickness * self.viewports.devicePixelRatio)
+        _shader.setAliasEnabled(self._aliasEnabled)
+
+        # change to correct value for shader
+        _shader.setAliasShade(self._aliasShade / 100.0)
+
+        for specView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
+
+            if specView.isDeleted:
+                continue
+
+            if specView.isVisible():
+                if specView.spectrum.dimensionCount > 1:
+                    if specView in self._spectrumSettings.keys():
+
+                        specSettings = self._spectrumSettings[specView]
+                        pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
+                        if None in pIndex:
+                            continue
+
+                        # should move this to buildSpectrumSettings
+                        # and emit a signal when visibleAliasingRange or foldingModes are changed
+
+                        fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
+                        # fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
+                        fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
+                        # fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
+                        dxAF = specSettings[GLDefs.SPECTRUM_DXAF]
+                        dyAF = specSettings[GLDefs.SPECTRUM_DYAF]
+                        xScale = specSettings[GLDefs.SPECTRUM_XSCALE]
+                        yScale = specSettings[GLDefs.SPECTRUM_YSCALE]
+
+                        specMatrix = np.array(specSettings[GLDefs.SPECTRUM_MATRIX], dtype=np.float32)
+
+                        alias = specView.spectrum.visibleAliasingRange
+                        folding = specView.spectrum.foldingModes
+
+                        for ii in range(alias[pIndex[0]][0], alias[pIndex[0]][1] + 1, 1):
+                            for jj in range(alias[pIndex[1]][0], alias[pIndex[1]][1] + 1, 1):
+
+                                foldX = foldY = 1.0
+                                foldXOffset = foldYOffset = 0
+                                if folding[pIndex[0]] == 'mirror':
+                                    foldX = pow(-1, ii)
+                                    foldXOffset = -dxAF if foldX < 0 else 0
+                                if folding[pIndex[1]] == 'mirror':
+                                    foldY = pow(-1, jj)
+                                    foldYOffset = -dyAF if foldY < 0 else 0
+
+                                specMatrix[0:16] = [xScale * foldX, 0.0, 0.0, 0.0,
+                                                    0.0, yScale * foldY, 0.0, 0.0,
+                                                    0.0, 0.0, 1.0, 0.0,
+                                                    fx0 + (ii * dxAF) + foldXOffset, fy0 + (jj * dyAF) + foldYOffset, 0.0, 1.0]
+
+                                # flipping in the same GL region -  xScale = -xScale
+                                #                                   offset = fx0-dxAF
+                                # circular -    offset = fx0 + dxAF*alias, alias = min->max
+                                _shader.setMVMatrix(specMatrix)
+                                _shader.setAliasPosition(ii, jj)
+
+                                self._GLPeaks.drawSymbols(specView)
+                                self._GLMultiplets.drawSymbols(specView)
+
+                else:
+                    specSettings = self._spectrumSettings[specView]
+                    # pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
+                    # if None in pIndex:
+                    #     continue
+
+                    # should move this to buildSpectrumSettings
+                    # and emit a signal when visibleAliasingRange or foldingModes are changed
+
+                    fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
+                    # # fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
+                    # fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
+                    # # fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
+                    dxAF = specSettings[GLDefs.SPECTRUM_DXAF]
+                    # dyAF = specSettings[GLDefs.SPECTRUM_DYAF]
+                    xScale = specSettings[GLDefs.SPECTRUM_XSCALE]
+                    # yScale = specSettings[GLDefs.SPECTRUM_YSCALE]
+
+                    specMatrix = np.array(specSettings[GLDefs.SPECTRUM_MATRIX], dtype=np.float32)
+
+                    specMatrix[0:16] = [xScale, 0.0, 0.0, 0.0,
+                                        0.0, 1.0, 0.0, 0.0,
+                                        0.0, 0.0, 1.0, 0.0,
+                                        fx0, 0.0, 0.0, 1.0]
+
+                    # if self._stackingMode:
+                    #     # use the stacking matrix to offset the 1D spectra
+                    _shader.setMVMatrix(specMatrix)
+                    _shader.setAliasPosition(0, 0)
+
+                    # draw the symbols
+                    self._GLPeaks.drawSymbols(specView)
+                    self._GLMultiplets.drawSymbols(specView)
+
+        GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
+
+    def drawAliasedLabels(self):
+        """Draw all the labels that require aliasing to multiple regions
+        """
+        _shader = self.globalGL._shaderProgramTexAlias.makeCurrent()
+        # set the scale to the axis limits, needs addressing correctly, possibly same as grid
+        _shader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+                                  self.axisT, -1.0, 1.0)
+        _shader.setPTexMatrix(self._uPMatrix)
+
+        self._axisScale[0:4] = [self.pixelX, self.pixelY, 0.0, 1.0]
+        _shader.setAxisScale(self._axisScale)
+        _shader.setStackOffset(np.array((0.0, 0.0), dtype=np.float32))
+
+        _shader.setAliasEnabled(self._aliasEnabled and self._aliasLabelsEnabled)
+
+        # change to correct value for shader
+        _shader.setAliasShade(self._aliasShade / 100.0)
+
+        for specView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
+
+            if specView.isDeleted:
+                continue
+
+            if specView.isVisible():
+                if specView.spectrum.dimensionCount > 1:
+                    if specView in self._spectrumSettings.keys():
+                        # set correct transform when drawing this contour
+
+                        specSettings = self._spectrumSettings[specView]
+                        pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
+                        if None in pIndex:
+                            continue
+
+                        # should move this to buildSpectrumSettings
+                        # and emit a signal when visibleAliasingRange or foldingModes are changed
+
+                        fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
+                        # fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
+                        fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
+                        # fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
+                        dxAF = specSettings[GLDefs.SPECTRUM_DXAF]
+                        dyAF = specSettings[GLDefs.SPECTRUM_DYAF]
+                        xScale = specSettings[GLDefs.SPECTRUM_XSCALE]
+                        yScale = specSettings[GLDefs.SPECTRUM_YSCALE]
+
+                        specMatrix = np.array(specSettings[GLDefs.SPECTRUM_MATRIX], dtype=np.float32)
+
+                        alias = specView.spectrum.visibleAliasingRange
+                        folding = specView.spectrum.foldingModes
+
+                        for ii in range(alias[pIndex[0]][0], alias[pIndex[0]][1] + 1, 1):
+                            for jj in range(alias[pIndex[1]][0], alias[pIndex[1]][1] + 1, 1):
+
+                                foldX = foldY = 1.0
+                                foldXOffset = foldYOffset = 0
+                                if folding[pIndex[0]] == 'mirror':
+                                    foldX = pow(-1, ii)
+                                    foldXOffset = -dxAF if foldX < 0 else 0
+                                if folding[pIndex[1]] == 'mirror':
+                                    foldY = pow(-1, jj)
+                                    foldYOffset = -dyAF if foldY < 0 else 0
+
+                                self._axisScale[0:4] = [foldX * self.pixelX / xScale,
+                                                        foldY * self.pixelY / yScale,
+                                                        0.0, 1.0]
+                                _shader.setAxisScale(self._axisScale)
+
+                                specMatrix[0:16] = [xScale * foldX, 0.0, 0.0, 0.0,
+                                                    0.0, yScale * foldY, 0.0, 0.0,
+                                                    0.0, 0.0, 1.0, 0.0,
+                                                    fx0 + (ii * dxAF) + foldXOffset, fy0 + (jj * dyAF) + foldYOffset, 0.0, 1.0]
+
+                                # flipping in the same GL region -  xScale = -xScale
+                                #                                   offset = fx0-dxAF
+                                # circular -    offset = fx0 + dxAF*alias, alias = min->max
+                                _shader.setMVMatrix(specMatrix)
+                                _shader.setAliasPosition(ii, jj)
+
+                                self._GLPeaks.drawLabels(specView)
+                                self._GLMultiplets.drawLabels(specView)
+
+                else:
+                    specSettings = self._spectrumSettings[specView]
+                    # pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
+                    # if None in pIndex:
+                    #     continue
+
+                    # should move this to buildSpectrumSettings
+                    # and emit a signal when visibleAliasingRange or foldingModes are changed
+
+                    fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
+                    # # fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
+                    # fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
+                    # # fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
+                    dxAF = specSettings[GLDefs.SPECTRUM_DXAF]
+                    # dyAF = specSettings[GLDefs.SPECTRUM_DYAF]
+                    xScale = specSettings[GLDefs.SPECTRUM_XSCALE]
+                    # yScale = specSettings[GLDefs.SPECTRUM_YSCALE]
+
+                    specMatrix = np.array(specSettings[GLDefs.SPECTRUM_MATRIX], dtype=np.float32)
+
+                    specMatrix[0:16] = [xScale, 0.0, 0.0, 0.0,
+                                        0.0, 1.0, 0.0, 0.0,
+                                        0.0, 0.0, 1.0, 0.0,
+                                        fx0, 0.0, 0.0, 1.0]
+
+                    # if self._stackingMode:
+                    #     # use the stacking matrix to offset the 1D spectra
+                    _shader.setMVMatrix(specMatrix)
+
+                    self._axisScale[0:4] = [self.pixelX / xScale,
+                                            self.pixelY,
+                                            0.0, 1.0]
+                    _shader.setAxisScale(self._axisScale)
+                    _shader.setAliasPosition(0, 0)
+
+                    # if stackingMode:
+                    #     # use the stacking matrix to offset the 1D spectra
+                    #     shader.setMVMatrix(spectrumSettings[specView][GLDefs.SPECTRUM_STACKEDMATRIX])
+                    # draw the symbols
+                    self._GLPeaks.drawLabels(specView)
+                    self._GLMultiplets.drawLabels(specView)
+
+    def drawIntegralLabels(self):
+        """Draw all the integral labels
+        """
+        for specView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
+
+            if specView.isDeleted:
+                continue
+
+            if specView.isVisible():
+                if specView.spectrum.dimensionCount == 1:
+                    self._GLIntegrals.drawLabels(specView)
 
     def _buildGL(self):
         """Separate the building of the display from the paint event; not sure that this is required
@@ -3165,7 +3417,6 @@ class CcpnGLWidget(QOpenGLWidget):
         with self._disableGLAliasing():
             # draw the grid components
             self.drawGrid()
-            # self.drawDiagonals()              # included in drawGrid
 
         # set the scale to the axis limits, needs addressing correctly, possibly same as grid
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
@@ -3178,21 +3429,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.drawSpectra()
         self.drawBoundingBoxes()
 
-        currentShader = self.globalGL._shaderProgramAlias.makeCurrent()
-        # set the scale to the axis limits, needs addressing correctly, possibly same as grid
-        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
-                                        self.axisT, -1.0, 1.0)
-        currentShader.setPMatrix(self._uPMatrix)
-
-        # GL.glEnable(GL.GL_LINE_STIPPLE)
-        # if self.viewports.devicePixelRatio > 1:
-        #     # should really use the GLSL shader to do this
-        #     GL.glLineStipple(1, GLDefs.GLLINE_STYLES['short-dashed'])
-        # else:
-        #     GL.glLineStipple(1, GLDefs.GLLINE_STYLES['dotted'])
-        self._GLPeaks.drawSymbols(self._spectrumSettings, shader=currentShader, stackingMode=self._stackingMode)
-        self._GLMultiplets.drawSymbols(self._spectrumSettings, shader=currentShader, stackingMode=self._stackingMode)
-        # GL.glDisable(GL.GL_LINE_STIPPLE)
+        # draw all the aliased symbols
+        self.drawAliasedSymbols()
 
         self.globalGL._shaderProgram1.makeCurrent()
 
@@ -3206,37 +3444,36 @@ class CcpnGLWidget(QOpenGLWidget):
             with self._disableGLAliasing():
                 self.drawMarksRulers()
 
+        # draw the text to the screen
+        self.enableTexture()
+        self.enableTextClientState()
+
+        self.drawAliasedLabels()
+
         # change to the text shader
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
         currentShader.setPTexMatrix(self._uPMatrix)
 
-        self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
+        self._axisScale[0:4] = [self.pixelX, self.pixelY, 0.0, 1.0]
         currentShader.setAxisScale(self._axisScale)
-        currentShader.setStackOffset(np.array((0.0, 0.0), dtype=np.float32))
-
-        # draw the text to the screen
-        self.enableTexture()
-        self.enableTextClientState()
-        self._GLPeaks.drawLabels(self._spectrumSettings, shader=currentShader, stackingMode=self._stackingMode)
-        self._GLMultiplets.drawLabels(self._spectrumSettings, shader=currentShader, stackingMode=self._stackingMode)
         currentShader.setStackOffset(np.array((0.0, 0.0), dtype=np.float32))
 
         if not self._stackingMode:
             if not (self.is1D and self.strip._isPhasingOn):
-                self._GLIntegrals.drawLabels(self._spectrumSettings)
+                self.drawIntegralLabels()
 
             self.drawMarksAxisCodes()
 
         else:
             # make the overlay/axis solid
-            currentShader = self.globalGL._shaderProgramTex.makeCurrent()
             currentShader.setBlendEnabled(False)
             self._spectrumLabelling.drawStrings()
 
             # not fully implemented yet
             # self._legend.drawStrings()
+
             currentShader.setBlendEnabled(True)
 
         self.disableTextClientState()
@@ -3374,7 +3611,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if spectrumView.isDeleted:
                 continue
-
             if not spectrumView._showContours:
                 continue
 
@@ -4390,7 +4626,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 offsets = [self.axisL + (GLDefs.MARKTEXTXOFFSET * self.pixelX),
                            mark.axisPosition + (GLDefs.MARKTEXTYOFFSET * self.pixelY)]
 
-            for pp in range(0, 2 * vertices, 2):
+            for pp in range(0, 3 * vertices, 3):
                 mark.attribs[pp:pp + 2] = offsets
 
             # redefine the mark's VBOs

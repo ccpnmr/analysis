@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:02 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-09 19:13:27 +0000 (Tue, March 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,14 +25,9 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-import os
-import sys
 import numpy as np
 from PyQt5 import QtWidgets
-
-
-from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
-
+from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.util.decorators import singleton
 from ccpn.framework.PathsAndUrls import openGLFontsPath
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
@@ -102,13 +97,14 @@ class GLGlobalData(QtWidgets.QWidget):
         """
         # add some shaders to the global data
         self.shaders = {}
-        for _shader in (PixelShader, TextShader, AliasedPixelShader):
+        for _shader in (PixelShader, TextShader, AliasedPixelShader, AliasedTextShader):
             _new = _shader()
             self.shaders[_new.name] = _new
 
         self._shaderProgram1 = self.shaders['pixelShader']
         self._shaderProgramTex = self.shaders['textShader']
         self._shaderProgramAlias = self.shaders['aliasedPixelShader']
+        self._shaderProgramTexAlias = self.shaders['aliasedTextShader']
 
 
 class PixelShader(ShaderProgramABC):
@@ -132,9 +128,9 @@ class PixelShader(ShaderProgramABC):
 
         void main()
         {
-          // calculate the position
-          gl_Position = (pMatrix * mvMatrix) * gl_Vertex;
-          _FC = gl_Color;
+            // calculate the position
+            gl_Position = pMatrix * mvMatrix * gl_Vertex;
+            _FC = gl_Color;
         }
         """
 
@@ -146,8 +142,8 @@ class PixelShader(ShaderProgramABC):
 
         void main()
         {
-          // set the pixel colour
-          gl_FragColor = _FC;
+            // set the pixel colour
+            gl_FragColor = _FC;
         }
         """
 
@@ -172,7 +168,7 @@ class PixelShader(ShaderProgramABC):
         self.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, matrix)
 
 
-class AliasedPixelShader(ShaderProgramABC):
+class AliasedPixelShader(PixelShader):
     """
     Pixel shader for aliased peak plotting
 
@@ -197,10 +193,10 @@ class AliasedPixelShader(ShaderProgramABC):
         
         void main()
         {
-          // calculate the position, set sahding value
-          gl_Position = pMatrix * mvMatrix * vec4(gl_Vertex.xy, 1, 1);
-          _FC = gl_Color;
-          _aliased = (aliasPosition - alias);
+            // calculate the position, set shading value
+            gl_Position = pMatrix * mvMatrix * vec4(gl_Vertex.xy, 0.0, 1.0);
+            _FC = gl_Color;
+            _aliased = (aliasPosition - alias);
         }
         """
 
@@ -216,45 +212,36 @@ class AliasedPixelShader(ShaderProgramABC):
         
         void main()
         {
-          // set the pixel colour
-          if (abs(_aliased) < 0.5) {
-            gl_FragColor = _FC;
-          }
-          else if (aliasEnabled != 0) {
-            // set the colour if aliasEnabled (could use this method or set the alpha)
-            gl_FragColor = (aliasShade * _FC) + (1 - aliasShade) * background;
-            //gl_FragColor = vec4(_FC.xyz, _FC.w * aliasShade);
-          }
-          else {
-            // skip the pixel
-            discard;
-          }
+            // set the pixel colour
+            if (abs(_aliased) < 0.5) {
+                gl_FragColor = _FC;
+            }
+            else if (aliasEnabled != 0) {
+                // set the colour if aliasEnabled (set opaque or set the alpha)
+                gl_FragColor = (aliasShade * _FC) + (1 - aliasShade) * background;
+                //gl_FragColor = vec4(_FC.xyz, _FC.w * aliasShade);
+            }
+            else {
+                // skip the pixel
+                discard;
+            }
         }
         """
 
-    # attribute list for shader
-    attributes = {'pMatrix'      : (16, np.float32),
-                  'mvMatrix'     : (16, np.float32),
-                  'aliasPosition': (1, np.float32),
-                  'background'   : (4, np.float32),
-                  'aliasShade'   : (1, np.float32),
-                  'aliasEnabled' : (1, np.uint32),
-                  }
+    # additional attribute list for shader
+    _attributes = {
+        'aliasPosition': (1, np.float32),
+        'background'   : (4, np.float32),
+        'aliasShade'   : (1, np.float32),
+        'aliasEnabled' : (1, np.uint32),
+        }
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # methods available for shader
 
-    def setPMatrix(self, matrix):
-        """Set the contents of projection pMatrix
-        :param matrix: consisting of 16 float32 elements
-        """
-        self.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, matrix)
-
-    def setMVMatrix(self, matrix):
-        """Set the contents of viewport mvMatrix
-        :param matrix: consisting of 16 float32 elements
-        """
-        self.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, matrix)
+    def __init__(self):
+        self.attributes.update(self._attributes)
+        super().__init__()
 
     def setAliasPosition(self, aliasX, aliasY):
         """Set the alias position:
@@ -330,16 +317,16 @@ class TextShader(ShaderProgramABC):
     vertexShader = """
         #version 120
 
-        uniform mat4    pTexMatrix;
-        uniform vec4    axisScale;
-        uniform vec2    stackOffset;
-        varying vec4    _FC;
-        varying vec2    _texCoord;
-        attribute vec2  _offset;
-
+        uniform   mat4  pTexMatrix;
+        uniform   vec4  axisScale;
+        uniform   vec2  stackOffset;
+        varying   vec4  _FC;
+        varying   vec2  _texCoord;
+        attribute vec3  _offset;
+        
         void main()
         {
-            gl_Position = pTexMatrix * ((gl_Vertex * axisScale) + vec4(_offset + stackOffset, 0.0, 0.0));
+            gl_Position = pTexMatrix * ((gl_Vertex * axisScale) + vec4(_offset.xy + stackOffset, 0.0, 0.0));
 
             _texCoord = gl_MultiTexCoord0.st;
             _FC = gl_Color;
@@ -350,28 +337,28 @@ class TextShader(ShaderProgramABC):
     fragmentShader = """
         #version 120
 
-        uniform sampler2D   texture;
-        uniform vec4        background;
-        uniform int         blendEnabled;
-        uniform float       alpha;
-        varying vec4        _FC;
-        vec4                _texFilter;
-        varying vec2        _texCoord;
-        float               _opacity;
+        uniform sampler2D texture;
+        uniform vec4      background;
+        uniform int       blendEnabled;
+        uniform float     alpha;
+        varying vec4      _FC;
+        varying vec2      _texCoord;
+        vec4              _texFilter;
+        float             _opacity;
 
         void main()
         {
-          _texFilter = texture2D(texture, _texCoord);
-          // colour for blending enabled
-          _opacity = _texFilter.w * alpha;
+            _texFilter = texture2D(texture, _texCoord);
+            // colour for blending enabled
+            _opacity = _texFilter.w * alpha;
 
-          if (blendEnabled != 0)
-            // multiply the character fade by the color fade to give the actual transparency
-            gl_FragColor = vec4(_FC.xyz, _FC.w * _opacity);
+            if (blendEnabled != 0)
+                // multiply the character fade by the color fade to give the actual transparency
+                gl_FragColor = vec4(_FC.xyz, _FC.w * _opacity);
 
-          else   
-            // plot a background box around the character
-            gl_FragColor = vec4((_FC.xyz * _opacity) + (1.0 - _opacity) * background.xyz, 1.0);
+            else   
+                // plot a background box around the character
+                gl_FragColor = vec4((_FC.xyz * _opacity) + (1.0 - _opacity) * background.xyz, 1.0);
         }
         """
 
@@ -454,3 +441,146 @@ class TextShader(ShaderProgramABC):
         value = float(np.clip(alpha, 0.0, 1.0))
 
         self.setGLUniform1f('alpha', value)
+
+
+class AliasedTextShader(TextShader):
+    """
+    Text shader for displaying text in aliased regions
+
+    Shader for plotting text, uses a billboard technique by using an _offset to determine pixel positions
+    Colour of the pixel is set by glColorPointer array.
+    Alpha value is grabbed from the texture to give anti-aliasing and modified by the 'alpha' attribute to
+    affect overall transparency.
+    """
+
+    name = 'aliasedTextShader'
+    CCPNSHADER = True
+
+    # shader for plotting smooth text to the screen in aliased Regions
+    vertexShader = """
+        #version 120
+
+        uniform   mat4  pTexMatrix;
+        uniform   mat4  mvMatrix;
+        uniform   vec4  axisScale;
+        uniform   vec2  stackOffset;
+        uniform   float aliasPosition;
+        varying   float _aliased;
+        varying   vec4  _FC;
+        varying   vec2  _texCoord;
+        attribute vec3  _offset;
+
+        void main()
+        {
+            gl_Position = pTexMatrix * mvMatrix * ((gl_Vertex * axisScale) + vec4(_offset.xy + stackOffset, 0.0, 0.0));
+            //gl_Position = pTexMatrix * mvMatrix * (gl_Vertex + vec4(_offset.xy + stackOffset, 0.0, 0.0));
+
+            _texCoord = gl_MultiTexCoord0.st;
+            _FC = gl_Color;
+            _aliased = (aliasPosition - _offset.z);
+        }
+        """
+
+    # fragment shader to determine shading from the texture alpha value and the 'alpha' attribute
+    fragmentShader = """
+        #version 120
+
+        uniform sampler2D texture;
+        uniform vec4      background;
+        uniform int       blendEnabled;
+        uniform float     alpha;
+        uniform float     aliasShade;
+        uniform int       aliasEnabled;
+        varying vec4      _FC;
+        varying vec2      _texCoord;
+        vec4              _texFilter;
+        float             _opacity;
+        varying float     _aliased;
+        
+        void main()
+        {
+            _texFilter = texture2D(texture, _texCoord);
+            // colour for blending enabled
+            _opacity = _texFilter.w * alpha;
+                        
+            // set the pixel colour
+            if (abs(_aliased) < 0.5)
+                if (blendEnabled != 0)
+                    // multiply the character fade by the color fade to give the actual transparency
+                    gl_FragColor = vec4(_FC.xyz, _FC.w * _opacity);
+                
+                else   
+                    // plot a background box around the character
+                    gl_FragColor = vec4((_FC.xyz * _opacity) + (1.0 - _opacity) * background.xyz, 1.0);
+
+            else if (aliasEnabled != 0) {
+                // modify the opacity
+                _opacity *= aliasShade;
+                
+                if (blendEnabled != 0)
+                    // multiply the character fade by the color fade to give the actual transparency
+                    gl_FragColor = vec4(_FC.xyz, _FC.w * _opacity);
+    
+                else   
+                    // plot a background box around the character
+                    gl_FragColor = vec4((_FC.xyz * _opacity) + (1.0 - _opacity) * background.xyz, 1.0);
+            }
+            else
+                // skip the pixel
+                discard;
+        }
+        """
+
+    """
+    """
+    # additional attribute list for shader
+    _attributes = {
+        'mvMatrix'     : (16, np.float32),
+        'aliasPosition': (1, np.float32),
+        'aliasShade'   : (1, np.float32),
+        'aliasEnabled' : (1, np.uint32),
+        }
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # methods available for shader
+
+    def __init__(self):
+        self.attributes.update(self._attributes)
+        super().__init__()
+
+    def setMVMatrix(self, matrix):
+        """Set the contents of viewport mvMatrix
+        :param matrix: consisting of 16 float32 elements
+        """
+        self.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, matrix)
+
+    def setAliasPosition(self, aliasX, aliasY):
+        """Set the alias position:
+        Used to calculate whether the current peak is in the aliased region
+        :param aliasX: X alias region
+        :param aliasY: Y alias region
+        """
+        self.setGLUniform1f('aliasPosition', getAliasSetting(aliasX, aliasY))
+
+    def setAliasShade(self, aliasShade):
+        """Set the alias shade: a single float in range [0.0, 1.0]
+        Used to determine visibility of aliased peaks, 0.0 -> background colour
+        :param aliasShade: single float32
+        """
+        if not isinstance(aliasShade, (float, np.float32)):
+            raise TypeError('aliasShade must be a float')
+        value = float(np.clip(aliasShade, 0.0, 1.0))
+
+        self.setGLUniform1f('aliasShade', value)
+
+    def setAliasEnabled(self, aliasEnabled):
+        """Set the alias enabled: bool True/False
+        Used to determine visibility of aliased peaks, using aliasShade
+        False = disable visibility of aliased peaks
+        :param aliasEnabled: bool
+        """
+        if not isinstance(aliasEnabled, bool):
+            raise TypeError('aliasEnabled must be a bool')
+        value = 1 if aliasEnabled else 0
+
+        self.setGLUniform1i('aliasEnabled', value)

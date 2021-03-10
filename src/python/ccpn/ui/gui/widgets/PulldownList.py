@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:25 +0000 (Sun, January 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-10 14:23:01 +0000 (Wed, March 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from contextlib import contextmanager
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -83,6 +82,11 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self.headerIcon = headerIcon
         self.backgroundText = backgroundText
 
+        # replace with a simple listView - fixes stylesheet hassle; default QComboBox listview can't be changed
+        _list = QtWidgets.QListView()
+        self.setView(_list)
+        setWidgetFont(_list, )
+
         self.setEditable(editable)
         if iconSize:
             self._iconSize = iconSize
@@ -98,6 +102,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
             self.popupAboutToBeShown.connect(self.clickToShowCallback)
 
         self.setStyleSheet('PulldownList { padding: 3px 3px 3px 3px; combobox-popup: 0; }')
+        # this can now be added to the stylesheet if needed
+        # 'QListView::item { padding: 12px; }')
 
         self.setMaxVisibleItems(maxVisibleItems)
         self._editedText = None
@@ -261,9 +267,9 @@ class PulldownList(QtWidgets.QComboBox, Base):
     def addItem(self, text, object=NULL, icon=None, ):
 
         if icon and isinstance(icon, QtGui.QIcon):
-            QtWidgets.QComboBox.addItem(self, icon, str(text))
+            super().addItem(icon, str(text))
         else:
-            QtWidgets.QComboBox.addItem(self, str(text))
+            super().addItem(str(text))
 
         if object is NULL:
             object = str(text)
@@ -345,6 +351,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
     def setPulldownColour(self, selectColour='lime'):
         from ccpn.util.Colour import spectrumColours
         import random
+
         for item in spectrumColours.items():
             pix = QtGui.QPixmap(QtCore.QSize(20, 20))
             pix.fill(QtGui.QColor(item[0]))
@@ -353,46 +360,6 @@ class PulldownList(QtWidgets.QComboBox, Base):
             self.select(selectColour)
         except:
             self.select(random.choice(self.texts))
-
-    # def _blockEvents(self, blanking=False):
-    #     """Block all updates/signals/notifiers in the widget.
-    #     """
-    #     # block on first entry
-    #     if self._blockingLevel == 0:
-    #         self.blockSignals(True)
-    #         self.setUpdatesEnabled(False)
-    #         if blanking:
-    #             self.project.blankNotification()
-    #
-    #     self._blockingLevel += 1
-    #
-    # def _unblockEvents(self, blanking=False):
-    #     """Unblock all updates/signals/notifiers in the widget.
-    #     """
-    #     if self._blockingLevel > 0:
-    #         self._blockingLevel -= 1
-    #
-    #         # unblock all signals on last exit
-    #         if self._blockingLevel == 0:
-    #             if blanking:
-    #                 self.project.unblankNotification()
-    #             self.setUpdatesEnabled(True)
-    #             self.blockSignals(False)
-    #     else:
-    #         raise RuntimeError('Error: PullDownList already at 0')
-    #
-    # @contextmanager
-    # def _blockWidgetSignals(self, blanking=False):
-    #     """Block all signals from the table
-    #     """
-    #     self._blockEvents(blanking)
-    #     try:
-    #         yield  # yield control to the calling process
-    #
-    #     except Exception as es:
-    #         raise es
-    #     finally:
-    #         self._unblockEvents(blanking)
 
 
 if __name__ == '__main__':

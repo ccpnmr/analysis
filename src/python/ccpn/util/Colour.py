@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-10 14:23:01 +0000 (Wed, March 10, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -903,56 +903,55 @@ def selectPullDownColour(pulldown, colourString, allowAuto=False):
 
 
 def fillColourPulldown(pulldown, allowAuto=False, allowNone=False, includeGradients=True):
+    # fill the pulldown with the list of colours
+    # this has no signals blocked otherwise it doesn't paint, and should be signalBlocked elsewhere
     currText = pulldown.currentText()
-    # currIndex = pulldown.currentIndex()
-    # print ('>>>', currText, currIndex)
 
     ICON_SIZE = max(getFontHeight(size='MEDIUM') or 16, 16)
 
-    with pulldown.blockWidgetSignals():
-        pulldown.clear()
-        if allowAuto:
-            pulldown.addItem(text='<auto>')
-        if allowNone:
-            pulldown.addItem(text='')
+    pulldown.clear()
+    if allowAuto:
+        pulldown.addItem(text='<auto>')
+    if allowNone:
+        pulldown.addItem(text='')
 
-        for item in spectrumColours.items():
-            # if item[1] not in pulldown.texts:
+    for item in spectrumColours.items():
+        # if item[1] not in pulldown.texts:
 
-            colName = item[1]  # colourNameWithSpace(item[1])
+        colName = item[1]  # colourNameWithSpace(item[1])
 
-            if item[0] != '#':
-                pix = QtGui.QPixmap(QtCore.QSize(ICON_SIZE, ICON_SIZE))
-                pix.fill(QtGui.QColor(item[0]))
-                pulldown.addItem(icon=QtGui.QIcon(pix), text=colName)
-            elif allowAuto:
-                pulldown.addItem(text=colName)
+        if item[0] != '#':
+            pix = QtGui.QPixmap(QtCore.QSize(ICON_SIZE, ICON_SIZE))
+            pix.fill(QtGui.QColor(item[0]))
+            pulldown.addItem(icon=QtGui.QIcon(pix), text=colName)
+        elif allowAuto:
+            pulldown.addItem(text=colName)
 
-        if includeGradients:
-            for colName, colourList in colorSchemeTable.items():
-                pix = QtGui.QPixmap(QtCore.QSize(ICON_SIZE, ICON_SIZE))
-                step = ICON_SIZE
-                stepX = ICON_SIZE
-                stepY = len(colourList) - 1
-                jj = 0
-                painter = QtGui.QPainter(pix)
+    if includeGradients:
+        for colName, colourList in colorSchemeTable.items():
+            pix = QtGui.QPixmap(QtCore.QSize(ICON_SIZE, ICON_SIZE))
+            step = ICON_SIZE
+            stepX = ICON_SIZE
+            stepY = len(colourList) - 1
+            jj = 0
+            painter = QtGui.QPainter(pix)
 
-                for ii in range(ICON_SIZE):
-                    _interp = (stepX - step) / stepX
-                    _intCol = interpolateColourHex(colourList[min(jj, stepY)], colourList[min(jj + 1, stepY)],
-                                                   _interp)
+            for ii in range(ICON_SIZE):
+                _interp = (stepX - step) / stepX
+                _intCol = interpolateColourHex(colourList[min(jj, stepY)], colourList[min(jj + 1, stepY)],
+                                               _interp)
 
-                    painter.setPen(QtGui.QColor(_intCol))
-                    painter.drawLine(ii, 0, ii, ICON_SIZE)
-                    step -= stepY
-                    while step < 0:
-                        step += stepX
-                        jj += 1
+                painter.setPen(QtGui.QColor(_intCol))
+                painter.drawLine(ii, 0, ii, ICON_SIZE)
+                step -= stepY
+                while step < 0:
+                    step += stepX
+                    jj += 1
 
-                painter.end()
-                pulldown.addItem(icon=QtGui.QIcon(pix), text=colName)
+            painter.end()
+            pulldown.addItem(icon=QtGui.QIcon(pix), text=colName)
 
-        pulldown.setCurrentText(currText)
+    pulldown.setCurrentText(currText)
 
 
 def _setColourPulldown(pulldown, attrib, allowAuto=False, includeGradients=True, allowNone=False):

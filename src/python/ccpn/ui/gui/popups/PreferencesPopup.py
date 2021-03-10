@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 14:28:02 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-10 09:47:32 +0000 (Wed, March 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,8 @@ from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreference
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
 from ccpn.ui.gui.widgets.FileDialog import SpectrumFileDialog, ProjectFileDialog, AuxiliaryFileDialog, \
-    LayoutsFileDialog, MacrosFileDialog, PluginsFileDialog, PipelineFileDialog, ExecutablesFileDialog
+    LayoutsFileDialog, MacrosFileDialog, PluginsFileDialog, PipelineFileDialog, ExecutablesFileDialog, \
+    ProjectSaveFileDialog
 from ccpn.framework.lib.pipeline.PipesLoader import _fetchUserPipesPath
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
@@ -94,6 +95,8 @@ def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, 
     # update the current userWorkingPath in the active file dialogs
     if userWorkingPath:
         _dialog = ProjectFileDialog(parent=self.mainWindow)
+        _dialog.initialPath = aPath(userWorkingPath)
+        _dialog = ProjectSaveFileDialog(parent=self.mainWindow)
         _dialog.initialPath = aPath(userWorkingPath)
 
     self._updateDisplay(updateColourScheme, updateSpectrumDisplays)

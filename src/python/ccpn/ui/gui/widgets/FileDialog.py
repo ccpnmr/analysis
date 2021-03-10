@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-05 15:55:03 +0000 (Fri, February 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-10 09:47:32 +0000 (Wed, March 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -105,10 +105,7 @@ class FileDialogABC(QtWidgets.QFileDialog):
     def __init__(self, parent=None,
                  acceptMode='open',
                  selectFile=None, fileFilter=None, directory=None,
-                 # restrictDirToFilter=False,
-                 # multiSelection=False,
                  useNative=None,
-                 initialPath=None,
                  _useDirectoryOnly=False,
                  confirmOverwrite=True,
                  **kwds):
@@ -117,13 +114,11 @@ class FileDialogABC(QtWidgets.QFileDialog):
 
         :param parent:
         :param acceptMode: 'open' or 'save'
-        :param selectFile:
-        :param fileFilter:
-        :param directory:
-        :param restrictDirToFilter:
-        :param multiSelection:
-        :param useNative:
-        :param initialPath:
+        :param selectFile: default filename to select - without path
+        :param fileFilter: file filter, e.g. '*.zip'
+        :param directory: default folder to select
+        :param useNative: True/False - use native dialog
+        :param confirmOverwrite: True/False - request overwrite if file exists
         :param kwds:
         """
 
@@ -378,10 +373,29 @@ class ProjectFileDialog(FileDialogABC):
     _fileMode = 'directory'
     _text = '{} Project'
 
+    def _updateCurrentPath(self):
+        """Update the current path for here and the ProjectSaveFileDialog
+        """
+        # accept the dialog and set the current selected folder for next time if directory not originally set
+        super()._updateCurrentPath()
+
+        # copy the value to the ProjectSaveFileDialog
+        absPath = aPath(self.directory().absolutePath())
+        self._initialPaths[ProjectSaveFileDialog()._clsID] = absPath
 
 class ProjectSaveFileDialog(FileDialogABC):
     # _fileMode = 'directory'
     _text = '{} Project'
+
+    def _updateCurrentPath(self):
+        """Update the current path for here and the ProjectFileDialog
+        """
+        # accept the dialog and set the current selected folder for next time if directory not originally set
+        super()._updateCurrentPath()
+
+        # copy the value to the ProjectFileDialog
+        absPath = aPath(self.directory().absolutePath())
+        self._initialPaths[ProjectFileDialog()._clsID] = absPath
 
 
 class DataFileDialog(FileDialogABC):

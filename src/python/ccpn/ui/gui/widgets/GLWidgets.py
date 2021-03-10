@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-01 19:14:38 +0000 (Mon, March 01, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-10 14:24:58 +0000 (Wed, March 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -529,8 +529,7 @@ class Gui1dWidget(CcpnGLWidget):
                                                                     drawMode=GL.GL_LINE_STRIP,
                                                                     dimension=2,
                                                                     GLContext=self)
-                spectrumView._buildGLContours(self._contourList[spectrumView],
-                                              firstShow=self._preferences.automaticNoiseContoursOnFirstShow)
+                spectrumView._buildGLContours(self._contourList[spectrumView])
 
                 self._buildSpectrumSetting(spectrumView=spectrumView, stackCount=stackCount)
                 # if self._stackingMode:

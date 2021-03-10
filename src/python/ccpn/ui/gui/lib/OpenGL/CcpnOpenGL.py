@@ -54,8 +54,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-02 13:57:31 +0000 (Tue, March 02, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-10 14:24:58 +0000 (Wed, March 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -745,6 +745,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_SPINNINGRATE] = spectrumView.spectrum.spinningRate
 
         indices = getAxisCodeMatchIndices(self.strip.axisCodes, spectrumView.spectrum.axisCodes)
+        # only need the axes for this spectrum
+        indices = indices[:spectrumView.spectrum.dimensionCount]
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
 
         if len(self._spectrumValues) > 2:
@@ -3245,8 +3247,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                     GLContext=self)
 
                 self._buildSpectrumSetting(spectrumView=spectrumView)
-                spectrumView._buildGLContours(self._contourList[spectrumView],
-                                              firstShow=self._preferences.automaticNoiseContoursOnFirstShow)
+                spectrumView._buildGLContours(self._contourList[spectrumView])
 
                 rebuildFlag = True
 

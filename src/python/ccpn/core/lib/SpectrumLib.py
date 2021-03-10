@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-05 15:49:17 +0000 (Fri, March 05, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-10 14:24:58 +0000 (Wed, March 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.util.Common import percentage, getAxisCodeMatchIndices
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeTransfers
+
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
@@ -687,22 +688,30 @@ def _recurseData(ii, dataList, startCondition, endCondition):
 
             _recurseData(ii + 1, newData, startCondition, endCondition)
 
+# keep for a minute - example of how to call _recurseData
+# # iterate over the array to calculate noise at each level
+# dataList = [dataArray]
+# startCondition = []
+# endCondition = []
+# _recurseData(0, dataList, startCondition, endCondition)
 
-def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,
-                                  setPositiveContours=True, setNegativeContours=True,
-                                  useSameMultiplier=True):
-    """Calculate the noise level, base contour level and positive/negative multipliers for the given apiSpectrum
-    """
-    # NOTE:ED - method doesn't seem to be used?
-    project = apiSpectrum.topObject
 
-    # the core objects should have been initialised at this point
-    if project and apiSpectrum in project._data2Obj:
-        spectrum = project._data2Obj[apiSpectrum]
-        if spectrum.dimensionCount == 1: return
-        setContourLevelsFromNoise(spectrum, setNoiseLevel=setNoiseLevel,
-                                  setPositiveContours=setPositiveContours, setNegativeContours=setNegativeContours,
-                                  useSameMultiplier=useSameMultiplier)
+
+# def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,
+#                                   setPositiveContours=True, setNegativeContours=True,
+#                                   useSameMultiplier=True):
+#     """Calculate the noise level, base contour level and positive/negative multipliers for the given apiSpectrum
+#     """
+#     # NOTE:ED - method doesn't seem to be used?
+#     project = apiSpectrum.topObject
+#
+#     # the core objects should have been initialised at this point
+#     if project and apiSpectrum in project._data2Obj:
+#         spectrum = project._data2Obj[apiSpectrum]
+#         if spectrum.dimensionCount == 1: return
+#         setContourLevelsFromNoise(spectrum, setNoiseLevel=setNoiseLevel,
+#                                   setPositiveContours=setPositiveContours, setNegativeContours=setNegativeContours,
+#                                   useSameMultiplier=useSameMultiplier)
 
 
 DEFAULTMULTIPLIER = 1.414214
@@ -751,100 +760,69 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
     if any(x != 'Frequency' for x in spectrum.dimensionTypes):
         raise NotImplementedError("setContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
 
-    # get specLimits for all dimensions
-    specLimits = sorted(spectrum.spectrumLimits)
-    dims = spectrum.dimensionCount
-    valsPerPoint = spectrum.valuesPerPoint
+    if setNoiseLevel:
+        # get noise level using random sampling method - may be slow for large spectra
+        noise = getNoiseEstimate(spectrum)
+        base = spectrum.noiseLevel = noise.noiseLevel
+    else:
+        base = spectrum.noiseLevel
+        # need to generate a min/max
+        noise = getContourEstimate(spectrum)
 
-    # set dimensions above 1 to just the centre of the spectrum +- 1/2 the values per point
-    # the ensures that at least 1 point is returned in each dimension
-    for ii in range(2, dims):
-        k = np.mean(specLimits[ii])
-        specLimits[ii] = (k - (valsPerPoint[ii] / 2), k + (valsPerPoint[ii] / 2))
+    # noise => noise.mean, noise.std, noise.min, noise.max, noise.noiseLevel
 
-    axisCodeDict = dict((k, v) for k, v in zip(spectrum.axisCodes, specLimits))
-    # exclusionBuffer = [1] * len(axisCodeDict)
+    if useDefaultLevels:
+        posLevels = defaultLevels
+        negLevels = defaultLevels
+    else:
+        # get from the spectrum
+        posLevels = spectrum.positiveContourCount
+        negLevels = spectrum.negativeContourCount
 
-    foundRegions = spectrum.getRegionData(minimumDimensionSize=1, **axisCodeDict)
-    if foundRegions:
+    if useDefaultMultiplier:
+        # use default as root2
+        posMult = negMult = defaultMultiplier
+    else:
+        # calculate multiplier to give contours across range of spectrum; trap base = 0
+        mx = noise.max
+        mn = noise.min
 
-        # just use the first region
-        for region in foundRegions[:1]:
-            dataArray, intRegion, *rest = region
+        posMult = pow(abs(mx / base), 1 / posLevels) if base else 0.0
+        if useSameMultiplier:
+            negMult = posMult
+        else:
+            negMult = pow(abs(mn / base), 1 / negLevels) if base else 0.0
 
-            if dataArray.size:
+    if setPositiveContours:
+        try:
+            spectrum.positiveContourBase = base
+            spectrum.positiveContourFactor = posMult
+        except Exception as es:
 
-                # iterate over the array to calculate noise at each level
-                dataList = [dataArray]
-                startCondition = []
-                endCondition = []
-                _recurseData(0, dataList, startCondition, endCondition)
+            # set to defaults if an error occurs
+            spectrum.positiveContourBase = defaultContourBase
+            spectrum.positiveContourFactor = defaultMultiplier
+            getLogger().warning('Error setting contour levels - %s', str(es))
 
-                if useDefaultLevels:
-                    posLevels = defaultLevels
-                    negLevels = defaultLevels
-                else:
-                    # get from the spectrum
-                    posLevels = spectrum.positiveContourCount
-                    negLevels = spectrum.negativeContourCount
+        spectrum.positiveContourCount = posLevels
 
-                if useDefaultContourBase:
-                    base = defaultContourBase
-                    if setNoiseLevel:
-                        spectrum.noiseLevel = base
-                else:
+    if setNegativeContours:
+        try:
+            spectrum.negativeContourBase = -base
+            spectrum.negativeContourFactor = negMult
+        except Exception as es:
 
-                    # calculate the base levels
-                    if setNoiseLevel:
-                        # put the new value into the spectrum
-                        base = endCondition[6]
-                        spectrum.noiseLevel = base
-                    else:
-                        # get the noise from the spectrum
-                        base = spectrum.noiseLevel
+            # set to defaults if an error occurs
+            spectrum.negativeContourBase = -defaultContourBase
+            spectrum.negativeContourFactor = defaultMultiplier
+            getLogger().warning('Error setting contour levels - %s', str(es))
 
-                if useDefaultMultiplier:
-                    # use default as root2
-                    posMult = negMult = defaultMultiplier
-                else:
-                    # calculate multiplier to give contours across range of spectrum; trap base = 0
-                    mx = startCondition[3]  # global array max
-                    mn = startCondition[4]  # global array min
+        spectrum.negativeContourCount = negLevels
 
-                    posMult = pow(abs(mx / base), 1 / posLevels) if base else 0.0
-                    if useSameMultiplier:
-                        negMult = posMult
-                    else:
-                        negMult = pow(abs(mn / base), 1 / negLevels) if base else 0.0
-
-                if setPositiveContours:
-                    try:
-                        spectrum.positiveContourBase = base  # do
-                        spectrum.positiveContourFactor = posMult
-                    except Exception as es:
-
-                        # set to defaults if an error occurs
-                        spectrum.positiveContourBase = defaultContourBase
-                        spectrum.positiveContourFactor = defaultMultiplier
-                        getLogger().warning('Error setting contour levels - %s', str(es))
-
-                    spectrum.positiveContourCount = posLevels
-
-                if setNegativeContours:
-                    try:
-                        spectrum.negativeContourBase = -base
-                        spectrum.negativeContourFactor = negMult
-                    except Exception as es:
-
-                        # set to defaults if an error occurs
-                        spectrum.negativeContourBase = -defaultContourBase
-                        spectrum.negativeContourFactor = defaultMultiplier
-                        getLogger().warning('Error setting contour levels - %s', str(es))
-
-                    spectrum.negativeContourCount = negLevels
+    return
 
 
-def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
+def getContourLevelsFromNoise(spectrum,
                               setPositiveContours=False, setNegativeContours=False,
                               useDefaultMultiplier=True, useDefaultLevels=True, useDefaultContourBase=False,
                               useSameMultiplier=True,
@@ -853,8 +831,6 @@ def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
     """
 
     # parameter error checking
-    if not isinstance(setNoiseLevel, bool):
-        raise TypeError('setNoiseLevel is not boolean.')
     if not isinstance(setPositiveContours, bool):
         raise TypeError('setPositiveContours is not boolean.')
     if not isinstance(setNegativeContours, bool):
@@ -878,89 +854,50 @@ def getContourLevelsFromNoise(spectrum, setNoiseLevel=False,
     if spectrum.dimensionCount == 1:
         return [None] * 6
 
-    # # exit if nothing set
-    # if not (setNoiseLevel or setPositiveContours or setNegativeContours):
-    #     return [None] * 5
-
     if any(x != 'Frequency' for x in spectrum.dimensionTypes):
         raise NotImplementedError("getContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
 
-    # get specLimits for all dimensions
-    specLimits = sorted(spectrum.spectrumLimits)
-    dims = spectrum.dimensionCount
-    valsPerPoint = spectrum.valuesPerPoint
+    # need to generate a min/max
+    noise = getContourEstimate(spectrum)
 
-    # set dimensions above 1 to just the centre of the spectrum +- 1/2 the values per point
-    # the ensures that at least 1 point is returned in each dimension
-    for ii in range(2, dims):
-        k = np.mean(specLimits[ii])
-        specLimits[ii] = (k - (valsPerPoint[ii] / 2), k + (valsPerPoint[ii] / 2))
+    # noise => noise.mean, noise.std, noise.min, noise.max, noise.noiseLevel
 
-    axisCodeDict = dict((k, v) for k, v in zip(spectrum.axisCodes, specLimits))
-    # exclusionBuffer = [1] * len(axisCodeDict)
+    if useDefaultLevels:
+        posLevels = defaultLevels
+        negLevels = defaultLevels
+    else:
+        # get from the spectrum
+        posLevels = spectrum.positiveContourCount
+        negLevels = spectrum.negativeContourCount
 
-    foundRegions = spectrum.getRegionData(minimumDimensionSize=1, **axisCodeDict)
-    if foundRegions:
+    if useDefaultContourBase:
+        posBase = defaultContourBase
+    else:
+        # calculate the base levels
+        posBase = spectrum.noiseLevel
+    negBase = -posBase if posBase else 0.0
 
-        # just use the first region
-        for region in foundRegions[:1]:
-            dataArray, intRegion, *rest = region
+    if useDefaultMultiplier:
+        # use default as root2
+        posMult = negMult = defaultMultiplier
+    else:
+        # calculate multiplier to give contours across range of spectrum; trap base = 0
+        mx = noise.max
+        mn = noise.min
 
-            if dataArray.size:
+        posMult = pow(abs(mx / posBase), 1 / posLevels) if posBase else 0.0
+        if useSameMultiplier:
+            negMult = posMult
+        else:
+            negMult = pow(abs(mn / negBase), 1 / negLevels) if negBase else 0.0
 
-                # iterate over the array to calculate noise at each level
-                dataList = [dataArray]
-                startCondition = []
-                endCondition = []
-                _recurseData(0, dataList, startCondition, endCondition)
+    if not setPositiveContours:
+        posBase = posMult = posLevels = None
 
-                if useDefaultLevels:
-                    posLevels = defaultLevels
-                    negLevels = defaultLevels
-                else:
-                    # get from the spectrum
-                    posLevels = spectrum.positiveContourCount
-                    negLevels = spectrum.negativeContourCount
+    if not setNegativeContours:
+        negBase = negMult = negLevels = None
 
-                if useDefaultContourBase:
-                    posBase = defaultContourBase
-                    # if setNoiseLevel:
-                    #     spectrum.noiseLevel = base
-                else:
-
-                    # calculate the base levels
-                    if setNoiseLevel:
-                        # put the new value into the spectrum
-                        posBase = endCondition[6]
-                        # spectrum.noiseLevel = base
-                    else:
-                        # get the noise from the spectrum
-                        posBase = spectrum.noiseLevel
-                negBase = -posBase
-
-                if useDefaultMultiplier:
-                    # use default as root2
-                    posMult = negMult = defaultMultiplier
-                else:
-                    # calculate multiplier to give contours across range of spectrum; trap base = 0
-                    mx = startCondition[3]  # global array max
-                    mn = startCondition[4]  # global array min
-
-                    posMult = pow(abs(mx / posBase), 1 / posLevels) if posBase else 0.0
-                    if useSameMultiplier:
-                        negMult = posMult
-                    else:
-                        negMult = pow(abs(mn / negBase), 1 / negLevels) if negBase else 0.0
-
-                if not setPositiveContours:
-                    posBase = posMult = posLevels = None
-
-                if not setNegativeContours:
-                    negBase = negMult = negLevels = None
-
-                return posBase, negBase, posMult, negMult, posLevels, negLevels
-
-    return [None] * 6
+    return posBase, negBase, posMult, negMult, posLevels, negLevels
 
 
 def getNoiseEstimateFromRegion(spectrum, strip):
@@ -1046,26 +983,45 @@ def getNoiseEstimate(spectrum):
 
     noiseLevel is calculated as abs(mean) + 3.0 * SD
 
-    Calculated from a random subset of the spectrum
+    Calculated from a random subset of points
     """
     # NOTE:ED more detail needed
 
-    FRACTPERAXIS = 0.04
-    SUBSETFRACT = 0.25
-    FRACT = 0.1
-    MAXSAMPLES = 10000
+    fractPerAxis = 0.04
+    subsetFract = 0.25
+    fract = 0.1
+    maxSamples = 10000
 
     npts = spectrum.pointCounts
 
     # take % of points in each axis
-    fract = (FRACTPERAXIS ** len(npts))
-    nsamples = min(int(np.prod(npts) * fract), MAXSAMPLES)
-
-    nsubsets = max(1, int(nsamples * SUBSETFRACT))
-    fraction = FRACT
+    _fract = (fractPerAxis ** len(npts))
+    nsamples = min(int(np.prod(npts) * _fract), maxSamples)
+    nsubsets = max(1, int(nsamples * subsetFract))
 
     with notificationEchoBlocking():
-        return _getNoiseEstimate(spectrum, nsamples, nsubsets, fraction)
+        return _getNoiseEstimate(spectrum, nsamples, nsubsets, fract)
+
+
+def getContourEstimate(spectrum):
+    """Get an estimate of the contour settings from the spectrum
+    Calculated from a random subset of points
+    """
+
+    fractPerAxis = 0.04
+    subsetFract = 0.01
+    fract = 0.1
+    maxSamples = 10000
+
+    npts = spectrum.pointCounts
+
+    # take % of points in each axis
+    _fract = (fractPerAxis ** len(npts))
+    nsamples = min(int(np.prod(npts) * _fract), maxSamples)
+    nsubsets = max(1, int(nsamples * subsetFract))
+
+    with notificationEchoBlocking():
+        return _getContourEstimate(spectrum, nsamples, nsubsets, fract)
 
 
 def _noiseFunc(value):
@@ -1149,7 +1105,70 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
 
     value = _noiseFunc(value)
 
-    # minStd *= apiDataSource.scale?
+    return value
+
+
+def _getContourEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
+    """
+    Estimate the contour levels for a spectrum.
+
+    'nsamples' random samples are taken from the spectrum
+    'nsubsets' is the number of random permutations of data taken from the
+    and finding subsets with the lowest standard deviation
+
+    A tuple (mean, SD, min, max noiseLevel) is returned from the subset with the lowest standard deviation.
+    mean is the mean of the minimum random subset, SD is the standard deviation, min/max are the minimum/maximum values,
+    and noiseLevel is the estimated noiseLevel caluated as abs(mean) + 3.0 * SD
+
+    :param spectrum: input spectrum
+    :param nsamples: number reandom samples
+    :param nsubsets: number of subsets
+    :param fraction: subset fraction
+    :return: tuple(mean, SD, min, max, noiseLevel)
+    """
+
+    npts = spectrum.pointCounts
+    if not isinstance(nsamples, int):
+        raise TypeError('nsamples must be an int')
+    if not (0 < nsamples <= np.prod(npts)):
+        raise ValueError(f'nsamples must be in range [1, {np.prod(npts)}]')
+    if not isinstance(nsubsets, int):
+        raise TypeError('nsubsets must be an int')
+    if not (0 < nsubsets <= nsamples):
+        # not strictly necessary but stops huge values
+        raise ValueError(f'nsubsets must be in range [1, {nsamples}]')
+    if not isinstance(fraction, float):
+        raise TypeError('fraction must be a float')
+    if not (0 < fraction <= 1.0):
+        raise ValueError('fraction must be i the range (0, 1]')
+
+    # create a list of random points in the spectrum, get only points that are not nan/inf
+    # getPositionValue is the slow bit
+    allPts = [[min(n - 2, int(n * random.random())) for n in npts] for i in range(nsamples)]
+    _list = np.array([spectrum.getPositionValue(pt) for pt in allPts], dtype=np.float32)
+    data = _list[np.isfinite(_list)]
+    fails = nsamples - len(data)
+
+    if fails:
+        getLogger().warning(f'Attempt to access {fails} non-existent data points in spectrum {spectrum}')
+
+    # check whether there are too many bad numbers in the data
+    good = nsamples - fails
+    if good == 0:
+        getLogger().warning(f'Spectrum {spectrum} contains all bad points')
+        return NoiseEstimateTuple(mean=None, std=None, min=None, max=None, noiseLevel=1.0)
+    elif good < 10:  # arbitrary number of bad points
+        getLogger().warning(f'Spectrum {spectrum} contains minimal data')
+        maxValue = max([abs(x) for x in data])
+        if maxValue > 0:
+            return NoiseEstimateTuple(mean=None, std=None, min=None, max=None, noiseLevel=0.1 * maxValue)
+        else:
+            return NoiseEstimateTuple(mean=None, std=None, min=None, max=None, noiseLevel=1.0)
+
+    value = NoiseEstimateTuple(mean=None,
+                               std=None,
+                               min=np.min(data), max=np.max(data),
+                               noiseLevel=None)
 
     return value
 
@@ -1273,6 +1292,7 @@ def _initExpBoundResonances(experiment):
                         resonances[contrib.resonance] = None
     for resonance in resonances.keys():
         _getBoundResonances(resonance, recalculate=True)
+
 
 def _setApiExpTransfers(experiment, overwrite=True):
     """
@@ -1416,7 +1436,7 @@ def _getAcqRefExpDimRef(refExperiment):
         return ll[0]
     else:
         raise RuntimeError("%s has no unambiguous RefExpDimRef for acqMeasurement (%s)"
-                       % (refExperiment, acqMeasurement))
+                           % (refExperiment, acqMeasurement))
 
 
 def _getAcqExpDim(experiment, ignorePreset=False):
@@ -1465,6 +1485,7 @@ def _getAcqExpDim(experiment, ignorePreset=False):
 
     return result
 
+
 def _getRefExpDim4ExpDim(expDim):
     """
     get the link between refExpDim and expDim through their children refExpDimRef and expDimRef.
@@ -1476,14 +1497,16 @@ def _getRefExpDim4ExpDim(expDim):
             break
     return refExpDim
 
+
 def _tempLinkRefExpDim2ExpDim(expDim, refExpDim):
     """
     Temporary link expDim and refExpDim through their sorted children refExpDimRefs and expDimRefs.
     The match refExpDimRef-expDimRef will be redone by isotope code.
     """
-    if len(expDim.sortedExpDimRefs()) ==  len(refExpDim.sortedRefExpDimRefs()):
+    if len(expDim.sortedExpDimRefs()) == len(refExpDim.sortedRefExpDimRefs()):
         for expDimRef, refExpDimRef in zip(expDim.sortedExpDimRefs(), refExpDim.sortedRefExpDimRefs()):
             expDimRef.setRefExpDimRef(refExpDimRef)
+
 
 def _clearLinkToRefExp(experiment):
     for expDim in experiment.expDims:

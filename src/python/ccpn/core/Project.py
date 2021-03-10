@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-22 16:19:37 +0000 (Mon, February 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-10 14:24:57 +0000 (Wed, March 10, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1436,7 +1436,8 @@ class Project(AbstractWrapperObject):
             spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
 
             # estimate new base contour levels
-            if self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:
+            # if self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:
+            if spectrum.noiseLevel is None:
                 getLogger().info("estimating noise level for spectrum %s" % str(spectrum.pid))
 
                 setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
@@ -1555,7 +1556,7 @@ class Project(AbstractWrapperObject):
         from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
 
         for spectrum in self.spectra:
-            if not spectrum.noiseLevel:
+            if spectrum.noiseLevel is None:
 
                 try:
                     setContourLevelsFromNoise(spectrum, setNoiseLevel=True,

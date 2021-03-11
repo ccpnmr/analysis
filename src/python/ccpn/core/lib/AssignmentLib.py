@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-11 18:03:31 +0000 (Thu, March 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-11 18:36:20 +0000 (Thu, March 11, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1030,11 +1030,11 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False, n
         for axisCode, matchedNmrAtomNames in nameMatchedNmrAtomsDict.items():
             ## deal with ambiguous nmrAtoms that can be assigned to multiple axisCodes e.g. {'Hn': ['H','H1'], 'Hc': ['H','H1']}
             for matchedNmrAtomName in matchedNmrAtomNames:
-                if matchedNmrAtomName in ambiguousNmrAtomNames:
-                    matchedNmrAtomNames.remove(matchedNmrAtomName)
-                    na = _getNmrAtomForName(nmrAtoms, matchedNmrAtomName)
-                    ambiguousNmrAtomsDict[axisCode].add(na)
-
+                for ambiguousNmrAtomName in ambiguousNmrAtomNames:
+                    if ambiguousNmrAtomName == matchedNmrAtomNames:
+                        matchedNmrAtomNames.remove(matchedNmrAtomName)
+                        na = _getNmrAtomForName(nmrAtoms, matchedNmrAtomName)
+                        ambiguousNmrAtomsDict[axisCode].add(na)
             ## deal with multiple ambiguous per axisCode. e.g. {'Hn': ['H','H1','H2']}
             if len(matchedNmrAtomNames) > 1:
                 matchedNmrAtoms = list(map(lambda x: _getNmrAtomForName(nmrAtoms, x), matchedNmrAtomNames))

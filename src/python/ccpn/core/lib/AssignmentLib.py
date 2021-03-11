@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-11 18:36:20 +0000 (Thu, March 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-11 18:38:52 +0000 (Thu, March 11, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -951,38 +951,6 @@ def _matchAxesToNmrAtomNames(axisCodes, nmrAtomNames, exactMatch:bool=False, mat
                     if ax[:matchingChar] == naName[:matchingChar]:
                         dd[ax].append(naName)
     return dd
-
-def _assignNmrResiduesToPeaks_(peaks, nmrResidues):
-    """ CCPN Internal. Used to assign via Drag and drop.
-    Searches for matches of peak Axis code to the nmrAtoms Names of all residues if any will do the assignment"""
-
-    for peak in peaks:
-        for axisCode in peak.axisCodes:
-            if axisCode == 'intensity':
-                continue
-            if axisCode:
-                if len(axisCode) > 0:
-                    code = axisCode[0]
-                    nmrAtoms = [nmrAtom for nmrResidue in nmrResidues for nmrAtom in nmrResidue.nmrAtoms if
-                                code in nmrAtom.name]
-                    matchingNmrAtoms = []
-                    for nmrAtom in nmrAtoms:
-                        if code == nmrAtom.name:
-                            matchingNmrAtoms.append(nmrAtom)
-                        else:
-                            if len(nmrAtoms) > 0:
-                                if axisCode == nmrAtom.name:
-                                    matchingNmrAtoms.append(nmrAtom)
-                                else:
-                                    matchingNmrAtoms.append(nmrAtoms[0])
-                    if len(matchingNmrAtoms) > 0:
-                        if axisCode.isupper():
-                            try:
-                                peak.assignDimension(axisCode, list(set(matchingNmrAtoms)))
-                            except:
-                                peak.assignDimension(axisCode[0], list(set(matchingNmrAtoms)))
-                        else:
-                            peak.assignDimension(axisCode, list(set(matchingNmrAtoms)))
 
 def _getNmrAtomForName(nmrAtoms, nmrAtomName):
     """

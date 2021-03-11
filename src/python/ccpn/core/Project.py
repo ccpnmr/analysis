@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-10 14:24:57 +0000 (Wed, March 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-11 12:20:56 +0000 (Thu, March 11, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -921,7 +921,17 @@ class Project(AbstractWrapperObject):
                 for notifier in dd:
                     notifier(self)
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Library functions
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def _checkUpgradedFromV2(self):
+        """Check whether the project has been upgraded from V2
+        """
+        if self._apiNmrProject.root._upgradedFromV2:
+            # reset the noise levels
+            self._setNoiseLevels()
+
     def _validateDataUrlAndFilePaths(self, newDataUrlPath=None):
         """Perform validate operation for setting dataUrl from preferences - to be called after loading
         """
@@ -1437,7 +1447,7 @@ class Project(AbstractWrapperObject):
 
             # estimate new base contour levels
             # if self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:
-            if spectrum.noiseLevel is None:
+            if not spectrum.noiseLevel:
                 getLogger().info("estimating noise level for spectrum %s" % str(spectrum.pid))
 
                 setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
@@ -1556,8 +1566,7 @@ class Project(AbstractWrapperObject):
         from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
 
         for spectrum in self.spectra:
-            if spectrum.noiseLevel is None:
-
+            if not spectrum.noiseLevel:
                 try:
                     setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                                               setPositiveContours=True, setNegativeContours=True,

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-10 14:24:58 +0000 (Wed, March 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-11 12:20:56 +0000 (Thu, March 11, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -970,8 +970,7 @@ def getSpectrumNoise(spectrum):
 
     Float
     """
-    noise = spectrum.noiseLevel
-    if noise is None:
+    if not spectrum.noiseLevel:
         noise = getNoiseEstimate(spectrum)
         spectrum.noiseLevel = noise.noiseLevel
 

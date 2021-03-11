@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-02-25 10:47:54 +0000 (Thu, February 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-11 12:20:56 +0000 (Thu, March 11, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1519,6 +1519,7 @@ class Framework(NotifierBase):
                 project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
 
             project._validateDataUrlAndFilePaths()
+            project._checkUpgradedFromV2()
 
             if self.preferences.general.useProjectPath:
                 getLogger().debug2('application - setting current path %s' % Path.Path(path).parent)

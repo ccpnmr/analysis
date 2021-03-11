@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-10 09:47:32 +0000 (Wed, March 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-11 12:55:11 +0000 (Thu, March 11, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -298,7 +298,10 @@ class FileDialogABC(QtWidgets.QFileDialog):
         """Update the current path
         """
         # accept the dialog and set the current selected folder for next time if directory not originally set
-        absPath = aPath(self.directory().absolutePath())
+        if self._fileMode == 'directoryOnly':
+            absPath = aPath(self.selectedFile())
+        else:
+            absPath = aPath(self.directory().absolutePath())
         self._initialPaths[self._clsID] = absPath
 
     def accept(self):

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-11 18:38:52 +0000 (Thu, March 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-11 20:20:22 +0000 (Thu, March 11, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1015,14 +1015,24 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False, n
         _filterPseudoNmrAtoms = [ambiguousNmrAtomsDict[axisCode].add(na) for na in nmrAtoms for axisCode
                                  in peak.axisCodes if na.isotopeCode == UnknownIsotopeCode]
 
-        ## assign the unambiguous nmrAtoms first
-        _assignPeakFromNmrAtomDict(peak, unambiguousNmrAtomsDict, ambiguous=False, overwrite=overwrite,
+        _assignPeakFromNmrAtomDict(peak, unambiguousNmrAtomsDict, ambiguousNmrAtomsDict, overwrite=overwrite,
                                    nmrResidue=nmrResidue)
-        if len(ambiguousNmrAtomsDict)>0:
-            _assignPeakFromNmrAtomDict(peak, ambiguousNmrAtomsDict, ambiguous=True, overwrite=overwrite,
-                                       nmrResidue=nmrResidue)
 
-def _assignPeakFromNmrAtomDict(peak, axisCode4NmrAtomsDict, ambiguous=True, overwrite=False, nmrResidue=None):
+
+
+def _finaliseAssignment(peak, axisCode4NmrAtomsDict, overwrite=False):
+    for _axisCode, _nmrAtoms in axisCode4NmrAtomsDict.items():
+        oldNmrAtoms = []
+        if not overwrite:  ## Add to existing. We could add a popup to query what to do. "Replace or add" assignment
+            axisCodesDims = peak.peakList.spectrum.getByAxisCodes('dimensions', [_axisCode], exactMatch=True)
+            if axisCodesDims:
+                dim = axisCodesDims[0] - 1 if axisCodesDims[0] > 0 else axisCodesDims[0]
+                oldNmrAtoms = list(peak.dimensionNmrAtoms[dim])
+        newNmrAtoms = list(set(list(_nmrAtoms) + oldNmrAtoms))
+        peak.assignDimension(_axisCode, newNmrAtoms)
+
+def _assignPeakFromNmrAtomDict(peak, unambiguousNmrAtomsDict, ambiguousNmrAtomsDict,
+                               overwrite=False, nmrResidue=None):
     """
     :param peak:
     :param axisCode4NmrAtomsDict:
@@ -1030,27 +1040,24 @@ def _assignPeakFromNmrAtomDict(peak, axisCode4NmrAtomsDict, ambiguous=True, over
     :param overwrite:
     :return:
     """
-    ## assign the unambiguous nmrAtoms first
-    if not ambiguous:
-        for _axisCode, _nmrAtoms in axisCode4NmrAtomsDict.items():
-            oldNmrAtoms = []
-            if not overwrite:  ## Add to existing. We could add a popup to query what to do. "Replace or add" assignment
-                axisCodesDims = peak.peakList.spectrum.getByAxisCodes('dimensions', [_axisCode], exactMatch=True)
-                if axisCodesDims:
-                    dim = axisCodesDims[0] - 1 if axisCodesDims[0] > 0 else axisCodesDims[0]
-                    oldNmrAtoms = list(peak.dimensionNmrAtoms[dim])
-            newNmrAtoms = list(set(list(_nmrAtoms) + oldNmrAtoms))
-            peak.assignDimension(_axisCode, newNmrAtoms)
-    else:
+
+    # add feedback for un-assignable nmrAtoms
+
+    if not ambiguousNmrAtomsDict and unambiguousNmrAtomsDict:
+        _finaliseAssignment(peak, unambiguousNmrAtomsDict, overwrite=overwrite)
+        return
+    if ambiguousNmrAtomsDict or unambiguousNmrAtomsDict:
         ##  prompt the user to what-to-do for ambiguous nmrAtoms/axisCodes
         from ccpn.ui.gui.popups.AssignAmbiguousNmrAtomsPopup import AssignNmrAtoms4AxisCodesPopup
         nmrResidueName = nmrResidue.pid+'. ' if nmrResidue else ''
         title = '%sAmbiguous NmrAtoms assignment.' %nmrResidueName
-        w = AssignNmrAtoms4AxisCodesPopup(None, title=title, axisCode4NmrAtomsDict=axisCode4NmrAtomsDict)
+        w = AssignNmrAtoms4AxisCodesPopup(None, title=title, axisCode4NmrAtomsDict= ambiguousNmrAtomsDict,
+                                          checkedAxisCode4NmrAtomsDict = unambiguousNmrAtomsDict,)
         result = w.exec_()
         if result:
             axisCode4NmrAtomsDict = w.getSelectedObjects()
-            _assignPeakFromNmrAtomDict(peak, axisCode4NmrAtomsDict, ambiguous=False, overwrite=overwrite)
+            _finaliseAssignment(peak, axisCode4NmrAtomsDict, overwrite=overwrite)
+
 
 
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-10 14:24:58 +0000 (Wed, March 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-11 10:39:52 +0000 (Thu, March 11, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2042,6 +2042,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # This is the correct blend function to ignore stray surface blending functions
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
+
+        self._setColourScheme()
         self.setBackgroundColour(self.background, silent=True)
         self.globalGL._shaderProgramTex.setBlendEnabled(0)
         self.globalGL._shaderProgramTex.setAlpha(1.0)

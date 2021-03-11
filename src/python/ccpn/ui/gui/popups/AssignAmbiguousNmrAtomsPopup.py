@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-11 20:20:22 +0000 (Thu, March 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-11 20:25:30 +0000 (Thu, March 11, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -92,7 +92,6 @@ class ObjectsSelectionWidget(Widget):
         self.checkedObjectsDict = {x.name:x for x in self.checkedObjects if hasattr(x, 'name')}
         self.allCheckBoxes = []
         self.enabledAll = enabledAll
-        print(self.enabledAll, 'ggg')
         self._setWidgets()
 
     def _setWidgets(self):
@@ -152,7 +151,9 @@ class AssignNmrAtoms4AxisCodesPopup(CcpnDialogMainWidget):
     title = 'AssignNmrAtoms for AxisCodes'
     def __init__(self, parent=None, mainWindow=None, title=title, axisCode4NmrAtomsDict=None,
                  checkedAxisCode4NmrAtomsDict = None, uncheckableObjects = None, **kwds):
-        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
+        super().__init__(parent, setLayout=True, windowTitle=title,
+                         size=(300, 300), minimumSize=None, **kwds)
+
 
         if mainWindow:
             self.mainWindow = mainWindow
@@ -206,24 +207,3 @@ class AssignNmrAtoms4AxisCodesPopup(CcpnDialogMainWidget):
 
     def _okCallback(self):
         self.accept()
-        # return self.getSelectedObjects()
-
-
-if __name__ == '__main__':
-    from ccpn.ui.gui.widgets.Application import TestApplication
-
-
-    app = TestApplication()
-
-    from ccpn.ui.gui.popups.AssignAmbiguousNmrAtomsPopup import AssignNmrAtoms4AxisCodesPopup
-
-    popup = AssignNmrAtoms4AxisCodesPopup(None,
-                               nmrAtoms=['H', 'Hn', 'Hr', 'F', 'Ca'],
-                               checked=['H'],
-                               relativeContribuitions=rc,
-                               size=[500, 450],
-                               grid=(0, 0))
-
-    popup.show()
-    popup.raise_()
-    app.start()

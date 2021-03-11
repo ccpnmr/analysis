@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-11 12:20:56 +0000 (Thu, March 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-11 12:37:22 +0000 (Thu, March 11, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -930,7 +930,7 @@ class Project(AbstractWrapperObject):
         """
         if self._apiNmrProject.root._upgradedFromV2:
             # reset the noise levels
-            self._setNoiseLevels()
+            self._setNoiseLevels(alwaysSetNoise=True)
 
     def _validateDataUrlAndFilePaths(self, newDataUrlPath=None):
         """Perform validate operation for setting dataUrl from preferences - to be called after loading
@@ -1559,14 +1559,14 @@ class Project(AbstractWrapperObject):
             if not spectrum.sliceColour:
                 spectrum.sliceColour = spectrum.positiveContourColour
 
-    def _setNoiseLevels(self):
+    def _setNoiseLevels(self, alwaysSetNoise=False):
         """Set noise levels for spectra that have not been defined
         """
         # 20190520:ED new code to set colours and update contour levels
         from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
 
         for spectrum in self.spectra:
-            if not spectrum.noiseLevel:
+            if not spectrum.noiseLevel or alwaysSetNoise:
                 try:
                     setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                                               setPositiveContours=True, setNegativeContours=True,

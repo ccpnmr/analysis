@@ -5,7 +5,7 @@ A widget to get     concentration Values and  concentrationUnits
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-30 16:47:46 +0100 (Wed, September 30, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-03-11 18:03:31 +0000 (Thu, March 11, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -78,7 +78,7 @@ class _NmrAtomsSelection(CcpnDialog):
     def addButtons(self):
         global i
         texts = ['info', 'UncheckAll', 'Cancel', 'Apply']
-        calls = [self.showIndo, self.uncheckAll, self.reject, self._apply ]
+        calls = [self.showInfo, self.uncheckAll, self.reject, self._apply]
         buttons = ButtonList(self, texts=texts, callbacks=calls, grid = (i,0), gridSpan=(i,2))
 
     def setRelativeContribuitions(self, relativeContribuitions=DefaultAtomWeights):
@@ -140,7 +140,7 @@ class _NmrAtomsSelection(CcpnDialog):
         nn = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
         return nn
 
-    def showIndo(self):
+    def showInfo(self):
         text = 'Select NmrAtoms which are present in all selected input Spectra.\n' \
                'Selecting multiple non compatible NmrAtoms can result in an empty bar chart.'
         showInfo('NmrAtom info',text)

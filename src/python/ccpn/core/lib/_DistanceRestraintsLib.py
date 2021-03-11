@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-05 11:01:32 +0000 (Fri, March 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-11 18:03:31 +0000 (Thu, March 11, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2188,7 +2188,11 @@ def _newV3DistanceRestraint(v3PeakList,
                 newV3Restraint = v3RestraintList.newRestraint(peaks=tempConstraint.peaks)
                 rc = newV3Restraint.newRestraintContribution(**dd)
                 for constraintItem in tempConstraint.sortedItems():
-                    _assignments = (assignmentMap[resonanceMap.get(x, x)] for x in constraintItem.resonances)
+                    _assignments = []
+                    for x in constraintItem.resonances:
+                        _assignment = assignmentMap[resonanceMap.get(x, x)]
+                        _assignment = [x if x is not None else '' for x in _assignment  ]
+                        _assignments.append(_assignment)
                     assignments = ['.'.join(ss) for ss in _assignments]
                     rc.addRestraintItem(assignments)
             project.deleteObjects(*[tempV3Dataset]) # delete the temp ConstrainList

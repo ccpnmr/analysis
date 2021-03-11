@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:31:17 +0000 (Thu, January 14, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-03-11 18:03:31 +0000 (Thu, March 11, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,7 @@ from ccpn.util.Logging import getLogger
 
 
 ASSIGNEDPEAKSCHANGED = '_assignedPeaksChanged'
-
+UnknownIsotopeCode = '?'
 
 class NmrAtom(AbstractWrapperObject):
     """NmrAtom objects are used for assignment. An NmrAtom within an assigned NmrResidue is

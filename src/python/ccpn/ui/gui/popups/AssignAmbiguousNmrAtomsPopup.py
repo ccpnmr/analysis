@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-12 15:18:03 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 15:35:58 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -79,12 +79,13 @@ ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
 
 class ObjectsSelectionWidget(Widget):
 
-    def __init__(self, parent, mainWindow, labelName, objects, checkedObjects = None, priorityNames=None,
+    def __init__(self, parent, mainWindow, labelName, objects, checkedObjects = None, dimLabel=None, priorityNames=None,
                  enabledAll=True, **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
         self.mainWindow = mainWindow
         self.labelName = labelName
+        self.dimLabel = dimLabel or ''
         self.objects = objects
         self.objectsDict = {x.name:x for x in objects if hasattr(x, 'name')}
         self.priorityNames  = priorityNames or []
@@ -95,9 +96,8 @@ class ObjectsSelectionWidget(Widget):
         self._setWidgets()
 
     def _setWidgets(self):
-        i = 0
-        labelnmrAtomNames = Label(self, text=self.labelName, grid=(i, 0), vAlign='t')
-        self.scrollArea = ScrollArea(self, setLayout=False, grid=(i, 1), hAlign='c')
+        j = 0
+        self.scrollArea = ScrollArea(self, setLayout=False, grid=(j, 1), hAlign='c')
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = Frame(self, setLayout=True)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -115,7 +115,7 @@ class ObjectsSelectionWidget(Widget):
             self.allCheckBoxes.append(atomSelection)
             n += 1
 
-        i += 1
+        j += 1
         for groupNmrAtoms in allOthersNmrAtoms:
             if len(groupNmrAtoms) > 0:
                 n += 1
@@ -126,7 +126,7 @@ class ObjectsSelectionWidget(Widget):
 
                     self.allCheckBoxes.append(atomSelection)
                     n += 1
-        i += 1
+        j += 1
 
     def getSelectedObjects(self):
         selected = []
@@ -186,9 +186,9 @@ class AssignNmrAtoms4AxisCodesPopup(CcpnDialogMainWidget):
     def _createWidgets(self):
         global i
         axisLabel = Label(self.mainWidget, 'AxisCode', grid=(i,0))
-        nmrAtomLabel = Label(self.mainWidget, 'NmrAtoms', grid=(i,1), hAlign='c')
+        nmrAtomLabel = Label(self.mainWidget, 'NmrAtoms', grid=(i,1),)# hAlign='c')
         i += 1
-        HLine(self.mainWidget, grid=(i, 0), height=10)  # colour=getColours()[DIVIDER],
+        HLine(self.mainWidget, grid=(i, 0), gridSpan=(1,2), height=10)  # colour=getColours()[DIVIDER],
         i += 1
 
     def _createCheckBoxes(self, _dict, checkAll=False, enabledAll=True):
@@ -199,9 +199,11 @@ class AssignNmrAtoms4AxisCodesPopup(CcpnDialogMainWidget):
             checkedObjects = []
             if checkAll:
                 checkedObjects = nmrAtoms
+
+            axisCodeLabel = Label(self.mainWidget, text=axisCode, grid=(i, 0), vAlign='t')
             selectionWidget = ObjectsSelectionWidget(self.mainWidget, self.mainWindow, axisCode, nmrAtoms,
                                                      priorityNames=PriorityNmrAtoms, checkedObjects=checkedObjects,
-                                                     enabledAll=enabledAll, grid=(i,0))
+                                                     enabledAll=enabledAll, grid=(i,1))
             self.selectionWidgets.append(selectionWidget)
             # HLine(self.mainWidget, grid=(i, 0), gridSpan=(1, 3), height=15)  # colour=getColours()[DIVIDER],
             i+=1

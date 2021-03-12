@@ -138,7 +138,7 @@ def assignBetas(nmrResidue: NmrResidue, peaks: typing.List[Peak], axisCode='C'):
         peaks[0].assignDimension(axisCode=axisCode, value=[nmrResidue.fetchNmrAtom(name='CB')])
 
 
-def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalShiftList, prior: float = 0.05, resShifts = None) -> list:
+def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalShiftList, prior: float = 0.05, resShifts=None) -> list:
     """
     Takes an NmrResidue and a ChemicalShiftList and returns a dictionary of the residue type to
     confidence levels for that NmrResidue.
@@ -342,6 +342,7 @@ def propagateAssignments(peaks: typing.List[Peak] = None, referencePeak: Peak = 
                 for nmrAtom in assignNmrAtoms:
                     peak.assignDimension(axisCode, nmrAtom)
 
+
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import _getResidueProbability
 
 
@@ -354,8 +355,8 @@ def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
         apiShiftLists = [shiftList._wrappedData for shiftList in shiftLists]
 
         apiShifts = [[(apiSpinSystem, [(resonance, shift)
-                      for resonance in apiSpinSystem.resonances
-                      for shift in [resonance.findFirstShift(parentList=apiShiftList)] if shift])
+                                       for resonance in apiSpinSystem.resonances
+                                       for shift in [resonance.findFirstShift(parentList=apiShiftList)] if shift])
                       for apiSpinSystem in apiSpinSystems
                       ]
                      for apiShiftList in apiShiftLists]
@@ -378,7 +379,7 @@ def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
             hash = ii
             probHash = probs[hash] = {}
 
-            for jj, _spinSystems  in enumerate(apiShifts):
+            for jj, _spinSystems in enumerate(apiShifts):
 
                 spinHash = probHash[jj] = {}
 
@@ -454,7 +455,7 @@ def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
                         scoreDicts = []
                         ccpCodes = getCcpCodes(apiChain)
 
-                        for scores in probsList.values():       # should iterate through residues
+                        for scores in probsList.values():  # should iterate through residues
                             scoreDict = {}
                             for ccpCode in ccpCodes:
                                 scoreDict[ccpCode] = None
@@ -927,7 +928,7 @@ def refitPeaks(peaks: Sequence[Peak], fitMethod: str = GAUSSIANMETHOD, singularM
 
 ######## CCPN Internal routines used to assign via Drag&Drop from SideBar ###########
 
-def _matchAxesToNmrAtomNames(axisCodes, nmrAtomNames, exactMatch:bool=False, matchingChar:int=1):
+def _matchAxesToNmrAtomNames(axisCodes, nmrAtomNames, exactMatch: bool = False, matchingChar: int = 1):
     """
     Make a dict of matching axisCodes, nmrAtomNames.
     Key: the axisCode; value: a list of matching NmrAtom names
@@ -948,16 +949,18 @@ def _matchAxesToNmrAtomNames(axisCodes, nmrAtomNames, exactMatch:bool=False, mat
                 if ax == naName:
                     dd[ax].append(naName)
             else:
-                if len(ax)>=matchingChar and len(naName)>=matchingChar:
+                if len(ax) >= matchingChar and len(naName) >= matchingChar:
                     if ax[:matchingChar] == naName[:matchingChar]:
                         dd[ax].append(naName)
     return dd
+
 
 def _getNmrAtomForName(nmrAtoms, nmrAtomName):
     """
     :return: The NmrAtom object for a given Name or return None. NmrAtoms list should not contain duplicates.
     """
     return ([na for na in nmrAtoms if nmrAtomName == na.name][:1] or [None])[0]
+
 
 def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
     """
@@ -1027,7 +1030,6 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
                                  in peak.axisCodes if na.isotopeCode == UnknownIsotopeCode or not na.isotopeCode]
 
         _assignPeakFromNmrAtomDict(peakGroup, unambiguousNmrAtomsDict, ambiguousNmrAtomsDict, overwrite=overwrite)
-
 
 def _finaliseAssignment(peak, axisCode4NmrAtomsDict, overwrite=False):
     for _axisCode, _nmrAtoms in axisCode4NmrAtomsDict.items():

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-26 16:47:33 +0000 (Tue, January 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 17:15:36 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -641,7 +641,7 @@ def newObjectList(klasses):
         for result in results:
             result._finaliseAction('create')
         # return the primary object
-        return results[0] if result else None
+        return results[0] if results else None
 
     return theDecorator
 

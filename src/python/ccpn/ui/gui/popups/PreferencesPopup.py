@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-05 19:15:58 +0000 (Fri, March 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 18:01:39 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -59,7 +59,8 @@ from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
 from ccpn.ui.gui.widgets.FileDialog import SpectrumFileDialog, ProjectFileDialog, AuxiliaryFileDialog, \
-    LayoutsFileDialog, MacrosFileDialog, PluginsFileDialog, PipelineFileDialog, ExecutablesFileDialog
+    LayoutsFileDialog, MacrosFileDialog, PluginsFileDialog, PipelineFileDialog, ExecutablesFileDialog, \
+    ProjectSaveFileDialog
 from ccpn.framework.lib.pipeline.PipesLoader import _fetchUserPipesPath
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
@@ -95,7 +96,9 @@ def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, 
     # update the current userWorkingPath in the active file dialogs
     if userWorkingPath:
         _dialog = ProjectFileDialog(parent=self.mainWindow)
-        _dialog.initialPath = aPath(userWorkingPath)
+        _dialog.initialPath = aPath(userWorkingPath).filepath
+        _dialog = ProjectSaveFileDialog(parent=self.mainWindow)
+        _dialog.initialPath = aPath(userWorkingPath).filepath
 
     self._updateDisplay(updateColourScheme, updateSpectrumDisplays)
 
@@ -1199,8 +1202,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
             return partial(self._setUserDataPath, value)
 
     def _setUserDataPath(self, value):
-
         self.preferences.general.dataPath = value
+        dialog = SpectrumFileDialog(parent=self)
+        dialog.initialPath = aPath(value).filepath
 
     def _getUserDataPath(self):
         currentDataPath = aPath(self.userDataPathText.text() or '~')
@@ -1219,6 +1223,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _setUserWorkingPath(self, value):
         self.preferences.general.userWorkingPath = value
+        dialog = ProjectFileDialog(parent=self)
+        dialog.initialPath = aPath(value).filepath
 
     def _getUserWorkingPath(self):
         currentDataPath = aPath(self.userWorkingPathData.text() or '~')
@@ -1237,6 +1243,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _setAuxiliaryFilesPath(self, value):
         self.preferences.general.auxiliaryFilesPath = value
+        dialog = AuxiliaryFileDialog(parent=self)
+        dialog.initialPath = aPath(value).filepath
 
     def _getAuxiliaryFilesPath(self):
         currentDataPath = aPath(self.auxiliaryFilesData.text() or '~')
@@ -1283,6 +1291,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _setUserLayoutsPath(self, value):
         self.preferences.general.userLayoutsPath = value
+        dialog = LayoutsFileDialog(parent=self)
+        dialog.initialPath = aPath(value).filepath
 
     def _getUserLayoutsPath(self):
         currentDataPath = aPath(self.userLayoutsPathData.text() or '~')
@@ -1301,6 +1311,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _setMacroFilesPath(self, value):
         self.preferences.general.userMacroPath = value
+        dialog = MacrosFileDialog(parent=self)
+        dialog.initialPath = aPath(value).filepath
 
     def _getMacroFilesPath(self):
         currentDataPath = aPath(self.macroPathData.text() or '~')
@@ -1319,6 +1331,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _setPluginFilesPath(self, value):
         self.preferences.general.userPluginPath = value
+        dialog = PluginsFileDialog(parent=self)
+        dialog.initialPath = aPath(value).filepath
 
     def _getPluginFilesPath(self):
         currentDataPath = aPath(self.pluginPathData.text() or '~')
@@ -1337,6 +1351,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _setPipesFilesPath(self, value):
         self.preferences.general.userPipesPath = value
+        dialog = PipelineFileDialog(parent=self)
+        dialog.initialPath = aPath(value).filepath
 
     def _getUserPipesPath(self):
         currentDataPath = aPath(self.userPipesPath.text() or '~')
@@ -1406,6 +1422,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         if 'externalPrograms' in self.preferences:
             if 'pymol' in self.preferences.externalPrograms:
                 self.preferences.externalPrograms.pymol = value
+                # dialog = ExecutablesFileDialog(parent=self)
+                # dialog.initialPath = aPath(value).filepath
 
     def _getPymolPath(self):
         # NOTE:ED - native dialog on OSX does not show contents of an .app dir.
@@ -1429,6 +1447,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         if 'externalPrograms' in self.preferences:
             if 'PDFViewer' in self.preferences.externalPrograms:
                 self.preferences.externalPrograms.PDFViewer = value
+                # # might cause a clash here
+                # dialog = ExecutablesFileDialog(parent=self)
+                # dialog.initialPath = aPath(value).filepath
 
     def _getPDFViewerPath(self):
         # NOTE:ED - native dialog on OSX does not show contents of an .app dir.

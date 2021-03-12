@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-08 16:27:02 +0000 (Mon, March 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 18:01:39 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -287,7 +287,7 @@ class SubstancePropertiesPopup(ComplexAttributeEditorPopupABC):
 
     def _initialiseCompoundView(self):
         view = self.compoundView.compoundView
-        if self.obj:
+        if self.obj and isinstance(self.obj, Substance):
             chemComps = self.obj._getChemComps() # will take only if there is one. We don't want display a chain here!
             if len(chemComps) == 1: # if chemComp give priority to the Smiles, as it preserves the atom nomenclature.
                 from ccpn.ui.gui.widgets.CompoundView import importChemComp

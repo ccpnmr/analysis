@@ -485,17 +485,17 @@ class FileSystemTreePanel(QtWidgets.QWidget, Base):
     self.fileTypePulldown = PulldownList(frame2, texts=texts, objects=self.fileTypes,
                                          callback=self.setFileType, grid=(0,0))
     
-    self.findButton = Button(frame2, '', grid=(0,2),
+    self.findButton = Button(frame2, 'Find', grid=(0,2),
                              callback=self.searchFiles,
                              tipText='Find files',
                              icon=path.join(ICON_DIR,'edit-find.png'))
 
-    self.homeButton = Button(frame2, '', grid=(0,3),
+    self.homeButton = Button(frame2, 'Home', grid=(0,3),
                              callback=self.goHome,
                              tipText='Go to home directiry',
                              icon=path.join(ICON_DIR,'go-home.png'))
 
-    self.rootButton = Button(frame2, '', grid=(0,4),
+    self.rootButton = Button(frame2, 'Root', grid=(0,4),
                              callback=self.goRoot,
                              tipText='Go to root directory',
                              icon=path.join(ICON_DIR,'drive.png'))

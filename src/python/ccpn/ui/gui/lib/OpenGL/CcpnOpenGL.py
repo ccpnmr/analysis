@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 18:01:38 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -96,7 +96,6 @@ from ccpn.ui.gui.lib.mouseEvents import \
     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK, \
     makeDragEvent
-
 
 from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT, VBO
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
@@ -746,6 +745,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_SPINNINGRATE] = spectrumView.spectrum.spinningRate
 
         indices = getAxisCodeMatchIndices(self.strip.axisCodes, spectrumView.spectrum.axisCodes)
+        # only need the axes for this spectrum
+        indices = indices[:spectrumView.spectrum.dimensionCount]
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds, self._spectrumValues[1].regionBounds)
 
@@ -812,7 +813,7 @@ class CcpnGLWidget(QOpenGLWidget):
             return 1.0
 
     def resizeGL(self, w, h):
-        """Resize event form the openGL architecture
+        """Resize event from the openGL architecture
         """
         # must be set here to catch the change of screen - possibly when unplugging a monitor
         self.refreshDevicePixelRatio()
@@ -836,6 +837,7 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                         self.axisT, -1.0, 1.0)
         currentShader.setPMatrix(self._uPMatrix)
+        currentShader.setMVMatrix(self._IMatrix)
 
         # needs to be offset from (0, 0) for mouse scaling
         if self._drawRightAxis and self._drawBottomAxis:
@@ -1183,7 +1185,6 @@ class CcpnGLWidget(QOpenGLWidget):
     def _scaleToXAxis(self, rescale=True, update=False):
         _useFirstDefault = getattr(self.strip.spectrumDisplay, '_useFirstDefault', False)
         if (self._aspectRatioMode or _useFirstDefault):
-            mby = 0.5 * (self.axisT + self.axisB)
 
             if (self._aspectRatioMode == 2) or _useFirstDefault:
                 ax0 = self._getValidAspectRatio(self._axisCodes[0])
@@ -1204,6 +1205,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 height = (self.h - self.AXIS_MOUSEYOFFSET) if self._drawBottomAxis else self.h
 
             ratio = (height / width) * 0.5 * abs((self.axisL - self.axisR) * ax1 / ax0)
+            mby = 0.5 * (self.axisT + self.axisB)
             self.axisB = mby + ratio * self.sign(self.axisB - mby)
             self.axisT = mby - ratio * self.sign(mby - self.axisT)
 
@@ -1216,7 +1218,6 @@ class CcpnGLWidget(QOpenGLWidget):
     def _scaleToYAxis(self, rescale=True, update=False):
         _useFirstDefault = getattr(self.strip.spectrumDisplay, '_useFirstDefault', False)
         if (self._aspectRatioMode or _useFirstDefault):
-            mbx = 0.5 * (self.axisR + self.axisL)
 
             if (self._aspectRatioMode == 2) or _useFirstDefault:
                 ax0 = self._getValidAspectRatio(self._axisCodes[0])
@@ -1237,6 +1238,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 height = (self.h - self.AXIS_MOUSEYOFFSET) if self._drawBottomAxis else self.h
 
             ratio = (width / height) * 0.5 * abs((self.axisT - self.axisB) * ax0 / ax1)
+            mbx = 0.5 * (self.axisR + self.axisL)
             self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
             self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
 
@@ -1382,14 +1384,15 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
 
-        self.rescale()
+        else:
+            self.rescale()
 
-        # put stuff in here that will change on a resize
-        self._updateAxes = True
-        for gr in self.gridList:
-            gr.renderMode = GLRENDERMODE_REBUILD
-        self._GLPeaks.rescale()
-        self._GLMultiplets.rescale()
+            # put stuff in here that will change on a resize
+            self._updateAxes = True
+            for gr in self.gridList:
+                gr.renderMode = GLRENDERMODE_REBUILD
+            self._GLPeaks.rescale()
+            self._GLMultiplets.rescale()
 
         self._clearAndUpdate()
         self.update()
@@ -1913,6 +1916,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # This is the correct blend function to ignore stray surface blending functions
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
 
+        self._setColourScheme()
         self.setBackgroundColour(self.background, silent=True)
         _shader = self.globalGL._shaderProgramTex
         _shader.makeCurrent()
@@ -2823,6 +2827,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 dPos = cursorCoordinate[0]
 
             else:
+                # for other Nd dimensions
                 dPos = pos = self._orderedAxes[n].position  # if n in self._orderedAxes else 0
                 activeOther.append(axisCode)  #[0])
 
@@ -3101,7 +3106,7 @@ class CcpnGLWidget(QOpenGLWidget):
             # NOTE:ED needed to cure that strange pyqt5 window-mask
             GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_FALSE)
 
-            yield       # pass control to the calling function
+            yield  # pass control to the calling function
 
         finally:
             GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
@@ -3131,8 +3136,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.drawCursors()
 
     def _paintGL(self):
-        w = self.w
-        h = self.h
 
         if self._updateBackgroundColour:
             self._updateBackgroundColour = False
@@ -3147,6 +3150,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
         currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
         currentShader.setPMatrix(self._uPMatrix)
+        currentShader.setMVMatrix(self._IMatrix)
 
         with self._disableGLAliasing():
             # draw the grid components
@@ -3157,7 +3161,6 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                         self.axisT, -1.0, 1.0)
         currentShader.setPMatrix(self._uPMatrix)
-        currentShader.setMVMatrix(self._IMatrix)
 
         # draw the spectra, need to reset the viewport
         self.viewports.setViewport(self._currentView)
@@ -3321,8 +3324,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                     GLContext=self)
 
                 self._buildSpectrumSetting(spectrumView=spectrumView)
-                spectrumView._buildGLContours(self._contourList[spectrumView],
-                                              firstShow=self._preferences.automaticNoiseContoursOnFirstShow)
+                spectrumView._buildGLContours(self._contourList[spectrumView])
 
                 rebuildFlag = True
 
@@ -5580,7 +5582,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                                        valueToRatio(p2[1], axisLimitB, axisLimitT))
 
                                         alpha = min([1.0, c / transparency])
-                                        # gridGLList.colors = np.append(gridGLList.colors, (r, g, b, alpha, r, g, b, alpha))
                                         colorList += (r, g, b, alpha, r, g, b, alpha)
 
                                         gridGLList.numVertices += 2

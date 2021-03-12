@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 15:32:06 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 18:01:39 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1480,7 +1480,7 @@ class ContoursTab(Widget):
     def _setContourLevels(self):
         """Estimate the contour levels for the current spectrum
         """
-        posBase, negBase, posMult, negMult, posLevels, negLevels = getContourLevelsFromNoise(self.spectrum, setNoiseLevel=False,
+        posBase, negBase, posMult, negMult, posLevels, negLevels = getContourLevelsFromNoise(self.spectrum,
                                                                                              setPositiveContours=self.setPositiveContours.isChecked(),
                                                                                              setNegativeContours=self.setNegativeContours.isChecked(),
                                                                                              useSameMultiplier=self.setUseSameMultiplier.isChecked(),

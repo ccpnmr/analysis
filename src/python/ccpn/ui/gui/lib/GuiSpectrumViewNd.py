@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:54:06 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 18:01:38 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -169,17 +169,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                     contour[:, 1] += yTranslate
                     printer.writePolyline(contour, colour)
 
-    def _buildGLContours(self, glList, firstShow=True):
+    def _buildGLContours(self, glList):
         """Build the contour arrays
         """
-        # GWV 02122020: Should always have been set on newObject or restored object
-
-        # if not self.spectrum.noiseLevel and firstShow:
-        #     getLogger().info("estimating noise level for spectrum %s" % str(self.spectrum.pid))
-        #     setContourLevelsFromNoise(self.spectrum, setNoiseLevel=True,
-        #                               setPositiveContours=True, setNegativeContours=True,
-        #                               useSameMultiplier=True)
-
         if self.spectrum.positiveContourBase is None or self.spectrum.positiveContourBase == 0.0:
             raise RuntimeError('Positive Contour Base is not defined')
 

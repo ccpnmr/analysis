@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-08 16:27:01 +0000 (Mon, March 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 18:01:38 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.DataSet import DataSet
 from ccpn.core.RestraintList import RestraintList
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
+from ccpn.util.Common import _incrementObjectName, _validateName
 from ccpnmodel.ccpncore.lib import V2Upgrade
 from ccpnmodel.v_3_0_2.upgrade import getNmrMolSystems
 
@@ -2187,7 +2188,11 @@ def _newV3DistanceRestraint(v3PeakList,
                 newV3Restraint = v3RestraintList.newRestraint(peaks=tempConstraint.peaks)
                 rc = newV3Restraint.newRestraintContribution(**dd)
                 for constraintItem in tempConstraint.sortedItems():
-                    _assignments = (assignmentMap[resonanceMap.get(x, x)] for x in constraintItem.resonances)
+                    _assignments = []
+                    for x in constraintItem.resonances:
+                        _assignment = assignmentMap[resonanceMap.get(x, x)]
+                        _assignment = [x if x is not None else '' for x in _assignment  ]
+                        _assignments.append(_assignment)
                     assignments = ['.'.join(ss) for ss in _assignments]
                     rc.addRestraintItem(assignments)
             project.deleteObjects(*[tempV3Dataset]) # delete the temp ConstrainList

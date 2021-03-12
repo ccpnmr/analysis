@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 14:37:54 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 18:01:38 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,12 +25,9 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-import sys
 from collections import namedtuple
-from PyQt5 import QtWidgets
+from ccpn.ui.gui.lib.OpenGL import GL
 
-
-from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
 
 viewportDimensions = namedtuple('viewportDimensions', 'left bottom width height')
 
@@ -76,8 +73,8 @@ class GLViewports(object):
 
         if name in self._views:
             thisView = self._views[name]
-            w = thisView[0].width()
-            h = thisView[0].height()
+            w = thisView[0].w  # width()
+            h = thisView[0].h  # height()
             l = setVal(thisView[1], w, h, 0)
             b = setVal(thisView[2], w, h, 0)
             wi = setVal(thisView[3], w, h, l)

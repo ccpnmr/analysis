@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:02 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 18:01:39 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -543,8 +543,7 @@ class Gui1dWidget(CcpnGLWidget):
                                                                     drawMode=GL.GL_LINE_STRIP,
                                                                     dimension=2,
                                                                     GLContext=self)
-                spectrumView._buildGLContours(self._contourList[spectrumView],
-                                              firstShow=self._preferences.automaticNoiseContoursOnFirstShow)
+                spectrumView._buildGLContours(self._contourList[spectrumView])
 
                 self._buildSpectrumSetting(spectrumView=spectrumView, stackCount=stackCount)
                 # if self._stackingMode:
@@ -2056,6 +2055,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         # This is the correct blend function to ignore stray surface blending functions
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
+
+        self._setColourScheme()
         self.setBackgroundColour(self.background, silent=True)
         # _shader = self.globalGL._shaderProgramTex
         # _shader.setBlendEnabled(0)

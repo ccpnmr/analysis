@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-12 18:01:38 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 18:19:44 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -109,6 +109,7 @@ class ObjectsSelectionWidget(Widget):
                     self.allCheckBoxes.append(atomSelection)
                     n += 1
         j += 1
+        self._checkExactMatches()
 
     def getSelectedObjects(self):
         selected = []
@@ -119,6 +120,13 @@ class ObjectsSelectionWidget(Widget):
                    selected.append(obj)
         return selected
 
+    def _checkExactMatches(self):
+        """
+        :return: set checked any box with same name as the axisCode. (just in case we missed it)
+        """
+        for cb in self.allCheckBoxes:
+            if cb.text() == self.labelName:
+                cb.setChecked(True)
 
 i = 0
 

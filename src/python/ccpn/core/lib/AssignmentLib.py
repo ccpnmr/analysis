@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-12 17:24:51 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 17:45:02 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1019,7 +1019,6 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
                 na = _getNmrAtomForName(nmrAtoms, _unambAxisNmrAtomNames[0])
                 unambiguousNmrAtomsDict[axisCode].add(na)
             if len(_unambAxisNmrAtomNames) > 1: # one axis but multiple nmrAtoms. 1:many {'Hn': ['H', 'Hn']}
-                exactMatchNames = [name for name in _unambAxisNmrAtomNames if name == axisCode]
                 matchedNmrAtoms = list(map(lambda x: _getNmrAtomForName(nmrAtoms, x), _unambAxisNmrAtomNames))
                 ambiguousNmrAtomsDict[axisCode].update(matchedNmrAtoms)
             if len(_ambNmrAtomNames) >= 1:  # multiple axes and multiple nmrAtoms. many:many {'Hn': ['H',...], 'Hc': ['H',...]}

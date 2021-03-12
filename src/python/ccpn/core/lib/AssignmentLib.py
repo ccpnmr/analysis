@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-12 16:28:03 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 17:24:51 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1019,6 +1019,7 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
                 na = _getNmrAtomForName(nmrAtoms, _unambAxisNmrAtomNames[0])
                 unambiguousNmrAtomsDict[axisCode].add(na)
             if len(_unambAxisNmrAtomNames) > 1: # one axis but multiple nmrAtoms. 1:many {'Hn': ['H', 'Hn']}
+                exactMatchNames = [name for name in _unambAxisNmrAtomNames if name == axisCode]
                 matchedNmrAtoms = list(map(lambda x: _getNmrAtomForName(nmrAtoms, x), _unambAxisNmrAtomNames))
                 ambiguousNmrAtomsDict[axisCode].update(matchedNmrAtoms)
             if len(_ambNmrAtomNames) >= 1:  # multiple axes and multiple nmrAtoms. many:many {'Hn': ['H',...], 'Hc': ['H',...]}
@@ -1032,15 +1033,17 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
         _assignPeakFromNmrAtomDict(peakGroup, unambiguousNmrAtomsDict, ambiguousNmrAtomsDict, overwrite=overwrite)
 
 def _finaliseAssignment(peak, axisCode4NmrAtomsDict, overwrite=False):
-    for _axisCode, _nmrAtoms in axisCode4NmrAtomsDict.items():
-        oldNmrAtoms = []
-        if not overwrite:  ## Add to existing. We could add a popup to query what to do. "Replace or add" assignment
-            axisCodesDims = peak.peakList.spectrum.getByAxisCodes('dimensions', [_axisCode], exactMatch=True)
-            if axisCodesDims:
-                dim = axisCodesDims[0] - 1 if axisCodesDims[0] > 0 else axisCodesDims[0]
-                oldNmrAtoms = list(peak.dimensionNmrAtoms[dim])
-        newNmrAtoms = list(set(list(_nmrAtoms) + oldNmrAtoms))
-        peak.assignDimension(_axisCode, newNmrAtoms)
+    from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+    with undoBlockWithoutSideBar():
+        for _axisCode, _nmrAtoms in axisCode4NmrAtomsDict.items():
+            oldNmrAtoms = []
+            if not overwrite:  ## Add to existing. We could add a popup to query what to do. "Replace or add" assignment
+                axisCodesDims = peak.peakList.spectrum.getByAxisCodes('dimensions', [_axisCode], exactMatch=True)
+                if axisCodesDims:
+                    dim = axisCodesDims[0] - 1 if axisCodesDims[0] > 0 else axisCodesDims[0]
+                    oldNmrAtoms = list(peak.dimensionNmrAtoms[dim])
+            newNmrAtoms = list(set(list(_nmrAtoms) + oldNmrAtoms))
+            peak.assignDimension(_axisCode, newNmrAtoms)
 
 
 def _assignPeakFromNmrAtomDict(peaks, unambiguousNmrAtomsDict, ambiguousNmrAtomsDict,

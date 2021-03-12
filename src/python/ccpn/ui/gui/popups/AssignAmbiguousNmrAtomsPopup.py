@@ -1,5 +1,6 @@
 """
-Module Documentation here
+This popup is used for selecting nmrAtoms when drag&dropping to peaks from sidebar and multiple options are available.
+No assignment is actually done here.
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -14,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-12 16:28:04 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 17:24:51 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,42 +26,22 @@ __date__ = "$Date: 2021-03-05 11:01:32 +0000 (Fri, March 05, 2021) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.core.Spectrum import Spectrum
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.ListWidget import ListWidget
-from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.guiSettings import getColours, SOFTDIVIDER
 from collections import defaultdict
-from functools import partial
-from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
-from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from collections import OrderedDict
+
 from ccpn.ui.gui.widgets.Widget import Widget
-from collections import OrderedDict as od
+
 from itertools import groupby
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.CheckBox import CheckBox, EditableCheckBox
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
-from ccpn.core.NmrResidue import NmrResidue
+
 from ccpn.core.NmrAtom import NmrAtom
 
 
@@ -113,7 +94,6 @@ class ObjectsSelectionWidget(Widget):
             atomSelection = CheckBox(self.scrollAreaWidgetContents, text=nmrAtomName,
                                      checked=nmrAtomName in self.checkedObjectsDict.keys(),
                                      checkable=self.enabledAll, grid=(n, 0))
-            atomSelection.setChecked(nmrAtomName == self.labelName)
             self.allCheckBoxes.append(atomSelection)
             n += 1
 
@@ -126,7 +106,6 @@ class ObjectsSelectionWidget(Widget):
                                              checked=nmrAtomName in self.checkedObjectsDict.keys(),
                                              checkable=self.enabledAll, grid=(n, 0))
 
-                    atomSelection.setChecked(nmrAtomName == self.labelName)
                     self.allCheckBoxes.append(atomSelection)
                     n += 1
         j += 1

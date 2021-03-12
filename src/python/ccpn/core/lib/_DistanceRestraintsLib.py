@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-12 18:01:38 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 18:11:49 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -24,7 +24,7 @@ __date__ = "$Date: 2021-02-22 15:44:00 +0000 (Mon, February 22, 2021) $"
 
 ###### WARNING: Private routines
 ##     Many routines are directly imported from V2 (ccpnmr2.5/python/ccpnmr/analysis/core/ConstraintBasic.py)
-##     and intput/output API objects.
+##     and input/output API objects.
 
 import re, operator
 import uuid
@@ -35,7 +35,6 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.DataSet import DataSet
 from ccpn.core.RestraintList import RestraintList
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
-from ccpn.util.Common import _incrementObjectName, _validateName
 from ccpnmodel.ccpncore.lib import V2Upgrade
 from ccpnmodel.v_3_0_2.upgrade import getNmrMolSystems
 
@@ -2140,13 +2139,15 @@ def _getRestraintsMapping(constraintSet, molSystem=None):
 
 def _newDataSet(project, name=None, **kwargs):
     name = name or 'my%s'%DataSet.className
-    name = _incrementObjectName(project, DataSet._pluralLinkName, name)
+    # name = _incrementObjectName(project, DataSet._pluralLinkName, name)
+    name = DataSet._uniqueName(project=project, name=name)
     ds = project.newDataSet(name=name, **kwargs)
     return ds
 
 def _newDistanceRestraintList(project, dataset=None, name=None):
     name  = name or 'my%s'%RestraintList.className
-    name = _incrementObjectName(project, RestraintList._pluralLinkName, name)
+    # name = _incrementObjectName(project, RestraintList._pluralLinkName, name)
+    name = RestraintList._uniqueName(project=project, name=name)
     if not dataset:
         dataset = _newDataSet(project)
     return dataset.newRestraintList(restraintType='Distance', name=name)

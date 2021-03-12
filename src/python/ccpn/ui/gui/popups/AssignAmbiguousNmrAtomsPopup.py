@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-12 15:35:58 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 15:52:23 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -112,6 +112,7 @@ class ObjectsSelectionWidget(Widget):
             atomSelection = CheckBox(self.scrollAreaWidgetContents, text=nmrAtomName,
                                      checked=nmrAtomName in self.checkedObjectsDict.keys(),
                                      checkable=self.enabledAll, grid=(n, 0))
+            atomSelection.setChecked(nmrAtomName == self.labelName)
             self.allCheckBoxes.append(atomSelection)
             n += 1
 
@@ -124,6 +125,7 @@ class ObjectsSelectionWidget(Widget):
                                              checked=nmrAtomName in self.checkedObjectsDict.keys(),
                                              checkable=self.enabledAll, grid=(n, 0))
 
+                    atomSelection.setChecked(nmrAtomName == self.labelName)
                     self.allCheckBoxes.append(atomSelection)
                     n += 1
         j += 1
@@ -148,7 +150,7 @@ class AssignNmrAtoms4AxisCodesPopup(CcpnDialogMainWidget):
     FIXEDWIDTH = False
     FIXEDHEIGHT = False
 
-    title = 'NmrAtoms assignment option.'
+    title = 'NmrAtoms assignment options'
     def __init__(self, parent=None, mainWindow=None, title=title, axisCode4NmrAtomsDict=None,
                  checkedAxisCode4NmrAtomsDict = None, uncheckableObjects = None, **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title,
@@ -176,7 +178,8 @@ class AssignNmrAtoms4AxisCodesPopup(CcpnDialogMainWidget):
         # self._createCheckBoxes(self.uncheckablesDict, checkAll=False, enabledAll=False)
 
         # enable the buttons
-        self.setOkButton(callback=self._okCallback, tipText='Assign selected NmrAtoms to each AxisCode', text='Ok', enabled=True)
+        tipText = 'Add selected NmrAtoms to existing peak assignment.'
+        self.setOkButton(callback=self._okCallback,tipText =tipText, text='Add', enabled=True)
         self.setCloseButton(callback=self.reject, tipText='Close')
         self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
 
@@ -207,6 +210,7 @@ class AssignNmrAtoms4AxisCodesPopup(CcpnDialogMainWidget):
             self.selectionWidgets.append(selectionWidget)
             # HLine(self.mainWidget, grid=(i, 0), gridSpan=(1, 3), height=15)  # colour=getColours()[DIVIDER],
             i+=1
+
 
     def getSelectedObjects(self):
         dd = defaultdict(set)

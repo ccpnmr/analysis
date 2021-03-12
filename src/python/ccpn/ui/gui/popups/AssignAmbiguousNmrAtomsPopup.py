@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-11 20:25:30 +0000 (Thu, March 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 15:18:03 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -148,12 +148,11 @@ class AssignNmrAtoms4AxisCodesPopup(CcpnDialogMainWidget):
     FIXEDWIDTH = False
     FIXEDHEIGHT = False
 
-    title = 'AssignNmrAtoms for AxisCodes'
+    title = 'NmrAtoms assignment option.'
     def __init__(self, parent=None, mainWindow=None, title=title, axisCode4NmrAtomsDict=None,
                  checkedAxisCode4NmrAtomsDict = None, uncheckableObjects = None, **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title,
                          size=(300, 300), minimumSize=None, **kwds)
-
 
         if mainWindow:
             self.mainWindow = mainWindow
@@ -170,10 +169,11 @@ class AssignNmrAtoms4AxisCodesPopup(CcpnDialogMainWidget):
         self.axisCode4NmrAtomsDict = axisCode4NmrAtomsDict or defaultdict(set)
         self.checkedAxisCode4NmrAtomsDict = checkedAxisCode4NmrAtomsDict or defaultdict(set)
         self.selectionWidgets = []
+        self._createWidgets()
         # self.uncheckablesDict = {'Un-assignable':uncheckableObjects}
-        self._createWidgets(self.axisCode4NmrAtomsDict, enabledAll=True)
-        self._createWidgets(self.checkedAxisCode4NmrAtomsDict, checkAll=True)
-        # self._createWidgets(self.uncheckablesDict, checkAll=False, enabledAll=False)
+        self._createCheckBoxes(self.axisCode4NmrAtomsDict, enabledAll=True)
+        self._createCheckBoxes(self.checkedAxisCode4NmrAtomsDict, checkAll=True)
+        # self._createCheckBoxes(self.uncheckablesDict, checkAll=False, enabledAll=False)
 
         # enable the buttons
         self.setOkButton(callback=self._okCallback, tipText='Assign selected NmrAtoms to each AxisCode', text='Ok', enabled=True)
@@ -183,8 +183,15 @@ class AssignNmrAtoms4AxisCodesPopup(CcpnDialogMainWidget):
         self.__postInit__()
         self._okButton = self.dialogButtons.button(self.OKBUTTON)
 
+    def _createWidgets(self):
+        global i
+        axisLabel = Label(self.mainWidget, 'AxisCode', grid=(i,0))
+        nmrAtomLabel = Label(self.mainWidget, 'NmrAtoms', grid=(i,1), hAlign='c')
+        i += 1
+        HLine(self.mainWidget, grid=(i, 0), height=10)  # colour=getColours()[DIVIDER],
+        i += 1
 
-    def _createWidgets(self, _dict, checkAll=False, enabledAll=True):
+    def _createCheckBoxes(self, _dict, checkAll=False, enabledAll=True):
         """Create the widgets for the popup
         """
         global i

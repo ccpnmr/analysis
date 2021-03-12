@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-12 15:18:03 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 16:28:03 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1060,7 +1060,7 @@ def _assignPeakFromNmrAtomDict(peaks, unambiguousNmrAtomsDict, ambiguousNmrAtoms
     if ambiguousNmrAtomsDict or unambiguousNmrAtomsDict:
         from ccpn.ui.gui.popups.AssignAmbiguousNmrAtomsPopup import AssignNmrAtoms4AxisCodesPopup
         w = AssignNmrAtoms4AxisCodesPopup(None, axisCode4NmrAtomsDict= ambiguousNmrAtomsDict,
-                                          checkedAxisCode4NmrAtomsDict = unambiguousNmrAtomsDict,)
+                                          checkedAxisCode4NmrAtomsDict = unambiguousNmrAtomsDict, peaks=peaks)
         result = w.exec_()
         if result:
             axisCode4NmrAtomsDict = w.getSelectedObjects()

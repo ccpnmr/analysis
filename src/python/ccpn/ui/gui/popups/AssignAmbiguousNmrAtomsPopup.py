@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-12 15:52:23 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-12 16:28:04 +0000 (Fri, March 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -60,7 +60,8 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CheckBox import CheckBox, EditableCheckBox
 
-
+from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.NmrAtom import NmrAtom
 
 
 PriorityNmrAtoms = [
@@ -152,7 +153,7 @@ class AssignNmrAtoms4AxisCodesPopup(CcpnDialogMainWidget):
 
     title = 'NmrAtoms assignment options'
     def __init__(self, parent=None, mainWindow=None, title=title, axisCode4NmrAtomsDict=None,
-                 checkedAxisCode4NmrAtomsDict = None, uncheckableObjects = None, **kwds):
+                 checkedAxisCode4NmrAtomsDict = None, peaks=None, uncheckableObjects = None, **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title,
                          size=(300, 300), minimumSize=None, **kwds)
 
@@ -171,6 +172,11 @@ class AssignNmrAtoms4AxisCodesPopup(CcpnDialogMainWidget):
         self.axisCode4NmrAtomsDict = axisCode4NmrAtomsDict or defaultdict(set)
         self.checkedAxisCode4NmrAtomsDict = checkedAxisCode4NmrAtomsDict or defaultdict(set)
         self.selectionWidgets = []
+        self.peaks = peaks or []
+        self.nmrResidues = set()
+        self._updateNmrResidues(self.axisCode4NmrAtomsDict)
+        self._updateNmrResidues(self.checkedAxisCode4NmrAtomsDict)
+
         self._createWidgets()
         # self.uncheckablesDict = {'Un-assignable':uncheckableObjects}
         self._createCheckBoxes(self.axisCode4NmrAtomsDict, enabledAll=True)
@@ -186,8 +192,28 @@ class AssignNmrAtoms4AxisCodesPopup(CcpnDialogMainWidget):
         self.__postInit__()
         self._okButton = self.dialogButtons.button(self.OKBUTTON)
 
+    def _updateNmrResidues(self, theDict):
+        for nmrAtoms in theDict.values():
+            for na in nmrAtoms:
+                if isinstance(na, NmrAtom):
+                    self.nmrResidues.add(na.nmrResidue)
+
     def _createWidgets(self):
         global i
+
+        self.scrollArea = ScrollArea(self.mainWidget, setLayout=False, grid=(i, 0), gridSpan=(1,2), hAlign='l')
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollAreaWidgetContents = Frame(self.mainWidget, setLayout=True)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        # self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
+        peaksPids = ', '.join([p.id for p in self.peaks])
+        peakLabel = Label(self.scrollAreaWidgetContents, 'Peak(s): %s' %peaksPids, grid=(0,0))
+        nrPids = ', '.join([nr.id for nr in self.nmrResidues])
+        nmrResidueLabel = Label(self.scrollAreaWidgetContents, 'NmrResidue(s): %s' %(nrPids), grid=(1, 0))
+
+        i += 1
+        divLabel = Label(self.mainWidget, ' ', grid=(i, 0))
+        i += 1
         axisLabel = Label(self.mainWidget, 'AxisCode', grid=(i,0))
         nmrAtomLabel = Label(self.mainWidget, 'NmrAtoms', grid=(i,1),)# hAlign='c')
         i += 1

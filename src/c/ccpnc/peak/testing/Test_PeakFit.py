@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-02-28 10:45:56 +0000 (Fri, February 28, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-12 17:10:37 +0000 (Fri, March 12, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -153,7 +153,14 @@ if __name__ == '__main__':
     def _gaussFWHM(ii, jj, sigmax=1.0, sigmay=1.0, mx=0.0, my=0.0, h=1.0):
         """Calculate the normal(gaussian) distribution in Full-width-Half-Maximum.
 
-        (https://arthursonzogni.com/Diagon/)
+        (https://arthursonzogni.com/Diagon/#math)
+
+                    ⎛              ⎛       2          2⎞⎞
+                    ⎜              ⎜⎛  x  ⎞    ⎛  y  ⎞ ⎟⎟
+            h ⋅ exp ⎜-4 ⋅ log(2) ⋅ ⎜⎜─────⎟  + ⎜─────⎟ ⎟⎟
+                    ⎜              ⎜⎜fwhm ⎟    ⎜fwhm ⎟ ⎟⎟
+                    ⎝              ⎝⎝    x⎠    ⎝    y⎠ ⎠⎠
+
         """
         pos = [ii - mx, jj - my]
 
@@ -164,10 +171,25 @@ if __name__ == '__main__':
 
     def _gaussSigma(ii, jj, sigmax=1.0, sigmay=1.0, mx=0.0, my=0.0, h=1.0):
         """Calculate the normal(gaussian) distribution.
+
+                ⎛     2       2⎞
+                ⎜ ⎛ x⎞    ⎛ y⎞ ⎟
+            exp ⎜-⎜──⎟  - ⎜──⎟ ⎟
+                ⎜ ⎜ς ⎟    ⎜ς ⎟ ⎟
+                ⎝ ⎝ x⎠    ⎝ y⎠ ⎠
+
+            ⎛            h           ⎞
+            ⎜────────────────────────⎟
+            ⎜    ____________________⎟
+            ⎜   ╱    ⎛ 2⎞            ⎟
+            ⎜  ╱ 4 ⋅ ⎝π ⎠ ⋅ ⎛ς  ⋅ ς ⎞⎟
+            ⎝╲╱             ⎝ x    y⎠⎠
+
         """
         pos = [ii - mx, jj - my]
 
-        ex = np.exp(-(pos[0] ** 2 / sigmax ** 2) - (pos[1] ** 2 / sigmay ** 2))
+        # ex = np.exp(-(pos[0] ** 2 / sigmax ** 2) - (pos[1] ** 2 / sigmay ** 2))
+        ex = np.exp(-(pos[0] / sigmax) ** 2 - (pos[1] / sigmay) ** 2)
         return (h / np.sqrt(4 * (np.pi ** 2) * (sigmax * sigmay))) * ex
 
 
@@ -218,30 +240,33 @@ if __name__ == '__main__':
     # convert the sigma into a FWHM and plot between volumeIntegralLimits * FWHM
     sigmax = 1.0
     mx = 0.0
-    integralLimit = 2.0
+    integralLimit = 4.0 # plot to a distance of 4 sigma
     numPoints=45
 
     thisFWHM = sigma2fwhm(sigmax)
     # height, (l1, l2) = (-40069.83984375, (18.269018037244678 / thisFWHM, 2.781543880701065 / thisFWHM))
-    height, (l1, l2) = (1317701.0, (21.94079803302884 / thisFWHM, 11.697283014655113 / thisFWHM))
+    # height, (l1, l2) = (1.0, (2.0 / thisFWHM, 2.0 / thisFWHM))
+    height, (l1, l2) = (1.0, (1.0, 1.0)) # should give area 2pi
+    # height, (l1, l2) = (2.0, (2.5, 2.7)) # should give area 2pi * height * l1 * l2
+    # height, (l1, l2) = (1317701.0, (21.94079803302884 / thisFWHM, 11.697283014655113 / thisFWHM))
     # estimated 2305274.18593
 
     limX = l1 * integralLimit * thisFWHM / 2.0
     limY = l2 * integralLimit * thisFWHM / 2.0
 
-    # fig = plt.figure(figsize=(10, 8), dpi=100)
-    # ax0 = fig.gca(projection='3d')
-    # plotSigmaRange = ((0, limX), (0, limY))
-    # xxS = np.linspace(*plotSigmaRange[0], numPoints)
-    # yyS = np.linspace(*plotSigmaRange[1], numPoints)
-    # xmS, ymS = np.meshgrid(xxS, yyS)
-    # peakArrayFWHM = np.array(_gaussFWHM(xmS, ymS, sigmax=l1*sigmax, sigmay=l2*sigmax, mx=mx, my=mx, h=height), dtype=np.float32)
-    # ax0.plot_wireframe(xmS, ymS, peakArrayFWHM)
+    fig = plt.figure(figsize=(10, 8), dpi=100)
+    ax0 = fig.gca(projection='3d')
+    plotSigmaRange = ((0, limX), (0, limY))
+    xxS = np.linspace(*plotSigmaRange[0], numPoints)
+    yyS = np.linspace(*plotSigmaRange[1], numPoints)
+    xmS, ymS = np.meshgrid(xxS, yyS)
+    peakArrayFWHM = np.array(_gaussFWHM(xmS, ymS, sigmax=l1*sigmax, sigmay=l2*sigmax, mx=mx, my=mx, h=height), dtype=np.float32)
+    ax0.plot_wireframe(xmS, ymS, peakArrayFWHM)
 
-    # # only need to use quadrant
-    # vol = 4.0*np.trapz(np.trapz(peakArrayFWHM, xxS), yyS)        # why does this work?
-    # print('>>>volume', vol)
-    #
+    # only need to use quadrant
+    vol = 4.0*np.trapz(np.trapz(peakArrayFWHM, xxS), yyS)        # why does this work?
+    print(f'>>> 2d volume (should be 2pi for unit gauss)   actual: {vol}    error: {height*l1*l2*2*np.pi - vol}')
+
     # make a 2d peak of unit height
     lim = 3 * integralLimit * thisFWHM / 2.0
     xxSig = np.linspace(-lim, lim, res)
@@ -304,23 +329,22 @@ if __name__ == '__main__':
 
     # only need to use half
     area = 2.0*np.trapz(vals, xxSig)     # THIS WORKS! - uses the correct x points for the trapz area
-    print('>>>volume new', abs(height * np.power(area, 2) * l1 * l2))
+    print(f'>>>volume new  {area}     {abs(height * np.power(area, 2) * l1 * l2)}')
     # estimated = 382919751.28
 
-    # lastArea=None
-    # for numPoints in range(9, 99):
-    #     xxSig = np.linspace(0, lim, numPoints)
-    #     vals = list(make_gauss(xxSig, sigmax, mx, height))
-    #     area = 2.0*np.trapz(vals, xxSig)/height     # THIS WORKS! - uses the correct x points for the trapz area
-    #     if lastArea:
-    #         diff = area-lastArea
-    #         print('>>>', numPoints, area, diff)
-    #         if diff < 1e-8:
-    #             break
-    #     lastArea = area
+    lastArea=None
+    for numPoints in range(9, 99):
+        xxSig = np.linspace(0, lim, numPoints)
+        vals = list(make_gauss(xxSig, sigmax, mx, height))
+        area = 2.0*np.trapz(vals, xxSig)/height     # THIS WORKS! - uses the correct x points for the trapz area
+        if lastArea:
+            diff = area-lastArea
+            print('>>>', numPoints, area, diff)
+            if diff < 1e-8:
+                break
+        lastArea = area
 
     # actually area will be area * FWHM * height / thisFWHM
-
 
     # make a plot
     # fig = plt.figure(figsize=(10, 8), dpi=100)
@@ -339,6 +363,9 @@ if __name__ == '__main__':
     # plt.axis('off')
     # plt.grid(b=None)
     # plt.subplots_adjust(left=-0.1, right=1.1, top=1.2, bottom=-0.1)
+
+    plt.show()
+    sys.exit()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit all peaks in single operation 1

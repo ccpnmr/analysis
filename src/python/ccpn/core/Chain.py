@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-08 13:08:15 +0000 (Mon, March 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-13 15:32:10 +0000 (Sat, March 13, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -583,23 +583,24 @@ def _newChainFromChemComp(project, chemComp, chainCode:str=None, includePseudoAt
     """
     from ccpn.util.Common import _incrementObjectName
     if chemComp:
-        root = project._wrappedData.root
-        moleculeName = _incrementObjectName(root, 'molecules', chemComp.ccpCode)
-        molecule = project._wrappedData.root.newMolecule(name=moleculeName)
-        chemCompVar = (chemComp.findFirstChemCompVar(linking='none') or chemComp.findFirstChemCompVar())
-        molResidue = molecule.newMolResidue(seqCode=1, chemCompVar=chemCompVar)
-        refSampleComponentStore = project._wrappedData.sampleStore.refSampleComponentStore
-        mcompp = refSampleComponentStore.newMolComponent(name=moleculeName)
-        # will need to add to mcompp all possible info we can harvest from the chemcomp. This will appear in the substance
-        # create a v3 chain. which is not frozen to changes.
-        apiMolSystem = project._wrappedData.molSystem
-        chainCode = _incrementObjectName(project, Chain._pluralLinkName, chainCode)
-        newApiChain = apiMolSystem.newChain(molecule=molecule, code=chainCode)
-        chain = project._data2Obj[newApiChain]
-        if not includePseudoAtoms:
-            for residue in chain.residues:
-                residue._removePseudoAtoms() # We should not create them in first place them!
-        return chain
+        with undoBlock():
+            root = project._wrappedData.root
+            moleculeName = _incrementObjectName(root, 'molecules', chemComp.ccpCode)
+            molecule = project._wrappedData.root.newMolecule(name=moleculeName)
+            chemCompVar = (chemComp.findFirstChemCompVar(linking='none') or chemComp.findFirstChemCompVar())
+            molResidue = molecule.newMolResidue(seqCode=1, chemCompVar=chemCompVar)
+            refSampleComponentStore = project._wrappedData.sampleStore.refSampleComponentStore
+            mcompp = refSampleComponentStore.newMolComponent(name=moleculeName)
+            # will need to add to mcompp all possible info we can harvest from the chemcomp. This will appear in the substance
+            # create a v3 chain. which is not frozen to changes.
+            apiMolSystem = project._wrappedData.molSystem
+            chainCode = _incrementObjectName(project, Chain._pluralLinkName, chainCode)
+            newApiChain = apiMolSystem.newChain(molecule=molecule, code=chainCode)
+            chain = project._data2Obj[newApiChain]
+            if not includePseudoAtoms:
+                for residue in chain.residues:
+                    residue._removePseudoAtoms() # We should not create them in first place them!
+            return chain
 
 def getter(self: Substance) -> Tuple[Chain, ...]:
     name = self.name

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-08 13:08:15 +0000 (Mon, March 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-13 15:32:10 +0000 (Sat, March 13, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,8 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import deleteObject, undoStackBlocking, renameObject, undoBlock
+from ccpn.core.lib.ContextManagers import deleteObject, undoStackBlocking, renameObject, undoBlock, \
+    undoBlockWithoutSideBar, notificationEchoBlocking
 
 
 class Residue(AbstractWrapperObject):
@@ -477,8 +478,9 @@ class Residue(AbstractWrapperObject):
         """
         chemAtomNames = [atom.name for atom in self._wrappedData.chemCompVar.chemAtoms]
         pseudoAtoms = [atom for atom in self.atoms if atom.name not in chemAtomNames]
-        with undoBlock():
-            self.project.deleteObjects(*pseudoAtoms)
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                self.project.deleteObjects(*pseudoAtoms)
 
 
 

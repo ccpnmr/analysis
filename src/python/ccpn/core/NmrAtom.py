@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-14 20:14:00 +0000 (Sun, March 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-14 22:45:04 +0000 (Sun, March 14, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -246,7 +246,7 @@ class NmrAtom(AbstractWrapperObject):
                     raise ValueError("Character %s not allowed in ccpn.NmrAtom id : %s.%s.%s.%s"
                                      % (Pid.altCharacter, chainCode, sequenceCode, residueType, name))
 
-            isotopeCode = self.isotopeCode
+            # isotopeCode = self.isotopeCode
             # if name and isotopeCode not in (None, '?'):
             #     # Check for isotope match
             #     if name2IsotopeCode(name) not in (isotopeCode, None):
@@ -393,6 +393,8 @@ class NmrAtom(AbstractWrapperObject):
             self._wrappedData.isotopeCode = UnknownIsotopeCode
             self._wrappedData.name = value
             self._wrappedData.isotopeCode = isotopeCode
+
+            # Don't change/guess isotopeCode. Only user should do.
             # except Exception as es:
             #
             #     raise ValueError("Cannot rename %s type NmrAtom to %s" % (self.name, value))
@@ -507,12 +509,6 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     if not isinstance(isotopeCode, (str, type(None))):
         raise TypeError('isotopeCode {} must be of type string (or None)'.format(isotopeCode))
 
-    # Set isotopeCode if empty
-    if not isotopeCode:
-        if name:
-            isotopeCode = name2IsotopeCode(name) or '?'
-        else:
-            isotopeCode = '?'
 
     # Deal with reserved names
     # serial = None
@@ -560,8 +556,8 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     if comment is not None:
         dd['details'] = comment
 
-    isotopeCode = isotopeCode.upper() if isotopeCode.upper() in DEFAULT_ISOTOPE_DICT.values() else UnknownIsotopeCode
-    # isotope code must be set after creation to avoid restrictions.
+    isotopeCode = isotopeCode if isotopeCode in DEFAULT_ISOTOPE_DICT.values() else UnknownIsotopeCode
+    # Don't guess isotope code. If given it must be set after creation to avoid API restrictions upon creation.
     obj = nmrProject.newResonance(**dd)
     result = self._project._data2Obj.get(obj)
     result.isotopeCode = isotopeCode

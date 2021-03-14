@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-14 14:22:01 +0000 (Sun, March 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-14 23:11:16 +0000 (Sun, March 14, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -31,9 +31,31 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, TextEditorCompoundWidget, \
     PulldownListCompoundWidget, CheckBoxCompoundWidget
 from ccpn.util import Constants as ct
+from functools import partial
 
 MERGE = 'merge'
 
+def _getNmrAtomIsotopeCodes(cls, nmrAtom):
+    priorityIsotopeCodes = [None] + ct.PriorityIsotopeCodes
+    cls.isotopeCode.modifyTexts(priorityIsotopeCodes)
+    _selectIsotopeCodeForName(cls,  isotopeCode=nmrAtom.isotopeCode)
+
+def _selectIsotopeCodeForName(cls, nmrAtomName=None, isotopeCode=None):
+    """
+    :param nmrAtomName:
+    :return: Select a possible option of IsotopeCode based on its name. If not in List, it is added and selected.
+    """
+    from ccpn.util.Common import name2IsotopeCode
+    nmrAtomName = nmrAtomName or cls.name.getText()
+    if not isotopeCode:
+        isotopeCode = name2IsotopeCode(str(nmrAtomName).upper())
+    currentIsotopeCodes = cls.isotopeCode.pulldownList.texts
+    if not isotopeCode in currentIsotopeCodes:
+        cls.isotopeCode.pulldownList.addItem(isotopeCode)
+    cls.isotopeCode.select(isotopeCode)
+
+def _nameChanged(cls, value):
+    _selectIsotopeCodeForName(cls)
 
 class NmrAtomNewPopup(AttributeEditorPopupABC):
     """
@@ -53,27 +75,6 @@ class NmrAtomNewPopup(AttributeEditorPopupABC):
         self.nmrResidue.modifyTexts([x.id for x in self.project.nmrResidues])
         self.nmrResidue.select(self._parentNmrResidue.id)
 
-    def _getNmrAtomIsotopeCodes(self, nmrAtom):
-        """ Add a SHORT list of possible isotopeCodes """
-        priorityIsotopeCodes = [None]+ct.PriorityIsotopeCodes
-        self.isotopeCode.modifyTexts(priorityIsotopeCodes)
-        self._selectIsotopeCodeForName()
-
-    def _selectIsotopeCodeForName(self, nmrAtomName=None):
-        """
-        :param nmrAtomName:
-        :return: Select a possible option of IsotopeCode based on its name. If not in List, it is added and selected.
-        """
-        from ccpn.util.Common import name2IsotopeCode
-        nmrAtomName = nmrAtomName or self.name.getText()
-        guessedIC = name2IsotopeCode(str(nmrAtomName).upper())
-        currentIsotopeCodes = self.isotopeCode.pulldownList.texts
-        if not guessedIC in currentIsotopeCodes:
-            self.isotopeCode.pulldownList.addItem(guessedIC)
-        self.isotopeCode.select(guessedIC)
-
-    def _nameChanged(self, value, *fgd):
-        self._selectIsotopeCodeForName()
 
     klass = NmrAtom
     attributes = [('Name', PulldownListCompoundWidget, getattr, None, _getNewNmrAtomTypes, None, {'editable': True}),
@@ -87,7 +88,7 @@ class NmrAtomNewPopup(AttributeEditorPopupABC):
     def __init__(self, parent=None, mainWindow=None, obj=None, **kwds):
         self._parentNmrResidue = obj
         super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, **kwds)
-        self.name.pulldownList.pulldownTextReady.connect(self._nameChanged)
+        self.name.pulldownList.pulldownTextReady.connect(partial(_nameChanged, self))
 
     def _applyAllChanges(self, changes):
         """Apply all changes - update nmrAtom name
@@ -151,6 +152,7 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
     attributes = [('Pid', EntryCompoundWidget, getattr, None, None, None, {}),
                   ('Name', PulldownListCompoundWidget, getattr, None, _getNmrAtomTypes, None, {'editable': True}),
                   ('NmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNmrResidueTypes, None, {'editable': False}),
+                  ('IsotopeCode', PulldownListCompoundWidget, getattr, setattr, _getNmrAtomIsotopeCodes, None, {'editable': True}),
                   ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   # ('comment', TextEditorCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <',
@@ -163,6 +165,8 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
         atomName = self.name.getText()
         nmrResidue = self.nmrResidue.getText()
         comment = self.comment.getText()
+        isotopeCode = self.isotopeCode.getText()
+        isotopeCode = isotopeCode if isotopeCode in ct.DEFAULT_ISOTOPE_DICT.values() else None
 
         destNmrResidue = self.project.getByPid('NR:{}'.format(nmrResidue))
         if not destNmrResidue:
@@ -174,6 +178,7 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
         if destNmrAtom and destNmrAtom == self.obj:
             # same nmrAtom so skip
             self.obj.comment = comment
+            self.obj.isotopeCode = isotopeCode
 
         elif destNmrAtom:
             # different name and/or different nmrResidue
@@ -182,6 +187,7 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
                 raise ValueError('Cannot re-assign NmrAtom to an existing NmrAtom of another NmrResidue without merging')
             destNmrAtom.mergeNmrAtoms(self.obj)
             destNmrAtom.comment = comment
+            self.destNmrAtom.isotopeCode = isotopeCode
 
         else:
             # assign to a new nmrAtom
@@ -191,7 +197,7 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
                               name=atomName,
                               mergeToExisting=merge)
             self.obj.comment = comment
-
+            self.obj.isotopeCode = isotopeCode
             self.pid.setText(self.obj.pid)
 
     def storeWidgetState(self):

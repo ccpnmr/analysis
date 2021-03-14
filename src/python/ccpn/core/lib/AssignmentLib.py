@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-14 15:15:55 +0000 (Sun, March 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-14 18:46:46 +0000 (Sun, March 14, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1001,8 +1001,10 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
                      axisCode = 'H' -> nmrAtom names = 'H1','H2',... ;  {'H': ['H1','H2'...]}
         ambiguous:   two axisCodes and multiple NmrAtoms matching the axisCode names
                      axisCode1 = 'Hn', axisCode2 = 'Hc' -> nmrAtom names = 'H','H1',...; {'Hn': ['H','H1'], 'Hc': ['H','H1']}
-        ambiguous:   an unique axisCode and but pseudo NmrAtoms not matching the axisCode name
+        ambiguous:   an unique axisCode and but pseudo NmrAtoms not matching the axisCode name or isotopeCodes of spectrum
                      axisCode = 'H' -> nmrAtom names = 'QA','Jolly',... ;  {'H': ['QA','Jolly',...]}
+        ambiguous:   an unique axisCode and but NmrAtoms with name matching axisCode and spectrum isotopeCode
+                     axisCode = 'H' -> nmrAtom names = 'M1','Hn',... ;  {'H': ['M1','Hn',...]} nmrAtom m1 has isotopeCode 1H
 
     Unambiguous nmrAtoms are assigned straight to the peak, if ambiguous nmrAtoms are present a UI will popup.
     Note: If you attempt to assign multiple peaks of different dimensionality at once, it will group based on axisCodes
@@ -1016,7 +1018,8 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
     # group peaks with exact axisCodes match so in case of multiple options we don't need a popup for similar peaks.
     peakGroups = defaultdict(list)
     for obj in peaks:
-        axs = tuple(sorted(x for x in list(obj.axisCodes))) # Please don't sort by first letter code here or defeat the purpose of all filters below.
+        axs = tuple(sorted(x for x in list(obj.axisCodes))) # Please don't sort/match simply by first letter code here
+                                                            # or it defeat the purpose of all filters done below.
         peakGroups[axs].append(obj)
 
     for peakGroup in peakGroups.values():
@@ -1040,16 +1043,19 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
             _unambAxisNmrAtomNames = [name for name in matchedNmrAtomNames if name not in ambiguousAxisNmrAtomNames]
             _ambNmrAtomNames = [name for name in matchedNmrAtomNames if name in ambiguousAxisNmrAtomNames]
 
-            ## fill dicts
-            if len(_unambAxisNmrAtomNames) == 1: # nothing ambiguous, 1:1 {'H': ['H']}
+            ## fill unambiguousNmrAtomsDict and ambiguousNmrAtomsDict dicts.
+            if len(_unambAxisNmrAtomNames) == 1 and len(matchedNmrAtomNames) == 1: # nothing ambiguous, 1:1 {'H': ['H']}
                 na = _getNmrAtomForName(nmrAtoms, _unambAxisNmrAtomNames[0])
                 unambiguousNmrAtomsDict[axisCode].add(na)
+            if len(matchedNmrAtomNames) > 1: # make sure nothing appereas as ambiguous and unambiguous. If this happens, keep only as ambiguous {'Hn': ['H', 'M1']} M1 with 1H isotope code
+                _nmrAtoms = list(map(lambda x: _getNmrAtomForName(nmrAtoms, x), matchedNmrAtomNames))
+                ambiguousNmrAtomsDict[axisCode].update(_nmrAtoms)
             if len(_unambAxisNmrAtomNames) > 1: # one axis but multiple nmrAtoms. 1:many {'Hn': ['H', 'Hn']}
-                matchedNmrAtoms = list(map(lambda x: _getNmrAtomForName(nmrAtoms, x), _unambAxisNmrAtomNames))
-                ambiguousNmrAtomsDict[axisCode].update(matchedNmrAtoms)
+                _nmrAtoms = list(map(lambda x: _getNmrAtomForName(nmrAtoms, x), _unambAxisNmrAtomNames))
+                ambiguousNmrAtomsDict[axisCode].update(_nmrAtoms)
             if len(_ambNmrAtomNames) >= 1:  # multiple axes and multiple nmrAtoms. many:many {'Hn': ['H',...], 'Hc': ['H',...]}
-                ambMatchedNmrAtoms = list(map(lambda x: _getNmrAtomForName(nmrAtoms, x), _ambNmrAtomNames))
-                ambiguousNmrAtomsDict[axisCode].update(ambMatchedNmrAtoms)
+                _nmrAtoms = list(map(lambda x: _getNmrAtomForName(nmrAtoms, x), _ambNmrAtomNames))
+                ambiguousNmrAtomsDict[axisCode].update(_nmrAtoms)
 
         _assignPeakFromNmrAtomDict(peakGroup, unambiguousNmrAtomsDict, ambiguousNmrAtomsDict, overwrite=overwrite)
 
@@ -1070,11 +1076,11 @@ def _finaliseAssignment(peak, axisCode4NmrAtomsDict, overwrite=False):
 def _assignPeakFromNmrAtomDict(peaks, unambiguousNmrAtomsDict, ambiguousNmrAtomsDict,
                                overwrite=False,):
     """
-    :param peak:
-    :param axisCode4NmrAtomsDict:
-    :param ambiguous:
-    :param overwrite:
-    :return:
+    assign peaks by axisCode based on unambiguousNmrAtomsDict and ambiguousNmrAtomsDict dictionaries
+    Dicts Key: the axisCode; Dicts value: a list of matching NmrAtom assignable for that axisCode
+    Dicts should not contains duplicated Values. i.e an NmrAtom or is ambiguous or unambiguous.
+    Overwrite to delete existing assignments.
+    If ambiguous values, a pop-up will appear otherwise will assign directly.
     """
 
     # add feedback for un-assignable nmrAtoms
@@ -1094,5 +1100,10 @@ def _assignPeakFromNmrAtomDict(peaks, unambiguousNmrAtomsDict, ambiguousNmrAtoms
                 _finaliseAssignment(peak, axisCode4NmrAtomsDict, overwrite=overwrite)
 
 def _assignNmrResiduesToPeaks(peaks, nmrResidues):
+    """
+    :param peaks:
+    :param nmrResidues:
+    :return: assign nmrResidues one at the time based on its nmrAtoms.
+    """
     for nmrResidue in nmrResidues:
         _assignNmrAtomsToPeaks(peaks, nmrResidue.nmrAtoms, exactMatch=False)

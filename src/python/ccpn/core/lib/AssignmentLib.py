@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-12 17:45:02 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-14 15:15:55 +0000 (Sun, March 14, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -954,6 +954,28 @@ def _matchAxesToNmrAtomNames(axisCodes, nmrAtomNames, exactMatch: bool = False, 
                         dd[ax].append(naName)
     return dd
 
+def _matchAxesToNmrAtomIsotopeCode(peak, nmrAtoms):
+    """
+    Make a dict of matching axisCodes, nmrAtomNames based on common isotopeCodes between nmrAtom-spectrum isotopeCode.
+    If nmrAtom.isotopeCode is unknown ('?' or None): it is added to all axisCodes values.
+    Key: the axisCode; value: a list of matching NmrAtom names
+    :param peak:
+    :param nmrAtoms:
+    :return:
+    """
+    dd = defaultdict(list)
+    axisCodes = list(peak.axisCodes)
+
+    for axisCode in axisCodes:
+        axisCodesDims = peak.peakList.spectrum.getByAxisCodes('dimensions', [axisCode], exactMatch=True)
+        if axisCodesDims:
+            ic = peak.peakList.spectrum.isotopeCodes[axisCodesDims[0] - 1]
+            for nmrAtom in nmrAtoms:
+                if nmrAtom.isotopeCode == ic:
+                    dd[axisCode].append(nmrAtom.name)
+                if not nmrAtom.isotopeCode or nmrAtom.isotopeCode == UnknownIsotopeCode:
+                    dd[axisCode].append(nmrAtom.name)
+    return dd
 
 def _getNmrAtomForName(nmrAtoms, nmrAtomName):
     """
@@ -965,7 +987,8 @@ def _getNmrAtomForName(nmrAtoms, nmrAtomName):
 def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
     """
     Called for assigning a selected peak via drag&drop of nmrAtoms from SideBar.
-    There are several scenarios divided in ambiguous and unambiguous assignment based on nomenclature matches.
+    There are several scenarios divided in ambiguous and unambiguous assignment based on nomenclature and isotopeCode
+    matches between nmrAtom-spectrum isotopeCodes or nmrAtom-spectrum axisCodes.
     The top cases are:
     
         unambiguous: exactMatch, an unique axisCode and a single NnmAtom which name matches 1:1 the axisCode name
@@ -982,7 +1005,8 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
                      axisCode = 'H' -> nmrAtom names = 'QA','Jolly',... ;  {'H': ['QA','Jolly',...]}
 
     Unambiguous nmrAtoms are assigned straight to the peak, if ambiguous nmrAtoms are present a UI will popup.
-
+    Note: If you attempt to assign multiple peaks of different dimensionality at once, it will group based on axisCodes
+    and will prompt multiple popups if ambiguity cannot be resolved.
     :param peaks:
     :param nmrAtoms:
     :param exactMatch:
@@ -992,7 +1016,7 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
     # group peaks with exact axisCodes match so in case of multiple options we don't need a popup for similar peaks.
     peakGroups = defaultdict(list)
     for obj in peaks:
-        axs = tuple(sorted(x for x in list(obj.axisCodes))) # Please don't sort by first letter code here.
+        axs = tuple(sorted(x for x in list(obj.axisCodes))) # Please don't sort by first letter code here or defeat the purpose of all filters below.
         peakGroups[axs].append(obj)
 
     for peakGroup in peakGroups.values():
@@ -1003,6 +1027,8 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
         ambiguousNmrAtomsDict = defaultdict(set)
         unambiguousNmrAtomsDict = defaultdict(set)
         nameMatchedNmrAtomsDict = _matchAxesToNmrAtomNames(list(peak.axisCodes), nmrAtomNames, exactMatch=exactMatch)
+        isotCodeMatchedNmrAtomsDict = _matchAxesToNmrAtomIsotopeCode(peak, nmrAtoms)
+        nameMatchedNmrAtomsDict.update(isotCodeMatchedNmrAtomsDict)
 
         ## check if same nmrAtoms can be assigned to multiple axisCodes and
         for c in list(combinations(list(nameMatchedNmrAtomsDict.values()), 2)):
@@ -1024,10 +1050,6 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
             if len(_ambNmrAtomNames) >= 1:  # multiple axes and multiple nmrAtoms. many:many {'Hn': ['H',...], 'Hc': ['H',...]}
                 ambMatchedNmrAtoms = list(map(lambda x: _getNmrAtomForName(nmrAtoms, x), _ambNmrAtomNames))
                 ambiguousNmrAtomsDict[axisCode].update(ambMatchedNmrAtoms)
-
-        ## Deal with ambiguous (pseudo)nmrAtoms that cannot be matched by AxisCode, such as Q, M etc they have the isotopeCode=='?'.
-        _filterPseudoNmrAtoms = [ambiguousNmrAtomsDict[axisCode].add(na) for na in nmrAtoms for axisCode
-                                 in peak.axisCodes if na.isotopeCode == UnknownIsotopeCode or not na.isotopeCode]
 
         _assignPeakFromNmrAtomDict(peakGroup, unambiguousNmrAtomsDict, ambiguousNmrAtomsDict, overwrite=overwrite)
 

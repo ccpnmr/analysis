@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-14 19:35:06 +0000 (Sun, March 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-14 20:01:05 +0000 (Sun, March 14, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -490,6 +490,8 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     :param serial: optional serial number.
     :return: a new NmrAtom instance.
     """
+    from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
+
     nmrProject = self._project._wrappedData
     resonanceGroup = self._wrappedData
 
@@ -545,26 +547,17 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
                                 )
                     previous._finaliseAction('rename')
 
-    dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': isotopeCode}
+    dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': UnknownIsotopeCode}
     if serial is None:
         dd['name'] = name
     if comment is not None:
         dd['details'] = comment
 
-    # NOTE:ED - check violated name, replaces the isotopeCode with '?' - follows v2 model check
-    checkIsotopeCode = isotopeCode.upper()
-    if name and not name.startswith(checkIsotopeCode):
-        from ccpn.util.Constants import isotopeRecords
-
-        record = isotopeRecords.get(checkIsotopeCode)
-        if record:
-            isValid = name.startswith(record.symbol) or (name.startswith('Q') and record.symbol == 'H')
-            if not isValid:
-                getLogger().warning("Invalid isotopeCode %s for nmrAtom name %s, setting isotopeCode to '?'" % (isotopeCode, name))
-                dd['isotopeCode'] = '?'
-
+    isotopeCode = isotopeCode.upper() if isotopeCode.upper() in DEFAULT_ISOTOPE_DICT.values() else UnknownIsotopeCode
+    # isotope code must be set after creation to avoid restrictions.
     obj = nmrProject.newResonance(**dd)
     result = self._project._data2Obj.get(obj)
+    result.isotopeCode = isotopeCode
     if result is None:
         raise RuntimeError('Unable to generate new NmrAtom item')
 
@@ -574,12 +567,6 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
         except ValueError:
             getLogger().warning("Could not reset serial of %s to %s - keeping original value"
                                 % (result, serial))
-
-    # if name and name[0] in PSEUDO_ATOM_NAMES:
-    #     # NOTE:ED - this is a hack to allow setting Q pseudoAtom types to isotopeCode 1H
-    #     #           could actually be used to bypass all name checking in the api
-    #     #           shouldn't be needed with the 'or' added to the isValid check above
-    #     obj.__dict__['isotopeCode'] = PSEUDO_ATOM_NAMES[name[0]]
 
     return result
 

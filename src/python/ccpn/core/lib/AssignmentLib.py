@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-14 18:46:46 +0000 (Sun, March 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-14 18:51:00 +0000 (Sun, March 14, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1008,7 +1008,7 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
 
     Unambiguous nmrAtoms are assigned straight to the peak, if ambiguous nmrAtoms are present a UI will popup.
     Note: If you attempt to assign multiple peaks of different dimensionality at once, it will group based on axisCodes
-    and will prompt multiple popups if ambiguity cannot be resolved.
+    and will prompt a popup for each group if ambiguity cannot be resolved.
     :param peaks:
     :param nmrAtoms:
     :param exactMatch:
@@ -1021,7 +1021,7 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
         axs = tuple(sorted(x for x in list(obj.axisCodes))) # Please don't sort/match simply by first letter code here
                                                             # or it defeat the purpose of all filters done below.
         peakGroups[axs].append(obj)
-
+    # we could add a warning in case many groups.
     for peakGroup in peakGroups.values():
         if not peakGroup:
             break

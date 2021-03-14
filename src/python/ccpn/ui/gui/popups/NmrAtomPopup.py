@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-14 14:18:53 +0000 (Sun, March 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-14 14:22:01 +0000 (Sun, March 14, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ class NmrAtomNewPopup(AttributeEditorPopupABC):
 
     def _getNmrAtomIsotopeCodes(self, nmrAtom):
         """ Add a SHORT list of possible isotopeCodes """
-        priorityIsotopeCodes = ct.PriorityIsotopeCodes
+        priorityIsotopeCodes = [None]+ct.PriorityIsotopeCodes
         self.isotopeCode.modifyTexts(priorityIsotopeCodes)
         self._selectIsotopeCodeForName()
 

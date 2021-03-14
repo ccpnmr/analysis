@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-11 18:03:31 +0000 (Thu, March 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-14 19:35:06 +0000 (Sun, March 14, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -149,9 +149,16 @@ class NmrAtom(AbstractWrapperObject):
 
     @property
     def isotopeCode(self) -> str:
-        """isotopeCode of NmrAtom. Set automatically on creation (from NmrAtom name)
-        and cannot be changed later"""
+        """isotopeCode of NmrAtom. Used to facilitate the nmrAtom assignment."""
         return self._wrappedData.isotopeCode
+
+    @isotopeCode.setter
+    def isotopeCode(self, value) -> str:
+        """Set the isotopeCode of NmrAtom. """
+        from ccpn.util import Constants as ct
+        if not self.isotopeCode == value:
+            isotopeCode = value if value in ct.DEFAULT_ISOTOPE_DICT.values() else UnknownIsotopeCode
+            self._wrappedData.isotopeCode = isotopeCode or UnknownIsotopeCode
 
     @property
     def boundNmrAtoms(self) -> 'NmrAtom':

@@ -92,7 +92,7 @@ In that way you need only refresh your peak table once, even when you pick 500 p
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -102,8 +102,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-22 14:48:54 +0100 (Wed, April 22, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-15 10:26:10 +0000 (Mon, March 15, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -115,6 +115,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import unittest
 from ccpn.core.testing.WrapperTesting import WrapperTesting
+from ccpn.util import Constants
 
 
 def notifyfunc(obj, value=None, ll=None):
@@ -228,7 +229,7 @@ class NotificationTest(WrapperTesting):
     # NOtifier suspension has been temporarily disabled,
     # due to problems with suspended delete notifiers.
     # This test should be reinstated, and the suspension should be reinstated and fixed
-    @unittest.skip
+    # @unittest.skip
     def test_notifiers_suspend(self):
         project = self.project
         ll = []
@@ -252,9 +253,10 @@ class NotificationTest(WrapperTesting):
         project._undo.redo()
 
         # NBNB This currently fails, because we have temporarily disabled notification suspension
-        self.assertEqual(ll, [])
+        # was wrong test, because delete bypasses the suspend notification, and two items are created
+        self.assertEqual(ll, ['deletex'])
         project.resumeNotification()
-        self.assertEqual(ll, ['deletex', 'createx'])
+        self.assertEqual(ll, ['deletex', 'createx', 'createx'])
 
         project.removeNotifier(not1)
         project.unRegisterNotifier('Note', 'delete', not2)
@@ -303,10 +305,23 @@ class NotificationTest(WrapperTesting):
         self.assertEqual(spectrum.pid, 'SP:HF-copy')
         self.assertEqual(peakList.pid, 'PL:HF-copy.1')
         self.assertEqual(peak1.pid, 'PK:HF-copy.1.1')
-        self.assertEqual(peak1.position, (1.0, 2.0))
-        self.assertEqual(spectrum.referencePoints, (1.0, 1.0))
+
+        # due to v2 conversion from ppm->point->ppm
+        self.assertAlmostEqual(peak1.ppmPositions[0], 1.0)
+        self.assertAlmostEqual(peak1.ppmPositions[1], 2.0)
+
+        # compare with the references in Constants
+        refpt = tuple([Constants.DEFAULT_SPECTRUM_PARAMETERS[ic]['refpt'] for ic in ('19F', '15N')])
+        self.assertEqual(spectrum.referencePoints, refpt)
+
+        vpp = peak1.spectrum.valuesPerPoint
+        _oldRefPoints = spectrum.referencePoints
         spectrum.referencePoints = (11., 11.)
-        self.assertEqual(peak1.position, (11.0, 12.0))
+
+        # peaks should have moved by amount equal to valuesPerPoint * number of points moved
+        self.assertAlmostEqual(peak1.ppmPositions[0], 1.0 + vpp[0] * (11. - _oldRefPoints[0]))
+        self.assertAlmostEqual(peak1.ppmPositions[1], 2.0 + vpp[1] * (11. - _oldRefPoints[1]))
+
         spectrum.delete()
 
         self.assertEqual(ll, ['newSpectrum', 'newSpectrum2', 'newPeakList', 'newPeak',

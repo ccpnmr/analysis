@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-15 14:04:49 +0000 (Mon, March 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-15 14:20:27 +0000 (Mon, March 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -111,7 +111,7 @@ class NmrAtomNewPopup(AttributeEditorPopupABC):
     def __init__(self, parent=None, mainWindow=None, obj=None, **kwds):
         self._parentNmrResidue = obj
         super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, **kwds)
-        self.name.pulldownList.pulldownTextReady.connect(partial(_nameChanged, self))
+        # self.name.pulldownList.pulldownTextReady.connect(partial(_nameChanged, self)) # don't automatically change anything.
 
     def _getParentNmrResidue(self, nmrAtom):
         return self._parentNmrResidue

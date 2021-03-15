@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-15 13:52:52 +0000 (Mon, March 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-15 14:04:49 +0000 (Mon, March 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -27,16 +27,17 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
 from ccpn.util.Common import greekKey, getIsotopeListFromCode
-from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.NmrAtom import NmrAtom, UnknownIsotopeCode
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, TextEditorCompoundWidget, \
     PulldownListCompoundWidget, CheckBoxCompoundWidget
 from ccpn.util import Constants as ct
 from functools import partial
 
 MERGE = 'merge'
+Undefined = 'Undefined'
 
 def _getNmrAtomIsotopeCodes(cls, nmrAtom):
-    priorityIsotopeCodes = [None] + ct.PriorityIsotopeCodes
+    priorityIsotopeCodes = [Undefined] + ct.PriorityIsotopeCodes
     cls.isotopeCode.modifyTexts(priorityIsotopeCodes)
     _selectIsotopeCodeForName(cls,  isotopeCode=nmrAtom.isotopeCode)
 
@@ -50,6 +51,8 @@ def _selectIsotopeCodeForName(cls, nmrAtomName=None, isotopeCode=None):
     if not isotopeCode:
         isotopeCode = name2IsotopeCode(str(nmrAtomName).upper())
     currentIsotopeCodes = cls.isotopeCode.pulldownList.texts
+    if isotopeCode is None or isotopeCode == UnknownIsotopeCode:
+        isotopeCode = Undefined
     if not isotopeCode in currentIsotopeCodes:
         cls.isotopeCode.pulldownList.insertItem(0, isotopeCode)
     cls.isotopeCode.select(isotopeCode)

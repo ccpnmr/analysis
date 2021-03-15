@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-12 17:15:36 +0000 (Fri, March 12, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-03-15 13:51:52 +0000 (Mon, March 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -490,9 +490,13 @@ class Peak(AbstractWrapperObject):
                 resonances = tuple(x._wrappedData for x in atoms if x is not None)
                 if isotopeCode and isotopeCode != '?':
                     # check for isotope match
-                    if any(x.isotopeCode not in (isotopeCode, '?') for x in resonances):
-                        raise ValueError("NmrAtom assigned to dimension %s must have isotope %s or '?'"
-                                         % (ii + 1, isotopeCode))
+                    for x in resonances:
+                        if x.isotopeCode not in (isotopeCode, '?'):
+                            msg = "IsotopeCodes mismatch between NmrAtom %s and Spectrum. " \
+                                  "Consider changing NmrAtom isotopeCode from %s to %s, None, or '?'" \
+                                  " to avoid future warnings." %(x.name, x.isotopeCode, isotopeCode)
+                            getLogger().warning(msg) # don't raise errors. NmrAtoms are just labels and can be assigned to anything if user wants so.
+
                 dimResonances.append(resonances)
 
         apiPeak.assignByDimensions(dimResonances)

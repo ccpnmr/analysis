@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-26 13:57:18 +0000 (Tue, January 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-15 19:13:50 +0000 (Mon, March 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -58,6 +58,7 @@ from ccpn.core.SampleComponent import SampleComponent
 from ccpn.core.Substance import Substance
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
+from ccpn.core.Atom import Atom
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.Complex import Complex
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
@@ -90,7 +91,7 @@ from ccpn.ui.gui.lib.MenuActions import _createNewDataSet, _createNewPeakList, _
     _createNewNote, _createNewIntegralList, _createNewSample, _createNewStructureEnsemble, _raiseNewChainPopup, _raiseChainPopup, _raiseComplexEditorPopup, \
     _raiseDataSetPopup, _raiseChemicalShiftListPopup, _raisePeakListPopup, _raiseMultipletListPopup, _raiseCreateNmrChainPopup, _raiseNmrChainPopup, \
     _raiseNmrResiduePopup, _raiseNmrResidueNewPopup, _raiseNmrAtomPopup, _raiseNmrAtomNewPopup, _raiseNotePopup, _raiseIntegralListPopup, \
-    _raiseRestraintListEditPopup, _raiseRestraintListNewPopup, _raiseSamplePopup, \
+    _raiseRestraintListEditPopup, _raiseRestraintListNewPopup, _raiseSamplePopup, _raiseAtomNewPopup, _raiseAtomPopup, \
     _raiseSampleComponentPopup, _raiseSpectrumPopup, _raiseSpectrumGroupEditorPopup, _raiseStructureEnsemblePopup, _raiseSubstancePopup
 
 from ccpn.ui.gui.lib.MenuActions import _openItemNoteTable, _openItemChemicalShiftListTable, \
@@ -99,7 +100,7 @@ from ccpn.ui.gui.lib.MenuActions import _openItemNoteTable, _openItemChemicalShi
     _openItemSpectrumGroupDisplay, _openItemStructureEnsembleTable, _openItemDataSetTable, \
     _openItemSpectrumDisplay, _openItemSampleDisplay, _openItemComplexTable, _openItemResidueTable, \
     _openItemSubstanceTable, _openItemSampleComponentTable, _openItemNmrResidueItem, _openItemNmrAtomItem, \
-    _openItemSpectrumInGroupDisplay
+    _openItemSpectrumInGroupDisplay, _openItemAtomItem
 
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, \
@@ -890,7 +891,16 @@ class SideBarStructure(object):
                                       callback=_raiseChainPopup(),
                                       menuAction=_openItemChainTable(position='bottom', relativeTo=None), isDraggable=True, children=[
                         SidebarClassTreeItems(klass=Residue, rebuildOnRename='Chain-ClassTreeItems',
-                                              callback=NYI, menuAction=_openItemResidueTable(position='bottom', relativeTo=None), isDraggable=True),
+                                              callback=NYI, menuAction=_openItemResidueTable(position='bottom', relativeTo=None), isDraggable=True,
+                                              children=[
+                                SidebarItem('<New Atom>', callback=_raiseAtomNewPopup(editMode=False)),
+
+                                SidebarClassItems(klass=Atom, rebuildOnRename='Chain-ClassTreeItems',
+                                                  callback=_raiseAtomPopup(),
+                                                  menuAction=_openItemAtomItem(position='left', relativeTo=None), isDraggable=True),
+                                ]),
+
+
                         ]),
                 ]),
 

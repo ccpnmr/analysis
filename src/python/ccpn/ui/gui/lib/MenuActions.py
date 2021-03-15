@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-26 13:57:18 +0000 (Tue, January 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-15 19:13:50 +0000 (Mon, March 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -54,6 +54,7 @@ from ccpn.ui.gui.popups.IntegralListPropertiesPopup import IntegralListPropertie
 from ccpn.ui.gui.popups.MultipletListPropertiesPopup import MultipletListPropertiesPopup
 from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomEditPopup, NmrAtomNewPopup
 from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup
+from ccpn.ui.gui.popups.AtomPopup import AtomNewPopup, AtomEditPopup
 from ccpn.ui.gui.popups.NmrResiduePopup import NmrResidueEditPopup, NmrResidueNewPopup
 from ccpn.ui.gui.popups.NotesPopup import NotesPopup
 from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
@@ -271,11 +272,17 @@ class _raiseNmrAtomNewPopup(RaisePopupABC):
     popupClass = NmrAtomNewPopup
     # objectArgumentName = 'nmrAtom'
 
+class _raiseAtomPopup(RaisePopupABC):
+    popupClass = AtomEditPopup
+    # objectArgumentName = 'Atom'
+
+class _raiseAtomNewPopup(RaisePopupABC):
+    popupClass = AtomNewPopup
+    # objectArgumentName = 'Atom'
 
 class _raiseNotePopup(RaisePopupABC):
     popupClass = NotesPopup
     # objectArgumentName = 'obj'
-
 
 class _raiseIntegralListPopup(RaisePopupABC):
     popupClass = IntegralListPropertiesPopup
@@ -526,6 +533,9 @@ class _openItemNmrAtomItem(OpenItemABC):
     objectArgumentName = 'nmrAtom'
     hasOpenMethod = False
 
+class _openItemAtomItem(OpenItemABC):
+    objectArgumentName = 'Atom'
+    hasOpenMethod = False
 
 class _openItemChainTable(OpenItemABC):
     openItemMethod = 'showResidueTable'

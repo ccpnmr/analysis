@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-13 15:32:10 +0000 (Sat, March 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-15 19:13:50 +0000 (Mon, March 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -279,6 +279,9 @@ class Chain(AbstractWrapperObject):
         except Exception as e:
             self.project._logger.warning("Error in creating an NmrChain from Chain: %s"
                                          % e)
+    @property
+    def chainType(self):
+        return self._wrappedData.molecule.molType
 
     #=========================================================================================
     # Implementation functions

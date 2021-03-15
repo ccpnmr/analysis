@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-12 17:15:36 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-15 16:22:58 +0000 (Mon, March 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -673,7 +673,7 @@ def deleteObject():
                                                 topObjectsToCheck=(self._wrappedData.topObject,),
                                                 obj=self, trigger='create', preExecution=False,
                                                 objsToBeUnDeleted=apiObjectsCreated),
-                            redo=BlankedPartial(self.delete,
+                            redo=BlankedPartial(partial(func, self),
                                                 obj=self, trigger='delete', preExecution=True)
                             )
 

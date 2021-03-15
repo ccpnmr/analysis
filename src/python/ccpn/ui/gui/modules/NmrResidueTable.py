@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:25 +0000 (Sun, January 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-15 16:22:58 +0000 (Mon, March 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -208,6 +208,24 @@ class NmrResidueTableModule(CcpnModule):
                 self.application.ui.mainWindow.clearMarks()
 
             newWidths = []
+
+            # follow the previous/next nmrResidues to navigate to the correct position
+            offset = nmrResidue.relativeOffset
+            nmrResidue = nmrResidue.mainNmrResidue
+            if offset is not None:
+                if offset < 0:
+                    for _next in range(-offset):
+                        _adjacent = nmrResidue.previousNmrResidue
+                        if not (_adjacent and _adjacent.mainNmrResidue):
+                            break
+                        nmrResidue = _adjacent.mainNmrResidue
+
+                elif offset > 0:
+                    for _next in range(offset):
+                        _adjacent = nmrResidue.nextNmrResidue
+                        if not (_adjacent and _adjacent.mainNmrResidue):
+                            break
+                        nmrResidue = _adjacent.mainNmrResidue
 
             for specDisplay in displays:
                 if self.current.strip in specDisplay.strips:

@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-15 13:51:52 +0000 (Mon, March 15, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-15 16:22:58 +0000 (Mon, March 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core.lib.peakUtils import _getPeakSNRatio, snapToExtremum as peakUtilsSnapToExtremum
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, \
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
     ccpNmrV3CoreSetter, undoBlock, undoBlockWithoutSideBar, undoStackBlocking
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
@@ -813,6 +813,48 @@ class Peak(AbstractWrapperObject):
                     if not (cs.isDeleted or cs._flaggedForDelete):
                         cs._finaliseAction(action)
             setattr(self, RECALCULATESHIFTVALUE, None)
+
+    @deleteObject()
+    def _delete(self):
+        """Delete object, with all contained objects and underlying data.
+        """
+        self.deleteAllNotifiers()
+        self._wrappedData.delete()
+
+    def delete(self):
+        """Delete a peak."""
+        dimensionNmrAtoms = list(self.dimensionNmrAtoms)
+
+        _pre = set(makeIterableList(dimensionNmrAtoms))
+        _cs = set(makeIterableList([shift for nmrAt in _pre for shift in nmrAt.chemicalShifts]))
+        _app = self.project.application
+
+        def _deleteChemShifts(shifts):
+            """Delete chemicalShifts that have no attached peaks"""
+            _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
+            for cs in _delCS:
+                cs.delete()
+
+        with undoBlockWithoutSideBar(application=_app):
+            # add notifiers to stack
+            with undoStackBlocking(application=_app) as addUndoItem:
+                for cs in _cs:
+                    addUndoItem(undo=cs.recalculateShiftValue)
+                    addUndoItem(redo=partial(cs._finaliseAction, 'change'))
+
+            # delete the peak - notifiers handled by decorator
+            self._delete()
+            _deleteChemShifts(_cs)
+            for cs in _cs:
+                # NOTE:ED - check whether recalculate is firing any notifiers
+                cs.recalculateShiftValue()
+                cs._finaliseAction('change')
+
+            # add notifiers to stack
+            with undoStackBlocking(application=_app) as addUndoItem:
+                for cs in _cs:
+                    addUndoItem(undo=cs.recalculateShiftValue)
+                    addUndoItem(redo=partial(cs._finaliseAction, 'change'))
 
     #=========================================================================================
     # CCPN functions

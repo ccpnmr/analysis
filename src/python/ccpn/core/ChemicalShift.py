@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:31:16 +0000 (Thu, January 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-15 16:22:57 +0000 (Mon, March 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -167,7 +167,8 @@ class ChemicalShift(AbstractWrapperObject):
         """
         # NOTE - This is calling the recalculate module that is used by the api
         #       and called when peak ppmPositions have changed
-        Shift.recalculateValue(self._wrappedData)
+        if not (self.isDeleted or self._flaggedForDelete):
+            Shift.recalculateValue(self._wrappedData)
 
     #===========================================================================================
     # new'Object' and other methods

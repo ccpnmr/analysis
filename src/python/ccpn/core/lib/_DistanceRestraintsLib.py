@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-13 15:32:10 +0000 (Sat, March 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-15 19:43:11 +0000 (Mon, March 15, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,8 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.DataSet import DataSet
 from ccpn.core.RestraintList import RestraintList
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
-from ccpn.util.Common import _incrementObjectName, _validateName
+from ccpn.util.Common import _incrementObjectName, _validateName, name2IsotopeCode
+
 from ccpnmodel.ccpncore.lib import V2Upgrade
 from ccpnmodel.v_3_0_2.upgrade import getNmrMolSystems
 
@@ -2273,11 +2274,19 @@ def _tempAtomAndResonanceSets(project):
     :return: atomSets, resonanceSets from nmrAtom.atom
     Use before calling _newV3DistanceRestraint.
     """
+    from ccpn.core.NmrAtom import UnknownIsotopeCode
     if project._wrappedData.resonanceSets: # already in the projects. Don't create new.
         return [], []
     atomSets  = []
     resonanceSets = []
     for i in project.nmrAtoms:
+        if i.isotopeCode == UnknownIsotopeCode:
+            isotopeCode = name2IsotopeCode(str(i.name).upper())
+            if isotopeCode == '1H':
+                getLogger().warning("isotopeCode is Undefined for NmrAtom: %s. "
+                                    "IsotopeCode has to be set for calculating Distance Restraints."
+                                    " Set to %s" %(i.name, isotopeCode))
+                i.isotopeCode = isotopeCode
         nmrProject = project._wrappedData
         v3Atom = i.atom
         resonance = i._wrappedData

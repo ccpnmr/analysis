@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-15 19:13:50 +0000 (Mon, March 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-17 13:13:10 +0000 (Wed, March 17, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -483,13 +483,17 @@ class Residue(AbstractWrapperObject):
                 self.project.deleteObjects(*pseudoAtoms)
 
     def _getChemAtomNames(self):
-        chemAtoms = self._wrappedData.chemCompVar.chemAtoms
+        """
+        :return: gets the atom names from the chemCompVar obj.
+        It uses chemCompVar instead of chemCompVar.chemComp.chemAtoms because the latter includes LinkAtom like 'next_1'
+        """
+        chemCompVar = self._wrappedData.chemCompVar
         chemAtomNames = []
-        for atom in chemAtoms:
-            if atom.name:
-                if not atom.name.startswith(('prev_', 'next_')): # These are from ChemBuild
-                    chemAtomNames.append(atom.name)
+        if chemCompVar:
+            chemAtoms = self._wrappedData.chemCompVar.chemAtoms
+            chemAtomNames = [atom.name for atom in chemAtoms]
         return chemAtomNames
+
 
 #=========================================================================================
 # Connections to parents:

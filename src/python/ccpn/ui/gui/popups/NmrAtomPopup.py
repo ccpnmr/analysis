@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-15 14:20:27 +0000 (Mon, March 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-17 10:04:36 +0000 (Wed, March 17, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -190,7 +190,7 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
                   ('Name', PulldownListCompoundWidget, getattr, None, _getNmrAtomName, None, {'editable': True}),
                   ('NmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNmrResidueTypes, _nmrResidueCallback, {'editable': False}),
                   ('IsotopeCode', PulldownListCompoundWidget, getattr, setattr, _getNmrAtomIsotopeCodes, None, {'editable': True}),
-                  ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {}),
+                  ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {'checkable':True}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   # ('comment', TextEditorCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <',
                   #                                                                      'addWordWrap': True}),
@@ -223,8 +223,8 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
                 # raise error to notify popup
                 raise ValueError('Cannot re-assign NmrAtom to an existing NmrAtom of another NmrResidue without merging')
             destNmrAtom.mergeNmrAtoms(self.obj)
-            destNmrAtom.comment = comment
-            self.destNmrAtom.isotopeCode = isotopeCode
+            destNmrAtom.comment += ' - '+comment
+            destNmrAtom.isotopeCode = isotopeCode
 
         else:
             # assign to a new nmrAtom

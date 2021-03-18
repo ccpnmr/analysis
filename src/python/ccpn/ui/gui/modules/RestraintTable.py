@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-02-25 10:49:18 +0000 (Thu, February 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-18 13:10:48 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,23 +25,17 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
-from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
-from ccpn.ui.gui.widgets.Column import Column, ColumnClass
+from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintListPulldown
 from ccpn.core.RestraintList import RestraintList
 from ccpn.core.Restraint import Restraint
-from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 
 
@@ -194,7 +188,6 @@ class RestraintTable(GuiTable):
                                       ('Comment', lambda restraint: RestraintTable._getCommentText(restraint), 'Notes',
                                        lambda restraint, value: RestraintTable._setComment(restraint, value), None)
                                       ])  # [Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
-                                        # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
 
         row = 0
         self.spacer = Spacer(self._widget, 5, 5,
@@ -322,25 +315,6 @@ class RestraintTable(GuiTable):
                            columnDefs=self.RLcolumns
                            )
 
-        # self.project.blankNotification()
-        # objs = self.getSelectedObjects()
-        #
-        # self._dataFrameObject = self.getDataFrameFromList(table=self,
-        #                                                   buildList=restraintList.restraints,
-        #                                                   colDefs=self.RLcolumns,
-        #                                                   hiddenColumns=self._hiddenColumns)
-        #
-        # # populate from the Pandas dataFrame inside the dataFrameObject
-        # self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-        # self._highLightObjs(objs)
-        # self.project.unblankNotification()
-
-    def setUpdateSilence(self, silence):
-        """
-        Silences/unsilences the update of the table until switched again
-        """
-        self._updateSilence = silence
-
     def _selectionCallback(self, data, *args):
         """
         Notifier Callback for selecting a row in the table
@@ -364,8 +338,7 @@ class RestraintTable(GuiTable):
 
         from ccpn.ui.gui.widgets.MessageDialog import showWarning
         from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
-        from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay, _getCurrentZoomRatio
-        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+        from ccpn.ui.gui.lib.Strip import _getCurrentZoomRatio, navigateToPositionInStrip
 
         if restraint and restraint.peaks:
             self.current.peaks = restraint.peaks
@@ -392,31 +365,6 @@ class RestraintTable(GuiTable):
                                                   widths=widths)
                         if markPositions:
                             display.strips[0]._markSelectedPeaks()
-
-                        # navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0,
-                        #                               widths=newWidths,  #['full'] * len(display.strips[0].axisCodes),
-                        #                               showSequentialResidues=(len(display.axisCodes) > 2) and
-                        #                                                      self._SGwidget.checkBoxes['sequentialStrips']['checkBox'].isChecked(),
-                        #                               markPositions=self._SGwidget.checkBoxes['markPositions']['checkBox'].isChecked()
-                        #                               )
-
-            # # navigate to peaks in selected spectrumDisplays
-            # if self.current.strip is not None:
-            #     validPeakListViews = [pp.peakList for pp in self.current.strip.peakListViews if isinstance(pp.peakList, PeakList)]
-            #
-            #     if peak and peak.peakList in validPeakListViews:
-            #         widths = None
-            #
-            #         if peak.peakList.spectrum.dimensionCount <= 2:
-            #             widths = _getCurrentZoomRatio(self.current.strip.viewRange())
-            #         navigateToPositionInStrip(strip=self.current.strip,
-            #                                   positions=peak.position,
-            #                                   axisCodes=peak.axisCodes,
-            #                                   widths=widths)
-            # else:
-            #     logger.warning('Impossible to navigate to peak position. Set a current strip first')
-
-        # logger.debug(str(NotImplemented))
 
     def _selectionPulldownCallback(self, item):
         """
@@ -446,7 +394,7 @@ class RestraintTable(GuiTable):
         CCPN-INTERNAL: Return number of peaks assigned to NmrAtom in Experiments and PeakLists
         using ChemicalShiftList
         """
-        if len(restraint.restraintContributions)>0:
+        if len(restraint.restraintContributions) > 0:
             if restraint.restraintContributions[0].restraintItems:
                 return ' - '.join(restraint.restraintContributions[0].restraintItems[0])
         else:
@@ -469,9 +417,3 @@ class RestraintTable(GuiTable):
         CCPN-INTERNAL: Notifier callback inactive
         """
         pass
-
-    # def _close(self):
-    #     """
-    #     Cleanup the notifiers when the window is closed
-    #     """
-    #     self.clearTableNotifiers()

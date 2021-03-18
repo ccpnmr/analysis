@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-15 16:22:58 +0000 (Mon, March 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 13:10:48 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -253,17 +253,6 @@ class NmrResidueTableModule(CcpnModule):
                     if strip != self.current.strip and not strip.header.headerVisible:
                         strip.header.reset()
                         strip.header.headerVisible = True
-
-            # # navigate the displays
-            # for display in displays:
-            #     if len(display.strips) > 0:
-            #         newWidths = []  #_getCurrentZoomRatio(display.strips[0].viewBox.viewRange())
-            #         navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0,
-            #                                       widths=newWidths,  #['full'] * len(display.strips[0].axisCodes),
-            #                                       showSequentialResidues=(len(display.axisCodes) > 2) and
-            #                                                              self.nmrResidueTableSettings.sequentialStripsWidget.checkBox.isChecked(),
-            #                                       markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked()
-            #                                       )
 
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
@@ -502,87 +491,6 @@ class NmrResidueTable(GuiTable):
         self.ncWidget.select(nmrChain.pid)
         self._update(nmrChain)
 
-    # def _updateChainCallback(self, data):
-    #   """
-    #   Notifier callback for updating the table
-    #   """
-    #   thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
-    #   nmrChain = data[Notifier.OBJECT]
-    #
-    #   if self._nmrChain in thisChainList:
-    #     trigger = data[Notifier.TRIGGER]
-    #     if nmrChain.pid == self.ncWidget.getText() and trigger == Notifier.DELETE:
-    #
-    #       self.clear()
-    #
-    #     elif nmrChain.pid == self.ncWidget.getText() and trigger == Notifier.CHANGE:
-    #
-    #       self.displayTableForNmrChain(nmrChain)
-    #
-    #     elif trigger == Notifier.RENAME:
-    #       if nmrChain == self._nmrChain:
-    #         self.displayTableForNmrChain(nmrChain)
-    #
-    #   else:
-    #     self.clear()
-    #
-    #   logger.debug('>updateCallback>', data['notifier'], self._nmrChain, data['trigger'], data['object'], self._updateSilence)
-    #
-    # def _updateResidueCallback(self, data):
-    #   """
-    #   Notifier callback for updating the table for change in nmrResidues
-    #   """
-    #   thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
-    #   nmrResidue = data[Notifier.OBJECT]
-    #   trigger = data[Notifier.TRIGGER]
-    #
-    #   if self._nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
-    #     # is the nmrResidue in the visible list
-    #     # TODO:ED move these into the table class
-    #
-    #     if trigger == Notifier.DELETE:
-    #
-    #         # remove item from self._dataFrameObject
-    #
-    #       self._dataFrameObject.removeObject(nmrResidue)
-    #
-    #     elif trigger == Notifier.CREATE:
-    #
-    #       # insert item into self._dataFrameObject
-    #
-    #       if self._nmrChain.nmrResidues and len(self._nmrChain.nmrResidues) > 1:
-    #         self._dataFrameObject.appendObject(nmrResidue)
-    #       else:
-    #         self._update(self._nmrChain)
-    #
-    #     elif trigger == Notifier.CHANGE:
-    #
-    #       # modify the line in the table
-    #       self._dataFrameObject.changeObject(nmrResidue)
-    #
-    #     elif trigger == Notifier.RENAME:
-    #       # get the old pid before the rename
-    #       oldPid = data[Notifier.OLDPID]
-    #
-    #       # modify the oldPid in the objectList, change to newPid
-    #       self._dataFrameObject.renameObject(nmrResidue, oldPid)
-    #
-    #   logger.debug('>updateResidueCallback>', data['notifier'], self._nmrChain, data['trigger'], data['object'], self._updateSilence)
-    #
-    # def _updateAtomCallback(self, data):
-    #   """
-    #   Notifier callback for updating the table
-    #   """
-    #   thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
-    #   nmrAtom = data[Notifier.OBJECT]
-    #   nmrResidue = nmrAtom.nmrResidue
-    #
-    #   if self._nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
-    #     # change the dataFrame for the updated nmrAtom
-    #     self._dataFrameObject.changeObject(nmrResidue)
-    #
-    #   logger.debug('>updateCallback>', data['notifier'], self._nmrChain, data['trigger'], data['object'], self._updateSilence)
-
     def _maximise(self):
         """
         refresh the table on a maximise event
@@ -596,38 +504,10 @@ class NmrResidueTable(GuiTable):
         """
         Update the table with NmrResidues of nmrChain
         """
-        # if not self._updateSilence:
-        # # objs = self.getSelectedObjects()
-        # self.setObjectsAndColumns(nmrChain.nmrResidues,self.NMRcolumns)
-        # # self.setColumns(self.NMRcolumns)
-        # # self.setObjects(nmrChain.nmrResidues)
-        # # self._highLightObjs(objs)
-        # self._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
-        # # self.show()
-
         self.populateTable(rowObjects=nmrChain.nmrResidues,
                            columnDefs=self.NMRcolumns,
                            selectedObjects=self.current.nmrResidues
                            )
-
-        # self.project.blankNotification()
-        # objs = self.getSelectedObjects()
-        #
-        # self._dataFrameObject = self.getDataFrameFromList(table=self,
-        #                                                   buildList=nmrChain.nmrResidues,
-        #                                                   colDefs=self.NMRcolumns,
-        #                                                   hiddenColumns=self._hiddenColumns)
-        #
-        # # populate from the Pandas dataFrame inside the dataFrameObject
-        # self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-        # self._highLightObjs(objs)
-        # self.project.unblankNotification()
-
-    def setUpdateSilence(self, silence):
-        """
-        Silences/unsilences the update of the table until switched again
-        """
-        self._updateSilence = silence
 
     def _selectionCallback(self, data):
         """
@@ -665,6 +545,7 @@ class NmrResidueTable(GuiTable):
     def _selectOnTableCurrentNmrResiduesNotifierCallback(self, data):
         """
         callback from a notifier to select the current NmrResidue
+        :param data:
         """
         currentNmrResidues = data['value']
         self._selectOnTableCurrentNmrResidues(currentNmrResidues)
@@ -674,34 +555,6 @@ class NmrResidueTable(GuiTable):
         highlight  current NmrResidues on the opened table
         """
         self.highlightObjects(currentNmrResidues)
-        # if len(currentNmrResidues) > 0:
-        #     self._highLightObjs(currentNmrResidues)
-        # else:
-        #     self.clearSelection()
-
-    # @staticmethod
-    # def _getCommentText(nmrResidue):
-    #   """
-    #   CCPN-INTERNAL: Get a comment from ObjectTable
-    #   """
-    #   try:
-    #     if nmrResidue.comment == '' or not nmrResidue.comment:
-    #       return ''
-    #     else:
-    #       return nmrResidue.comment
-    #   except:
-    #     return ''
-
-    # @staticmethod
-    # def _setComment(nmrResidue, value):
-    #   """
-    #   CCPN-INTERNAL: Insert a comment into ObjectTable
-    #   """
-    #
-    #   # why is it blanking a notification here?
-    #   # NmrResidueTable.project.blankNotification()
-    #   nmrResidue.comment = value
-    #   # NmrResidueTable.project.unblankNotification()
 
     @staticmethod
     def _getNmrAtomNames(nmrResidue):
@@ -718,72 +571,6 @@ class NmrResidueTable(GuiTable):
         """
         l1 = [peak for atom in nmrResidue.nmrAtoms if not atom._flaggedForDelete for peak in atom.assignedPeaks if not peak._flaggedForDelete]
         return len(set(l1))
-
-    # @staticmethod
-    # def _getMeanNmrResiduePeaksShifts(nmrResidue):
-    #   deltas = []
-    #   peaks = nmrResidue.nmrAtoms[0].assignedPeaks
-    #   for i, peak in enumerate(peaks):
-    #     deltas += [
-    #       (((peak.position[0] - peaks[0].position[0]) * 7) ** 2 + (peak.position[1] - peaks[0].position[1]) ** 2) ** 0.5,]
-    #   if not None in deltas and deltas:
-    #     return round(float(np.mean(deltas)),3)
-    #   return
-
-    # def _setNotifiers(self):
-    #   """
-    #   Set a Notifier to call when an object is created/deleted/renamed/changed
-    #   rename calls on name
-    #   change calls on any other attribute
-    #   """
-    #   self._clearNotifiers()
-    #   self._chainNotifier = Notifier(self.project,
-    #                                      [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-    #                                      NmrChain.__name__,
-    #                                      self._updateChainCallback)
-    #   self._residueNotifier = Notifier(self.project,
-    #                                      [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
-    #                                      NmrResidue.__name__,
-    #                                      self._updateResidueCallback,
-    #                                      onceOnly=True)
-    #   self._atomNotifier = Notifier(self.project,
-    #                                      [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-    #                                      NmrAtom.__name__,
-    #                                      self._updateAtomCallback,
-    #                                      onceOnly=True)
-    #   # very slow
-    #   # self._peakNotifier = Notifier(self.project,
-    #   #                                [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE],
-    #   #                                'Peak',
-    #   #                                self._updateCallback,
-    #   #                                onceOnly = True
-    #   #                               )
-    #
-    #   self._selectOnTableCurrentNmrResiduesNotifier = Notifier(self.current,
-    #                                                       [Notifier.CURRENT],
-    #                                                       targetName='nmrResidues',
-    #                                                       callback=self._selectOnTableCurrentNmrResiduesNotifierCallback)
-    #
-    # def _clearNotifiers(self):
-    #   """
-    #   clean up the notifiers
-    #   """
-    #   if self._chainNotifier is not None:
-    #     self._chainNotifier.unRegister()
-    #   if self._residueNotifier is not None:
-    #     self._residueNotifier.unRegister()
-    #   if self._atomNotifier is not None:
-    #     self._atomNotifier.unRegister()
-    #   if self._peakNotifier is not None:
-    #     self._peakNotifier.unRegister()
-    #   if self._selectOnTableCurrentNmrResiduesNotifier is not None:
-    #     self._selectOnTableCurrentNmrResiduesNotifier.unRegister()
-
-    # def _close(self):
-    #     """
-    #     Cleanup the notifiers when the window is closed
-    #     """
-    #     self.clearTableNotifiers()
 
     def _getPullDownSelection(self):
         return self.ncWidget.getText()
@@ -899,7 +686,6 @@ class _CSMNmrResidueTable(NmrResidueTable):
             # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None, None),
             ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value), None)
             ])  #[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
-        # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
 
         self._widget.setFixedHeight(45)
         self.chemicalShiftsMappingModule = None

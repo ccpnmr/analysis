@@ -6,7 +6,7 @@ tertiary version by Ejb 9/5/17
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-23 10:34:50 +0000 (Mon, November 23, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-18 13:10:47 +0000 (Thu, March 18, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,26 +27,21 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import ChemicalShiftListPulldown
-# from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
-from ccpn.ui.gui.widgets.Column import Column, ColumnClass
+from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.ChemicalShift import ChemicalShift
-from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.Peak import Peak
 from ccpn.core.lib.CallBack import CallBack
-from PyQt5 import QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo, showWarning
 
@@ -245,7 +240,6 @@ class ChemicalShiftTable(GuiTable):
                   lambda cs, value: ChemicalShiftTable._setComment(cs, value), None)
                  ])
         #[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
-        # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
 
         # create the table; objects are added later via the displayTableForNmrChain method
         # initialise the table
@@ -301,7 +295,7 @@ class ChemicalShiftTable(GuiTable):
                                updateFunc=self._update,
                                pullDownWidget=self.CScolumns,
                                callBackClass=ChemicalShift,
-                               selectCurrentCallBack=None,
+                               selectCurrentCallBack=self._selectOnTableCurrentChemShiftNotifierCallback,
                                searchCallBack=None,
                                moduleParent=moduleParent)
 
@@ -394,25 +388,19 @@ class ChemicalShiftTable(GuiTable):
         """
         Notifier Callback for selecting a row in the table
         """
-        # obj = data[CallBack.OBJECT]
-        #
-        # getLogger().debug('ChemicalShiftTable>>> selection', obj)
-        # return
-
         objs = data[CallBack.OBJECT]
-        if not objs:
-            return
-        if isinstance(objs, (tuple, list)):
-            chemicalShift = objs[0]
+        self.current.chemicalShifts = objs or []
+
+        if objs:
+            nmrResidues = tuple(set(cs.nmrAtom.nmrResidue for cs in objs))
         else:
-            chemicalShift = objs
+            nmrResidues = []
 
-        if chemicalShift:
-            self.current.chemicalShift = chemicalShift
-            ChemicalShiftTableModule.currentCallback = {'object': self.chemicalShiftList, 'table': self}
-
-            self.current.nmrAtom = chemicalShift.nmrAtom
-            self.current.nmrResidue = chemicalShift.nmrAtom.nmrResidue
+        if nmrResidues:
+            # set the associated nmrResidue and nmrAtoms
+            nmrAtoms = tuple(set(nmrAtom for nmrRes in nmrResidues for nmrAtom in nmrRes.nmrAtoms))
+            self.current.nmrAtoms = nmrAtoms
+            self.current.nmrResidues = nmrResidues
 
     def _selectionPulldownCallback(self, item):
         """
@@ -506,6 +494,21 @@ class ChemicalShiftTable(GuiTable):
                 popup = NmrAtomEditPopup(parent=self.mainWindow, mainWindow=self.mainWindow, obj=currentNmrAtom)
                 popup.exec_()
 
+    def _selectOnTableCurrentChemShiftNotifierCallback(self, data):
+        """
+        Callback from a notifier to highlight the chemical shifts
+        :param data:
+        """
+        currentShifts = data['value']
+        self._selectOnTableCurrentChemShifts(currentShifts)
+
+    def _selectOnTableCurrentChemShifts(self, currentShifts):
+        """
+        Highlight the list of currentShifts on the table
+        :param currentShifts:
+        """
+        self.highlightObjects(currentShifts)
+
     @staticmethod
     def _getShiftPeakCount(chemicalShift):
         """
@@ -581,6 +584,5 @@ class ChemicalShiftTable(GuiTable):
         """
         Cleanup the notifiers when the window is closed
         """
-        # self.clearTableNotifiers()
         self._chemicalShiftListPulldown.unRegister()
         super()._close()

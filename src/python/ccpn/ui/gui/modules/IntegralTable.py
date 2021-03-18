@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:24 +0000 (Sun, January 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-18 13:10:48 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -23,23 +23,17 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
-# from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
-from ccpn.ui.gui.widgets.Column import Column, ColumnClass
+from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import IntegralListPulldown
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Integral import Integral
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.CallBack import CallBack
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 
 logger = getLogger()
@@ -139,7 +133,6 @@ class IntegralTable(GuiTable):
         """
         obj.baseline = float(value) if value else None
 
-
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, integralList=None, **kwds):
         """
         Initialise the widgets for the module.
@@ -181,14 +174,13 @@ class IntegralTable(GuiTable):
             ('ValueError', lambda il: il.valueError, '', None, None),
             ('Bias', lambda il: il.bias, '', None, None),
             ('FigureOfMerit', lambda il: il.figureOfMerit, figureOfMeritTipText,
-                           lambda il, value: self._setFigureOfMerit(il, value), None),
+             lambda il, value: self._setFigureOfMerit(il, value), None),
             ('Baseline', lambda il: il.baseline, 'Baseline for the integral area', lambda il, value: self._setBaseline(il, value), None),
             ('Slopes', lambda il: il.slopes, '', None, None),
             # ('Annotation', lambda il: il.annotation, '', None, None),
             ('Comment', lambda il: self._getCommentText(il), commentsTipText,
-                           lambda il, value: self._setComment(il, value), None), ]
+             lambda il, value: self._setComment(il, value), None), ]
                 )  #      [Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
-                    # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
 
         # create the table; objects are added later via the displayTableForIntegrals method
         self.spacer = Spacer(self._widget, 5, 5,
@@ -210,14 +202,14 @@ class IntegralTable(GuiTable):
 
         # initialise the table
         super().__init__(parent=parent,
-                            mainWindow=self.mainWindow,
-                            dataFrameObject=None,
-                            setLayout=True,
-                            autoResize=True,
-                            selectionCallback=self._selectionCallback,
-                            actionCallback=self._actionCallback,
-                            multiSelect=True,
-                            grid=(3, 0), gridSpan=(1, 6))
+                         mainWindow=self.mainWindow,
+                         dataFrameObject=None,
+                         setLayout=True,
+                         autoResize=True,
+                         selectionCallback=self._selectionCallback,
+                         actionCallback=self._actionCallback,
+                         multiSelect=True,
+                         grid=(3, 0), gridSpan=(1, 6))
         self.moduleParent = moduleParent
 
         if integralList is not None:
@@ -304,35 +296,6 @@ class IntegralTable(GuiTable):
                            columnDefs=self.ITcolumns
                            )
 
-        # self.project.blankNotification()
-        # objs = self.getSelectedObjects()
-        #
-        # self._dataFrameObject = self.getDataFrameFromList(table=self,
-        #                                                   buildList=integralList.integrals,
-        #                                                   colDefs=self.ITcolumns,
-        #                                                   hiddenColumns=self._hiddenColumns)
-        #
-        # # populate from the Pandas dataFrame inside the dataFrameObject
-        # self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-        # self._highLightObjs(objs)
-        # self.project.unblankNotification()
-
-    def setUpdateSilence(self, silence):
-        """
-        Silences/unsilences the update of the table until switched again
-        """
-        self._updateSilence = silence
-
-    # def _clearRegions(self):
-    #     strip = self.current.strip
-    #     if strip:
-    #         strip.plotWidget.viewBox._clearIntegralRegions()
-
-    # def _showRegions(self):
-    #     strip = self.current.strip
-    #     if strip:
-    #         strip.plotWidget.viewBox._showIntegralLines()
-
     def _selectionCallback(self, data, *args):
         """
         Set as current the selected integrals on the table
@@ -374,50 +337,22 @@ class IntegralTable(GuiTable):
                 self.clearTable()
 
     def _selectOnTableCurrentIntegralsNotifierCallback(self, data):
-        """callback from a notifier to select the current Integrals  """
+        """
+        Callback from a notifier to select the current Integrals
+        """
         currentIntegrals = data['value']
         self._selectOnTableCurrentIntegrals(currentIntegrals)
 
     def _selectOnTableCurrentIntegrals(self, currentIntegrals):
-        """ highlight current integrals on the opened integral table """
-
-        # print(currentIntegrals)
-
+        """
+        Highlight current integrals on the opened integral table
+        """
         self.highlightObjects(currentIntegrals)
-        # if len(currentIntegrals) > 0:
-        #     self._highLightObjs(currentIntegrals)
-        # else:
-        #     self.clearSelection()
-
-    ##### Action callback: Lines on plot
-
-    # def _showLines(self, integral):
-    #
-    #   if self.application is not None:
-    #     self.strip = self.current.strip
-    #     if self.strip is not None:
-    #       self.plotWidget = self.strip.plotWidget
-    #       if len(integral.limits) == 1:
-    #         self.linearRegions.setLines(integral.limits[0])
-    #       self.plotWidget.addItem(self.linearRegions)
-
-    # def _clearLines(self):
-    #   if self.application is not None:
-    #     self.strip = self.current.strip
-    #     if self.strip is not None:
-    #       self.plotWidget = self.strip.plotWidget
-    #       self.plotWidget.removeItem(self.linearRegions)
-    #
-    # def _lineMoved(self):
-    #   integral = self.current.integral
-    #   values = []
-    #   for line in self.linearRegions.lines:
-    #       values.append(line.pos().x())
-    #   if integral is not None:
-    #     integral.limits = [[min(values),max(values)],]
 
     def _navigateToPosition(self):
-        """ If current strip contains the double clicked peak will navigateToPositionInStrip """
+        """
+        If current strip contains the double clicked peak will navigateToPositionInStrip
+        """
         from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 
         integral = self.current.integral
@@ -460,6 +395,4 @@ class IntegralTable(GuiTable):
         """
         Cleanup the notifiers when the window is closed
         """
-        # self.clearTableNotifiers()
-        # self._clearRegions()
         super()._close()

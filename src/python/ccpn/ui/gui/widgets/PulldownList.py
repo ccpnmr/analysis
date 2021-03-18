@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-10 14:23:01 +0000 (Wed, March 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 13:10:48 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -86,6 +86,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
         _list = QtWidgets.QListView()
         self.setView(_list)
         setWidgetFont(_list, )
+        # add a scrollBar for long lists
+        _list.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
 
         self.setEditable(editable)
         if iconSize:
@@ -102,7 +104,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
             self.popupAboutToBeShown.connect(self.clickToShowCallback)
 
         self.setStyleSheet('PulldownList { padding: 3px 3px 3px 3px; combobox-popup: 0; }')
-        # this can now be added to the stylesheet if needed
+        # this (or similar) can now be added to the stylesheet if needed
         # 'QListView::item { padding: 12px; }')
 
         self.setMaxVisibleItems(maxVisibleItems)
@@ -375,13 +377,13 @@ if __name__ == '__main__':
     icons = [None, None, None, Icon(color='#008000')]
 
 
-    def callback(object):
-        print('callback', object)
+    def callback(obj):
+        print('callback', obj)
 
 
-    def callback2(object):
+    def callback2(obj):
         print('HEY')
-        print('callback2', object)
+        print('callback2', obj)
 
 
     def callback21():
@@ -397,16 +399,7 @@ if __name__ == '__main__':
     #popup.setSize(250,50)
     policyDict = dict(
             vAlign='top',
-            hPolicy='expanding',
             )
-    policyDict = dict(
-            vAlign='top',
-            # hAlign='left',
-            )
-    #policyDict = dict(
-    #   hAlign='left',
-    # )
-    #policyDict = {}
 
     pulldownList = PulldownList(parent=popup, texts=texts, icons=icons,
                                 objects=objects, callback=callback, clickToShowCallback=callback21, grid=(0, 0), **policyDict

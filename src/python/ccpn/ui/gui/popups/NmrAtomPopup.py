@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-17 10:04:36 +0000 (Wed, March 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 15:11:52 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -60,21 +60,29 @@ def _selectIsotopeCodeForName(cls, nmrAtomName=None, isotopeCode=None):
 def _nameChanged(cls, value):
     _selectIsotopeCodeForName(cls)
 
-def _getNmrAtomName(cls, nmrAtom, nmrResidue = None):
+def _getNmrAtomName(cls, nmrAtom, nmrResidue=None):
+    """
+    called from edit and new NnmAtom popup.
+    :param cls: the popup obj.
+    :param nmrAtom: the NmrAtom Obj or its dummy
+    :param nmrResidue: the NmrResidue Obj or its dummy
+    :return:
+    """
     from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES, ALL_ATOMS_SORTED
-    if not nmrResidue and nmrAtom:
-        nmrResidue = cls._getParentNmrResidue(nmrAtom)
-    defaultAtoms = getIsotopeListFromCode(None)
-    atomsNameOptions = defaultAtoms
-    if nmrResidue:
-        atomsNameOptions = PROTEIN_ATOM_NAMES.get(nmrResidue.residueType, defaultAtoms)
-    cls.name.modifyTexts(atomsNameOptions)
-    currentNames = cls.name.pulldownList.texts
-    objName = cls.obj.name
-    if objName and objName not in currentNames:
-            cls.name.pulldownList.insertItem(0, objName)
-    cls.name.select(objName)
+    nmrAtomName = nmrAtom.name # compoundWidget for setting the NmrAtom name
+    nameWidget = cls.name
+    if nmrAtomName:
+        nameWidget.select(nmrAtomName)
 
+    ## if a residue type is specified: Append all other options for that type only!
+    if not nmrResidue:
+        nmrResidue = cls._getParentNmrResidue(nmrAtom)
+    atomsNameOptions = PROTEIN_ATOM_NAMES.get(nmrResidue.residueType, [])
+
+    ## if residue type is not specify: Append all other NEF options, independently from isotopeCode!
+    if not atomsNameOptions:
+        atomsNameOptions = getIsotopeListFromCode(None)
+    nameWidget.modifyTexts([nmrAtomName]+atomsNameOptions)
 
 class NmrAtomNewPopup(AttributeEditorPopupABC):
     """
@@ -93,11 +101,11 @@ class NmrAtomNewPopup(AttributeEditorPopupABC):
         """
         self.nmrResidue.modifyTexts([x.id for x in self.project.nmrResidues])
         self.nmrResidue.select(self._parentNmrResidue.id)
-        _getNmrAtomName(self,nmrAtom)
+        _getNmrAtomName(self, nmrAtom)
 
     def _nmrResidueCallback(self, value):
         nmrResidue = self.project.getByPid('NR:{}'.format(value))
-        _getNmrAtomName(self, None, nmrResidue=nmrResidue)
+        _getNmrAtomName(self, self.obj, nmrResidue=nmrResidue)
 
     klass = NmrAtom
     attributes = [('Name', PulldownListCompoundWidget, getattr, None, _getNmrAtomName, None, {'editable': True}),
@@ -179,11 +187,11 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
         """
         self.nmrResidue.modifyTexts([x.id for x in self.obj.project.nmrResidues])
         self.nmrResidue.select(self.obj.nmrResidue.id)
-        _getNmrAtomName(self,nmrAtom)
+        _getNmrAtomName(self, nmrAtom)
 
     def _nmrResidueCallback(self, value):
         nmrResidue = self.project.getByPid('NR:{}'.format(value))
-        _getNmrAtomName(self, None, nmrResidue=nmrResidue)
+        _getNmrAtomName(self, self.obj, nmrResidue=nmrResidue)
 
     klass = NmrAtom
     attributes = [('Pid', EntryCompoundWidget, getattr, None, None, None, {}),

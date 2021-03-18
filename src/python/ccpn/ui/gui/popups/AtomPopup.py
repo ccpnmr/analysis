@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-15 19:13:50 +0000 (Mon, March 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 15:11:52 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ MERGE = 'merge'
 
 _NameSeparator = '-- NEF Atoms --'
 
-def _getAtomName(cls, atom, residue = None):
+def _setAtomNames(cls, atom, residue = None):
     from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES, ALL_ATOMS_SORTED
     from ccpn.core.lib.AssignmentLib import NEF_ATOM_NAMES
     compoundWidget = cls.name
@@ -47,7 +47,6 @@ def _getAtomName(cls, atom, residue = None):
         residue = cls._getParentResidue()
         residueAtomNames = residue._getChemAtomNames()
         NEF_atomNames = makeIterableList(NEF_ATOM_NAMES.values())
-
         atomsNameOptions = residueAtomNames + [_NameSeparator] + [x for x in NEF_atomNames if x not in residueAtomNames]
 
     compoundWidget.modifyTexts(atomsNameOptions)
@@ -74,8 +73,11 @@ class AtomNewPopup(AttributeEditorPopupABC):
     Atom attributes new popup
     """
 
+    def _setAtomName(self, atom):
+        self.name.modifyTexts([self.obj.name])
+
     klass = Atom
-    attributes = [('Name', PulldownListCompoundWidget, getattr, None, _getAtomName, None, {'editable': False}),
+    attributes = [('Name', PulldownListCompoundWidget, getattr, None, _setAtomName, None, {'editable': False}),
                   ('Residue', PulldownListCompoundWidget, getattr, None, _setResidue, None, {'editable': False},),
                   # ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
 
@@ -129,12 +131,12 @@ class AtomEditPopup(AttributeEditorPopupABC):
             parentResidue = self.obj.residue
             return parentResidue
 
-    def _getAtomName(self, atom):
+    def _setAtomName(self, atom):
         self.name.modifyTexts([self.obj.name])
 
     klass = Atom
     attributes = [('Pid', EntryCompoundWidget, getattr, None, None, None, {}),
-                  ('Name', PulldownListCompoundWidget, getattr, None, _getAtomName, None, {'editable': False}),
+                  ('Name', PulldownListCompoundWidget, getattr, None, _setAtomName, None, {'editable': False}),
                   ('Residue', PulldownListCompoundWidget, getattr, None, _setResidue, None, {'editable': False}),
                   # ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {}),
                   # ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),

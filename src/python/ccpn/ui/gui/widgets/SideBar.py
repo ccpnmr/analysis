@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-15 19:13:50 +0000 (Mon, March 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 15:11:53 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -893,7 +893,7 @@ class SideBarStructure(object):
                         SidebarClassTreeItems(klass=Residue, rebuildOnRename='Chain-ClassTreeItems',
                                               callback=NYI, menuAction=_openItemResidueTable(position='bottom', relativeTo=None), isDraggable=True,
                                               children=[
-                                SidebarItem('<New Atom>', callback=_raiseAtomNewPopup(editMode=False)),
+                                # SidebarItem('<New Atom>', callback=_raiseAtomNewPopup(editMode=False)),
 
                                 SidebarClassItems(klass=Atom, rebuildOnRename='Chain-ClassTreeItems',
                                                   callback=_raiseAtomPopup(),

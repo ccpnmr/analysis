@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-18 15:11:52 +0000 (Thu, March 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 16:55:21 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,8 @@ from functools import partial
 
 MERGE = 'merge'
 Undefined = 'Undefined'
+OtherNames = '--  Other Options  --'
+OtherByIC  = '-- Name Options --'
 
 def _getNmrAtomIsotopeCodes(cls, nmrAtom):
     priorityIsotopeCodes = [Undefined] + ct.PriorityIsotopeCodes
@@ -60,7 +62,7 @@ def _selectIsotopeCodeForName(cls, nmrAtomName=None, isotopeCode=None):
 def _nameChanged(cls, value):
     _selectIsotopeCodeForName(cls)
 
-def _getNmrAtomName(cls, nmrAtom, nmrResidue=None):
+def _getNmrAtomName(cls, nmrAtom, nmrResidue=None, isotopeCode=None):
     """
     called from edit and new NnmAtom popup.
     :param cls: the popup obj.
@@ -69,20 +71,46 @@ def _getNmrAtomName(cls, nmrAtom, nmrResidue=None):
     :return:
     """
     from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES, ALL_ATOMS_SORTED
+    from ccpn.core.lib.AssignmentLib import NEF_ATOM_NAMES
+
     nmrAtomName = nmrAtom.name # compoundWidget for setting the NmrAtom name
     nameWidget = cls.name
-    if nmrAtomName:
-        nameWidget.select(nmrAtomName)
-
+    isotopeCode = isotopeCode or cls.isotopeCode
+    atomNameOptions = []
     ## if a residue type is specified: Append all other options for that type only!
     if not nmrResidue:
         nmrResidue = cls._getParentNmrResidue(nmrAtom)
-    atomsNameOptions = PROTEIN_ATOM_NAMES.get(nmrResidue.residueType, [])
+    atomNameOptionsByResType = PROTEIN_ATOM_NAMES.get(nmrResidue.residueType, [])
+    ## if residue type is not specify: Append all other NEF options
+    if atomNameOptionsByResType:
+        atomNameOptions += atomNameOptionsByResType
+    else:
+        atomNameOptions += getIsotopeListFromCode(None) # all options
 
-    ## if residue type is not specify: Append all other NEF options, independently from isotopeCode!
-    if not atomsNameOptions:
-        atomsNameOptions = getIsotopeListFromCode(None)
-    nameWidget.modifyTexts([nmrAtomName]+atomsNameOptions)
+    if isotopeCode in NEF_ATOM_NAMES:
+        atomsNameOptionsByIC = getIsotopeListFromCode(isotopeCode or nmrAtom.isotopeCode)
+        atomNotOfSameIsotopeCode = [x for x in atomNameOptions if x not in atomsNameOptionsByIC]
+        atomOfSameIsotopeCode = [x for x in atomNameOptions if x in atomsNameOptionsByIC]
+        atomNameOptions = [nmrAtomName]+\
+                          [OtherByIC]+\
+                          atomOfSameIsotopeCode+\
+                          [OtherNames]+\
+                          atomNotOfSameIsotopeCode
+        nameSeparators = [OtherNames, OtherByIC]
+    else:
+        atomNameOptions = [nmrAtomName]+\
+                          [OtherNames]+\
+                          atomNameOptions
+        nameSeparators = [OtherNames]
+
+    nameWidget.modifyTexts(atomNameOptions)
+
+    nameWidget.pulldownList.disableLabelsOnPullDown(nameSeparators)
+
+def _isotopeCodeCallback(cls, value):
+    from ccpn.core.lib.AssignmentLib import NEF_ATOM_NAMES
+    _isotopeCode = value if value in NEF_ATOM_NAMES else None
+    _getNmrAtomName(cls, cls.obj, isotopeCode=value)
 
 class NmrAtomNewPopup(AttributeEditorPopupABC):
     """
@@ -107,10 +135,11 @@ class NmrAtomNewPopup(AttributeEditorPopupABC):
         nmrResidue = self.project.getByPid('NR:{}'.format(value))
         _getNmrAtomName(self, self.obj, nmrResidue=nmrResidue)
 
+
     klass = NmrAtom
     attributes = [('Name', PulldownListCompoundWidget, getattr, None, _getNmrAtomName, None, {'editable': True}),
                   ('NmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNewNmrResidueTypes, _nmrResidueCallback, {'editable': False},),
-                  ('IsotopeCode', PulldownListCompoundWidget, getattr, setattr, _getNmrAtomIsotopeCodes, None, {'editable': True}),
+                  ('IsotopeCode', PulldownListCompoundWidget, getattr, setattr, _getNmrAtomIsotopeCodes, _isotopeCodeCallback, {'editable': True}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   # ('comment', TextEditorCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <',
                   #                                                                      'addWordWrap': True}),
@@ -197,7 +226,7 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
     attributes = [('Pid', EntryCompoundWidget, getattr, None, None, None, {}),
                   ('Name', PulldownListCompoundWidget, getattr, None, _getNmrAtomName, None, {'editable': True}),
                   ('NmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNmrResidueTypes, _nmrResidueCallback, {'editable': False}),
-                  ('IsotopeCode', PulldownListCompoundWidget, getattr, setattr, _getNmrAtomIsotopeCodes, None, {'editable': True}),
+                  ('IsotopeCode', PulldownListCompoundWidget, getattr, setattr, _getNmrAtomIsotopeCodes, _isotopeCodeCallback, {'editable': True}),
                   ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {'checkable':True}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   # ('comment', TextEditorCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <',

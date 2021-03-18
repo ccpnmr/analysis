@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:31 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 13:29:08 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.core.testing.WrapperTesting import WrapperTesting
-from ccpn.util import Path
+from ccpn.util import Path, Constants
 
 
 class SimpleSpectrumTest(WrapperTesting):
@@ -108,32 +108,48 @@ class DummySpectrumTest(WrapperTesting):
     def test_dummySpectrum(self):
         axisCodes = ('CO', 'Hn', 'Nh')
         spectrum = self.project.createDummySpectrum(axisCodes)
-        self.assertEqual(spectrum.isotopeCodes, ('13C', '1H', '15N'))
+        isotopeCodes = ('13C', '1H', '15N')
+        self.assertEqual(spectrum.isotopeCodes, isotopeCodes)
         self.assertEqual(spectrum.name, 'COHnNh')
+
         spectrum1 = self.project.createDummySpectrum(axisCodes=['H', 'N', 'C'], name='testspec')
         self.assertEqual(spectrum1.name, 'testspec')
+
         spectrum2 = self.project.createDummySpectrum(axisCodes=['Hp', 'F', 'Ph', 'H'])
         self.assertEqual(spectrum2.name, 'HpFPhH')
         # Undo and redo all operations
         self.undo.undo()
+        self.assertEqual(len(self.project.spectra), 2)
         self.undo.undo()
+        self.assertEqual(len(self.project.spectra), 1)
         self.undo.undo()
+        self.assertEqual(len(self.project.spectra), 0)
         self.undo.redo()
+        self.assertEqual(len(self.project.spectra), 1)
         self.undo.redo()
+        self.assertEqual(len(self.project.spectra), 2)
         self.undo.redo()
+        self.assertEqual(len(self.project.spectra), 3)
 
         self.project._wrappedData.root.checkAllValid(complete=True)
 
         self.assertEqual(spectrum.name, 'COHnNh')
         self.assertEqual(spectrum1.name, 'testspec')
         self.assertEqual(spectrum2.name, 'HpFPhH')
+
         self.assertEqual(spectrum.isotopeCodes, ('13C', '1H', '15N'))
-        self.assertEqual(spectrum.spectrometerFrequencies, (10., 100., 10.))
-        self.assertEqual(spectrum.spectralWidthsHz, (2560., 1280., 2560.))
-        self.assertEqual(spectrum.totalPointCounts, (256, 128, 256))
-        self.assertEqual(spectrum.pointCounts, (256, 128, 256))
+
+        numPoints = tuple([Constants.DEFAULT_SPECTRUM_PARAMETERS[ic]['numPoints'] for ic in isotopeCodes])
+        sf = tuple([Constants.DEFAULT_SPECTRUM_PARAMETERS[ic]['sf'] for ic in isotopeCodes])
+        sw = tuple([Constants.DEFAULT_SPECTRUM_PARAMETERS[ic]['sw'] for ic in isotopeCodes])
+        refppm = tuple([Constants.DEFAULT_SPECTRUM_PARAMETERS[ic]['refppm'] for ic in isotopeCodes])
+        refpt = tuple([Constants.DEFAULT_SPECTRUM_PARAMETERS[ic]['refpt'] for ic in isotopeCodes])
+
+        self.assertEqual(spectrum.spectrometerFrequencies, sf)
+        self.assertEqual(spectrum.spectralWidthsHz, sw)
+        self.assertEqual(spectrum.pointCounts, numPoints)
         self.assertEqual(spectrum.experimentType, None)
         self.assertEqual(spectrum.dimensionCount, 3)
         self.assertEqual(spectrum.axisCodes, axisCodes)
-        self.assertEqual(spectrum.referencePoints, (1., 1., 1.))
-        self.assertEqual(spectrum.referenceValues, (236., 11.8, 236.))
+        self.assertEqual(spectrum.referencePoints, refpt)
+        self.assertEqual(spectrum.referenceValues, refppm)

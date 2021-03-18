@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 13:29:08 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -104,7 +104,9 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
 
     # build here so it doesn't conflict with OpenGl update
     strip._CcpnGLWidget.buildAllContours()
-    strip._CcpnGLWidget.update()
+    # strip._CcpnGLWidget.update()
+
+    strip._CcpnGLWidget.emitAllAxesChanged()
 
 
 def _setStripAxisPosition(strip, axisIndex, position, update=True):

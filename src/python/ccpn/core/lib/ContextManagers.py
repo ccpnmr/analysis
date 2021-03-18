@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-12 18:01:38 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 13:29:07 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2018-12-20 15:44:34 +0000 (Thu, December 20, 2018) $"
 
 import decorator
 import inspect
+import traceback
 from contextlib import contextmanager
 from collections.abc import Iterable
 from functools import partial
@@ -35,7 +36,6 @@ from inspect import signature, Parameter
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
 from ccpn.util.Common import makeIterableList
-import traceback
 
 
 @contextmanager
@@ -563,7 +563,7 @@ CURRENT_ATTRIBUTE_NAME = '_currentAttributeName'
 
 
 class _ObjectStore(object):
-    "A class to store a current setting"
+    """A class to store a current setting"""
 
     def __init__(self, obj):
         self.current = getApplication().current
@@ -688,11 +688,6 @@ def newObjectList(klasses):
                                 )
 
                     _storeNewObjectCurrent(result, addUndoItem)
-                    # if hasattr(result, CURRENT_ATTRIBUTE_NAME):
-                    #     storeObj = _ObjectStore(result)
-                    #     addUndoItem(undo=storeObj._storeCurrentSelectedObject,
-                    #                 redo=storeObj._restoreCurrentSelectedObject,
-                    #                 )
 
         # handle notifying all objects in the list - e.g. sampleComponent also makes a substance
         for result in results:
@@ -718,11 +713,16 @@ def deleteObject():
         self = args[0]
         application = getApplication()  # pass it in to reduce overhead
 
+        # moved outside so that the current objects are preserved
+        with notificationBlanking(application=application):
+            with undoStackBlocking(application=application) as addUndoItem:
+                _storeDeleteObjectCurrent(self, addUndoItem)
+
         self._finaliseAction('delete')
 
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
-                _storeDeleteObjectCurrent(self, addUndoItem)
+                # _storeDeleteObjectCurrent(self, addUndoItem)
 
                 # retrieve list of created items from the api
                 apiObjectsCreated = self._getApiObjectTree()
@@ -730,7 +730,7 @@ def deleteObject():
                                                 topObjectsToCheck=(self._wrappedData.topObject,),
                                                 obj=self, trigger='create', preExecution=False,
                                                 objsToBeUnDeleted=apiObjectsCreated),
-                            redo=BlankedPartial(self.delete,
+                            redo=BlankedPartial(partial(func, self),
                                                 obj=self, trigger='delete', preExecution=True)
                             )
 
@@ -1059,8 +1059,10 @@ def queueStateChange(verify):
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import newTestApplication
-    from ccpn.framework.Application import getApplication
 
+
+    # import at top
+    # from ccpn.framework.Application import getApplication
 
     def _undoTest(value):
         pass

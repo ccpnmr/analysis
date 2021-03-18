@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 13:29:08 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1203,7 +1203,7 @@ class NefDictFrame(Frame):
         """Add a new gui table into a moreLess frame to hold a nef loop
         """
         frame = MoreLessFrame(self, name=_name, showMore=True, grid=(0, 0))
-        table = GuiTable(frame.contentsFrame, grid=(0, 0), gridSpan=(1, 1), _applyPostSort=False, multiSelect=True)
+        table = GuiTable(frame.contentsFrame, grid=(0, 0), gridSpan=(1, 1), multiSelect=True)
         table._hiddenColumns = []
         table.setData(_data)
         table.resizeColumnsToContents()

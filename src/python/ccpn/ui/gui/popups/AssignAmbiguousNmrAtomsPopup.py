@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-12 18:19:44 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 13:29:08 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -122,11 +122,11 @@ class ObjectsSelectionWidget(Widget):
 
     def _checkExactMatches(self):
         """
-        :return: set checked any box with same name as the axisCode. (just in case we missed it)
+        :return: set checked only if one box with same name as the axisCode. Don't do other guessing here.
         """
-        for cb in self.allCheckBoxes:
-            if cb.text() == self.labelName:
-                cb.setChecked(True)
+        if len(self.allCheckBoxes) == 1:
+            if self.allCheckBoxes[0].text() == self.labelName:
+                self.allCheckBoxes[0].setChecked(True)
 
 i = 0
 

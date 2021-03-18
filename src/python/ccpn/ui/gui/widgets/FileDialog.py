@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-12 18:01:39 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 13:29:09 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -477,6 +477,10 @@ class ExportFileDialog(FileDialogABC):
 
 class ExcelFileDialog(FileDialogABC):
     _text = '{} Excel File'
+
+
+class ChemCompFileDialog(FileDialogABC):
+    _text = '{} Xml File'
 
 
 class ExecutablesFileDialog(FileDialogABC):

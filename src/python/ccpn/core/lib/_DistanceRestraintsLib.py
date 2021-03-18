@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-12 18:11:49 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 13:29:08 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2149,22 +2149,24 @@ def _newDistanceRestraintList(project, dataset=None, name=None):
     # name = _incrementObjectName(project, RestraintList._pluralLinkName, name)
     name = RestraintList._uniqueName(project=project, name=name)
     if not dataset:
-        dataset = _newDataSet(project)
+        dataset = _newDataSet(project, name=name)
     return dataset.newRestraintList(restraintType='Distance', name=name)
 
 def _newV3DistanceRestraint(v3PeakList,
                             v3RestraintList=None,
+                            newDsName=None,
                             intensityType='height',
                             normalise=True,
                             labelling=True,
                             refDist=3.2, negError=0.2, posError=0.2, absMin=1.72, absMax=8.0, power=6,
                             residueRanges=None,
                             minMerit=0.0,
+                            **kwargs,
                             ):
 
     project = v3PeakList.project
     if not v3RestraintList:
-        v3RestraintList = _newDistanceRestraintList(project)
+        v3RestraintList = _newDistanceRestraintList(project, name=newDsName)
 
     # get the needed V2 objects
     v2PeakList = v3PeakList._wrappedData

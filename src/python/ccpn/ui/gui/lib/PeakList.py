@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 13:29:08 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -53,7 +53,8 @@ def restrictedPick(peakListView, axisCodes, peak=None, nmrResidue=None):
         nmrResidueIsotopeCodes = [atom.isotopeCode for atom in nmrResidue.nmrAtoms]
         shiftList = spectrum.chemicalShiftList
         nmrResidueShifts = [shiftList.getChemicalShift(nmrAtom.id).value
-                            for nmrAtom in nmrResidue.nmrAtoms]
+                            for nmrAtom in nmrResidue.nmrAtoms
+                            if shiftList.getChemicalShift(nmrAtom.id)]
         shiftDict = dict(zip(nmrResidueIsotopeCodes, nmrResidueShifts))
         shiftIsotopeCodes = [commonUtil.name2IsotopeCode(code) for code in axisCodes]
         positionCodeDict = {axisCodes[ii]: shiftDict[shiftIsotopeCode]

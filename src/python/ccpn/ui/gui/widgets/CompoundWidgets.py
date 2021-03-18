@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:37 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 13:29:09 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -268,7 +268,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
     def __init__(self, parent=None, mainWindow=None,
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', callback=None, default=None, editable=True,
+                 labelText='', entryText='', callback=None, default=None, editable=True,
                  sizeAdjustPolicy=None, compoundKwds={}, tipText=None,
                  **kwds):
         """
@@ -293,7 +293,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
         if tipText:
             self.label.setToolTip(tipText)
 
-        self.entry = Entry(parent=self, callback=callback, editable=editable, **compoundKwds)
+        self.entry = Entry(parent=self, text=entryText, callback=callback, editable=editable, **compoundKwds)
         self._addWidget(self.entry)
 
         if default is not None:

@@ -4,7 +4,7 @@ This file contains StructureTableModule and StructureTable classes
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-28 17:00:32 +0100 (Tue, April 28, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-18 13:29:08 +0000 (Thu, March 18, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,31 +25,19 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import pyqtgraph as pg
-import numpy as np
 import pandas as pd
-from collections import OrderedDict
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
-from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import StructureEnsemblePulldown
-from ccpn.ui.gui.widgets.Table import ObjectTable
-from ccpn.ui.gui.widgets.Column import Column, ColumnClass
-from PyQt5 import QtGui, QtWidgets, QtCore, QtOpenGL
+from ccpn.ui.gui.widgets.Column import ColumnClass
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.StructureEnsemble import StructureEnsemble
-from ccpn.core.StructureEnsemble import EnsembleData
-# from ccpn.ui._implementation.Module import Module
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 
 
@@ -89,74 +77,7 @@ class StructureTableModule(CcpnModule):
             self.project = None
             self.current = None
 
-        # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-        # # add test structure Ensembles
-        # try:
-        #   StructureTableModule.defined
-        # except:
-        #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-        #   self.ensemble = self.project.newStructureEnsemble()
-        #   self.data = self.ensemble.data
-        #
-        #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H',
-        #      'CB', 'HB1', 'HB2', 'HB3',
-        #      'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23',
-        #      'CE', 'HE1', 'HE2', 'HE3',
-        #      'CG', 'HG1', 'HG2', 'HG3',
-        #      'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-        #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
-        #                                                                                                  'VAL'] * 8
-        #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
-        #   self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-        #   self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-        #   self.comment = ['Test'] * 33
-        #
-        #   self.data['atomName'] = self.testAtomName
-        #   self.data['residueName'] = self.testResidueName
-        #   self.data['chainCode'] = self.testChainCode
-        #   self.data['sequenceId'] = self.testSequenceId
-        #   self.data['modelNumber'] = self.testModelNumber
-        #   self.data['comment'] = self.comment
-        #
-        #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-        #   self.ensemble = self.project.newStructureEnsemble()
-        #   self.data = self.ensemble.data
-        #
-        #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H',
-        #      'CB', 'HB1', 'HB2', 'HB3',
-        #      'CE', 'HE1', 'HE2', 'HE3',
-        #      'CG', 'HG1', 'HG2', 'HG3',
-        #      'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23',
-        #      'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-        #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
-        #                                                                                                  'VAL'] * 8
-        #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
-        #   self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-        #   self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-        #
-        #   self.data['atomName'] = self.testAtomName
-        #   self.data['residueName'] = self.testResidueName
-        #   self.data['chainCode'] = self.testChainCode
-        #   self.data['sequenceId'] = self.testSequenceId
-        #   self.data['modelNumber'] = self.testModelNumber
-        #   self.data['comment'] = self.comment
-        #
-        #   self.ensemble = self.project.newStructureEnsemble()
-        #   self.ensemble.data = self.data.extract(index='1, 2, 6-7, 9')
-        #
-        #   # make a test dataset in here
-        #
-        #   self.dataSet = self.project.newDataSet(self.ensemble.longPid)    # title - should be ensemble name/title/longPid
-        #
-        #   self.dataItem = self.dataSet.newData('derivedConformers')
-        #   self.dataSet.attachedObject = self.ensemble       # the newest object
-        #   self.dataItem.setParameter(name='backboneSelector', value=self.ensemble.data.backboneSelector)
-        #
-        #   StructureTableModule.defined=True
-        #   # should be a DataSet with the corresponding stuff in it
-        #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-        # finally:
-        #   pass
+        # add test code here
 
         # settings
         self._STwidget = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
@@ -210,68 +131,6 @@ class StructureTableModule(CcpnModule):
         """
         self._closeModule()
 
-
-# class NewStructureTable(pg.TableWidget):
-#   """
-#   Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
-#   """
-#   #row.modelNumber, etc., may not exist..
-#   columnHeadings = [
-#                 ('Index', np.uint),
-#                 ('modelNumber', np.uint),
-#                 ('chainCode', np.str),
-#                 ('sequenceId', np.uint),
-#                 ('insertionCode', np.str),
-#                 ('residueName', np.str),
-#                 ('atomName', np.str),
-#                 ('altLocationCode', np.str),
-#                 ('element', np.str),
-#                 ('x', np.float32),
-#                 ('y', np.float32),
-#                 ('z', np.float32),
-#                 ('occupancy', np.float32),
-#                 ('bFactor', np.float32),
-#                 ('nmrChainCode', np.str),
-#                 ('nmrSequenceCode', np.str),
-#                 ('nmrResidueName', np.str),
-#                 ('nmrAtomName', np.str)]       # will need to put the comment back in
-#
-#   columnFunction = [
-#                 ('#', lambda row: StructureTable._stLamInt(row, 'Index'), 'Index', None),
-#                 ('modelNumber', lambda row: StructureTable._stLamInt(row, 'modelNumber'), 'modelNumber', None),
-#                 ('chainCode', lambda row: StructureTable._stLamStr(row, 'chainCode'), 'chainCode', None),
-#                 ('sequenceId', lambda row: StructureTable._stLamInt(row, 'sequenceId'), 'sequenceId', None),
-#                 ('insertionCode', lambda row: StructureTable._stLamStr(row, 'insertionCode'), 'insertionCode', None),
-#                 ('residueName', lambda row: StructureTable._stLamStr(row, 'residueName'), 'residueName', None),
-#                 ('atomName', lambda row: StructureTable._stLamStr(row, 'atomName'), 'atomName', None),
-#                 ('altLocationCode', lambda row: StructureTable._stLamStr(row, 'altLocationCode'), 'altLocationCode', None),
-#                 ('element', lambda row: StructureTable._stLamStr(row, 'element'), 'element', None),
-#                 ('x', lambda row: StructureTable._stLamFloat(row, 'x'), 'x', None),
-#                 ('y', lambda row: StructureTable._stLamFloat(row, 'y'), 'y', None),
-#                 ('z', lambda row: StructureTable._stLamFloat(row, 'z'), 'z', None),
-#                 ('occupancy', lambda row: StructureTable._stLamFloat(row, 'occupancy'), 'occupancy', None),
-#                 ('bFactor', lambda row: StructureTable._stLamFloat(row, 'bFactor'), 'bFactor', None),
-#                 ('nmrChainCode', lambda row: StructureTable._stLamStr(row, 'nmrChainCode'), 'nmrChainCode', None),
-#                 ('nmrSequenceCode', lambda row: StructureTable._stLamStr(row, 'nmrSequenceCode'), 'nmrSequenceCode', None),
-#                 ('nmrResidueName', lambda row: StructureTable._stLamStr(row, 'nmrResidueName'), 'nmrResidueName', None),
-#                 ('nmrAtomName', lambda row: StructureTable._stLamStr(row, 'nmrAtomName'), 'nmrAtomName', None),
-#                 ('Comment', lambda row:StructureTable._getCommentText(row), 'Notes',
-#                  lambda row, value:StructureTable._setComment(row, 'comment', value))
-#   ]
-#
-#         # testing - usage example
-#         # w = pg.TableWidget()
-#         #
-#         # data = np.array([
-#         #   (1, 1.6, 'x'),
-#         #   (3, 5.4, 'y'),
-#         #   (8, 12.5, 'z'),
-#         #   (443, 1e-12, 'w'),
-#         # ], dtype=[('Column 1', int), ('Column 2', float), ('Column 3', object)])
-#         #
-#         # w.setData(data)
-#
-#   pass
 
 class GuiTableStructure(GuiTable):
     """
@@ -406,7 +265,7 @@ class StructureTable(GuiTableStructure):
             ('Comment', lambda row: StructureTable._getCommentText(row), 'Notes',
              lambda row, value: StructureTable._setComment(row, 'comment', value), None)
             ]  # [Column(colName, func, tipText, editValue, columnFormat)
-                # for colName, func, tipText, editValue, columnFormat in self.columnDefs]
+
         self.STcolumns = ColumnClass(self.structureColumns)
 
         # create the table; objects are added later via the displayTableForStructure method
@@ -435,18 +294,17 @@ class StructureTable(GuiTableStructure):
         self.dataFrameObject = None
 
         super().__init__(parent=parent,
-                            mainWindow=self._mainWindow,
-                            dataFrameObject=None,  # class collating table and objects and headings,
-                            setLayout=True,
-                            autoResize=True, multiSelect=True,
-                            selectionCallback=self._selectionCallback,
-                            actionCallback=self._actionCallback,
-                            grid=(3, 0), gridSpan=(1, 6)
-                            )
+                         mainWindow=self._mainWindow,
+                         dataFrameObject=None,  # class collating table and objects and headings,
+                         setLayout=True,
+                         autoResize=True, multiSelect=True,
+                         selectionCallback=self._selectionCallback,
+                         actionCallback=self._actionCallback,
+                         grid=(3, 0), gridSpan=(1, 6)
+                         )
         self.moduleParent = moduleParent
 
         self._ensembleNotifier = None
-        self._updateSilence = False
         self._setNotifiers()
 
         if len(self.stButtons.radioButtons) > 0:
@@ -629,116 +487,34 @@ class StructureTable(GuiTableStructure):
         """
         Update the table from StructureEnsemble
         """
-        if not self._updateSilence:
-            # tuples = structureEnsemble.data.as_namedtuples()
-            # self.setColumns(self.STcolumns)
-            # self.setObjects(tuples)
-            # self.show()
+        self._dataFrameObject = self.getDataFrameFromRows(table=self,
+                                                          dataFrame=structureEnsemble.data,
+                                                          colDefs=self.STcolumns,
+                                                          hiddenColumns=self._hiddenColumns)
 
-            # import inspect
-            # attr = inspect.getmembers(StructureEnsemble, lambda a:not (inspect.isroutine(a)))
-            # filteredAttr = [a for a in attr if
-            #                 not (a[0].startswith('__') and a[0].endswith('__')) and not a[0].startswith(
-            #                   '_')]
-            # for i in filteredAttr:
-            #   att, val = i
-            #   try:
-            #     setattr(structureEnsemble, att, val)
-            #   except Exception as e:
-            #     # print(e, att)
-            #     del filteredAttr[att]       # remove the attribute
-            #
-            # data = np.array([
-            #   (1, 1.6, 'x'),
-            #   (3, 5.4, 'y'),
-            #   (8, 12.5, 'z'),
-            #   (443, 1e-12, 'w'),
-            # ], dtype=[('Column 1', int), ('Column 2', float), ('Column 3', object)])
-
-            # self.hide()
-            # tuples = structureEnsemble.data.as_namedtuples()
-            # headings = [head[0] for head in self.STcolumns]
-            # data = []
-            # for row in tuples:
-            #   data.append(list(row))
-            #
-            # df = pd.DataFrame(data[0], columns=headings)
-
-            # PandasData = np.dataFra([12,45,'help'], dtype=[('Index', int),
-            #                                       ('modelNumber', int),
-            #                                       ('chainCode', str)])
-
-            # xdata = np.array({'x':10,'y':13.34}, dtype=[('x', np.uint8), ('y', np.float64)])
-            # df = pd.DataFrame(xdata)
-
-            # x = np.empty((10,), dtype=[('x', np.uint8), ('y', np.float64)])
-            # df = pd.DataFrame(x)
-            # t = df.dtypes
-
-            # newArraydata = np.array( [(1, 1.6, 'x'),
-            #       (3, 5.4, 'y'),
-            #       (8, 12.5, 'z'),
-            #       (443, 1e-12, 'w')],
-            #                          dtype=[('Index', np.uint),
-            #                                       ('modelNumber', np.float32),
-            #                                       ('chainCode', np.str)])
-
-            # temp = [(1, 1.6, 'x'),
-            #         (3, 5.4, 'y'),
-            #         (8, 12.5, 'z'),
-            #         (443, 1e-12, 'w')]
-            # newArraydata = np.array(temp, dtype=[('Index', int),
-            #                                         ('modelNumber', float),
-            #                                         ('chainCode', str)])
-
-            # self._project.blankNotification()
-            #
-            # self.setData(structureEnsemble.data.values)
-            # self.setHorizontalHeaderLabels([head[0] for head in NewStructureTable.columnHeadings])
-            #
-            # self._project.unblankNotification()
-            # self.resizeColumnsToContents()
-            # self.show()
-
-            # add a comment field to the Pandas dataFrame?
-
-            # dataFrameObject = self.getDataFrameFromRows(structureEnsemble.data, self.STcolumns)
-
-            self._dataFrameObject = self.getDataFrameFromRows(table=self,
-                                                              dataFrame=structureEnsemble.data,
-                                                              colDefs=self.STcolumns,
-                                                              hiddenColumns=self._hiddenColumns)
-
-            # new populate from Pandas
-            self._project.blankNotification()
-            self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-            self._project.unblankNotification()
+        # new populate from Pandas
+        self._project.blankNotification()
+        self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+        self._project.unblankNotification()
 
     def _updateDataSet(self, structureData):
         """
         Update the table from EnsembleData
         """
-        if not self._updateSilence:
-            # tuples = structureData.as_namedtuples()
-            # self.setColumns(self.STcolumns)
-            # self.setObjects(tuples)
-            # self.show()
+        # tuples = structureData.as_namedtuples()
+        # self.setColumns(self.STcolumns)
+        # self.setObjects(tuples)
+        # self.show()
 
-            self._dataFrameObject = self.getDataFrameFromRows(table=self,
-                                                              dataFrame=structureData,
-                                                              colDefs=self.AVcolumns,
-                                                              hiddenColumns=self._hiddenColumns)
+        self._dataFrameObject = self.getDataFrameFromRows(table=self,
+                                                          dataFrame=structureData,
+                                                          colDefs=self.AVcolumns,
+                                                          hiddenColumns=self._hiddenColumns)
 
-            # new populate from Pandas
-            self._project.blankNotification()
-            self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-            self._project.unblankNotification()
-
-    def setUpdateSilence(self, silence):
-        """
-        Silences/unsilences the update of the table until switched again
-        """
-        self._updateSilence = silence
+        # new populate from Pandas
+        self._project.blankNotification()
+        self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+        self._project.unblankNotification()
 
     def _selectionCallback(self, data):  #structureData, row, col):
         """
@@ -796,7 +572,7 @@ class StructureTable(GuiTableStructure):
         Notifier Callback for updating the table
         """
         thisEnsembleList = getattr(data[Notifier.THEOBJECT], self.attributeName)  # get the object
-        getLogger().debug('>updateCallback> %s %s %s %s %s' % (data['notifier'], self.thisObj, data['trigger'], data['object'], self._updateSilence))
+        getLogger().debug('>updateCallback> %s %s %s %s' % (data['notifier'], self.thisObj, data['trigger'], data['object']))
         if self.thisObj in thisEnsembleList:
             item = self.stButtons.get()
             getLogger().debug('>selectionPulldownCallback> %s %s %s' % (item, type(item), self.thisObj))
@@ -951,3 +727,146 @@ class StructureTable(GuiTableStructure):
     #   getLogger().info('table.paint '+str(self.paintCount))
     #   self.paintCount+=1
     #   return super(StructureTable, self).paintEvent(event)
+
+    # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # # add test structure Ensembles
+    # try:
+    #   StructureTableModule.defined
+    # except:
+    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    #   self.ensemble = self.project.newStructureEnsemble()
+    #   self.data = self.ensemble.data
+    #
+    #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H',
+    #      'CB', 'HB1', 'HB2', 'HB3',
+    #      'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23',
+    #      'CE', 'HE1', 'HE2', 'HE3',
+    #      'CG', 'HG1', 'HG2', 'HG3',
+    #      'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+    #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
+    #                                                                                                  'VAL'] * 8
+    #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+    #   self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+    #   self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+    #   self.comment = ['Test'] * 33
+    #
+    #   self.data['atomName'] = self.testAtomName
+    #   self.data['residueName'] = self.testResidueName
+    #   self.data['chainCode'] = self.testChainCode
+    #   self.data['sequenceId'] = self.testSequenceId
+    #   self.data['modelNumber'] = self.testModelNumber
+    #   self.data['comment'] = self.comment
+    #
+    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    #   self.ensemble = self.project.newStructureEnsemble()
+    #   self.data = self.ensemble.data
+    #
+    #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H',
+    #      'CB', 'HB1', 'HB2', 'HB3',
+    #      'CE', 'HE1', 'HE2', 'HE3',
+    #      'CG', 'HG1', 'HG2', 'HG3',
+    #      'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23',
+    #      'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+    #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
+    #                                                                                                  'VAL'] * 8
+    #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
+    #   self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+    #   self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
+    #
+    #   self.data['atomName'] = self.testAtomName
+    #   self.data['residueName'] = self.testResidueName
+    #   self.data['chainCode'] = self.testChainCode
+    #   self.data['sequenceId'] = self.testSequenceId
+    #   self.data['modelNumber'] = self.testModelNumber
+    #   self.data['comment'] = self.comment
+    #
+    #   self.ensemble = self.project.newStructureEnsemble()
+    #   self.ensemble.data = self.data.extract(index='1, 2, 6-7, 9')
+    #
+    #   # make a test dataset in here
+    #
+    #   self.dataSet = self.project.newDataSet(self.ensemble.longPid)    # title - should be ensemble name/title/longPid
+    #
+    #   self.dataItem = self.dataSet.newData('derivedConformers')
+    #   self.dataSet.attachedObject = self.ensemble       # the newest object
+    #   self.dataItem.setParameter(name='backboneSelector', value=self.ensemble.data.backboneSelector)
+    #
+    #   StructureTableModule.defined=True
+    #   # should be a DataSet with the corresponding stuff in it
+    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # finally:
+    #   pass
+
+    # tuples = structureEnsemble.data.as_namedtuples()
+    # self.setColumns(self.STcolumns)
+    # self.setObjects(tuples)
+    # self.show()
+
+    # import inspect
+    # attr = inspect.getmembers(StructureEnsemble, lambda a:not (inspect.isroutine(a)))
+    # filteredAttr = [a for a in attr if
+    #                 not (a[0].startswith('__') and a[0].endswith('__')) and not a[0].startswith(
+    #                   '_')]
+    # for i in filteredAttr:
+    #   att, val = i
+    #   try:
+    #     setattr(structureEnsemble, att, val)
+    #   except Exception as e:
+    #     # print(e, att)
+    #     del filteredAttr[att]       # remove the attribute
+    #
+    # data = np.array([
+    #   (1, 1.6, 'x'),
+    #   (3, 5.4, 'y'),
+    #   (8, 12.5, 'z'),
+    #   (443, 1e-12, 'w'),
+    # ], dtype=[('Column 1', int), ('Column 2', float), ('Column 3', object)])
+
+    # self.hide()
+    # tuples = structureEnsemble.data.as_namedtuples()
+    # headings = [head[0] for head in self.STcolumns]
+    # data = []
+    # for row in tuples:
+    #   data.append(list(row))
+    #
+    # df = pd.DataFrame(data[0], columns=headings)
+
+    # PandasData = np.dataFra([12,45,'help'], dtype=[('Index', int),
+    #                                       ('modelNumber', int),
+    #                                       ('chainCode', str)])
+
+    # xdata = np.array({'x':10,'y':13.34}, dtype=[('x', np.uint8), ('y', np.float64)])
+    # df = pd.DataFrame(xdata)
+
+    # x = np.empty((10,), dtype=[('x', np.uint8), ('y', np.float64)])
+    # df = pd.DataFrame(x)
+    # t = df.dtypes
+
+    # newArraydata = np.array( [(1, 1.6, 'x'),
+    #       (3, 5.4, 'y'),
+    #       (8, 12.5, 'z'),
+    #       (443, 1e-12, 'w')],
+    #                          dtype=[('Index', np.uint),
+    #                                       ('modelNumber', np.float32),
+    #                                       ('chainCode', np.str)])
+
+    # temp = [(1, 1.6, 'x'),
+    #         (3, 5.4, 'y'),
+    #         (8, 12.5, 'z'),
+    #         (443, 1e-12, 'w')]
+    # newArraydata = np.array(temp, dtype=[('Index', int),
+    #                                         ('modelNumber', float),
+    #                                         ('chainCode', str)])
+
+    # self._project.blankNotification()
+    #
+    # self.setData(structureEnsemble.data.values)
+    # self.setHorizontalHeaderLabels([head[0] for head in NewStructureTable.columnHeadings])
+    #
+    # self._project.unblankNotification()
+    # self.resizeColumnsToContents()
+    # self.show()
+
+    # add a comment field to the Pandas dataFrame?
+
+    # dataFrameObject = self.getDataFrameFromRows(structureEnsemble.data, self.STcolumns)

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:31 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-18 13:29:08 +0000 (Thu, March 18, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import json
 import operator
-import typing
 import os
 from collections import OrderedDict
 from ccpn.util.Logging import getLogger
@@ -38,18 +37,14 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.Sample import Sample
-from ccpn.core.Spectrum import Spectrum
+# from ccpn.core.Spectrum import Spectrum
 from ccpn.core.Substance import Substance
 from ccpn.core.Integral import Integral
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.SpectrumHit import SpectrumHit
 from ccpn.core.Peak import Peak
 from ccpn.core.Multiplet import Multiplet
-# from ccpn.core.Integral import Integral
 from ccpn.ui._implementation.Strip import Strip
-
-
-# from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
 
 SingularOnly = 'singularOnly'
@@ -127,7 +122,7 @@ class Current:
             ss = field
             ll.append('%s (%s)' % (ss, dd['docTemplate'] % ss))
 
-    # Have the doc string reflect all defined curent attributes
+    # Have the doc string reflect all defined current attributes
     __doc__ = (
             """The current object gives access to the collection of active or selected objects and values.
           
@@ -210,19 +205,6 @@ class Current:
             self._blanking -= 1
         else:
             raise RuntimeError('Error decreasing blanking; already at 0')
-
-    # GWV 20181122: deactivated
-    # def _updateSelectedPeaks(self, currentPeaks):
-    #     """ Update selected status of peaks.
-    #     This attribute is redundant information but is done for time efficiency in drawing,
-    #     so you don't have to check whether a peak is in a list / set but just check the attribute.
-    #     """
-    #     for peakList in self.project.peakLists:
-    #         for peak in peakList.peaks:
-    #             peak._isSelected = False
-    #
-    #     for peak in currentPeaks:
-    #         peak._isSelected = True
 
     def __str__(self):
         return '<Current>'
@@ -378,7 +360,7 @@ class Current:
         # define singular properties
         def getter(self):
             ll = getField(self)
-            if len(ll)>0:
+            if len(ll) > 0:
                 v = ll[-1]
                 if not getattr(v, 'isDeleted', False):
                     return v
@@ -402,7 +384,7 @@ class Current:
 
             # define the add'Field' method
             def adder(self, value):
-                """Add %s to current.%s""" % (singular, plural)
+                # """Add %s to current.%s""" % (singular, plural)
                 values = getField(self)
                 if value not in values:
                     setField(self, values + [value])
@@ -411,7 +393,7 @@ class Current:
 
             # define the remove'Field' method
             def remover(self, value):
-                """Remove %s from current.%s""" % (singular, plural)
+                # """Remove %s from current.%s""" % (singular, plural)
                 values = getField(self)
                 if value in values:
                     values.remove(value)
@@ -440,7 +422,8 @@ class Current:
         #     param._setupCoreNotifier('delete', cleanup)
 
     def _cleanUp(self, cDict, fieldName):
-        "Callback for deletion of an object in the project"
+        """Callback for deletion of an object in the project
+        """
         from ccpn.core.lib.Notifiers import Notifier  ## needs to be local to avoid circular imports
 
         self.increaseBlanking()
@@ -485,8 +468,7 @@ class Current:
         return path
 
     def _restoreStateFromFile(self, statePath):
-        """
-        restore current from the default File in the project directory
+        """restore current from the default File in the project directory
         """
         try:
             path = self._createStateFile(statePath)

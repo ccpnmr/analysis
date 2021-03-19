@@ -133,35 +133,43 @@ ELEMENT_DEFAULT = (0,QtGui.QColor(160, 160, 255, 255), (1,))
 ATOM = 'atom'
 PROPERTY = 'property'
 PROPERTIES_ATOM = [
-              ('Bonding', (('Toggle aromatic ring', 'toggle-aromatic.png', 'bond-aromatic'),
-                           ('Toggle dative bond', 'bond-dative.png', 'bond-dative'))),
-              ('Atomic Charge', (('Add positive charge', 'charge-pos.png', '+'),
-                          ('Set neutral charge', 'charge-none.png', '0'),
-                          ('Add negative charge', 'charge-neg.png', '-'))),
-              ('Valence Slots', (('Add valance', 'valence-add.png', 'v+'),
-                           ('Remove valance', 'valence-remove.png', 'v-'))),
-              ('Stereochemistry', (('Toggle stereo centre', 'stereo.png', 'st'),
-                                   ('Move atom forward', 'stereo-up.png', 'st+'),
-                                   ('Move atom backward', 'stereo-down.png', 'st-'))),
-              ('Chirality Label', (('R chirality', 'stereo-R.png', 'chiral-r'),
-                             ('S chirality', 'stereo-S.png', 'chiral-s'),
-                             ('No chirality label','stereo-none.png',  'chiral-n'),
-                             ('Alpha chirality', 'stereo-a.png', 'chiral-a'),
-                             ('Beta chirality', 'stereo-b.png', 'chiral-b'),
+              ('Bonding', (('Aromatic ring', 'Toggle aromatic ring', 'toggle-aromatic.png', 'bond-aromatic'),
+                           ('Dative bond','Toggle dative bond', 'bond-dative.png', 'bond-dative'))),
+              ('Atomic Charge', (('Add positive', 'Add positive charge', 'charge-pos.png', '+'),
+                          ('Set Neutral','Set neutral charge', 'charge-none.png', '0'),
+                          ('Add negative', 'Add negative charge', 'charge-neg.png', '-'))),
+              ('Valence Slots', (('Add', 'Add valance', 'valence-add.png', 'v+'),
+                           ('Remove', 'Remove valance', 'valence-remove.png', 'v-'))),
+              ('Stereochemistry', (('Stereo centre', 'Toggle stereo centre', 'stereo.png', 'st'),
+                                   ('Atom forward','Move selected atom forward', 'stereo-up.png', 'st+'),
+                                   ('Atom backward', 'Move selected atom backward' ,'stereo-down.png', 'st-'))),
+              ('Chirality Label', (('Set R label', 'Set R chirality label ', 'stereo-R.png', 'chiral-r'),
+                             ('Set S label', 'Set S shirality label', 'stereo-S.png', 'chiral-s'),
+                             ('Remove labels', 'Remove chirality label','stereo-none.png',  'chiral-n'),
+                             ('Set Alpha', 'Alpha Chirality', 'stereo-a.png', 'chiral-a'),
+                             ('Set Beta','Beta Chirality', 'stereo-b.png', 'chiral-b'),
                              )),] # ('R/S', None, 'chiral-rs'),
 PROPERTIES_MULTI = [
-              ('Atomic Exchange', (('Toggle variable atom', 'variable-atom.png', 'xv'),
-                            ('Toggle fast exchange (H+)', 'exchange-hydrogen.png', 'xf'))),
-              ('NMR Groups', (('NMR equivalent', 'nmr-equivalent.png', 'e'),
-                              ('NMR non-stereo (e.g. prochiral)', 'nmr-prochiral.png',  'p'),
-                              ('No atom group', 'nmr-no-group.png', 'u'))),
+              ('Atomic Exchange', (('Variable atom', 'Toggle variable atom', 'variable-atom.png', 'xv'),
+                            ('Fast exchange', 'Toggle fast exchange (H+)', 'exchange-hydrogen.png', 'xf'))),
+              ('NMR Groups', (('Set equivalents', 'Select multiple atoms and click Set Equivalent to set NMR equivalent labels',
+                               'nmr-equivalent.png', 'e'),
+                              ('Set prochirals', 'Select multiple atoms and click Set Equivalent to set NMR non-stereo (e.g. prochiral)', 'nmr-prochiral.png',  'p'),
+                              ('Remove group','No atom group', 'nmr-no-group.png', 'u'))),
              ]
+PROPERTIES_LINKS = [
+                    ('Links', (('Add previous', 'Add pseudo link as "Previous residue"',  'link-prev.png', 'lp'),
+                             ('Add next', 'Add pseudo link as "Next residue"',  'link-next.png', 'ln'),
+                             ('Add generic', 'Add a generic pseudo link ', 'link.png', 'nl')))
+                    ]
+
+
 CHARGE_FONT = QtGui.QFont("DejaVu Sans Mono", 11, QtGui.QFont.Bold)
 NEG_COLOR = QtGui.QColor(255, 40, 40, 255)
 POS_COLOR = QtGui.QColor(40, 40, 255, 255)
 CHARGE_BG_COLOR = QtGui.QColor(255, 255, 255, 128)
 CHIRAL_FONT = QtGui.QFont("DejaVu Sans Mono", 7, QtGui.QFont.Bold)
-CHIRAL_COLOR = QtGui.QColor(255, 255, 0, 255)
+CHIRAL_COLOR = QtGui.QColor(0, 0, 255, 255)
 
 ELEMENT_ISO_ABUN = {
   'Ac':((0.0,227,227.0277470),),

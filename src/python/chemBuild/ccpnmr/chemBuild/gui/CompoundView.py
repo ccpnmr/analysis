@@ -20,7 +20,8 @@ from ccpnmr.chemBuild.gui.GraphicsItems import AromaticItem, EquivItem, Prochira
 from ccpnmr.chemBuild.general.Constants import LINK, MIMETYPE, MIMETYPE_ELEMENT, MIMETYPE_COMPOUND
 from ccpnmr.chemBuild.general.Constants import ATOM_NAME_FG, ELEMENT_FONT
 from ccpnmr.chemBuild.general.Constants import AROMATIC, EQUIVALENT, PROCHIRAL
-    
+from memops.qtgui.Entry import Entry
+
 class CompoundView(QGraphicsView):
 
   def __init__(self, parent=None, variant=None):
@@ -49,7 +50,7 @@ class CompoundView(QGraphicsView):
     self.showChargeSymbols = True
     self.showChiralities = True
     self.showStats = False
-    self.showGroups = False
+    self.showGroups = True
     self.menuAtomView = None
     self.menuAtom = None
     self.movePos = None
@@ -77,8 +78,8 @@ class CompoundView(QGraphicsView):
     self.scene.addItem(self.selectionBox)
 
     self.editAtom = None
-    self.editWidget = QtWidgets.QLineEdit()
-    self.editWidget.setMaxLength(8)
+    self.editWidget = Entry(None, '', callback=self.setAtomName, grid=(0,0)) # QtWidgets.QLineEdit()
+    self.editWidget.setMaxLength(20)
     self.editWidget.resize(50, 30)
 
     effect = QtWidgets.QGraphicsDropShadowEffect(self)
@@ -86,12 +87,22 @@ class CompoundView(QGraphicsView):
     effect.setOffset(2,2)
     
     #self.editWidget.setGraphicsEffect(effect)
-    self.editWidget.returnPressed.connect(self.setAtomName)
+    # self.editWidget.returnPressed.connect(self.setAtomName)
     self.editWidget.hide()
     self.editProxy = self.scene.addWidget(self.editWidget)
+
     self.editProxy.setZValue(2)
-    
-    self.backgroundColor = Qt.darkGray
+    ##  edit AtomGroup name
+    self.editAtomGroup = None
+    self.editAtomGroupWidget = QtWidgets.QLineEdit()
+    self.editAtomGroupWidget.setMaxLength(20)
+    self.editAtomGroupWidget.resize(50, 30)
+    self.editAtomGroupWidget.returnPressed.connect(self.setAtomGroupName)
+    self.editAtomGroupWidget.hide()
+    self.editAtomGroupWidgetProxy = self.scene.addWidget(self.editAtomGroupWidget)
+    self.editAtomGroupWidgetProxy.setZValue(2)
+
+    self.backgroundColor = Qt.white
     
     self.setBackgroundBrush(self.backgroundColor)
 
@@ -188,8 +199,24 @@ class CompoundView(QGraphicsView):
         
     else:
       event.ignore()
+
+  def setAtomGroupName(self, *args):
+    atomGroup = self.editAtomGroup
+    if not atomGroup:
+      return
+    text = self.editAtomGroupWidget.text()
+  #   check if already exists and give warning
+    if text:
+      atomGroup.name = text
+      self.parent.updateVars()
+
+    self.editAtomGroup = None
+    self.editAtomGroupWidget.hide()
+    self.updateAll()
+
+
         
-  def setAtomName(self):
+  def setAtomName(self, *args):
     
     atom = self.editAtom
     
@@ -229,8 +256,21 @@ class CompoundView(QGraphicsView):
     
     center = QtCore.QPointF(self.editWidget.rect().center())
     pos = atomLabel.pos() - center
-    self.editProxy.setPos(pos)    
-  
+    self.editProxy.setPos(pos)
+
+
+
+  def queryAtomGroupName(self, atomGroupLabel):
+
+    self.editAtomGroup = atomGroup = atomGroupLabel.atomGroup
+
+    self.editAtomGroupWidget.setText(atomGroup.name)
+    self.editAtomGroupWidget.setVisible(True)
+
+    center = QtCore.QPointF(self.editAtomGroupWidget.rect().center())
+    pos = atomGroupLabel.pos() - center
+    self.editAtomGroupWidgetProxy.setPos(pos)
+
   def drawForeground(self, painter, viewRect):
   
     QtWidgets.QGraphicsView.drawForeground(self, painter, viewRect)
@@ -284,13 +324,19 @@ class CompoundView(QGraphicsView):
     
     self.resetCachedContent()
     self.fitInView(self.sceneRect(), Qt.KeepAspectRatio)
+
+  def refreshView(self):
+    self.updateAll()
   
   def setupContextMenu(self):
     
     QAction = QtWidgets.QAction
     
     menu = QtWidgets.QMenu(self)
-    
+
+    action = QAction('Refresh View', self, triggered=self.refreshView)
+    menu.addAction(action)
+
     action = QAction('Reset View', self, triggered=self.resetView)
     menu.addAction(action)
     
@@ -1062,23 +1108,23 @@ class CompoundView(QGraphicsView):
 
       usedGroups = set(var.atomGroups)
       for group in usedGroups:
+
         if group in groupDict:
           groupDict[group].syncGroup()
-
         elif group.groupType == EQUIVALENT:
-          EquivItem(scene, self, group)
-
+          i = EquivItem(scene, self, group)
         elif group.groupType == PROCHIRAL:
-          ProchiralItem(scene, self, group)
-
+          i = ProchiralItem(scene, self, group)
         elif group.groupType == AROMATIC:
-          AromaticItem(scene, self, group)
+          i = AromaticItem(scene, self, group)
 
       zombieGroups = set(groupDict.keys()) - usedGroups
       for group in zombieGroups:
         groupItem = groupDict[group]
         del groupDict[group]
-        del groupItem
+        scene.removeItem(groupItem)
+        scene.removeItem(groupItem.atomGroupLabel)
+        # del groupItem
 
       for atom in var.varAtoms:
         atomView = getView(atom)

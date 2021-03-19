@@ -304,7 +304,7 @@ def makeChemComp(compound,  ccpCode,  molType, hasStdChirality=None, rootProject
     varAtoms = group.varAtoms
     atoms = [va.atom for va in varAtoms]
     chemAtomSets = [groupMapping[g] for g in group.subGroups]
-    
+
     key = frozenset(atoms)
     if key in done:
       groupMapping[group] = done[key]
@@ -356,10 +356,12 @@ def makeChemComp(compound,  ccpCode,  molType, hasStdChirality=None, rootProject
             stackB.add(va)
            
       equiv = False
- 
+      print('lop', name, [a.name for st in chemAtomSets for a in st.chemAtomSet.chemAtoms])
+
     else:
       continue
- 
+
+    print('XPOP', name, [a.name for st in chemAtomSets for a in st.chemAtomSet.chemAtoms])
     chemAtomSet = chemComp.newChemAtomSet(isProchiral=isProchiral,
                                           name=str(name),
                                           isEquivalent=equiv,
@@ -573,7 +575,7 @@ def importChemComp(chemComp):
   
     chemAtomsB = chemAtomSet.chemAtoms
     atoms = set([atomMap[ca.name] for ca in chemAtomsB])
-    
+
     for var in compound.variants:
       varAtoms = set([var.atomDict.get(a) for a in atoms])
       
@@ -590,7 +592,8 @@ def importChemComp(chemComp):
       else:
         continue
       
-      AtomGroup(compound, varAtoms, groupType)
+      ag = AtomGroup(compound, varAtoms, groupType)
+      ag.name = chemAtomSet.name
   
   # Compound second
   
@@ -620,7 +623,8 @@ def importChemComp(chemComp):
         continue
       
       # Automatically fills subGroups that were defined first
-      AtomGroup(compound, varAtoms, groupType)
+      ag = AtomGroup(compound, varAtoms, groupType)
+      ag.name = chemAtomSet.name
   
   # Curate charges and link names
   

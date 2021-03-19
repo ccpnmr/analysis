@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-19 13:56:47 +0000 (Fri, March 19, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-19 17:31:57 +0000 (Fri, March 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2853,10 +2853,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if rescale:
             self._rescaleAllAxes()
 
-    from ccpn.util.decorators import callList
-
-    @callList
-    def _scaleToYAxis(self, rescale=True, _callList=[]):
+    def _scaleToYAxis(self, rescale=True):
 
         _useFirstDefault = getattr(self.spectrumDisplay, '_useFirstDefault', False)
         if (self._aspectRatioMode or _useFirstDefault):  # and self._axisType != GLDefs.RIGHTAXIS:

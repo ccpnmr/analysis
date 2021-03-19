@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-19 13:56:47 +0000 (Fri, March 19, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-19 17:31:57 +0000 (Fri, March 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -831,6 +831,9 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self.stripFrame.update()
         self._stripFrameScrollArea._updateAxisWidgets()
+
+        # force a fractional delayed update of the extra axes
+        QtCore.QTimer.singleShot(100, self._stripFrameScrollArea.refreshViewPort)
 
     def setZWidgets(self):
         """Update the widgets in the planeToolbar

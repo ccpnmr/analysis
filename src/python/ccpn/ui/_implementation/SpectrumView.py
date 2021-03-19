@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 16:52:40 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-19 10:11:06 +0000 (Fri, March 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -454,7 +454,6 @@ del _findSpectrumView
 
 # Notifiers:
 # Notify SpectrumView change when ApiSpectrumView changes (underlying object is StripSpectrumView)
-# TODO change to calling _setupApiNotifier
 Project._apiNotifiers.append(
         ('_notifyRelatedApiObject', {'pathToObject': 'stripSpectrumViews', 'action': 'change'},
          ApiSpectrumView._metaclass.qualifiedName(), '')

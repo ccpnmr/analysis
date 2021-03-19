@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-19 10:11:06 +0000 (Fri, March 19, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,6 +31,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import PeakListView as ApiPeakListView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.ui._implementation.PMIListViewABC import PMIListViewABC
@@ -128,10 +129,9 @@ PeakList.peakListViews = property(getter, None, None,
 del getter
 
 # Notifiers:
-# TODO change to calling _setupApiNotifier
 Project._apiNotifiers.append(
         ('_notifyRelatedApiObject', {'pathToObject': 'stripPeakListViews', 'action': 'change'},
-         ApiStripPeakListView._metaclass.qualifiedName(), '')
+         ApiPeakListView._metaclass.qualifiedName(), '')
         )
 
 
@@ -144,18 +144,16 @@ Project._apiNotifiers.append(
 def _peakListAddPeakListViews(project: Project, apiPeakList: Nmr.PeakList):
     """Add ApiPeakListView when ApiPeakList is created"""
     for apiSpectrumView in apiPeakList.dataSource.spectrumViews:
-        apiListView = apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
+        apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
 
 
-#
 Project._setupApiNotifier(_peakListAddPeakListViews, Nmr.PeakList, 'postInit')
 
 
 def _spectrumViewAddPeakListViews(project: Project, apiSpectrumView: ApiSpectrumView):
     """Add ApiPeakListView when ApiSpectrumView is created"""
     for apiPeakList in apiSpectrumView.dataSource.peakLists:
-        apiListView = apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
+        apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
 
 
-#
 Project._setupApiNotifier(_spectrumViewAddPeakListViews, ApiSpectrumView, 'postInit')

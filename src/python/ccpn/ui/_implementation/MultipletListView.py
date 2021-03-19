@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2021-03-19 10:11:06 +0000 (Fri, March 19, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,6 +31,7 @@ from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripMultipletListView as ApiStripMultipletListView
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import MultipletListView as ApiMultipletListView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.ui._implementation.PMIListViewABC import PMIListViewABC
@@ -137,34 +138,25 @@ MultipletList.multipletListViews = property(getter, None, None,
 del getter
 
 # Notifiers:
-# TODO change to calling _setupApiNotifier
 Project._apiNotifiers.append(
         ('_notifyRelatedApiObject', {'pathToObject': 'stripMultipletListViews', 'action': 'change'},
-         ApiStripMultipletListView._metaclass.qualifiedName(), '')
+         ApiMultipletListView._metaclass.qualifiedName(), '')
         )
-
-
-#EJB 20181122: moved to MultipletList
-# Notify MultipletListView change when MultipletList changes
-# MultipletList._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
-#                                  {'pathToObject': 'multipletListViews', 'action': 'change'})
 
 
 def _multipletListAddMultipletListViews(project: Project, apiMultipletList: Nmr.MultipletList):
     """Add ApiMultipletListView when ApiMultipletList is created"""
     for apiSpectrumView in apiMultipletList.dataSource.spectrumViews:
-        apiListView = apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial, multipletList=apiMultipletList)
+        apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial, multipletList=apiMultipletList)
 
 
-#
 Project._setupApiNotifier(_multipletListAddMultipletListViews, Nmr.MultipletList, 'postInit')
 
 
 def _spectrumViewAddMultipletListViews(project: Project, apiSpectrumView: ApiSpectrumView):
     """Add ApiMultipletListView when ApiSpectrumView is created"""
     for apiMultipletList in apiSpectrumView.dataSource.multipletLists:
-        apiListView = apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial, multipletList=apiMultipletList)
+        apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial, multipletList=apiMultipletList)
 
 
-#
 Project._setupApiNotifier(_spectrumViewAddMultipletListViews, ApiSpectrumView, 'postInit')

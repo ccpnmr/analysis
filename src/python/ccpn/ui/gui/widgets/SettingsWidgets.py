@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-19 13:56:47 +0000 (Fri, March 19, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -137,7 +137,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.yAxisUnitsButtons.setVisible(showYAxis)
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=12)
+        HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=15)
 
         row += 1
         self.useAspectRatioModeLabel = Label(parent, text="Aspect Ratio Mode", grid=(row, 0))
@@ -184,11 +184,28 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         row += 1
         _buttonFrame = Frame(parent, setLayout=True, grid=(row, 1), gridSpan=(1, 3), hAlign='l')
-        self.setFromDefaultsButton = Button(_buttonFrame, text='Set from Defaults', grid=(0, 0), callback=self._setAspectFromDefaults)
+        self.setFromDefaultsButton = Button(_buttonFrame, text='Set from Defaults', grid=(0, 0), callback=self.updateFromDefaults)
         self.setFromScreenButton = Button(_buttonFrame, text='Set from Screen', grid=(0, 1), callback=self._setAspectFromScreen)
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=12)
+        HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=15)
+
+        if self._spectrumDisplay.MAXPEAKLABELTYPES:
+            row += 1
+            _texts = ['Short', 'Full', 'Pid', 'Minimal', 'Id', 'Annotation']
+            _names = ['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id', 'annSDS_Annotation']
+            _texts = _texts[:self._spectrumDisplay.MAXPEAKLABELTYPES]
+            _names = _names[:self._spectrumDisplay.MAXPEAKLABELTYPES]
+
+            self.annotationsLabel = Label(parent, text="Symbol Labelling", grid=(row, 0))
+            self.annotationsData = RadioButtons(parent, texts=_texts,
+                                                objectNames=_names,
+                                                selectedInd=annotationType,
+                                                callback=self._symbolsChanged,
+                                                direction='horizontal',
+                                                grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                                tipTexts=None,
+                                                )
 
         if self._spectrumDisplay.MAXPEAKSYMBOLTYPES:
             # if not self._spectrumDisplay.is1D:
@@ -214,23 +231,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 self.symbol.radioButtons[1].setVisible(False)
                 self.symbol.radioButtons[2].setVisible(False)
 
-        if self._spectrumDisplay.MAXPEAKLABELTYPES:
-            row += 1
-            _texts = ['Short', 'Full', 'Pid', 'Minimal', 'Peak Id', 'Annotation']
-            _names = ['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id', 'annSDS_Annotation']
-            _texts = _texts[:self._spectrumDisplay.MAXPEAKLABELTYPES]
-            _names = _names[:self._spectrumDisplay.MAXPEAKLABELTYPES]
-
-            self.annotationsLabel = Label(parent, text="Symbol Annotation", grid=(row, 0))
-            self.annotationsData = RadioButtons(parent, texts=_texts,
-                                                objectNames=_names,
-                                                selectedInd=annotationType,
-                                                callback=self._symbolsChanged,
-                                                direction='horizontal',
-                                                grid=(row, 1), gridSpan=(1, 3), hAlign='l',
-                                                tipTexts=None,
-                                                )
-
         row += 1
         self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixel)", grid=(row, 0))
         self.symbolSizePixelData = Spinbox(parent, step=1,
@@ -253,7 +253,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.stripArrangementButtons = RadioButtons(parent, texts=['    ', '    ', '    '],
                                                     objectNames=['stripSDS_Row', 'stripSDS_Column', 'stripSDS_Tile'],
                                                     selectedInd=stripArrangement,
-                                                    callback=self._stripArrangementChanged,
                                                     direction='horizontal',
                                                     grid=(row, 1), gridSpan=(1, 3), hAlign='l',
                                                     tipTexts=None,
@@ -266,6 +265,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         # NOTE:ED - temporarily disable/hide the Tile button
         self.stripArrangementButtons.radioButtons[2].setEnabled(False)
         self.stripArrangementButtons.radioButtons[2].setVisible(False)
+        self.stripArrangementButtons.setCallback(self._stripArrangementChanged)
 
         row += 1
         self._spacer = Spacer(parent, 5, 5,
@@ -325,12 +325,19 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         self._settingsChanged()
 
-    def _setAspectFromDefaults(self, *args):
+    def updateFromDefaults(self, *args):
+        """Update the defaults from preferences
+        """
         with self.aspectDataFrame.blockWidgetSignals():
             for aspect, label in self.aspectScreen.items():
                 if aspect in self.preferences.general.aspectRatios:
                     value = self.preferences.general.aspectRatios[aspect]
                     self.aspectData[aspect].setValue(value)
+
+        self.blockSignals(True)
+        self.useAspectRatioModeButtons.setIndex(int(self.preferences.general.aspectRatioMode))
+        self._updateLockedSettings()
+        self.blockSignals(False)
 
         self._settingsChanged()
 
@@ -345,8 +352,12 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         """Respond to an external change in the lock status of a strip
         """
         if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
+            self.blockSignals(True)
+
             self.useAspectRatioModeButtons.setIndex(aDict[GLNotifier.GLVALUES][0])
             self._updateLockedSettings()
+
+            self.blockSignals(False)
 
     @pyqtSlot(dict)
     def _aspectRatioChangedInDisplay(self, aDict):
@@ -357,10 +368,14 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             if not _aspectRatios:
                 return
 
+            self.blockSignals(True)
+
             for aspect in sorted(_aspectRatios.keys()):
                 aspectValue = _aspectRatios[aspect]
                 if aspect in self.aspectScreen and aspect in self.aspectData:
                     self.aspectScreen[aspect].setText(self.aspectData[aspect].textFromValue(aspectValue))
+
+            self.blockSignals(False)
 
     @pyqtSlot()
     def _symbolsChanged(self):
@@ -383,6 +398,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
             self.symbolSizePixelData.set(values[SYMBOLSIZE])
             self.symbolThicknessData.set(values[SYMBOLTHICKNESS])
+
             self.blockSignals(False)
 
     def _stripArrangementChanged(self):
@@ -400,6 +416,15 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         """Handle the return from widget callback
         """
         pass
+
+    def updateRatiosInDisplay(self, ratios):
+        """Manually update the settings in the display
+        """
+        with self.aspectScreenFrame.blockWidgetSignals():
+            for aspect in sorted(ratios.keys()):
+                aspectValue = ratios[aspect]
+                if aspect in self.aspectScreen and aspect in self.aspectData:
+                    self.aspectData[aspect].setText(aspectValue)
 
 
 class _commonSettings():

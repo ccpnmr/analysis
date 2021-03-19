@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-03 17:13:31 +0000 (Wed, February 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-19 13:56:47 +0000 (Fri, March 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1548,7 +1548,26 @@ class GuiStrip(Frame):
                 self._emitSymbolChanged()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # symbolTypes
+
+    def updateAxisRatios(self):
+        # notify strips to update fixed/locked state
+
+        try:
+            # update settings - not very nice, using the settings signal for the minute :|
+            self.spectrumDisplay._spectrumDisplaySettings.updateFromDefaults()
+        except Exception as es:
+            print(str(es))
+
+    def setFixedAspectRatios(self, ratios):
+        # update the ratios for the fixed mode
+        self._CcpnGLWidget._lockedAspectRatios = ratios.copy()
+
+    def setAspectRatioMode(self, mode):
+        # update the aspect ratio mode
+        self._CcpnGLWidget._aspectRatioMode = mode
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # marks
 
     def _createMarkAtPosition(self, positions, axisCodes):
         try:

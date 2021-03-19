@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-11 10:39:52 +0000 (Thu, March 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-19 13:56:47 +0000 (Fri, March 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2827,8 +2827,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         return 1.0 if x >= 0 else -1.0
 
     def _scaleToXAxis(self, rescale=True):
+
         _useFirstDefault = getattr(self.spectrumDisplay, '_useFirstDefault', False)
-        if (self._aspectRatioMode or _useFirstDefault):
+        if (self._aspectRatioMode or _useFirstDefault):  # and self._axisType != GLDefs.BOTTOMAXIS:
             mby = 0.5 * (self.axisT + self.axisB)
 
             # if self._useDefaultAspect or _useFirstDefault:
@@ -2838,12 +2839,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             else:
                 try:
                     ax0, ax1 = self.spectrumDisplay._stripAddMode
-                except:
+                except Exception as es:
+                    # just let stripAddMode fail for axis widget
                     ax0 = self.pixelX
                     ax1 = self.pixelY
-
-            # width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
-            # height = (self.h - self.AXIS_MOUSEYOFFSET) if self._drawBottomAxis else self.h
 
             width, height = self._parentStrip.mainViewSize()
 
@@ -2854,9 +2853,13 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if rescale:
             self._rescaleAllAxes()
 
-    def _scaleToYAxis(self, rescale=True):
+    from ccpn.util.decorators import callList
+
+    @callList
+    def _scaleToYAxis(self, rescale=True, _callList=[]):
+
         _useFirstDefault = getattr(self.spectrumDisplay, '_useFirstDefault', False)
-        if (self._aspectRatioMode or _useFirstDefault):
+        if (self._aspectRatioMode or _useFirstDefault):  # and self._axisType != GLDefs.RIGHTAXIS:
             mbx = 0.5 * (self.axisR + self.axisL)
 
             # if self._useDefaultAspect or _useFirstDefault:
@@ -2866,12 +2869,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             else:
                 try:
                     ax0, ax1 = self.spectrumDisplay._stripAddMode
-                except:
+                except Exception as es:
+                    # just let stripAddMode fail for axis widget
                     ax0 = self.pixelX
                     ax1 = self.pixelY
-
-            # width = (self.w - self.AXIS_MARGINRIGHT) if self._drawRightAxis else self.w
-            # height = (self.h - self.AXIS_MOUSEYOFFSET) if self._drawBottomAxis else self.h
 
             width, height = self._parentStrip.mainViewSize()
 

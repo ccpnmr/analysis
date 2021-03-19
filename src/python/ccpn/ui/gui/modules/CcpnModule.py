@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-19 17:40:23 +0000 (Fri, March 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -627,7 +627,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 widgetsState[varName] = varObj.getText()
                 continue
             if varObj.__class__.__name__ in CommonWidgets.keys():
-                try:  # try because widgets can be dinamically deleted
+                try:  # try because widgets can be dynamically deleted
                     widgetsState[varName] = getattr(varObj, CommonWidgets[varObj.__class__.__name__][0].__name__)()
                 except Exception as e:
                     getLogger().debug('Error %s', e)

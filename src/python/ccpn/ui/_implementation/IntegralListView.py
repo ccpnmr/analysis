@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2021-03-19 17:40:23 +0000 (Fri, March 19, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,6 +31,7 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Project import Project
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripIntegralListView as ApiStripIntegralListView
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import IntegralListView as ApiIntegralListView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.ui._implementation.PMIListViewABC import PMIListViewABC
@@ -128,34 +129,25 @@ IntegralList.integralListViews = property(getter, None, None,
 del getter
 
 # Notifiers:
-# TODO change to calling _setupApiNotifier
 Project._apiNotifiers.append(
         ('_notifyRelatedApiObject', {'pathToObject': 'stripIntegralListViews', 'action': 'change'},
-         ApiStripIntegralListView._metaclass.qualifiedName(), '')
+         ApiIntegralListView._metaclass.qualifiedName(), '')
         )
-
-
-#EJB 20181122: moved to IntegralList
-# Notify IntegralListView change when IntegralList changes
-# IntegralList._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
-#                                 {'pathToObject': 'integralListViews', 'action': 'change'})
 
 
 def _integralListAddIntegralListViews(project: Project, apiIntegralList: Nmr.IntegralList):
     """Add ApiIntegralListView when ApiIntegralList is created"""
     for apiSpectrumView in apiIntegralList.dataSource.spectrumViews:
-        apiListView = apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial, integralList=apiIntegralList)
+        apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial, integralList=apiIntegralList)
 
 
-#
 Project._setupApiNotifier(_integralListAddIntegralListViews, Nmr.IntegralList, 'postInit')
 
 
 def _spectrumViewAddIntegralListViews(project: Project, apiSpectrumView: ApiSpectrumView):
     """Add ApiIntegralListView when ApiSpectrumView is created"""
     for apiIntegralList in apiSpectrumView.dataSource.integralLists:
-        apiListView = apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial, integralList=apiIntegralList)
+        apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial, integralList=apiIntegralList)
 
 
-#
 Project._setupApiNotifier(_spectrumViewAddIntegralListViews, ApiSpectrumView, 'postInit')

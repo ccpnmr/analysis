@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-17 10:36:49 +0100 (Fri, July 17, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-19 17:40:23 +0000 (Fri, March 19, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -140,19 +140,27 @@ class SpectrumDisplayScrollArea(ScrollArea):
                     if child._axisType == BOTTOMAXIS:
                         # resize the X axis widgets
                         child.setGeometry(0, rect.height(), _width, margins[3])
-                        # child._resizeGL(_width, margins[3])
                     else:
                         # resize the Y axis widgets
                         child.setGeometry(rect.width(), 0, margins[2], _height)
-                        # child._resizeGL(margins[2], _height)
-                    # child._updateAxes = True
-                    # child.update()
 
             if self._cornerWidget:
                 self._cornerWidget.setGeometry(_width, _height, margins[2], offset)
 
         except:
             pass
+
+    def refreshViewPort(self):
+        from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidgetAxis, GuiNdWidgetAxis
+
+        self._updateAxisWidgets()
+
+        # search for the axis widgets
+        children = self.findChildren((Gui1dWidgetAxis, GuiNdWidgetAxis))
+        if children:
+            for child in children:
+                child._updateAxes = True
+                child.update()
 
     def setViewportMargins(self, *margins):
         """Set the viewport margins and keep a local copy

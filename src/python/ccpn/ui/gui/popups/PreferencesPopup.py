@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-12 18:01:39 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-19 17:40:23 +0000 (Fri, March 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -89,7 +89,10 @@ FONTPREFS = 'font{}'
 def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, userWorkingPath=None):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
-    self.application.preferences = newPrefs
+    # update the preferences, but keep in place
+    self.application.preferences.clear()
+    self.application.preferences.update(newPrefs)
+
     # application preferences updated so re-save
     self.application._savePreferences()
 
@@ -206,7 +209,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self._revertButton.setEnabled(False)
 
     def _updateSpectrumDisplays(self):
-        checked = self.application.preferences.general.showToolbar
+
         for display in self.project.spectrumDisplays:
 
             for strip in display.strips:
@@ -241,7 +244,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self._updateSpectrumDisplays()
 
         # colour theme has changed - flag displays to update
-        self._updateGui()
+        self._updateGui(updateSpectrumDisplays)
 
     def _applyChanges(self):
         """
@@ -326,7 +329,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         super().reject()
 
-    def _updateGui(self):
+    def _updateGui(self, updateSpectrumDisplays):
 
         # prompt the GLwidgets to update
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -337,11 +340,15 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                       GLNotifier.GLALLMULTIPLETS,
                                       GLNotifier.GLPREFERENCES])
 
-        # NOTE:ED - quick setting of new background colour for cornerWidget, not very nice should use a notifier
         for specDisplay in self.project.spectrumDisplays:
             specDisplay.setVisibleAxes()
             if not specDisplay.is1D:
                 specDisplay.attachZPlaneWidgets()
+
+            # update the fixed/locked state
+            if specDisplay.strips and updateSpectrumDisplays:
+                # update the ratios from preferences
+                specDisplay.strips[0].updateAxisRatios()
 
     def _setTabs(self):
         """Creates the tabs as Frame Widget. All the children widgets will go in the Frame.
@@ -400,7 +407,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.autoBackupFrequencyData.valueChanged.connect(self._queueSetAutoBackupFrequency)
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
 
         row += 1
         self.userWorkingPathLabel = Label(parent, "User Working Path ", grid=(row, 0), )
@@ -458,7 +465,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useProjectPathBox.setToolTip('Set the current user working path to the project folder on loading')
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+
         row += 1
         self.verifySSLLabel = Label(parent, text="Verify SSL certificates", grid=(row, 0))
         self.verifySSLBox = CheckBox(parent, grid=(row, 1))
@@ -531,7 +539,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useNativeWebBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeWebbrowser'))
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
 
         row += 1
         self.useImportNefPopupLabel = Label(parent, text="Show Import Popup\n    on dropped Nef Files", grid=(row, 0))
@@ -539,7 +547,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useImportNefPopupBox.toggled.connect(partial(self._queueToggleAppearanceOptions, 'openImportPopupOnDroppedNef'))
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
 
         # NOTE:ED - testing new font loader
         row += 1
@@ -707,7 +715,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                 self.aspectData[aspect].setEnabled(False)
             else:
                 self.aspectData[aspect].setEnabled(True)
-                self.aspectData[aspect].valueChanged.connect(partial(self._queueSetAspect, aspect))
+                self.aspectData[aspect].valueChanged.connect(partial(self._queueSetAspect, aspect, ii))
 
         self.useSearchBoxModeBox.setChecked(self.preferences.general.searchBoxMode)
         self.useSearchBoxDoFitBox.setChecked(self.preferences.general.searchBoxDoFit)
@@ -726,7 +734,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             #     self.searchBox1dData[searchBox1d].setEnabled(False)
             # else:
             #     self.searchBox1dData[searchBox1d].setEnabled(True)
-            self.searchBox1dData[searchBox1d].valueChanged.connect(partial(self._queueSetSearchBox1d, searchBox1d))
+            self.searchBox1dData[searchBox1d].valueChanged.connect(partial(self._queueSetSearchBox1d, searchBox1d, ii))
 
         self.searchBoxNdLabel = {}
         self.searchBoxNdData = {}
@@ -742,7 +750,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             #     self.searchBoxNdData[searchBoxNd].setEnabled(False)
             # else:
             #     self.searchBoxNdData[searchBoxNd].setEnabled(True)
-            self.searchBoxNdData[searchBoxNd].valueChanged.connect(partial(self._queueSetSearchBoxNd, searchBoxNd))
+            self.searchBoxNdData[searchBoxNd].valueChanged.connect(partial(self._queueSetSearchBoxNd, searchBoxNd, ii))
 
     def _populateExternalProgramsTab(self):
         """Populate the widgets in the externalProgramsTab
@@ -883,7 +891,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                 )
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
 
         row += 1
         self.zoomCentreLabel = Label(parent, text="Zoom Centre", grid=(row, 0))
@@ -924,7 +932,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showIntensityLimitBox.valueChanged.connect(self._queueSetIntensityLimit)
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
 
         row += 1
         self.zPlaneNavigationModeLabel = Label(parent, text="zPlane Navigation Mode", grid=(row, 0))
@@ -948,58 +956,27 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                 )
 
         row += 1
+        Label(parent, text='Fixed Aspects', grid=(row, 0), hAlign='r')
+
+        row += 1
         self.aspectLabel = {}
         self.aspectData = {}
         self.aspectLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
         self.aspectDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
 
         row += 1
-        self.useSearchBoxModeLabel = Label(parent, text="Use Search Box Widths", grid=(row, 0))
-        self.useSearchBoxModeBox = CheckBox(parent, grid=(row, 1))
-        self.useSearchBoxModeBox.toggled.connect(self._queueSetUseSearchBoxMode)
-        self.useSearchBoxModeLabel.setToolTip(
-                'Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
-        self.useSearchBoxModeBox.setToolTip(
-                'Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
 
         row += 1
-        self.useSearchBoxDoFitLabel = Label(parent, text="Apply Peak Fitting Method\n after Snap To Extrema", grid=(row, 0))
-        self.useSearchBoxDoFitBox = CheckBox(parent, grid=(row, 1))
-        self.useSearchBoxDoFitBox.toggled.connect(self._queueSetUseSearchBoxDoFit)
-        self.useSearchBoxDoFitLabel.setToolTip('Option to apply fitting method after initial snap to extrema')
-        self.useSearchBoxDoFitBox.setToolTip('Option to apply fitting method after initial snap to extrema')
-
-        row += 1
-        self.defaultSearchBox1dRatioLabel = Label(parent, text="1d Search Box Widths (ppm)", grid=(row, 0), hAlign='r')
-
-        row += 1
-        self.searchBox1dLabel = {}
-        self.searchBox1dData = {}
-        self.searchBox1dLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
-        self.searchBox1dDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
-
-        row += 1
-        self.defaultSearchBoxNdRatioLabel = Label(parent, text="Nd Search Box Widths (ppm)", grid=(row, 0), hAlign='r')
-
-        row += 1
-        self.searchBoxNdLabel = {}
-        self.searchBoxNdData = {}
-        self.searchBoxNdLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
-        self.searchBoxNdDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
-
-        row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
-
-        row += 1
-        self.annotationsLabel = Label(parent, text="Peak Annotations", grid=(row, 0))
-        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Peak Id', 'Annotation'],
+        self.annotationsLabel = Label(parent, text="Symbol Labelling", grid=(row, 0))
+        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Id', 'Annotation'],
                                             callback=self._queueSetAnnotations,
                                             direction='h',
                                             grid=(row, 1), hAlign='l', gridSpan=(1, 2),
                                             tipTexts=None,
                                             )
         row += 1
-        self.symbolsLabel = Label(parent, text="Symbols", grid=(row, 0))
+        self.symbolsLabel = Label(parent, text="Symbol Type", grid=(row, 0))
         self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths', 'Plus'],
                                    callback=self._queueSetSymbol,
                                    direction='h',
@@ -1046,7 +1023,44 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.contourThicknessData.valueChanged.connect(self._queueSetContourThickness)
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+
+        row += 1
+        self.useSearchBoxModeLabel = Label(parent, text="Use Search Box Widths", grid=(row, 0))
+        self.useSearchBoxModeBox = CheckBox(parent, grid=(row, 1))
+        self.useSearchBoxModeBox.toggled.connect(self._queueSetUseSearchBoxMode)
+        self.useSearchBoxModeLabel.setToolTip(
+                'Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
+        self.useSearchBoxModeBox.setToolTip(
+                'Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
+
+        row += 1
+        self.useSearchBoxDoFitLabel = Label(parent, text="Apply Peak Fitting Method\n after Snap To Extrema", grid=(row, 0))
+        self.useSearchBoxDoFitBox = CheckBox(parent, grid=(row, 1))
+        self.useSearchBoxDoFitBox.toggled.connect(self._queueSetUseSearchBoxDoFit)
+        self.useSearchBoxDoFitLabel.setToolTip('Option to apply fitting method after initial snap to extrema')
+        self.useSearchBoxDoFitBox.setToolTip('Option to apply fitting method after initial snap to extrema')
+
+        row += 1
+        self.defaultSearchBox1dRatioLabel = Label(parent, text="1d Search Box Widths (ppm)", grid=(row, 0), hAlign='r')
+
+        row += 1
+        self.searchBox1dLabel = {}
+        self.searchBox1dData = {}
+        self.searchBox1dLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
+        self.searchBox1dDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+
+        row += 1
+        self.defaultSearchBoxNdRatioLabel = Label(parent, text="Nd Search Box Widths (ppm)", grid=(row, 0), hAlign='r')
+
+        row += 1
+        self.searchBoxNdLabel = {}
+        self.searchBoxNdData = {}
+        self.searchBoxNdLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
+        self.searchBoxNdDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
 
         row += 1
         self.autoCorrectLabel = Label(parent, text="Autocorrect Colours", grid=(row, 0))
@@ -1067,7 +1081,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.marksDefaultColourButton.clicked.connect(self._queueChangeMarksColourButton)
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
 
         row += 1
         self.multipletAveragingLabel = Label(parent, text="Multiplet Averaging", grid=(row, 0))
@@ -1079,7 +1093,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                )
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
 
         row += 1
         self.singleContoursLabel = Label(parent, text="Generate Single Contours\n   per Plane", grid=(row, 0))
@@ -1674,7 +1688,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.peakFittingMethod = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetAspect(self, aspect):
+    def _queueSetAspect(self, aspect, dim):
+        """dim is required by the decorator to give a unique id for aspect dim
+        """
         textFromValue = self.aspectData[aspect].textFromValue
         value = self.aspectData[aspect].get()
         prefValue = textFromValue(self.preferences.general.aspectRatios[aspect])
@@ -1705,7 +1721,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.searchBoxDoFit = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetSearchBox1d(self, searchBox1d):
+    def _queueSetSearchBox1d(self, searchBox1d, dim):
+        """dim is required by the decorator to give a unique id for searchBox dim
+        """
         textFromValue = self.searchBox1dData[searchBox1d].textFromValue
         value = self.searchBox1dData[searchBox1d].get()
         prefValue = textFromValue(self.preferences.general.searchBoxWidths1d[searchBox1d])
@@ -1718,7 +1736,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.searchBoxWidths1d[searchBox1d] = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetSearchBoxNd(self, searchBoxNd):
+    def _queueSetSearchBoxNd(self, searchBoxNd, dim):
+        """dim is required by the decorator to give a unique id for searchBox dim
+        """
         textFromValue = self.searchBoxNdData[searchBoxNd].textFromValue
         value = self.searchBoxNdData[searchBoxNd].get()
         prefValue = textFromValue(self.preferences.general.searchBoxWidthsNd[searchBoxNd])

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-08 16:27:02 +0000 (Mon, March 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-19 17:40:23 +0000 (Fri, March 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -660,7 +660,6 @@ del getter
 # Notifiers:
 
 # crosslinks window, nmrResidue
-# TODO change to calling _setupApiNotifier
 Project._apiNotifiers.append(
         ('_modifiedLink', {'classNames': ('Window', 'SpectrumDisplay')},
          ApiBoundDisplay._metaclass.qualifiedName(), 'setWindow'),

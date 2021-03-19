@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-12 18:01:38 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-19 17:40:23 +0000 (Fri, March 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1080,13 +1080,13 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisR = mbx - zoomOut * (mbx - self.axisR)
 
             if not self._aspectRatioMode:
+                self._rescaleXAxis()
                 self.GLSignals._emitXAxisChanged(source=self, strip=self.strip,
                                                  axisB=self.axisB, axisT=self.axisT,
                                                  axisL=self.axisL, axisR=self.axisR,
                                                  row=tilePos[0], column=tilePos[1],
                                                  aspectRatios=self._lockedAspectRatios)
 
-                self._rescaleXAxis()
                 self._storeZoomHistory()
 
             else:
@@ -1123,13 +1123,13 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisT = mby - zoomOut * (mby - self.axisT)
 
             if not self._aspectRatioMode:
+                self._rescaleYAxis()
                 self.GLSignals._emitYAxisChanged(source=self, strip=self.strip,
                                                  axisB=self.axisB, axisT=self.axisT,
                                                  axisL=self.axisL, axisR=self.axisR,
                                                  row=tilePos[0], column=tilePos[1],
                                                  aspectRatios=self._lockedAspectRatios)
 
-                self._rescaleYAxis()
                 self._storeZoomHistory()
 
             else:
@@ -1156,7 +1156,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                            axisL=self.axisL, axisR=self.axisR,
                                            row=tilePos[0], column=tilePos[1])
 
-    def emitYAxisChanged(self, allStrips=False):
+    def emitYAxisChanged(self, allStrips=False, aspectRatios=None):
         """Signal all strips in the spectrumDisplay to refresh
         Strips will be scaled to the Y-Axis if aspect ratio is set to Locked/Fixed
         :param allStrips: True/False, if true, apply scaling to all strips; False, ignore the current strip in spectrumDisplay
@@ -1167,9 +1167,9 @@ class CcpnGLWidget(QOpenGLWidget):
                                          axisB=self.axisB, axisT=self.axisT,
                                          axisL=self.axisL, axisR=self.axisR,
                                          row=tilePos[0], column=tilePos[1],
-                                         aspectRatios=None)
+                                         aspectRatios=aspectRatios.copy() if aspectRatios else None)
 
-    def emitXAxisChanged(self, allStrips=False):
+    def emitXAxisChanged(self, allStrips=False, aspectRatios=None):
         """Signal all strips in the spectrumDisplay to refresh
         Strips will be scaled to the X-Axis if aspect ratio is set to Locked/Fixed
         :param allStrips: True/False, if true, apply scaling to all strips; False, ignore the current strip in spectrumDisplay
@@ -1180,7 +1180,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                          axisB=self.axisB, axisT=self.axisT,
                                          axisL=self.axisL, axisR=self.axisR,
                                          row=tilePos[0], column=tilePos[1],
-                                         aspectRatios=None)
+                                         aspectRatios=aspectRatios.copy() if aspectRatios else None)
 
     def _scaleToXAxis(self, rescale=True, update=False):
         _useFirstDefault = getattr(self.strip.spectrumDisplay, '_useFirstDefault', False)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-19 17:40:23 +0000 (Fri, March 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -819,7 +819,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 self._stripAddMode = (self.strips[0]._CcpnGLWidget.pixelX, self.strips[0]._CcpnGLWidget.pixelY)
                 self._rightGLAxis.show()
                 self._bottomGLAxis.hide()
-                self._rightGLAxis._glAxisLockChanged(aDict)
+                # self._rightGLAxis._glAxisLockChanged(aDict)
                 self._stripAddMode = None
                 self._rightGLAxis._updateAxes = True
             else:
@@ -829,12 +829,15 @@ class GuiSpectrumDisplay(CcpnModule):
                 self._stripAddMode = (self.strips[0]._CcpnGLWidget.pixelX, self.strips[0]._CcpnGLWidget.pixelY)
                 self._rightGLAxis.hide()
                 self._bottomGLAxis.show()
-                self._bottomGLAxis._glAxisLockChanged(aDict)
+                # self._bottomGLAxis._glAxisLockChanged(aDict)
                 self._stripAddMode = None
                 self._bottomGLAxis._updateAxes = True
 
         self.stripFrame.update()
         self._stripFrameScrollArea._updateAxisWidgets()
+
+        # force a fractional delayed update of the extra axes
+        QtCore.QTimer.singleShot(100, self._stripFrameScrollArea.refreshViewPort)
 
     def setZWidgets(self):
         """Update the widgets in the planeToolbar

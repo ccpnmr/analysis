@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-08 15:34:46 +0000 (Mon, March 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-22 19:44:29 +0000 (Mon, March 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -201,7 +201,7 @@ class PeakList(PMIListABC):
                 noiseLevel = spectrum.noiseLevel
                 negativeNoiseLevel = spectrum.negativeNoiseLevel
 
-                if negativeNoiseLevel is None:
+                if negativeNoiseLevel is None and spectrum.noiseLevel is not None:
                     negativeNoiseLevel = -spectrum.noiseLevel
 
                 if not noiseLevel and not negativeNoiseLevel:

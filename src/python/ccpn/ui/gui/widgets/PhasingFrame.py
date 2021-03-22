@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:54 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-22 18:19:23 +0000 (Mon, March 22, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -70,9 +70,9 @@ class PhasingFrame(Frame):
         self.label0.setFixedWidth(30)
         # self.phLabel0 = Label(self, text=value, grid=(0, 1))
         # self.phLabel0.setFixedWidth(35)
-        self.coarseSlider0 = Slider(self, callback=self.setCoarsePh0, grid=(0, 2), **sliderDict)
+        self.coarseSlider0 = Slider(self, callback=self.setCoarsePh0, grid=(0, 2), objectName='PF_ph0coarse', **sliderDict)
         # self.slider0.setFixedWidth(200)
-        self.slider0 = DoubleSpinbox(self, grid=(0, 3), decimals=1, step=0.1, callback=self.setPh0)
+        self.slider0 = DoubleSpinbox(self, grid=(0, 3), decimals=1, step=0.1, callback=self.setPh0, objectName='PF_ph0fine')
         self.slider0.setRange(-180, 180)
 
         sliderDict = {
@@ -89,20 +89,20 @@ class PhasingFrame(Frame):
         self.label1.setFixedWidth(30)
         # self.phLabel1 = Label(self, text=value, grid=(0, 4))
         # self.phLabel1.setFixedWidth(35)
-        self.coarseSlider1 = Slider(self, callback=self.setCoarsePh1, grid=(0, 5), **sliderDict)
+        self.coarseSlider1 = Slider(self, callback=self.setCoarsePh1, grid=(0, 5), objectName='PF_ph1coarse', **sliderDict)
         # self.slider1.setFixedWidth(200)
-        self.slider1 = DoubleSpinbox(self, grid=(0, 6), decimals=1, step=0.1, callback=self.setPh1)
+        self.slider1 = DoubleSpinbox(self, grid=(0, 6), decimals=1, step=0.1, callback=self.setPh1, objectName='PF_ph1fine')
         self.slider1.setRange(-360, 360)
 
         self.PivotLabel = Label(self, text='pivot', grid=(0, 7))
         self.PivotLabel.setFixedWidth(35)
-        self.pivotEntry = DoubleSpinbox(self, callback=lambda value: self._returnCallback(), decimals=3, step=0.1, grid=(0, 8))
+        self.pivotEntry = DoubleSpinbox(self, callback=lambda value: self._returnCallback(), decimals=3, step=0.1, grid=(0, 8), objectName='PF_pivot')
         self.pivotEntry.setFixedWidth(60)
 
         self.pivotEntry.valueChanged.connect(self.setPivotValue)
         if includeDirection:
             self.directionList = PulldownList(self, texts=directionTexts,
-                                              callback=None, grid=(0, 9))
+                                              callback=None, grid=(0, 9), objectName='PF_direction')
             self.directionList.activated.connect(lambda text: self.directionCallback())
         else:
             self.directionList = None
@@ -191,6 +191,7 @@ if __name__ == '__main__':
     import os
     import sys
     from PyQt5 import QtGui, QtWidgets
+
 
     def myCallback(ph0, ph1, pivot, direction):
         print(ph0, ph1, pivot, direction)

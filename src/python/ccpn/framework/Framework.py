@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-11 12:20:56 +0000 (Thu, March 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-22 18:19:23 +0000 (Mon, March 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -304,10 +304,10 @@ class Framework(NotifierBase):
 
         self.current = None
 
-        self.preferences = None  # intialised by self._getUserPrefs
-        self.layout = None  # intialised by self._getUserLayout
-        self.styleSheet = None  # intialised by self.getStyleSheet
-        self.colourScheme = None  # intialised by self.getStyleSheet
+        self.preferences = None  # initialised by self._getUserPrefs
+        self.layout = None  # initialised by self._getUserLayout
+        self.styleSheet = None  # initialised by self.getStyleSheet
+        self.colourScheme = None  # initialised by self.getStyleSheet
 
         # Necessary as attribute is queried during initialisation:
         self._mainWindow = None
@@ -567,7 +567,7 @@ class Framework(NotifierBase):
 
     def _savePreferences(self):
         "Save the preferences to file"
-        with catchExceptions(application=self, errorStringTemplate='Error saving preferences; "%s"',printTraceBack=True):
+        with catchExceptions(application=self, errorStringTemplate='Error saving preferences; "%s"', printTraceBack=True):
             directory = os.path.dirname(userPreferencesPath)
             if not os.path.exists(directory):
                 os.makedirs(directory)
@@ -762,10 +762,9 @@ class Framework(NotifierBase):
             getLogger().warning('Impossible to restore SpectrumDisplays')
 
         try:
-            if self.preferences.general.restoreLayoutOnOpening:
-                layout = self._getUserLayout()
-                if layout:
-                    Layout.restoreLayout(self._mainWindow, layout)
+            if self.preferences.general.restoreLayoutOnOpening and \
+                    self.ui.mainWindow.moduleLayouts:
+                Layout.restoreLayout(self._mainWindow, self.ui.mainWindow.moduleLayouts)
         except Exception as e:
             getLogger().warning('Impossible to restore Layout %s' % e)
 
@@ -1647,7 +1646,7 @@ class Framework(NotifierBase):
         # with suspendSideBarNotifications(project=self.project):
         with undoBlock():
             with notificationEchoBlocking():
-                with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s',printTraceBack=True):
+                with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s', printTraceBack=True):
                     self.sparkyReader.importSparkyProject(self.project, dataBlock)
 
         # with undoBlock():

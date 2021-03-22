@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-15 19:13:50 +0000 (Mon, March 15, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-22 18:19:23 +0000 (Mon, March 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -263,6 +263,12 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             self.getMenuAction('Project->Archive').setEnabled(False)
         else:
             self.getMenuAction('Project->Archive').setEnabled(True)
+
+        # get the project layout as soon as mainWindow is initialised
+        if self.application.preferences.general.restoreLayoutOnOpening:
+            self.moduleLayouts = self.application._getUserLayout()
+        else:
+            self.moduleLayouts = None
 
     def _updateWindowTitle(self):
         """
@@ -612,32 +618,32 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             if projectDir:
                 # try and load the new project
                 # try:
-                    project = self._loadProjectLastValid(projectDir)
+                project = self._loadProjectLastValid(projectDir)
 
-                    if self.application.preferences.general.useProjectPath:
-                        Logging.getLogger().debug2('mainWindow - setting current path %s' % Path.Path(projectDir).parent)
-                        # this dialog doesn't need to be seen, required to set initialPath
-                        _dialog = ProjectFileDialog(parent=self, acceptMode='open')
-                        _dialog.initialPath = Path.Path(projectDir).parent
+                if self.application.preferences.general.useProjectPath:
+                    Logging.getLogger().debug2('mainWindow - setting current path %s' % Path.Path(projectDir).parent)
+                    # this dialog doesn't need to be seen, required to set initialPath
+                    _dialog = ProjectFileDialog(parent=self, acceptMode='open')
+                    _dialog.initialPath = Path.Path(projectDir).parent
 
-                # except Exception as es:
-                #     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s' % str(projectDir))
-                #     Logging.getLogger().warning('Fatal error loading project: %s' % str(projectDir))
+            # except Exception as es:
+            #     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s' % str(projectDir))
+            #     Logging.getLogger().warning('Fatal error loading project: %s' % str(projectDir))
 
-                # try:
-                #     project = self._loadProject(projectDir)
-                #
-                # except Exception as es:
-                #     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s\nReloading last saved position.' % str(projectDir))
-                #     Logging.getLogger().warning('Fatal error loading project: %s - Reloading last saved position.' % str(projectDir))
-                #
-                #     # try and load the previous project (only one try)
-                #     try:
-                #         project = self._loadProject(lastValidProject)
-                #
-                #     except Exception as es:
-                #         MessageDialog.showError('loadProject', 'Fatal error loading previous project:\n%s' % str(lastValidProject))
-                #         Logging.getLogger().warning('Fatal error loading previous project: %s' % str(lastValidProject))
+            # try:
+            #     project = self._loadProject(projectDir)
+            #
+            # except Exception as es:
+            #     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s\nReloading last saved position.' % str(projectDir))
+            #     Logging.getLogger().warning('Fatal error loading project: %s - Reloading last saved position.' % str(projectDir))
+            #
+            #     # try and load the previous project (only one try)
+            #     try:
+            #         project = self._loadProject(lastValidProject)
+            #
+            #     except Exception as es:
+            #         MessageDialog.showError('loadProject', 'Fatal error loading previous project:\n%s' % str(lastValidProject))
+            #         Logging.getLogger().warning('Fatal error loading previous project: %s' % str(lastValidProject))
 
         undo = self._project._undo
         if undo is not None:

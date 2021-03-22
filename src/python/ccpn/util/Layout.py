@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:26 +0000 (Sun, January 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-22 18:19:23 +0000 (Mon, March 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -27,15 +27,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import ntpath
 import glob
+import json
+import sys
 from ccpn.util.AttrDict import AttrDict
 from collections import OrderedDict as od
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
-import json
-import sys, os
-from ccpn.util import Path
+from ccpn.util.Path import aPath
 
 
 StateDirName = 'state'
@@ -55,17 +54,17 @@ TitleText = 'LayoutFile'
 Title = "Title"
 
 DefaultLayoutFile = {
-    Title      : TitleText,
-    Warning    : WarningMessage,
-    General    : {
+    Title           : TitleText,
+    Warning         : WarningMessage,
+    General         : {
         ApplicationName   : "",
         ApplicationVersion: "",
-        LayoutVersionName:"",
+        LayoutVersionName : "",
         },
     SpectrumDisplays: [],
-    GuiModules : [],
-    FileNames  : [],
-    LayoutState: {}
+    GuiModules      : [],
+    FileNames       : [],
+    LayoutState     : {}
     }
 
 METADATA = '_metadata'
@@ -74,7 +73,7 @@ MODULES = 'modules'
 
 def _createLayoutFile(application):
     try:
-        path = application.statePath + '/' + DefaultLayoutFileName
+        path = aPath(application.statePath) / DefaultLayoutFileName
 
         if General in DefaultLayoutFile:
             if ApplicationName in DefaultLayoutFile[General]:
@@ -92,10 +91,10 @@ def _createLayoutFile(application):
 
 
 def getLayoutFile(application):
-    path = os.path.join(application.statePath, DefaultLayoutFileName)
-    if not os.path.exists(path):
+    path = aPath(application.statePath) / DefaultLayoutFileName
+    if not path.exists():
         _createLayoutFile(application)
-    return path
+    return path.asString()
 
 
 def _updateGeneral(mainWindow, layout):
@@ -119,7 +118,6 @@ def _updateFileNames(mainWindow, layout):
     :return: #updates the fileNames needed for importing the module. list of file name from the full path
     """
     guiModules = mainWindow.moduleArea.ccpnModules
-    paths = []
     names = set()
     for guiModule in guiModules:
         if not isinstance(guiModule, GuiSpectrumDisplay):  #Don't Save spectrum Displays
@@ -127,11 +125,7 @@ def _updateFileNames(mainWindow, layout):
             if pyModule:
                 file = pyModule.__file__
                 if file:
-                    path = os.path.abspath(file)
-                    basename = ntpath.basename(path)
-                    basenameList = os.path.splitext(basename)
-                    if len(basenameList) > 0:
-                        names.add(basenameList[0])
+                    names.add(aPath(file).basename)
 
     if len(names) > 0:
         if FileNames in layout:
@@ -165,6 +159,7 @@ def _updateLayoutState(mainWindow, layout):
     if LayoutState in layout:
         # setattr(layout, LayoutState, mainWindow.moduleArea.saveState())
         layout[LayoutState] = mainWindow.moduleArea.saveState()
+
 
 def _updateSpectrumDisplays(mainWindow, layout):
     sds = _getSpectrumDisplaysState(mainWindow.project.spectrumDisplays)
@@ -378,30 +373,30 @@ def _getModuleNamesFromState(layoutState):
     return names
 
 
-
 def _openSpectrumDisplays(mainWindow, spectrumDisplaysState):
     """
 
     """
     project = mainWindow.project
     for dd in spectrumDisplaysState:
-        spectrumDisplayKeys = ["displayAxisCodes","axisOrder", "title", "positions", "widths", "units", "stripDirection","is1D"]
+        spectrumDisplayKeys = ["displayAxisCodes", "axisOrder", "title", "positions", "widths", "units", "stripDirection", "is1D"]
         fd = {i: dd.get(i) for i in spectrumDisplayKeys}
         spectraPids = dd.get("spectra")
         spectra = [project.getByPid(p) for p in spectraPids if project.getByPid(p)]
         stripsZoomStates = dd.get("stripsZoomStates")
-        if len(spectra)>0:
+        if len(spectra) > 0:
             sd = mainWindow.createSpectrumDisplay(spectra[0], **fd)
             for sp in spectra[1:]:
                 sd.displaySpectrum(sp)
-            if len(stripsZoomStates)>0:
-                if len(sd.strips)>0:
+            if len(stripsZoomStates) > 0:
+                if len(sd.strips) > 0:
                     sd.strips[0].restoreZoomFromState(stripsZoomStates[0])
                     for stripState in stripsZoomStates[1:]:
                         newStrip = sd.addStrip()
                         newStrip.restoreZoomFromState(stripState)
         else:
-            project.newSpectrumDisplay(axisCodes=fd.get('displayAxisCodes'), stripDirection = fd.get('stripDirection'))
+            project.newSpectrumDisplay(axisCodes=fd.get('displayAxisCodes'), stripDirection=fd.get('stripDirection'))
+
 
 def restoreLayout(mainWindow, layout, restoreSpectrumDisplay=False):
     ## import all the ccpnModules classes specific for the application.
@@ -411,7 +406,6 @@ def restoreLayout(mainWindow, layout, restoreSpectrumDisplay=False):
     if restoreSpectrumDisplay:
         if SpectrumDisplays in layout:
             _openSpectrumDisplays(mainWindow, layout[SpectrumDisplays])
-
 
     if FileNames in layout:
         neededModules = layout.get(FileNames)  # getattr(layout, FileNames)
@@ -455,11 +449,12 @@ def restoreLayout(mainWindow, layout, restoreSpectrumDisplay=False):
         if len(openedModulesName) > 0:
             if len(compare) == len(openedModulesName):
                 try:
-                    mainWindow.moduleArea.restoreState(state)
+                    mainWindow.moduleArea.restoreState(state, restoreSpectrumDisplay=restoreSpectrumDisplay)
                 except Exception as e:
                     getLogger().debug2("Layout error: %s" % e)
             else:
                 getLogger().debug2("Layout error: Some of the modules are missing. Geometries could not be restored")
+
 
 def _getSpectrumDisplaysState(spectrumDisplays):
     """
@@ -471,27 +466,29 @@ def _getSpectrumDisplaysState(spectrumDisplays):
         dd = spectrumDisplay.getAsDict()
         stripDirection = dd.get("stripArrangement")
         axisCodes = dd.get("axisCodes")
-        spectrumDisplayKeys = ["longPid","axisOrder", "title", "positions", "widths", "units", "is1D"]
+        spectrumDisplayKeys = ["longPid", "axisOrder", "title", "positions", "widths", "units", "is1D"]
         fd = {i: dd.get(i) for i in spectrumDisplayKeys}
         fd.update({'stripDirection': stripDirection})
         fd.update({'displayAxisCodes': axisCodes})
-        fd.update({'spectra':[sp.pid for sp in spectrumDisplay._getSpectra()]})
+        fd.update({'spectra': [sp.pid for sp in spectrumDisplay._getSpectra()]})
         # strips informations
         stripsZoomStates = [strip.zoomState for strip in spectrumDisplay.strips]
         fd.update({"stripsZoomStates": stripsZoomStates})
         ll.append(fd)
     return ll
 
-def _getFileNameFromPath(path, extToSplit= 'json'):
-    file = ntpath.basename(path)
-    name = file.split("."+extToSplit)[0]
+
+def _getFileNameFromPath(path):
+    name = aPath(path).basename
     return name
+
 
 def _getPredefinedLayouts(dirPath):
     # path has to finish with /
-    sp = os.path.join(dirPath, '*.json')
+    sp = (aPath(dirPath) / '*.json').asString()
     layoutsFiles = glob.glob(sp)
     return layoutsFiles
+
 
 def _dictLayoutsNamePath(paths):
     dd = od()
@@ -500,10 +497,10 @@ def _dictLayoutsNamePath(paths):
         dd[name] = path
     return dd
 
+
 def isLayoutFile(filePath):
     with open(filePath) as fp:
         layout = json.load(fp, object_hook=AttrDict)
         if layout.get(LayoutState):
             return True
     return False
-

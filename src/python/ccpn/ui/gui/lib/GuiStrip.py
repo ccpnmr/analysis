@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-19 13:56:47 +0000 (Fri, March 19, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-22 18:19:23 +0000 (Mon, March 22, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -167,7 +167,8 @@ class GuiStrip(Frame):
         if len(spectrumDisplay.strips) > 1:
 
             _firstStrip = spectrumDisplay.strips[0]
-            # copy the values form the first strip
+
+            # copy the values from the first strip
             self.symbolLabelling = min(_firstStrip.symbolLabelling, self.spectrumDisplay.MAXPEAKLABELTYPES - 1)
             self.symbolType = min(_firstStrip.symbolType, self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
             self.symbolSize = _firstStrip.symbolSize
@@ -187,11 +188,6 @@ class GuiStrip(Frame):
         else:
 
             # get the values from the preferences
-            self.symbolLabelling = min(self._preferences.annotationType, self.spectrumDisplay.MAXPEAKLABELTYPES - 1)
-            self.symbolType = min(self._preferences.symbolType, self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
-            self.symbolSize = self._preferences.symbolSizePixel
-            self.symbolThickness = self._preferences.symbolThickness
-
             self.gridVisible = self._preferences.showGrid
             self.crosshairVisible = self._preferences.showCrosshair
             self.doubleCrosshairVisible = self._preferences.showDoubleCrosshair
@@ -200,6 +196,12 @@ class GuiStrip(Frame):
             self.showSpectraOnPhasing = self._preferences.showSpectraOnPhasing
             self._contourThickness = self._preferences.contourThickness
             self._spectrumBordersVisible = self._preferences.showSpectrumBorder
+
+            # get the values from the settings (check in case the number of states has changed)
+            self.symbolLabelling = min(settings[ANNOTATIONTYPES], self.spectrumDisplay.MAXPEAKLABELTYPES - 1)
+            self.symbolType = min(settings[SYMBOLTYPES], self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
+            self.symbolSize = settings[SYMBOLSIZE]
+            self.symbolThickness = settings[SYMBOLTHICKNESS]
 
             self.spectrumDisplay._setFloatingAxes(xUnits=settings[AXISXUNITS],
                                                   yUnits=settings[AXISYUNITS],

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-23 12:06:19 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 12:51:34 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -216,33 +216,25 @@ class CreateNmrChainPopup(CcpnDialog):
                     return newNmrChain
 
     def _cloneFromNmrChain(self, name):
-        with undoBlock():
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                newNmrChain = self._createEmptyNmrChain(name)
+                if newNmrChain:
 
-            newNmrChain = self._createEmptyNmrChain(name)
-            if newNmrChain:
+                    if len(self._nmrChain.nmrResidues) > 0:
+                        for nmrResidue in self._nmrChain.nmrResidues:
 
-                if len(self._nmrChain.nmrResidues) > 0:
-                    self.project.blankNotification()  # For speed issue: Blank the notifications until the penultimate residue
-                    for nmrResidue in self._nmrChain.nmrResidues[:-1]:
+                            # need to check whether the mainResidue exists before creating the +/- residues
+                            if nmrResidue.relativeOffset:
+                                mainSequence = nmrResidue.mainNmrResidue.sequenceCode
+                                newNmrResidue = newNmrChain.newNmrResidue(sequenceCode=mainSequence,
+                                                                          residueType=nmrResidue.residueType)
+                            newNmrResidue = newNmrChain.newNmrResidue(sequenceCode=nmrResidue.sequenceCode, residueType=nmrResidue.residueType)
+                            for nmrAtom in nmrResidue.nmrAtoms:
+                                newNmrResidue.fetchNmrAtom(nmrAtom.name, isotopeCode=nmrAtom.isotopeCode)
 
-                        # need to check whether the mainResidue exists before creating the +/- residues
-                        if nmrResidue.relativeOffset:
-                            mainSequence = nmrResidue.mainNmrResidue.sequenceCode
-                            newNmrResidue = newNmrChain.newNmrResidue(sequenceCode=mainSequence,
-                                                                      residueType=nmrResidue.residueType)
 
-                        newNmrResidue = newNmrChain.newNmrResidue(sequenceCode=nmrResidue.sequenceCode, residueType=nmrResidue.residueType)
-                        for nmrAtom in nmrResidue.nmrAtoms:
-                            newNmrResidue.fetchNmrAtom(nmrAtom.name)
-                    self.project.unblankNotification()
-                    lastNmrResidue = self._nmrChain.nmrResidues[-1]
-                    lastTargetNmrResidue = newNmrChain.newNmrResidue(sequenceCode=lastNmrResidue.sequenceCode,
-                                                                     residueType=lastNmrResidue.residueType)
-                    # lastNmrResidue.residue = lastResidue
-                    for nmrAtom in lastNmrResidue.nmrAtoms:
-                        lastTargetNmrResidue.fetchNmrAtom(nmrAtom.name)
-
-                return newNmrChain
+                    return newNmrChain
 
     def _cloneFromSubstance(self, name):
         """Create a new nmr chain from a substance which has a SMILES set."""

@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 12:06:48 +0000 (Tue, March 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-03-23 12:51:34 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -575,7 +575,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     return result
 
 
-def _fetchNmrAtom(self: NmrResidue, name: str):
+def _fetchNmrAtom(self: NmrResidue, name: str, isotopeCode=None):
     """Fetch NmrAtom with name=name, creating it if necessary
 
     :param name: string name for new nmrAto if created
@@ -585,7 +585,7 @@ def _fetchNmrAtom(self: NmrResidue, name: str):
 
     with undoBlock():
         result = (self.getNmrAtom(name.translate(Pid.remapSeparators)) or
-                  self.newNmrAtom(name=name))
+                  self.newNmrAtom(name=name, isotopeCode=isotopeCode))
 
         if result is None:
             raise RuntimeError('Unable to generate new NmrAtom item')

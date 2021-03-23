@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:23 +0000 (Sun, January 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 12:51:34 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ import re
 import collections
 import pandas as pd
 import itertools
+from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 
 
 try:
@@ -1083,7 +1084,8 @@ class CcpnSparkyReader:
         return newChain
 
     def _fetchAndAssignNmrAtom(self, peak, nmrResidue, atomName):
-        atom = nmrResidue.fetchNmrAtom(name=str(atomName))
+        isotopeCode = DEFAULT_ISOTOPE_DICT.get(str(atomName))
+        atom = nmrResidue.fetchNmrAtom(name=str(atomName), isotopeCode=isotopeCode)
         peak.assignDimension(axisCode=atomName[0], value=[atom])
 
     def _connectNmrResidues(self, nmrChain):

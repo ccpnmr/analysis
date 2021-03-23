@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-11 12:20:56 +0000 (Thu, March 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 18:18:30 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -669,7 +669,7 @@ def _recurseData(ii, dataList, startCondition, endCondition):
         max = np.max(flatData)
         min = np.min(flatData)
         mn = np.mean(flatData)
-        noiseLevel = mn + 3.0 * SD
+        noiseLevel = mn + 3.5 * SD
 
         if not startCondition:
             startCondition[:] = [ii, data.shape, SD, max, min, mn, noiseLevel]
@@ -980,7 +980,7 @@ def getSpectrumNoise(spectrum):
 def getNoiseEstimate(spectrum):
     """Get an estimate of the noiseLevel from the spectrum
 
-    noiseLevel is calculated as abs(mean) + 3.0 * SD
+    noiseLevel is calculated as abs(mean) + 3.5 * SD
 
     Calculated from a random subset of points
     """
@@ -1028,7 +1028,7 @@ def _noiseFunc(value):
     return NoiseEstimateTuple(mean=value.mean,
                               std=value.std,
                               min=value.min, max=value.max,
-                              noiseLevel=abs(value.mean) + 3.0 * value.std)
+                              noiseLevel=abs(value.mean) + 3.5 * value.std)
 
 
 def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
@@ -1041,7 +1041,7 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
 
     A tuple (mean, SD, min, max noiseLevel) is returned from the subset with the lowest standard deviation.
     mean is the mean of the minimum random subset, SD is the standard deviation, min/max are the minimum/maximum values,
-    and noiseLevel is the estimated noiseLevel caluated as abs(mean) + 3.0 * SD
+    and noiseLevel is the estimated noiseLevel caluated as abs(mean) + 3.5 * SD
 
     :param spectrum: input spectrum
     :param nsamples: number reandom samples
@@ -1117,7 +1117,7 @@ def _getContourEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
 
     A tuple (mean, SD, min, max noiseLevel) is returned from the subset with the lowest standard deviation.
     mean is the mean of the minimum random subset, SD is the standard deviation, min/max are the minimum/maximum values,
-    and noiseLevel is the estimated noiseLevel caluated as abs(mean) + 3.0 * SD
+    and noiseLevel is the estimated noiseLevel caluated as abs(mean) + 3.5 * SD
 
     :param spectrum: input spectrum
     :param nsamples: number reandom samples

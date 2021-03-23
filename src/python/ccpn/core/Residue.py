@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-18 13:29:07 +0000 (Thu, March 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 15:38:08 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -467,12 +467,23 @@ class Residue(AbstractWrapperObject):
         """
         Delete from project all the pseudo atoms which are not present in the original chemComp and were added artificially.
         """
-        chemAtomNames = [atom.name for atom in self._wrappedData.chemCompVar.chemAtoms]
+        chemAtomNames = self._getChemAtomNames()
         pseudoAtoms = [atom for atom in self.atoms if atom.name not in chemAtomNames]
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
                 self.project.deleteObjects(*pseudoAtoms)
 
+    def _getChemAtomNames(self):
+        """
+        :return: gets the atom names from the chemCompVar obj.
+        It uses chemCompVar instead of chemCompVar.chemComp.chemAtoms because the latter includes LinkAtom like 'next_1'
+        """
+        chemCompVar = self._wrappedData.chemCompVar
+        chemAtomNames = []
+        if chemCompVar:
+            chemAtoms = self._wrappedData.chemCompVar.chemAtoms
+            chemAtomNames = [atom.name for atom in chemAtoms]
+        return chemAtomNames
 
 
 #=========================================================================================

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-18 13:29:07 +0000 (Thu, March 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 15:38:07 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -260,16 +260,22 @@ class Chain(AbstractWrapperObject):
     def _toNmrChain(self):
         """ Makes an Nmr Chain from the chain """
         try:
-            nmrChain = self.project.newNmrChain(isConnected=True)
-            for residue in self.residues:
-                nmrResidue = nmrChain.newNmrResidue(sequenceCode=residue.sequenceCode, residueType=residue.residueType)
-                atomNames = [atom.name for atom in residue.atoms]
-                for atomName in atomNames:
-                    if atomName:
-                        nmrResidue.newNmrAtom(atomName)
+            from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
+            from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+            with undoBlockWithoutSideBar():
+                nmrChain = self.project.newNmrChain(isConnected=True)
+                for residue in self.residues:
+                    nmrResidue = nmrChain.newNmrResidue(sequenceCode=residue.sequenceCode, residueType=residue.residueType)
+                    for atom in residue.atoms:
+                        if atom.name:
+                            isotopeCode = DEFAULT_ISOTOPE_DICT.get(atom.elementSymbol)
+                            nmrResidue.newNmrAtom(atom.name, isotopeCode=isotopeCode)
         except Exception as e:
             self.project._logger.warning("Error in creating an NmrChain from Chain: %s"
                                          % e)
+    @property
+    def chainType(self):
+        return self._wrappedData.molecule.molType
 
     #=========================================================================================
     # Implementation functions

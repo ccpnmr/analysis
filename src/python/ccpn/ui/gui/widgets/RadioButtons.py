@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 18:41:24 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-23 15:38:09 +0000 (Tue, March 23, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,6 +29,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Font import setWidgetFont
 from functools import partial
 from ccpn.ui.gui.widgets.Widget import Widget
+
 
 CHECKED = QtCore.Qt.Checked
 UNCHECKED = QtCore.Qt.Unchecked
@@ -91,7 +92,6 @@ class RadioButtons(QtWidgets.QWidget, Base):
         # buttonGroup.connect(buttonGroup, QtCore.SIGNAL('buttonClicked(int)'), self._callback)
         buttonGroup.buttonClicked.connect(self._callback)
         self.setCallback(callback)
-
 
     def setButtons(self, texts=None, selectedInd=None, direction='h', tipTexts=None, objectNames=None, silent=False,
                    icons=None):
@@ -164,10 +164,10 @@ class RadioButtons(QtWidgets.QWidget, Base):
             if i.isChecked():
                 texts.append(i.text())
         if self.isExclusive:
-            return texts[-1]
+            # could still be undefined
+            return texts[-1] if texts else None
         else:
             return texts
-
 
     def getIndex(self):
         ixs = []
@@ -222,6 +222,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
             #  e.g. self.callback(self.get())
             self.callback()
 
+
 def _fillMissingValuesInSecondList(aa, bb, value):
     if not value:
         value = ''
@@ -234,6 +235,7 @@ def _fillMissingValuesInSecondList(aa, bb, value):
         else:
             raise NameError('Lists are not of same length.')
     return aa, bb
+
 
 class EditableRadioButtons(Widget, Base):
     """
@@ -262,13 +264,13 @@ class EditableRadioButtons(Widget, Base):
         self.callback = callback
 
         self._setButtons(texts=texts, editables=editables, selectedInd=selectedInd, direction=direction,
-                        tipTexts=tipTexts, backgroundTexts=backgroundTexts, objectNames=objectNames, icons=icons,)
+                         tipTexts=tipTexts, backgroundTexts=backgroundTexts, objectNames=objectNames, icons=icons, )
 
-    def setButtons(self,  *args, **kwargs):
+    def setButtons(self, *args, **kwargs):
         self._setButtons(*args, **kwargs)
 
     def _setButtons(self, texts=None, editables=None, selectedInd=None, direction='h', tipTexts=None,
-                   objectNames=None, backgroundTexts=None, silent=False, icons=None):
+                    objectNames=None, backgroundTexts=None, silent=False, icons=None):
         """Change the buttons in the button group """
         texts, editables = _fillMissingValuesInSecondList(texts, editables, value=False)
         texts, tipTexts = _fillMissingValuesInSecondList(texts, tipTexts, value='')
@@ -279,11 +281,13 @@ class EditableRadioButtons(Widget, Base):
         self.radioButtons = []
         # rebuild the button list
         for i, text in enumerate(texts):
-            if 'h' in direction: grid = (0, i)
-            else: grid = (i, 0)
+            if 'h' in direction:
+                grid = (0, i)
+            else:
+                grid = (i, 0)
             button = EditableRadioButton(self, text=text, editable=editables[i], tipText=tipTexts[i],
-                                          backgroundText = backgroundTexts[i],
-                                          callbackOneditingFinished=False) #callback=self.callback,
+                                         backgroundText=backgroundTexts[i],
+                                         callbackOneditingFinished=False)  #callback=self.callback,
             button.lineEdit.editingFinished.connect(partial(self._editingFinishedCallback, button, i))
             button.radioButton.clicked.connect(partial(self._buttonClicked, button, i))
             self.radioButtons.append(button)
@@ -328,7 +332,6 @@ class EditableRadioButtons(Widget, Base):
         else:
             return texts
 
-
     def getIndex(self):
         ixs = []
         for i, rb in enumerate(self.radioButtons):
@@ -348,8 +351,6 @@ class EditableRadioButtons(Widget, Base):
             self.setIndex(i)
             if self.callback and not silent:
                 self.callback()
-
-
 
     def setExclusive(self, value):
         # raise ValueError('Not implemented yet')
@@ -398,18 +399,22 @@ if __name__ == '__main__':
 
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
+
     def testCallback(self, *args):
         print('GET:', self.get())
-        print('INDEX',self.getIndex())
+        print('INDEX', self.getIndex())
         print('SELECTED:', self.getSelectedText())
+
 
     def testCall(*args):
         print('ddd', args)
+
+
     app = TestApplication()
     popup = CcpnDialog(windowTitle='Test radioButtons', setLayout=True)
 
     buttonGroup = QtWidgets.QButtonGroup(popup)
-    radioButtons = EditableRadioButtons(parent=popup, texts=['a', ''], tipTexts=['',''],
+    radioButtons = EditableRadioButtons(parent=popup, texts=['a', ''], tipTexts=['', ''],
                                         editables=[False, True], grid=(0, 0),
                                         callback=testCall, direction='v')
 

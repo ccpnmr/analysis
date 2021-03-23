@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:34 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-23 15:38:08 +0000 (Tue, March 23, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -277,8 +277,8 @@ class TestNmrAtomCreation(WrapperTesting):
         self.assertEqual(self.nmrResidue.nmrAtoms, [])
 
         newNmrAtom = self.project.produceNmrAtom(chainCode='@2',
-                                                  sequenceCode='@1',
-                                                  name='NE')
+                                                 sequenceCode='@1',
+                                                 name='NE')
 
         self.assertEqual(newNmrAtom.pid, 'NA:@2.@1..NE')
         self.assertEqual(self.project.nmrAtoms, [newNmrAtom])
@@ -290,8 +290,8 @@ class TestNmrAtomCreation(WrapperTesting):
         self.assertEqual(len(self.project.nmrResidues), 1)
 
         newNmrAtom = self.project.produceNmrAtom(chainCode='A',
-                                                  sequenceCode='11',
-                                                  name='NE')
+                                                 sequenceCode='11',
+                                                 name='NE')
 
         self.assertEqual(newNmrAtom.pid, 'NA:A.11..NE')
         self.assertEqual(self.project.nmrAtoms, [newNmrAtom])
@@ -320,32 +320,32 @@ class TestNmrAtomProperties(WrapperTesting):
         del self.nmrChain
         del self.nmrAtom
 
-    def test_AnonoymousNmrAtom_id(self):
+    def test_AnonymousNmrAtom_id(self):
         self.assertEqual(self.nmrAtom.id, '@2.@1..H@1')
 
-    def test_AnonoymousNmrAtom_pid(self):
+    def test_AnonymousNmrAtom_pid(self):
         self.assertEqual(self.nmrAtom.pid, 'NA:@2.@1..H@1')
 
-    def test_AnonoymousNmrAtom_longPid(self):
+    def test_AnonymousNmrAtom_longPid(self):
         self.assertEqual(self.nmrAtom.longPid, 'NmrAtom:@2.@1..H@1')
 
-    def test_AnonoymousNmrAtom_project(self):
+    def test_AnonymousNmrAtom_project(self):
         self.assertTrue(self.project is self.nmrAtom.project)
 
-    def test_AnonoymousNmrAtom_nmrResidue(self):
+    def test_AnonymousNmrAtom_nmrResidue(self):
         self.assertTrue(self.nmrResidue is self.nmrAtom.nmrResidue)
 
     @unittest.expectedFailure
-    def test_AnonoymousNmrAtom_name(self):
+    def test_AnonymousNmrAtom_name(self):
         self.assertTrue('name' not in self.nmrAtom.keys())
 
-    def _test_AnonoymousNmrAtom_apiResonance(self):
+    def _test_AnonymousNmrAtom_apiResonance(self):
         print(self.nmrAtom.apiResonance)
 
-    def _test_AnonoymousNmrAtom_atom(self):
+    def _test_AnonymousNmrAtom_atom(self):
         print(self.nmrAtom.atom)
 
-    def _test_AnonoymousNmrAtom_assignedPeaks(self):
+    def _test_AnonymousNmrAtom_assignedPeaks(self):
         self.assertEqual(self.nmrAtom.assignedPeaks, [[]])
 
 
@@ -408,43 +408,13 @@ class TestNmrAtomMethods(WrapperTesting):
         self.assertEqual(len(res1.nmrAtoms), 1)
         self.assertEqual(len(self.project.nmrResidues), 2)
 
-    @unittest.skip
     def test_RenameAtom(self):
-        print(self.nmrAtom.id)
+        self.assertEqual(self.nmrAtom.id, '@2.@1..H')
         self.nmrAtom.rename('N')
-        print(self.nmrAtom.id)
+        self.assertEqual(self.nmrAtom.id, '@2.@1..N')
 
-    @unittest.skip
-    def test_UpdateAtom(self):
-        print(self.nmrAtom.update)
-
-    @unittest.skip
-    def test_PopAtom(self):
-        print(self.nmrAtom.pop('id'))
-
-    @unittest.skip
-    def test_PopItemFromAtom(self):
-        print(self.nmrAtom.popitem())
-
-    @unittest.skip
-    def test_SetDefault(self):
-        print(self.nmrAtom.setdefault())
-
-    @unittest.skip
-    def test_ClearAtom(self):
-        print(self.nmrAtom.clear())
-
-    @unittest.skip
     def test_DeleteAtom(self):
         print(self.nmrAtom.delete())
-
-    @unittest.skip
-    def test_AtomItems(self):
-        print(self.nmrAtom.items())
-
-    @unittest.skip
-    def test_AtomItems(self):
-        print(self.nmrAtom.values())
 
 
 class TestNmrAtomReceivedProperties(WrapperTesting):

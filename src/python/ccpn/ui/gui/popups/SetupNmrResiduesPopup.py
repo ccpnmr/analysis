@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:36 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 15:38:09 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,8 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
+from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 
 
 class SetupNmrResiduesPopup(CcpnDialogMainWidget):
@@ -91,7 +93,9 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
 
                     nmrResidue = nmrChain.newNmrResidue()
                     for i, axisCode in enumerate(peak.axisCodes):
-                        nmrAtom = nmrResidue.fetchNmrAtom(name=str(axisCode))
+                        isotopeCode = DEFAULT_ISOTOPE_DICT.get(str(axisCode))
+                        nmrAtom = nmrResidue.fetchNmrAtom(name=str(axisCode), isotopeCode=isotopeCode)
+
                         peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
 
         # remove if popup does not need to close

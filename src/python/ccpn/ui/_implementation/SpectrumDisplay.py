@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-19 17:40:23 +0000 (Fri, March 19, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 15:38:08 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from numpy import ndarray
 from typing import Sequence, Tuple, Optional
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
@@ -519,13 +520,6 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
     :param bool independentStrips: if True do freeStrip display.
     """
 
-    inputValues = locals()
-
-    # defaults = collections.OrderedDict((('displayAxisCodes', ()), ('axisOrder', ()), ('title', None),
-    #                                     ('positions', ()), ('widths', ()), ('units', ()),
-    #                                     ('stripDirection', 'Y'), ('is1D', False),
-    #                                     ('independentStrips', False)))
-
     if title and Pid.altCharacter in title:
         raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
 
@@ -536,7 +530,6 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
     axisOrder = spectrum.getDefaultOrdering(axisOrder)
     spectrumAxisCodes = spectrum.axisCodes
 
-    mapIndices = ()
     if axisOrder:
         mapIndices = commonUtil._axisCodeMapIndices(spectrumAxisCodes, axisOrder)
         if displayAxisCodes:
@@ -624,6 +617,19 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                 apiAxis.unit = unit
                 apiAxis.position = position
                 apiAxis.width = width
+
+        # set the intensity axes not caught by the dataDims
+        for apiAxis in orderedApiAxes[len(orderedDataDims):]:
+            if apiAxis.code == 'intensity':
+                _intensities = spectrum.intensities
+                # assumes _intensities if a numpy array
+                if not isinstance(_intensities, ndarray):
+                    raise TypeError(f'spectrum.intensities {spectrum.id} must be an ndarray')
+
+                if _intensities is not None and _intensities.size != 0:
+                    _max, _min = max(_intensities), min(_intensities)
+                    apiAxis.position = float(_min + _max) / 2
+                    apiAxis.width = float(_max - _min)
 
         if dataSource.numDim != 1:  # it gets crazy on 1D displays
             display._useFirstDefault = False

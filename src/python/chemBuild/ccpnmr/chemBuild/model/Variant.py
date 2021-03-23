@@ -1237,7 +1237,8 @@ class Variant:
       prevAtom = atom
 
   def autoNameAtoms(self, varAtoms):
-    
+    # TODO rename also the (NMR) AtomGroups.
+
     used = self.compound.atomDict
     nonH = [a for a in varAtoms if a.element not in ('H',LINK)]
     hydrogens = [a for a in varAtoms if a.element == 'H']

@@ -32,9 +32,11 @@ class Entry(QtWidgets.QLineEdit, Base):
     self.callback = callback
     
     self.textChanged.connect(self._changed)
-    
-    self.connect(self, QtCore.SIGNAL('returnPressed()'), self._callback)
-    self.connect(self, QtCore.SIGNAL('editingFinished()'), self._callback)
+    self.returnPressed.connect(self._callback)
+    self.editingFinished.connect(self._callback)
+
+    # self.connect(self, QtCore.SIGNAL('returnPressed()'), self._callback)
+    # self.connect(self, QtCore.SIGNAL('editingFinished()'), self._callback)
       
     if listener:
       if isinstance(listener, (set, list, tuple)):

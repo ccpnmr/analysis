@@ -4,7 +4,7 @@ PI = 3.1415926535898
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpnmr.chemBuild.model.Bond import Bond, BOND_TYPE_VALENCES, BOND_STEREO_DICT
-
+import numpy as np
 from ccpnmr.chemBuild.general.Constants import LINK, DISALLOWED
 from ccpnmr.chemBuild.general.Constants import HIGHLIGHT, HIGHLIGHT_BG, ATOM_NAME_FG
 from ccpnmr.chemBuild.general.Constants import ELEMENT_FONT, ELEMENT_DATA,  ELEMENT_DEFAULT
@@ -118,7 +118,7 @@ class AtomLabel(QtWidgets.QGraphicsItem):
     
     else:
       angle = 1.0
-     
+
     
     name = atom.name
     if name:
@@ -162,18 +162,131 @@ class AtomLabel(QtWidgets.QGraphicsItem):
 
     if useName and self.drawData:
       point, text = self.drawData
+      painter.setFont(ELEMENT_FONT)
+      if self.hover:
+        painter.setPen(Qt.black)
+
+      elif not isinstance(self.compoundView, QtWidgets.QGraphicsItem):
+        if self.compoundView.backgroundColor == Qt.darkGray:
+          painter.setPen(ATOM_NAME_FG)
+
+        else:
+          painter.setPen(QtGui.QColor(0, 0, 0, 128))
+
+        # if self.atomView.isSelected():
+        #   painter.setPen(Qt.green)
+
+      painter.drawText(point, text)
+    painter.setRenderHint(QtGui.QPainter.Antialiasing, False)
+
+
+class AtomGroupLabel(QtWidgets.QGraphicsItem):
+
+  def __init__(self, scene, atomView, compoundView, atomGroup):
+
+    QtWidgets.QGraphicsItem.__init__(self)
+    self.scene = scene
+    self.setAcceptHoverEvents(True)
+    self.setAcceptedMouseButtons(Qt.LeftButton)
+    self.setZValue(1)
+    self.compoundView = compoundView
+    self.atomView = atomView
+    self.center = atomView.center
+    self.hover = False
+    self.atomGroup = atomGroup
+    self.bbox = NULL_RECT
+    self.drawData = ()
+    self.syncLabel()
+    self.setCacheMode(self.DeviceCoordinateCache)
+
+  def delete(self):
+
+    self.compoundView.scene.removeItem(self)
+
+  def hoverEnterEvent(self, event):
+
+    self.hover = True
+    self.update()
+
+
+  def hoverLeaveEvent(self, event):
+
+    self.hover = False
+    self.update()
+
+  def mouseDoubleClickEvent(self, event):
+
+    self.compoundView.queryAtomGroupName(self)
+
+    return QtWidgets.QGraphicsItem.mouseDoubleClickEvent(self, event)
+
+  def syncLabel(self):
+
+    rad = 20.0
+
+    atomGroup = self.atomGroup
+    coords =  np.array([a.coords for a in self.atomGroup.varAtoms])
+    coords = list(coords.mean(axis=0))
+
+    xa, ya, za = coords
+
+    angle = 0
+
+    name = atomGroup.name
+    if name:
+      text = name
+    else:
+      text = '???'
+
+    # create a rectangle where to contain the text. Used for trigger the hover event etc
+    textRect = FONT_METRIC.tightBoundingRect(text)
+    textLenght = len(text)
+    boxFactor = 0.5 * textLenght
+    w = textRect.width() + boxFactor
+    h = textRect.height() * 0.5
+
+    x = xa + (rad + w) * sin(angle)
+    y = ya + (rad + h) * sin(angle)
+
+    # Global absolute centre
+    self.setPos(QPointF(x, y))
+    _center = QPointF(-w/2, h) # text position
+    self.drawData = (_center, text)
+    rect = QRectF(QPointF(-w, -h),
+                  QPointF(w, h))
+    self.bbox = rect.adjusted(-h, -h, h, h)
+
+
+    self.update()
+
+  def boundingRect(self):
+    if not self.compoundView.showGroups:
+      return NULL_RECT
+    return self.bbox
+
+  def paint(self, painter, option, widget):
+
+    painter.setRenderHint(QtGui.QPainter.Antialiasing, True)
+    useName = self.compoundView.showGroups
+
+    if useName and self.drawData:
+      point, text = self.drawData
 
       painter.setFont(ELEMENT_FONT)
       if self.hover:
-        painter.setPen(Qt.white)
+        painter.setPen(Qt.black)
       elif not isinstance(self.compoundView, QtWidgets.QGraphicsItem):
         if self.compoundView.backgroundColor == Qt.darkGray:
           painter.setPen(ATOM_NAME_FG)
         else:
           painter.setPen(QtGui.QColor(0, 0, 0, 128))
-        
+
+      # painter.drawRect(self.bbox)
+
       painter.drawText(point, text)
     painter.setRenderHint(QtGui.QPainter.Antialiasing, False)
+
+
 
 
 class SelectionBox(QtWidgets.QGraphicsItem):
@@ -240,6 +353,10 @@ class AtomGroupItem(QtWidgets.QGraphicsItem):
     self.center = NULL_POINT
     self.syncGroup()
     self.setCacheMode(self.DeviceCoordinateCache)
+    self.name = self.atomGroup.name
+    self.atomGroupLabel = AtomGroupLabel(scene, self, compoundView, self.atomGroup)
+    scene.addItem(self)
+    scene.addItem(self.atomGroupLabel)
 
 
   def boundingRect(self):
@@ -249,6 +366,16 @@ class AtomGroupItem(QtWidgets.QGraphicsItem):
   def paint(self, painter, option, widget):
 
     pass
+
+  def delete(self):
+
+    compoundView = self.compoundView
+    atomGroup = self.atomGroup
+    self.atomGroupLabel.delete()
+    compoundView.scene.removeItem(self)
+
+    # del self.atomGroupLabel
+    # del self
     
 class EquivItem(AtomGroupItem):
 
@@ -302,7 +429,7 @@ class EquivItem(AtomGroupItem):
     pen = QtGui.QPen(EQUIV_COLOR, 2, Qt.SolidLine)
     painter.setPen(pen)
     painter.drawEllipse(center, 2.0, 2.0)
-    
+
 
 class ProchiralItem(AtomGroupItem):
     
@@ -682,8 +809,10 @@ class AtomItem(QtWidgets.QGraphicsItem):
       groupItems = compoundView.groupItems
       for group in self.atom.atomGroups:
         groupItems[group].syncGroup()
-      
+        groupItems[group].atomGroupLabel.syncLabel()
+
       self.atomLabel.syncLabel()
+
       
     return QtWidgets.QGraphicsItem.itemChange(self, change, value)
     
@@ -774,6 +903,7 @@ class AtomItem(QtWidgets.QGraphicsItem):
     groupItems = compoundView.groupItems
     for group in atom.atomGroups:
       groupItems[group].syncGroup()
+      groupItems[group].atomGroupLabel.syncLabel()
       
     if self.compoundView.autoChirality:
       atom.autoSetChirality()

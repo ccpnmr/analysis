@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:28 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 15:38:07 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
-
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
@@ -199,7 +198,7 @@ class NmrResidue(AbstractWrapperObject):
         return self._wrappedData.residueType or ''
 
     @residueType.setter
-    def residueType(self, value : typing.Optional[str]):
+    def residueType(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
             raise TypeError(f'residueType {repr(value)} must be a string or None')
         if isinstance(value, str) and not value:
@@ -1086,7 +1085,11 @@ class NmrResidue(AbstractWrapperObject):
                         if newResonance is None:
                             resonance.resonanceGroup = newApiResonanceGroup
                         else:
-                            absorbResonance(newResonance, resonance)
+                            _res = self._project._data2Obj.get(resonance)
+                            _newRes = self._project._data2Obj.get(newResonance)
+                            if not (_res and _newRes):
+                                raise RuntimeError('Cannot find associated v3 resonances')
+                            absorbResonance(_newRes, _res)
 
                     apiResonanceGroup.delete()
 
@@ -1287,15 +1290,16 @@ class NmrResidue(AbstractWrapperObject):
 
         return _newNmrAtom(self, name=name, isotopeCode=isotopeCode, comment=comment, **kwds)
 
-    def fetchNmrAtom(self, name: str):
+    def fetchNmrAtom(self, name: str, isotopeCode: str = None):
         """Fetch NmrAtom with name=name, creating it if necessary
 
-        :param name: string name for new nmrAto if created
+        :param name: string name for new nmrAtom if created
+        :param isotopeCode: optional isotope code only used for a new nmrAtom.
         :return: new or existing nmrAtom
         """
         from ccpn.core.NmrAtom import _fetchNmrAtom  # imported here to avoid circular imports
 
-        return _fetchNmrAtom(self, name=name)
+        return _fetchNmrAtom(self, name=name, isotopeCode=isotopeCode)
 
 
 #=========================================================================================

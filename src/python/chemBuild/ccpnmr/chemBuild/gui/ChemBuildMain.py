@@ -3,7 +3,8 @@ from os import path
 from math import atan2, cos, sin
 
 from PyQt5 import QtCore, QtGui, QtWidgets, QtSvg
-
+from qtconsole.rich_jupyter_widget import RichJupyterWidget
+from qtconsole.inprocess import QtInProcessKernelManager
 from ccpnmr.chemBuild.gui.CompoundView import CompoundView
 from ccpnmr.chemBuild.gui.AtomDragWidget import AtomDragWidget
 from functools import partial
@@ -23,7 +24,7 @@ from memops.qtgui.Tree import FileSystemTreePanel
 from memops.qtgui.MessageDialog import showYesNo, showError
 
 from ccpnmr.chemBuild.general.Constants import LINK, LINKS, ELEMENTS, CCPN_MOLTYPES
-from ccpnmr.chemBuild.general.Constants import PROPERTIES_ATOM, PROPERTIES_MULTI
+from ccpnmr.chemBuild.general.Constants import PROPERTIES_ATOM, PROPERTIES_MULTI, PROPERTIES_LINKS
 from ccpnmr.chemBuild.general.Constants import MIMETYPE_ELEMENT, ELEMENT_DATA, ELEMENT_DEFAULT
 from ccpnmr.chemBuild.general.Constants import MIMETYPE_COMPOUND, PI, ELEMENT_FONT, CHIRAL_FONT, CHARGE_FONT
 from ccpnmr.chemBuild.general.Constants import PERIODIC_TABLE, PERIODIC_TABLE_COLORS
@@ -142,7 +143,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     viewMenu.addItem('Atom names', self.toggleAtomNames, checked=True)
     viewMenu.addItem('Charge symbols', self.toggleChargeSymbols, checked=True)
     viewMenu.addItem('Chirality labels', self.toggleChiralityLabels, checked=True)
-    self.toggleGroupsAction =  viewMenu.addItem('NMR atom groups', self.toggleGroups, checked=False)
+    self.toggleGroupsAction =  viewMenu.addItem('NMR atom groups', self.toggleGroups, checked=True)
     viewMenu.addItem('Compound stats', self.toggleAtomStats, checked=False)
     viewMenu.addItem('Skeletal formula', self.toggleSkeletalFormula, checked=False)
     viewMenu.addSeparator()
@@ -359,75 +360,85 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     # Properties panel
 
     toolbox = QtWidgets.QToolBox(self)
-    toolbox.setMinimumWidth(220)
+    toolbox.setMinimumWidth(100)
     self.splitter.addWidget(toolbox)
     
     frame = QtWidgets.QWidget(toolbox)
     toolbox.addItem(frame, self.getIcon('atom-property.png'), 'Atom Properties')
-    
+
     # Simple Properties
     row = 0
-    for i, (cat, properties) in enumerate(PROPERTIES_ATOM):
-      label = Label(parent=frame, text=' ' + cat + ':', grid=(row, 0), gridSpan=(1,3))
-      
+    for i, (cat, properties) in enumerate(PROPERTIES_ATOM+PROPERTIES_MULTI+PROPERTIES_LINKS):
+      label = Label(parent=frame, text=cat + ':', grid=(row, 0), gridSpan=(1,2))
       row += 1
 
       col = 0   
-      for propText, icon, propType in properties:
+      for name, propText, icon, propType in properties:
         # button = Button(frame, '', lambda x=propType: self.addProperty(x), self.getIcon(icon),
-        button=Button(frame, '', partial(self.addProperty, propType), self.getIcon(icon),
+        button=Button(frame, name, partial(self.addProperty, propType), self.getIcon(icon),
                tipText=propText, grid=(row,col))
+        button.setStyleSheet("QPushButton { text-align: left; }")
+        button.setMaximumWidth(160)
         button.setIconSize(QtCore.QSize(28,28))
+
         col += 1
         
-        if col == 3:
+        if col == 2:
           row += 1
           col = 0
 
       row += 1
     
-    # Advanced Properties
-    
-    label = Label(frame, 'Residue Links:', grid=(row, 0), gridSpan=(1,3))
-    row += 1
-    
-    col = 0   
-    for linkText, linkType, icon,  in LINKS:
-      button = Button(frame, '', partial(self.addLink, linkType), self.getIcon(icon),
-                      tipText=linkText, grid=(row,col))
-      button.setIconSize(QtCore.QSize(28,28))
-      col += 1
+    # # Advanced Properties
+    #
+    # label = Label(frame, 'Residue Links:', grid=(row, 0), gridSpan=(1,3))
+    # row += 1
+    #
+    # col = 0
+    # for linkText, linkType, icon,  in LINKS:
+    #   button = Button(frame, linkText, partial(self.addLink, linkType), self.getIcon(icon),
+    #                   tipText=linkText, grid=(row,col))
+    #   button.setIconSize(QtCore.QSize(28,28))
+    #   button.setStyleSheet("QPushButton { text-align: left; }")
+    #   button.setMinimumWidth(buttonMinWidth)
+    #   col += 1
+    #
+    # row += 1
 
-    row += 1
- 
-    for i, (cat, properties) in enumerate(PROPERTIES_MULTI):
-      label = Label(frame, ' ' + cat + ':', grid=(row, 0), gridSpan=(1,3))
-      row += 1   
-         
-      col = 0   
-      for propText, icon, propType in properties:
-        # button = Button(frame, '', lambda x=propType: self.addProperty(x), self.getIcon(icon),
-        button = Button(frame, '', partial(self.addProperty, propType), self.getIcon(icon),
-                        tipText=propText, grid=(row,col))
-        button.setIconSize(QtCore.QSize(28,28))
-        col += 1
-      
-      row += 1
-      
-    frame.layout().setRowStretch(row, 2)
+    # for i, (cat, properties) in enumerate(PROPERTIES_MULTI):
+    #   label = Label(frame, ' ' + cat + ':', grid=(row, 1), gridSpan=(1,3))
+    #   print(cat, i, row, 'hgfd')
+    #   row += 1
+    #
+    #   col = 0
+    #   for propText, icon, propType in properties:
+    #     # button = Button(frame, '', lambda x=propType: self.addProperty(x), self.getIcon(icon),
+    #     text = propText.split('(')[0]
+    #     button = Button(frame, text, partial(self.addProperty, propType), self.getIcon(icon),
+    #                     tipText=propText, grid=(row,col))
+    #     button.setIconSize(QtCore.QSize(28,28))
+    #     button.setStyleSheet("QPushButton { text-align: left; }")
+    #     button.setMinimumWidth(buttonMinWidth)
+    #     col += 1
+    #
+    #   row += 1
+    #
+    # frame.layout().setRowStretch(row, 1)
     frame.layout().setColumnStretch(0, 2)
     frame.layout().setColumnStretch(1, 2)
     frame.layout().setColumnStretch(2, 2)
-   
-    
+
     # Var panel
     
     frame = QtWidgets.QWidget(toolbox)
     toolbox.addItem(frame, self.getIcon('variants.png'), 'Compound Variants')
     
     self.defaultVarCheckBox = CheckButton(frame, 'Current is a default form',
-                                          callback=self.toggleDefaultVar)
-  
+                                          callback=self.toggleDefaultVar, grid=(0,0))
+    self.delVarButton = Button(frame, 'Delete variant', callback=self.deleteVar,
+                               tipText='Removes the current variant form from the compound definition',
+                               grid=(1,0))
+
     columns = [Column('Polymer', self.getColPoly,
                tipText='Relative position in biopolymer chain'),
                Column('Protons', self.getColProton,
@@ -439,11 +450,9 @@ class ChemBuildMain(QtWidgets.QMainWindow):
                Column('Stereo', self.getColStereo,
                tipText='Stereochemistry that distinguishes variants')]
     
-    self.varTable = ObjectTable(frame, columns, [], callback=self.selectVar)
+    self.varTable = ObjectTable(frame, columns, [], callback=self.selectVar, grid=(2,0))
     
-    self.delVarButton = Button(frame, 'Delete variant', callback=self.deleteVar,
-                               tipText='Removes the current variant form from the compound definition')
-    
+
     frame.layout().setRowStretch(2,2)
  
  
@@ -495,6 +504,40 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     box.textChanged.connect(self.changeDetails)
     layout.addWidget(box)
 
+    # Console
+
+    frame = QtWidgets.QWidget(toolbox)
+    toolbox.addItem(frame, self.getIcon('ipython.png'), 'IPython Console')
+    alignment = Qt.AlignTop | Qt.AlignLeft
+
+    layout = QtWidgets.QVBoxLayout(frame)
+    layout.setSpacing(2)
+    layout.setContentsMargins(2, 2, 2, 2)
+    frame.setLayout(layout)
+
+    label = QtWidgets.QLabel(frame)
+    label.setText("Commands:")
+    label.setAlignment(alignment)
+    layout.addWidget(label)
+
+    # start the kernel
+    self.namespace = {
+
+                      'mainWindow': self,
+                      'getCompound': self._getCompound,
+                      }
+
+    km = QtInProcessKernelManager()
+    km.start_kernel()
+    km.kernel.gui = 'qt4'
+
+    self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
+
+    self.ipythonWidget.kernel_manager = km
+    km.kernel.shell.push(self.namespace)
+    self._startChannels()
+    layout.addWidget(self.ipythonWidget)
+
     
     self.splitter.setCollapsible(1, False)
     self.splitter.setStretchFactor(0, 0)
@@ -523,7 +566,17 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     if not compound:
       self.compoundFileName = None
       self.setCompound( Compound('Unnamed') )
-      
+
+  def _getCompound(self):
+    return self.compound
+
+  def _startChannels(self):
+    self.ipythonWidget.kernel_client = self.ipythonWidget.kernel_manager.client()
+    self.ipythonWidget.kernel_client.start_channels()
+
+  def _stopChannels(self):
+    self.ipythonWidget.kernel_client.stop_channels()
+    self.ipythonWidget.kernel_client = None
 
   def getIcon(self, fileName):
   
@@ -572,8 +625,9 @@ class ChemBuildMain(QtWidgets.QMainWindow):
         
       self.compound.copyVarAtoms(variant.varAtoms, (x,y))
       self.compoundView.centerView()
+      self.autoNameAtoms()
       self.updateAll()
-  
+
   def addInchi(self):
   
     prompt = 'Enter InChI string to add:'
@@ -1258,7 +1312,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     
         tableList.append((poly, proton, link, stereo, var))
         
-      tableList.sort()
+      # tableList.sort()
       tableList = [x[4] for x in tableList]
       
       
@@ -2471,8 +2525,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
         variant.autoNameAtoms(hydrogens)
                   
         self.updateAll()
-        self.updateVars()    
-          
+        self.updateVars()
+
   def autoNameAtoms(self):
   
     

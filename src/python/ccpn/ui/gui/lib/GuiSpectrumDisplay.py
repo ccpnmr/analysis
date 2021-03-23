@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-19 17:40:23 +0000 (Fri, March 19, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 15:38:08 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-# import importlib, os
 import numpy as np
 from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial
@@ -216,9 +215,9 @@ class GuiSpectrumDisplay(CcpnModule):
         """
 
         getLogger().debug('GuiSpectrumDisplay>> mainWindow, name: %s %s' % (mainWindow, name))
-        super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=name,
-                                                 size=(1100, 1300), autoOrientation=False
-                                                 )
+        super().__init__(mainWindow=mainWindow, name=name,
+                         size=(1100, 1300), autoOrientation=False
+                         )
         self.mainWindow = mainWindow
         self.application = mainWindow.application
         # derive current from application
@@ -229,13 +228,33 @@ class GuiSpectrumDisplay(CcpnModule):
         # self.mainWidget will be the parent of all the subsequent widgets
         self.qtParent = self.mainWidget
 
+        # set up the widgets
+        self._setWidgets(mainWindow, useScrollArea)
+
+        # populate the widgets
+        self._populateWidgets()
+
+        # self.stripFrame.setAcceptDrops(True)
+
+        # notifier to respond to items being dropped onto the stripFrame
+        self.droppedNotifier = self.setGuiNotifier(self.stripFrame,
+                                                   [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+                                                   self._processDroppedItems)
+
+        # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
+        # the module to another location
+        self.hoverEvent = self._hoverEvent
+        self._phasingTraceScale = 1.0e-7
+        self.stripScaleFactor = 1.0
+
+        self._registerNotifiers()
+
+    def _setWidgets(self, mainWindow, useScrollArea):
+        """Set the widgets for the spectrumDisplay
+        """
         # get the settings from preferences
-        annotationType = min(self.application.preferences.general.annotationType, self.MAXPEAKLABELTYPES - 1)
-        symbolType = min(self.application.preferences.general.symbolType, self.MAXPEAKSYMBOLTYPES - 1)
-        symbolSize = self.application.preferences.general.symbolSizePixel
-        symbolThickness = self.application.preferences.general.symbolThickness
-        aliasEnabled = self.application.preferences.general.aliasEnabled
-        aliasShade = self.application.preferences.general.aliasShade
+        baseAspectRatioCode = self.application.preferences.general._baseAspectRatioAxisCode,
+        aspectCodes = self.application.preferences.general.aspectRatios
 
         # create settings widget
         if not self.is1D:
@@ -243,12 +262,8 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     mainWindow=self.mainWindow, spectrumDisplay=self,
                                                                     grid=(0, 0),
                                                                     xTexts=AXISUNITS, yTexts=AXISUNITS,
-                                                                    _baseAspectRatioAxisCode=self.application.preferences.general._baseAspectRatioAxisCode,
-                                                                    _aspectRatios=self.application.preferences.general.aspectRatios.copy(),
-                                                                    _aspectRatioMode=self.application.preferences.general.aspectRatioMode,
-                                                                    symbolType=symbolType, annotationType=annotationType,
-                                                                    symbolSize=symbolSize, symbolThickness=symbolThickness,
-                                                                    aliasEnabled=aliasEnabled, aliasShade=aliasShade
+                                                                    _baseAspectRatioAxisCode=baseAspectRatioCode,
+                                                                    _aspectRatios=aspectCodes,
                                                                     )
         else:
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
@@ -256,20 +271,13 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     grid=(0, 0),
                                                                     xTexts=AXISUNITS, yTexts=[''],
                                                                     showYAxis=False,
-                                                                    _baseAspectRatioAxisCode=self.application.preferences.general._baseAspectRatioAxisCode,
-                                                                    _aspectRatios=self.application.preferences.general.aspectRatios.copy(),
-                                                                    _aspectRatioMode=self.application.preferences.general.aspectRatioMode,
-                                                                    symbolType=symbolType, annotationType=annotationType,
-                                                                    symbolSize=symbolSize, symbolThickness=symbolThickness,
-                                                                    aliasEnabled=aliasEnabled, aliasShade=aliasShade
+                                                                    _baseAspectRatioAxisCode=baseAspectRatioCode,
+                                                                    _aspectRatios=aspectCodes,
                                                                     )
-
         self._spectrumDisplaySettings.settingsChanged.connect(self._settingsChanged)
         self.settingsWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-
         # respond to values changed in the containing spectrumDisplay settings widget
         self._spectrumDisplaySettings.stripArrangementChanged.connect(self._stripDirectionChangedInSettings)
-
         # GWV: Not sure what the widget argument is for
         # LM: is the spectrumDisplay, used in the widget to set actions/callbacks to the buttons
         spectrumRow = 1
@@ -277,43 +285,33 @@ class GuiSpectrumDisplay(CcpnModule):
         stripRow = 2
         axisRow = 3
         phasingRow = 4
-
         _spacing = 4
         _styleSheet = 'QToolBar { spacing: 0px; padding: 0px; }' \
                       'QToolButton { padding: 0px; }'
         _iconSize = max(getFontHeight(size='VLARGE') or 30, 30)
         # TOOLBAR_HEIGHT = _iconSize + _spacing
-
         self.toolBarFrame = Frame(parent=self.qtParent, grid=(spectrumRow, 0), gridSpan=(1, 7), setLayout=True,
                                   hPolicy='preferred', hAlign='left', showBorder=False,
                                   spacing=(_spacing, _spacing), margins=(_spacing, _spacing, _spacing, _spacing))
-
         # Utilities Toolbar; filled in Nd/1d classes
         self.spectrumUtilToolBar = ToolBar(parent=self.toolBarFrame, iconSizes=(_iconSize, _iconSize),
                                            grid=(0, 0), hPolicy='preferred', hAlign='left')
-
         # spectrum toolbar - holds spectrum icons for spectrumDisplay
         self.spectrumToolBar = SpectrumToolBar(parent=self.toolBarFrame, widget=self,
                                                grid=(1, 0), hPolicy='preferred', hAlign='left')
-
         # spectrumGroupsToolBar - holds spectrumGroup icons, slightly different behaviour
         self.spectrumGroupToolBar = SpectrumGroupToolBar(parent=self.toolBarFrame, spectrumDisplay=self,
                                                          grid=(2, 0), hPolicy='preferred', hAlign='left')
-
         self.spectrumGroupToolBar.hide()
-
         self.spectrumUtilToolBar.setStyleSheet(_styleSheet)
         self.spectrumToolBar.setStyleSheet(_styleSheet)
         self.spectrumGroupToolBar.setStyleSheet(_styleSheet)
-
         if self.application.preferences.general.showToolbar:
             self.spectrumUtilToolBar.show()
         else:
             self.spectrumUtilToolBar.hide()
-
         self.stripFrame = Frame(setLayout=True, showBorder=False, spacing=(5, 0), stretch=(1, 1), margins=(0, 0, 0, 0),
                                 acceptDrops=True)
-
         if useScrollArea:
             # scroll area for strips
             # This took a lot of sorting-out; better leave as is or test thoroughly
@@ -338,7 +336,6 @@ class GuiSpectrumDisplay(CcpnModule):
             self._stripFrameScrollArea = None
             self.qtParent.getLayout().addWidget(self.stripFrame, stripRow, 0, 1, 7)
             # self.stripFrame.setStyleSheet(frameStyleSheetTemplate % ('Frame', ''))
-
         if INCLUDE_AXIS_WIDGET:
             # NOTE:ED - testing new axis widget - required actually adding tiling
             if self.is1D:
@@ -376,10 +373,8 @@ class GuiSpectrumDisplay(CcpnModule):
         self.qtParent.getLayout().setContentsMargins(1, 0, 1, 0)
         self.qtParent.getLayout().setSpacing(0)
         self.lastAxisOnly = mainWindow.application.preferences.general.lastAxisOnly
-
         if not self.is1D:
             self.setVisibleAxes()
-
         from ccpn.ui.gui.widgets.PlaneToolbar import ZPlaneToolbar
 
         self._stripToolBarWidget = Frame(parent=self.qtParent, setLayout=True, grid=(axisRow, 0), gridSpan=(1, 7),
@@ -388,7 +383,6 @@ class GuiSpectrumDisplay(CcpnModule):
                                          grid=(0, 0), gridSpan=(1, 1), margins=(2, 2, 2, 2), hPolicy='preferred')
         if len(self.axisCodes) < 3:
             self._stripToolBarWidget.setVisible(False)
-
         includeDirection = not self.is1D
         self.phasingFrame = PhasingFrame(parent=self.qtParent,
                                          showBorder=False,
@@ -401,20 +395,46 @@ class GuiSpectrumDisplay(CcpnModule):
                                          margins=(2, 2, 2, 2), spacing=(0, 0))
         self.phasingFrame.setVisible(False)
 
-        # self.stripFrame.setAcceptDrops(True)
+    def _populateWidgets(self):
+        """Update the state of spectrumDisplay from the project layout OR from preferences if not found
+        """
+        # populate settings widget
+        if self.application.preferences.general.restoreLayoutOnOpening and \
+                self.mainWindow.moduleLayouts:
 
-        # notifier to respond to items being dropped onto the stripFrame
-        self.droppedNotifier = self.setGuiNotifier(self.stripFrame,
-                                                   [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
-                                                   self._processDroppedItems)
+            try:
+                # not very clean - need to separate into an attribute dict
+                with self._spectrumDisplaySettings.blockWidgetSignals(recursive=False):
+                    with self.phasingFrame.blockWidgetSignals(recursive=False):
+                        # read from the project layout
+                        found = self.restoreModuleState()
+            except Exception as es:
+                found = False
 
-        # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
-        # the module to another location
-        self.hoverEvent = self._hoverEvent
-        self._phasingTraceScale = 1.0e-7
-        self.stripScaleFactor = 1.0
+            if not found:
+                # read from the preferences
+                self._updateStateFromPreferences()
+        else:
+            # read from the preferences
+            self._updateStateFromPreferences()
 
-        self._registerNotifiers()
+    def _updateStateFromPreferences(self):
+        """Update the state of spectrumDisplay from the preferences
+        """
+        prefsGen = self.application.preferences.general
+        # initialise to the project defaults
+        self._spectrumDisplaySettings._populateWidgets(prefsGen.aspectRatioMode, prefsGen.aspectRatios,
+                                                       prefsGen.annotationType, 0,
+                                                       prefsGen.symbolSizePixel, prefsGen.symbolThickness, prefsGen.symbolType,
+                                                       prefsGen.xAxisUnits, prefsGen.yAxisUnits
+                                                       prefGens.aliasEnabled, prefGens.aliasShade)
+
+    def restoreWidgetsState(self, **widgetsState):
+        super(GuiSpectrumDisplay, self).restoreWidgetsState(**widgetsState)
+        getLogger().debug(f'spectrumDisplay {self} - restoreWidgetsState')
+
+        # need to set the values from the restored state
+        self._spectrumDisplaySettings._updateLockedSettings(always=True)
 
     def clearSpectra(self):
         """

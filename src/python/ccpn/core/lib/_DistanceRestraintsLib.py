@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-18 13:29:08 +0000 (Thu, March 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 15:38:08 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.DataSet import DataSet
 from ccpn.core.RestraintList import RestraintList
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
+from ccpn.util.Common import name2IsotopeCode
 from ccpnmodel.ccpncore.lib import V2Upgrade
 from ccpnmodel.v_3_0_2.upgrade import getNmrMolSystems
 
@@ -2132,21 +2133,18 @@ def _getRestraintsMapping(constraintSet, molSystem=None):
     return assignmentMap, resonanceMap
 
 
-
 ###########################################################################
 ############################## V3 #########################################
 ###########################################################################
 
 def _newDataSet(project, name=None, **kwargs):
     name = name or 'my%s'%DataSet.className
-    # name = _incrementObjectName(project, DataSet._pluralLinkName, name)
     name = DataSet._uniqueName(project=project, name=name)
     ds = project.newDataSet(name=name, **kwargs)
     return ds
 
 def _newDistanceRestraintList(project, dataset=None, name=None):
     name  = name or 'my%s'%RestraintList.className
-    # name = _incrementObjectName(project, RestraintList._pluralLinkName, name)
     name = RestraintList._uniqueName(project=project, name=name)
     if not dataset:
         dataset = _newDataSet(project, name=name)
@@ -2274,11 +2272,19 @@ def _tempAtomAndResonanceSets(project):
     :return: atomSets, resonanceSets from nmrAtom.atom
     Use before calling _newV3DistanceRestraint.
     """
+    from ccpn.core.NmrAtom import UnknownIsotopeCode
     if project._wrappedData.resonanceSets: # already in the projects. Don't create new.
         return [], []
     atomSets  = []
     resonanceSets = []
     for i in project.nmrAtoms:
+        if i.isotopeCode == UnknownIsotopeCode:
+            isotopeCode = name2IsotopeCode(str(i.name).upper())
+            if isotopeCode == '1H':
+                getLogger().warning("isotopeCode is Undefined for NmrAtom: %s. "
+                                    "IsotopeCode has to be set for calculating Distance Restraints."
+                                    " Set to %s" %(i.name, isotopeCode))
+                i.isotopeCode = isotopeCode
         nmrProject = project._wrappedData
         v3Atom = i.atom
         resonance = i._wrappedData

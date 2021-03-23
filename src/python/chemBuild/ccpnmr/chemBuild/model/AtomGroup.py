@@ -15,7 +15,8 @@ class AtomGroup:
     self.groupType = groupType
     self.subGroups = set()
     self.variant = list(varAtoms)[0].variant
-    
+    self._name = None
+
     compound = self.compound
     compound.isModified = True
     
@@ -74,7 +75,39 @@ class AtomGroup:
             bond.bondType = 'aromatic'
   
         varAtom.updateValences()
-        
+
+  def _getName(self, suffix ='%'):
+
+    varAtoms = list(self.varAtoms)
+
+
+    names = set([va.name for va in varAtoms])
+    while len(names) > 1:
+      names = set([x[:-1] for x in names])
+
+    baseName = str(names.pop() or varAtoms[0].name)
+    name = baseName + suffix
+
+    return name
+
+  @property
+  def name(self):
+    return self._name
+
+  @name.getter
+  def name(self):
+    if not self._name:
+      _name = self._getName()
+    else:
+     _name = self._name
+    return _name
+
+  @name.setter
+  def name(self, value):
+    if value is None:
+      raise ValueError('Value cannot be None')
+    self._name = str(value)
+
   def delete(self):
   
     compound = self.compound
@@ -95,6 +128,5 @@ class AtomGroup:
           
       for varAtom in self.varAtoms:
         varAtom.updateValences()
-    
     del self
       

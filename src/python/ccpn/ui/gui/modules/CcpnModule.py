@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-19 17:40:23 +0000 (Fri, March 19, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 15:38:09 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -79,6 +79,7 @@ CommonWidgets = {
     CheckBox.__name__                   : (CheckBox.get, CheckBox.setChecked),
     ColourDialog.__name__               : (ColourDialog.getColor, ColourDialog.setColour),
     DoubleSpinbox.__name__              : (DoubleSpinbox.value, DoubleSpinbox.setValue),
+    ScientificDoubleSpinBox.__name__    : (ScientificDoubleSpinBox.value, ScientificDoubleSpinBox.setValue),
     # Label.__name__:                   (Label.get,                   Label.setText),
     LineEdit.__name__                   : (LineEdit.get, LineEdit.setText),
     LineEditButtonDialog.__name__       : (LineEditButtonDialog.get, LineEditButtonDialog.setText),
@@ -113,6 +114,7 @@ CommonWidgetsEdits = {
     CheckBox.__name__                       : (CheckBox.get, CheckBox.setChecked, None),
     ColourDialog.__name__                   : (ColourDialog.getColor, ColourDialog.setColour, None),
     DoubleSpinbox.__name__                  : (DoubleSpinbox.value, DoubleSpinbox.setValue, None),
+    ScientificDoubleSpinBox.__name__        : (ScientificDoubleSpinBox.value, ScientificDoubleSpinBox.setValue, None),
 
     LineEdit.__name__                       : (LineEdit.get, LineEdit.setText, None),
     LineEditButtonDialog.__name__           : (LineEditButtonDialog.get, LineEditButtonDialog.setText, None),
@@ -629,8 +631,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             if varObj.__class__.__name__ in CommonWidgets.keys():
                 try:  # try because widgets can be dynamically deleted
                     widgetsState[varName] = getattr(varObj, CommonWidgets[varObj.__class__.__name__][0].__name__)()
-                except Exception as e:
-                    getLogger().debug('Error %s', e)
+                except Exception as es:
+                    getLogger().debug(f'Error {es} - {varName}')
         # self._kwargs = collections.OrderedDict(sorted(widgetsState.items()))
 
         return collections.OrderedDict(sorted(widgetsState.items()))
@@ -663,6 +665,12 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
             except Exception as e:
                 getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
+
+    def restoreModuleState(self):
+        """Restore the state for this widget
+        """
+        if self.mainWindow.moduleLayouts:
+            return self.mainWindow.moduleArea.restoreModuleState(self.mainWindow.moduleLayouts, self)
 
     def rename(self, newName):
         self.label.setText(newName)

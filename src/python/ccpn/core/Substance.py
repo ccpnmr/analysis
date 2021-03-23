@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-08 12:39:51 +0000 (Mon, March 08, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-23 11:19:30 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -618,7 +618,8 @@ class Substance(AbstractWrapperObject):
                                  allowNone=True, checkExisting=False)
 
         apiNmrProject = self.project._wrappedData
-        if apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name, labeling=apiLabeling) is not None:
+        _molComponent = apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name, labeling=apiLabeling)
+        if _molComponent is not None and _molComponent != self._wrappedData:
             raise ValueError("%s.%s already exists" % (name, labelling if labelling != DEFAULT_LABELLING else ''))
 
         # rename functions from here

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:52 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-23 11:19:30 +0000 (Tue, March 23, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -98,9 +98,6 @@ class SubstanceTest(WrapperTesting):
         self.assertEqual(substance1._id, 'notmuch.')
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
-        # with self.assertRaisesRegexp(TypeError, 'ccpn.Substance.name must be a string'):
-        #   substance1.rename(name=None, labelling=None)
-
         substance1.rename(name=None, labelling='noName')
         self.assertEqual(substance1._id, 'notmuch.noName')
         self.assertEqual(sc1._id, 'S1.notmuch.noName')
@@ -131,8 +128,6 @@ class SubstanceTest(WrapperTesting):
             substance1.rename(name=12, labelling=None)
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
-        #TODO:ED have changed substance to allow None in the Labelling
-        # with self.assertRaisesRegexp(ValueError, 'ccpn.Substance.labelling must be set'):
         substance1.rename(name='notmuch', labelling='')
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
@@ -194,7 +189,6 @@ class Test_Substance_SpectrumLink(WrapperTesting):
             atomLabel = self.substance2.getSpecificAtomLabelling('cC1.1.ALA.CA')
 
     def _test_Substance_removeAtomLabelling(self):
-        # TODO the error raised seems to be different to the test. Fix?
         with self.assertRaisesRegexp(ValueError, 'does not exist'):
             atomLabel = self.substance1.removeSpecificAtomLabelling('X.1.ALA.CA')
 

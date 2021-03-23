@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:02 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 17:14:20 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2280,3 +2280,42 @@ class GL1dLabelling():
     #     """Get the current object is in visible planes settings
     #     """
     #     return True, False, 0, 1.0
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Drawing
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def drawSymbols(self, spectrumSettings, shader=None, stackingMode=True):
+        """Draw the symbols to the screen
+        """
+        if self.strip.isDeleted:
+            return
+
+        lineThickness = self._GLParent._symbolThickness
+        GL.glLineWidth(lineThickness * self._GLParent.viewports.devicePixelRatio)
+        shader.setAliasEnabled(self._GLParent._aliasEnabled)
+
+        # change to correct value for shader
+        shader.setAliasShade(self._GLParent._aliasShade / 100.0)
+        shader.setAliasPosition(0, 0)
+
+        for objListView, specView in self._visibleListViews:
+            if not objListView.isDeleted and objListView in self._GLSymbols.keys():
+
+                specSettings = self._spectrumSettings[specView]
+
+                fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
+                xScale = specSettings[GLDefs.SPECTRUM_XSCALE]
+
+                if stackingMode:
+                    _matrix = np.array(spectrumSettings[specView][GLDefs.SPECTRUM_STACKEDMATRIX])
+                else:
+                    _matrix = np.array(self._GLParent._IMatrix)
+
+                _matrix[0] = xScale
+                _matrix[12] += fx0
+
+                shader.setMVMatrix(_matrix)
+                self._GLSymbols[objListView].drawIndexVBO()
+
+        GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self._GLParent.viewports.devicePixelRatio)

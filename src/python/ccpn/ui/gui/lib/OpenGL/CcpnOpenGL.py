@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-19 17:40:23 +0000 (Fri, March 19, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 17:14:20 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -748,7 +748,10 @@ class CcpnGLWidget(QOpenGLWidget):
         # only need the axes for this spectrum
         indices = indices[:spectrumView.spectrum.dimensionCount]
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds, self._spectrumValues[1].regionBounds)
+        if spectrumView.spectrum.dimensionCount > 1:
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds, self._spectrumValues[1].regionBounds)
+        else:
+            self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds, )
 
         if len(self._spectrumValues) > 2:
             # store a list for the extra dimensions - should only be one per spectrumDisplay really
@@ -2448,7 +2451,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 if not self.mousePressInRegion(self._externalRegions._regions):
                     self.mousePressInIntegralLists()
 
-        if int(ev.buttons() & Qt.LeftButton):
+        if int(ev.buttons() & Qt.LeftButton) and not self.is1D:
             # find the bounds for the region that has currently been clicked
 
             if (keyModifiers & (Qt.ShiftModifier | Qt.ControlModifier)):
@@ -2680,18 +2683,24 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if (keyModifiers & Qt.ShiftModifier) and (keyModifiers & Qt.ControlModifier):
 
-                # check for a valid region pick
-                if self._validRegionPick:
-                    self._endCoordinate = [np.clip(pos, mn, mx) for pos, mn, mx in zip(cursorCoordinate, self._minBounds, self._maxBounds)]
+                if self.is1D:
+                    self._endCoordinate = cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
                     self._selectionMode = 3
+                    self._drawSelectionBox = True
+                    self._drawDeltaOffset = True
                 else:
-                    # in case bad picking needs to be shown to the user, shows a red box
-                    # awkward for overlaid spectra with different aliasing regions specified
-                    self._endCoordinate = [np.clip(pos, mn, mx) for pos, mn, mx in zip(cursorCoordinate, self._minBounds, self._maxBounds)]  #cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
-                    self._selectionMode = 4
+                    # check for a valid region pick
+                    if self._validRegionPick:
+                        self._endCoordinate = [np.clip(pos, mn, mx) for pos, mn, mx in zip(cursorCoordinate, self._minBounds, self._maxBounds)]
+                        self._selectionMode = 3
+                    else:
+                        # in case bad picking needs to be shown to the user, shows a red box
+                        # awkward for overlaid spectra with different aliasing regions specified
+                        self._endCoordinate = [np.clip(pos, mn, mx) for pos, mn, mx in zip(cursorCoordinate, self._minBounds, self._maxBounds)]  #cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
+                        self._selectionMode = 4
 
-                self._drawSelectionBox = True
-                self._drawDeltaOffset = True
+                    self._drawSelectionBox = True
+                    self._drawDeltaOffset = True
 
             elif (keyModifiers & Qt.ShiftModifier) and int(event.buttons() & Qt.LeftButton):
 

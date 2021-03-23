@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2018-02-07 15:28:41 +0000 (Wed, February 02, 2018) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2021-03-23 12:06:19 +0000 (Tue, March 23, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,7 +37,7 @@ from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Chain import Chain
 from ccpn.core.Substance import Substance
 from ccpn.core.Complex import Complex
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 
 
 CHAIN = Chain.className
@@ -200,27 +200,20 @@ class CreateNmrChainPopup(CcpnDialog):
         self.buttonBox.setButtonEnabled(Create, value)
 
     def _cloneFromChain(self, name):
-        with undoBlock():
+        from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 
-            newNmrChain = self._createEmptyNmrChain(name)
-            if newNmrChain:
-
-                if len(self._chain.residues) > 0:
-                    self.project.blankNotification()  # For speed issue: Blank the notifications until the penultimate residue
-                    for residue in self._chain.residues[:-1]:
-                        nmrResidue = newNmrChain.newNmrResidue(sequenceCode=residue.sequenceCode,
-                                                               residueType=residue.residueType)
-                        for atom in residue.atoms:
-                            nmrResidue.fetchNmrAtom(atom.name)
-                    self.project.unblankNotification()
-                    lastResidue = self._chain.residues[-1]
-                    lastNmrResidue = newNmrChain.newNmrResidue(sequenceCode=lastResidue.sequenceCode,
-                                                               residueType=lastResidue.residueType)
-                    # lastNmrResidue.residue = lastResidue
-                    for atom in lastResidue.atoms:
-                        lastNmrResidue.fetchNmrAtom(atom.name)
-
-                return newNmrChain
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                newNmrChain = self._createEmptyNmrChain(name)
+                if newNmrChain:
+                    if len(self._chain.residues) > 0:
+                        for residue in self._chain.residues:
+                            nmrResidue = newNmrChain.newNmrResidue(sequenceCode=residue.sequenceCode,
+                                                                   residueType=residue.residueType)
+                            for atom in residue.atoms:
+                                isotopeCode = DEFAULT_ISOTOPE_DICT.get(atom.elementSymbol)
+                                nmrResidue.newNmrAtom(atom.name, isotopeCode=isotopeCode) # is not a fetch but new. cannot be already one!
+                    return newNmrChain
 
     def _cloneFromNmrChain(self, name):
         with undoBlock():

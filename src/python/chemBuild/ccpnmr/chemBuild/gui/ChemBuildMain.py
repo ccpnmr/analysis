@@ -3,7 +3,8 @@ from os import path
 from math import atan2, cos, sin
 
 from PyQt5 import QtCore, QtGui, QtWidgets, QtSvg
-
+from qtconsole.rich_jupyter_widget import RichJupyterWidget
+from qtconsole.inprocess import QtInProcessKernelManager
 from ccpnmr.chemBuild.gui.CompoundView import CompoundView
 from ccpnmr.chemBuild.gui.AtomDragWidget import AtomDragWidget
 from functools import partial
@@ -503,6 +504,40 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     box.textChanged.connect(self.changeDetails)
     layout.addWidget(box)
 
+    # Console
+
+    frame = QtWidgets.QWidget(toolbox)
+    toolbox.addItem(frame, self.getIcon('ipython.png'), 'IPython Console')
+    alignment = Qt.AlignTop | Qt.AlignLeft
+
+    layout = QtWidgets.QVBoxLayout(frame)
+    layout.setSpacing(2)
+    layout.setContentsMargins(2, 2, 2, 2)
+    frame.setLayout(layout)
+
+    label = QtWidgets.QLabel(frame)
+    label.setText("Commands:")
+    label.setAlignment(alignment)
+    layout.addWidget(label)
+
+    # start the kernel
+    self.namespace = {
+
+                      'mainWindow': self,
+                      'getCompound': self._getCompound,
+                      }
+
+    km = QtInProcessKernelManager()
+    km.start_kernel()
+    km.kernel.gui = 'qt4'
+
+    self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
+
+    self.ipythonWidget.kernel_manager = km
+    km.kernel.shell.push(self.namespace)
+    self._startChannels()
+    layout.addWidget(self.ipythonWidget)
+
     
     self.splitter.setCollapsible(1, False)
     self.splitter.setStretchFactor(0, 0)
@@ -531,7 +566,17 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     if not compound:
       self.compoundFileName = None
       self.setCompound( Compound('Unnamed') )
-      
+
+  def _getCompound(self):
+    return self.compound
+
+  def _startChannels(self):
+    self.ipythonWidget.kernel_client = self.ipythonWidget.kernel_manager.client()
+    self.ipythonWidget.kernel_client.start_channels()
+
+  def _stopChannels(self):
+    self.ipythonWidget.kernel_client.stop_channels()
+    self.ipythonWidget.kernel_client = None
 
   def getIcon(self, fileName):
   
@@ -1267,7 +1312,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     
         tableList.append((poly, proton, link, stereo, var))
         
-      tableList.sort()
+      # tableList.sort()
       tableList = [x[4] for x in tableList]
       
       

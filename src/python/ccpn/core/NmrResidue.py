@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:31:17 +0000 (Thu, January 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 12:06:48 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -198,7 +198,7 @@ class NmrResidue(AbstractWrapperObject):
         return self._wrappedData.residueType or ''
 
     @residueType.setter
-    def residueType(self, value : typing.Optional[str]):
+    def residueType(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
             raise TypeError(f'residueType {repr(value)} must be a string or None')
         if isinstance(value, str) and not value:
@@ -1094,7 +1094,11 @@ class NmrResidue(AbstractWrapperObject):
                         if newResonance is None:
                             resonance.resonanceGroup = newApiResonanceGroup
                         else:
-                            absorbResonance(newResonance, resonance)
+                            _res = self._project._data2Obj.get(resonance)
+                            _newRes = self._project._data2Obj.get(newResonance)
+                            if not (_res and _newRes):
+                                raise RuntimeError('Cannot find associated v3 resonances')
+                            absorbResonance(_newRes, _res)
 
                     apiResonanceGroup.delete()
 

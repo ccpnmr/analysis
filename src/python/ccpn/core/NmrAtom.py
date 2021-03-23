@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-14 22:45:04 +0000 (Sun, March 14, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-23 12:06:48 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,7 @@ from ccpn.util.Logging import getLogger
 
 ASSIGNEDPEAKSCHANGED = '_assignedPeaksChanged'
 UnknownIsotopeCode = '?'
+
 
 class NmrAtom(AbstractWrapperObject):
     """NmrAtom objects are used for assignment. An NmrAtom within an assigned NmrResidue is
@@ -156,6 +157,7 @@ class NmrAtom(AbstractWrapperObject):
     def isotopeCode(self, value) -> str:
         """Set the isotopeCode of NmrAtom. """
         from ccpn.util import Constants as ct
+
         if not self.isotopeCode == value:
             isotopeCode = value if value in ct.DEFAULT_ISOTOPE_DICT.values() else UnknownIsotopeCode
             self._wrappedData.isotopeCode = isotopeCode or UnknownIsotopeCode
@@ -327,7 +329,7 @@ class NmrAtom(AbstractWrapperObject):
 
     @property
     def chemicalShifts(self) -> Tuple:
-        "Returns ChemicalShift objects connected to NmrAtom"
+        """Returns ChemicalShift objects connected to NmrAtom"""
         getDataObj = self._project._data2Obj.get
         return tuple(sorted(getDataObj(x) for x in self._wrappedData.shifts))
 
@@ -508,7 +510,6 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
         raise TypeError('Name {} must be of type string (or None)'.format(name))
     if not isinstance(isotopeCode, (str, type(None))):
         raise TypeError('isotopeCode {} must be of type string (or None)'.format(isotopeCode))
-
 
     # Deal with reserved names
     # serial = None

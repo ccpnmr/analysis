@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2021-02-01 08:07:13 +0000 (Mon, February 01, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-23 12:06:48 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -112,8 +112,6 @@ class NmrStretchTest(WrapperTesting):
                          ['@-.@1.ALA', '@-.@2.VAL', '@-.@3.GLY', '@-.@4.CYS', '@-.@5.GLN', ])
 
         nmrResidues[0].connectPrevious(nmrResidues[1])
-        # self.undo.undo()
-        # self.undo.redo()
         nmrResidues[1].connectPrevious(nmrResidues[2])
         nmrResidues[4].connectNext(nmrResidues[3])
         nmrResidues[4].connectPrevious(nmrResidues[0])
@@ -121,7 +119,7 @@ class NmrStretchTest(WrapperTesting):
                          ['#3.@3.GLY', '#3.@2.VAL', '#3.@1.ALA', '#3.@5.GLN', '#3.@4.CYS', ])
 
         self.undo.undo()
-        self.undo.undo()  # ejb - error here on Nmr.py/setLabel(41524)
+        self.undo.undo()
         self.undo.undo()
         self.undo.undo()
         self.assertEqual([x.id for x in nmrChain.nmrResidues],
@@ -460,15 +458,20 @@ class NmrStretchTest(WrapperTesting):
         self.assertEqual(nmrChain4.isDeleted, False)
         self.assertEqual(self.project.getNmrChain('@5').nmrResidues, nmrResidues4)
 
-        return
+        # return
+        self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
+                         ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA'])
 
         nmrResidues[1].disconnect()
+        # disconnect second element to give left as disconnected, right as connected
+        self.assertEqual([x.id for x in nmrResidues[2].nmrChain.mainNmrResidues],
+                         ['#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA'])
         self.undo.undo()
         self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
-                         ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE'])
+                         ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA'])
         self.undo.redo()
         self.assertEqual([x.id for x in nmrResidues],
-                         ['@-.@1.ALA', '@-.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE'])
+                         ['@-.@1.ALA', '@-.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA'])
 
     def test_disconnect_midchain_1(self):
         nmrChain = self.project.newNmrChain(isConnected=True)
@@ -837,10 +840,6 @@ class NmrResidueTest(WrapperTesting):
         # This is a no-op
         self.assertEqual(nr1.id, "A.999.THR")
 
-        # TODO:ED this does not raise an error now!
-        # with self.assertRaises(ValueError):
-        #   nr2 = nr2.assignTo(sequenceCode=15)
-
         nr2 = nr2.assignTo(sequenceCode=515, residueType='XXX')
         self.assertEqual(nr2.id, 'A.515.XXX')
         obj = nchain.newNmrResidue(sequenceCode=777)
@@ -848,21 +847,19 @@ class NmrResidueTest(WrapperTesting):
 
         self.assertTrue(len(nr1.nmrAtoms) == 2)
 
-        # self.assertRaises(ValueError,  nr2.assignTo, chainCode=nr1.nmrChain.shortName,
-        #                   sequenceCode=nr1.sequenceCode, residueType=nr1.residueType,)
-        # with self.assertRaises(ValueError):
-        # nr2 = nr2.assignTo(chainCode=nr1.nmrChain.shortName,
-        #                   sequenceCode=nr1.sequenceCode, residueType=nr1.residueType)
+        self.assertRaises(ValueError, nr2.assignTo, chainCode=nr1.nmrChain.shortName,
+                          sequenceCode=nr1.sequenceCode, residueType=nr1.residueType, )
+        with self.assertRaises(ValueError):
+            nr2 = nr2.assignTo(chainCode=nr1.nmrChain.shortName,
+                               sequenceCode=nr1.sequenceCode, residueType=nr1.residueType)
 
         nrx = nr2.assignTo(chainCode=nr1.nmrChain.shortName, sequenceCode=nr1.sequenceCode,
                            residueType=nr1.residueType, mergeToExisting=True)
-        # NB merging is not undoable
-        # self.assertEqual(len(self.undo), 0)
-        # self.assertEqual(len(self.undo.waypoints), 0)
+
         self.assertEqual(nr2.id, 'A.515.XXX-Deleted')
         self.assertIs(nrx, nr1)
         self.assertIsNone(nr2._apiResonanceGroup)
-        self.assertTrue(len(nr1.nmrAtoms) == 4)
+        self.assertTrue(len(nr1.nmrAtoms) == 2)
 
     def test_fetchNmrResidue(self):
         nmrChain = self.project.fetchNmrChain()

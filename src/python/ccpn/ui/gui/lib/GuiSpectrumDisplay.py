@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 15:38:08 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 15:42:52 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -426,8 +426,8 @@ class GuiSpectrumDisplay(CcpnModule):
         self._spectrumDisplaySettings._populateWidgets(prefsGen.aspectRatioMode, prefsGen.aspectRatios,
                                                        prefsGen.annotationType, 0,
                                                        prefsGen.symbolSizePixel, prefsGen.symbolThickness, prefsGen.symbolType,
-                                                       prefsGen.xAxisUnits, prefsGen.yAxisUnits
-                                                       prefGens.aliasEnabled, prefGens.aliasShade)
+                                                       prefsGen.xAxisUnits, prefsGen.yAxisUnits,
+                                                       prefsGen.aliasEnabled, prefsGen.aliasShade)
 
     def restoreWidgetsState(self, **widgetsState):
         super(GuiSpectrumDisplay, self).restoreWidgetsState(**widgetsState)

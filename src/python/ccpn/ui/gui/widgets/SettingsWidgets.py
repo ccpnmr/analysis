@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 15:38:09 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 15:42:52 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -112,7 +112,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         # populate the widgets
         self._populateWidgets(_aspectRatioMode, _aspectRatios, annotationType, stripArrangement,
-                              symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits)
+                              symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits, aliasEnabled, aliasShade)
 
         # connect to the lock/symbol/ratio changed pyqtSignals
         self._GLSignals = GLNotifier(parent=self._parent)
@@ -279,7 +279,9 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         row += 1
         self.aliasEnabledLabel = Label(parent, text="Show Aliased Peaks", grid=(row, 0))
-        self.aliasEnabledData = CheckBox(parent, checked=aliasEnabled, grid=(row, 1), objectName='SDS_aliasEnabled')
+        self.aliasEnabledData = CheckBox(parent,
+                                         # checked=aliasEnabled,
+                                         grid=(row, 1), objectName='SDS_aliasEnabled')
         self.aliasEnabledData.clicked.connect(self._symbolsChanged)
 
         row += 1
@@ -292,7 +294,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         Label(_sliderBox, text="0", grid=(0, 0), hAlign='l')
         Label(_sliderBox, text="100%", grid=(0, 2), hAlign='l')
         self.aliasShadeData.setMinimumWidth(LineEditsMinimumWidth)
-        self.aliasShadeData.set(aliasShade)
+        # self.aliasShadeData.set(aliasShade)
         self.aliasShadeData.valueChanged.connect(self._symbolsChanged)
 
         row += 1
@@ -302,7 +304,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self._parent.setContentsMargins(5, 5, 5, 5)
 
     def _populateWidgets(self, aspectRatioMode, aspectRatios, annotationType, stripArrangement,
-                         symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits):
+                         symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits,
+                         aliasEnabled, aliasShade):
         """Populate the widgets
         """
         with self.blockWidgetSignals():
@@ -325,6 +328,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.symbolSizePixelData.setValue(int(symbolSize))
             self.symbolThicknessData.setValue(int(symbolThickness))
             self.stripArrangementButtons.setIndex(stripArrangement)
+            self.aliasEnabledData.set(aliasEnabled)
+            self.aliasShadeData.set(aliasShade)
 
     def getValues(self):
         """Return a dict containing the current settings

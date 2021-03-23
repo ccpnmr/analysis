@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-22 19:21:39 +0000 (Mon, March 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 21:11:01 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -973,7 +973,7 @@ class GuiSpectrumDisplay(CcpnModule):
             return
 
         # resize the contents of the stripFrame
-        self.setColumnStretches(stretchValue=True, widths=False)
+        # self.setColumnStretches(stretchValue=True, widths=False)
         super().resizeEvent(ev)
 
     def _hoverEvent(self, event):

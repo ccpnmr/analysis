@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-22 18:19:23 +0000 (Mon, March 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 21:11:01 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -183,6 +183,17 @@ class GuiStrip(Frame):
             self._contourThickness = _firstStrip._contourThickness
             self._spectrumBordersVisible = _firstStrip._spectrumBordersVisible
 
+            if spectrumDisplay.stripArrangement == 'Y':
+                if self.spectrumDisplay.lastAxisOnly:
+                    self.setAxesVisible(False, True)
+                else:
+                    self.setAxesVisible(True, True)
+            elif spectrumDisplay.stripArrangement == 'X':
+                if self.spectrumDisplay.lastAxisOnly:
+                    self.setAxesVisible(True, False)
+                else:
+                    self.setAxesVisible(True, True)
+
             # self._CcpnGLWidget._useLockedAspect = spectrumDisplay.strips[0]._CcpnGLWidget._useLockedAspect
 
         else:
@@ -207,6 +218,8 @@ class GuiStrip(Frame):
                                                   yUnits=settings[AXISYUNITS],
                                                   aspectRatioMode=settings[AXISASPECTRATIOMODE],
                                                   aspectRatios=settings[AXISASPECTRATIOS])
+
+            self.setAxesVisible(True, True)
 
         # set the axis units from the current settings
         self._CcpnGLWidget._xUnits = settings[AXISXUNITS]
@@ -1890,6 +1903,11 @@ class GuiStrip(Frame):
         """Set the visibility of the bottom axis
         """
         self._CcpnGLWidget.setBottomAxisVisible(axisVisible=axisVisible)
+
+    def getAxesVisible(self):
+        """Get the visibility of strip axes
+        """
+        return self._CcpnGLWidget.getAxesVisible()
 
     def setAxesVisible(self, rightAxisVisible=True, bottomAxisVisible=False):
         """Set the visibility of strip axes

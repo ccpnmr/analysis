@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 15:42:52 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-23 16:17:38 +0000 (Tue, March 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -286,11 +286,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         row += 1
         self.aliasShadeLabel = Label(parent, text="    Opacity", grid=(row, 0))
-        # self.aliasShadeData = DoubleSpinbox(parent, step=0.05,
-        #                                    min=0.0, max=1.0, grid=(row, 1), hAlign='l', objectName='SDS_aliasShade')
         _sliderBox = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l')
-        # self.aliasShadeData = Slider(parent, grid=(row, 1), hAlign='l', objectName='SDS_aliasShade')
-        self.aliasShadeData = Slider(_sliderBox, grid=(0, 1), hAlign='l')
+        self.aliasShadeData = Slider(_sliderBox, grid=(0, 1), hAlign='l', objectName='SDS_aliasShade')
         Label(_sliderBox, text="0", grid=(0, 0), hAlign='l')
         Label(_sliderBox, text="100%", grid=(0, 2), hAlign='l')
         self.aliasShadeData.setMinimumWidth(LineEditsMinimumWidth)

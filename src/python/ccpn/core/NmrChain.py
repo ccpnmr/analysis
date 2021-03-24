@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:31:17 +0000 (Thu, January 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-24 00:05:20 +0000 (Wed, March 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -368,7 +368,8 @@ class NmrChain(AbstractWrapperObject):
             if self._wrappedData.implCode == '@-' and self._wrappedData.nmrProject:
                 raise TypeError("NmrChain '@-' cannot be deleted")
 
-        super()._finaliseAction(action)
+        if not super()._finaliseAction(action):
+            return
 
     #=========================================================================================
     # CCPN functions

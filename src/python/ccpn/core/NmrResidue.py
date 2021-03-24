@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-23 13:05:15 +0000 (Tue, March 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-24 00:05:20 +0000 (Wed, March 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1165,7 +1165,8 @@ class NmrResidue(AbstractWrapperObject):
     # def _finaliseAction(self, action: str):
     #     """Subclassed to handle associated ChemicalShift instances
     #     """
-    #     super()._finaliseAction(action=action)
+    #     if not super()._finaliseAction(action=action):
+    #         return
     #     # propagate the rename to associated ChemicalShift instances
     #     if action == 'rename':
     #         for cs in self.chemicalShifts:

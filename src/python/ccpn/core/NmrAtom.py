@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 15:38:07 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-24 13:34:07 +0000 (Wed, March 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -549,8 +549,11 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     if comment is not None:
         dd['details'] = comment
 
+    if isotopeCode is None:
+        isotopeCode = DEFAULT_ISOTOPE_DICT.get(name[0]) #This should go in 3.1. We should remove any guesses.
+
     isotopeCode = isotopeCode if isotopeCode in DEFAULT_ISOTOPE_DICT.values() else UnknownIsotopeCode
-    # Don't guess isotope code. If given it must be set after creation to avoid API restrictions upon creation.
+
     obj = nmrProject.newResonance(**dd)
     result = self._project._data2Obj.get(obj)
     result.isotopeCode = isotopeCode

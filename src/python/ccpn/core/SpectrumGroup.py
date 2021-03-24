@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-24 13:34:08 +0000 (Wed, March 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -354,7 +354,8 @@ class SpectrumGroup(AbstractWrapperObject):
         """Subclassed to handle associated seriesValues instances
         """
         oldPid = self.pid
-        super()._finaliseAction(action)
+        if not super()._finaliseAction(action):
+            return
 
         # propagate the rename to associated seriesValues
         if action in ['rename']:

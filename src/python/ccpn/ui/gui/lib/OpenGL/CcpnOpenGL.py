@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 17:14:20 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-24 13:34:08 +0000 (Wed, March 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -4425,6 +4425,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.rescale(rescaleStaticVTraces=False)
         self.update()
+
+    def getAxesVisible(self):
+        """Get the visibility of the axes
+        """
+        return (self._drawRightAxis, self._drawBottomAxis)
 
     def setAxesVisible(self, rightAxisVisible=True, bottomAxisVisible=False):
         """Set the visibility of the axes

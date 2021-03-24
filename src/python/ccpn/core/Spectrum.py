@@ -50,7 +50,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-08 16:27:01 +0000 (Mon, March 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-24 14:53:33 +0000 (Wed, March 24, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2034,7 +2034,7 @@ class Spectrum(AbstractWrapperObject):
                                  (axisCode, newAxisCodeOrder, self.axisCodes))
         return newValues
 
-    def getByAxisCodes(self, parameterName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
+    def getByAxisCodes(self, parameterName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False, matchLength: bool = True):
         """Return values defined by attributeName in order defined by axisCodes:
         (default order if None).
 
@@ -2060,10 +2060,10 @@ class Spectrum(AbstractWrapperObject):
 
         if axisCodes is not None:
             # change to order defined by axisCodes
-            values = self._reorderValues(values, axisCodes)
+            values = self._reorderValues(values, axisCodes[:self.dimensionCount] if matchLength else axisCodes)
         return values
 
-    def setByAxisCodes(self, parameterName: str, values: Sequence, axisCodes: Sequence[str] = None, exactMatch: bool = False):
+    def setByAxisCodes(self, parameterName: str, values: Sequence, axisCodes: Sequence[str] = None, exactMatch: bool = False, matchLength: bool = True):
         """Set attributeName to values in order defined by axisCodes:
         (default order if None)
 
@@ -2085,7 +2085,7 @@ class Spectrum(AbstractWrapperObject):
 
         if axisCodes is not None:
             # change values to the order appropriate for spectrum
-            values = self._reorderValues(values, axisCodes)
+            values = self._reorderValues(values, axisCodes[:self.dimensionCount] if matchLength else axisCodes)
         try:
             setattr(self, parameterName, values)
         except AttributeError:

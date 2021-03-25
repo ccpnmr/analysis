@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-25 17:05:11 +0000 (Thu, March 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-25 18:46:36 +0000 (Thu, March 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -613,7 +613,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
         # GST only present in v 3.1 layouts
         elif typ == 'area':
             if contents is not None:
-                self._buildFromState(openedModulesNames, contents, docks, root, depth)
+                self._buildFromState(openedModulesNames, contents, docks, root, depth, restoreSpectrumDisplay=restoreSpectrumDisplay)
             obj = None
 
             # except KeyError:
@@ -627,11 +627,11 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
             if typ != 'dock':
                 for o in contents:
-                    self._buildFromState(openedModulesNames, o, docks, obj, depth + 1)
+                    self._buildFromState(openedModulesNames, o, docks, obj, depth + 1, restoreSpectrumDisplay=restoreSpectrumDisplay)
                 obj.apoptose(propagate=False)
                 obj.restoreState(state)  ## this has to be done later?
 
-    def restoreModuleState(self, layout, module):
+    def restoreModuleState(self, layout, module, discard=False):
         """Search the restore tree for a given module
         """
         if 'layoutState' in layout:
@@ -644,9 +644,9 @@ class CcpnModuleArea(ModuleArea, DropBase):
                 getLogger().debug('Reading from V%s layout format.' % version)
 
             if 'main' in state and state['main'] is not None:
-                return self._searchState(module, state['main'])
+                return self._searchState(module, state['main'], discard)
 
-    def _searchState(self, module, state):
+    def _searchState(self, module, state, discard):
         """Traverse through the tree to find the module
         """
         try:
@@ -663,16 +663,17 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
         elif typ == 'area':
             if contents is not None:
-                return self._searchState(module, contents)
+                return self._searchState(module, contents, discard)
 
         else:
             if contents is not None:
                 found = None
                 for ii, o in enumerate(contents):
-                    if self._searchState(module, o):
+                    if self._searchState(module, o, discard):
                         found = ii
                         break
                 if found is not None:
-                    # remove from the list
-                    contents.pop(ii)
+                    if discard:
+                        # remove from the list
+                        contents.pop(ii)
                     return True

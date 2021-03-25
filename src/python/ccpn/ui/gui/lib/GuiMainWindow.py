@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-22 18:19:23 +0000 (Mon, March 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-25 18:46:36 +0000 (Thu, March 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -264,11 +264,14 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         else:
             self.getMenuAction('Project->Archive').setEnabled(True)
 
+        from copy import deepcopy
+
         # get the project layout as soon as mainWindow is initialised
         if self.application.preferences.general.restoreLayoutOnOpening:
             self.moduleLayouts = self.application._getUserLayout()
+            self._spectrumModuleLayouts = deepcopy(self.moduleLayouts)
         else:
-            self.moduleLayouts = None
+            self._spectrumModuleLayouts = self.moduleLayouts = None
 
     def _updateWindowTitle(self):
         """

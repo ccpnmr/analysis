@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-22 18:19:23 +0000 (Mon, March 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-25 18:46:36 +0000 (Thu, March 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -764,7 +764,7 @@ class Framework(NotifierBase):
         try:
             if self.preferences.general.restoreLayoutOnOpening and \
                     self.ui.mainWindow.moduleLayouts:
-                Layout.restoreLayout(self._mainWindow, self.ui.mainWindow.moduleLayouts)
+                Layout.restoreLayout(self._mainWindow, self.ui.mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
         except Exception as e:
             getLogger().warning('Impossible to restore Layout %s' % e)
 

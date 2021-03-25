@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 17:01:59 +0100 (Thu, April 16, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-25 17:05:11 +0000 (Thu, March 25, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -38,10 +38,12 @@ class LabelledEnum(Enum):
         STRING = 2, 'String'
     """
 
-    def __new__(cls, value, description):
+    def __new__(cls, value, description, label=None):
         obj = object.__new__(cls)
         obj._value_ = value
         obj._description_ = description
+        # add optional extra information
+        obj._label_ = label
         return obj
 
     def __str__(self):
@@ -51,6 +53,11 @@ class LabelledEnum(Enum):
     @property
     def description(self):
         return self._description_
+
+    # this makes sure that the label is read-only
+    @property
+    def label(self):
+        return self._label_
 
     def prev(self):
         cls = self.__class__
@@ -63,6 +70,12 @@ class LabelledEnum(Enum):
         members = list(cls)
         index = members.index(self) + 1
         return members[index % len(members)]
+
+    def search(self, value):
+        cls = self.__class__
+        members = [val for val in list(cls) if val.label == value]
+        if members and len(members) == 1:
+            return members[0]
 
 
 if __name__ == '__main__':

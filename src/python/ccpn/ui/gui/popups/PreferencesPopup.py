@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-19 13:56:47 +0000 (Fri, March 19, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-25 17:05:10 +0000 (Thu, March 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -53,6 +53,7 @@ from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
 from ccpn.util.UserPreferences import UserPreferences
 from ccpn.util.Common import ZPlaneNavigationModes
 from ccpn.util.Path import aPath
+from ccpn.util.Constants import AXIS_UNITS
 from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
@@ -62,7 +63,7 @@ from ccpn.ui.gui.widgets.FileDialog import SpectrumFileDialog, ProjectFileDialog
     ProjectSaveFileDialog
 from ccpn.framework.lib.pipeline.PipesLoader import _fetchUserPipesPath
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
-from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
+from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR, getFontHeight
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLFONT_DEFAULTSIZE, _OLDGLFONT_SIZES
 
 
@@ -221,7 +222,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
                     strip.symbolThickness = self.application.preferences.general.symbolThickness
                     strip.gridVisible = self.application.preferences.general.showGrid
-                    strip._contourThickness = self.application.preferences.general.contourThickness
+                    strip.contourThickness = self.application.preferences.general.contourThickness
                     strip.crosshairVisible = self.application.preferences.general.showCrosshair
                     strip.doubleCrosshairVisible = self.application.preferences.general.showDoubleCrosshair
                     strip.sideBandsVisible = self.application.preferences.general.showSideBands
@@ -337,12 +338,15 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                       GLNotifier.GLPREFERENCES])
 
         for specDisplay in self.project.spectrumDisplays:
-            specDisplay.setVisibleAxes()
-            if not specDisplay.is1D:
-                specDisplay.attachZPlaneWidgets()
-
             # update the fixed/locked state
             if specDisplay.strips and updateSpectrumDisplays:
+
+                if not specDisplay.is1D:
+                    specDisplay.zPlaneNavigationMode = ZPlaneNavigationModes(self.application.preferences.general.zPlaneNavigationMode).label
+                    specDisplay.attachZPlaneWidgets()
+                specDisplay._stripDirectionChangedInSettings(self.application.preferences.general.stripArrangement)
+                # specDisplay.setVisibleAxes()
+
                 # update the ratios from preferences
                 specDisplay.strips[0].updateAxisRatios()
 
@@ -674,7 +678,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.zoomPercentData.setValue(int(self.preferences.general.zoomPercent))
         self.stripWidthZoomPercentData.setValue(int(self.preferences.general.stripWidthZoomPercent))
         self.aspectRatioModeData.setIndex(self.preferences.general.aspectRatioMode)
+        self.stripArrangementButtons.setIndex(self.preferences.general.stripArrangement)
         self.zPlaneNavigationModeData.setIndex(self.preferences.general.zPlaneNavigationMode)
+
+        self.xAxisUnitsData.setIndex(self.preferences.general.xAxisUnits)
+        self.yAxisUnitsData.setIndex(self.preferences.general.yAxisUnits)
 
         self.showZoomXLimitApplyBox.setChecked(self.preferences.general.zoomXLimitApply)
         self.showZoomYLimitApplyBox.setChecked(self.preferences.general.zoomYLimitApply)
@@ -684,6 +692,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.symbolSizePixelData.setValue(int('%i' % self.preferences.general.symbolSizePixel))
         self.symbolThicknessData.setValue(int(self.preferences.general.symbolThickness))
         self.contourThicknessData.setValue(int(self.preferences.general.contourThickness))
+
         self.autoCorrectBox.setChecked(self.preferences.general.autoCorrectColours)
         _setColourPulldown(self.marksDefaultColourBox, self.preferences.general.defaultMarksColour)
         self.showSideBandsData.setValue(int(self.preferences.general.numSideBands))
@@ -927,16 +936,26 @@ class PreferencesPopup(CcpnDialogMainWidget):
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
 
         row += 1
-        self.zPlaneNavigationModeLabel = Label(parent, text="zPlane Navigation Mode", grid=(row, 0))
-        self.zPlaneNavigationModeData = RadioButtons(parent, texts=[val.description for val in ZPlaneNavigationModes],
-                                                     callback=self._queueSetZPlaneNavigationMode,
-                                                     direction='h',
-                                                     grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                                     tipTexts=('Tools are located at the bottom of the spectrumDisplay,\nand will operate on the last strip selected in that spectrumDisplay',
-                                                               'Tools are located at the bottom of each strip',
-                                                               'Tools are displayed in the upper-left corner of each strip display'),
-                                                     )
-        self.zPlaneNavigationModeLabel.setToolTip('Select where the zPlane navigation tools are located')
+        self.xAxisUnits = Label(parent, text="X Axis Units", grid=(row, 0))
+        self.xAxisUnitsData = RadioButtons(parent, texts=AXIS_UNITS,
+                                           # selectedInd=xAxisUnits,
+                                           callback=self._queueSetXUnits,
+                                           direction='h',
+                                           grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                           tipTexts=None,
+                                           )
+
+        row += 1
+        self.yAxisUnits = Label(parent, text="Y Axis Units", grid=(row, 0))
+        self.yAxisUnitsData = RadioButtons(parent, texts=AXIS_UNITS,
+                                           # selectedInd=yAxisUnits,
+                                           callback=self._queueSetYUnits,
+                                           direction='h',
+                                           grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                           tipTexts=None)
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
 
         row += 1
         self.aspectRatioModeLabel = Label(parent, text="Aspect Ratio Mode", grid=(row, 0))
@@ -977,25 +996,55 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                    )
 
         row += 1
-        self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixels)", grid=(row, 0))
+        self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixel)", grid=(row, 0))
         self.symbolSizePixelData = Spinbox(parent, step=1,
                                            min=2, max=50, grid=(row, 1), hAlign='l')
         self.symbolSizePixelData.setMinimumWidth(LineEditsMinimumWidth)
         self.symbolSizePixelData.valueChanged.connect(self._queueSetSymbolSizePixel)
 
         row += 1
-        self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (points)", grid=(row, 0))
+        self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (pixel)", grid=(row, 0))
         self.symbolThicknessData = Spinbox(parent, step=1,
                                            min=1, max=20, grid=(row, 1), hAlign='l')
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         self.symbolThicknessData.valueChanged.connect(self._queueSetSymbolThickness)
 
         row += 1
-        self.contourThicknessLabel = Label(parent, text="Contour Thickness (points)", grid=(row, 0))
+        self.contourThicknessLabel = Label(parent, text="Contour Thickness (pixel)", grid=(row, 0))
         self.contourThicknessData = Spinbox(parent, step=1,
                                             min=1, max=20, grid=(row, 1), hAlign='l')
         self.contourThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         self.contourThicknessData.valueChanged.connect(self._queueSetContourThickness)
+
+        row += 1
+        _height = getFontHeight(size='VLARGE') or 24
+        self.stripArrangementLabel = Label(parent, text="Strip Arrangement", grid=(row, 0))
+        self.stripArrangementButtons = RadioButtons(parent, texts=['    ', '    ', '    '],
+                                                    # selectedInd=stripArrangement,
+                                                    direction='horizontal',
+                                                    grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                                    tipTexts=None,
+                                                    icons=[('icons/strip-row', (_height, _height)),
+                                                           ('icons/strip-column', (_height, _height)),
+                                                           ('icons/strip-tile', (_height, _height))
+                                                           ],
+                                                    )
+        # NOTE:ED - temporarily disable/hide the Tile button
+        self.stripArrangementButtons.radioButtons[2].setEnabled(False)
+        self.stripArrangementButtons.radioButtons[2].setVisible(False)
+        self.stripArrangementButtons.setCallback(self._queueSetStripArrangement)
+
+        row += 1
+        self.zPlaneNavigationModeLabel = Label(parent, text="zPlane Navigation Mode", grid=(row, 0))
+        self.zPlaneNavigationModeData = RadioButtons(parent, texts=[val.description for val in ZPlaneNavigationModes],
+                                                     callback=self._queueSetZPlaneNavigationMode,
+                                                     direction='h',
+                                                     grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                                     tipTexts=('Tools are located at the bottom of the spectrumDisplay,\nand will operate on the last strip selected in that spectrumDisplay',
+                                                               'Tools are located at the bottom of each strip',
+                                                               'Tools are displayed in the upper-left corner of each strip display'),
+                                                     )
+        self.zPlaneNavigationModeLabel.setToolTip('Select where the zPlane navigation tools are located')
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
@@ -1044,14 +1093,16 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.marksDefaultColourLabel = Label(parent, text="Default Marks Colour", grid=(row, 0))
-        self.marksDefaultColourBox = PulldownList(parent, grid=(row, 1), )
+        _colourFrame = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l', gridSpan=(1, 2))
+        self.marksDefaultColourBox = PulldownList(_colourFrame, grid=(0, 0))
+        self.marksDefaultColourBox.setMinimumWidth(LineEditsMinimumWidth)
 
         # populate colour pulldown and set to the current colour
         fillColourPulldown(self.marksDefaultColourBox, allowAuto=False, includeGradients=True)
         self.marksDefaultColourBox.currentIndexChanged.connect(self._queueChangeMarksColourIndex)
 
         # add a colour dialog button
-        self.marksDefaultColourButton = Button(parent, grid=(row, 2), hAlign='l',
+        self.marksDefaultColourButton = Button(_colourFrame, grid=(0, 1), hAlign='l',
                                                icon='icons/colours', hPolicy='fixed')
         self.marksDefaultColourButton.clicked.connect(self._queueChangeMarksColourButton)
 
@@ -1514,6 +1565,28 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.contourThickness = value
 
     @queueStateChange(_verifyPopupApply)
+    def _queueSetXUnits(self):
+        value = self.xAxisUnitsData.getIndex()
+        if value != self.preferences.general.xAxisUnits:
+            return partial(self.setXAxisUnits, value)
+
+    def setXAxisUnits(self, value):
+        """Set the xAxisUnits
+        """
+        self.preferences.general.xAxisUnits = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetYUnits(self):
+        value = self.yAxisUnitsData.getIndex()
+        if value != self.preferences.general.yAxisUnits:
+            return partial(self.setYAxisUnits, value)
+
+    def setYAxisUnits(self, value):
+        """Set the yAxisUnits
+        """
+        self.preferences.general.yAxisUnits = value
+
+    @queueStateChange(_verifyPopupApply)
     def _queueSetZPlaneNavigationMode(self):
         value = self.zPlaneNavigationModeData.getIndex()
         if value != self.preferences.general.zPlaneNavigationMode:
@@ -1556,6 +1629,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Set the peak symbol type - current a cross or lineWidths
         """
         self.preferences.general.symbolType = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetStripArrangement(self):
+        value = self.stripArrangementButtons.getIndex()
+        if value != self.preferences.general.stripArrangement:
+            return partial(self._setStripArrangement, value)
+
+    def _setStripArrangement(self, value):
+        """Set the stripArrangement
+        """
+        self.preferences.general.stripArrangement = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetZoomCentre(self):

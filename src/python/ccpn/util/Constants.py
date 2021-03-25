@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-14 14:22:01 +0000 (Sun, March 14, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-25 17:05:11 +0000 (Thu, March 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -67,6 +67,9 @@ sequenceCodePattern = re.compile('(\-?\d+)?(.*?)(\+\d+|\-\d+)?$')
 # Units allowed for amounts (e.g. Sample)
 amountUnits = ('L', 'g', 'mole')
 
+# Units allowed for the visible axes
+AXIS_UNITS = ['ppm', 'Hz', 'points']
+
 #  Units allowed for concentrations (e.g. SampleComponents)
 concentrationUnits = ('Molar', 'g/L', 'L/L', 'mol/mol', 'g/g', 'eq', 'sec')
 
@@ -97,7 +100,7 @@ DEFAULT_SPECTRUM_PARAMETERS = {
     '2H' : {'numPoints': 12800, 'sf': 100., 'sw': 1280, 'refppm': 11.8, 'refpt': 1, },
     '3H' : {'numPoints': 12800, 'sf': 100., 'sw': 1280, 'refppm': 11.8, 'refpt': 1, },
     '13C': {'numPoints': 25600, 'sf': 100., 'sw': 2560, 'refppm': 236., 'refpt': 1, },
-    '19F': {'numPoints': 25600, 'sf': 100., 'sw': 20000,'refppm': -40.4,'refpt': 0, }
+    '19F': {'numPoints': 25600, 'sf': 100., 'sw': 20000, 'refppm': -40.4, 'refpt': 0, }
     }
 
 # Map of (lower-cased) NmrExpPrototype.measurementType to element type code
@@ -229,7 +232,6 @@ DEFAULT_ISOTOPE_DICT = OrderedDict((
     ))
 
 PriorityIsotopeCodes = ['1H', '13C', '15N', '17O', '19F', '31P']
-
 
 IsotopeRecord = namedtuple('IsotopeRecord', (
     'isotopeCode', 'elementNumber', 'massNumber', 'isRadioactive',

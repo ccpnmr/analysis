@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-22 18:19:23 +0000 (Mon, March 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-25 17:05:11 +0000 (Thu, March 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -667,6 +667,12 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
         else:
             if contents is not None:
-                for o in contents:
+                found = None
+                for ii, o in enumerate(contents):
                     if self._searchState(module, o):
-                        return True
+                        found = ii
+                        break
+                if found is not None:
+                    # remove from the list
+                    contents.pop(ii)
+                    return True

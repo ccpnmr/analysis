@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-15 10:42:41 +0000 (Fri, January 15, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-25 17:05:11 +0000 (Thu, March 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,7 @@ from ccpn.util.FrozenDict import FrozenDict
 from ccpn.util import Constants
 from ccpn.util.Logging import getLogger
 
+
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt = 2000000000
 
@@ -65,6 +66,8 @@ validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
 validCcpnFileNameChars = validFileNamePartChars + '-.' + separatorFileNameChar
 CAMELCASEPTN = r'((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))'
 CAMELCASEREP = r' \1'
+
+
 # alternative camelCase split = r'((?<=[a-z])[A-Z]|(?<=[A-Z])[A-Z](?=[a-z]))''
 
 # # Not used - Rasmus 20/2/2017
@@ -111,7 +114,7 @@ def _incrementObjectName(project, pluralLinkName, name):
     while name in names:
         name = incrementName(name)
     if originalName != name:
-        getLogger().info('Name:% already assigned. Renamed to %s' %(originalName, name))
+        getLogger().info('Name:% already assigned. Renamed to %s' % (originalName, name))
     return name
 
 
@@ -823,12 +826,15 @@ def _SortByMatch(item):
     """
     return -item[2]  # sort from high to low
 
+
 def _atoi(text):
     return int(text) if text.isdigit() else text
 
+
 def _naturalKeyObjs(obj, theProperty='name'):
     text = getattr(obj, theProperty)
-    return [_atoi(c) for c in re.split(r'(\d+)', text) ]
+    return [_atoi(c) for c in re.split(r'(\d+)', text)]
+
 
 def naturalSortList(ll, reverse=True):
     """
@@ -836,8 +842,9 @@ def naturalSortList(ll, reverse=True):
     :return: a sorted list by natural sort
     """
     convert = lambda text: int(text) if text.isdigit() else text.lower()
-    alphanumKey = lambda key:[convert(c) for c in re.split('([0-9]+)', key)]
+    alphanumKey = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
     return sorted(ll, key=alphanumKey, reverse=reverse)
+
 
 def sortObjectByName(objs, reverse=True):
     """
@@ -848,6 +855,7 @@ def sortObjectByName(objs, reverse=True):
     Sorts the objects by digit if present in the name, otherwise alphabetically.
     """
     objs.sort(key=_naturalKeyObjs, reverse=reverse)
+
 
 def getAxisCodeMatch(axisCodes, refAxisCodes, exactMatch=False, allMatches=False) -> OrderedDict:
     """Return an OrderedDict containing the mapping from the refAxisCodes to axisCodes
@@ -1174,9 +1182,9 @@ def getIsotopeListFromCode(isotopeCode):
 
 
 class ZPlaneNavigationModes(LabelledEnum):
-    PERSPECTRUMDISPLAY = 0, 'Per Spectrum Display'
-    PERSTRIP = 1, 'Per Strip'
-    INSTRIP = 2, 'In Strip'
+    PERSPECTRUMDISPLAY = 0, 'Per Spectrum Display', 'spectrumdisplay'
+    PERSTRIP = 1, 'Per Strip', 'strip'
+    INSTRIP = 2, 'In Strip', 'instrip'
 
 
 if __name__ == '__main__':
@@ -1253,7 +1261,7 @@ def _validateName(project, cls, value: str, attribName: str = 'name', allowWhite
                   checkExisting: bool = True):
     """Check that the attribName is valid
     """
-    from ccpn.core.lib import Pid # avoids circular imports
+    from ccpn.core.lib import Pid  # avoids circular imports
 
     if value is not None:
         if not isinstance(value, str):
@@ -1358,6 +1366,7 @@ def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
 
         return len(name) <= 32
 
+
 def zipCycle(*iterables, emptyDefault=None):
     """
     Make an iterator returning elements from the iterable and saving a copy of each.
@@ -1374,12 +1383,15 @@ def zipCycle(*iterables, emptyDefault=None):
             (0, 4, 'b', None)
     """
     from itertools import cycle, zip_longest
+
     cycles = [cycle(i) for i in iterables]
     for _ in zip_longest(*iterables):
         yield tuple(next(i, emptyDefault) for i in cycles)
 
+
 def _getObjectsByPids(project, pids):
     return list(filter(None, map(lambda x: project.getByPid(x), pids)))
+
 
 def _getPidsFromObjects(objs):
     return list(filter(None, map(lambda x: x.pid, objs)))

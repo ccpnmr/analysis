@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-26 18:36:39 +0000 (Tue, January 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-25 17:05:11 +0000 (Thu, March 25, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -553,11 +553,6 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         self.strip.optionsChanged.connect(self._optionsChanged)
         self.mainWindow = mainWindow
 
-        try:
-            self._prefsGeneral = mainWindow.application.preferences.general
-        except:
-            self._prefsGeneral = None
-
     def __postInit__(self, widget, strip, axis):
         """Seems an awkward way of getting a generic post init function but can't think of anything else yet
         """
@@ -572,13 +567,6 @@ class PlaneAxisWidget(_OpenGLFrameABC):
                                          self._wheelEvent
                                          ))
         self._resize()
-
-    # def eventFilter(self, source, event):
-    #     """Filter to get wheel mousepress events to set the current activePlane
-    #     """
-    #     if event.type() in [QtCore.QEvent.Wheel, QtCore.QEvent.KeyPress, QtCore.QEvent.FocusIn]:
-    #         self.strip._activePlane = source.parent().axis
-    #     return False
 
     def scrollPpmPosition(self, event):
         """Pass the wheel mouse event to the ppmPosition widget
@@ -620,12 +608,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
 
     def _selectAxisCallback(self, widgets):
         # if the first widget is clicked then change the selected axis
-        try:
-            self._prefsGeneral = self.mainWindow.application.preferences.general
-        except:
-            self._prefsGeneral = None
-
-        if self._prefsGeneral and self._prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.value:
+        if self.strip.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.label:
             if widgets[3].isVisible():
                 widgets[3].setVisible(False)
                 widgets[2].setVisible(True)
@@ -640,12 +623,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
 
     def _selectPositionCallback(self, widgets):
         # if the other widgets are clicked then toggle the planeToolbar buttons
-        try:
-            self._prefsGeneral = self.mainWindow.application.preferences.general
-        except:
-            self._prefsGeneral = None
-
-        if self._prefsGeneral and self._prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.value:
+        if self.strip.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.label:
             if widgets[3].isVisible():
                 widgets[3].setVisible(False)
                 widgets[2].setVisible(True)
@@ -744,7 +722,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
     def hideWidgets(self):
         """Hide the planeToolbar if opened
         """
-        if self._prefsGeneral and self._prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.value:
+        if self.strip.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.label:
             axisButtons = (self._axisLabel, self._axisPpmPosition, self._axisPlaneCount, self._axisSelector)
 
             # if the other widgets are clicked then toggle the planeToolbar buttons
@@ -820,19 +798,19 @@ class ZPlaneToolbar(Frame):
         """
         layout = self.getLayout()
 
-        if strip != self._strip:
-            self.removeZPlaneWidgets()
+        # if strip != self._strip: - causing it to skip on undo/redo
+        self.removeZPlaneWidgets()
 
-            for col, fr in enumerate(strip.planeAxisBars):
-                index = layout.indexOf(fr._axisSelector)
-                if index == -1:
-                    layout.addWidget(fr._axisSelector._mainWidget, 0, 2 + col * 2, 1, 1)
-                    fr._axisSelector._mainWidget.setParent(self)
-                    fr._axisSelector.setVisible(True)
-                    fr._resize()
+        for col, fr in enumerate(strip.planeAxisBars):
+            index = layout.indexOf(fr._axisSelector)
+            if index == -1:
+                layout.addWidget(fr._axisSelector._mainWidget, 0, 2 + col * 2, 1, 1)
+                fr._axisSelector._mainWidget.setParent(self)
+                fr._axisSelector.setVisible(True)
+                fr._resize()
 
-            self._header.setText(strip.pid)
-            self._strip = strip
+        self._header.setText(strip.pid)
+        self._strip = strip
 
         self.setVisible(True)
         self.update()

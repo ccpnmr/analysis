@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-23 20:36:51 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 15:42:36 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -551,6 +551,10 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
                                 )
                     previous._finaliseAction('rename')
 
+    else:
+        # add default as all other CCPN objects. IsotopeCode should not decide here. The Gui should address.
+        name = self._nextAvailableName(NmrAtom, self.project)
+
     dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': UnknownIsotopeCode}
     if serial is None:
         dd['name'] = name
@@ -558,13 +562,14 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
         dd['details'] = comment
 
     if isotopeCode is None:
-        isotopeCode = DEFAULT_ISOTOPE_DICT.get(name[0]) #This should go in 3.1. We should remove any guesses.
+        if name is not None:
+            isotopeCode = DEFAULT_ISOTOPE_DICT.get(name[0]) #This should go in 3.1. We should remove any guesses.
 
     isotopeCode = isotopeCode if isotopeCode in DEFAULT_ISOTOPE_DICT.values() else UnknownIsotopeCode
 
     obj = nmrProject.newResonance(**dd)
     result = self._project._data2Obj.get(obj)
-    result.isotopeCode = isotopeCode
+    result.isotopeCode = isotopeCode # it has to be set after the creation to avoid API errors.
     if result is None:
         raise RuntimeError('Unable to generate new NmrAtom item')
 

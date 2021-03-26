@@ -98,7 +98,7 @@
         "traceColour"                          : null,
         "traceIncludeNegative"                 : false,
         "aliasEnabled"                         : true,
-        "aliasShade"                           : 20
+        "aliasShade"                           : 20,
         "stripArrangement"                     : 0
     },
     "proxySettings"    : {

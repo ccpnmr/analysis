@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2021-02-01 08:07:13 +0000 (Mon, February 01, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-03-26 16:20:47 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -45,8 +45,8 @@ class NmrAtomTest(WrapperTesting):
 
         atomCX = ile5.fetchNmrAtom('CX')
         atomNX = ile5.newNmrAtom(name='NX')
-        with self.assertRaises(ValueError):
-            atomCX.rename('NX')
+        # with self.assertRaises(ValueError):
+        #     atomCX.rename('NX')
         with self.assertRaises(TypeError):
             atomCX.rename(42)
         with self.assertRaises(TypeError):
@@ -61,18 +61,18 @@ class NmrAtomTest(WrapperTesting):
         atomCX = atomCX.assignTo()
         self.assertEqual(atomCX.pid, 'NA:A.888.ILE.CZ')
 
-        atomCX.rename()
-        self.assertEqual(atomCX.pid, 'NA:A.888.ILE.C@160')
+        atomCX.rename('Co')
+        self.assertEqual(atomCX.pid, 'NA:A.888.ILE.Co')
 
         self.project._wrappedData.root.checkAllValid(complete=True)
 
 
-        self.assertEqual(atomCX.pid, 'NA:A.888.ILE.C@160')
+        self.assertEqual(atomCX.pid, 'NA:A.888.ILE.Co')
         # Undo and redo all operations
         self.undo.undo()
         self.assertEqual(atomCX.pid, 'NA:A.888.ILE.CZ')
         self.undo.redo()
-        self.assertEqual(atomCX.pid, 'NA:A.888.ILE.C@160')
+        self.assertEqual(atomCX.pid, 'NA:A.888.ILE.Co')
 
     def test_newNmrAtomReassign(self):
         nc = self.project.newNmrChain(shortName='X')

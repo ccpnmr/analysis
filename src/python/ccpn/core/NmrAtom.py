@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-26 15:42:36 +0000 (Fri, March 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 16:20:47 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -380,14 +380,18 @@ class NmrAtom(AbstractWrapperObject):
         self._wrappedData.isotopeCode = value if value else '?'
 
     @logCommand(get='self')
-    def rename(self, value: str = None):
+    def rename(self, value: str):
         """Rename the NmrAtom, changing its name, Pid, and internal representation."""
 
         # NBNB TODO change so you can set names of the form '@123' (?)
 
         # NB This is a VERY special case
         # - API code and notifiers will take care of resetting id and Pid
-        _validateName(self.project, NmrAtom, value=value, allowWhitespace=False, allowNone=True, checkExisting=False)
+        if value and value != self.name:
+            from ccpn.util.Common import _incrementObjectName
+            value = _incrementObjectName(self.project, NmrAtom._pluralLinkName, value)
+
+        _validateName(self.project, NmrAtom, value=value, allowWhitespace=False, allowNone=False, checkExisting=False)
 
         with renameObjectContextManager(self) as addUndoItem:
             isotopeCode = self.isotopeCode
@@ -518,7 +522,9 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
 
         previous = self.getNmrAtom(name.translate(Pid.remapSeparators))
         if previous is not None:
-            raise ValueError("%s already exists" % previous.longPid)
+            from ccpn.util.Common import _incrementObjectName
+            name = _incrementObjectName(self.project, NmrAtom._pluralLinkName, name)
+            # raise ValueError("%s already exists" % previous.longPid)
 
         # Deal with reserved names
         index = name.find('@')

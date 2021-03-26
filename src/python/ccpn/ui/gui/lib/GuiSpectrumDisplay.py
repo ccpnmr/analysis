@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-24 13:34:08 +0000 (Wed, March 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 12:43:47 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -89,6 +89,7 @@ SPECTRUMGROUPLIST = 'spectrumGroupList'
 STRIPDIRECTIONS = ['Y', 'X', 'T']
 SPECTRUMDISPLAY = 'spectrumDisplay'
 STRIPARRANGEMENT = 'stripArrangement'
+ZPLANENAVIGATIONMODE = 'zPlaneNavigationMode'
 
 MAXITEMLOGGING = 4
 MAXTILEBOUND = 65536
@@ -235,6 +236,8 @@ class GuiSpectrumDisplay(CcpnModule):
         self._populateWidgets()
 
         # self.stripFrame.setAcceptDrops(True)
+        self._spectrumDisplaySettings.stripArrangementChanged.connect(self._stripDirectionChangedInSettings)
+        self._spectrumDisplaySettings.zPlaneNavigationModeChanged.connect(self._zPlaneNavigationModeChangedInSettings)
 
         # notifier to respond to items being dropped onto the stripFrame
         self.droppedNotifier = self.setGuiNotifier(self.stripFrame,
@@ -278,6 +281,8 @@ class GuiSpectrumDisplay(CcpnModule):
         self.settingsWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         # respond to values changed in the containing spectrumDisplay settings widget
         self._spectrumDisplaySettings.stripArrangementChanged.connect(self._stripDirectionChangedInSettings)
+        self._spectrumDisplaySettings.zPlaneNavigationModeChanged.connect(self._zPlaneNavigationModeChangedInSettings)
+
         # GWV: Not sure what the widget argument is for
         # LM: is the spectrumDisplay, used in the widget to set actions/callbacks to the buttons
         spectrumRow = 1
@@ -336,6 +341,7 @@ class GuiSpectrumDisplay(CcpnModule):
             self._stripFrameScrollArea = None
             self.qtParent.getLayout().addWidget(self.stripFrame, stripRow, 0, 1, 7)
             # self.stripFrame.setStyleSheet(frameStyleSheetTemplate % ('Frame', ''))
+
         if INCLUDE_AXIS_WIDGET:
             # NOTE:ED - testing new axis widget - required actually adding tiling
             if self.is1D:
@@ -349,9 +355,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 self._rightGLAxis.tilePosition = (0, -1)
                 self._rightGLAxis.setAxisType(1)
-                # # I think I am missing a notifier for setting the aspectRatio of the new axes
-                # self._rightGLAxis.aspectRatioMode = self.application.preferences.general.aspectRatioMode
-                # self._rightGLAxis.aspectRatios = self.application.preferences.general.aspectRatios.copy()
                 self._rightGLAxis.show()
 
             # NOTE:ED - testing new axis widget - required actually adding tiling
@@ -366,8 +369,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 self._bottomGLAxis.tilePosition = (-1, 0)
                 self._bottomGLAxis.setAxisType(0)
-                # self._bottomGLAxis.aspectRatioMode = self.application.preferences.general.aspectRatioMode
-                # self._bottomGLAxis.aspectRatios = self.application.preferences.general.aspectRatios.copy()
                 self._bottomGLAxis.hide()
 
         self.qtParent.getLayout().setContentsMargins(1, 0, 1, 0)
@@ -407,7 +408,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 with self._spectrumDisplaySettings.blockWidgetSignals(recursive=False):
                     with self.phasingFrame.blockWidgetSignals(recursive=False):
                         # read from the project layout
-                        found = self.restoreModuleState()
+                        found = self.restoreSpectrumState(discard=True)
             except Exception as es:
                 found = False
 
@@ -424,10 +425,18 @@ class GuiSpectrumDisplay(CcpnModule):
         prefsGen = self.application.preferences.general
         # initialise to the project defaults
         self._spectrumDisplaySettings._populateWidgets(prefsGen.aspectRatioMode, prefsGen.aspectRatios,
-                                                       prefsGen.annotationType, 0,
+                                                       prefsGen.annotationType, prefsGen.stripArrangement,
                                                        prefsGen.symbolSizePixel, prefsGen.symbolThickness, prefsGen.symbolType,
                                                        prefsGen.xAxisUnits, prefsGen.yAxisUnits,
-                                                       prefsGen.aliasEnabled, prefsGen.aliasShade)
+                                                       prefsGen.aliasEnabled, prefsGen.aliasShade,
+                                                       prefsGen.contourThickness,
+                                                       prefsGen.zPlaneNavigationMode)
+
+    def restoreSpectrumState(self, discard=False):
+        """Restore the state for this widget
+        """
+        if self.mainWindow._spectrumModuleLayouts:
+            return self.mainWindow.moduleArea.restoreModuleState(self.mainWindow._spectrumModuleLayouts, self, discard=discard)
 
     def restoreWidgetsState(self, **widgetsState):
         super(GuiSpectrumDisplay, self).restoreWidgetsState(**widgetsState)
@@ -581,7 +590,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         for strip in self.strips:
             strip._updateVisibility()
-        self._updateAxesVisibilty()
+        self._updateAxesVisibility()
 
         spectrumView = data[Notifier.OBJECT]
         trigger = data[Notifier.TRIGGER]
@@ -717,7 +726,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         for strip in self.strips:
             strip._updateVisibility()
-        self._updateAxesVisibilty()
+        self._updateAxesVisibility()
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -747,16 +756,37 @@ class GuiSpectrumDisplay(CcpnModule):
 
         newDirection = STRIPDIRECTIONS[value]
 
+        # if newDirection != self.stripArrangement:
         # set the new stripDirection, and redraw
         self.stripArrangement = newDirection
+
+        # notify settings widget - because cheating
+        self._spectrumDisplaySettings.setStripArrangementButtons(value)
         self._redrawLayout()
+        self._forceRedrawFloatingAxes()
+
+    def _zPlaneNavigationModeChangedInSettings(self, value):
+        """Handle changing the zPlaneNavigation mode from the settings widget
+        """
+        if value not in range(len(ZPlaneNavigationModes)):
+            raise ValueError('zPlaneNavigation not in ', ZPlaneNavigationModes)
+
+        newDirection = ZPlaneNavigationModes(value).label
+
+        if newDirection != self.zPlaneNavigationMode:
+            # set the new stripDirection, and redraw
+            self.zPlaneNavigationMode = newDirection
+
+            # notify settings widget
+            self.attachZPlaneWidgets()
+            self._forceRedrawFloatingAxes()
 
     def _listViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
         """
         for strip in self.strips:
             strip._updateVisibility()
-        self._updateAxesVisibilty()
+        self._updateAxesVisibility()
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -804,14 +834,38 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         if not isinstance(value, str):
             raise TypeError('stripArrangement must be a string')
-        elif value not in ['X', 'Y', 'T']:
+        elif value not in STRIPDIRECTIONS:
             raise ValueError("stripArrangement must be either 'X', 'Y' or 'T'")
 
         AbstractWrapperObject.setParameter(self, SPECTRUMDISPLAY, STRIPARRANGEMENT, value)
 
         self.setVisibleAxes()
 
-    def _updateAxesVisibilty(self):
+    @property
+    def zPlaneNavigationMode(self):
+        """Position of the zPlane navigation buttons
+        """
+        # Using AbstractWrapperObject because there seems to already be a setParameter
+        # belonging to spectrumDisplay
+        arrangement = AbstractWrapperObject.getParameter(self, SPECTRUMDISPLAY, ZPLANENAVIGATIONMODE)
+        if arrangement is not None:
+            return arrangement
+
+        return ZPlaneNavigationModes(0).label
+
+    @zPlaneNavigationMode.setter
+    def zPlaneNavigationMode(self, value):
+        """Set the new position of zPlane navigation buttons
+        """
+        labels = [val.label for val in ZPlaneNavigationModes]
+        if not isinstance(value, str):
+            raise TypeError('zPlaneNavigationMode must be a string')
+        elif value not in labels:
+            raise ValueError(f"zPlaneNavigationMode must be in {repr(labels)}")
+
+        AbstractWrapperObject.setParameter(self, SPECTRUMDISPLAY, ZPLANENAVIGATIONMODE, value)
+
+    def _updateAxesVisibility(self):
         if not self.is1D:
             self._rightGLAxis.updateVisibleSpectrumViews()
             self._bottomGLAxis.updateVisibleSpectrumViews()
@@ -855,9 +909,13 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self.stripFrame.update()
         self._stripFrameScrollArea._updateAxisWidgets()
+        self._forceRedrawFloatingAxes()
 
-        # force a fractional delayed update of the extra axes
-        QtCore.QTimer.singleShot(100, self._stripFrameScrollArea.refreshViewPort)
+    def _forceRedrawFloatingAxes(self):
+        """force a fractional delayed update of the extra axes
+        """
+        # can't think of a better way yet - will be fixable of single window used for all viewports in fucture
+        QtCore.QTimer.singleShot(50, self._stripFrameScrollArea.refreshViewPort)
 
     def setZWidgets(self):
         """Update the widgets in the planeToolbar
@@ -2448,15 +2506,17 @@ class GuiSpectrumDisplay(CcpnModule):
             return
 
         try:
-            _prefsGeneral = self.application.preferences.general
             _currentStrip = self.application.current.strip
         except:
             pass
         else:
 
+            # update the settings widget
+            self._spectrumDisplaySettings.setZPlaneButtons(self.zPlaneNavigationMode)
+
             with self._hideWidget(self.mainWidget):
-                # NOTE:ED - should stop the mainWidget dancing around
-                if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.value:
+
+                if self.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.label:
 
                     for strip in self.strips:
                         if strip and not (strip.isDeleted or strip._flaggedForDelete):
@@ -2472,7 +2532,7 @@ class GuiSpectrumDisplay(CcpnModule):
                         self.zPlaneFrame.attachZPlaneWidgets(_currentStrip)
                     self.zPlaneFrame.setVisible(True)
 
-                if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.value:
+                if self.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.label:
                     self.zPlaneFrame.setVisible(False)
                     self.zPlaneFrame._strip = None
                     for strip in self.strips:
@@ -2485,7 +2545,7 @@ class GuiSpectrumDisplay(CcpnModule):
                             strip.zPlaneFrame.attachZPlaneWidgets(strip)
                             strip.zPlaneFrame.setVisible(True)
 
-                if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.value:
+                if self.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.label:
                     for strip in self.strips:
                         if strip and not (strip.isDeleted or strip._flaggedForDelete):
                             strip.zPlaneFrame.setVisible(False)

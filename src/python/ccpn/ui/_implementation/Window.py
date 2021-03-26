@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-12 18:01:38 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 12:43:47 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -245,8 +245,8 @@ class Window(AbstractWrapperObject):
     def createSpectrumDisplay(self, spectrum, displayAxisCodes: Sequence[str] = (),
                               axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
                               widths: Sequence[float] = (), units: Sequence[str] = (),
-                              stripDirection: str = 'Y', is1D: bool = False,
-                              position = 'right', relativeTo = None, isGrouped = False,
+                              stripDirection: str = None, is1D: bool = False,
+                              position='right', relativeTo=None, isGrouped=False,
                               **kwds):
         """
         :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
@@ -259,6 +259,8 @@ class Window(AbstractWrapperObject):
         :param bool independentStrips: if True do freeStrip display.
         """
         from ccpn.ui._implementation.SpectrumDisplay import _createSpectrumDisplay
+        from ccpn.ui.gui.lib.GuiSpectrumDisplay import STRIPDIRECTIONS
+        from ccpn.util.Common import ZPlaneNavigationModes
 
         spectrum = self.project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
         if any(x != 'Frequency' for x in spectrum.dimensionTypes):
@@ -273,10 +275,23 @@ class Window(AbstractWrapperObject):
 
         with undoBlockWithoutSideBar():
 
+            try:
+                zPlaneNavigationMode = ZPlaneNavigationModes(0).label
+
+                # default to preferences if not set
+                _stripDirection = self.project.application.preferences.general.stripArrangement
+                stripDirection = stripDirection or STRIPDIRECTIONS[_stripDirection]
+                _zPlaneNavigationMode = self.project.application.preferences.general.zPlaneNavigationMode
+                zPlaneNavigationMode = ZPlaneNavigationModes(_zPlaneNavigationMode).label
+            except Exception as es:
+                getLogger().warning(f'createSpectrumDisplay {es}')
+
             # create the new spectrumDisplay
             display = _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
                                              title=title, positions=positions, widths=widths, units=units,
-                                             stripDirection=stripDirection, is1D=is1D, isGrouped=isGrouped, **kwds)
+                                             stripDirection=stripDirection, is1D=is1D, isGrouped=isGrouped,
+                                             zPlaneNavigationMode=zPlaneNavigationMode,
+                                             **kwds)
 
             # add the new module to mainWindow at the required position
             self.moduleArea.addModule(display, position=position, relativeTo=relativeTo)

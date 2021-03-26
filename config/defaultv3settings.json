@@ -99,6 +99,7 @@
         "traceIncludeNegative"                 : false,
         "aliasEnabled"                         : true,
         "aliasShade"                           : 20
+        "stripArrangement"                     : 0
     },
     "proxySettings"    : {
         "verifySSL"        : true,

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-24 13:34:08 +0000 (Wed, March 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 12:43:46 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1551,38 +1551,40 @@ def _setApiRefExperiment(experiment, refExperiment):
             continue
 
         if not _getRefExpDim4ExpDim(expDim):
-            refExpDim = refExpDims.pop(0)
-            _tempLinkRefExpDim2ExpDim(expDim, refExpDim)
+            if len(refExpDims)>0:
+                refExpDim = refExpDims.pop(0)
+                _tempLinkRefExpDim2ExpDim(expDim, refExpDim)
 
         # set reference data comparison list
         _refExpDim = _getRefExpDim4ExpDim(expDim)
-        refExpDimRefs = list(_refExpDim.refExpDimRefs)
-        refData = []
-        for refExpDimRef in refExpDimRefs:
-            expMeasurement = refExpDimRef.expMeasurement
-            atomSites = expMeasurement.atomSites
-            refData.append((frozenset(x.isotopeCode for x in atomSites),
-                            expMeasurement.measurementType.lower(),
-                            frozenset(x.name for x in atomSites),
-                            refExpDimRef))
+        if _refExpDim:
+            refExpDimRefs = list(_refExpDim.refExpDimRefs)
+            refData = []
+            for refExpDimRef in refExpDimRefs:
+                expMeasurement = refExpDimRef.expMeasurement
+                atomSites = expMeasurement.atomSites
+                refData.append((frozenset(x.isotopeCode for x in atomSites),
+                                expMeasurement.measurementType.lower(),
+                                frozenset(x.name for x in atomSites),
+                                refExpDimRef))
 
-        # set experiment data comparison list
-        inData = []
-        for expDimRef in expDim.expDimRefs:
-            inData.append((frozenset(expDimRef.isotopeCodes),
-                           expDimRef.measurementType.lower(),
-                           frozenset(((expDimRef.displayName),)),
-                           expDimRef))
+            # set experiment data comparison list
+            inData = []
+            for expDimRef in expDim.expDimRefs:
+                inData.append((frozenset(expDimRef.isotopeCodes),
+                               expDimRef.measurementType.lower(),
+                               frozenset(((expDimRef.displayName),)),
+                               expDimRef))
 
-        # match expDimRef to refExpDimRef. comparing isotopeCodes,
-        # if equal measurementTypes, if equal name/displayname
-        for end in (-1, -2, -3):
-            for ii in range(len(inData) - 1, -1, -1):
-                for jj in range(len(refData) - 1, -1, -1):
-                    if inData[ii][:end] == refData[jj][:end]:
-                        expDimRef = inData[ii][-1]
-                        expDimRef.refExpDimRef = refData[jj][-1]
-                        expDimRef.measurementType = refData[jj][-1].expMeasurement.measurementType
-                        del inData[ii]
-                        del refData[jj]
-                        break
+            # match expDimRef to refExpDimRef. comparing isotopeCodes,
+            # if equal measurementTypes, if equal name/displayname
+            for end in (-1, -2, -3):
+                for ii in range(len(inData) - 1, -1, -1):
+                    for jj in range(len(refData) - 1, -1, -1):
+                        if inData[ii][:end] == refData[jj][:end]:
+                            expDimRef = inData[ii][-1]
+                            expDimRef.refExpDimRef = refData[jj][-1]
+                            expDimRef.measurementType = refData[jj][-1].expMeasurement.measurementType
+                            del inData[ii]
+                            del refData[jj]
+                            break

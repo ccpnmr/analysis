@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 16:17:38 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 12:43:48 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -49,9 +49,9 @@ from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
     SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES, AXISASPECTRATIOS, \
-    AXISASPECTRATIOMODE, ALIASENABLED, ALIASSHADE
+    AXISASPECTRATIOMODE, ALIASENABLED, ALIASSHADE, AXISASPECTRATIOMODE, CONTOURTHICKNESS
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
-from ccpn.util.Common import getAxisCodeMatchIndices
+from ccpn.util.Common import getAxisCodeMatchIndices, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Base import SignalBlocking
 from ccpn.core.Chain import Chain
 
@@ -71,6 +71,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
     settingsChanged = pyqtSignal(dict)
     symbolsChanged = pyqtSignal(dict)
     stripArrangementChanged = pyqtSignal(int)
+    zPlaneNavigationModeChanged = pyqtSignal(int)
 
     def __init__(self, parent=None,
                  mainWindow=None,
@@ -82,7 +83,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                  aliasEnabled=False, aliasShade=0,
                  stripArrangement=0,
                  _baseAspectRatioAxisCode='H', _aspectRatios={},
-                 _aspectRatioMode=0,
+                 _aspectRatioMode=0, contourThickness=0, zPlaneNavigationMode=0,
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -112,7 +113,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         # populate the widgets
         self._populateWidgets(_aspectRatioMode, _aspectRatios, annotationType, stripArrangement,
-                              symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits, aliasEnabled, aliasShade)
+                              symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits, aliasEnabled, aliasShade,
+                              contourThickness, zPlaneNavigationMode)
 
         # connect to the lock/symbol/ratio changed pyqtSignals
         self._GLSignals = GLNotifier(parent=self._parent)
@@ -127,35 +129,34 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         # insert widgets into the parent widget
         row = 0
         self.xAxisUnits = Label(parent, text="X Axis Units", grid=(row, 0))
-        self.xAxisUnitsButtons = RadioButtons(parent, texts=xTexts,
-                                              objectNames=[f'xUnitsSDS_{text}' for text in xTexts],
-                                              objectName='xUnitsSDS',
-                                              # selectedInd=xAxisUnits,
-                                              callback=self._settingsChanged,
-                                              direction='h',
-                                              grid=(row, 1), gridSpan=(1, 3), hAlign='l',
-                                              tipTexts=None,
-                                              )
-        # for button in self.xAxisUnitsButtons.radioButtons:
-        #     button.setObjectName(button.objectName()+'_x')
+        self.xAxisUnitsData = RadioButtons(parent, texts=xTexts,
+                                           objectNames=[f'xUnitsSDS_{text}' for text in xTexts],
+                                           objectName='xUnitsSDS',
+                                           # selectedInd=xAxisUnits,
+                                           callback=self._settingsChanged,
+                                           direction='h',
+                                           grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                           tipTexts=None,
+                                           )
         self.xAxisUnits.setVisible(showXAxis)
-        self.xAxisUnitsButtons.setVisible(showXAxis)
+        self.xAxisUnitsData.setVisible(showXAxis)
+
         row += 1
         self.yAxisUnits = Label(parent, text="Y Axis Units", grid=(row, 0))
-        self.yAxisUnitsButtons = RadioButtons(parent, texts=yTexts,
-                                              objectNames=[f'yUnitsSDS_{text}' for text in xTexts],
-                                              objectName='yUnitsSDS',
-                                              # selectedInd=yAxisUnits,
-                                              callback=self._settingsChanged,
-                                              direction='h',
-                                              grid=(row, 1), gridSpan=(1, 3), hAlign='l',
-                                              tipTexts=None)
-        # for button in self.yAxisUnitsButtons.radioButtons:
-        #     button.setObjectName(button.objectName()+'_y')
+        self.yAxisUnitsData = RadioButtons(parent, texts=yTexts,
+                                           objectNames=[f'yUnitsSDS_{text}' for text in xTexts],
+                                           objectName='yUnitsSDS',
+                                           # selectedInd=yAxisUnits,
+                                           callback=self._settingsChanged,
+                                           direction='h',
+                                           grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                           tipTexts=None)
         self.yAxisUnits.setVisible(showYAxis)
-        self.yAxisUnitsButtons.setVisible(showYAxis)
+        self.yAxisUnitsData.setVisible(showYAxis)
+
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=15)
+
         row += 1
         self.useAspectRatioModeLabel = Label(parent, text="Aspect Ratio Mode", grid=(row, 0))
         self.useAspectRatioModeButtons = RadioButtons(parent, texts=['Free', 'Locked', 'Fixed'],
@@ -167,9 +168,11 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                                       grid=(row, 1), gridSpan=(1, 3), hAlign='l',
                                                       tipTexts=None,
                                                       )
+
         row += 1
         Label(parent, text='Current Fixed', grid=(row, 1))
         Label(parent, text='Screen', grid=(row, 2))
+
         row += 1
         self.aspectLabel = {}
         self.aspectData = {}
@@ -196,12 +199,15 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
             self.aspectScreen[aspect] = Label(self.aspectScreenFrame, text=aspect, grid=(ii, 0), hAlign='l')
             # self.aspectScreen[aspect].setText(self.aspectData[aspect].textFromValue(aspectValue))
+
         row += 1
         _buttonFrame = Frame(parent, setLayout=True, grid=(row, 1), gridSpan=(1, 3), hAlign='l')
         self.setFromDefaultsButton = Button(_buttonFrame, text='Set from Defaults', grid=(0, 0), callback=self.updateFromDefaults)
         self.setFromScreenButton = Button(_buttonFrame, text='Set from Screen', grid=(0, 1), callback=self._setAspectFromScreen)
+
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=15)
+
         if self._spectrumDisplay.MAXPEAKLABELTYPES:
             row += 1
             _texts = ['Short', 'Full', 'Pid', 'Minimal', 'Id', 'Annotation']
@@ -243,6 +249,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 self.symbol.radioButtons[2].setEnabled(False)
                 self.symbol.radioButtons[1].setVisible(False)
                 self.symbol.radioButtons[2].setVisible(False)
+
         row += 1
         self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixel)", grid=(row, 0))
         self.symbolSizePixelData = Spinbox(parent, step=1,
@@ -250,13 +257,22 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.symbolSizePixelData.setMinimumWidth(LineEditsMinimumWidth)
         # self.symbolSizePixelData.setValue(int(symbolSize))
         self.symbolSizePixelData.valueChanged.connect(self._symbolsChanged)
+
         row += 1
-        self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (point)", grid=(row, 0))
+        self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (pixel)", grid=(row, 0))
         self.symbolThicknessData = Spinbox(parent, step=1,
                                            min=1, max=20, grid=(row, 1), hAlign='l', objectName='SDS_symbolThickness')
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         # self.symbolThicknessData.setValue(int(symbolThickness))
         self.symbolThicknessData.valueChanged.connect(self._symbolsChanged)
+
+        row += 1
+        self.contourThicknessLabel = Label(parent, text="Contour Thickness (pixel)", grid=(row, 0))
+        self.contourThicknessData = Spinbox(parent, step=1,
+                                            min=1, max=20, grid=(row, 1), hAlign='l', objectName='SDS_contour')
+        self.contourThicknessData.setMinimumWidth(LineEditsMinimumWidth)
+        self.contourThicknessData.valueChanged.connect(self._symbolsChanged)
+
         row += 1
         _height = getFontHeight(size='VLARGE') or 24
         self.stripArrangementLabel = Label(parent, text="Strip Arrangement", grid=(row, 0))
@@ -295,6 +311,20 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.aliasShadeData.valueChanged.connect(self._symbolsChanged)
 
         row += 1
+        self.zPlaneNavigationModeLabel = Label(parent, text="zPlane Navigation Mode", grid=(row, 0))
+        self.zPlaneNavigationModeData = RadioButtons(parent, texts=[val.description for val in ZPlaneNavigationModes],
+                                                     objectNames=[f'zPlaneSDS_{val.label}' for val in ZPlaneNavigationModes],
+                                                     objectName='zPlaneSDS',
+                                                     callback=self._zPlaneNavigationModeChanged,
+                                                     direction='h',
+                                                     grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                                     tipTexts=('Tools are located at the bottom of the spectrumDisplay,\nand will operate on the last strip selected in that spectrumDisplay',
+                                                               'Tools are located at the bottom of each strip',
+                                                               'Tools are displayed in the upper-left corner of each strip display'),
+                                                     )
+        self.zPlaneNavigationModeLabel.setToolTip('Select where the zPlane navigation tools are located')
+
+        row += 1
         self._spacer = Spacer(parent, 5, 5,
                               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                               grid=(row, 4), gridSpan=(1, 1))
@@ -302,14 +332,15 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
     def _populateWidgets(self, aspectRatioMode, aspectRatios, annotationType, stripArrangement,
                          symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits,
-                         aliasEnabled, aliasShade):
+                         aliasEnabled, aliasShade,
+                         contourThickness, zPlaneNavigationMode):
         """Populate the widgets
         """
         with self.blockWidgetSignals():
 
             # put the values into the correct widgets
-            self.xAxisUnitsButtons.setIndex(xAxisUnits)
-            self.yAxisUnitsButtons.setIndex(yAxisUnits)
+            self.xAxisUnitsData.setIndex(xAxisUnits)
+            self.yAxisUnitsData.setIndex(yAxisUnits)
 
             self.useAspectRatioModeButtons.setIndex(aspectRatioMode)
             for ii, aspect in enumerate(sorted(aspectRatios.keys())):
@@ -324,9 +355,12 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
             self.symbolSizePixelData.setValue(int(symbolSize))
             self.symbolThicknessData.setValue(int(symbolThickness))
+            self.contourThicknessData.setValue(int(contourThickness))
+
             self.stripArrangementButtons.setIndex(stripArrangement)
             self.aliasEnabledData.set(aliasEnabled)
             self.aliasShadeData.set(aliasShade)
+            self.zPlaneNavigationModeData.setIndex(zPlaneNavigationMode)
 
     def getValues(self):
         """Return a dict containing the current settings
@@ -337,14 +371,15 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         # NOTE:ED - should really use an intermediate data structure here
 
-        return {AXISXUNITS         : self.xAxisUnitsButtons.getIndex(),
-                AXISYUNITS         : self.yAxisUnitsButtons.getIndex(),
+        return {AXISXUNITS         : self.xAxisUnitsData.getIndex(),
+                AXISYUNITS         : self.yAxisUnitsData.getIndex(),
                 AXISASPECTRATIOMODE: self.useAspectRatioModeButtons.getIndex(),
                 AXISASPECTRATIOS   : aspectRatios,
                 SYMBOLTYPES        : self.symbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
                 ANNOTATIONTYPES    : self.annotationsData.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
                 SYMBOLSIZE         : int(self.symbolSizePixelData.text()),
                 SYMBOLTHICKNESS    : int(self.symbolThicknessData.text()),
+                CONTOURTHICKNESS   : int(self.contourThicknessData.text()),
                 ALIASENABLED       : self.aliasEnabledData.isChecked(),
                 ALIASSHADE         : int(self.aliasShadeData.get())
                 }
@@ -376,6 +411,22 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         self._settingsChanged()
 
+    def setStripArrangementButtons(self, value):
+        """Update the state of the stripArrangement radioButtons
+        """
+        self.blockSignals(True)
+        self.stripArrangementButtons.setIndex(value)
+        self.blockSignals(False)
+
+    def setZPlaneButtons(self, value):
+        """Update the state of the zPlaneNavigation radioButtons
+        """
+        self.blockSignals(True)
+        labels = [val.label for val in ZPlaneNavigationModes]
+        if value in labels:
+            self.zPlaneNavigationModeData.setIndex(labels.index(value))
+        self.blockSignals(False)
+
     def updateFromDefaults(self, *args):
         """Update the defaults from preferences
         """
@@ -388,6 +439,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.blockSignals(True)
         self.useAspectRatioModeButtons.setIndex(int(self.preferences.general.aspectRatioMode))
         self._updateLockedSettings()
+        self.xAxisUnitsData.setIndex(self.preferences.general.xAxisUnits)
+        self.yAxisUnitsData.setIndex(self.preferences.general.yAxisUnits)
         self.blockSignals(False)
 
         self._settingsChanged()
@@ -448,6 +501,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.annotationsData.setIndex(values[ANNOTATIONTYPES])
             self.symbolSizePixelData.set(values[SYMBOLSIZE])
             self.symbolThicknessData.set(values[SYMBOLTHICKNESS])
+            self.contourThicknessData.set(values[CONTOURTHICKNESS])
             self.aliasEnabledData.set(values[ALIASENABLED])
             self.aliasShadeData.set(values[ALIASSHADE])
 
@@ -457,6 +511,11 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         """Emit a signal if the strip arrangement buttons have been pressed
         """
         self.stripArrangementChanged.emit(self.stripArrangementButtons.getIndex())
+
+    def _zPlaneNavigationModeChanged(self):
+        """Emit a signal if the zPlane navigation buttons have been pressed
+        """
+        self.zPlaneNavigationModeChanged.emit(self.zPlaneNavigationModeData.getIndex())
 
     def doCallback(self):
         """Handle the user callback

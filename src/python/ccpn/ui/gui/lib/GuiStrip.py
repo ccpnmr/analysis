@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-24 13:34:08 +0000 (Wed, March 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 12:43:47 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ from ccpn.util.Common import ZPlaneNavigationModes
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISASPECTRATIOS, AXISASPECTRATIOMODE, \
-    BOTTOMAXIS, RIGHTAXIS, ALIASENABLED, ALIASSHADE
+    BOTTOMAXIS, RIGHTAXIS, ALIASENABLED, ALIASSHADE, CONTOURTHICKNESS
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
     notificationBlanking, undoBlockWithoutSideBar
 from ccpn.util.decorators import logCommand
@@ -175,6 +175,7 @@ class GuiStrip(Frame):
             self.symbolThickness = _firstStrip.symbolThickness
             self.aliasEnabled = _firstStrip.aliasEnabled
             self.aliasShade = _firstStrip.aliasShade
+            self.contourThickness = _firstStrip.contourThickness
 
             self.gridVisible = _firstStrip.gridVisible
             self.crosshairVisible = _firstStrip.crosshairVisible
@@ -182,7 +183,6 @@ class GuiStrip(Frame):
             self.sideBandsVisible = _firstStrip.sideBandsVisible
 
             self.showSpectraOnPhasing = _firstStrip.showSpectraOnPhasing
-            self._contourThickness = _firstStrip._contourThickness
             self._spectrumBordersVisible = _firstStrip._spectrumBordersVisible
 
             if spectrumDisplay.stripArrangement == 'Y':
@@ -196,6 +196,9 @@ class GuiStrip(Frame):
                 else:
                     self.setAxesVisible(True, True)
 
+            # set the axis units from the current settings
+            self.xUnits = _firstStrip.xUnits
+            self.yUnits = _firstStrip.yUnits
             # self._CcpnGLWidget._useLockedAspect = spectrumDisplay.strips[0]._CcpnGLWidget._useLockedAspect
 
         else:
@@ -207,7 +210,6 @@ class GuiStrip(Frame):
             self.sideBandsVisible = self._preferences.showSideBands
 
             self.showSpectraOnPhasing = self._preferences.showSpectraOnPhasing
-            self._contourThickness = self._preferences.contourThickness
             self._spectrumBordersVisible = self._preferences.showSpectrumBorder
 
             # get the values from the settings (check in case the number of states has changed)
@@ -215,6 +217,7 @@ class GuiStrip(Frame):
             self.symbolType = min(settings[SYMBOLTYPES], self.spectrumDisplay.MAXPEAKSYMBOLTYPES - 1)
             self.symbolSize = settings[SYMBOLSIZE]
             self.symbolThickness = settings[SYMBOLTHICKNESS]
+            self.contourThickness = settings[CONTOURTHICKNESS]
             self.aliasEnabled = settings[ALIASENABLED]
             self.aliasShade = settings[ALIASSHADE]
 
@@ -225,9 +228,10 @@ class GuiStrip(Frame):
 
             self.setAxesVisible(True, True)
 
-        # set the axis units from the current settings
-        self._CcpnGLWidget._xUnits = settings[AXISXUNITS]
-        self._CcpnGLWidget._yUnits = settings[AXISYUNITS]
+            # set the axis units from the current settings
+            self.xUnits = settings[AXISXUNITS]
+            self.yUnits = settings[AXISYUNITS]
+
         self._CcpnGLWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
         self._CcpnGLWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
         self._CcpnGLWidget._applyXLimit = self._preferences.zoomXLimitApply
@@ -329,6 +333,36 @@ class GuiStrip(Frame):
         if hasattr(self, 'gridAction'):
             self.gridAction.setChecked(visible)
         self._CcpnGLWidget._gridVisible = visible
+
+        # spawn a redraw of the GL windows
+        self._CcpnGLWidget.GLSignals.emitPaintEvent()
+
+    @property
+    def xUnits(self):
+        """Current xUnits
+        """
+        return self._CcpnGLWidget._xUnits
+
+    @xUnits.setter
+    def xUnits(self, units):
+        """set the xUnits
+        """
+        self._CcpnGLWidget._xUnits = units
+
+        # spawn a redraw of the GL windows
+        self._CcpnGLWidget.GLSignals.emitPaintEvent()
+
+    @property
+    def yUnits(self):
+        """Current yUnits
+        """
+        return self._CcpnGLWidget._yUnits
+
+    @yUnits.setter
+    def yUnits(self, units):
+        """set the yUnits
+        """
+        self._CcpnGLWidget._yUnits = units
 
         # spawn a redraw of the GL windows
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
@@ -1097,31 +1131,24 @@ class GuiStrip(Frame):
             self.stripLabel.setHighlighted(flag)
 
     def _attachZPlaneWidgets(self):
-        """Attach the ZPlane widgets for the curent strip intothe spectrumDisplay axis frame
+        """Attach the ZPlane widgets for the current strip into the spectrumDisplay axis frame
         """
         if self.spectrumDisplay.is1D:
             return
 
-        try:
-            _prefsGeneral = self.application.preferences.general
-        except:
-            pass
-        else:
-            spec = self.spectrumDisplay
-            if _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.value:
-                spec.zPlaneFrame.attachZPlaneWidgets(self)
+        spec = self.spectrumDisplay
+        if spec.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.label:
+            spec.zPlaneFrame.attachZPlaneWidgets(self)
 
     def _removeZPlaneWidgets(self):
         """Remove the ZPlane widgets for the curent strip from the spectrumDisplay axis frame
         """
-        try:
-            _prefsGeneral = self.application.preferences.general
-        except:
-            pass
-        else:
-            spec = self.spectrumDisplay
-            if spec.zPlaneFrame and _prefsGeneral.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.value:
-                spec.zPlaneFrame.removeZPlaneWidgets()
+        if self.spectrumDisplay.is1D:
+            return
+
+        spec = self.spectrumDisplay
+        if spec.zPlaneFrame and spec.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.label:
+            spec.zPlaneFrame.removeZPlaneWidgets()
 
     def _newPhasingTrace(self):
         self._CcpnGLWidget.newTrace()
@@ -1427,15 +1454,13 @@ class GuiStrip(Frame):
     def _emitSymbolChanged(self):
         # spawn a redraw of the GL windows
         self._CcpnGLWidget.GLSignals._emitSymbolsChanged(source=None, strip=self,
-                                                         symbolDict={SYMBOLTYPES    : self.symbolType,
-                                                                     ANNOTATIONTYPES: self.symbolLabelling,
-                                                                     SYMBOLSIZE     : self.symbolSize,
-                                                                     SYMBOLTHICKNESS: self.symbolThickness,
-                                                                     ALIASENABLED   : self.aliasEnabled,
-                                                                     ALIASSHADE     : self.aliasShade,
-                                                                     # GRIDVISIBLE           : self.gridVisible,
-                                                                     # CROSSHAIRVISIBLE      : self.crosshairVisible,
-                                                                     # DOUBLECROSSHAIRVISIBLE: self.doubleCrosshairVisible,
+                                                         symbolDict={SYMBOLTYPES     : self.symbolType,
+                                                                     ANNOTATIONTYPES : self.symbolLabelling,
+                                                                     SYMBOLSIZE      : self.symbolSize,
+                                                                     SYMBOLTHICKNESS : self.symbolThickness,
+                                                                     CONTOURTHICKNESS: self.contourThickness,
+                                                                     ALIASENABLED    : self.aliasEnabled,
+                                                                     ALIASSHADE      : self.aliasShade,
                                                                      })
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1493,6 +1518,11 @@ class GuiStrip(Frame):
                                                          self._CcpnGLWidget.GLSignals.GLALLMULTIPLETS,
                                                          ])
 
+    def _setContoursPaintEvent(self):
+        # prompt the GLwidgets to update
+        self._CcpnGLWidget.GLSignals.emitEvent(triggers=[self._CcpnGLWidget.GLSignals.GLALLCONTOURS,
+                                                         ])
+
     def _symbolsChangedInSettings(self, aDict):
         """Respond to changes in the symbol values in the settings widget
         """
@@ -1502,6 +1532,7 @@ class GuiStrip(Frame):
         symbolThickness = aDict[SYMBOLTHICKNESS]
         aliasEnabled = aDict[ALIASENABLED]
         aliasShade = aDict[ALIASSHADE]
+        contourThickness = aDict[CONTOURTHICKNESS]
 
         if self.isDeleted:
             return
@@ -1529,6 +1560,10 @@ class GuiStrip(Frame):
             elif aliasShade != self.aliasShade:
                 self.aliasShade = aliasShade
                 self._setSymbolsPaintEvent()
+
+            elif contourThickness != self.contourThickness:
+                self.contourThickness = contourThickness
+                self._setContoursPaintEvent()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # symbolSize
@@ -1575,6 +1610,29 @@ class GuiStrip(Frame):
         self._CcpnGLWidget._symbolThickness = value if (value and value >= 0) else oldValue
         if value != oldValue:
             self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # contourThickness
+
+    @property
+    def contourThickness(self):
+        """Get the contour thickness for the strip
+        """
+        return self._CcpnGLWidget._contourThickness
+
+    @contourThickness.setter
+    def contourThickness(self, value):
+        """Set the contour thickness for the strip
+        """
+        if not isinstance(value, (int, float)):
+            raise TypeError('Error: contourThickness not an (int, float)')
+        value = int(value)
+
+        oldValue = self._CcpnGLWidget._contourThickness
+        self._CcpnGLWidget._contourThickness = value if (value and value >= 0) else oldValue
+        if value != oldValue:
             if self.spectrumViews:
                 self._emitSymbolChanged()
 

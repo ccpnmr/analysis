@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 12:43:47 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -224,7 +224,7 @@ class GuiStripNd(GuiStrip):
             # set the axis in the strip for modifying with the wheelMouse event - not implemented yet
             self.activePlaneAxis = self.planeAxisBars[0].axis
 
-            # set tghe active axis to the first available planeAxisBar
+            # set the active axis to the first available planeAxisBar
             self.optionsChanged.emit({EMITSOURCE      : self.planeAxisBars[0],
                                       EMITCLICKED     : True,
                                       EMITIGNORESOURCE: False})
@@ -235,11 +235,12 @@ class GuiStripNd(GuiStrip):
         # add container for the zPlane navigation widgets for 'Per Strip' mode
         self.zPlaneFrame = ZPlaneToolbar(self._stripToolBarWidget, self.mainWindow, self, grid=(0, 0),
                                          showHeader=False, showLabels=False, margins=(2, 2, 2, 2))
-        if self._preferences.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.value:
-            self.zPlaneFrame.attachZPlaneWidgets(self)
-        self.zPlaneFrame.setVisible(self._preferences.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.value)
 
-        if self._preferences.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.value:
+        if self.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.label:
+            self.zPlaneFrame.attachZPlaneWidgets(self)
+        self.zPlaneFrame.setVisible(self.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.label)
+
+        if self.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.label:
             self.spectrumDisplay.zPlaneFrame.attachZPlaneWidgets(self)
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 15:38:08 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 12:43:47 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -402,7 +402,8 @@ class SpectrumDisplay(AbstractWrapperObject):
 @newObject(SpectrumDisplay)
 def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 'Y',
                         title: str = None, window: Window = None, comment: str = None,
-                        independentStrips=False, nmrResidue=None, serial: int = None):
+                        independentStrips=False, nmrResidue=None, serial: int = None,
+                        zPlaneNavigationMode: str = None):
     """Create new SpectrumDisplay
 
     See the SpectrumDisplay class for details.
@@ -478,15 +479,20 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
         else:
             apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
 
-    # Create first strip
-    if independentStrips:
-        apiStrip = apiSpectrumDisplay.newFreeStrip(axisCodes=axisCodes, axisOrder=axisCodes)
-    else:
-        apiStrip = apiSpectrumDisplay.newBoundStrip()
-
     result = self._project._data2Obj.get(apiSpectrumDisplay)
     if result is None:
         raise RuntimeError('Unable to generate new SpectrumDisplay item')
+
+    result.stripArrangement = stripDirection
+    # may need to set other values here, guarantees before strip generation
+    if zPlaneNavigationMode:
+        result.zPlaneNavigationMode = zPlaneNavigationMode
+
+    # Create first strip
+    if independentStrips:
+        apiSpectrumDisplay.newFreeStrip(axisCodes=axisCodes, axisOrder=axisCodes)
+    else:
+        apiSpectrumDisplay.newBoundStrip()
 
     if serial is not None:
         try:
@@ -508,7 +514,8 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                            axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
                            widths: Sequence[float] = (), units: Sequence[str] = (),
                            stripDirection: str = 'Y', is1D: bool = False,
-                           independentStrips: bool = False, isGrouped=False):
+                           independentStrips: bool = False, isGrouped=False,
+                           zPlaneNavigationMode: str = 'strip'):
     """
     :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
     :param \*str axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
@@ -575,7 +582,7 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
     with undoBlock():
         display = project.newSpectrumDisplay(axisCodes=displayAxisCodes, stripDirection=stripDirection,
                                              independentStrips=independentStrips,
-                                             title=title)
+                                             title=title, zPlaneNavigationMode=zPlaneNavigationMode)
 
         # Set unit, position and width
         orderedApiAxes = display._wrappedData.orderedAxes

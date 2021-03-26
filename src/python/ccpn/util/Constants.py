@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-18 13:29:09 +0000 (Thu, March 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 12:43:48 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -68,6 +68,9 @@ sequenceCodePattern = re.compile('(\-?\d+)?(.*?)(\+\d+|\-\d+)?$')
 
 # Units allowed for amounts (e.g. Sample)
 amountUnits = ('L', 'g', 'mole')
+
+# Units allowed for the visible axes
+AXIS_UNITS = ['ppm', 'Hz', 'points']
 
 #  Units allowed for concentrations (e.g. SampleComponents)
 concentrationUnits = ('Molar', 'g/L', 'L/L', 'mol/mol', 'g/g', 'eq', 'sec')
@@ -225,7 +228,6 @@ DEFAULT_ISOTOPE_DICT = OrderedDict((
     ))
 
 PriorityIsotopeCodes = ['1H', '13C', '15N', '17O', '19F', '31P']
-
 
 # IsotopeRecord = namedtuple('IsotopeRecord', (
 #     'isotopeCode', 'elementNumber', 'massNumber', 'isRadioactive',

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-19 17:40:23 +0000 (Fri, March 19, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 12:43:48 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -917,7 +917,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             thisSpecView = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
                 0].isDeleted else None
 
-            if thisSpecView:
+            if thisSpecView and thisSpecView in self._spectrumSettings:
                 thisSpec = thisSpecView.spectrum
 
                 # generate different axes depending on units - X Axis
@@ -1583,6 +1583,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._symbolThickness = 0
         self._aliasEnabled = True
         self._aliasShade = 0.0
+        self._contourThickness = 0
 
         self._contourList = {}
         self._hTraces = {}
@@ -1786,20 +1787,22 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
                 self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                 self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
-                aRM = aDict[GLNotifier.GLVALUES][GLDefs.AXISASPECTRATIOMODE]
+                if GLDefs.AXISASPECTRATIOMODE in aDict[GLNotifier.GLVALUES]:
+                    aRM = aDict[GLNotifier.GLVALUES][GLDefs.AXISASPECTRATIOMODE]
 
-                if self._aspectRatioMode != aRM:
-                    self._aspectRatioMode = aRM
+                    if self._aspectRatioMode != aRM:
+                        self._aspectRatioMode = aRM
 
-                    changeDict = {GLNotifier.GLSOURCE         : None,
-                                  GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
-                                  GLNotifier.GLVALUES         : (aRM,)
-                                  }
-                    self._glAxisLockChanged(changeDict)
+                        changeDict = {GLNotifier.GLSOURCE         : None,
+                                      GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
+                                      GLNotifier.GLVALUES         : (aRM,)
+                                      }
+                        self._glAxisLockChanged(changeDict)
 
-                self._aspectRatios.update(aDict[GLNotifier.GLVALUES][GLDefs.AXISASPECTRATIOS])
-                if aRM == 2:
-                    self._rescaleAllZoom(rescale=True)
+                    if GLDefs.AXISASPECTRATIOS in aDict[GLNotifier.GLVALUES]:
+                        self._aspectRatios.update(aDict[GLNotifier.GLVALUES][GLDefs.AXISASPECTRATIOS])
+                        if aRM == 2:
+                            self._rescaleAllZoom(rescale=True)
 
             # spawn rebuild event for the grid
             self._updateAxes = True

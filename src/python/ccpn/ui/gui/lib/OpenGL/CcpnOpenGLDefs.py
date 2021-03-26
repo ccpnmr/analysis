@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 12:43:47 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -235,6 +235,7 @@ ANNOTATIONTYPES = 'annotationTypes'
 SYMBOLTYPES = 'symbolTypes'
 SYMBOLSIZE = 'symbolSize'
 SYMBOLTHICKNESS = 'symbolThickness'
+CONTOURTHICKNESS = 'contourThickness'
 STRIPGRID = 'stripGrid'
 STRIPCONTOURS = 'stripContours'
 STRIPCURSOR = 'stripCursor'

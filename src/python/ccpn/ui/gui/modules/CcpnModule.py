@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 15:38:09 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 12:43:47 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -665,12 +665,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
             except Exception as e:
                 getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
-
-    def restoreModuleState(self):
-        """Restore the state for this widget
-        """
-        if self.mainWindow.moduleLayouts:
-            return self.mainWindow.moduleArea.restoreModuleState(self.mainWindow.moduleLayouts, self)
 
     def rename(self, newName):
         self.label.setText(newName)

@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-24 13:34:08 +0000 (Wed, March 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 12:43:47 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -398,6 +398,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._symbolType = 0
         self._symbolSize = 0
         self._symbolThickness = 0
+        self._contourThickness = 0
         self._aliasEnabled = True
         self._aliasShade = 0.0
 
@@ -3366,7 +3367,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # self.buildSpectra()
 
-        GL.glLineWidth(self.strip._contourThickness * self.viewports.devicePixelRatio)
+        GL.glLineWidth(self._contourThickness * self.viewports.devicePixelRatio)
         GL.glDisable(GL.GL_BLEND)
 
         for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
@@ -3542,7 +3543,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 GL.glEnable(GL.GL_BLEND)
 
                 # use the viewports.devicePixelRatio for retina displays
-                GL.glLineWidth(self.strip._contourThickness * self.viewports.devicePixelRatio)
+                GL.glLineWidth(self._contourThickness * self.viewports.devicePixelRatio)
 
                 drawList.drawIndexVBO()
 
@@ -5758,19 +5759,21 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
                 self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
-                aRM = aDict[GLNotifier.GLVALUES][GLDefs.AXISASPECTRATIOMODE]
+                if GLDefs.AXISASPECTRATIOMODE in aDict[GLNotifier.GLVALUES]:
+                    aRM = aDict[GLNotifier.GLVALUES][GLDefs.AXISASPECTRATIOMODE]
 
-                if self._aspectRatioMode != aRM:
-                    self._aspectRatioMode = aRM
-                    changeDict = {GLNotifier.GLSOURCE         : None,
-                                  GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
-                                  GLNotifier.GLVALUES         : (aRM,)
-                                  }
-                    self._glAxisLockChanged(changeDict)
+                    if self._aspectRatioMode != aRM:
+                        self._aspectRatioMode = aRM
+                        changeDict = {GLNotifier.GLSOURCE         : None,
+                                      GLNotifier.GLSPECTRUMDISPLAY: self.spectrumDisplay,
+                                      GLNotifier.GLVALUES         : (aRM,)
+                                      }
+                        self._glAxisLockChanged(changeDict)
 
-                self._aspectRatios.update(aDict[GLNotifier.GLVALUES][GLDefs.AXISASPECTRATIOS])
-                if aRM == 2:
-                    self._rescaleAllZoom(rescale=True)
+                    if GLDefs.AXISASPECTRATIOS in aDict[GLNotifier.GLVALUES]:
+                        self._aspectRatios.update(aDict[GLNotifier.GLVALUES][GLDefs.AXISASPECTRATIOS])
+                        if aRM == 2:
+                            self._rescaleAllZoom(rescale=True)
 
             # spawn rebuild event for the grid
             self._updateAxes = True

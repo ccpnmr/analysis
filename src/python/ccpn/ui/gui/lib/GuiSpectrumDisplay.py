@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-26 12:43:47 +0000 (Fri, March 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 14:32:38 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -537,12 +537,12 @@ class GuiSpectrumDisplay(CcpnModule):
         """Get the local spectrumView linked to the spectrum
         """
         specViews = [specView for specView in self.spectrumViews if specView.spectrum == spectrum]
-        if len(specViews) == 1:
-            return specViews[0]
+        return specViews
 
     def _refreshSpectrumView(self, spectrum):
-        specView = self.getSpectrumViewFromSpectrum(spectrum)
-        specView.buildContours = True
+        specViews = self.getSpectrumViewFromSpectrum(spectrum)
+        for specView in specViews:
+            specView.buildContours = True
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -565,8 +565,8 @@ class GuiSpectrumDisplay(CcpnModule):
         spectrum = data[Notifier.OBJECT]
 
         if trigger == Notifier.CHANGE:
-            specView = self.getSpectrumViewFromSpectrum(spectrum)
-            if not specView:
+            specViews = self.getSpectrumViewFromSpectrum(spectrum)
+            if not specViews:
                 return
 
             action = self.spectrumActionDict.get(spectrum)

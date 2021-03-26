@@ -114,7 +114,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         # populate the widgets
         self._populateWidgets(_aspectRatioMode, _aspectRatios, annotationType, stripArrangement,
-                              symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits, aliasEnabled, aliasShade,
+                              symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits,
+                              aliasEnabled, aliasShade, aliasLabelsEnabled,
                               contourThickness, zPlaneNavigationMode)
 
         # connect to the lock/symbol/ratio changed pyqtSignals
@@ -341,7 +342,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
     def _populateWidgets(self, aspectRatioMode, aspectRatios, annotationType, stripArrangement,
                          symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits,
-                         aliasEnabled, aliasShade, aliasLabelsEnabled):
+                         aliasEnabled, aliasShade, aliasLabelsEnabled,
                          contourThickness, zPlaneNavigationMode):
         """Populate the widgets
         """

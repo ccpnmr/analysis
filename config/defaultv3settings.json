@@ -100,7 +100,7 @@
         "traceIncludeNegative"                 : false,
         "aliasEnabled"                         : true,
         "aliasShade"                           : 20,
-        "aliasLabelsEnabled"                   : true
+        "aliasLabelsEnabled"                   : true,
         "stripArrangement"                     : 0
     },
     "proxySettings"    : {

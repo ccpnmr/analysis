@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-13 15:32:10 +0000 (Sat, March 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-29 13:48:00 +0100 (Mon, March 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -197,9 +197,11 @@ class CalculateDistanceRestraintsPopup(CcpnDialogMainWidget):
         if self.project:
             pl = self.pLwidget.getSelectedObject()
             if pl:
-                atomSets, resonanceSets = drl._tempAtomAndResonanceSets(self.project)
+                nmrAtoms = drl._getNmrAtomsFromPeakList(pl)
+                drl._correctIsotopeCodes(nmrAtoms)
+                resonanceSets, atomSets = drl._setupResonanceAndAtomSets(pl)
                 drl._newV3DistanceRestraint(pl, **self.params)
-                drl._deleteTempAtomAndResonanceSets(self.project, atomSets, resonanceSets)
+                drl._deleteTempResonanceAndAtomSets(self.project, resonanceSets, atomSets)
         self.accept()
 
 # if __name__ == '__main__':

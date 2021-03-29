@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-26 15:42:36 +0000 (Fri, March 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-29 13:46:57 +0100 (Mon, March 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -81,10 +81,6 @@ class TestNmrAtomCreation(WrapperTesting):
         a = self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
         self.assertEqual(a.pid, 'NA:@2.@1..Arbitrary^Name')
         self.assertEqual(a.isotopeCode, '?')
-
-    def test_CreateNmrAtomWithArbitraryDottedAndHattedNamesCollide(self):
-        self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
-        self.assertRaises(Exception, self.nmrResidue.newNmrAtom, name='Arbitrary.Name')
 
     def test_CreateNmrAtomWithArbitraryNameAndArbitraryIsotopeCode(self):
         a = self.nmrResidue.newNmrAtom(name='Arbitrary', isotopeCode='Arbitrary_Isotope')
@@ -178,13 +174,13 @@ class TestNmrAtomProperties(WrapperTesting):
         del self.nmrAtom
 
     def test_AnonymousNmrAtom_id(self):
-        self.assertEqual(self.nmrAtom.id, '@2.@1..H@1')
+        self.assertEqual(self.nmrAtom.id, '@2.@1..myNmrAtom_1')
 
     def test_AnonymousNmrAtom_pid(self):
-        self.assertEqual(self.nmrAtom.pid, 'NA:@2.@1..H@1')
+        self.assertEqual(self.nmrAtom.pid, 'NA:@2.@1..myNmrAtom_1')
 
     def test_AnonymousNmrAtom_longPid(self):
-        self.assertEqual(self.nmrAtom.longPid, 'NmrAtom:@2.@1..H@1')
+        self.assertEqual(self.nmrAtom.longPid, 'NmrAtom:@2.@1..myNmrAtom_1')
 
     def test_AnonymousNmrAtom_project(self):
         self.assertTrue(self.project is self.nmrAtom.project)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-15 09:47:03 +0000 (Mon, March 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-29 19:51:45 +0100 (Mon, March 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.core.testing.WrapperTesting import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting, fixCheckAllValid
 from ccpn.util import Path, Constants
 
 
@@ -87,6 +87,12 @@ class SpectrumIntensitiesTest(WrapperTesting):
     projectPath = 'V3ProjectForTests.ccpn'
 
     def test_intensities_get(self):
+
+        # fix the bad structure for the test
+        # new pdb loader does not load the into the data model so there are no atoms defined
+        # the corresponding dataMatrices therefore have dimension set to zero which causes a crash :|
+        fixCheckAllValid(self.project)
+
         self.project._wrappedData.root.checkAllValid(complete=True)
         spectrum = self.project.getSpectrum('1H_1D')
         intensities = spectrum.intensities

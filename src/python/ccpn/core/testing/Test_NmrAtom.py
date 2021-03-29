@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-26 16:20:47 +0000 (Fri, March 26, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-29 19:51:45 +0100 (Mon, March 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.core.testing.WrapperTesting import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting, fixCheckAllValid
 
 
 class NmrAtomTest(WrapperTesting):
@@ -63,6 +63,11 @@ class NmrAtomTest(WrapperTesting):
 
         atomCX.rename('Co')
         self.assertEqual(atomCX.pid, 'NA:A.888.ILE.Co')
+
+        # fix the bad structure for the test
+        # new pdb loader does not load the into the data model so there are no atoms defined
+        # the corresponding dataMatrices therefore have dimension set to zero which causes a crash :|
+        fixCheckAllValid(self.project)
 
         self.project._wrappedData.root.checkAllValid(complete=True)
 

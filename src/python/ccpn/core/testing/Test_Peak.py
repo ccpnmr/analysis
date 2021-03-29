@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2021-01-27 17:38:23 +0000 (Wed, January 27, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-29 19:51:45 +0100 (Mon, March 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.util import Common as commonUtil
-from ccpn.core.testing.WrapperTesting import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting, fixCheckAllValid
 
 
 class PeakTest(WrapperTesting):
@@ -52,6 +52,12 @@ class PeakTest(WrapperTesting):
         self.undo.redo()
         self.assertTrue(shift is not None)
         self.assertTrue(shift.value is not None)
+
+        # fix the bad structure for the test
+        # new pdb loader does not load the into the data model so there are no atoms defined
+        # the corresponding dataMatrices therefore have dimension set to zero which causes a crash :|
+        fixCheckAllValid(self.project)
+
         self.project._wrappedData.root.checkAllValid(complete=True)
 
 
@@ -69,6 +75,11 @@ class PeakTest2(WrapperTesting):
         peakList1 = self.project.getPeakList('15NNoesy_182.1')
         peak1 = peakList1.getPeak(2)
         peak2 = peak1.copyTo(peakList1)
+
+        # fix the bad structure for the test
+        # new pdb loader does not load the into the data model so there are no atoms defined
+        # the corresponding dataMatrices therefore have dimension set to zero which causes a crash :|
+        fixCheckAllValid(self.project)
 
         self.project._wrappedData.root.checkAllValid(complete=True)
 

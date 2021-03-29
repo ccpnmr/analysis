@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-29 16:18:46 +0100 (Mon, March 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-29 19:51:45 +0100 (Mon, March 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-03-30 15:03:06 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 import numpy
-from ccpn.core.testing.WrapperTesting import WrapperTesting, checkGetSetAttr
+from ccpn.core.testing.WrapperTesting import WrapperTesting, checkGetSetAttr, fixCheckAllValid
 from ccpn.framework import Framework
 import unittest
 
@@ -86,6 +86,11 @@ class StructureEnsembleTesting_Project(WrapperTesting):
     def test_haveEnsemble(self):
 
         self.assertGreater(len(self.project.structureEnsembles), 0)
+
+        # fix the bad structure for the test
+        # new pdb loader does not load the into the data model so there are no atoms defined
+        # the corresponding dataMatrices therefore have dimension set to zero which causes a crash :|
+        fixCheckAllValid(self.project)
 
         self.project._wrappedData.root.checkAllValid(complete=True)
 

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-29 15:42:53 +0100 (Wed, July 29, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-03-29 19:51:45 +0100 (Mon, March 29, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,7 +30,28 @@ import unittest
 import contextlib
 # from ccpn import core
 from ccpn.framework import Framework
+from ccpn.util.Logging import getLogger
 from ccpnmodel.ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
+
+
+#=========================================================================================
+# fix checkAlValid
+#=========================================================================================
+
+def fixCheckAllValid(project):
+    # fix the bad structure for the test
+    # new pdb loader does not load the into the data model so there are no atoms defined
+    # the corresponding dataMatrices therefore have dimension set to zero which causes a crash :|
+    # SHOULD NOT BE USED IN MAIN CODE YET
+
+    for st in project.structureEnsembles:
+        stw = st._wrappedData
+        getLogger().info(f'fixing {stw}')
+        for dm in list(stw.dataMatrices):
+            if dm.name in ['bFactors', 'coordinates', 'occupancies']:
+                _shape = dm.shape
+                _shape = tuple(max(val, 1) for val in _shape)
+                dm.__dict__['shape'] = _shape
 
 
 #=========================================================================================

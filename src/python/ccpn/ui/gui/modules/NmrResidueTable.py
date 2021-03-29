@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-24 00:05:20 +0000 (Wed, March 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-03-29 13:52:40 +0100 (Mon, March 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -186,7 +186,7 @@ class NmrResidueTableModule(CcpnModule):
 
         # handle a single nmrResidue - should always contain an object
         objs = data[CallBack.OBJECT]
-        if not objs:
+        if not objs or not all(objs):
             return
         if isinstance(objs, (tuple, list)):
             nmrResidue = objs[0]

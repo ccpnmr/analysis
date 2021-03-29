@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2021-03-29 12:48:23 +0100 (Mon, March 29, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-29 16:18:46 +0100 (Mon, March 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -45,23 +45,15 @@ class StructureEnsembleTesting_None(WrapperTesting):
         self.loadData('../structures/2CPP.pdb')
         ensemble = self.project.structureEnsembles[0]
 
-        # if data is None:
-        #     result.data = EnsembleData()
-        # else:
-        #     logger.warning("EnsembleData successfully set on new StructureEnsemble were not echoed - too large")
-        #
-        #     result.data = data
-        #     data._containingObject = result
-        #     for modelNumber in sorted(data['modelNumber'].unique()):
-        #         result.newModel(serial=modelNumber, label='Model_%s' % modelNumber)
-
         self.assertEqual(len(ensemble.models), 1)
         self.assertEqual(len(ensemble.data), 3204)
         self.assertEqual(ensemble.data.shape, (3204, 17))
         self.assertTrue(self.project.save())
-        loadedProject = Framework.createFramework(projectPath=self.project.path, _skipUpdates=True).project
+        _path = self.project.path
+        _framework = Framework.createFramework(projectPath=_path, nologging=True, _skipUpdates=True, )
+
         try:
-            ensemble = loadedProject.structureEnsembles[0]
+            ensemble = _framework.project.structureEnsembles[0]
             data = ensemble.data
             self.assertEqual(len(ensemble.models), 1)
             self.assertEqual(len(data), 3204)
@@ -76,6 +68,8 @@ class StructureEnsembleTesting_None(WrapperTesting):
         except Exception as es:
             print(str(es))
 
+        _framework._closeProject()
+
 
 #=========================================================================================
 # StructureEnsembleTesting    Loaded project
@@ -87,24 +81,15 @@ class StructureEnsembleTesting_Project(WrapperTesting):
     # setUp       initialise a newStructureEnsemble
     #=========================================================================================
 
-    def setUp(self):
-        """
-        Test StructureEnsemble with a pre-loaded valid project
-        """
-        self.projectPath = 'V3ProjectForTests.ccpn'
-        super().setUp()  # ejb - call WrapperTesting setup to load project
+    projectPath = 'V3ProjectForTests.ccpn'
 
     def test_haveEnsemble(self):
-        # assert len(self.project.structureEnsembles) > 0
-        #
+
         self.assertGreater(len(self.project.structureEnsembles), 0)
 
         self.project._wrappedData.root.checkAllValid(complete=True)
 
         models = self.project.structureEnsembles[0].models
-        # assert len(models) > 0
-        # assert len(models) == 20
-        #
         self.assertGreater(len(models), 0)
         self.assertEquals(len(models), 20)
 

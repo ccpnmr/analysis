@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-18 16:55:21 +0000 (Thu, March 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-29 16:14:43 +0100 (Mon, March 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -260,7 +260,8 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
                 # raise error to notify popup
                 raise ValueError('Cannot re-assign NmrAtom to an existing NmrAtom of another NmrResidue without merging')
             destNmrAtom.mergeNmrAtoms(self.obj)
-            destNmrAtom.comment += ' - '+comment
+            newComment = ' - '.join(filter(None, [destNmrAtom.comment, comment]))
+            destNmrAtom.comment = newComment
             destNmrAtom.isotopeCode = isotopeCode
 
         else:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-15 19:13:50 +0000 (Mon, March 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-29 13:47:22 +0100 (Mon, March 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -494,6 +494,7 @@ class _openItemChemicalShiftListTable(OpenItemABC):
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
+        contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
         contextMenu.addAction('Duplicate', partial(self._duplicateAction, objs))
         contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
         contextMenu.move(position)

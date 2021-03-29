@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-12 10:31:35 +0000 (Fri, February 12, 2021) $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2021-03-29 12:48:23 +0100 (Mon, March 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -91,7 +91,7 @@ class StructureEnsembleTesting_Project(WrapperTesting):
         """
         Test StructureEnsemble with a pre-loaded valid project
         """
-        self.projectPath = 'CcpnCourse3e'
+        self.projectPath = 'V3ProjectForTests.ccpn'
         super().setUp()  # ejb - call WrapperTesting setup to load project
 
     def test_haveEnsemble(self):

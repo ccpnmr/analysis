@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-29 13:46:35 +0100 (Mon, March 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-29 14:33:25 +0100 (Mon, March 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -387,10 +387,16 @@ class NmrAtom(AbstractWrapperObject):
 
         # NB This is a VERY special case
         # - API code and notifiers will take care of resetting id and Pid
+
+        if value == self.name: return
         if value is None:
             value = self._nextAvailableName(NmrAtom, self.project)
             getLogger().warning('Renaming an %s without a specified value. Name set to the next available option: %s.' %(self.id, value))
-        _validateName(self.project, NmrAtom, value=value, allowWhitespace=False, allowNone=False, checkExisting=True)
+        _validateName(self.project, NmrAtom, value=value, allowWhitespace=False, allowNone=False, checkExisting=False) # Check existing True fails.
+
+        previous = self._parent.getNmrAtom(value.translate(Pid.remapSeparators))
+        if previous is not None:
+            raise ValueError("%s already exists" % previous.longPid)
 
         with renameObjectContextManager(self) as addUndoItem:
             isotopeCode = self.isotopeCode

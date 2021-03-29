@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-26 16:20:47 +0000 (Fri, March 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-29 13:46:35 +0100 (Mon, March 29, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -387,11 +387,10 @@ class NmrAtom(AbstractWrapperObject):
 
         # NB This is a VERY special case
         # - API code and notifiers will take care of resetting id and Pid
-        if value and value != self.name:
-            from ccpn.util.Common import _incrementObjectName
-            value = _incrementObjectName(self.project, NmrAtom._pluralLinkName, value)
-
-        _validateName(self.project, NmrAtom, value=value, allowWhitespace=False, allowNone=False, checkExisting=False)
+        if value is None:
+            value = self._nextAvailableName(NmrAtom, self.project)
+            getLogger().warning('Renaming an %s without a specified value. Name set to the next available option: %s.' %(self.id, value))
+        _validateName(self.project, NmrAtom, value=value, allowWhitespace=False, allowNone=False, checkExisting=True)
 
         with renameObjectContextManager(self) as addUndoItem:
             isotopeCode = self.isotopeCode
@@ -522,9 +521,9 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
 
         previous = self.getNmrAtom(name.translate(Pid.remapSeparators))
         if previous is not None:
-            from ccpn.util.Common import _incrementObjectName
-            name = _incrementObjectName(self.project, NmrAtom._pluralLinkName, name)
-            # raise ValueError("%s already exists" % previous.longPid)
+            # from ccpn.util.Common import _incrementObjectName
+            # name = _incrementObjectName(self.project, NmrAtom._pluralLinkName, name)
+            raise ValueError("%s already exists" % previous.longPid)
 
         # Deal with reserved names
         index = name.find('@')

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:30 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-30 16:58:51 +0100 (Tue, March 30, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.core.testing.WrapperTesting import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting, fixCheckAllValid
 
 
 class ChemicalShiftTest(WrapperTesting):
@@ -33,6 +33,12 @@ class ChemicalShiftTest(WrapperTesting):
     projectPath = 'V3ProjectForTests.ccpn'
 
     def test_rename_list(self):
+
+        # fix the bad structure for the test
+        # new pdb loader does not load the into the data model so there are no atoms defined
+        # the corresponding dataMatrices therefore have dimension set to zero which causes a crash :|
+        fixCheckAllValid(self.project)
+
         self.project._wrappedData.root.checkAllValid(complete=True)
 
         shiftList = self.project.chemicalShiftLists[0]

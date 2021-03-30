@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:50 +0000 (Mon, March 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-30 16:58:51 +0100 (Tue, March 30, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -212,9 +212,9 @@ class NoteTest_setUp(WrapperTesting):
     #     self.assertTrue(self.project.save())
     #     #
     #     # loadedProject = core.loadProject(self.project.path)
-    #     loadedProject = Framework.createFramework(projectPath=self.project.path, _skipUpdates=True).project
-    #     # loadedProject.delete()
-
+    #     _framework = Framework.createFramework(projectPath=self.project.path, _skipUpdates=True)
+    #     loadedProject = _framework.project
+    #     _framework._closeProject()
 
 #=========================================================================================
 # NoteTest_No_setUp

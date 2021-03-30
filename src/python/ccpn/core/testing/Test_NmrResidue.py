@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 15:38:08 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-30 16:58:51 +0100 (Tue, March 30, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from unittest import skip
-from ccpn.core.testing.WrapperTesting import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting, fixCheckAllValid
 
 
 class ResidueAllNmrResiduesTest(WrapperTesting):

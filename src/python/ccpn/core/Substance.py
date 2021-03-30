@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 15:38:08 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-30 16:58:51 +0100 (Tue, March 30, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -547,7 +547,7 @@ class Substance(AbstractWrapperObject):
         for spectum in self.project.spectra:
             if self in spectum.referenceSubstances:
                 _referenceSpectra.append(spectum)
-        return _referenceSpectra
+        return tuple(_referenceSpectra)
 
     @referenceSpectra.setter
     def referenceSpectra(self, spectra):

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-24 13:34:07 +0000 (Wed, March 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-30 16:58:50 +0100 (Tue, March 30, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -371,7 +371,7 @@ class NmrAtom(AbstractWrapperObject):
         self._wrappedData.isotopeCode = value if value else '?'
 
     @logCommand(get='self')
-    def rename(self, value: str = None):
+    def rename(self, value: str):
         """Rename the NmrAtom, changing its name, Pid, and internal representation.
         """
 
@@ -379,7 +379,16 @@ class NmrAtom(AbstractWrapperObject):
 
         # NB This is a VERY special case
         # - API code and notifiers will take care of resetting id and Pid
-        value = self._uniqueName(project=self.project, name=value)
+
+        if value == self.name: return
+        if value is None:
+            value = self._uniqueName(project=self.project, name=value)
+            getLogger().warning('Renaming an %s without a specified value. Name set to the next available option: %s.' %(self.id, value))
+        # _validateName(self.project, NmrAtom, value=value, allowWhitespace=False, allowNone=False, checkExisting=False) # Check existing True fails.
+
+        previous = self._parent.getNmrAtom(value.translate(Pid.remapSeparators))
+        if previous is not None:
+            raise ValueError("%s already exists" % previous.longPid)
 
         with renameObjectContextManager(self) as addUndoItem:
             isotopeCode = self.isotopeCode
@@ -510,6 +519,8 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
 
         previous = self.getNmrAtom(name.translate(Pid.remapSeparators))
         if previous is not None:
+            # from ccpn.util.Common import _incrementObjectName
+            # name = _incrementObjectName(self.project, NmrAtom._pluralLinkName, name)
             raise ValueError("%s already exists" % previous.longPid)
 
         # Deal with reserved names
@@ -543,6 +554,10 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
                                 )
                     previous._finaliseAction('rename')
 
+    else:
+        # add default as all other CCPN objects. IsotopeCode should not decide here. The Gui should address.
+        name = self._nextAvailableName(NmrAtom, self.project)
+
     dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': UnknownIsotopeCode}
     if serial is None:
         dd['name'] = name
@@ -550,13 +565,14 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
         dd['details'] = comment
 
     if isotopeCode is None:
-        isotopeCode = DEFAULT_ISOTOPE_DICT.get(name[0]) #This should go in 3.1. We should remove any guesses.
+        if name is not None:
+            isotopeCode = DEFAULT_ISOTOPE_DICT.get(name[0]) #This should go in 3.1. We should remove any guesses.
 
     isotopeCode = isotopeCode if isotopeCode in DEFAULT_ISOTOPE_DICT.values() else UnknownIsotopeCode
 
     obj = nmrProject.newResonance(**dd)
     result = self._project._data2Obj.get(obj)
-    result.isotopeCode = isotopeCode
+    result.isotopeCode = isotopeCode # it has to be set after the creation to avoid API errors.
     if result is None:
         raise RuntimeError('Unable to generate new NmrAtom item')
 

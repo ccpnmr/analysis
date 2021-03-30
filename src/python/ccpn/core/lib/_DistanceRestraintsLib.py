@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 15:38:08 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-30 16:58:51 +0100 (Tue, March 30, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ import re, operator
 import uuid
 from math import sqrt
 import numpy as np
-
+from collections import defaultdict
 from ccpn.util.Logging import getLogger
 from ccpn.core.DataSet import DataSet
 from ccpn.core.RestraintList import RestraintList
@@ -2264,44 +2264,159 @@ def _newV3AmbigDistRestraints(v3PeakList,
 
 # Temporary functions
 
-def _tempAtomAndResonanceSets(project):
+def _getNmrAtomsFromPeakList(peakList):
+    from ccpn.util.Common import makeIterableList as mi
+
+    nmrAtoms = set()
+    for pk in peakList.peaks:
+        nmrAtoms.update(mi(pk.assignedNmrAtoms))
+    return list(nmrAtoms)
+
+def _getAtomMappingFromPeakList(peakList):
+
+    atomMap = []
+    atomGroupsMap = defaultdict(list) # {list(atoms): list(x,ys type of atoms )}
+    nmrAtoms = _getNmrAtomsFromPeakList(peakList)
+    for nmrAtom in nmrAtoms:
+        atom = nmrAtom.atom
+        if atom:
+            atomGroup = atom.componentAtoms
+
+            if len(atomGroup)>0:
+                atomGroupsMap[atomGroup].append(atom)
+
+            elif atom.compoundAtoms:
+                atomMap.append([atom, []])
+            else:
+                atomMap.append([atom, [atom]])
+
+    for atomGroup in list(atomGroupsMap):
+        atomNames = atomGroupsMap.get(atomGroup)
+        if atomNames and  len(atomNames)==1:
+            atomMap.append([atomNames[0], atomGroup])
+            atomGroupsMap.pop(atomGroup)
+
+    return atomMap, atomGroupsMap
+
+
+def _makeUnAmbiguous(project, atomMap):
+    atomSets = []
+    resonanceSets = []
+    nmrProject =  project._wrappedData
+    for atom, atomGroup in atomMap:
+        nmrAtom = atom.nmrAtom
+        v2AtomGroup = [atom._wrappedData for atom in atomGroup]
+        resonance = nmrAtom._wrappedData
+        atomSet = project._wrappedData.findFirstAtomSet(atoms=frozenset(v2AtomGroup))
+        if not atomSet:
+            try:
+                if len(v2AtomGroup)>0:
+                    newAtomSet = nmrProject.newAtomSet(name=atom.name, atoms=v2AtomGroup)
+                    nrs = nmrProject.newResonanceSet(resonances=[resonance], atomSets=[newAtomSet])
+                    resonanceSets.append(nrs)
+                    atomSets.append(newAtomSet)
+            except Exception as e:
+                print('ERROR ',atom.name,atomGroup )
+    return resonanceSets, atomSets
+
+def _makeAmbiguous(project, atomGroupsMap):
+    """
+    Used for making  resonanceSet with multiple resonances with multiple atoms in the atomSet and multiple atomSets:
+                like:
+                resonanceSet made by a list of multiple nmrAtoms [13.LEU.HDx%, 13.LEU.HDy%]
+
+                1 atomSet) atomSet.name  ==>  HD1% # chemAtomGroup name
+                           atomSet.atoms ==>  (<Atom:A.51.LEU.HD12>, <Atom:A.51.LEU.HD11>, <Atom:A.51.LEU.HD13>) # chemAtomGroup Atoms
+
+                2atomSet) atomSet.name  ==>  HD2%
+                          atomSet.atoms ==>  (< Atom:A.51.LEU.HD21 >, < Atom:A.51.LEU.HD23 >, < Atom:A.51.LEU.HD22 >)
+
+    :param atomGroupsMap:
+    :return:
+    """
+    atomSets = []
+    resonanceSets = []
+    nmrProject =  project._wrappedData
+    ambDict = defaultdict(list)  # [atoms used for making resonances]: [[atomset name , atoms for atomset], ]
+    for atomGroup, ambigGroup in atomGroupsMap.items():
+        ambigGroup = tuple(ambigGroup)
+        ambDict[ambigGroup] = []
+        for atom in ambigGroup:
+
+            if len(atom.componentAtoms)>0:
+
+                for _atom in atom.componentAtoms:
+                    setName = _atom.name
+                    setGroup = _atom.componentAtoms
+                    newAtomSets = []
+                    if setGroup:
+                        v2AtomGroup = tuple(atom._wrappedData for atom in setGroup)
+                        ambDict[ambigGroup].extend([[setName, v2AtomGroup]])
+                        # print('AtomSet Name:',setName, '| AtomSet atoms', setGroup, '| ResonanceSet:',ambigGroup)
+
+                    else:
+                        v2AtomGroup = tuple([_atom._wrappedData])
+                        # print('SIMPLE:, AtomSet Name:',setName, '| AtomSet atoms', [_atom], '| ResonanceSet:',ambigGroup)
+                        ambDict[ambigGroup].extend([[setName, v2AtomGroup]])
+                break
+
+    for ambigGroup, v in ambDict.items():
+        _atomSets = []
+        nmrAtoms = [a.nmrAtom for a in ambigGroup]
+        resonances = [na._wrappedData for na in nmrAtoms]
+        for sets in v:
+            name = sets[0]
+            v2AtomGroup = sets[1]
+            atomSet = project._wrappedData.findFirstAtomSet(atoms=frozenset(v2AtomGroup))
+            if not atomSet:
+                newAtomSet = nmrProject.newAtomSet(name=name, atoms=v2AtomGroup)
+                _atomSets.append(newAtomSet)
+
+        resonanceSet = project._wrappedData.findFirstResonanceSet(resonances=frozenset(resonances))
+        if not resonanceSet:
+            nrs = nmrProject.newResonanceSet(resonances=resonances, atomSets=_atomSets)
+            resonanceSets.append(nrs)
+            atomSets.extend(_atomSets)
+    return resonanceSets, atomSets
+
+
+def _correctIsotopeCodes(nmrAtoms):
     """
 
-    AtomSets and resonanceSets are needed for the V2-DistanceRestraint Calculation machinery to work.
     :param project:
     :return: atomSets, resonanceSets from nmrAtom.atom
     Use before calling _newV3DistanceRestraint.
     """
     from ccpn.core.NmrAtom import UnknownIsotopeCode
-    if project._wrappedData.resonanceSets: # already in the projects. Don't create new.
-        return [], []
-    atomSets  = []
-    resonanceSets = []
-    for i in project.nmrAtoms:
+    for i in nmrAtoms:
         if i.isotopeCode == UnknownIsotopeCode:
             isotopeCode = name2IsotopeCode(str(i.name).upper())
-            if isotopeCode == '1H':
+            if isotopeCode:
                 getLogger().warning("isotopeCode is Undefined for NmrAtom: %s. "
                                     "IsotopeCode has to be set for calculating Distance Restraints."
                                     " Set to %s" %(i.name, isotopeCode))
                 i.isotopeCode = isotopeCode
-        nmrProject = project._wrappedData
-        v3Atom = i.atom
-        resonance = i._wrappedData
-        if v3Atom:
-            atom = v3Atom._wrappedData
-            atomSet = nmrProject.newAtomSet(name=atom.name, atoms=[atom])
-            nrs = nmrProject.newResonanceSet(resonances=[resonance], atomSets=[atomSet])
-            atomSets.append(atomSet)
-            resonanceSets.append(nrs)
-    return atomSets, resonanceSets
 
-def _deleteTempAtomAndResonanceSets(project, atomSets, resonanceSets):
+
+def _setupResonanceAndAtomSets(peakList):
+    """
+    AtomSets and resonanceSets are needed for the V2-DistanceRestraint Calculation machinery to work.
+    """
+    project = peakList.project
+    atomMap, atomGroupsMap = _getAtomMappingFromPeakList(peakList)
+    ambResonanceSets, ambAtomSets  = _makeAmbiguous(project, atomGroupsMap)
+    unambResonanceSets, unambAtomSets  = _makeUnAmbiguous(project, atomMap)
+    resonanceSets =  ambResonanceSets + unambResonanceSets
+    atomSets = ambAtomSets + unambAtomSets
+    return resonanceSets, atomSets
+
+def _deleteTempResonanceAndAtomSets(project, resonanceSets, atomSets):
     """
     :param project:
     :param atomSets: V2 objects
     :param resonanceSets: V2 objects
     :return:  removes the objects from the project. Called after creating distanceRestraints.
     """
-    project.deleteObjects(*atomSets)
-    project.deleteObjects(*resonanceSets)
+    with notificationEchoBlocking():
+        project.deleteObjects(*atomSets)
+        project.deleteObjects(*resonanceSets)

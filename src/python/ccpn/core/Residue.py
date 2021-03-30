@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-17 13:13:10 +0000 (Wed, March 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-30 13:27:30 +0100 (Tue, March 30, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -481,6 +481,44 @@ class Residue(AbstractWrapperObject):
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
                 self.project.deleteObjects(*pseudoAtoms)
+
+    @property
+    def _chemCompVar(self):
+        """
+        :return:
+        """
+        return self._wrappedData.chemCompVar
+
+    def _getChemCompAtomGroups(self):
+        """
+        """
+        atomGroups = {}
+        if not self._chemCompVar: return
+        atomSets = self._chemCompVar.chemAtomSets
+        for atomSet in atomSets:
+            atomGroups[atomSet.name] = [a.name for a in atomSet.chemAtoms]
+        return atomGroups
+
+    def _newAtomsfromChemCompAtomGroups(self):
+
+        if not self._chemCompVar: return
+        atomSets = self._chemCompVar.chemAtomSets
+        for atomSet in atomSets:
+
+            atomType = 'equivalent' if atomSet.isEquivalent else 'pseudo' # check this. (prochiral, aromatic, etc..)
+
+            apiAtoms = [self._wrappedData.findFirstAtom(name=a.name) for a in atomSet.chemAtoms]
+            existingAtom = self._wrappedData.findFirstAtom(name=atomSet.name)
+            if not existingAtom and len(apiAtoms)>0:
+
+                self._wrappedData.newAtom(name=atomSet.name,
+                                          components=apiAtoms,
+                                          elementSymbol=atomSet.elementSymbol,
+                                          atomType=atomType)
+            else:
+                print('AlreadyThere', existingAtom)
+
+
 
     def _getChemAtomNames(self):
         """

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:25 +0000 (Sun, January 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-03-30 19:40:42 +0100 (Tue, March 30, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,8 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 TEXT = ''' Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - 2021
 | 
             **Active Developers:**
-            Ed Brooksbank, Luca Mureddu, Victoria A Higman, Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister
+            Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń,
+            Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister
 
 
             **This program uses:**

@@ -258,12 +258,13 @@ def makeChemComp(compound,  ccpCode,  molType, hasStdChirality=None, rootProject
     while len(names) > 1:
       names = set([x[:-1] for x in names])
     
-    name = str(names.pop() or varAtoms[0].name)
-    
-    while chemComp.findFirstChemAtomSet(name=name+'*'):
+    # name = str(names.pop() or varAtoms[0].name)
+    name = group.name
+
+    while chemComp.findFirstChemAtomSet(name=name):
       name = name + "'"
-    
-    name = name + "*"
+
+    # name = name + "*"
  
     if group.groupType == EQUIVALENT:
       isProchiral = False
@@ -314,11 +315,13 @@ def makeChemComp(compound,  ccpCode,  molType, hasStdChirality=None, rootProject
     while len(names) > 1:
       names = set([x[:-1] for x in names])
     
-    name = str(names.pop()) + '*'
-    
+    # name = str(names.pop()) + '*'
+    name = group.name
+
     while chemComp.findFirstChemAtomSet(name=name):
+
       name = name + "'"
- 
+
     if group.groupType == EQUIVALENT:
       isProchiral = False
       equiv = True
@@ -356,12 +359,10 @@ def makeChemComp(compound,  ccpCode,  molType, hasStdChirality=None, rootProject
             stackB.add(va)
            
       equiv = False
-      print('lop', name, [a.name for st in chemAtomSets for a in st.chemAtomSet.chemAtoms])
 
     else:
       continue
 
-    print('XPOP', name, [a.name for st in chemAtomSets for a in st.chemAtomSet.chemAtoms])
     chemAtomSet = chemComp.newChemAtomSet(isProchiral=isProchiral,
                                           name=str(name),
                                           isEquivalent=equiv,

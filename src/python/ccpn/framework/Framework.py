@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-26 12:43:47 +0000 (Fri, March 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-30 19:47:35 +0100 (Tue, March 30, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -81,6 +81,7 @@ from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar
 from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
+from ccpn.framework.Version import authors
 
 import faulthandler
 
@@ -127,6 +128,39 @@ def _ccpnExceptionhook(type, value, tback):
 sys.excepthook = _ccpnExceptionhook
 
 
+def _strList(inlist:list, maxlen:int=80) -> list:
+    outstr = ''
+    # skip = False  # print commas and ampersand
+    lencount = maxlen
+
+    nameList = sorted(inlist, key=lambda name: name.split()[-1])
+
+    outList = []
+
+    for cName in nameList[:-1]:
+        skip = False
+        if len(outstr + cName) > lencount and cName not in nameList[-2:]:
+            outstr += cName + ', '
+            outList.append(outstr)
+            lencount += maxlen
+            skip = True
+            outstr = ''
+        elif cName not in nameList[-2:]:
+            outstr += cName + ', '
+        else:
+            outstr += cName
+
+    if len(nameList) == 1:
+        outstr = nameList[0]
+    else:
+        outstr = outstr + ' & ' + nameList[-1]
+
+    if outstr:
+        outList.append(outstr)
+
+    return outList
+
+
 def printCreditsText(fp, programName, version):
     """Initial text to terminal """
     from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
@@ -141,13 +175,14 @@ def printCreditsText(fp, programName, version):
     lines.append("")
 
     try:
-        if isinstance(__credits__, str):
-            lines.append("Developed by: %s" % __credits__)
-        else:
-            if isinstance(__credits__, tuple):
-                lines.append("Developed by: %s" % __credits__[0])
-                for crLine in __credits__[1:]:
-                    lines.append("              %s" % crLine)
+        prefix = "Active Developers:   "
+        if isinstance(authors, str):
+            lines.append("%s%s" % (prefix, authors))
+        elif isinstance(authors, (list, tuple)):
+            authorList = _strList(authors, maxlen=60)
+            lines.append("%s%s" % (prefix, authorList[0]))
+            for crLine in authorList[1:]:
+                lines.append("%s%s" % (' ' * len(prefix), crLine))
     except:
         pass
 

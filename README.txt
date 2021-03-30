@@ -6,7 +6,7 @@ See LICENSE.txt and DISCLAIMER.txt
 
 
 =====================================================================================================================
-minicoda distribution:
+miniconda distribution:
 Subject to Anaconda End User Licence Agreement (https://docs.continuum.io/anaconda/eula)
 =====================================================================================================================
 Copyright 2016, Continuum Analytics, Inc.

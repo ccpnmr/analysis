@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:50 +0000 (Mon, March 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-30 19:47:35 +0100 (Tue, March 30, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -30,5 +30,6 @@ applicationVersion = '3.0.4'
 
 revision = '3'
 
-authors = __credits__
+authors = ('Ed Brooksbank', 'Joanna Fox', 'Victoria A Higman', 'Luca Mureddu', 'Eliza Płoskoń',
+           'Timothy J Ragan', 'Gary S Thompson', 'Brian O Smith', 'Geerten W Vuister')
 projectName = 'CCPN'

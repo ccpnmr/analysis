@@ -260,12 +260,10 @@ def makeChemComp(compound,  ccpCode,  molType, hasStdChirality=None, rootProject
     
     # name = str(names.pop() or varAtoms[0].name)
     name = group.name
-    print('BEF NAME', name)
 
     while chemComp.findFirstChemAtomSet(name=name):
       name = name + "'"
-      print('NAME', name)
-    
+
     # name = name + "*"
  
     if group.groupType == EQUIVALENT:

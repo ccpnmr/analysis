@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-29 13:47:22 +0100 (Mon, March 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-30 18:57:43 +0100 (Tue, March 30, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -538,6 +538,16 @@ class _openItemAtomItem(OpenItemABC):
     objectArgumentName = 'Atom'
     hasOpenMethod = False
 
+    def _openContextMenu(self, parentWidget, position, objs):
+        """Open a context menu.
+        """
+        contextMenu = Menu('', parentWidget, isFloatWidget=True)
+        if self.openAction:
+            contextMenu.addAction(self.contextMenuText, self.openAction)
+        contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
+        contextMenu.move(position)
+        contextMenu.exec()
+
 class _openItemChainTable(OpenItemABC):
     openItemMethod = 'showResidueTable'
     objectArgumentName = 'chain'
@@ -546,6 +556,16 @@ class _openItemChainTable(OpenItemABC):
 class _openItemResidueTable(OpenItemABC):
     objectArgumentName = 'residue'
     hasOpenMethod = False
+
+    def _openContextMenu(self, parentWidget, position, objs):
+        """Open a context menu.
+        """
+        contextMenu = Menu('', parentWidget, isFloatWidget=True)
+        if self.openAction:
+            contextMenu.addAction(self.contextMenuText, self.openAction)
+        contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
+        contextMenu.move(position)
+        contextMenu.exec()
 
 
 class _openItemNoteTable(OpenItemABC):

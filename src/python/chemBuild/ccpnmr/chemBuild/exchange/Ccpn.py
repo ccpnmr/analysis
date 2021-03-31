@@ -298,6 +298,7 @@ def makeChemComp(compound,  ccpCode,  molType, hasStdChirality=None, rootProject
     groupMapping[group] = chemAtomSet
     done[key] = chemAtomSet
 
+  # make the subGroups. Nested atomGroup.
   for group in compound.atomGroups:
     if not group.subGroups:
       continue
@@ -606,7 +607,7 @@ def importChemComp(chemComp):
     for chemAtomSetB in chemAtomSet.chemAtomSets:
       chemAtomsB.update(chemAtomSetB.chemAtoms)
     atoms = set([atomMap[ca.name] for ca in chemAtomsB])
-    
+
     for var in compound.variants:
       varAtoms = set([var.atomDict.get(a) for a in atoms])
       
@@ -621,8 +622,10 @@ def importChemComp(chemComp):
       elif chemAtomSet.isEquivalent is None:
         groupType = EQUIVALENT  
       else:
-        continue
-      
+        # double check this
+        groupType = NONSTEREO
+        # continue
+
       # Automatically fills subGroups that were defined first
       ag = AtomGroup(compound, varAtoms, groupType)
       ag.name = chemAtomSet.name

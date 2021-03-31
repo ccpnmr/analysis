@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-26 17:49:29 +0000 (Fri, March 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-31 12:10:03 +0100 (Wed, March 31, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1279,13 +1279,57 @@ class Gui1dWidget(CcpnGLWidget):
         """
         pass
 
-    def drawSpectra(self):
+    def KEEPdrawSpectra(self):
         if self.strip.isDeleted:
             return
 
         currentShader = self.globalGL._shaderProgram1
 
         # self.buildSpectra()
+
+        GL.glLineWidth(self._contourThickness * self.viewports.devicePixelRatio)
+        GL.glDisable(GL.GL_BLEND)
+
+        # only draw the traces for the spectra that are visible
+        specTraces = [trace.spectrumView for trace in self._staticHTraces]
+
+        _visibleSpecs = [specView for specView in self._ordering
+                        if not specView.isDeleted and
+                        specView.isVisible() and
+                        specView._showContours and
+                        specView in self._spectrumSettings.keys() and
+                        specView in self._contourList.keys() and
+                        (specView not in specTraces or self.showSpectraOnPhasing)]
+
+        # for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
+        #
+        #     if spectrumView.isDeleted:
+        #         continue
+        #     if not spectrumView._showContours:
+        #         continue
+        #
+        #     if spectrumView.isVisible() and spectrumView in self._spectrumSettings.keys():
+        #         # set correct transform when drawing this contour
+        #
+        #         if spectrumView in self._contourList.keys() and \
+        #                 (spectrumView not in specTraces or self.showSpectraOnPhasing):
+
+        for spectrumView in _visibleSpecs:
+            if self._stackingMode:
+                # use the stacking matrix to offset the 1D spectra
+                currentShader.setMVMatrix(self._spectrumSettings[spectrumView][
+                                              GLDefs.SPECTRUM_STACKEDMATRIX])
+            # draw contours
+            self._contourList[spectrumView].drawVertexColorVBO()
+
+        # reset lineWidth
+        GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
+
+    def drawSpectra(self):
+        if self.strip.isDeleted:
+            return
+
+        currentShader = self.globalGL._shaderProgram1
 
         GL.glLineWidth(self._contourThickness * self.viewports.devicePixelRatio)
         GL.glDisable(GL.GL_BLEND)
@@ -1297,23 +1341,76 @@ class Gui1dWidget(CcpnGLWidget):
             if not spectrumView._showContours:
                 continue
 
+            # only draw the traces for the spectra that are visible
+            specTraces = [trace.spectrumView for trace in self._staticHTraces]
+
             if spectrumView.isVisible() and spectrumView in self._spectrumSettings.keys():
+
                 # set correct transform when drawing this contour
+                if spectrumView.spectrum.displayFoldedContours:
+                    specSettings = self._spectrumSettings[spectrumView]
 
-                # only draw the traces for the spectra that are visible
-                specTraces = [trace.spectrumView for trace in self._staticHTraces]
+                    # should move this to buildSpectrumSettings
+                    # and emit a signal when visibleAliasingRange or foldingModes are changed
 
-                if spectrumView in self._contourList.keys() and \
-                        (spectrumView not in specTraces or self.showSpectraOnPhasing):
+                    fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
+                    # fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
+                    dxAF = specSettings[GLDefs.SPECTRUM_DXAF]
+                    # dyAF = specSettings[GLDefs.SPECTRUM_DYAF]
+                    # xScale = specSettings[GLDefs.SPECTRUM_XSCALE]
+                    # yScale = specSettings[GLDefs.SPECTRUM_YSCALE]
 
-                    if self._stackingMode:
-                        # use the stacking matrix to offset the 1D spectra
-                        currentShader.setMVMatrix(self._spectrumSettings[spectrumView][
-                                                      GLDefs.SPECTRUM_STACKEDMATRIX])
-                    # draw contours
-                    self._contourList[spectrumView].drawVertexColorVBO()
+                    # specMatrix = np.array(specSettings[GLDefs.SPECTRUM_MATRIX], dtype=np.float32)
+
+                    alias = spectrumView.spectrum.visibleAliasingRange
+                    folding = spectrumView.spectrum.foldingModes
+
+                    for ii in range(alias[0][0], alias[0][1] + 1, 1):
+
+                        if self._stackingMode:
+                            _matrix = np.array(specSettings[GLDefs.SPECTRUM_STACKEDMATRIX])
+                        else:
+                            _matrix = np.array(self._IMatrix)
+
+                        # # take the stacking matrix and insert the correct x-scaling to map the pointPositions to the screen
+                        # _matrix[0] = xScale
+                        # _matrix[12] += fx0
+
+                        foldX = 1.0
+                        foldXOffset = foldYOffset = 0
+                        if folding[0] == 'mirror':
+                            foldX = pow(-1, ii)
+                            foldXOffset = (2*fx0-dxAF) if foldX < 0 else 0
+                        # foldYOffset = ii * 1e8 #if foldX < 0 else 0
+
+                        # specMatrix[0:16] = [xScale * foldX, 0.0, 0.0, 0.0,
+                        #                     0.0, 1.0, 0.0, 0.0,
+                        #                     0.0, 0.0, 1.0, 0.0,
+                        #                     fx0 + (ii * dxAF) + foldXOffset, 0.0, 0.0, 1.0]
+
+                        # take the stacking matrix and insert the correct x-scaling to map the pointPositions to the screen
+                        _matrix[0] = foldX
+                        _matrix[12] += (ii * dxAF) + foldXOffset
+                        # _matrix[12] += foldXOffset
+                        # _matrix[13] += foldYOffset
+
+                        # flipping in the same GL region -  xScale = -xScale
+                        #                                   offset = fx0-dxAF
+                        # circular -    offset = fx0 + dxAF*alias, alias = min->max
+                        currentShader.setMVMatrix(_matrix)
+
+                        self._contourList[spectrumView].drawVertexColorVBO()
+
                 else:
-                    pass
+                    if spectrumView in self._contourList.keys() and \
+                            (spectrumView not in specTraces or self.showSpectraOnPhasing):
+
+                        if self._stackingMode:
+                            # use the stacking matrix to offset the 1D spectra
+                            currentShader.setMVMatrix(self._spectrumSettings[spectrumView][
+                                                          GLDefs.SPECTRUM_STACKEDMATRIX])
+                        # draw contours
+                        self._contourList[spectrumView].drawVertexColorVBO()
 
         # reset lineWidth
         GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)

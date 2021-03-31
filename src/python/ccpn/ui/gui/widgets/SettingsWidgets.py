@@ -296,6 +296,12 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.stripArrangementButtons.radioButtons[2].setVisible(False)
         self.stripArrangementButtons.setCallback(self._stripArrangementChanged)
 
+        if self._spectrumDisplay.is1D:
+            # not currently required for 1D
+            self.stripArrangementLabel.setVisible(False)
+            self.stripArrangementButtons.setVisible(False)
+            self.stripArrangementButtons.setEnabled(False)
+
         row += 1
         self.aliasEnabledLabel = Label(parent, text="Show Aliased Peaks", grid=(row, 0))
         self.aliasEnabledData = CheckBox(parent,
@@ -333,6 +339,11 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                                                'Tools are displayed in the upper-left corner of each strip display'),
                                                      )
         self.zPlaneNavigationModeLabel.setToolTip('Select where the zPlane navigation tools are located')
+
+        if len(self._spectrumDisplay.axisCodes) < 3:
+            self.zPlaneNavigationModeLabel.setVisible(False)
+            self.zPlaneNavigationModeData.setVisible(False)
+            self.zPlaneNavigationModeData.setEnabled(False)
 
         row += 1
         self._spacer = Spacer(parent, 5, 5,

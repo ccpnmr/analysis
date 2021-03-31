@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-29 13:52:40 +0100 (Mon, March 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-31 10:54:37 +0100 (Wed, March 31, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 from ccpnc.clibrary import Clibrary
-
+from PyQt5 import QtCore
 
 logger = getLogger()
 ALL = '<all>'
@@ -579,11 +579,22 @@ class NmrResidueTable(GuiTable):
     def _selectPullDown(self, value):
         self.ncWidget.select(value)
 
+    def mousePressEvent(self, event):
+        """handle mouse press events
+        Clicking is handled on the mouse release
+        """
+        if event.button() == QtCore.Qt.RightButton:
+            # stops the selection from the table when the right button is clicked
+            self._rightClickedTableItem = self.itemAt(event.pos())
+
+        super().mousePressEvent(event)
+
     def _setContextMenu(self, enableExport=True, enableDelete=True):
         """Subclass guiTable to insert new merge items to top of context menu
         """
         super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
         _actions = self.tableMenu.actions()
+
         if _actions:
             _topMenuItem = _actions[0]
             _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)

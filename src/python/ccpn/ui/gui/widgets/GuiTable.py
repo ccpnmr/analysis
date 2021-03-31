@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-18 13:10:48 +0000 (Thu, March 18, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-03-31 10:54:37 +0100 (Wed, March 31, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -329,7 +329,7 @@ GuiTable::item::selected {
         self._enableDelete = enableDelete
         self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
         self._enableSearch = enableSearch
-        self._currentRightMenuItem = None
+        self._rightClickedTableItem = None # last selected item in a table before raising the context menu. Enabled with mousePress event filter
 
         # populate if a dataFrame has been passed in
         if dataFrameObject:
@@ -1499,8 +1499,8 @@ GuiTable::item::selected {
         return rows
 
     def getRightMouseItem(self):
-        if self._currentRightMenuItem:
-            row = self._currentRightMenuItem.row()
+        if self._rightClickedTableItem:
+            row = self._rightClickedTableItem.row()
             data = {}
             for cc in range(self.columnCount()):
                 colName = self.horizontalHeaderItem(cc).text()

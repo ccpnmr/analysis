@@ -1,0 +1,109 @@
+# This is the configuration file for the tip of the day dialog
+{
+    # there are two modes overview and tip
+    TIP_OF_THE_DAY: {
+
+        # the buttons shown in the bottom and their labels
+        BUTTONS: {
+            Random: Random
+            Dont_show: Don't show tips
+            CancelButton: Close
+            NextButton: Next
+            BackButton: Previous
+        }
+
+        # title of the tip of the day window
+        TITLE: Tip of the Day
+
+        # the minimum size of the tip panel
+        MIN_SIZE: [550, 385]
+
+        # order of the buttons in the button bar
+        LAYOUT: [
+                Random
+                Stretch
+                Dont_show
+                BackButton
+                NextButton
+                CancelButton
+        ]
+
+        # patterns for tip filenames
+        IDENTIFIERS: [
+            "tip_*.json",
+            "*/tip_*.json"
+        ],
+
+        # what to display if there are  no more tips
+        EMPTY_TEXT: All tips viewed to reset goto preferences->tips and click 'reset tips'
+
+        # directories to search for tips
+        DIRECTORIES: [
+            /Users/garythompson/Dropbox/git/ccpnmr/ccpnmr_3.0.3.edge_gwv6/src/python/ccpn/ui/gui/widgets/tips
+        ],
+
+        # whether to show dots indicating the current position in the sequence at the bottom of the tip pane
+        USE_DOTS: false
+
+        # Divider between header and card
+        HAS_DIVIDER: true
+
+        DIVIDER_COLOR: "#a9a9a9"
+        DIVIDER_WIDTH: 1px
+    }
+
+    OVERVIEW: {
+        BUTTONS: {
+            CancelButton: Close
+            NextButton: Next
+            BackButton: Previous
+        },
+
+        TITLE: Overview
+        MIN_SIZE: [800, 400],
+        LAYOUT: [
+                Stretch
+                BackButton
+                NextButton
+                CancelButton
+        ],
+        IDENTIFIERS: [
+            tip_*.json
+            */tip_*.json
+        ],
+        EMPTY_TEXT: '''<DOCTYPE html>
+                        <html>
+                            <head>
+                            <style>
+                                body { background-color: blue; }
+                                p    { color: white;
+                                      font-size: large;
+                                      font-family: courier;
+                                }
+                                table {
+                                    margin: auto;
+                                }
+                            </style>
+                            </head>
+                            <body>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <p>Overview files missing please correct your setup or contact the developers...</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </body>
+                        </html>
+        '''
+
+        DIRECTORIES: [
+            /Users/garythompson/Dropbox/git/ccpnmr/ccpnmr_3.0.3.edge_gwv6/src/python/ccpn/ui/gui/widgets/tips
+        ],
+        USE_DOTS: true
+
+        HAS_DIVIDER: false
+    }
+
+    DEFAULT: CancelButton
+}

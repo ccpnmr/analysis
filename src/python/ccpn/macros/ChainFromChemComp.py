@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-07 13:35:37 +0100 (Wed, April 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-07 13:36:49 +0100 (Wed, April 07, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -249,11 +249,11 @@ class NewChainFromChemComp(CcpnDialogMainWidget):
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
-    app = TestApplication()
-    popup = NewChainFromChemComp(mainWindow=None)
+    # app = TestApplication()
+    popup = NewChainFromChemComp(mainWindow=mainWindow)
     popup.show()
     popup.raise_()
-    app.start()
+    # app.start()
 
 
 

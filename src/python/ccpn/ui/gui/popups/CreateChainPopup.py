@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-08 12:39:51 +0000 (Mon, March 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-07 19:12:58 +0100 (Wed, April 07, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -32,12 +32,20 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
 from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
 from ccpn.core.lib.ContextManagers import queueStateChange
+import ccpn.ui.gui.widgets.CompoundWidgets as cw
+from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 
+
+DefaultAddAtomGroups = True
+DefaultAddPseudoAtoms = False
+DefaultAddNonstereoAtoms = True
+DefaultSetBoundsForAtomGroups = False
 
 def _nextChainCode(project):
     """This gives a "next" available chain code.
@@ -113,6 +121,27 @@ class CreateChainPopup(AttributeEditorPopupABC):
         label5a = Label(self.mainWidget, 'Chain code', grid=(row, 2))
         code = _nextChainCode(self.project)
         self.lineEdit2a = LineEdit(self.mainWidget, grid=(row, 3), text=code)
+        row += 1
+        tipText6a = """E.g. for a Val residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms will create a new atom HG1%;
+         also the set HG1% and HG2% will create a new atom HG%"""
+        label6a = Label(self.mainWidget, 'Expand Atoms From AtomSets', tipText=tipText6a, grid=(row, 0))
+        self.expandAtomsFromAtomSetW = CheckBox(self.mainWidget, checked=DefaultAddAtomGroups,
+                                                tipText=tipText6a, grid=(row, 1))
+        row += 1
+        tipText7a = """Add new atoms for Non-stereo Specific Atoms (if any). E.g. for a residue VAL will be added HGx%, HGy% if atoms HG1% and HG2% are present. 
+        \nThis option is available only if 'Expand Atoms From AtomSets' is selected."""
+        label7a = Label(self.mainWidget, 'Add Non-Stereo Specific Atoms', tipText=tipText7a, grid=(row, 0))
+        self.addNonstereoAtomsW = CheckBox(self.mainWidget, checked=DefaultAddNonstereoAtoms,
+                                           tipText=tipText7a, grid=(row, 1),)
+        row += 1
+        tipText8a = """E.g. for a Val residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms will create a new atom HG1% and an extra pseudo atom MG1;
+        also the set HG1% and HG2% will create a new atom HG% and an extra pseudo atom QG.
+        \nThis option is available only if 'Expand Atoms From AtomSets' is selected."""
+        label8a = Label(self.mainWidget, 'Add extra Pseudo-Atoms', tipText=tipText8a, grid=(row, 0))
+        self.addPseudoAtomsW = CheckBox(self.mainWidget, checked=DefaultAddPseudoAtoms,
+                                        tipText=tipText8a, grid=(row, 1),)
+        self._togglePseudoAtomOptions(self.expandAtomsFromAtomSetW.get())
+
 
         # define the blank object to hold the new attributes
         self.obj = AttrDict()
@@ -122,6 +151,9 @@ class CreateChainPopup(AttributeEditorPopupABC):
         self.obj.compoundName = None
         self.obj.comment = None
         self.obj.molType = self.molTypes[0]
+        self.obj.expandFromAtomSets = DefaultAddAtomGroups
+        self.obj.addPseudoAtoms = DefaultAddPseudoAtoms
+        self.obj.addNonstereoAtoms = DefaultAddNonstereoAtoms
 
         # attach the calbacks for the widgets
         self.moleculeEdit.textChanged.connect(self._queueSetMoleculeName)
@@ -130,6 +162,9 @@ class CreateChainPopup(AttributeEditorPopupABC):
         self.lineEdit2a.textChanged.connect(self._queueSetChainCode)
         self.sequenceEditor.textChanged.connect(self._queueSetSequence)
         self.molTypePulldown.currentIndexChanged.connect(self._queueSetMolType)
+        self.expandAtomsFromAtomSetW.clicked.connect(self._queueSetExpandAtomsFromAtomSets)
+        self.addNonstereoAtomsW.clicked.connect(self._queueSetAddNonstereoAtomsW)
+        self.addPseudoAtomsW.clicked.connect(self._queueSetAddPseudoAtomsW)
 
         self._popupReady = True
         self._populate()
@@ -152,6 +187,9 @@ class CreateChainPopup(AttributeEditorPopupABC):
                 self.sequenceEditor.setText(self.obj.sequence)
                 self.lineEdit1a.set(self.obj.startNumber)
                 self.lineEdit2a.setText(self.obj.shortName)
+                self.expandAtomsFromAtomSetW.set(self.obj.expandFromAtomSets)
+                self.addNonstereoAtomsW.set(self.obj.addNonstereoAtoms)
+                self.addPseudoAtomsW.set(self.obj.addPseudoAtoms)
 
     def _createSequence(self):
         """Creates a sequence using the values specified in the text widget.
@@ -159,6 +197,50 @@ class CreateChainPopup(AttributeEditorPopupABC):
         Three-letter codes can be entered as space or <return> separated
         """
         self.project.createChain(**self.obj)
+
+    def _togglePseudoAtomOptions(self, value):
+        isParentChecked = self.expandAtomsFromAtomSetW.get()
+        self.addNonstereoAtomsW.setEnabled(isParentChecked)
+        self.addPseudoAtomsW.setEnabled(isParentChecked)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetExpandAtomsFromAtomSets(self, value):
+        """Queue changes to the expandFromAtomSets
+        """
+        prefValue = self.obj.expandFromAtomSets
+        if value != prefValue:
+            return partial(self._setExpandAtomsFromAtomSets, value)
+
+    def _setExpandAtomsFromAtomSets(self, value: str):
+        """Sets expandFromAtomSets of molecule being created.
+        """
+        self.obj.expandFromAtomSets = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetAddNonstereoAtomsW(self, value):
+        """Queue changes to the expandFromAtomSets
+        """
+        prefValue = self.obj.addNonstereoAtoms
+        if value != prefValue:
+            return partial(self._setSetAddNonstereoAtomsW, value)
+
+    def _setSetAddNonstereoAtomsW(self, value: str):
+        """Sets AddNonstereoAtoms of molecule being created.
+        """
+        self.obj.addNonstereoAtoms = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetAddPseudoAtomsW(self, value):
+        """Queue changes to the SetAddPseudoAtomsW
+        """
+        prefValue = self.obj.addPseudoAtoms
+        if value != prefValue:
+            return partial(self._setSetAddPseudoAtomsW, value)
+
+    def _setSetAddPseudoAtomsW(self, value: str):
+        """Sets addPseudoAtoms of molecule being created.
+        """
+        self.obj.addPseudoAtoms = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetMoleculeName(self, value):

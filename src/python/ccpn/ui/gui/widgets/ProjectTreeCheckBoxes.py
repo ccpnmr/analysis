@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:51 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-07 19:07:09 +0100 (Wed, April 07, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -411,6 +411,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         Note._pluralLinkName,
         PeakCluster._pluralLinkName,
         'restraintLinks',
+        'additionalData',
         ]
 
     lockedItems = {
@@ -438,7 +439,8 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         'ccpn_notes'                 : (Note._pluralLinkName, Note.className),
         'ccpn_peak_cluster'          : (PeakCluster._pluralLinkName, PeakCluster.className),
         # 'ccpn_peak_cluster_serial'          : (PeakCluster._pluralLinkName, PeakCluster.className),
-        'nef_peak_restraint_links'   : ('restraintLinks','RestraintLink')
+        'nef_peak_restraint_links'   : ('restraintLinks','RestraintLink'),
+        'ccpn_additional_data'       : ('additionalData', 'internalData'),
         }
 
     # defines the names of the saveframe loops that are displayed
@@ -463,6 +465,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         Note._pluralLinkName             : ['ccpn_note'],
         PeakCluster._pluralLinkName      : ['ccpn_peak_cluster_list', 'ccpn_peak_cluster', 'ccpn_peak_cluster_peaks'],
         'restraintLinks'                 : ['nef_peak_restraint_link'],
+        'additionalData'                 : ['ccpn_internal_data'],
         }
 
     nefProjectToHandlerMapping = {
@@ -483,6 +486,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         Note._pluralLinkName             : 'ccpn_note',
         PeakCluster._pluralLinkName      : None,
         'restraintLinks'                 : None,
+        'additionalData'                 : 'ccpn_internal_data',
         }
 
     contents = {}
@@ -713,6 +717,8 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     contents['ccpn_notes'] = content_list  # content_ccpn_notes
 
     contents['nef_peak_restraint_links'] = content_list  # content_ccpn_notes
+
+    contents['ccpn_additional_data'] = content_list
 
     def _fillFunc(self, project, saveFrame, *args, **kwds):
         saveFrameName = saveFrame['sf_category']

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-15 17:12:45 +0000 (Fri, January 15, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-04-07 19:07:09 +0100 (Wed, April 07, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -840,7 +840,28 @@ class CcpnNefContent:
                                                                                projectIsEmpty=projectIsEmpty,
                                                                                selection=selection))
 
+    def content_ccpn_additional_data(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        objs = OrderedSet()
+
+        loopName = 'ccpn_internal_data'
+        saveFrameName = saveFrame['sf_category']
+
+        loop = saveFrame[loopName]
+        for row in loop.data:
+            pid = row.get('ccpn_object_pid')
+            objs.add(pid)
+
+        result = {saveFrameName: objs}
+
+        self._contentLoops(project, saveFrame)
+        self.updateContent(saveFrame, result)
+
+    contents['ccpn_additional_data'] = content_ccpn_additional_data
+    contents['ccpn_internal_data'] = _noLoopContent
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # these are the empty ones that need methods adding as required
+
     contents['nef_nmr_meta_data'] = _contentLoops
     contents['nef_related_entries'] = _noLoopContent
     contents['nef_program_script'] = _noLoopContent
@@ -849,8 +870,6 @@ class CcpnNefContent:
     contents['ccpn_spectrum_dimension'] = _noLoopContent
     contents['nef_spectrum_dimension'] = _noLoopContent
     contents['ccpn_substance_synonym'] = _noLoopContent
-    contents['ccpn_additional_data'] = _contentLoops
-    contents['ccpn_internal_data'] = _noLoopContent
     contents['ccpn_dataset'] = _contentLoops
     contents['ccpn_calculation_step'] = _noLoopContent
     contents['ccpn_calculation_data'] = _noLoopContent

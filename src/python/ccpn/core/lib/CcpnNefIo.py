@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-07 13:09:04 +0100 (Wed, April 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-07 19:07:09 +0100 (Wed, April 07, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -4265,23 +4265,49 @@ class CcpnNefReader(CcpnNefContent):
 
         # Make PeakList if old nef parameters exist
         # if len(peakListParameters):
-        peakList = spectrum.newPeakList(**peakListParameters)
 
-        # # Load peaks (if exist)
-        # loop = saveFrame.get('nef_peak')
-        # if loop:
-        #     self.load_nef_peak(peakList, loop)
+        try:
+            # check the list of items in the import dict
+            _frame = self._importDict[saveFrame.name]
+            importRows = _frame['_importPeaks']
+        except:
+            importRows = []
 
-        # Load remaining loops, with spectrum as parent
+        peakListId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (spectrumName, peakListSerial))
+        peakList = project.getObjectsByPartialId(className='PeakList', idStartsWith=peakListId)
+
+        if self._checkImport(saveFrame, peakListId, checkID='_importPeaks'):
+            if peakList:
+                self.warning('PeakList %s already exists. Skipping' % peakListId)
+                return peakList
+
+            else:
+                peakList = spectrum.newPeakList(**peakListParameters)
+
+                # Load 'nef_peak' loop, with spectrum as parent - load the peaks
+                for loopName in loopNames:
+                    if loopName in ('nef_peak',):
+                        # Those are treated elsewhere
+                        loop = saveFrame.get(loopName)
+                        if loop:
+                            importer = self.importers[loopName]
+                            importer(self, spectrum, loop, saveFrame, peakListId=peakListSerial)
+
+                # # Load peaks (if exist)
+                # loop = saveFrame.get('nef_peak')
+                # if loop:
+                #     self.load_nef_peak(peakList, loop)
+
+        # Load remaining loops, with spectrum as parent - ccpn multiplets/integrals
         for loopName in loopNames:
-            if loopName not in ('nef_spectrum_dimension', 'ccpn_spectrum_dimension',  #'nef_peak',
+            if loopName not in ('nef_spectrum_dimension', 'ccpn_spectrum_dimension', 'nef_peak',
                                 'nef_spectrum_dimension_transfer',
                                 ):
                 # Those are treated elsewhere
                 loop = saveFrame.get(loopName)
                 if loop:
                     importer = self.importers[loopName]
-                    importer(self, spectrum, loop, saveFrame, peakListId=peakList.serial)
+                    importer(self, spectrum, loop, saveFrame, peakListId=peakListSerial)
                     # importer(self, spectrum, loop, peakListId=oldSerial)
         #
         # if len(peakListParameters):
@@ -5314,11 +5340,21 @@ class CcpnNefReader(CcpnNefContent):
 
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
-        framecode = saveFrame['sf_framecode']
+        # framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap.get(category) or {}
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
         self._updateStringParameters(parameters)
+
+        try:
+            # check the list of items in the import dict
+            _frame = self._importDict[saveFrame.name]
+            importRows = _frame['_importRows']
+        except:
+            importRows = []
+        if parameters['name'] not in importRows:
+            # skip if not in the import list
+            return
 
         # Make main object
         result = project.newSpectrumGroup(**parameters)
@@ -5917,9 +5953,21 @@ class CcpnNefReader(CcpnNefContent):
         result = []
         mapping = nef2CcpnMap.get(loopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+
+        try:
+            # check the list of items in the import dict
+            _frame = self._importDict[saveFrame.name]
+            importRows = _frame['_importRows']
+        except:
+            importRows = []
+
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
             self._updateStringParameters(parameters)
+
+            if parameters['name'] not in importRows:
+                # skip if not in the import list
+                continue
 
             obj = creatorFunc(**parameters)
             result.append(obj)
@@ -5971,8 +6019,20 @@ class CcpnNefReader(CcpnNefContent):
         # ccpn_additional_data contains nothing except for the ccpn_internal_data loop
         loopName = 'ccpn_internal_data'
         loop = saveFrame[loopName]
+
+        try:
+            # check the list of items in the import dict
+            _frame = self._importDict[saveFrame.name]
+            importRows = _frame['_importRows']
+        except:
+            importRows = []
+
         for row in loop.data:
             pid, data = row.values()
+            if pid not in importRows:
+                # skip if not in the import list
+                continue
+
             obj = project.getByPid(pid)
             if obj is None:
                 getLogger().debug2('Loading NEF additional data: unable to find object "%s"' % pid)
@@ -5986,17 +6046,20 @@ class CcpnNefReader(CcpnNefContent):
         loopName = 'ccpn_internal_data'
         loop = saveFrame[loopName]
         _rowErrors = saveFrame._rowErrors[loopName] = OrderedSet()
+        saveFrame._rowErrors['ccpn_additional_data'] = OrderedSet()
+        verifyFunc = project.getByPid
 
         for row in loop.data:
             pid, data = row.values()
-            obj = project.getByPid(pid)
-            if obj is None:
-                getLogger().debug2('Loading NEF additional data: unable to find object "%s"' % pid)
-            else:
-                data = obj._ccpnInternalData
+            result = verifyFunc(pid)
+
+            if result:
+                data = result._ccpnInternalData
                 if data:
-                    self.error('ccpn_additional_data - Object {} contains internal data'.format(obj), saveFrame, (obj,))
+                    self.error('ccpn_additional_data - Object {} contains internal data'.format(result), saveFrame, (result,))
                     _rowErrors.add(loop.data.index(row))
+                    saveFrame._rowErrors['ccpn_additional_data'].add(pid)
+                    saveFrame._rowErrors['ccpn_internal_data_' + pid] = (loop.data.index(row),)
 
     verifiers['ccpn_additional_data'] = verify_ccpn_additional_data
     verifiers['ccpn_internal_data'] = _noLoopVerify

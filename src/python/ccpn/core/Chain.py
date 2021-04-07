@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-07 13:35:37 +0100 (Wed, April 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-07 14:41:00 +0100 (Wed, April 07, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -580,17 +580,27 @@ def _fetchChemCompFromFile(project, filePath):
     :param project: v3 project object.
     :param filePath: xml file path  for the chemcomp. Xml filename must contain the same strings as defined  in the
     guid inside the file.
-    TODO check for already loaded guid. like ccp three letters.
     :return: The API chemComp object
     """
     from ccpnmodel.ccpncore.xml.memops.Implementation import loadFromStream
-    from ccpnmodel.ccpncore.lib import ApiPath
+    from ccpn.util.Path import aPath
     memopsRoot =  project._wrappedData.root
-    topObjId = ApiPath.getTopObjIdFromFileName(filePath)
-    chemComp = memopsRoot.findFirstChemComp(guid=topObjId) # Check if the chemcomp is already loaded
-    if not chemComp:
+    basename = aPath(filePath).basename
+    ll = basename.split('+') # assuming the file is an old xml type with + separators or created from Chembuild.
+    if len(ll)>1:
+        ccpCode = ll[1]
+        chemComp = memopsRoot.findFirstChemComp(ccpCode=ccpCode) # Check if the chemcomp is already loaded
+        if chemComp:
+            raise RuntimeError('A ChemComp with the same ccpCode is already loaded. Could not create a new ChemComp'
+                                'with a pre-existing ccpCode: %s.' % ccpCode)
+    topObjId = ll[-1]
+    chemComp = memopsRoot.findFirstChemComp(topObjId=topObjId)  # Check if the chemcomp is already loaded
+    if chemComp:
+        getLogger().warning('A ChemComp with the same topObjId is already loaded. Returning the pre-existing.')
+    else:
         with open(filePath) as stream:
             chemComp = loadFromStream(stream, topObject=memopsRoot, topObjId=topObjId,)
+
     return chemComp
 
 def _newChainFromChemComp(project, chemComp,

@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-07 13:36:49 +0100 (Wed, April 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-07 14:41:00 +0100 (Wed, April 07, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -239,8 +239,8 @@ class NewChainFromChemComp(CcpnDialogMainWidget):
                                                   )
                     getLogger().info("New Chain available from SideBar")
                 except Exception as err:
-                    traceback.print_stack()
-                    MessageDialog.showError('Error creating Chain from File', 'Check terminal traceback for details')
+
+                    MessageDialog.showError('Error creating Chain from File', str(err))
 
             else:
                 getLogger().warning('No selected file. Chain from ChemComp Aborted')

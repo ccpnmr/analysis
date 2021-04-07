@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-07 13:35:37 +0100 (Wed, April 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-07 16:27:55 +0100 (Wed, April 07, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -239,9 +239,9 @@ def expandChainAtoms(chain,
                 E.g. H1* to become H1%.
 
         :param addPseudoAtoms: bool: True. Default
-                Add new atoms with an alternative names to the one derived from the atomSets.
+                Add new atoms with alternative names to the one derived from the atomSets.
                 E.g.  MD, QG, MG. This will create a atom with same atom components
-                as the standard from the chemComp atomSet. Therefore its a duplicated!
+                as the standard from the chemComp atomSet. Therefore it's a duplicated!
                 These atoms might not be present in the original ChemComp definitions
 
         :param addNonstereoAtoms: bool: True. Default

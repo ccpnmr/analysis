@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-06 12:45:58 +0100 (Tue, April 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-07 13:35:37 +0100 (Wed, April 07, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -55,11 +55,12 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.lib.GuiPath import PathEdit
-
+from ccpn.ui.gui.widgets import MessageDialog
+import traceback
 
 A = str(u"\u212B")
 
-AddAtomGroups = 'addAtomGroups'
+AddAtomGroups = 'expandFromAtomSets'
 AddPseudoAtoms = 'addPseudoAtoms'
 RemoveDuplicateEquivalentAtoms = 'removeDuplicateEquivalentAtoms'
 AddNonstereoAtoms = 'addNonstereoAtoms'
@@ -143,7 +144,7 @@ class NewChainFromChemComp(CcpnDialogMainWidget):
 
         row += 1
         self.addAtomGroupsW = cw.CheckBoxCompoundWidget(self.mainWidget,
-                                                         labelText='Add Atom Groups',
+                                                         labelText='Expand Atoms from Atom Groups',
                                                          checked=DefaultOptions.get(AddAtomGroups, True),
                                                          grid=(row, 0), gridSpan=(1, 1))
 
@@ -156,11 +157,11 @@ class NewChainFromChemComp(CcpnDialogMainWidget):
         advRow = 0
 
 
-        # self.addNonstereoAtomsW = cw.CheckBoxCompoundWidget(advContentsFrame,
-        #                                                     labelText='Add Non Stereo-Specific Atom Groups',
-        #                                                     checked=DefaultOptions.get(AddNonstereoAtoms),
-        #                                                     grid=(advRow, 0), gridSpan=(1, 1))
-        #
+        self.addNonstereoAtomsW = cw.CheckBoxCompoundWidget(advContentsFrame,
+                                                            labelText='Add Non Stereo-Specific Atom',
+                                                            checked=DefaultOptions.get(AddNonstereoAtoms),
+                                                            grid=(advRow, 0), gridSpan=(1, 1))
+
         # advRow += 1
         # self.addPseudoAtomsW = cw.CheckBoxCompoundWidget(advContentsFrame,
         #                                                  labelText='Add Pseudo-Atom Groups',
@@ -214,8 +215,8 @@ class NewChainFromChemComp(CcpnDialogMainWidget):
         _params = DefaultOptions
         _params.update({ChainCode: self.chainCodeW.getText() or _params[ChainCode]})
         _params.update({AddAtomGroups: self.addAtomGroupsW.get() or _params[AddAtomGroups]})
-        # _params.update({AddNonstereoAtoms: self.addNonstereoAtomsW.get() or _params[AddNonstereoAtoms] })
-        # _params.update({AddPseudoAtoms: self.addPseudoAtomsW.get() or _params[AddPseudoAtoms]})
+        _params.update({AddNonstereoAtoms: self.addNonstereoAtomsW.get() or _params[AddNonstereoAtoms] })
+        _params.update({AddPseudoAtoms: self.addPseudoAtomsW.get() or _params[AddPseudoAtoms]})
         # _params.update({PseudoNamingSystem: self.pseudoNamingSystemsW.getText() or _params[PseudoNamingSystem]})
         # _params.update({RemoveDuplicateEquivalentAtoms: self.renamePseudoAtomsW.get() or _params[RemoveDuplicateEquivalentAtoms]})
         # _params.update({SetBoundsForAtomGroups: self.setBoundsForAtomGroupsW.get() or _params[SetBoundsForAtomGroups]})
@@ -225,14 +226,24 @@ class NewChainFromChemComp(CcpnDialogMainWidget):
         if self.project:
             filePath = self.filePathEdit.get()
             if filePath:
-                chemComp = _fetchChemCompFromFile(self.project, filePath)
-                chain = _newChainFromChemComp(self.project, chemComp,
-                                              chainCode=self.chainCodeW.getText(),
-                                              addAtomGroups=self.addAtomGroupsW.get())
-                getLogger().info("New Chain available from SideBar")
+                expandFromAtomSets =  self.addAtomGroupsW.get() or DefaultOptions[AddAtomGroups]
+                addNonstereoAtoms = self.addNonstereoAtomsW.get() or DefaultOptions[AddNonstereoAtoms]
+
+                try:
+                    chemComp = _fetchChemCompFromFile(self.project, filePath)
+
+                    chain = _newChainFromChemComp(self.project, chemComp,
+                                                  chainCode = self.chainCodeW.getText(),
+                                                  expandFromAtomSets = expandFromAtomSets,
+                                                  addNonstereoAtoms = addNonstereoAtoms
+                                                  )
+                    getLogger().info("New Chain available from SideBar")
+                except Exception as err:
+                    traceback.print_stack()
+                    MessageDialog.showError('Error creating Chain from File', 'Check terminal traceback for details')
+
             else:
                 getLogger().warning('No selected file. Chain from ChemComp Aborted')
-        print(self.params)
 
         self.accept()
 

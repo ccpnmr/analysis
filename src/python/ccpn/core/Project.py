@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-11 12:37:22 +0000 (Thu, March 11, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-07 13:35:37 +0100 (Wed, April 07, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1903,7 +1903,10 @@ class Project(AbstractWrapperObject):
     @logCommand('project.')
     def createChain(self, sequence: Union[str, Sequence[str]], compoundName: str = None,
                     startNumber: int = 1, molType: str = None, isCyclic: bool = False,
-                    shortName: str = None, role: str = None, comment: str = None, **kwds):
+                    shortName: str = None, role: str = None, comment: str = None,
+                    expandFromAtomSets: bool = True,
+                    addPseudoAtoms: bool = True, addNonstereoAtoms: bool = True,
+                    **kwds):
         """Create new chain from sequence of residue codes, using default variants.
 
         Automatically creates the corresponding polymer Substance if the compoundName is not already taken
@@ -1919,13 +1922,18 @@ class Project(AbstractWrapperObject):
         :param str shortName: shortName for new chain (optional)
         :param str role: role for new chain (optional)
         :param str comment: comment for new chain (optional)
+        :param bool expandFromAtomSets: Create new Atoms corresponding to the ChemComp AtomSets definitions.
+                Eg. H1, H2, H3 equivalent atoms will add a new H% atom. This will facilitate assignments workflows.
+                See ccpn.core.lib.MoleculeLib.expandChainAtoms for details.
         :return: a new Chain instance.
         """
         from ccpn.core.Chain import _createChain
 
         return _createChain(self, sequence=sequence, compoundName=compoundName,
                             startNumber=startNumber, molType=molType, isCyclic=isCyclic,
-                            shortName=shortName, role=role, comment=comment, **kwds)
+                            shortName=shortName, role=role, comment=comment,
+                            expandFromAtomSets=expandFromAtomSets, addPseudoAtoms=addPseudoAtoms,
+                            addNonstereoAtoms=addNonstereoAtoms, **kwds)
 
     @logCommand('project.')
     def newSubstance(self, name: str = None, labelling: str = None, substanceType: str = 'Molecule',

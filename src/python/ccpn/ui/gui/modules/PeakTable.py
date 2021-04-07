@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-22 18:19:23 +0000 (Mon, March 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-07 13:09:42 +0100 (Wed, April 07, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -300,7 +300,7 @@ class PeakListTableWidget(GuiTable):
                           )
         # annotation column
         annotationTipText = 'Any other peak label (excluded assignments)'
-        columnDefs.append(('Annotation', lambda pk: pk.annotation, annotationTipText,
+        columnDefs.append(('Annotation', lambda pk: self._getAnnotation(pk), annotationTipText,
                            lambda pk, value: self._setAnnotation(pk, value), None))
 
         # comment column

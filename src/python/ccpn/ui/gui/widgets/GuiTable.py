@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-31 10:54:37 +0100 (Wed, March 31, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-04-07 13:09:42 +0100 (Wed, April 07, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -516,6 +516,19 @@ GuiTable::item::selected {
         CCPN-INTERNAL: Insert a comment into object
         """
         obj.comment = value if value else None
+
+    @staticmethod
+    def _getAnnotation(obj):
+        """
+        CCPN-INTERNAL: Get an annotation from GuiTable
+        """
+        try:
+            if obj.annotation == '' or not obj.annotation:
+                return ''
+            else:
+                return obj.annotation
+        except:
+            return ''
 
     @staticmethod
     def _setAnnotation(obj, value):

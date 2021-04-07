@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-07 14:41:00 +0100 (Wed, April 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-07 16:22:20 +0100 (Wed, April 07, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -496,7 +496,11 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
 
 @newObject(Chain)
 def _createChainFromSubstance(self: Substance, shortName: str = None, role: str = None,
-                              comment: str = None, serial: int = None) -> Chain:
+                              comment: str = None, serial: int = None,
+                              expandFromAtomSets: bool = True,
+                              addPseudoAtoms: bool = True,
+                              addNonstereoAtoms: bool = True,
+                              ) -> Chain:
     """Create new Chain that matches Substance
 
     :param shortName:
@@ -538,6 +542,16 @@ def _createChainFromSubstance(self: Substance, shortName: str = None, role: str 
     for residue in result.residues:
         # Necessary as CCPN V2 default protonation states do not match the NEF / V3 standard
         residue.resetVariantToDefault()
+
+    if expandFromAtomSets:
+        from ccpn.core.lib.MoleculeLib import expandChainAtoms
+        expandChainAtoms(result,
+                         replaceStarWithPercent=True,
+                         addPseudoAtoms=addPseudoAtoms,
+                         addNonstereoAtoms=addNonstereoAtoms,
+                         setBoundsForAtomGroups=True,
+                         atomNamingSystem='PDB_REMED',
+                         pseudoNamingSystem='AQUA')
 
     return result
 

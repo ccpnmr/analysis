@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-07 19:12:58 +0100 (Wed, April 07, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-04-08 16:57:53 +0100 (Thu, April 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -111,8 +111,8 @@ class CreateChainPopup(AttributeEditorPopupABC):
         self.molTypes = ['protein', 'DNA', 'RNA', 'other']
         self.molTypePulldown.setData(self.molTypes)
         label3a = Label(self.mainWidget, text="Sequence", grid=(row, 0))
-        tipText = """Sequence may be entered a set of one letter codes without
-                 spaces or a set of three letter codes with spaces inbetween"""
+        tipText = "Sequence may be entered a set of one letter codes without\n" \
+                  "spaces or a set of three letter codes with spaces inbetween"
         self.sequenceEditor = TextEditor(self.mainWidget, grid=(row, 1), gridSpan=(1, 3), tipText=tipText)
         row += 1
 
@@ -122,21 +122,23 @@ class CreateChainPopup(AttributeEditorPopupABC):
         code = _nextChainCode(self.project)
         self.lineEdit2a = LineEdit(self.mainWidget, grid=(row, 3), text=code)
         row += 1
-        tipText6a = """E.g. for a Val residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms will create a new atom HG1%;
-         also the set HG1% and HG2% will create a new atom HG%"""
+        tipText6a = "E.g., for a VAL residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms will create a new atom HG1%;\n" \
+                    "        also the set HG1%, HG2% will create a new atom HG%"
         label6a = Label(self.mainWidget, 'Expand Atoms From AtomSets', tipText=tipText6a, grid=(row, 0))
         self.expandAtomsFromAtomSetW = CheckBox(self.mainWidget, checked=DefaultAddAtomGroups,
                                                 tipText=tipText6a, grid=(row, 1))
         row += 1
-        tipText7a = """Add new atoms for Non-stereo Specific Atoms (if any). E.g. for a residue VAL will be added HGx%, HGy% if atoms HG1% and HG2% are present. 
-        \nThis option is available only if 'Expand Atoms From AtomSets' is selected."""
+        tipText7a = "Add new atoms for Non-stereo Specific Atoms (if any).\n" \
+                    "E.g., for a VAL residue, HGx%, HGy% will be added if atoms HG1% and HG2% are present.\n" \
+                    "This option is available only if 'Expand Atoms From AtomSets' is selected."
         label7a = Label(self.mainWidget, 'Add Non-Stereo Specific Atoms', tipText=tipText7a, grid=(row, 0))
         self.addNonstereoAtomsW = CheckBox(self.mainWidget, checked=DefaultAddNonstereoAtoms,
                                            tipText=tipText7a, grid=(row, 1),)
         row += 1
-        tipText8a = """E.g. for a Val residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms will create a new atom HG1% and an extra pseudo atom MG1;
-        also the set HG1% and HG2% will create a new atom HG% and an extra pseudo atom QG.
-        \nThis option is available only if 'Expand Atoms From AtomSets' is selected."""
+        tipText8a = "E.g., for a VAL residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms\n" \
+                    "        will create a new atom HG1% and an extra pseudo-atom MG1;\n" \
+                    "        also the set HG1%, HG2% will create a new atom HG% and an extra pseudo-atom QG.\n" \
+                    "This option is available only if 'Expand Atoms From AtomSets' is selected."
         label8a = Label(self.mainWidget, 'Add extra Pseudo-Atoms', tipText=tipText8a, grid=(row, 0))
         self.addPseudoAtomsW = CheckBox(self.mainWidget, checked=DefaultAddPseudoAtoms,
                                         tipText=tipText8a, grid=(row, 1),)

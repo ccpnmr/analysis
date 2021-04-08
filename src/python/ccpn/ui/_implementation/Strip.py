@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-02-10 18:09:05 +0000 (Wed, February 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-08 15:34:40 +0100 (Thu, April 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,7 @@ from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoBlock, newObject
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, newObject
 
 
 STRIPTILING = 'stripTiling'
@@ -318,7 +318,7 @@ class Strip(AbstractWrapperObject):
     @logCommand(get='self')
     def resetAxisOrder(self):
         """Reset display to original axis order"""
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             self._wrappedData.resetAxisOrder()
 
     def findAxis(self, axisCode):
@@ -386,7 +386,7 @@ class Strip(AbstractWrapperObject):
             stripSerial = 0
 
         if useUndoBlock:
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 # Make spectrumView
                 obj = apiStrip.spectrumDisplay.newSpectrumView(spectrumName=dataSource.name,
                                                                stripSerial=stripSerial, dataSource=dataSource,
@@ -410,7 +410,7 @@ class Strip(AbstractWrapperObject):
         result = []
         peakLists = []
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
 
                 validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isVisible()]
@@ -604,7 +604,7 @@ class Strip(AbstractWrapperObject):
         # sort each of the regions
         sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
 
                 # create a peakList if there isn't one
@@ -675,7 +675,7 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
 
     # with logCommandBlock(prefix='newStrip=', get='self') as log:
     #     log('copyStrip', strip=repr(strip.pid))
-    with undoBlock():
+    with undoBlockWithoutSideBar():
 
         if strip.spectrumDisplay is self:
             # Within same display. Not that useful, but harmless

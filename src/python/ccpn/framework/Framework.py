@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-30 19:40:41 +0100 (Tue, March 30, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-08 15:34:40 +0100 (Thu, April 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1600,7 +1600,7 @@ class Framework(NotifierBase):
         self.project.shiftAveraging = False
         # with suspendSideBarNotifications(project=self.project):
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
                 with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s', printTraceBack=True):
                     # need datablock selector here, with subset selection dependent on datablock type
@@ -1679,7 +1679,7 @@ class Framework(NotifierBase):
         self.project.shiftAveraging = True
 
         # with suspendSideBarNotifications(project=self.project):
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
                 with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s', printTraceBack=True):
                     self.sparkyReader.importSparkyProject(self.project, dataBlock)
@@ -1748,7 +1748,7 @@ class Framework(NotifierBase):
                 return
 
         if spectraPaths:
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 with notificationEchoBlocking():
                     for spectrumPath in tqdm(spectraPaths):
                         self.project.loadData(str(spectrumPath))
@@ -1913,7 +1913,7 @@ class Framework(NotifierBase):
             self.project.shiftAveraging = False
             # with suspendSideBarNotifications(project=self.project):
 
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 with notificationEchoBlocking():
                     with catchExceptions(application=self, errorStringTemplate='Error importing Nef file: %s', printTraceBack=True):
                         # need datablock selector here, with subset selection dependent on datablock type

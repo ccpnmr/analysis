@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -10,9 +10,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 18:41:24 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-08 15:34:41 +0100 (Thu, April 08, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,7 +35,7 @@ from ccpn.core.Note import Note
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.guiSettings import BORDERNOFOCUS_COLOUR
 
@@ -219,7 +219,7 @@ class NotesEditorModule(CcpnModule):
 
             try:
                 if name != self.note.name or text != self.note.text or comment != self.note.comment:
-                    with undoBlock():
+                    with undoBlockWithoutSideBar():
                         if name != self.note.name:
                             self.note.rename(name)
                         self.note.text = text

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-26 14:31:18 +0000 (Fri, March 26, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-08 15:34:40 +0100 (Thu, April 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -73,7 +73,7 @@ from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, \
-    BlankedPartial, undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar, undoStackRevert
+    BlankedPartial, undoBlockWithoutSideBar, notificationEchoBlocking, undoBlockWithoutSideBar, undoStackRevert
 from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
@@ -1052,7 +1052,7 @@ class GuiSpectrumDisplay(CcpnModule):
         # handle Pids, many more items than mainWindow._processPids
         pids = data.get(DropBase.PIDS, [])
         if pids and len(pids) > 0:
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 getLogger().info('Handling pids...')
                 if len(pids) > MAXITEMLOGGING:
                     with notificationEchoBlocking():
@@ -1088,15 +1088,15 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 success = True
             elif obj is not None and isinstance(obj, PeakList):
-                with undoBlock():
+                with undoBlockWithoutSideBar():
                     self._handlePeakList(obj)
                 success = True
             elif obj is not None and isinstance(obj, SpectrumGroup):
-                with undoBlock():
+                with undoBlockWithoutSideBar():
                     self._handleSpectrumGroup(obj)
                 success = True
             elif obj is not None and isinstance(obj, Sample):
-                with undoBlock():
+                with undoBlockWithoutSideBar():
                     self._handleSample(obj)
                 success = True
             elif obj is not None and isinstance(obj, NmrAtom):
@@ -1118,13 +1118,13 @@ class GuiSpectrumDisplay(CcpnModule):
                 showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup, PeakList,'
                                                            ' NmrChain, NmrResidue, NmrAtom or Strip')
         if nmrChains:
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 self._handleNmrChains(nmrChains)
         if nmrResidues:
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 self._handleNmrResidues(nmrResidues)
         if nmrAtoms:
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 self._handleNmrAtoms(nmrAtoms)
 
         return success
@@ -1603,7 +1603,7 @@ class GuiSpectrumDisplay(CcpnModule):
                         % (self.pid,))
             return
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             with undoStackBlocking() as addUndoItem:
                 with self._hideWidget(self.stripFrame):
                     # retrieve list of created items from the api
@@ -1905,7 +1905,7 @@ class GuiSpectrumDisplay(CcpnModule):
             showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
             return
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             with undoStackBlocking() as addUndoItem:
                 with self._hideWidget(self.stripFrame):
                     addUndoItem(undo=self._redrawAxes,
@@ -2453,7 +2453,7 @@ class GuiSpectrumDisplay(CcpnModule):
             #     nmrResidueStr = '[' + ','.join(["'%s'" % nmrRes.pid for nmrRes in nmrs]) + ']'
             #     log('addPeaks', peaks=peakStr, nmrResidues=nmrResidueStr)
 
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 # _undo._newItem(undoPartial=partial(_updateGl, self, []))
 
                 if autoClearMarks:

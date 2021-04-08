@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-07 13:09:42 +0100 (Wed, April 07, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-08 15:34:41 +0100 (Thu, April 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -52,7 +52,7 @@ from collections import OrderedDict, defaultdict
 from ccpn.util.Logging import getLogger
 from types import SimpleNamespace
 from contextlib import contextmanager
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.lib.Util import getParentObjectFromPid
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
@@ -1078,7 +1078,7 @@ GuiTable::item::selected {
                     if hasattr(selected[0], 'project'):
                         thisProject = selected[0].project
 
-                        with undoBlock():
+                        with undoBlockWithoutSideBar():
                             # echo [sI.pid for sI in selected])
                             for obj in selected:
                                 if hasattr(obj, 'pid'):

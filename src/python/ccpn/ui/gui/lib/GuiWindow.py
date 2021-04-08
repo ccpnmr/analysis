@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-26 11:24:48 +0000 (Fri, February 26, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-08 15:34:41 +0100 (Thu, April 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -191,7 +191,7 @@ class GuiWindow():
         """Deassign all from selected peaks
         """
         if self.current.peaks:
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 for peak in self.current.peaks:
                     assignedDims = list(peak.dimensionNmrAtoms)
                     assignedDims = tuple([] for dd in assignedDims)
@@ -413,7 +413,7 @@ class GuiWindow():
         if not (peaks or clickedPeaks):
             return
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             if set(clickedPeaks or []):
                 from ccpn.ui.gui.popups.ReorderPeakListAxes import ReorderPeakListAxes as ReorderPeakListAxesPopup
 
@@ -436,7 +436,7 @@ class GuiWindow():
         """add current peaks to a new multiplet"""
         strip = self.application.current.strip
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             if strip and strip.spectrumDisplay:
                 spectra = [spectrumView.spectrum for spectrumView in
                            strip.spectrumViews if spectrumView.isVisible()]
@@ -758,7 +758,7 @@ class GuiWindow():
         searchBoxDoFit = self.application.preferences.general.searchBoxDoFit
         fitMethod = self.application.preferences.general.peakFittingMethod
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             n = len(peaks)
 
             if n == 1:

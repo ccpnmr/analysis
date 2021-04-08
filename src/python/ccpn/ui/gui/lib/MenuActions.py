@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-30 18:57:43 +0100 (Tue, March 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-08 15:34:41 +0100 (Thu, April 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -42,8 +42,6 @@ from ccpn.core.RestraintList import RestraintList
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
-from ccpn.core.lib.ContextManagers import undoBlock
-
 from ccpn.ui.gui.popups.ChainPopup import ChainPopup
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListEditor
 from ccpn.ui.gui.popups.ComplexEditorPopup import ComplexEditorPopup
@@ -744,7 +742,7 @@ class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
             specGroup = self.node._parent.obj
             spectra = list(specGroup.spectra)
 
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 for obj in objs:
                     if obj in spectra:
                         spectra.remove(obj)

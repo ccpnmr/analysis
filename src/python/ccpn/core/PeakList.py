@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-22 19:44:29 +0000 (Mon, March 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-08 20:31:22 +0100 (Thu, April 08, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -278,7 +278,7 @@ class PeakList(PMIListABC):
         """
         Pick 1D peaks from data in self.spectrum.
         """
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             if excludeRegions is None:
                 excludeRegions = [[-20.1, -19.1]]
             excludeRegions = [sorted(pair, reverse=True) for pair in excludeRegions]
@@ -461,7 +461,7 @@ class PeakList(PMIListABC):
             else:
                 raise ValueError("PeakList has no attribute %s" % key)
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             newPeakList = targetSpectrum.newPeakList(**params)
             # newPeakList.symbolColour = targetSpectrum.positiveContourColour
             # newPeakList.textColour = targetSpectrum.positiveContourColour
@@ -496,7 +496,7 @@ class PeakList(PMIListABC):
         #     peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in peakList2]) + ']'
         #     log('subtractPeakLists', peaks=peakStr)
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             spectrum = self.spectrum
 
             assert spectrum is peakList.spectrum, 'For now requires both peak lists to be in same spectrum'
@@ -535,7 +535,7 @@ class PeakList(PMIListABC):
         selectedRegion = []
         minDropFactor = self.project._appBase.preferences.general.peakDropFactor
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             for ii, ind in enumerate(indices):
                 if ind is not None:
                     selectedRegion.insert(ii, [positions[ind] - tolerances[ii], positions[ind] + tolerances[ii]])
@@ -591,7 +591,7 @@ class PeakList(PMIListABC):
                         excludedDiagonalDims=None, excludedDiagonalTransform=None,
                         estimateLineWidths=True):
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             peaks = self._pickPeaksRegion(regionToPick=regionToPick,
                                           doPos=doPos, doNeg=doNeg,
                                           minLinewidth=minLinewidth, exclusionBuffer=exclusionBuffer,
@@ -1095,7 +1095,7 @@ class PeakList(PMIListABC):
         if not all(0 <= ii < dims for ii in newAxisOrder):
             raise ValueError('newAxisOrder elements must be in range 0-%i', dims-1)
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             # reorder all peaks in the peakList
             for peak in self.peaks:
                 pos = peak.position

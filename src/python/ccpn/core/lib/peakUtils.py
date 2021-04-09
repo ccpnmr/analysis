@@ -11,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-02-10 18:09:05 +0000 (Wed, February 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-09 16:51:16 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -639,7 +639,8 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     peakDims = apiPeak.sortedPeakDims()
 
     if numDim == 1:
-        _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1)
+        maximumLimit = getApp.preferences.general.searchBoxWidths1d.get(peak.axisCodes[-1][0], 0.01)
+        _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit)
         return
 
     if searchBoxMode and numDim > 1:

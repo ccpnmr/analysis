@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:37 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-09 10:45:13 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Tabs import Tabs
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.Constants import INTERNALQTDATA
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
@@ -1173,7 +1173,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         updateList = self._updatedStateToObjects()
         renameList = self._getRenames()
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             try:
                 if self.editMode:
                     # edit mode

@@ -6,7 +6,7 @@ from ccpn.core.Project import Project
 from typing import List
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, navigateToNmrAtomsInStrip
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.util.Logging import getLogger
 
 
@@ -75,7 +75,7 @@ def makeStripPlot(spectrumDisplay: GuiSpectrumDisplay, nmrAtomPairs: List[List[N
     if not nmrAtomPairs:
         return
 
-    with undoBlock():
+    with undoBlockWithoutSideBar():
         numberOfStrips = len(spectrumDisplay.strips)
 
         # Make sure there are enough strips to display nmrAtomPairs

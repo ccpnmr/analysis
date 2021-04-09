@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 15:38:09 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-09 10:45:13 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -238,7 +238,7 @@ class CreateNmrChainPopup(CcpnDialog):
 
     def _cloneFromSubstance(self, name):
         """Create a new nmr chain from a substance which has a SMILES set."""
-        with undoBlock():
+        with undoBlockWithoutSideBar():
 
             newNmrChain = self._createEmptyNmrChain(name)
             if newNmrChain:

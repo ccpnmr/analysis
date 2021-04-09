@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 15:32:05 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-09 10:45:13 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -561,7 +561,7 @@ def dialogErrorReport(self, undo, es):
 @contextmanager
 def handleDialogApply(self):
     """Context manager to wrap the apply button for dialogs
-    Error trapping is contained inside the undoBlock, any error raised is placed in
+    Error trapping is contained inside the undoBlockWithoutSideBar, any error raised is placed in
     the errorValue of the yielded object and a warning popup is raised
 
     e.g.
@@ -573,7 +573,7 @@ def handleDialogApply(self):
             # an error occurred in the code block
     """
 
-    from ccpn.core.lib.ContextManagers import undoBlock
+    from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 
     undo = self.project._undo
 
@@ -585,8 +585,8 @@ def handleDialogApply(self):
 
 
     try:
-        # add an undoBlock
-        with undoBlock():
+        # add an undoBlockWithoutSideBar
+        with undoBlockWithoutSideBar():
 
             # transfer control to the calling function
             error = errorContent()

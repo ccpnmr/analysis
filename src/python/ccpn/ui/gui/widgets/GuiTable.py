@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-18 13:29:09 +0000 (Thu, March 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-09 10:45:13 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -52,7 +52,7 @@ from collections import OrderedDict, defaultdict
 from ccpn.util.Logging import getLogger
 from types import SimpleNamespace
 from contextlib import contextmanager
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.lib.Util import getParentObjectFromPid
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
@@ -329,7 +329,7 @@ GuiTable::item::selected {
         self._enableDelete = enableDelete
         self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
         self._enableSearch = enableSearch
-        self._currentRightMenuItem = None
+        self._rightClickedTableItem = None # last selected item in a table before raising the context menu. Enabled with mousePress event filter
 
         # populate if a dataFrame has been passed in
         if dataFrameObject:
@@ -516,6 +516,19 @@ GuiTable::item::selected {
         CCPN-INTERNAL: Insert a comment into object
         """
         obj.comment = value if value else None
+
+    @staticmethod
+    def _getAnnotation(obj):
+        """
+        CCPN-INTERNAL: Get an annotation from GuiTable
+        """
+        try:
+            if obj.annotation == '' or not obj.annotation:
+                return ''
+            else:
+                return obj.annotation
+        except:
+            return ''
 
     @staticmethod
     def _setAnnotation(obj, value):
@@ -1065,7 +1078,7 @@ GuiTable::item::selected {
                     if hasattr(selected[0], 'project'):
                         thisProject = selected[0].project
 
-                        with undoBlock():
+                        with undoBlockWithoutSideBar():
                             # echo [sI.pid for sI in selected])
                             for obj in selected:
                                 if hasattr(obj, 'pid'):
@@ -1499,8 +1512,8 @@ GuiTable::item::selected {
         return rows
 
     def getRightMouseItem(self):
-        if self._currentRightMenuItem:
-            row = self._currentRightMenuItem.row()
+        if self._rightClickedTableItem:
+            row = self._rightClickedTableItem.row()
             data = {}
             for cc in range(self.columnCount()):
                 colName = self.horizontalHeaderItem(cc).text()

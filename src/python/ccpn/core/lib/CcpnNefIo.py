@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:49 +0000 (Mon, March 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-09 10:45:12 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -62,11 +62,11 @@ from ccpn.core.Sample import Sample
 # from ccpn.core.SampleComponent import SampleComponent
 from ccpn.core.Substance import Substance
 from ccpn.core.Chain import Chain
-# from ccpn.core.Residue import Residue
-# from ccpn.core.Atom import Atom
+from ccpn.core.Residue import Residue
+from ccpn.core.Atom import Atom
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
-# from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 # from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.DataSet import DataSet
@@ -114,6 +114,32 @@ DEFAULTRESTRAINTLINKLOAD = False
 REGEXREMOVEENDQUOTES = u'\`\d*`+?'
 
 NEFEXTENSION = '.nef'
+
+DEFAULTUPDATEPARAMETERS = ('comment',)
+
+# NAMETOOBJECTMAPPING = {obj.className.lower(): obj for obj in (Project, Spectrum, SpectrumGroup, Complex, PeakList,
+#                                                               IntegralList, MultipletList, PeakCluster, Sample,
+#                                                               Substance, Chain, NmrChain, ChemicalShiftList, DataSet,
+#                                                               RestraintList, Note)}
+
+NAMETOOBJECTMAPPING = {'nef_chemical_shift_list'    : ChemicalShiftList,
+                       'ccpn_spectrum_group'        : SpectrumGroup,
+                       'nef_nmr_spectrum'           : PeakList,
+                       'integral'                   : IntegralList,
+                       'multiplet'                  : MultipletList,
+                       'ccpn_peak_cluster_list'     : PeakCluster,
+                       'ccpn_sample'                : Sample,
+                       'ccpn_complex'               : Complex,
+                       'ccpn_substance'             : Substance,
+                       'nef_molecular_system'       : Chain,
+                       'ccpn_assignment'            : NmrChain,
+                       'nef_distance_restraint_list': RestraintList,
+                       'nef_dihedral_restraint_list': RestraintList,
+                       'nef_rdc_restraint_list'     : RestraintList,
+                       'ccpn_restraint_list'        : RestraintList,
+                       'ccpn_notes'                 : Note,
+                       }
+
 
 # NEf to CCPN tag mapping (and tag order)
 #
@@ -1651,7 +1677,7 @@ class CcpnNefWriter:
         loopName = 'ccpn_substance_reference_spectra'
         loop = result[loopName]
         referenceSpectra = substance.referenceSpectra
-        if len(referenceSpectra)>0:
+        if len(referenceSpectra) > 0:
             for spectrum in referenceSpectra:
                 loop.newRow((spectrum.name,))
         else:
@@ -2103,7 +2129,7 @@ class CcpnNefReader(CcpnNefContent):
         if not saveFrame:
             return
 
-        category = saveFrame['sf_category']
+        # category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
 
         if not frameSearchList or framecode in frameSearchList:
@@ -2128,6 +2154,50 @@ class CcpnNefReader(CcpnNefContent):
                     self._searchReplaceLoop(project, loop, searchFrameCode=searchFrameCode,
                                             replaceFrameCode=replaceFrameCode, replace=replace,
                                             rowSearchList=rowSearchList)
+
+    def _searchReplaceDictLoop(self, project, loop: StarIo.NmrLoop,
+                               searchFrameCode=None, replaceFrameCode=None, replace=False,
+                               rowSearchList=None):
+        """Search the loop for occurrences of item in dict and replace if required
+        """
+        import re
+
+        if not loop:
+            return
+
+        for row in loop.data:
+            for rowNum, (k, val) in enumerate(row.items()):
+                if rowSearchList and k not in rowSearchList:
+                    continue
+
+                # val is a string so can replace easily
+                if isinstance(val, str):
+                    for _old, _new in zip(searchFrameCode, replaceFrameCode):
+                        # add double-quotes around the string - catches case of contains only the pid
+                        # NOTE:ED - not very generic, should write better regex search, but requires doubling up all searches
+                        val = re.sub(_old, _new, '"' + val + '"')
+                        val = val[1:-1]
+
+                    row[k] = val
+
+    def _searchReplaceDict(self, project, saveFrame: StarIo.NmrSaveFrame,
+                           searchFrameCode=None, replaceFrameCode=None,
+                           replace=False, validFramesOnly=False,
+                           frameSearchList=None, attributeSearchList=None,
+                           loopSearchList=None, rowSearchList=None):
+        """Search the saveFrame for occurrences of item in dict and replace if required
+        """
+        if not saveFrame:
+            return
+
+        mapping = nef2CcpnMap.get(saveFrame.category) or {}
+        for tag, ccpnTag in mapping.items():
+            if ccpnTag == _isALoop:
+                loop = saveFrame.get(tag)
+                if loop and not (loopSearchList and loop.name not in loopSearchList):
+                    self._searchReplaceDictLoop(project, loop, searchFrameCode=searchFrameCode,
+                                                replaceFrameCode=replaceFrameCode, replace=replace,
+                                                rowSearchList=rowSearchList)
 
     def searchReplace(self, project: Project, dataBlock: StarIo.NmrDataBlock,
                       projectIsEmpty: bool = True,
@@ -2185,8 +2255,6 @@ class CcpnNefReader(CcpnNefContent):
             positions = [int(_val[POSITIONCERTAINTYLEN:]) for _val in row.keys() if isinstance(_val, str) and _val.startswith(POSITIONCERTAINTY)]
             maxPos = max(positions)
             break
-
-        print('>>> positions {}'.format(positions))
 
         for rowNum, row in enumerate(loop.data):
             for posNum in range(1, maxPos + 1):
@@ -2328,6 +2396,25 @@ class CcpnNefReader(CcpnNefContent):
                                                                frameSearchList=frameSearchList, attributeSearchList=attributeSearchList,
                                                                loopSearchList=loopSearchList, rowSearchList=rowSearchList))
 
+    def searchReplaceDict(self, project: Project, dataBlock: StarIo.NmrDataBlock,
+                          projectIsEmpty: bool = True,
+                          selection: typing.Optional[dict] = None,
+                          searchFrameCode=None, replaceFrameCode=None,
+                          replace=False, validFramesOnly=False,
+                          frameSearchList=None, attributeSearchList=None,
+                          loopSearchList=None, rowSearchList=None):
+        """Search the saveframes for references to findFrameCode
+        If replace is True, will replace all attributes of saveFrame (if in selection, or all if selection is empty)
+        and row items
+        """
+        if searchFrameCode:
+            return self.traverseDataBlock(project, dataBlock, True, selection=None,
+                                          traverseFunc=partial(self._searchReplaceDict,
+                                                               searchFrameCode=searchFrameCode, replaceFrameCode=replaceFrameCode,
+                                                               replace=replace, validFramesOnly=validFramesOnly,
+                                                               frameSearchList=frameSearchList, attributeSearchList=attributeSearchList,
+                                                               loopSearchList=loopSearchList, rowSearchList=rowSearchList))
+
     def _printFunc(self, project, saveFrame):
         """Print the contents of a saveFrame/dataBlock - results generated from _contentNef
         Loops are included in the saveFrame
@@ -2460,6 +2547,8 @@ class CcpnNefReader(CcpnNefContent):
         saveFrame = dataBlock.get('nef_molecular_system')
         if saveFrame and (self._importAll or self._importDict.get(saveFrame.name)):
             self._saveFrameName = 'nef_molecular_system'
+
+            # NOTE:ED - caution here - this creates a substance called Molecule_1
             self.load_nef_molecular_system(project, saveFrame)
             del saveframeOrderedDict['nef_molecular_system']
 
@@ -2669,6 +2758,14 @@ class CcpnNefReader(CcpnNefContent):
 
         return result
 
+    def _updateStringParameters(self, params, attribs=DEFAULTUPDATEPARAMETERS):
+        """Update the values in the parameters that should be None|str
+        """
+        for attrib in attribs:
+            val = params.get(attrib, None)
+            if val is not None:
+                params[attrib] = str(val)
+
     def load_nef_nmr_meta_data(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """load nef_nmr_meta_data saveFrame"""
 
@@ -2795,9 +2892,11 @@ class CcpnNefReader(CcpnNefContent):
             if not self._checkImport(saveFrame, chainCode):
                 continue
 
+            self._updateStringParameters(rows[0], attribs=('ccpn_chain_comment',))
             compoundName = rows[0].get('ccpn_compound_name')
             role = rows[0].get('ccpn_chain_role')
             comment = rows[0].get('ccpn_chain_comment')
+
             for row in rows:
                 if row.get('linking') == 'dummy':
                     row['residue_name'] = 'dummy.' + row['residue_name']
@@ -2869,10 +2968,10 @@ class CcpnNefReader(CcpnNefContent):
             result.append(newChain)
 
             # Add Residue comments
-            for ii, apiResidue in enumerate(newChain.residues):
+            for ii, residue in enumerate(newChain.residues):
                 comment = rows[ii].get('ccpn_comment')
-                if comment:
-                    apiResidue.details = comment
+                if comment is not None:
+                    residue.comment = str(comment)
         #
         return result
 
@@ -2907,8 +3006,8 @@ class CcpnNefReader(CcpnNefContent):
         tags = ('residue_name', 'linking', 'residue_variant')
         for chainCode, rows in sorted(chainData.items()):
             compoundName = rows[0].get('ccpn_compound_name')
-            role = rows[0].get('ccpn_chain_role')
-            comment = rows[0].get('ccpn_chain_comment')
+            # role = rows[0].get('ccpn_chain_role')
+            # comment = rows[0].get('ccpn_chain_comment')
             for row in rows:
                 if row.get('linking') == 'dummy':
                     row['residue_name'] = 'dummy.' + row['residue_name']
@@ -3075,6 +3174,8 @@ class CcpnNefReader(CcpnNefContent):
         mapping = nef2CcpnMap.get(category) or {}
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+        self._updateStringParameters(parameters)
+
         parameters['name'] = framecode[len(category) + 1:]
 
         # Make main object
@@ -3301,6 +3402,31 @@ class CcpnNefReader(CcpnNefContent):
             # dataBlock[newSaveFrameName] = saveFrame
             self._renameDataBlock(project, dataBlock, saveFrame, newSaveFrameName)
 
+            # search in additionalData for the pid and change
+            if category in NAMETOOBJECTMAPPING:
+                obj = NAMETOOBJECTMAPPING[category]
+
+                frameCats = frames.get('ccpn_additional_data') or []
+                frameList = [frame.name for frame in frameCats]
+                attList = ('None',)
+                loopList = ('ccpn_internal_data',)
+                replaceList = ('ccpn_object_pid', 'internal_data_string',)
+
+                # rename the items in the additionalData saveFrame
+                _oldPid = Pid.PREFIXSEP.join([obj.shortClassName, itemName])
+                _newPid = Pid.PREFIXSEP.join([obj.shortClassName, newName])
+                # rename the items in the additionalData saveFrame
+                _oldLongPid = Pid.PREFIXSEP.join([obj.className, itemName])
+                _newLongPid = Pid.PREFIXSEP.join([obj.className, newName])
+
+                # need different search
+                self.searchReplaceDict(project, dataBlock, True, None,
+                                       (f'(\"{_oldPid}\")', f'(\"{_oldLongPid}\")'),
+                                       (f'\"{_newPid}\"', f'\"{_newLongPid}\"'),
+                                       replace=True, validFramesOnly=True,
+                                       frameSearchList=frameList, attributeSearchList=attList,
+                                       loopSearchList=loopList, rowSearchList=replaceList)
+
             return newName
 
     def rename_nef_molecular_system(self, project: Project,
@@ -3322,16 +3448,57 @@ class CcpnNefReader(CcpnNefContent):
         _frameID = _saveFrameNameFromCategory(saveFrame)
         framecode, frameName, subName, prefix, postfix, preSerial, postSerial, category = _frameID
         frames = self._getSaveFramesInOrder(dataBlock)
-        frameCats = frames.get(category) or []
+        # frameCats = frames.get(category) or []
 
         frameList = ['None']  #_saveFrameNameFromCategory(frame).framecode for frame in frameCats if _saveFrameNameFromCategory(frame).fr]
+        loopList = ('nef_sequence',)
         replaceList = ('chain_code', 'complex_chain_code',
                        'chain_code_1', 'chain_code_2', 'chain_code_3', 'chain_code_4', 'chain_code_5',
                        'chain_code_6', 'chain_code_7', 'chain_code_8', 'chain_code_9', 'chain_code_10',
                        'chain_code_11', 'chain_code_12', 'chain_code_13', 'chain_code_14', 'chain_code_15',
                        'ccpn_tensor_chain_code', 'tensor_chain_code')
         self.searchReplace(project, dataBlock, True, None, itemName, newName, replace=True,
-                           frameSearchList=frameList, rowSearchList=replaceList)
+                           frameSearchList=frameList, rowSearchList=replaceList, loopSearchList=loopList)
+
+        # update in the additionalData saveFrames
+        _frameID = _saveFrameNameFromCategory(saveFrame)
+        framecode, frameName, subName, prefix, postfix, preSerial, postSerial, category = _frameID
+
+        frames = None
+        for contentBlock in contentDataBlocks:
+            framesBlock = self._getSaveFramesInOrder(contentBlock)
+            if not frames:
+                frames = framesBlock
+            else:
+                # merge the frames dict
+                frames = self._mergeSaveFramesInOrder(frames, framesBlock)
+
+        # search in additionalData for the pid and change
+        if category in NAMETOOBJECTMAPPING:
+            frameCats = frames.get('ccpn_additional_data') or []
+            frameList = [frame.name for frame in frameCats]
+            attList = ('None',)
+            loopList = ('ccpn_internal_data',)
+            replaceList = ('ccpn_object_pid', 'internal_data_string',)
+
+            for (obj, _pre, _post) in ((Chain, '(\"{}\")', '\"{}\"'),
+                                       (Residue, '(?:\"{}\.)(.*?)\"', '\"{}.\\1\"'),
+                                       (Atom, '(?:\"{}\.)(.*?)\"', '\"{}.\\1\"'),
+                                       ):
+                # rename the items in the additionalData saveFrame
+                _oldPid = Pid.PREFIXSEP.join([obj.shortClassName, itemName])
+                _newPid = Pid.PREFIXSEP.join([obj.shortClassName, newName])
+                # rename the items in the additionalData saveFrame
+                _oldLongPid = Pid.PREFIXSEP.join([obj.className, itemName])
+                _newLongPid = Pid.PREFIXSEP.join([obj.className, newName])
+
+                # need different search
+                self.searchReplaceDict(project, dataBlock, True, None,
+                                       (_pre.format(_oldPid), _pre.format(_oldLongPid)),
+                                       (_post.format(_newPid), _post.format(_newLongPid)),
+                                       replace=True, validFramesOnly=True,
+                                       frameSearchList=frameList, attributeSearchList=attList,
+                                       loopSearchList=loopList, rowSearchList=replaceList)
 
         return newName
 
@@ -3356,12 +3523,52 @@ class CcpnNefReader(CcpnNefContent):
                        'chain_code_11', 'chain_code_12', 'chain_code_13', 'chain_code_14', 'chain_code_15',
                        'ccpn_tensor_chain_code', 'tensor_chain_code', 'short_name')
         self.searchReplace(project, dataBlock, True, None, itemName, newName, replace=True,
-                           loopSearchList=loopList, rowSearchList=replaceList)
+                           loopSearchList=loopList, rowSearchList=replaceList, attributeSearchList=(None,))
 
         loopList = ('nef_chemical_shift')
         replaceList = ('chain_code',)
         self.searchReplace(project, dataBlock, True, None, itemName, newName, replace=True,
-                           loopSearchList=loopList, rowSearchList=replaceList)
+                           loopSearchList=loopList, rowSearchList=replaceList, attributeSearchList=(None,))
+
+        # update in the additionalData saveFrames
+        _frameID = _saveFrameNameFromCategory(saveFrame)
+        framecode, frameName, subName, prefix, postfix, preSerial, postSerial, category = _frameID
+
+        frames = None
+        for contentBlock in contentDataBlocks:
+            framesBlock = self._getSaveFramesInOrder(contentBlock)
+            if not frames:
+                frames = framesBlock
+            else:
+                # merge the frames dict
+                frames = self._mergeSaveFramesInOrder(frames, framesBlock)
+
+        # search in additionalData for the pid and change
+        if category in NAMETOOBJECTMAPPING:
+            frameCats = frames.get('ccpn_additional_data') or []
+            frameList = [frame.name for frame in frameCats]
+            attList = ('None',)
+            loopList = ('ccpn_internal_data',)
+            replaceList = ('ccpn_object_pid', 'internal_data_string',)
+
+            for (obj, _pre, _post) in ((NmrChain, '(\"{}\")', '\"{}\"'),
+                                       (NmrResidue, '(?:\"{}\.)(.*?)\"', '\"{}.\\1\"'),
+                                       (NmrAtom, '(?:\"{}\.)(.*?)\"', '\"{}.\\1\"'),
+                                       ):
+                # rename the items in the additionalData saveFrame
+                _oldPid = Pid.PREFIXSEP.join([obj.shortClassName, itemName])
+                _newPid = Pid.PREFIXSEP.join([obj.shortClassName, newName])
+                # rename the items in the additionalData saveFrame
+                _oldLongPid = Pid.PREFIXSEP.join([obj.className, itemName])
+                _newLongPid = Pid.PREFIXSEP.join([obj.className, newName])
+
+                # need different search
+                self.searchReplaceDict(project, dataBlock, True, None,
+                                       (_pre.format(_oldPid), _pre.format(_oldLongPid)),
+                                       (_post.format(_newPid), _post.format(_newLongPid)),
+                                       replace=True, validFramesOnly=True,
+                                       frameSearchList=frameList, attributeSearchList=attList,
+                                       loopSearchList=loopList, rowSearchList=replaceList)
 
         return newName
 
@@ -3452,12 +3659,49 @@ class CcpnNefReader(CcpnNefContent):
         if not itemName or newName == itemName:
             return
 
+        _frameID = _saveFrameNameFromCategory(saveFrame)
+        framecode, frameName, subName, prefix, postfix, preSerial, postSerial, category = _frameID
+
+        frames = None
+        for contentBlock in contentDataBlocks:
+            framesBlock = self._getSaveFramesInOrder(contentBlock)
+            if not frames:
+                frames = framesBlock
+            else:
+                # merge the frames dict
+                frames = self._mergeSaveFramesInOrder(frames, framesBlock)
+
         newName = self._getNewName(contentDataBlocks, saveFrame, itemName, newName, 'ccpn_notes', 'Note')
 
         loopList = ('ccpn_note')
         replaceList = ('name')
         self.searchReplace(project, dataBlock, True, None, itemName, newName, replace=True,
                            loopSearchList=loopList, rowSearchList=replaceList)
+
+        # search in additionalData for the pid and change
+        if category in NAMETOOBJECTMAPPING:
+            obj = NAMETOOBJECTMAPPING[category]
+
+            frameCats = frames.get('ccpn_additional_data') or []
+            frameList = [frame.name for frame in frameCats]
+            attList = ('None',)
+            loopList = ('ccpn_internal_data',)
+            replaceList = ('ccpn_object_pid', 'internal_data_string',)
+
+            # rename the items in the additionalData saveFrame
+            _oldPid = Pid.PREFIXSEP.join([obj.shortClassName, itemName])
+            _newPid = Pid.PREFIXSEP.join([obj.shortClassName, newName])
+            # rename the items in the additionalData saveFrame
+            _oldLongPid = Pid.PREFIXSEP.join([obj.className, itemName])
+            _newLongPid = Pid.PREFIXSEP.join([obj.className, newName])
+
+            # need different search
+            self.searchReplaceDict(project, dataBlock, True, None,
+                                   (f'(\"{_oldPid}\")', f'(\"{_oldLongPid}\")'),
+                                   (f'\"{_newPid}\"', f'\"{_newLongPid}\"'),
+                                   replace=True, validFramesOnly=True,
+                                   frameSearchList=frameList, attributeSearchList=attList,
+                                   loopSearchList=loopList, rowSearchList=replaceList)
 
         return newName
 
@@ -3573,6 +3817,44 @@ class CcpnNefReader(CcpnNefContent):
         self.searchReplace(project, dataBlock, True, None, oldSerial, newSerial, replace=True, validFramesOnly=True,
                            frameSearchList=frameList, attributeSearchList=attList,
                            loopSearchList=loopList, rowSearchList=replaceList)
+
+        # rename the items in the additionalData saveFrame
+        _oldLongPid = Pid.PREFIXSEP.join(['{}List'.format(_upperCaseName), itemName])
+        _newLongPid = Pid.PREFIXSEP.join(['{}List'.format(_upperCaseName), newName])
+
+        frameCats = frames.get('ccpn_additional_data') or []
+        frameList = [frame.name for frame in frameCats]
+        attList = ('None',)
+        loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_internal_data',)]
+        replaceList = ('ccpn_object_pid',)
+        self.searchReplace(project, dataBlock, True, None, _oldLongPid, _newLongPid, replace=True, validFramesOnly=True,
+                           frameSearchList=frameList, attributeSearchList=attList,
+                           loopSearchList=loopList, rowSearchList=replaceList)
+
+        # search in additionalData for the pid and change
+        if _lowerCaseName in NAMETOOBJECTMAPPING:
+            obj = NAMETOOBJECTMAPPING[_lowerCaseName]
+
+            frameCats = frames.get('ccpn_additional_data') or []
+            frameList = [frame.name for frame in frameCats]
+            attList = ('None',)
+            loopList = ('ccpn_internal_data',)
+            replaceList = ('ccpn_object_pid', 'internal_data_string',)
+
+            # rename the items in the additionalData saveFrame
+            _oldPid = Pid.PREFIXSEP.join([obj.shortClassName, itemName])
+            _newPid = Pid.PREFIXSEP.join([obj.shortClassName, newName])
+            # rename the items in the additionalData saveFrame
+            _oldLongPid = Pid.PREFIXSEP.join([obj.className, itemName])
+            _newLongPid = Pid.PREFIXSEP.join([obj.className, newName])
+
+            # need different search
+            self.searchReplaceDict(project, dataBlock, True, None,
+                                   (f'(\"{_oldPid}\")', f'(\"{_oldLongPid}\")'),
+                                   (f'\"{_newPid}\"', f'\"{_newLongPid}\"'),
+                                   replace=True, validFramesOnly=True,
+                                   frameSearchList=frameList, attributeSearchList=attList,
+                                   loopSearchList=loopList, rowSearchList=replaceList)
 
         return newName
 
@@ -3700,6 +3982,30 @@ class CcpnNefReader(CcpnNefContent):
             # remove the old saveFrame in the dataBlock and replace with the new
             self._renameDataBlock(project, dataBlock, saveFrame, newSaveFrameName)
 
+            if category in NAMETOOBJECTMAPPING:
+                obj = NAMETOOBJECTMAPPING[category]
+
+                frameCats = frames.get('ccpn_additional_data') or []
+                frameList = [frame.name for frame in frameCats]
+                attList = ('None',)
+                loopList = ('ccpn_internal_data',)
+                replaceList = ('ccpn_object_pid', 'internal_data_string',)
+
+                # rename the items in the additionalData saveFrame
+                _oldPid = Pid.PREFIXSEP.join([obj.shortClassName, itemName])
+                _newPid = Pid.PREFIXSEP.join([obj.shortClassName, Pid.IDSEP.join((name, newLabelling or ''))])
+                # rename the items in the additionalData saveFrame
+                _oldLongPid = Pid.PREFIXSEP.join([obj.className, itemName])
+                _newLongPid = Pid.PREFIXSEP.join([obj.className, Pid.IDSEP.join((name, newLabelling or ''))])
+
+                # need different search
+                self.searchReplaceDict(project, dataBlock, True, None,
+                                       (f'(\"{_oldPid}\")', f'(\"{_oldLongPid}\")'),
+                                       (f'\"{_newPid}\"', f'\"{_newLongPid}\"'),
+                                       replace=True, validFramesOnly=True,
+                                       frameSearchList=frameList, attributeSearchList=attList,
+                                       loopSearchList=loopList, rowSearchList=replaceList)
+
             return Pid.IDSEP.join([name, newLabelling])
 
         # if name != _frameID.subname:
@@ -3785,6 +4091,45 @@ class CcpnNefReader(CcpnNefContent):
 
         # need to rename the key in dataBlock
         self._renameDataBlock(project, dataBlock, saveFrame, newFrameCode)
+
+        # rename the items in the additionalData saveFrame
+        _oldLongPid = Pid.PREFIXSEP.join(['{}List'.format(_upperCaseName), itemName])
+        _newLongPid = Pid.PREFIXSEP.join(['{}List'.format(_upperCaseName), newName])
+
+        frameCats = frames.get('ccpn_additional_data') or []
+        frameList = [frame.name for frame in frameCats]
+        attList = ('None',)
+        loopList = [loopName.format(_lowerCaseName) for loopName in ('ccpn_internal_data',)]
+        replaceList = ('ccpn_object_pid',)
+        self.searchReplace(project, dataBlock, True, None, _oldLongPid, _newLongPid, replace=True, validFramesOnly=True,
+                           frameSearchList=frameList, attributeSearchList=attList,
+                           loopSearchList=loopList, rowSearchList=replaceList)
+
+        # search in additionalData for the pid and change
+        if category in NAMETOOBJECTMAPPING:
+            obj = NAMETOOBJECTMAPPING[category]
+
+            frameCats = frames.get('ccpn_additional_data') or []
+            frameList = [frame.name for frame in frameCats]
+            attList = ('None',)
+            loopList = ('ccpn_internal_data',)
+            replaceList = ('ccpn_object_pid', 'internal_data_string',)
+
+            # rename the items in the additionalData saveFrame
+            _oldPid = Pid.PREFIXSEP.join([obj.shortClassName, itemName])
+            _newPid = Pid.PREFIXSEP.join([obj.shortClassName, newName])
+            # rename the items in the additionalData saveFrame
+            _oldLongPid = Pid.PREFIXSEP.join([obj.className, itemName])
+            _newLongPid = Pid.PREFIXSEP.join([obj.className, newName])
+
+            # need different search
+            self.searchReplaceDict(project, dataBlock, True, None,
+                                   (f'(\"{_oldPid}\")', f'(\"{_oldLongPid}\")'),
+                                   (f'\"{_newPid}\"', f'\"{_newLongPid}\"'),
+                                   replace=True, validFramesOnly=True,
+                                   frameSearchList=frameList, attributeSearchList=attList,
+                                   loopSearchList=loopList, rowSearchList=replaceList)
+
         return newName
 
     renames['nef_chemical_shift_list'] = rename_saveframe
@@ -3817,6 +4162,8 @@ class CcpnNefReader(CcpnNefContent):
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters)
+
             tt = tuple(row.get(tag) for tag in ('chain_code', 'sequence_code', 'residue_name',
                                                 'atom_name'))
             element = row.get('element')
@@ -3835,6 +4182,7 @@ class CcpnNefReader(CcpnNefContent):
                 nmrResidue = self.produceNmrResidue(*tt[:3])
                 nmrAtom = self.produceNmrAtom(nmrResidue, tt[3], isotopeCode=isotopeCode)
                 parameters['nmrAtom'] = nmrAtom
+
                 result.append(creatorFunc(**parameters))
 
             except ValueError:
@@ -3884,6 +4232,7 @@ class CcpnNefReader(CcpnNefContent):
         mapping = nef2CcpnMap.get(category) or {}
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+        self._updateStringParameters(parameters)
 
         if category == 'nef_distance_restraint_list':
             restraintType = 'Distance'
@@ -4065,13 +4414,15 @@ class CcpnNefReader(CcpnNefContent):
                     dd['figureOfMerit'] = val
                 val = row.get('ccpn_comment')
                 if val is not None:
-                    dd['comment'] = val
+                    dd['comment'] = str(val)
                 restraint = restraintList.newRestraint(**dd)
                 restraints[serial] = restraint
                 result.append(restraint)
 
             # Get or make restraintContribution
             parameters = parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters)
+
             combinationId = parameters.get('combinationId')
             nonAssignmentValues = tuple(parameters.get(tag) for tag in contributionTags)
             if combinationId:
@@ -4165,10 +4516,12 @@ class CcpnNefReader(CcpnNefContent):
         # Get peakList parameters
         # peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mapping)
         peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mappingNoPeakList)
+        self._updateStringParameters(peakListParameters)
 
         # Get spectrum parameters
         spectrumParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping,
                                                                       ccpnPrefix=None)
+        self._updateStringParameters(spectrumParameters)
         # ccpnPrefix='spectrum')
 
         # Get name from spectrum parameters, or from the framecode
@@ -4231,23 +4584,49 @@ class CcpnNefReader(CcpnNefContent):
 
         # Make PeakList if old nef parameters exist
         # if len(peakListParameters):
-        peakList = spectrum.newPeakList(**peakListParameters)
 
-        # # Load peaks (if exist)
-        # loop = saveFrame.get('nef_peak')
-        # if loop:
-        #     self.load_nef_peak(peakList, loop)
+        try:
+            # check the list of items in the import dict
+            _frame = self._importDict[saveFrame.name]
+            importRows = _frame['_importPeaks']
+        except:
+            importRows = []
 
-        # Load remaining loops, with spectrum as parent
+        peakListId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (spectrumName, peakListSerial))
+        peakList = project.getObjectsByPartialId(className='PeakList', idStartsWith=peakListId)
+
+        if self._checkImport(saveFrame, peakListId, checkID='_importPeaks'):
+            if peakList:
+                self.warning('PeakList %s already exists. Skipping' % peakListId)
+                return peakList
+
+            else:
+                peakList = spectrum.newPeakList(**peakListParameters)
+
+                # Load 'nef_peak' loop, with spectrum as parent - load the peaks
+                for loopName in loopNames:
+                    if loopName in ('nef_peak',):
+                        # Those are treated elsewhere
+                        loop = saveFrame.get(loopName)
+                        if loop:
+                            importer = self.importers[loopName]
+                            importer(self, spectrum, loop, saveFrame, peakListId=peakListSerial)
+
+                # # Load peaks (if exist)
+                # loop = saveFrame.get('nef_peak')
+                # if loop:
+                #     self.load_nef_peak(peakList, loop)
+
+        # Load remaining loops, with spectrum as parent - ccpn multiplets/integrals
         for loopName in loopNames:
-            if loopName not in ('nef_spectrum_dimension', 'ccpn_spectrum_dimension',  #'nef_peak',
+            if loopName not in ('nef_spectrum_dimension', 'ccpn_spectrum_dimension', 'nef_peak',
                                 'nef_spectrum_dimension_transfer',
                                 ):
                 # Those are treated elsewhere
                 loop = saveFrame.get(loopName)
                 if loop:
                     importer = self.importers[loopName]
-                    importer(self, spectrum, loop, saveFrame, peakListId=peakList.serial)
+                    importer(self, spectrum, loop, saveFrame, peakListId=peakListSerial)
                     # importer(self, spectrum, loop, peakListId=oldSerial)
         #
         # if len(peakListParameters):
@@ -4269,7 +4648,7 @@ class CcpnNefReader(CcpnNefContent):
             if substance is None:
                 self.warning(
                         "No substance saveframe found with framecode %s. Skipping substance from referenceSubstances"
-                        % nameLabelling,loop)
+                        % nameLabelling, loop)
             else:
                 referenceSubstances.append(substance)
         #
@@ -4514,9 +4893,11 @@ class CcpnNefReader(CcpnNefContent):
 
         mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+
         creatorFunc = spectrum.newPeakList
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters)
 
             # NOTE:ED - adding flags to restrict importing to the selection
             serial = parameters.get('serial')
@@ -4542,10 +4923,11 @@ class CcpnNefReader(CcpnNefContent):
 
         mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-        creatorFunc = spectrum.getPeakList
+
+        verifyFunc = spectrum.getPeakList
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
-            peakList = creatorFunc(parameters['serial'])
+            peakList = verifyFunc(parameters['serial'])
             if peakList is not None:
                 self.error('{} - PeakList {} already exists'.format(_ID, peakList), loop, (peakList,))
                 _rowErrors.add(loop.data.index(row))
@@ -4562,9 +4944,11 @@ class CcpnNefReader(CcpnNefContent):
 
         mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+
         creatorFunc = spectrum.newIntegralList
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters)
 
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, parameters['serial']])
             if not self._checkImport(saveFrame, listName, checkID='_importIntegrals'):
@@ -4589,10 +4973,11 @@ class CcpnNefReader(CcpnNefContent):
 
         mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-        creatorFunc = spectrum.getIntegralList
+
+        verifyFunc = spectrum.getIntegralList
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
-            integralList = creatorFunc(parameters['serial'])
+            integralList = verifyFunc(parameters['serial'])
             if integralList is not None:
                 self.error('{} - IntegralList {} already exists'.format(_ID, integralList), loop, (integralList,))
                 _rowErrors.add(loop.data.index(row))
@@ -4612,6 +4997,7 @@ class CcpnNefReader(CcpnNefContent):
         creatorFunc = spectrum.newMultipletList
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters)
 
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, parameters['serial']])
             if not self._checkImport(saveFrame, listName, checkID='_importMultiplets'):
@@ -4636,10 +5022,11 @@ class CcpnNefReader(CcpnNefContent):
 
         mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-        creatorFunc = spectrum.getMultipletList
+
+        verifyFunc = spectrum.getMultipletList
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
-            multipletList = creatorFunc(parameters['serial'])
+            multipletList = verifyFunc(parameters['serial'])
             if multipletList is not None:
                 self.error('{} - MultipletList {} already exists'.format(_ID, multipletList), loop, (multipletList,))
                 _rowErrors.add(loop.data.index(row))
@@ -4668,6 +5055,7 @@ class CcpnNefReader(CcpnNefContent):
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters, attribs=('comment', 'annotation'))
 
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, row['integral_list_serial']])
             if not self._checkImport(saveFrame, listName, checkID='_importIntegrals'):
@@ -4708,7 +5096,7 @@ class CcpnNefReader(CcpnNefContent):
         _ID = 'ccpn_integral'
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
-        serial2creatorFunc = dict((x.serial, x.getIntegral) for x in spectrum.integralLists)
+        serial2verifyFunc = dict((x.serial, x.getIntegral) for x in spectrum.integralLists)
 
         mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
@@ -4717,7 +5105,7 @@ class CcpnNefReader(CcpnNefContent):
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, row['integral_list_serial']])
             integralID = '_'.join([_ID, listName])
 
-            integralFunc = serial2creatorFunc.get(row['integral_list_serial'])
+            integralFunc = serial2verifyFunc.get(row['integral_list_serial'])
             if integralFunc:
                 integral = integralFunc(parameters['serial'])
                 if integral is not None:
@@ -4744,12 +5132,18 @@ class CcpnNefReader(CcpnNefContent):
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters, attribs=('comment', 'annotation'))
 
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, row['multiplet_list_serial']])
             if not self._checkImport(saveFrame, listName, checkID='_importMultiplets'):
                 continue
 
-            multiplet = serial2creatorFunc[row['multiplet_list_serial']]()  #**parameters)
+            # these are now derived
+            if parameters.get('position'):
+                del parameters['position']
+            if parameters.get('positionError'):
+                del parameters['positionError']
+            multiplet = serial2creatorFunc[row['multiplet_list_serial']](**parameters)
 
             if row['slopes']:
                 multiplet.slopes = eval(row['slopes'])
@@ -4769,7 +5163,7 @@ class CcpnNefReader(CcpnNefContent):
         _ID = 'ccpn_multiplet'
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
-        serial2creatorFunc = dict((x.serial, x.getMultiplet) for x in spectrum.multipletLists)
+        serial2verifyFunc = dict((x.serial, x.getMultiplet) for x in spectrum.multipletLists)
 
         mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
@@ -4778,7 +5172,7 @@ class CcpnNefReader(CcpnNefContent):
             listName = Pid.IDSEP.join(('' if x is None else str(x)) for x in [spectrum.name, row['multiplet_list_serial']])
             multipletID = '_'.join([_ID, listName])
 
-            multFunc = serial2creatorFunc.get(row['multiplet_list_serial'])
+            multFunc = serial2verifyFunc.get(row['multiplet_list_serial'])
             if multFunc:
                 multiplet = multFunc(parameters['serial'])
                 if multiplet is not None:
@@ -4860,6 +5254,7 @@ class CcpnNefReader(CcpnNefContent):
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters, attribs=('comment', 'annotation'))
 
             # NOTE:ED - adding flags to restrict importing to the selection
             serial = parameters.get('serial')
@@ -4912,10 +5307,11 @@ class CcpnNefReader(CcpnNefContent):
 
         mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-        creatorFunc = project.getPeakCluster
+
+        verifyFunc = project.getPeakCluster
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
-            peakCluster = creatorFunc(parameters['serial'])
+            peakCluster = verifyFunc(parameters['serial'])
             if peakCluster is not None:
                 self.error('{} - PeakCluster {} already exists'.format(_ID, peakCluster), loop, (peakCluster,))
                 _rowErrors.add(loop.data.index(row))
@@ -4987,6 +5383,7 @@ class CcpnNefReader(CcpnNefContent):
         for row in loop.data:
 
             parameters = _parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters, attribs=('comment', 'annotation'))
 
             # get or make peak
             serial = parameters['serial']
@@ -5210,11 +5607,11 @@ class CcpnNefReader(CcpnNefContent):
                     _dataSet = project.getDataSet('myDataSet_{}'.format(dataSetSerial))
                     if _dataSet is not None:
                         for prefix in ['nef_distance_restraint_list',
-                                             'nef_dihedral_restraint_list',
-                                             'nef_rdc_restraint_list',
-                                             'ccpn_restraint_list']:
+                                       'nef_dihedral_restraint_list',
+                                       'nef_rdc_restraint_list',
+                                       'ccpn_restraint_list']:
                             if _restraintPid.startswith(prefix):
-                                _name = _restraintPid[len(prefix)+1:]
+                                _name = _restraintPid[len(prefix) + 1:]
                                 restraintList = _dataSet.getRestraintList(_name)
                                 if restraintList:
                                     break
@@ -5261,10 +5658,21 @@ class CcpnNefReader(CcpnNefContent):
 
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
-        framecode = saveFrame['sf_framecode']
+        # framecode = saveFrame['sf_framecode']
         mapping = nef2CcpnMap.get(category) or {}
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+        self._updateStringParameters(parameters)
+
+        try:
+            # check the list of items in the import dict
+            _frame = self._importDict[saveFrame.name]
+            importRows = _frame['_importRows']
+        except:
+            importRows = []
+        if parameters['name'] not in importRows:
+            # skip if not in the import list
+            return
 
         # Make main object
         result = project.newSpectrumGroup(**parameters)
@@ -5338,6 +5746,7 @@ class CcpnNefReader(CcpnNefContent):
         mapping = nef2CcpnMap.get(category) or {}
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+        self._updateStringParameters(parameters)
 
         # Make main object
         result = project.newComplex(**parameters)
@@ -5414,6 +5823,7 @@ class CcpnNefReader(CcpnNefContent):
         mapping = nef2CcpnMap.get(category) or {}
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+        self._updateStringParameters(parameters)
 
         # Make main object
         result = project.newSample(**parameters)
@@ -5460,6 +5870,8 @@ class CcpnNefReader(CcpnNefContent):
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters)
+
             result.append(creatorFunc(**parameters))
 
         return result
@@ -5470,7 +5882,7 @@ class CcpnNefReader(CcpnNefContent):
                                      sampleName: str = None):
         """verify ccpn_sample_component loop"""
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
-        creatorFunc = parent.getSampleComponent
+        verifyFunc = parent.getSampleComponent
 
         if sampleName is None:
             self.error('Undefined sampleName', loop, None)
@@ -5481,8 +5893,7 @@ class CcpnNefReader(CcpnNefContent):
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
 
-            # NOTE:ED - need to check if 'labelling' removed from pid (which is should be)
-            result = creatorFunc('.'.join([sampleName, parameters.get('name') or '', parameters.get('labelling') or '']))
+            result = verifyFunc('.'.join([sampleName, parameters.get('name') or '', parameters.get('labelling') or '']))
             if result is not None:
                 self.error('ccpn_sample_component - SampleComponent {} already exists'.format(result), loop, (result,))
                 _rowErrors.add(loop.data.index(row))
@@ -5619,9 +6030,11 @@ class CcpnNefReader(CcpnNefContent):
         # read nmr_chain loop
         mapping = nef2CcpnMap.get(nmrChainLoopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+
         creatorFunc = project.newNmrChain
         for row in saveFrame[nmrChainLoopName].data:
             parameters = _parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters)
 
             # NOTE:ED - adding flags to restrict importing to the selection
             if not self._checkImport(saveFrame, parameters.get('shortName')):
@@ -5672,6 +6085,8 @@ class CcpnNefReader(CcpnNefContent):
         # for row in saveFrame[nmrResidueLoopName].data:
         for row in nmrResidueLoopData:
             parameters = _parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters)
+
             parameters['residueType'] = row.get('residue_name')
             # NB chainCode None is not possible here (for ccpn data)
             chainCode = row['chain_code']
@@ -5696,6 +6111,8 @@ class CcpnNefReader(CcpnNefContent):
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
         for row in saveFrame[nmrAtomLoopName].data:
             parameters = _parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters)
+
             chainCode = row['chain_code']
 
             # NOTE:ED - adding flags to restrict importing to the selection
@@ -5731,15 +6148,16 @@ class CcpnNefReader(CcpnNefContent):
         # read nmr_chain loop
         mapping = nef2CcpnMap.get(nmrChainLoopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-        creatorFunc = project.getNmrChain
+
+        verifyFunc = project.getNmrChain
         loop = saveFrame[nmrChainLoopName]
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
             if parameters['shortName'] == coreConstants.defaultNmrChainCode:
-                result = project.getNmrChain(coreConstants.defaultNmrChainCode)
+                result = verifyFunc(coreConstants.defaultNmrChainCode)
             else:
                 name = parameters['shortName']
-                result = creatorFunc(name)
+                result = verifyFunc(name)
                 # shortName.translate(Pid.remapSeparators))
             if result:
                 # warning as already exists
@@ -5760,7 +6178,7 @@ class CcpnNefReader(CcpnNefContent):
             # parameters['residueType'] = row.get('residue_name')
             # NB chainCode None is not possible here (for ccpn data)
             chainCode = row['chain_code']
-            nmrChain = project.getNmrChain(chainCode)
+            nmrChain = verifyFunc(chainCode)
             if nmrChain is not None:
                 name = Pid.IDSEP.join(('' if x is None else str(x)) for x in (row.get('sequence_code'), row.get('residue_name')))
                 result = nmrChain.getNmrResidue(name)
@@ -5853,8 +6271,22 @@ class CcpnNefReader(CcpnNefContent):
         result = []
         mapping = nef2CcpnMap.get(loopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+
+        try:
+            # check the list of items in the import dict
+            _frame = self._importDict[saveFrame.name]
+            importRows = _frame['_importRows']
+        except:
+            importRows = []
+
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters)
+
+            if parameters['name'] not in importRows:
+                # skip if not in the import list
+                continue
+
             obj = creatorFunc(**parameters)
             result.append(obj)
 
@@ -5882,7 +6314,7 @@ class CcpnNefReader(CcpnNefContent):
         loop = saveFrame[loopName]
         _rowErrors = saveFrame._rowErrors[loopName] = OrderedSet()
         saveFrame._rowErrors['ccpn_notes'] = OrderedSet()
-        creatorFunc = project.getNote
+        verifyFunc = project.getNote
 
         result = []
         mapping = nef2CcpnMap.get(loopName) or {}
@@ -5890,7 +6322,7 @@ class CcpnNefReader(CcpnNefContent):
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
             name = parameters['name']
-            result = creatorFunc(name)
+            result = verifyFunc(name)
             if result:
                 self.error('ccpn_notes - Note {} already exists'.format(result), saveFrame, (result,))
                 _rowErrors.add(loop.data.index(row))
@@ -5905,8 +6337,20 @@ class CcpnNefReader(CcpnNefContent):
         # ccpn_additional_data contains nothing except for the ccpn_internal_data loop
         loopName = 'ccpn_internal_data'
         loop = saveFrame[loopName]
+
+        try:
+            # check the list of items in the import dict
+            _frame = self._importDict[saveFrame.name]
+            importRows = _frame['_importRows']
+        except:
+            importRows = []
+
         for row in loop.data:
             pid, data = row.values()
+            if pid not in importRows:
+                # skip if not in the import list
+                continue
+
             obj = project.getByPid(pid)
             if obj is None:
                 getLogger().debug2('Loading NEF additional data: unable to find object "%s"' % pid)
@@ -5920,17 +6364,20 @@ class CcpnNefReader(CcpnNefContent):
         loopName = 'ccpn_internal_data'
         loop = saveFrame[loopName]
         _rowErrors = saveFrame._rowErrors[loopName] = OrderedSet()
+        saveFrame._rowErrors['ccpn_additional_data'] = OrderedSet()
+        verifyFunc = project.getByPid
 
         for row in loop.data:
             pid, data = row.values()
-            obj = project.getByPid(pid)
-            if obj is None:
-                getLogger().debug2('Loading NEF additional data: unable to find object "%s"' % pid)
-            else:
-                data = obj._ccpnInternalData
+            result = verifyFunc(pid)
+
+            if result:
+                data = result._ccpnInternalData
                 if data:
-                    self.error('ccpn_additional_data - Object {} contains internal data'.format(obj), saveFrame, (obj,))
+                    self.error('ccpn_additional_data - Object {} contains internal data'.format(result), saveFrame, (result,))
                     _rowErrors.add(loop.data.index(row))
+                    saveFrame._rowErrors['ccpn_additional_data'].add(pid)
+                    saveFrame._rowErrors['ccpn_internal_data_' + pid] = (loop.data.index(row),)
 
     verifiers['ccpn_additional_data'] = verify_ccpn_additional_data
     verifiers['ccpn_internal_data'] = _noLoopVerify

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 15:38:07 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-09 10:45:11 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -335,7 +335,11 @@ def _getChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: 
 def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: str = None,
                  startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                  shortName: str = None, role: str = None, comment: str = None,
-                 serial: int = None) -> Chain:
+                 serial: int = None,
+                 expandFromAtomSets: bool = True,
+                 addPseudoAtoms: bool = True,
+                 addNonstereoAtoms: bool = True,
+                 ) -> Chain:
     """Create new chain from sequence of residue codes, using default variants.
 
     Automatically creates the corresponding polymer Substance if the compoundName is not already taken
@@ -352,6 +356,9 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     :param str role: role for new chain (optional)
     :param str comment: comment for new chain (optional)
     :param serial: optional serial number.
+    :param bool expandFromAtomSets: Create new Atoms corresponding to the ChemComp AtomSets definitions.
+                Eg. H1, H2, H3 equivalent atoms will add a new H% atom. This will facilitate assignments workflows.
+                See ccpn.core.lib.MoleculeLib.expandChainAtoms for details.
     :return: a new Chain instance.
     """
 
@@ -434,6 +441,17 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
 
     try:
         result = _newApiChain(self, apiMolecule, shortName, role, comment)
+        if result:
+            if expandFromAtomSets:
+                from ccpn.core.lib.MoleculeLib import expandChainAtoms
+                expandChainAtoms(result,
+                                 replaceStarWithPercent=True,
+                                 addPseudoAtoms=addPseudoAtoms,
+                                 addNonstereoAtoms=addNonstereoAtoms,
+                                 setBoundsForAtomGroups=True,
+                                 atomNamingSystem='PDB_REMED',
+                                 pseudoNamingSystem='AQUA')
+
 
     except Exception as es:
         if substance:
@@ -462,7 +480,11 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
 
 @newObject(Chain)
 def _createChainFromSubstance(self: Substance, shortName: str = None, role: str = None,
-                              comment: str = None, serial: int = None) -> Chain:
+                              comment: str = None, serial: int = None,
+                              expandFromAtomSets: bool = True,
+                              addPseudoAtoms: bool = True,
+                              addNonstereoAtoms: bool = True,
+                              ) -> Chain:
     """Create new Chain that matches Substance
 
     :param shortName:
@@ -504,6 +526,16 @@ def _createChainFromSubstance(self: Substance, shortName: str = None, role: str 
     for residue in result.residues:
         # Necessary as CCPN V2 default protonation states do not match the NEF / V3 standard
         residue.resetVariantToDefault()
+
+    if expandFromAtomSets:
+        from ccpn.core.lib.MoleculeLib import expandChainAtoms
+        expandChainAtoms(result,
+                         replaceStarWithPercent=True,
+                         addPseudoAtoms=addPseudoAtoms,
+                         addNonstereoAtoms=addNonstereoAtoms,
+                         setBoundsForAtomGroups=True,
+                         atomNamingSystem='PDB_REMED',
+                         pseudoNamingSystem='AQUA')
 
     return result
 
@@ -549,22 +581,37 @@ def _fetchChemCompFromFile(project, filePath):
     :return: The API chemComp object
     """
     from ccpnmodel.ccpncore.xml.memops.Implementation import loadFromStream
-    from ccpnmodel.ccpncore.lib import ApiPath
+    from ccpn.util.Path import aPath
     memopsRoot =  project._wrappedData.root
-    topObjId = ApiPath.getTopObjIdFromFileName(filePath)
-    chemComp = memopsRoot.findFirstChemComp(guid=topObjId) # Check if the chemcomp is already loaded
-    if not chemComp:
+    basename = aPath(filePath).basename
+    ll = basename.split('+') # assuming the file is an old xml type with + separators or created from Chembuild.
+    if len(ll)>1:
+        ccpCode = ll[1]
+        chemComp = memopsRoot.findFirstChemComp(ccpCode=ccpCode) # Check if the chemcomp is already loaded
+        if chemComp:
+            raise RuntimeError('A ChemComp with the same ccpCode is already loaded. Could not create a new ChemComp'
+                                'with a pre-existing ccpCode: %s.' % ccpCode)
+    topObjId = ll[-1]
+    chemComp = memopsRoot.findFirstChemComp(topObjId=topObjId)  # Check if the chemcomp is already loaded
+    if chemComp:
+        getLogger().warning('A ChemComp with the same topObjId is already loaded. Returning the pre-existing.')
+    else:
         with open(filePath) as stream:
             chemComp = loadFromStream(stream, topObject=memopsRoot, topObjId=topObjId,)
+
     return chemComp
 
-def _newChainFromChemComp(project, chemComp, chainCode:str=None, includePseudoAtoms:bool=False):
+def _newChainFromChemComp(project, chemComp,
+                          chainCode:str=None,
+                          expandFromAtomSets = True,
+                          addPseudoAtoms = False,
+                          addNonstereoAtoms = False,
+                          ):
     """
     :param project:
     :param chemComp: the chemComp object. Use _fetchChemCompFromFile(project, chemCompFilePath)
     :param chainCode: str. the code that will appear on sidebar.
-    :param includePseudoAtoms: Remove all atoms that are not included in the original chemComp file.
-                               These are created artificially and include pseudoAtoms such as: H%, MB etc
+
     :return: A new chain containing only one residue corresponding to the small molecule and its atoms.
             Atoms are named as defined in the chemComp file.
             Residue name is set from the chemComp ccpCode.
@@ -587,9 +634,15 @@ def _newChainFromChemComp(project, chemComp, chainCode:str=None, includePseudoAt
             chainCode = _incrementObjectName(project, Chain._pluralLinkName, chainCode)
             newApiChain = apiMolSystem.newChain(molecule=molecule, code=chainCode)
             chain = project._data2Obj[newApiChain]
-            if not includePseudoAtoms:
-                for residue in chain.residues:
-                    residue._removePseudoAtoms() # We should not create them in first place them!
+            if expandFromAtomSets:
+                from ccpn.core.lib.MoleculeLib import expandChainAtoms
+                expandChainAtoms(chain,
+                                 replaceStarWithPercent=True,
+                                 addPseudoAtoms=addPseudoAtoms,
+                                 addNonstereoAtoms=addNonstereoAtoms,
+                                 setBoundsForAtomGroups=True,
+                                 )
+
             return chain
 
 def getter(self: Substance) -> Tuple[Chain, ...]:

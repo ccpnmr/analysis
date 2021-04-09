@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-26 12:43:47 +0000 (Fri, March 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-09 10:45:12 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,7 @@ from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, undoBloc
 from ccpn.ui._implementation.Window import Window
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, undoBlockWithoutSideBar, deleteObject
 from ccpn.util.Logging import getLogger
 
 
@@ -285,7 +286,7 @@ class SpectrumDisplay(AbstractWrapperObject):
         if not all(isinstance(val, int) for val in spectrumIndex):
             raise ValueError("spectrum indexing values must be Int")
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
 
             # rebuild the display when the ordering has changed
             with undoStackBlocking() as addUndoItem:
@@ -310,7 +311,7 @@ class SpectrumDisplay(AbstractWrapperObject):
             raise TypeError('ind %s is not of type Int' % str(ind))
 
         index = ind  #.spectrumViews.index(spectrumView)
-        with undoBlock():
+        with undoBlockWithoutSideBar():
 
             if not self._orderedSpectrumViews:
                 self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
@@ -336,7 +337,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     def resetAxisOrder(self):
         """Reset display to original axis order"""
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             self._wrappedData.resetAxisOrder()
 
     def findAxis(self, axisCode):
@@ -579,7 +580,7 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                 "Display of sampled dimension spectra is not implemented yet")
         # # NBNB TBD FIXME
 
-    with undoBlock():
+    with undoBlockWithoutSideBar():
         display = project.newSpectrumDisplay(axisCodes=displayAxisCodes, stripDirection=stripDirection,
                                              independentStrips=independentStrips,
                                              title=title, zPlaneNavigationMode=zPlaneNavigationMode)

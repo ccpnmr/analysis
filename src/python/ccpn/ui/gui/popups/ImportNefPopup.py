@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-18 13:29:08 +0000 (Thu, March 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-09 10:45:13 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -551,6 +551,26 @@ class NefDictFrame(Frame):
                 for rowIndex in chainErrors:
                     table.setRowBackgroundColour(rowIndex, _fillColour)
 
+    def table_ccpn_additional_data(self, saveFrame, item):
+        itemName = item.data(0, 0)
+        primaryCode = 'ccpn_additional_data'
+        _content = getattr(saveFrame, '_content', None)
+        _errors = getattr(saveFrame, '_rowErrors', {})
+
+        numPrimary = _content.get(primaryCode)
+        if numPrimary and len(numPrimary) <= 1:
+            return
+
+        if _errors:
+            _fillColour = INVALIDTABLEFILLCHECKCOLOUR if item.checkState(0) else INVALIDTABLEFILLNOCHECKCOLOUR
+
+            # colour rows by extra colour
+            chainErrors = _errors.get('ccpn_internal_data_' + itemName)
+            if chainErrors:
+                table = self._nefTables.get('ccpn_internal_data')
+                for rowIndex in chainErrors:
+                    table.setRowBackgroundColour(rowIndex, _fillColour)
+
     def _set_bad_saveframe(self, name=None, saveFrame=None, parentGroup=None, prefix=None, mappingCode=None,
                            errorCode=None, tableColourFunc=None):
         # check if the current saveFrame exists; i.e., category exists as row = [0]
@@ -606,11 +626,12 @@ class NefDictFrame(Frame):
         # NOTE:ED - call autoRename
         if _handleAutoRename:
             mappingCode = mappingCode or ''
-            errorCode = errorCode or ''
+            # errorCode = errorCode or ''
             mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
-            plural, singular = mapping
-            _auto = partial(self._rename, item=item, parentName=plural, lineEdit=None, saveFrame=saveFrame, autoRename=True)
-            _auto()
+            if mapping:
+                plural, singular = mapping
+                _auto = partial(self._rename, item=item, parentName=plural, lineEdit=None, saveFrame=saveFrame, autoRename=True)
+                _auto()
             return
 
         # cat = saveFrame.get('sf_category')
@@ -661,9 +682,12 @@ class NefDictFrame(Frame):
             self._commentData.setMinimumHeight(_height * 3)
 
             if errorCode in _errors and itemName in _errors[errorCode]:
-                palette = saveFrameData.palette()
-                palette.setColor(QtGui.QPalette.Base, _fillColour)
-                saveFrameData.setPalette(palette)
+                try:
+                    palette = saveFrameData.palette()
+                    palette.setColor(QtGui.QPalette.Base, _fillColour)
+                    saveFrameData.setPalette(palette)
+                except Exception as es:
+                    pass
 
             if tableColourFunc is not None:
                 tableColourFunc(self, saveFrame, item)
@@ -907,6 +931,13 @@ class NefDictFrame(Frame):
                                                  errorCode='ccpn_substance',
                                                  tableColourFunc=None)
 
+    handleSaveFrames['ccpn_internal_data'] = partial(handle_treeView_selection,
+                                                 prefix='ccpn_internal_data_',
+                                                 mappingCode='ccpn_additional_data',
+                                                 errorCode='ccpn_additional_data',
+                                                 # tableColourFunc=table_ccpn_additional_data)
+                                                 tableColourFunc=None)
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     _setBadSaveFrames['nef_sequence'] = partial(_set_bad_saveframe,
@@ -1011,6 +1042,13 @@ class NefDictFrame(Frame):
                                                   errorCode='ccpn_substance',
                                                   tableColourFunc=None)
 
+    _setBadSaveFrames['ccpn_internal_data'] = partial(_set_bad_saveframe,
+                                                 prefix='ccpn_internal_data_',
+                                                 mappingCode='ccpn_additional_data',
+                                                 errorCode='ccpn_additional_data',
+                                                 # tableColourFunc=table_ccpn_additional_data)
+                                                 tableColourFunc=None)
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     applyCheckBoxes['nef_sequence'] = partial(apply_checkBox_item,
@@ -1071,6 +1109,7 @@ class NefDictFrame(Frame):
     applyCheckBoxes['ccpn_peak_list'] = partial(apply_checkBox_item,
                                                 prefix='nef_peak_',
                                                 mappingCode='nef_peak',
+                                                checkID='_importPeaks',
                                                 )
 
     applyCheckBoxes['ccpn_integral_list'] = partial(apply_checkBox_item,
@@ -1103,6 +1142,11 @@ class NefDictFrame(Frame):
     applyCheckBoxes['nef_peak_restraint_link'] = partial(apply_checkBox_item,
                                                          prefix='nef_peak_restraint_',
                                                          mappingCode='nef_peak_restraint_link',
+                                                         )
+
+    applyCheckBoxes['ccpn_internal_data'] = partial(apply_checkBox_item,
+                                                         prefix='ccpn_internal_data_',
+                                                         mappingCode='ccpn_additional_data',
                                                          )
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1207,6 +1251,7 @@ class NefDictFrame(Frame):
         table._hiddenColumns = []
         table.setData(_data)
         table.resizeColumnsToContents()
+        table.resizeRowsToContents()
         self._nefTables[_name] = table
 
         return frame, table

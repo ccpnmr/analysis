@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-18 13:29:08 +0000 (Thu, March 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-09 10:45:12 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
@@ -412,6 +412,16 @@ class ChemicalShiftTable(GuiTable):
             self._update(self.chemicalShiftList)
         else:
             self.clearTable()
+
+    def mousePressEvent(self, event):
+        """handle mouse press events
+        Clicking is handled on the mouse release
+        """
+        if event.button() == QtCore.Qt.RightButton:
+            # stops the selection from the table when the right button is clicked
+            self._rightClickedTableItem = self.itemAt(event.pos())
+
+        super().mousePressEvent(event)
 
     def _setContextMenu(self, enableExport=True, enableDelete=True):
         """Subclass guiTable to insert new merge items to top of context menu

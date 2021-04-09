@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-30 16:58:51 +0100 (Tue, March 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-09 10:45:11 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -647,7 +647,9 @@ class Substance(AbstractWrapperObject):
 
     @logCommand(get='self')
     def createChain(self, shortName: str = None, role: str = None,
-                    comment: str = None, **kwds):
+                    comment: str = None, expandFromAtomSets: bool = True,
+                    addPseudoAtoms: bool = True, addNonstereoAtoms: bool = True,
+                    **kwds):
         """Create new Chain that matches Substance
 
         See the Chain class for details.
@@ -661,7 +663,10 @@ class Substance(AbstractWrapperObject):
         """
         from ccpn.core.Chain import _createChainFromSubstance
 
-        return _createChainFromSubstance(self, shortName=shortName, role=role, comment=comment, **kwds)
+        return _createChainFromSubstance(self, shortName=shortName, role=role, comment=comment,
+                                         expandFromAtomSets=expandFromAtomSets, addPseudoAtoms=addPseudoAtoms,
+                                         addNonstereoAtoms=addNonstereoAtoms,
+                                         **kwds)
 
     @logCommand('project.')
     def getChain(self, shortName: str = None, role: str = None,

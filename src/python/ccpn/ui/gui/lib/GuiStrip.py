@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-25 17:05:10 +0000 (Thu, March 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-09 11:57:52 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2217,7 +2217,7 @@ class GuiStrip(Frame):
                                 % (newIndex, stripCount))
             newIndex = stripCount - 1
 
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             with undoStackBlocking() as addUndoItem:
                 # needs to be first as it uses currentOrdering
                 addUndoItem(undo=partial(self._moveToStripLayout, newIndex, currentIndex))

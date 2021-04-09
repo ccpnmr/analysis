@@ -54,8 +54,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-03 18:11:37 +0000 (Wed, February 03, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-09 11:57:52 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -85,7 +85,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
     rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse, PICK, SELECT
 from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
 from ccpn.ui.gui.lib.mouseEvents import MouseModes, getCurrentMouseMode
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 
 
 class CrossHair:
@@ -482,7 +482,7 @@ class ViewBox(pg.ViewBox):
                 # update strips which have the above peaks in them
                 # (could check for visibility...)
 
-                with undoBlock():
+                with undoBlockWithoutSideBar():
                     peakLists = set([peak.peakList for peak in peaks])
                     for peakList in peakLists:
                         for peakListView in peakList.peakListViews:

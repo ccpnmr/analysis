@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-25 17:05:11 +0000 (Thu, March 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-09 18:43:50 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -479,7 +479,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.symbolSizePixelData.set(values[SYMBOLSIZE])
             self.symbolThicknessData.set(values[SYMBOLTHICKNESS])
             self.contourThicknessData.set(values[CONTOURTHICKNESS])
-
+            self.mainWindow.statusBar().showMessage("Cycle Symbol Labelling: %s " %self.annotationsData.get())
             self.blockSignals(False)
 
     def _stripArrangementChanged(self):

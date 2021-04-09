@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-08 16:57:53 +0100 (Thu, April 08, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-09 17:22:55 +0100 (Fri, April 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -138,7 +138,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
         tipText8a = "E.g., for a VAL residue, the set of HG11, HG12, HG13 (NMR equivalent) atoms\n" \
                     "        will create a new atom HG1% and an extra pseudo-atom MG1;\n" \
                     "        also the set HG1%, HG2% will create a new atom HG% and an extra pseudo-atom QG.\n" \
-                    "This option is available only if 'Expand Atoms From AtomSets' is selected."
+                    "This option is available only if 'Expand Atoms From AtomSets' is selected and proton groups."
         label8a = Label(self.mainWidget, 'Add extra Pseudo-Atoms', tipText=tipText8a, grid=(row, 0))
         self.addPseudoAtomsW = CheckBox(self.mainWidget, checked=DefaultAddPseudoAtoms,
                                         tipText=tipText8a, grid=(row, 1),)

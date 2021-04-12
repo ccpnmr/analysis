@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-31 12:10:03 +0100 (Wed, March 31, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-12 15:35:36 +0100 (Mon, April 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -1294,12 +1294,12 @@ class Gui1dWidget(CcpnGLWidget):
         specTraces = [trace.spectrumView for trace in self._staticHTraces]
 
         _visibleSpecs = [specView for specView in self._ordering
-                        if not specView.isDeleted and
-                        specView.isVisible() and
-                        specView._showContours and
-                        specView in self._spectrumSettings.keys() and
-                        specView in self._contourList.keys() and
-                        (specView not in specTraces or self.showSpectraOnPhasing)]
+                         if not specView.isDeleted and
+                         specView.isVisible() and
+                         specView._showContours and
+                         specView in self._spectrumSettings.keys() and
+                         specView in self._contourList.keys() and
+                         (specView not in specTraces or self.showSpectraOnPhasing)]
 
         # for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
         #
@@ -1380,7 +1380,7 @@ class Gui1dWidget(CcpnGLWidget):
                         foldXOffset = foldYOffset = 0
                         if folding[0] == 'mirror':
                             foldX = pow(-1, ii)
-                            foldXOffset = (2*fx0-dxAF) if foldX < 0 else 0
+                            foldXOffset = (2 * fx0 - dxAF) if foldX < 0 else 0
                         # foldYOffset = ii * 1e8 #if foldX < 0 else 0
 
                         # specMatrix[0:16] = [xScale * foldX, 0.0, 0.0, 0.0,
@@ -1517,7 +1517,7 @@ class Gui1dWidget(CcpnGLWidget):
         # only need the axes for this spectrum
         indices = indices[:spectrumView.spectrum.dimensionCount]
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds, 0)
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds,)
 
         self._maxX = max(self._maxX, fx0)
         self._minX = min(self._minX, fx1)

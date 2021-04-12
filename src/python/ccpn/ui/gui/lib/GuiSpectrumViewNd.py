@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-12 18:01:38 +0000 (Fri, March 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-12 15:35:36 +0100 (Mon, April 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -213,8 +213,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             self._project._logger.warning("No data file found for %s" % self)
             return
 
-    # from ccpn.util.decorators import profile
-    # @profile
     def _constructContours(self, posLevels, negLevels, glList=None):
         """Construct the contours for this spectrum using an OpenGL display list
         The way this is done here, any change in contour level needs to call this function.
@@ -241,8 +239,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             if numDims < 3 or self._application.preferences.general.generateSinglePlaneContours:
                 dataArrays = tuple()
 
-                # NOTE:ED - Should be using the correct getPlaneData
-
                 for position, dataArray in self._getPlaneData():
                     dataArrays += (dataArray,)
 
@@ -257,34 +253,34 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 stripIndices = tuple(specIndices.index(ii) for ii in range(numDims))
                 regionLimits = tuple(axis.region for axis in self.strip.orderedAxes)
 
-                axisLimits = dict([(self.spectrum.axisCodes[ii], regionLimits[stripIndices[ii]])
-                                   for ii in range(numDims) if stripIndices[ii] is not None and stripIndices[ii] > 1])
+                # get the spectrumLimits bounded by the first/last points
+                axisLimits = {}
+                for axisCode in self.spectrum.axisCodes:
+                    lim = self.spectrum.getPpmArray(axisCode=axisCode)
+                    axisLimits[axisCode] = (min(lim[0], lim[-1]),
+                                            max(lim[0], lim[-1]))
 
-                # this isn't fully tested and still has an offset of -1
-                # cheat to move the spectrum by 1 point by adding buffer to visible XY axes
-                exclusionBuffer = [0 if stripIndices[ii] > 1 else 1 for ii in range(numDims)]
+                # fill the others in from the strip
+                axisLimits.update(dict([(self.spectrum.axisCodes[ii], regionLimits[stripIndices[ii]])
+                                        for ii in range(numDims) if stripIndices[ii] is not None and stripIndices[ii] > 1]))
 
-                foundRegions = self.spectrum.getRegionData(exclusionBuffer=exclusionBuffer, minimumDimensionSize=1, **axisLimits)
+                # use a single Nd dataArray and flatten to the visible axes - averages across the planes
+                data = self.spectrum.getRegion(**axisLimits)
 
-                if foundRegions:
-                    # just use the first region
-                    for region in foundRegions[:1]:
-                        dataArray, intRegion, *rest = region
+                if data is not None and data.size:
+                    xyzDims = tuple((numDims - ind - 1) for ind in specIndices)
+                    xyzDims = tuple(reversed(xyzDims))
+                    tempDataArray = data.transpose(*xyzDims)
 
-                        if dataArray.size:
-                            xyzDims = tuple((numDims - ind - 1) for ind in specIndices)
-                            xyzDims = tuple(reversed(xyzDims))
-                            tempDataArray = dataArray.transpose(*xyzDims)
+                    # flatten multidimensional arrays into single array
+                    for maxCount in range(numDims - 2):
+                        tempDataArray = np.max(tempDataArray.clip(0.0, 1e15), axis=0) + np.min(tempDataArray.clip(-1e12, 0.0), axis=0)
 
-                            # flatten multidimensional arrays into single array
-                            for maxCount in range(numDims - 2):
-                                tempDataArray = np.max(tempDataArray.clip(0.0, 1e15), axis=0) + np.min(tempDataArray.clip(-1e12, 0.0), axis=0)
-
-                            contourList = Contourer2d.contourerGLList((tempDataArray,),
-                                                                      posLevelsArray,
-                                                                      negLevelsArray,
-                                                                      np.array(_posColours, dtype=np.float32),
-                                                                      np.array(_negColours, dtype=np.float32))
+                    contourList = Contourer2d.contourerGLList((tempDataArray,),
+                                                              posLevelsArray,
+                                                              negLevelsArray,
+                                                              np.array(_posColours, dtype=np.float32),
+                                                              np.array(_negColours, dtype=np.float32))
 
             if contourList and contourList[1] > 0:
                 # set the contour arrays for the GL object
@@ -292,11 +288,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 glList.indices = contourList[2]
                 glList.vertices = contourList[3]
                 glList.colors = contourList[4]
-                # min1x = np.min(glList.vertices[::2])
-                # max1x = np.max(glList.vertices[::2])
-                # min1y = np.min(glList.vertices[1::2])
-                # max1y = np.max(glList.vertices[1::2])
-                # print('>>>min, max', min1x, max1x, min1y, max1y)
             else:
                 # clear the arrays
                 glList.numVertices = 0
@@ -308,12 +299,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             # old contouring
             doPosLevels = doNegLevels = True
 
-            # NOTE:ED - Should be using the correct getPlaneData
-
             for position, dataArray in self._getPlaneData():
                 if doPosLevels:
                     posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
-                    #print("posContours", posContours)
                     if posContoursAll is None:
                         posContoursAll = posContours
                     else:
@@ -322,11 +310,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                 posContoursAll.append(contourData)
                             else:
                                 posContoursAll[n].extend(contourData)
-                            # print(contourData)
 
                 if doNegLevels:
                     negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
-                    #print("negContours", len(negContours))
                     if negContoursAll is None:
                         negContoursAll = negContours
                     else:
@@ -335,7 +321,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                 negContoursAll.append(contourData)
                             else:
                                 negContoursAll[n].extend(contourData)
-                            # print(contourData)
 
             glList.clearArrays()
 

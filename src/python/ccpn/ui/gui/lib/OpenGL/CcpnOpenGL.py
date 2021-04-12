@@ -2320,36 +2320,44 @@ class CcpnGLWidget(QOpenGLWidget):
                 if not self.mousePressInRegion(self._externalRegions._regions):
                     self.mousePressInIntegralLists()
 
-        if int(ev.buttons() & Qt.LeftButton) and not self.is1D:
+        if int(ev.buttons() & Qt.LeftButton):
             # find the bounds for the region that has currently been clicked
-
             if (keyModifiers & (Qt.ShiftModifier | Qt.ControlModifier)):
+
+                if self.is1D:
+                    bounds = ([],)
+                    self._minBounds = [None, ]
+                    self._maxBounds = [None, ]
+                else:
+                    bounds = ([], [])
+                    self._minBounds = [None, None]
+                    self._maxBounds = [None, None]
+
                 # get the list of visible spectrumViews, or the first in the list
                 visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
-                bounds = ([], [])
+
                 for specView in visibleSpectrumViews:
                     specSettings = self._spectrumSettings[specView]
 
-                    pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
-                    if None in pIndex:
-                        continue
+                    if not self.is1D:
+                        pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
+                        if None in pIndex:
+                            continue
 
-                    for ii in range(2):
+                    for ii in range(len(bounds)):
                         bounds[ii].extend(list(specSettings[GLDefs.SPECTRUM_REGIONBOUNDS][ii]))
 
-                bounds = [sorted(bnd) for bnd in bounds]
+                bounds = [sorted(set([round(b, 12) for b in bnd])) for bnd in bounds]
 
                 mn = min(self.axisL, self.axisR)
                 mx = max(self.axisL, self.axisR)
                 bounds[0] = [mn] + [bnd for bnd in bounds[0] if mn < bnd < mx] + [mx]
-                mn = min(self.axisB, self.axisT)
-                mx = max(self.axisB, self.axisT)
-                bounds[1] = [mn] + [bnd for bnd in bounds[1] if mn < bnd < mx] + [mx]
+                if len(bounds) > 1:
+                    mn = min(self.axisB, self.axisT)
+                    mx = max(self.axisB, self.axisT)
+                    bounds[1] = [mn] + [bnd for bnd in bounds[1] if mn < bnd < mx] + [mx]
 
-                self._minBounds = [None, None]
-                self._maxBounds = [None, None]
-
-                for jj in range(2):
+                for jj in range(len(bounds)):
                     for minB, maxB in zip(bounds[jj], bounds[jj][1:]):
                         if minB < self._startCoordinate[jj] < maxB:
                             self._minBounds[jj] = minB
@@ -2553,8 +2561,18 @@ class CcpnGLWidget(QOpenGLWidget):
             if (keyModifiers & Qt.ShiftModifier) and (keyModifiers & Qt.ControlModifier):
 
                 if self.is1D:
-                    self._endCoordinate = cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
-                    self._selectionMode = 3
+                    # self._endCoordinate = cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
+                    # self._selectionMode = 3
+                    # check for a valid region pick
+                    if self._validRegionPick:
+                        self._endCoordinate = [np.clip(cursorCoordinate[0], self._minBounds[0], self._maxBounds[0]), cursorCoordinate[1]]
+                        self._selectionMode = 3
+                    else:
+                        # in case bad picking needs to be shown to the user, shows a red box
+                        # awkward for overlaid spectra with different aliasing regions specified
+                        self._endCoordinate = [np.clip(cursorCoordinate[0], self._minBounds[0], self._maxBounds[0]), cursorCoordinate[1]]
+                        self._selectionMode = 4
+
                     self._drawSelectionBox = True
                     self._drawDeltaOffset = True
                 else:

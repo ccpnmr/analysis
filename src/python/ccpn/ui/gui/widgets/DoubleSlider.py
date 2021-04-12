@@ -65,7 +65,7 @@ class DoubleRangeView(QGraphicsView):
         self._slider = Slider()
         self._slider.setName('slider')
 
-        self._balloon = SpeechBalloon(owner=self)
+        self._balloon = SpeechBalloon(owner=self, ontop=True)
         self._balloon.setStyleSheet('color: gray;')
         self._balloon.setGeometry(200, 200, 70, 30)
 

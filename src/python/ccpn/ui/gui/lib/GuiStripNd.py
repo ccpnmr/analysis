@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-26 12:43:47 +0000 (Fri, March 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-12 19:39:17 +0100 (Mon, April 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -51,7 +51,7 @@ from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, PlaneAxisWidget,
     EMITSOURCE, EMITCLICKED, EMITIGNORESOURCE
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
 from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
     _getNdIntegralMenu, _getNdMultipletMenu, _getNdAxisMenu
@@ -278,7 +278,7 @@ class GuiStripNd(GuiStrip):
         """
         Copy the strip into new SpectrumDisplay
         """
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             # create a new spectrum display
             newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=self.axisOrder)
             for spectrum in self.spectra:
@@ -300,7 +300,7 @@ class GuiStripNd(GuiStrip):
             if nDim > len(axisOrder):
                 axisOrder.extend(self.axisOrder[2:])
 
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 # create a new spectrum display with the new axis order
                 newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
                 for spectrum in self.spectra:
@@ -324,7 +324,7 @@ class GuiStripNd(GuiStrip):
             if nDim > len(axisOrder):
                 axisOrder.extend(self.axisOrder[3:])
 
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 # create a new spectrum display with the new axis order
                 newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
                 for spectrum in self.spectra:  #[1:]:
@@ -348,7 +348,7 @@ class GuiStripNd(GuiStrip):
             if nDim > len(axisOrder):
                 axisOrder.extend(self.axisOrder[3:])
 
-            with undoBlock():
+            with undoBlockWithoutSideBar():
                 # create a new spectrum display with the new axis order
                 newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
                 for spectrum in self.spectra:

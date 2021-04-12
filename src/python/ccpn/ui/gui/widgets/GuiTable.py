@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-09 10:45:13 +0100 (Fri, April 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-12 19:39:18 +0100 (Mon, April 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -763,8 +763,9 @@ GuiTable::item::selected {
         if objList and isinstance(objList[0], pd.Series):
             pass
         else:
-            # not sure how to handle this for series
-            if set(objList or []) == set(self._lastSelection or []):
+            if not objList:
+                return
+            if set(objList or []) == set(self._lastSelection or []): # pd.Series should never reach here or will crash here. Cannot use set([series])== because Series are mutable, thus they cannot be hashed
                 return
 
         self._lastSelection = objList

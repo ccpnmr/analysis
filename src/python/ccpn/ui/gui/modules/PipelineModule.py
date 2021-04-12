@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:35 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-12 19:39:17 +0100 (Mon, April 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -717,7 +717,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         self.savePipelineLabel = Label(self.settingsWidget, 'Save in: directory path',
                                        tipText='Select path where to save your Pipeline file', grid=(row, 0))
         self.savePipelineLineEdit = LineEditButtonDialog(self.settingsWidget,
-                                                         fileMode=QtWidgets.QFileDialog.Directory, grid=(row, 1))
+                                                         fileMode='directory', grid=(row, 1))
         row += 1
         self.addBoxLabel = Label(self.settingsWidget, 'Add Pipes', grid=(row, 0))
         self.addBoxPosition = RadioButtons(self.settingsWidget, texts=['top', 'bottom'],

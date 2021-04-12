@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-18 13:29:09 +0000 (Thu, March 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-12 19:39:18 +0100 (Mon, April 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -388,6 +388,7 @@ class ProjectFileDialog(FileDialogABC):
         absPath = aPath(self.directory().absolutePath())
         self._initialPaths[ProjectSaveFileDialog()._clsID] = absPath
 
+
 class ProjectSaveFileDialog(FileDialogABC):
     # _fileMode = 'directory'
     _text = '{} Project'
@@ -498,13 +499,13 @@ class LineButtonFileDialog(FileDialogABC):
     """
 
     def __init__(self, parent=None,
-                 fileMode=QtWidgets.QFileDialog.AnyFile,
-                 text=None,
+                 fileMode='anyFile',
+                 dialogText=None,
                  directory=None,
                  fileFilter=None,
                  **kwds):
         self._fileMode = fileMode
-        self._text = text
+        self._text = dialogText
         super().__init__(parent, fileFilter=fileFilter, directory=directory, **kwds)
 
 
@@ -522,7 +523,7 @@ class LineEditButtonDialog(Widget):
         self.openPathIcon = Icon('icons/directory')
 
         if textDialog is None:
-            self.textDialog = ''
+            self.textDialog = 'Select File'
         else:
             self.textDialog = textDialog
 
@@ -532,7 +533,7 @@ class LineEditButtonDialog(Widget):
             self.textLineEdit = textLineEdit
 
         if fileMode is None:
-            self.fileMode = QtWidgets.QFileDialog.AnyFile
+            self.fileMode = 'anyFile'
         else:
             self.fileMode = fileMode
 
@@ -549,7 +550,7 @@ class LineEditButtonDialog(Widget):
         button.setStyleSheet("border: 0px solid transparent")
 
     def _openFileDialog(self):
-        self.fileDialog = LineButtonFileDialog(self, fileMode=self.fileMode, text=self.textDialog,
+        self.fileDialog = LineButtonFileDialog(self, fileMode=self.fileMode, dialogText=self.textDialog,
                                                directory=self.directory, fileFilter=self.fileFilter)
         self.fileDialog._show()
         selectedFile = self.fileDialog.selectedFile()

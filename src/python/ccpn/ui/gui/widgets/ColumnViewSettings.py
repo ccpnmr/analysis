@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:37 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-12 19:39:18 +0100 (Mon, April 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,8 @@ from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.util.Logging import getLogger
@@ -70,8 +72,13 @@ class ColumnViewSettings(Widget):
         # self.hiddenColumns = []
         # self.hideColumns = hideColumns or []      # list of column names
         self._hideColumnWidths = {}
+        self.filterLabel = Label(self, 'Display Columns', grid=(0, 0), vAlign='t', hAlign='l')
+        self.widgetFrame = Frame(self, setLayout=True, margins=(5,5,5,5))
+        self.scrollArea = ScrollArea(self, setLayout=True, grid=(1, 0))
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setWidget(self.widgetFrame)
+        # self.widgetFrame.getLayout().setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         self.initCheckBoxes()
-        self.filterLabel = Label(self, 'Display Columns', grid=(0, 1), vAlign='t', hAlign='l')
 
     def initCheckBoxes(self):
 
@@ -85,11 +92,11 @@ class ColumnViewSettings(Widget):
                 if colum != DATAFRAME_OBJECT:
                     if self.direction == 'v':
                         i += 1
-                        cb = CheckBox(self, text=colum, grid=(i, 1), callback=self.checkBoxCallBack,
+                        cb = CheckBox(self.widgetFrame, text=colum, grid=(i, 1), callback=self.checkBoxCallBack,
                                       checked=True if colum not in hiddenColumns else False,
                                       hAlign='l', tipText=CheckboxTipText, )
                     else:
-                        cb = CheckBox(self, text=colum, grid=(1, i), callback=self.checkBoxCallBack,
+                        cb = CheckBox(self.widgetFrame, text=colum, grid=(1, i), callback=self.checkBoxCallBack,
                                       checked=True if colum not in hiddenColumns else False,
                                       hAlign='l', tipText=CheckboxTipText, )
 

@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:30 +0000 (Thu, February 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-12 19:39:17 +0100 (Mon, April 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,7 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 
 from typing import Tuple, Optional, List
 from functools import partial
-from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock
+from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar
 
 
 SPECTRUMVIEWINDEX = '_spectrumViewIndex'
@@ -131,7 +131,7 @@ class OrderedSpectrumViews(object):
         Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
         :param spectrumIndex: tuple of ints
         """
-        with undoBlock():
+        with undoBlockWithoutSideBar():
             with undoStackBlocking() as addUndoItem:
                 _oldSpectrumViews = self._retrieveOrderedSpectrumViewIndex()
                 self._storeOrderedSpectrumViewIndex(spectrumViewIndex=spectrumIndex)

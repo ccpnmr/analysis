@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-26 12:43:48 +0000 (Fri, March 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-12 19:39:18 +0100 (Mon, April 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -504,6 +504,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.contourThicknessData.set(values[CONTOURTHICKNESS])
             self.aliasEnabledData.set(values[ALIASENABLED])
             self.aliasShadeData.set(values[ALIASSHADE])
+
+            self.mainWindow.statusBar().showMessage("Cycle Symbol Labelling: %s " %self.annotationsData.get())
 
             self.blockSignals(False)
 

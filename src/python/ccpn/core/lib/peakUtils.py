@@ -621,219 +621,30 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     Assumes called with an existing peak, will fit within a box ±halfBoxSearchWidth about the current peak position.
     """
 
-    import math
-    from ccpn.core.Peak import Peak
-    from ccpnc.peak import Peak as CPeak
-    from ccpn.framework.Application import getApplication
-
-    getApp = getApplication()
-
-    # error checking - that the peak is a valid peak
-    peak = getApp.project.getByPid(peak) if isinstance(peak, str) else peak
-    if not isinstance(peak, Peak):
-        raise TypeError('%s is not of type Peak' % peak)
-
-    apiPeak = peak._wrappedData
-
-    dataSource = apiPeak.peakList.dataSource
-    numDim = dataSource.numDim
-    peakDims = apiPeak.sortedPeakDims()
-
+    spectrum = peak.spectrum
+    numDim = spectrum.dimensionCount
     if numDim == 1:
-        maximumLimit = getApp.preferences.general.searchBoxWidths1d.get(peak.axisCodes[-1][0], 0.01)
-        _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit)
-        return
+        # do the fit for 1D here
+        _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1)
 
-    if searchBoxMode and numDim > 1:
-        # NOTE:ED get the peakDim axisCode here and define the new half boxwidths based on the ValuePerPoint
-        searchBoxWidths = getApp.preferences.general.searchBoxWidthsNd
-
-        boxWidths = []
-        axisCodes = peak.axisCodes
-        for peakDim, axisCode in zip(peakDims, axisCodes):
-            dataDim = peakDim.dataDim
-            if hasattr(dataDim, 'primaryDataDimRef'):
-                ddr = dataDim.primaryDataDimRef
-                pointToValue = ddr and ddr.pointToValue
-            else:
-                pointToValue = dataDim.pointToValue
-
-            letterAxisCode = (axisCode[0] if axisCode != 'intensity' else axisCode) if axisCode else None
-            if letterAxisCode in searchBoxWidths:
-                newWidth = math.floor(searchBoxWidths[letterAxisCode] / (2.0 * abs(pointToValue(1) - pointToValue(0))))
-                boxWidths.append(max(1, newWidth))
-            else:
-                # default to the given parameter value
-                boxWidths.append(max(1, halfBoxSearchWidth or 1))
     else:
+        from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
+        from ccpn.framework.Application import getApplication
 
-        boxWidths = []
-        axisCodes = peak.axisCodes
-        for peakDim, axisCode in zip(peakDims, axisCodes):
-            dataDim = peakDim.dataDim
-            if dataDim.className == 'FreqDataDim':
+        getApp = getApplication()
 
-                peakBoxWidth = peakDim.boxWidth or 1
-                halfBoxWidth = dataDim.numPoints / 100  # a bit of a hack copied from V2
-                boxWidths.append(max(halfBoxWidth, 1, int(peakBoxWidth / 2)))
+        spectrum = peak.spectrum
+        myPeakPicker = PeakPickerNd(spectrum=spectrum)
+        myPeakPicker.setParameters(dropFactor=minDropFactor,
+                                   fitMethod=fitMethod,
+                                   searchBoxMode=searchBoxMode,
+                                   searchBoxDoFit=searchBoxDoFit,
+                                   halfBoxSearchWidth=halfBoxSearchWidth,
+                                   halfBoxFitWidth=halfBoxFitWidth,
+                                   searchBoxWidths=getApp.preferences.general.searchBoxWidthsNd,
+                                   )
 
-                # from V2 - seems to give individual boxWidths per peak
-                # boxWidth = peakDim.boxWidth
-                # if not boxWidth:  # if None (or even if 0)
-                #     boxWidth = getPeakFindBoxwidth(dataDim)
-                # halfBoxWidth = dataDim.numPoints / 100  # a bit of a hack
-                # halfBoxWidth = max(halfBoxWidth, 1, int(boxWidth / 2))
-                # first[i] = max(0, int(math.floor(position[i] - halfBoxWidth)))
-                # last[i] = min(dataDim.numPoints, int(math.ceil(position[i] + 1 + halfBoxWidth)))
-                # buff[i] = buf
-            else:
-
-                # NOTE:ED - check this with v2
-                boxWidths.append(max(1, halfBoxSearchWidth or 1))
-
-                # first[i] = max(0, int(math.floor(position[i] + 0.5)))
-                # last[i] = min(dataDim.numPoints, first[i] + 1)
-                # buff[i] = 0
-
-    # add the new boxWidths array as np.int32 type
-    boxWidths = np.array(boxWidths, dtype=np.int32)
-
-    # get the height - remember not to use (position-1) because function does that
-    height = dataSource.getPointValue([peakDim.position for peakDim in peakDims])
-
-    # generate a np array with the position of the peak in points rounded to integers
-    position = [peakDim.position - 1 for peakDim in peakDims]  # API position starts at 1
-
-    # round up/down the position
-    pLower = np.floor(position).astype(np.int32)
-    pUpper = np.ceil(position).astype(np.int32)
-    position = np.round(position)
-
-    # generate a np array with the number of points per dimension
-    # numPoints = [peakDim.dataDim.numPoints for peakDim in peakDims]
-    numPoints = np.array([peakDim.dataDim.numPoints for peakDim in peakDims], dtype=np.int32)
-
-    # extra plane in each direction increases accuracy of group fitting
-    # startPoint = np.maximum(pLower - halfBoxSearchWidth, 0)
-    # endPoint = np.minimum(pUpper + halfBoxSearchWidth, numPoints)
-    startPoint = np.maximum(pLower - boxWidths, 0)
-    endPoint = np.minimum(pUpper + boxWidths, numPoints)
-
-    # map to co-ordinates to a (0,0) cornered box
-    regionArray = np.array((startPoint - startPoint, endPoint - startPoint), dtype=np.int32)
-
-    # Get the data; note that arguments have to be cast to int32s/float32s for the C routines
-    dataArray, intRegion = dataSource.getRegionData(startPoint, endPoint)
-
-    if not (dataArray is not None and dataArray.size != 0):
-        getLogger().warning('no region found')
-        return
-
-    scaledHeight = 0.5 * height  # this is so that have sensible pos/negLevel
-    if height > 0:
-        doPos = True
-        doNeg = False
-        posLevel = scaledHeight
-        negLevel = 0  # arbitrary - not necessary
-    else:
-        doPos = False
-        doNeg = True
-        posLevel = 0  # arbitrary - not necessary
-        negLevel = scaledHeight
-
-    exclusionBuffer = [1] * numDim
-
-    nonAdj = 0
-    minLinewidth = [0.0] * numDim
-
-    excludedRegionsList = []
-    excludedDiagonalDimsList = []
-    excludedDiagonalTransformList = []
-
-    peakPoints = CPeak.findPeaks(dataArray, doNeg, doPos,
-                                 negLevel, posLevel, exclusionBuffer,
-                                 nonAdj, minDropFactor, minLinewidth,
-                                 excludedRegionsList, excludedDiagonalDimsList, excludedDiagonalTransformList)
-
-    if not peakPoints:
-        getLogger().warning('no points found')
-        return
-
-    # catch any C errors
-    try:
-
-        # find the closest peak in the found list
-        bestHeight = bestDist = peakPoint = None
-        bestFit = 0.0
-        for findNextPeak in peakPoints:
-
-            # find the highest peak to start from
-            peakHeight = findNextPeak[1]
-            peakDist = np.linalg.norm((np.array(findNextPeak[0]) - boxWidths) / boxWidths)
-            peakFit = abs(peakHeight / (1.0 + peakDist))
-
-            if height == None or peakFit > bestFit:
-                bestFit = peakFit
-                bestHeight = abs(peakHeight)
-                bestDist = peakDist
-                peakPoint = findNextPeak[0]
-
-        # use this as the centre for the peak fitting
-        peakPoint = np.array(peakPoint)
-        peakArray = peakPoint.reshape((1, numDim))
-        peakArray = peakArray.astype(np.float32)
-
-        if searchBoxDoFit:
-            if fitMethod == PARABOLICMETHOD:
-                # parabolic - generate all peaks in one operation
-                result = CPeak.fitParabolicPeaks(dataArray, regionArray, peakArray)
-
-            else:
-                method = 0 if fitMethod == GAUSSIANMETHOD else 1
-
-                # use the halfBoxFitWidth to give a close fit
-                firstArray = np.maximum(peakArray[0] - halfBoxFitWidth, regionArray[0])
-                lastArray = np.minimum(peakArray[0] + halfBoxFitWidth + 1, regionArray[1])
-                regionArray = np.array((firstArray, lastArray), dtype=np.int32)
-
-                # fit the single peak
-                result = CPeak.fitPeaks(dataArray, regionArray, peakArray, method)
-        else:
-            # take the maxima
-            result = ((bestHeight, peakPoint, None),)
-
-    except CPeak.error as e:
-        # there could be some fitting error
-        getLogger().warning("Aborting peak fit, Error for peak: %s" % peak)
-        return
-
-    # if any results are found then set the new peak position/height
-    if result:
-        height, center, linewidth = result[0]
-
-        # work on the _wrappedData
-        apiPeak = peak._wrappedData
-        peakDims = apiPeak.sortedPeakDims()
-
-        dataSource = apiPeak.peakList.dataSource
-        dataDims = dataSource.sortedDataDims()
-
-        for i, peakDim in enumerate(peakDims):
-            newPos = min(max(center[i], 0.5), dataArray.shape[i] - 1.5)
-
-            # NOTE:ED - ignore if out of range - might not need any more
-            dist = abs(newPos - center[i])
-            if dist < boxWidths[i]:
-                peakDim.position = center[i] + startPoint[i] + 1.0  # API position starts at 1
-            if linewidth and len(linewidth) > i:
-                peakDim.lineWidth = dataDims[i].valuePerPoint * linewidth[i]
-
-        if searchBoxDoFit:
-            # apiPeak.height = dataSource.scale * height
-            apiPeak.height = height
-        else:
-            # get the interpolated height
-            peak.height = peak.peakList.spectrum.getHeight(peak.ppmPositions)
+        myPeakPicker.snapToExtremum(peak)
 
 
 def peakParabolicInterpolation(peak: 'Peak', update=False):
@@ -868,10 +679,16 @@ def peakParabolicInterpolation(peak: 'Peak', update=False):
 
     # get the position as the nearest grid point
     position = [int(p + 0.5) for p in peak.pointPositions]
-    # get the data +/-1 point along each axis
-    sliceTuples = [(p - 1, p + 1) for p in position]  # nb: sliceTuples run [1,n] with n inclusive
-    #TODO get this via spectrum rather than datasource (once Spectrum.getRegionData is functional again)
-    data = spectrum.dataSource.getRegionData(sliceTuples)
+    # # get the data +/-1 point along each axis
+    # sliceTuples = [(p - 1, p + 1) for p in position]  # nb: sliceTuples run [1,n] with n inclusive
+    # #TODO get this via spectrum rather than datasource (once Spectrum.getRegionData is functional again)
+    # data = spectrum.dataSource.getRegionData(sliceTuples)
+
+    # TODO:ED - check where this is used
+    _valuesPerPoint = spectrum.valuesPerPoint
+    _axisCodes = spectrum.axisCodes
+    _regionData = {axisCode: (ppm - valPerPoint / 2, ppm + valPerPoint / 2,) for axisCode, ppm, valPerPoint in zip(_axisCodes, peak.ppmPositions, _valuesPerPoint)}
+    data = spectrum.getRegion(**_regionData)
 
     heights = [0.0] * spectrum.dimensionCount
     newPosition = position[:]
@@ -888,7 +705,7 @@ def peakParabolicInterpolation(peak: 'Peak', update=False):
 
     arr = numpy.array(heights)
     height = float(numpy.average(arr))
-    heightError = arr.max() - arr.min()
+    heightError = np.max(arr) - np.min(arr)
     if update:
         peak.pointPositions = newPosition
         peak.height = height
@@ -896,65 +713,65 @@ def peakParabolicInterpolation(peak: 'Peak', update=False):
     return newPosition, height, heightError
 
 
-def getSpectrumData(peak: 'Peak', halfBoxWidth: int = 3):
-    """Get a region of the spectrum data centred on the peak.
-    Will return the smallest region containing the peak ±halfBoxWidth about the current peak position.
-
-    returns a tuple of the form (dataArray, region, position, planePosition)
-
-        dataArray is the numpy array surrounding the peak, ordered by spectrum axisCodes
-        region is a tuple (bottomLeft, topRight)
-        position is the float32 relative position of the peak in dataArray
-        planePosition is the int32 position of the nearest planes to the peak
-
-    where bottomLeft is the co-ordinates of the bottom-left corner of the region
-            topRight is the co-ordinates of the top-right corner of the region
-
-            Co-ordinates are indexed from (0, 0)
-
-            Note: screen point co-ordinates are indexed from (1, 1)
-
-    The region will be cropped to the bounds of the spectrum, in which case position will not correspond to the centre
-    if no region is found, returns None
-    """
-
-    from ccpn.core.Peak import Peak
-    from ccpn.framework.Application import getApplication
-
-    # error checking - that the peak is a valid peak
-    peak = getApplication().project.getByPid(peak) if isinstance(peak, str) else peak
-    if not isinstance(peak, Peak):
-        raise TypeError('%s is not of type Peak' % peak)
-
-    apiPeak = peak._wrappedData
-
-    dataSource = apiPeak.peakList.dataSource
-    peakDims = apiPeak.sortedPeakDims()
-
-    # generate a np array with the position of the peak in points rounded to integers
-    position = [peakDim.position - 1 for peakDim in peakDims]  # API position starts at 1
-
-    # round up/down the position to give the square containing the peak
-    pLower = np.floor(position).astype(np.int32)
-    pUpper = np.ceil(position).astype(np.int32)
-    position = np.array(position, dtype=np.float32)
-
-    # generate a np array with the number of points per dimension
-    # numPoints = [peakDim.dataDim.numPoints for peakDim in peakDims]
-    numPoints = np.array([peakDim.dataDim.numPoints for peakDim in peakDims], dtype=np.int32)
-
-    # add extra points in each direction
-    startPoint = np.maximum(pLower - halfBoxWidth, 0)
-    endPoint = np.minimum(pUpper + halfBoxWidth, numPoints)
-
-    # Get the data; note that arguments has to be cast to ints for the C routines
-    dataArray, intRegion = dataSource.getRegionData(startPoint, endPoint)
-
-    if not (dataArray is not None and dataArray.size != 0):
-        getLogger().warning('no region found')
-        return
-
-    return (dataArray, intRegion, list(position - startPoint), list(np.round(position).astype(np.int32)))
+# def getSpectrumData(peak: 'Peak', halfBoxWidth: int = 3):
+#     """Get a region of the spectrum data centred on the peak.
+#     Will return the smallest region containing the peak ±halfBoxWidth about the current peak position.
+#
+#     returns a tuple of the form (dataArray, region, position, planePosition)
+#
+#         dataArray is the numpy array surrounding the peak, ordered by spectrum axisCodes
+#         region is a tuple (bottomLeft, topRight)
+#         position is the float32 relative position of the peak in dataArray
+#         planePosition is the int32 position of the nearest planes to the peak
+#
+#     where bottomLeft is the co-ordinates of the bottom-left corner of the region
+#             topRight is the co-ordinates of the top-right corner of the region
+#
+#             Co-ordinates are indexed from (0, 0)
+#
+#             Note: screen point co-ordinates are indexed from (1, 1)
+#
+#     The region will be cropped to the bounds of the spectrum, in which case position will not correspond to the centre
+#     if no region is found, returns None
+#     """
+#
+#     from ccpn.core.Peak import Peak
+#     from ccpn.framework.Application import getApplication
+#
+#     # error checking - that the peak is a valid peak
+#     peak = getApplication().project.getByPid(peak) if isinstance(peak, str) else peak
+#     if not isinstance(peak, Peak):
+#         raise TypeError('%s is not of type Peak' % peak)
+#
+#     apiPeak = peak._wrappedData
+#
+#     dataSource = apiPeak.peakList.dataSource
+#     peakDims = apiPeak.sortedPeakDims()
+#
+#     # generate a np array with the position of the peak in points rounded to integers
+#     position = [peakDim.position - 1 for peakDim in peakDims]  # API position starts at 1
+#
+#     # round up/down the position to give the square containing the peak
+#     pLower = np.floor(position).astype(np.int32)
+#     pUpper = np.ceil(position).astype(np.int32)
+#     position = np.array(position, dtype=np.float32)
+#
+#     # generate a np array with the number of points per dimension
+#     # numPoints = [peakDim.dataDim.numPoints for peakDim in peakDims]
+#     numPoints = np.array([peakDim.dataDim.numPoints for peakDim in peakDims], dtype=np.int32)
+#
+#     # add extra points in each direction
+#     startPoint = np.maximum(pLower - halfBoxWidth, 0)
+#     endPoint = np.minimum(pUpper + halfBoxWidth, numPoints)
+#
+#     # Get the data; note that arguments has to be cast to ints for the C routines
+#     dataArray, intRegion = dataSource.getRegionData(startPoint, endPoint)
+#
+#     if not (dataArray is not None and dataArray.size != 0):
+#         getLogger().warning('no region found')
+#         return
+#
+#     return (dataArray, intRegion, list(position - startPoint), list(np.round(position).astype(np.int32)))
 
 
 def estimateVolumes(peaks: Sequence[Union[str, 'Peak']], volumeIntegralLimit=2.0):
@@ -988,36 +805,6 @@ def estimateVolumes(peaks: Sequence[Union[str, 'Peak']], volumeIntegralLimit=2.0
             pp.estimateVolume(volumeIntegralLimit=volumeIntegralLimit)
         else:
             getLogger().warning('Peak %s contains undefined height/lineWidths' % str(pp))
-
-
-def _findPeakHeight(peak):
-    """may need this later
-    """
-    spectrum = peak.peakList.spectrum
-    numDim = spectrum.dimensionCount
-
-    exclusionBuffer = [1] * numDim
-    valuesPerPoint = spectrum.valuesPerPoint
-    regionToPick = dict((code, (pos - value / 2, pos + value / 2)) for code, pos, value in zip(spectrum.axisCodes, peak.position, valuesPerPoint))
-
-    foundRegions = spectrum.getRegionData(exclusionBuffer, minimumDimensionSize=0, **regionToPick)
-
-    if not foundRegions:
-        return
-
-    for region in foundRegions:
-        if not region:
-            continue
-
-        dataArray, intRegion, \
-        startPoints, endPoints, \
-        startPointBufferActual, endPointBufferActual, \
-        startPointIntActual, numPointInt, \
-        startPointBuffer, endPointBuffer = region
-
-        if dataArray.size:
-            print('>>> here', regionToPick, dataArray)
-            # now do a fit at this position
 
 
 def movePeak(peak, ppmPositions, updateHeight=True):
@@ -1238,7 +1025,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
             if a == nearestPosition or b == nearestPosition:  # avoid snapping to an existing peak, as it might be a wrong snap.
                 height = peak.peakList.spectrum.getHeight(peak.position)
             # elif abs(nearestPosition) > abs(peak.position[0] + maximumLimit):  # avoid snapping on the noise if not maximum found
-                 # peak.height = peak.peakList.spectrum.getHeight(peak.position)
+            # peak.height = peak.peakList.spectrum.getHeight(peak.position)
 
             else:
                 position = [float(nearestPosition), ]

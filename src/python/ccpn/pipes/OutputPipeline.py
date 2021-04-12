@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:23 +0000 (Sun, January 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-04-12 17:53:17 +0100 (Mon, April 12, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -113,7 +113,7 @@ class OutputPipelineGuiPipe(GuiPipe):
         row += 1
         self.savePathLabel = Label(self.pipeFrame, SavePath, grid=(row, 0))
         setattr(self, SavePath,
-                LineEditButtonDialog(self.pipeFrame, fileMode=QtWidgets.QFileDialog.Directory, grid=(row, 1)))
+                LineEditButtonDialog(self.pipeFrame, fileMode='directory', grid=(row, 1)))
         self._setDefaultDataPath()
 
     def _setDefaultDataPath(self):

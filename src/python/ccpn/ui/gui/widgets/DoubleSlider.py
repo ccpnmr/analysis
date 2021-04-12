@@ -8,7 +8,7 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QLinearGradient, QBrush, QFont, QFontMetrics, QCursor, \
     QGuiApplication, QPolygon, QPolygonF, QPixmap, QPalette
 from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsItem, QGraphicsItemGroup, QGraphicsRectItem, QLabel, \
-    QWidget, QGraphicsObject, QStyleOption, QStyle, QStylePainter, QCheckBox, QVBoxLayout, QLineEdit
+    QWidget, QGraphicsObject, QStyleOption, QStyle, QStylePainter, QCheckBox, QVBoxLayout, QLineEdit, QFormLayout
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 from SpeechBalloon import SpeechBalloon
 
@@ -1400,17 +1400,17 @@ if __name__ == '__main__':
     lineEdit1 = QLineEdit()
     lineEdit2 = QLineEdit()
 
-    v_layout = QVBoxLayout()
-    v_layout.addWidget(label1)
-    v_layout.addWidget(label2)
-    v_layout.addWidget(label3)
-    v_layout.addWidget(label4)
-    v_layout.addWidget(label5)
-    v_layout.addWidget(label6)
-    v_layout.addWidget(lineEdit1)
-    v_layout.addWidget(lineEdit2)
-    v_layout.addWidget(label6)
-    v_layout.addWidget(check)
+    v_layout = QFormLayout()
+    v_layout.addRow('Left Value [signal]',label1)
+    v_layout.addRow('Right Value [signal]',label2)
+    v_layout.addRow('Min Value [signal]',label3)
+    v_layout.addRow('Max Value [signal]',label4)
+    v_layout.addRow('Derived value left [signal]',label5)
+    v_layout.addRow('Derived value right[signal]',label6)
+    v_layout.addRow('Left Value [set]',lineEdit1)
+    v_layout.addRow('Right Value [set]',lineEdit2)
+
+    v_layout.addRow('Enabled',check)
 
     container = QWidget()
     container.setLayout(v_layout)

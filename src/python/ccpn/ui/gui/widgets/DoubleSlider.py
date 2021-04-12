@@ -1371,7 +1371,7 @@ class SetOneOf(QObject):
         # ic(results)
         results = list(results)
         results[self._index] = value
-
+        results = [int(result) for result in results]
         # ic(results)
         self.output.emit(*results)
 

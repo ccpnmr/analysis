@@ -1,0 +1,9 @@
+<p style=%(para)s>
+When some words are missing in the pre-defined dictionaries
+you can create your own. A custom dictionary is a .dic text
+file containing each <span style=%(blue)s>word</span> on a new line. All you have to do
+is add the directories where your dictionaries are stored in
+<span style=%(red)s> Settings/Preferences | Editor | Spelling.</span>
+</p>
+<p style=%(para2)s>
+</p>

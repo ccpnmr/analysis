@@ -1,0 +1,4 @@
+{
+    "para2": "' margin-bottom: 0px;'",
+    "blue": "'color: blue;'"
+}

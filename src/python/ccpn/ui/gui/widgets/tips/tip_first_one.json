@@ -1,0 +1,11 @@
+{
+  "header": "This is a png file I have set a background to match",
+
+  "type": "picture",
+
+  "color": "#cecece",
+
+  "order":  10,
+
+  "contents" : ["pic1.png"]
+}

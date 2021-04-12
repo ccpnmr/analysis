@@ -34,6 +34,7 @@ from SpeechBalloon import SpeechBalloon
 # TODO off by 1 error on handle balloon position
 # TODO when dragging handles balloon position overruns
 # TODO support for mouse wheel
+# TODO add timer to display balloon window
 # TODO pull request
 
 

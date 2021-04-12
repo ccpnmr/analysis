@@ -10,6 +10,7 @@ from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QLinearGradient, Q
 from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsItem, QGraphicsItemGroup, QGraphicsRectItem, QLabel, \
     QWidget, QGraphicsObject, QStyleOption, QStyle, QStylePainter, QCheckBox, QVBoxLayout, QLineEdit
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
+from SpeechBalloon import SpeechBalloon
 
 # class MyGraphicsScene(QGraphicsScene):
 #     def drawBackground(self, painter, rect):
@@ -20,7 +21,7 @@ from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 #
 #         super(MyGraphicsScene, self).drawBackground(painter, rect)
 #         painter.fillRect(rect, myBrush)
-from icecream import ic
+
 
 # TODO cleanup code
 # * TODO set values - done
@@ -32,6 +33,7 @@ from icecream import ic
 # TODO remove 'arbitary' fudge factors
 # TODO off by 1 error on handle balloon position
 # TODO when dragging handles balloon position overruns
+# TODO support for mouse wheel
 # TODO pull request
 
 

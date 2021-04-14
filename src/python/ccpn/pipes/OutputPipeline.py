@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-12 19:39:17 +0100 (Mon, April 12, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-14 14:34:34 +0100 (Wed, April 14, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,6 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_OUTPUTS
-from ccpn.util.Hdf5 import convertDataToHdf5
 import pandas as pd
 import os
 
@@ -154,7 +153,10 @@ class OutputSpectraPipe(SpectraPipe):
             for spectrum in spectra:
                 if spectrum is not None:
                     fullPath = str(path) + str(spectrum.name) + '.hdf5'
-                    convertDataToHdf5(spectrum=spectrum, outputPath=fullPath)
+                    if spectrum.dimensionCount == 1:
+                        spectrum.extractSliceToFile(axisCode=spectrum.axisCodes[0],
+                                                    position=[1, spectrum.pointCounts[0]],
+                                                    path=fullPath)
         sucess = False
         if df is not None:
             if mode == CSV:

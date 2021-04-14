@@ -1089,13 +1089,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # checking path
         if instance.setPath(path, substituteSuffix=False) is None:
-            logger.debug('%s.checkForValidFormat: setting path "%s" yielded None' %
-                         (instance.__class__.__name__, path))
+            logger.debug('path "%s" is not valid for dataFormat "%s"' %
+                         (path, instance.dataFormat))
             return None
 
         if not instance.checkPath(instance.path, mode=instance.defaultOpenReadMode):
-            logger.debug('%s.checkForValidFormat: path "%s" not valid for data format "%s"' %
-                         (instance.__class__.__name__, path, instance.dataFormat))
+            logger.debug('path "%s" is not valid for reading dataFormat "%s"' %
+                         (path, instance.dataFormat))
             return None
 
         # checking opening file and reading parameters
@@ -1104,19 +1104,19 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 pass
                 # instance.readParameters()
         except RuntimeError as es:
-            logger.debug('%s.checkForValidFormat: bailing on reading with error: "%s"' %
-                         (instance.__class__.__name__, es))
+            logger.debug('path "%s", dataFormat "%s": bailing on reading with error: "%s"' %
+                         (path, instance.dataFormat, es))
             return None
 
         # Check dimensionality; should be > 0
         if instance.dimensionCount == 0:
-            logger.debug('%s.checkForValidFormat: reading parameters from "%s" yielded dimensionCount=0' %
-                         (instance.__class__.__name__, path))
+            logger.debug('path "%s": reading parameters in dataFormat "%s" yielded dimensionCount 0' %
+                         (path, instance.dataFormat))
             return None
 
         elif instance.dimensionCount > 0:
-            logger.debug('%s.checkForValidFormat: path "%s" is valid for data format "%s"' %
-                         (instance.__class__.__name__, path, instance.dataFormat))
+            logger.debug('path "%s" is valid for dataFormat "%s"' %
+                         (path, instance.dataFormat))
             return instance  # found the file with right attributes
 
         return None

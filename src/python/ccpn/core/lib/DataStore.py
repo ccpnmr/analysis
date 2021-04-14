@@ -231,9 +231,6 @@ class DataStore(CcpNmrJson):
         self.autoVersioning = autoVersioning
 
         self._getPathRedirections()
-        
-        if spectrum is not None:
-            self._importFromSpectrum(spectrum)
 
     @property
     def path(self):
@@ -339,7 +336,7 @@ class DataStore(CcpNmrJson):
     def errorMessage(self):
         """Error message displayed on logger
         """
-        getLogger().warning(self._message())
+        getLogger().error(self._message())
 
     #=========================================================================================
     # Implementation

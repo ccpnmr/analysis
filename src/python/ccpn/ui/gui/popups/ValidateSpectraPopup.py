@@ -493,7 +493,8 @@ class ValidateSpectraPopup(CcpnDialog):
         for sp in self.project.spectra:
             enabled = (not sp.isEmptySpectrum())
             _row = SpectrumPathRow(parentWidget=self.spectrumScrollAreaWidgetContents, row=scrollRow,
-                                   labelText=sp.pid, obj=sp, enabled=enabled,
+                                   labelText='%s  (%s)' % (sp.pid, sp.dataFormat),
+                                   obj=sp, enabled=enabled,
                                    callback=self._spectrumRowCallback)
             scrollRow += 1
             self.spectrumData[sp] = _row

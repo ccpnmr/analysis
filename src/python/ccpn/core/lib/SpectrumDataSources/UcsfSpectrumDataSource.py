@@ -78,13 +78,17 @@ class UcsfSpectrumDataSource(SpectrumDataSourceABC):
 
             # we need to read some data from the file first, as the headerSize is dependent on the
             # number of dimensions
-            header = BinaryHeader(UCSF_FILE_HEADER, self.wordSize).read(self.fp)
+            header = BinaryHeader(UCSF_FILE_HEADER, self.wordSize).read(self.fp, doSeek=True)
             if header.bytesToString(0,8) != 'UCSF NMR':
-                raise RuntimeError('File "%s" appears not be a proper UCSF format' % self.path)
+                raise RuntimeError('File "%s" does not have the mandatory "UCSF NMR" first eight header bytes' % self.path)
+
             self.dimensionCount = int(header.bytes[10])
+            if self.dimensionCount < 1 or self.dimensionCount > self.MAXDIM:
+                raise RuntimeError('File "%s" has an invalid dimensionCount (%d)' %
+                                   (self.path, self.dimensionCount))
 
             # Now get the full thing
-            self.header = BinaryHeader(self.headerSize, self.wordSize).read(self.fp)
+            self.header = BinaryHeader(self.headerSize, self.wordSize).read(self.fp, doSeek=True)
             if (sys.byteorder != 'big'):
                 self.header.swapBytes()
 

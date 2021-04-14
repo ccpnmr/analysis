@@ -101,8 +101,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-18 13:29:08 +0000 (Thu, March 18, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-14 19:56:58 +0100 (Wed, April 14, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -294,7 +294,8 @@ class NotificationTest(WrapperTesting):
         not1 = project.registerNotifier('Spectrum', 'create', notifyfunc,
                                         parameterDict={'value': 'newSpectrum2', 'll': ll})
 
-        spectrum = project.createDummySpectrum(axisCodes=('Fn', 'Nf'), name='HF-hsqc')
+        spectrum = self.project.newEmptySpectrum(isotopeCodes=('19F', '15N'), name='HF-hsqc')
+
         peakList = spectrum.peakLists[0]
         peak1 = peakList.newPeak(ppmPositions=(1.0, 2.0))
         self.assertEqual(ll, ['newSpectrum', 'newSpectrum2', 'newPeakList', 'newPeak'])
@@ -350,8 +351,8 @@ class NotificationTest(WrapperTesting):
                                         parameterDict={'value': 'renameSpectrumGroup', 'll': ll})
         not5 = project.registerNotifier('SpectrumGroup', 'Spectrum', notifyfunc,
                                         parameterDict={'value': 'modLink', 'll': ll})
-        spectrum = project.createDummySpectrum(axisCodes=('Fn', 'Nf'), name='HF-hsqc')
-        spectrum2 = project.createDummySpectrum(axisCodes=('Hc', 'Ch'), name='HC-hsqc')
+        spectrum = self.project.newEmptySpectrum(isotopeCodes=('19F', '15N'), name='FN-hsqc')
+        spectrum2 = self.project.newEmptySpectrum(isotopeCodes=('19F', '13C'), name='FC-hsqc')
         spectrumGroup = project.newSpectrumGroup(name='Groupie')
         spectrumGroup2 = project.newSpectrumGroup(name='Sloupie')
         spectrumGroup.spectra = (spectrum,)

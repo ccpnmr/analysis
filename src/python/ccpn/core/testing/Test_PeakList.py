@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:34 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-14 19:56:58 +0100 (Wed, April 14, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,9 +32,9 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 class PeakListCreationTest(WrapperTesting):
     def setUp(self):
         with self.initialSetup():
-            self.spectrum = self.project.createDummySpectrum('H')
-            self.spectrum1 = self.project.createDummySpectrum(('H', 'N'))
-            self.spectrum2 = self.project.createDummySpectrum(('H', 'N'))
+            self.spectrum1 = self.project.newEmptySpectrum(isotopeCodes=('1H'), name='H')
+            self.spectrum2 = self.project.newEmptySpectrum(isotopeCodes=('1H', '15N'), name='HN-hsqc')
+            self.spectrum3 = self.project.newEmptySpectrum(isotopeCodes=('1H', '15N'), name='HN-hsqc')
 
     def test_newPeakList(self):
         self.assertEqual(len(self.spectrum.peakLists), 1)

@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:50 +0000 (Mon, March 01, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-14 19:56:59 +0100 (Wed, April 14, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,13 +25,13 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 
 
-def _create1DSpectrum(project, name, intensities, positions, expType, axisCodes):
+def _create1DSpectrum(project, name, intensities, positions, expType, isotopeCodes):
     '''
      CCPN internal. Used in pipes
     Function to create a user defined CCPN object spectrum. It can be used to create STD spectrum
     '''
 
-    spectrum = project.createDummySpectrum(axisCodes, name)
+    spectrum = project.newEmptySpectrum(isotopeCodes=isotopeCodes, name=name)
     spectrum.positions = positions
     spectrum.intensities = intensities
     spectrum.pointCounts = (len(intensities),)

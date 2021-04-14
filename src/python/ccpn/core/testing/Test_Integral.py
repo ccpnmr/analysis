@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
 __credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:33 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-14 19:56:58 +0100 (Wed, April 14, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,7 +40,7 @@ class IntegralListTest(WrapperTesting):
         params = params1.copy()
         params.update(params2)
 
-        spectrum = self.project.createDummySpectrum(axisCodes=('Hc', 'Ch'), name='HSQC-tst')
+        spectrum = self.project.newEmptySpectrum(isotopeCodes=('1H', '13C'), name='HSQC-tst')
         integralList = spectrum.newIntegralList(title='Int2d', comment='No!')
         self.undo.undo()
         self.undo.redo()
@@ -63,7 +63,7 @@ class IntegralListTest(WrapperTesting):
         self.undo.redo()
 
     def test_1dIntegral(self):
-        spectrum = self.project.createDummySpectrum(axisCodes=('H'), name='H1D-tst')
+        spectrum = self.project.newEmptySpectrum(isotopeCodes=('1H',), name='H1D-tst')
         # set some dummy information on the 1D spectrum
         spectrum.positions = np.array([x for x in range(0, 10)], dtype=np.float32)
         spectrum.intensities = np.array([x * 0.1 for x in range(0, 10)], dtype=np.float32)

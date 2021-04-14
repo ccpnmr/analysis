@@ -28,6 +28,7 @@ import pandas as pd
 import numpy as np
 import random
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.Common import getAxisCodeMatchIndices, name2IsotopeCode
 
 def _lorentzian(points, center, linewidth, intensity=1):
     points = np.asarray(points)
@@ -50,7 +51,8 @@ if not AxisCode in df:
     showWarning('AxisCode not in Table', 'Check AxisCode parameter in this macro or the input file.')
 else:
     peaks = df.get(AxisCode)
-    sp = project.createDummySpectrum(name=str(SpectrumName), axisCodes=[AxisCode])
+    isotopeCodes = [name2IsotopeCode(x) for x in [AxisCode]]
+    sp = project.newEmptySpectrum(isotopeCodes=isotopeCodes, name=str(SpectrumName))
     # sp.positions = np.arange(*sp.spectrumLimits[0], 0.001)
     # can just call sp.positions which will fill of position is None, but here for clarity
     sp.positions = sp.getPpmArray(dimension=1)

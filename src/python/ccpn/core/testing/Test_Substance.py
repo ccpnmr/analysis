@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 15:38:08 +0000 (Tue, March 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-14 19:56:58 +0100 (Wed, April 14, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -152,14 +152,14 @@ class Test_Substance_SpectrumLink(WrapperTesting):
 
     def setUp(self):
         with self.initialSetup():
-            self.spectrum1 = self.project.createDummySpectrum(axisCodes=['CO', 'Hn', 'Nh'])
+            self.spectrum1 = self.project.newEmptySpectrum(isotopeCodes=('13C', '1H', '15N'), name='COHnNh')
             self.assertEqual(self.spectrum1.isotopeCodes, ('13C', '1H', '15N'))
-            self.assertEqual(self.spectrum1.name, 'COHnNh')
+
 
             self.chain1 = self.project.createChain(sequence='ACDC', compoundName='sequence1', shortName='cC1',
                                                    molType='protein')
 
-            self.spectrum2 = self.project.createDummySpectrum(axisCodes=['Hp', 'F', 'Ph', 'H'])
+            self.spectrum2 = self.project.newEmptySpectrum(isotopeCodes=('1H', '19F', '31P', '1H'), name='HpFPhH')
             self.assertEqual(self.spectrum2.isotopeCodes, ('1H', '19F', '31P', '1H'))
             self.assertEqual(self.spectrum2.name, 'HpFPhH')
 

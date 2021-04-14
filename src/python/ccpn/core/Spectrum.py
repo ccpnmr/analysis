@@ -49,8 +49,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-24 14:53:33 +0000 (Wed, March 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-14 19:56:58 +0100 (Wed, April 14, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -2505,7 +2505,7 @@ class Spectrum(AbstractWrapperObject):
         'Clone 1D spectrum to a new spectrum.'
         #FIXME Crude approach / hack
 
-        newSpectrum = self.project.createDummySpectrum(name=self.name, axisCodes=self.axisCodes)
+        newSpectrum = project.newEmptySpectrum(isotopeCodes=self.isotopeCodes, name=self.name)
         newSpectrum._positions = self.positions
         newSpectrum._intensities = self.intensities
         for peakList in self.peakLists:

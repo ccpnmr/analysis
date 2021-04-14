@@ -6,7 +6,7 @@ import os
 import glob
 import numpy as np
 from collections import OrderedDict as od
-from ccpn.util.Common import getAxisCodeMatchIndices
+from ccpn.util.Common import getAxisCodeMatchIndices, name2IsotopeCode
 from ccpn.framework.PathsAndUrls import macroPath as mp
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.Logging import getLogger
@@ -330,8 +330,9 @@ def _simulatedSpectrumFromCSL(project, csl, axesCodesMap):
         return success
     with notificationEchoBlocking():
         nmrAtomNames = list(axesCodesMap.keys())
-        targetSpectrumAxCodes = list(axesCodesMap.values())
-        targetSpectrum = project.createDummySpectrum(axisCodes=targetSpectrumAxCodes, name=None)#, chemicalShiftList=csl)
+        isotopeCodes = [name2IsotopeCode(x) for x in list(axesCodesMap.values())]
+        targetSpectrum =  project.newEmptySpectrum(isotopeCodes=isotopeCodes, name=csl.name)
+        targetSpectrum.chemicalShiftList = csl
         peakList = targetSpectrum.peakLists[-1]
 
         # filter by NmrAtom of interest

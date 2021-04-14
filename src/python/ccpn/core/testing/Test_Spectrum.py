@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-30 16:58:51 +0100 (Tue, March 30, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-14 19:56:58 +0100 (Wed, April 14, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -112,16 +112,17 @@ class DummySpectrumTest(WrapperTesting):
     projectPath = None
 
     def test_dummySpectrum(self):
+        # Double check these test after refactoring DummySpectrum
         axisCodes = ('CO', 'Hn', 'Nh')
-        spectrum = self.project.createDummySpectrum(axisCodes)
+        spectrum = self.project.newEmptySpectrum(isotopeCodes=('13C','1H', '15N'), name='COHnNh')
         isotopeCodes = ('13C', '1H', '15N')
         self.assertEqual(spectrum.isotopeCodes, isotopeCodes)
         self.assertEqual(spectrum.name, 'COHnNh')
 
-        spectrum1 = self.project.createDummySpectrum(axisCodes=['H', 'N', 'C'], name='testspec')
+        spectrum1 = self.project.newEmptySpectrum(isotopeCodes=('1H', '15N', '13C'), name='testspec')
         self.assertEqual(spectrum1.name, 'testspec')
 
-        spectrum2 = self.project.createDummySpectrum(axisCodes=['Hp', 'F', 'Ph', 'H'])
+        spectrum2 = self.project.newEmptySpectrum(isotopeCodes=('1H', '19F', '31P', '1H'), name='HpFPhH')
         self.assertEqual(spectrum2.name, 'HpFPhH')
         # Undo and redo all operations
         self.undo.undo()

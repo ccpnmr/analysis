@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/165Ho.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        1.0
+    ],
+    [
+        "elementNumber",
+        67
+    ],
+    [
+        "gFactor",
+        1.668
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "165Ho"
+    ],
+    [
+        "massNumber",
+        165
+    ],
+    [
+        "name",
+        "Holmium"
+    ],
+    [
+        "quadrupoleMoment",
+        3.58
+    ],
+    [
+        "spin",
+        3.5
+    ],
+    [
+        "symbol",
+        "Ho"
+    ]
+]

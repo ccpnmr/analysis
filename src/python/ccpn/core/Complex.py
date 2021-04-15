@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import typing
 from functools import partial
-from ccpn.util.Common import _validateName
+
 from ccpn.core.Project import Project
 from ccpn.core.Chain import Chain
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -137,12 +137,7 @@ class Complex(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Complex, changing its name and Pid.
         """
-        _validateName(self.project, Complex, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.__dict__['name'] = value
-        return (oldName,)
+        return self._rename(value)
 
     #=========================================================================================
     # CCPN functions
@@ -171,12 +166,7 @@ def _newComplex(self: Project, name: str, chains=(), serial: int = None, comment
     :return: a new Complex instance.
     """
 
-    if not name:
-        name = Complex._nextAvailableName(Complex, self)
-    _validateName(self, Complex, name)
-
-    if name and Pid.altCharacter in name:
-        raise ValueError("Character %s not allowed in ccpn.Complex.name" % Pid.altCharacter)
+    name = Complex._uniqueName(project=self, name=name)
 
     if chains:
         getByPid = self._project.getByPid

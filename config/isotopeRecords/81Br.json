@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/81Br.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.4931
+    ],
+    [
+        "elementNumber",
+        35
+    ],
+    [
+        "gFactor",
+        1.51371
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "81Br"
+    ],
+    [
+        "massNumber",
+        81
+    ],
+    [
+        "name",
+        "Bromine"
+    ],
+    [
+        "quadrupoleMoment",
+        0.262
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Br"
+    ]
+]

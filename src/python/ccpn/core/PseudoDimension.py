@@ -144,15 +144,6 @@ class PseudoDimension(AbstractWrapperObject):
     def pointErrors(self, value: typing.Sequence) -> tuple:
         self._wrappedData.pointErrors = value
 
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
-
     #=========================================================================================
     # Implementation functions
     #=========================================================================================

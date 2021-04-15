@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/181Ta.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.99988
+    ],
+    [
+        "elementNumber",
+        73
+    ],
+    [
+        "gFactor",
+        0.67729
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "181Ta"
+    ],
+    [
+        "massNumber",
+        181
+    ],
+    [
+        "name",
+        "Tantalum"
+    ],
+    [
+        "quadrupoleMoment",
+        3.17
+    ],
+    [
+        "spin",
+        3.5
+    ],
+    [
+        "symbol",
+        "Ta"
+    ]
+]

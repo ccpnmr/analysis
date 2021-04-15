@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import typing
 from datetime import datetime
+
 from ccpn.util import Constants as utilConstants
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -180,14 +181,8 @@ class Note(AbstractWrapperObject):
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename Note, changing its name and Pid.
-
-        NB, the serial remains immutable."""
-        commonUtil._validateName(self.project, Note, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.name = value
-        return (oldName,)
+        """
+        return self._rename()
 
     #=========================================================================================
     # CCPN functions
@@ -215,9 +210,7 @@ def _newNote(self: Project, name: str = None, text: str = None, comment: str = N
     :return: a new Note instance.
     """
 
-    if not name:
-        name = Note._nextAvailableName(Note, self)
-    commonUtil._validateName(self, Note, name)
+    name = Note._uniqueName(project=self, name=name)
 
     if text is not None:
         if not isinstance(text, str):

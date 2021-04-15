@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/179Hf.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.1362
+    ],
+    [
+        "elementNumber",
+        72
+    ],
+    [
+        "gFactor",
+        -0.1424
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "179Hf"
+    ],
+    [
+        "massNumber",
+        179
+    ],
+    [
+        "name",
+        "Hafnium"
+    ],
+    [
+        "quadrupoleMoment",
+        3.79
+    ],
+    [
+        "spin",
+        4.5
+    ],
+    [
+        "symbol",
+        "Hf"
+    ]
+]

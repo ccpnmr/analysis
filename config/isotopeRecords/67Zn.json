@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/67Zn.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.041
+    ],
+    [
+        "elementNumber",
+        30
+    ],
+    [
+        "gFactor",
+        0.350192
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "67Zn"
+    ],
+    [
+        "massNumber",
+        67
+    ],
+    [
+        "name",
+        "Zinc"
+    ],
+    [
+        "quadrupoleMoment",
+        0.15
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Zn"
+    ]
+]

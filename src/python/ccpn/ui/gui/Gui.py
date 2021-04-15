@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-02 15:50:50 +0000 (Tue, February 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:33 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -294,17 +294,20 @@ class Gui(Ui):
         """Echo commands strings, one by one, to logger
         and store them in internal list for perusal
         """
-        console = self.application.ui.mainWindow.pythonConsole
-        logger = self.application.project._logger
-
+        logger = Logging.getLogger()
         for command in commands:
+            logger.echoInfo(command)
 
-            # only write to the console if enabled in framework
-            if self.application._enableLoggingToConsole:
+        if self.application.ui is not None and \
+           self.application.ui.mainWindow is not None and \
+           self.application._enableLoggingToConsole:
+
+            console = self.application.ui.mainWindow.pythonConsole
+            for command in commands:
                 command = re.sub(REMOVEDEBUG, '', command)
                 console._write(command + '\n')
 
-            logger.echoInfo(command)
+
 
     #TODO:RASMUS: should discuss how application should deal with it
     def getByGid(self, gid):

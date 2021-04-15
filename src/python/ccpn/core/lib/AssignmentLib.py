@@ -77,6 +77,8 @@ import typing
 import numpy
 from ccpn.util.Logging import getLogger
 
+defaultAssignmentTolerance = 0.03
+
 
 def isInterOnlyExpt(experimentType: str) -> bool:
     """
@@ -885,7 +887,7 @@ def peaksAreOnLine(peaks: typing.List[Peak], dim: int):
         else:
             tolerance = min(*ll)  # this fails if len(ll) == 1, hence the above
     else:
-        tolerance = Constants.defaultAssignmentTolerance
+        tolerance = defaultAssignmentTolerance
     # tolerance = min([getAssignmentToleranceForPeakDimension(peak, dim) for peak in peaks])
     if max_difference < tolerance:
         return True

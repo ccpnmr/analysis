@@ -30,7 +30,6 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
-from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 
 
@@ -93,9 +92,7 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
 
                     nmrResidue = nmrChain.newNmrResidue()
                     for i, axisCode in enumerate(peak.axisCodes):
-                        isotopeCode = DEFAULT_ISOTOPE_DICT.get(str(axisCode))
-                        nmrAtom = nmrResidue.fetchNmrAtom(name=str(axisCode), isotopeCode=isotopeCode)
-
+                        nmrAtom = nmrResidue.fetchNmrAtom(name=str(axisCode))
                         peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
 
         # remove if popup does not need to close

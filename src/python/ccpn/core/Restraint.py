@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from typing import Sequence, Tuple, Union
 import collections
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.RestraintList import RestraintList
@@ -81,15 +82,6 @@ class Restraint(AbstractWrapperObject):
     def serial(self) -> int:
         """serial number of Restraint, used in Pid and to identify the Restraint. """
         return self._wrappedData.serial
-
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
 
     @property
     def peaks(self) -> Tuple[Peak, ...]:

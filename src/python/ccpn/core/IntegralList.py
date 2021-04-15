@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-29 14:41:18 +0000 (Fri, January 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:28 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -24,17 +24,17 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.core.Spectrum import Spectrum
 from typing import List, Tuple
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import IntegralList as ApiIntegralList
 import numpy as np
-from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject
-from ccpn.util.Logging import getLogger
-from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D, estimateNoiseLevel1D, _filterROI1Darray
-from ccpn.core._implementation.PMIListABC import PMIListABC
 from scipy import signal
-from ccpn.util.Common import percentage
+
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import IntegralList as ApiIntegralList
+from ccpn.core.Spectrum import Spectrum
+from ccpn.core._implementation.PMIListABC import PMIListABC
+from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D, estimateNoiseLevel1D, _filterROI1Darray
+from ccpn.core.lib.ContextManagers import newObject
+from ccpn.util.decorators import logCommand
+from ccpn.util.Logging import getLogger
 
 
 # moved on peakUtil ####################################################################

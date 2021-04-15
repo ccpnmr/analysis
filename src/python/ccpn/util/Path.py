@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:51 +0000 (Fri, January 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:39 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -69,7 +69,8 @@ class Path(_Path_):
 
     @property
     def basename(self):
-        """the name of self without any suffixes"""
+        """the name of self without any suffixes
+        """
         return self.name.split('.')[0]
 
     @property
@@ -78,12 +79,16 @@ class Path(_Path_):
         return self if self.is_dir() else self.parent
 
     def addTimeStamp(self):
-        """Return a Path instance with path.timeStamp.suffix profile"""
+        """Return a Path instance with path.timeStamp.suffix profile
+        """
         now = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
         return self.parent / (self.stem + '.' + str(now) + self.suffix)
 
     @property
     def version(self):
+        """Parse self to yield a version integer, presumably generated with the incrementVersion method
+        Return 0 if not found
+        """
         suffixes = self.suffixes
         version = 0
         if len(suffixes) > 0:
@@ -94,7 +99,8 @@ class Path(_Path_):
         return version
 
     def incrementVersion(self):
-        """Return a Path instance with path.version.suffix profile"""
+        """Return a Path instance with path.version.suffix profile
+        """
         suffixes = self.suffixes
         version = 0
         if len(suffixes) > 0:
@@ -107,21 +113,37 @@ class Path(_Path_):
         suffixes.insert(0, '.' + str(version))
         return self.parent / (self.basename + ''.join(suffixes))
 
+    def uniqueVersion(self):
+        """Return a Path instance which is unique by incrementing version index
+        """
+        result = Path(self)
+        while result.exists():
+            result = result.incrementVersion()
+        return result
+
     def normalise(self):
+        """Return normalised path
+        """
         return Path(os.path.normpath(self.asString()))  # python <= 3.4; strings only
 
     def open(self, *args, **kwds):
-        """Subclassing to catch any long file name errors that allegedly can occur on windows"""
+        """Subclassing to catch any long file name errors that allegedly can occur on windows
+        """
         try:
             fp = super().open(*args, **kwds)
         except FileNotFoundError:
             if len(self.asString()) > 256:
-                raise FileNotFoundError('file "%s" not found; potentially path length (%d) is too large. Consider moving the file'
+                raise FileNotFoundError('Error opening file "%s"; potentially path length (%d) is too large. Consider moving the file'
                                         % (self, len(self.asString()))
                                         )
             else:
-                raise FileNotFoundError('file "%s" not found' % self)
+                raise FileNotFoundError('Error opening file "%s"' % self)
         return fp
+
+    def globList(self, pattern='*'):
+        """Return a list rather then a generator
+        """
+        return [p for p in self.glob(pattern=pattern)]
 
     def removeDir(self):
         """Recursively remove content of self and sub-directories
@@ -131,7 +153,7 @@ class Path(_Path_):
         _rmdirs(str(self))
 
     def fetchDir(self, dirName):
-        """Return and if needed create dirName in self
+        """Return and (if needed) create dirName relative to self
         :return: Path instance of self / dirName
         """
         if not self.is_dir():
@@ -145,7 +167,7 @@ class Path(_Path_):
         """Remove file represented by self.
         """
         if self.is_dir():
-            raise ValueError('%s is a directory' % self)
+            raise RuntimeError('%s is a directory' % self)
         self.unlink()
 
     def assureSuffix(self, suffix):
@@ -165,6 +187,22 @@ class Path(_Path_):
 
         return self
 
+    def withoutSuffix(self):
+        """Return self without suffix
+        """
+        if len(self.suffixes) > 0:
+            return self.with_suffix('')
+        else:
+            return self
+
+    def withSuffix(self, suffix):
+        """Return self with suffix; inverse of withoutSuffix()
+        partially copies with_suffix, but does not allow for empty argument
+        """
+        if suffix is None or len(suffix) == 0:
+            raise ValueError('No suffix defined')
+        return self.with_suffix(suffix=suffix)
+
     def split3(self):
         """Return a tuple of (.parent, .stem, .suffix) strings
         """
@@ -176,7 +214,16 @@ class Path(_Path_):
         return (str(self.parent), str(self.name))
 
     def asString(self):
+        "Return self as a string"
         return str(self)
+
+    def startswith(self, prefix):
+        "Return True if self starts with prefix"
+        path = self.asString()
+        return path.startswith(prefix)
+
+    def __len__(self):
+        return len(self.asString())
 
     def __eq__(self, other):
         return (str(self).strip() == str(other).strip())
@@ -423,12 +470,11 @@ def suggestFileLocations(fileNames, startDir=None):
 
 
 def fetchDir(path, dirName):
-    '''
-
+    """
     :param path: string of parent path where to add a new subdir
     :param dirName: str of the new sub dir
     :return: if not already existing, creates a new folder with the given name, return the full path as str
-    '''
+    """
     if path is not None:
         newPath = os.path.join(path, dirName)
         if not os.path.exists(newPath):
@@ -436,3 +482,21 @@ def fetchDir(path, dirName):
             return newPath
         else:
             return newPath
+
+# Original in util.Common
+defaultFileNameChar = '_'
+separatorFileNameChar = '+'
+validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
+                          'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                          + defaultFileNameChar)
+validCcpnFileNameChars = validFileNamePartChars + '-.' + separatorFileNameChar
+
+def makeValidCcpnFilePath(path):
+    """Replace invalid chars in path to assure Python 2.1 (used in ObjectDomain) compatibility
+    """
+    ll = []
+    for ii, char in enumerate(path):
+        if char not in validFileNamePartChars:
+            char = defaultFileNameChar
+        ll.append(char)
+    return ''.join(ll)

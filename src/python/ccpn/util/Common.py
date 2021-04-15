@@ -46,8 +46,10 @@ from string import whitespace
 from ccpn.util.LabelledEnum import LabelledEnum
 from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
 from ccpn.util.FrozenDict import FrozenDict
-from ccpn.util import Constants
 from ccpn.util.Logging import getLogger
+
+from ccpn.util import Constants
+from ccpn.util.isotopes import isotopeRecords
 
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
@@ -55,46 +57,43 @@ maxRandomInt = 2000000000
 
 WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 
-# valid characters for file names
-# NB string.ascii_letters and string.digits are not compatible
-# with Python 2.1 (used in ObjectDomain)
-defaultFileNameChar = '_'
-separatorFileNameChar = '+'
-validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
-                          'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                          + defaultFileNameChar)
-validCcpnFileNameChars = validFileNamePartChars + '-.' + separatorFileNameChar
-CAMELCASEPTN = r'((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))'
-CAMELCASEREP = r' \1'
+# # valid characters for file names
+# # NB string.ascii_letters and string.digits are not compatible
+# # with Python 2.1 (used in ObjectDomain)
+# defaultFileNameChar = '_'
+# separatorFileNameChar = '+'
+# validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
+#                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+#                           + defaultFileNameChar)
+# validCcpnFileNameChars = validFileNamePartChars + '-.' + separatorFileNameChar
 
-
-# alternative camelCase split = r'((?<=[a-z])[A-Z]|(?<=[A-Z])[A-Z](?=[a-z]))''
 
 # # Not used - Rasmus 20/2/2017
 # Sentinel = collections.namedtuple('Sentinel', ['value'])
 
 
-def convertStringToFileName(fileNameString, validChars=validCcpnFileNameChars,
-                            defaultChar=defaultFileNameChar):
-    ll = [x for x in fileNameString]
-    for ii, char in enumerate(ll):
-        if char not in validChars:
-            ll[ii] = defaultChar
-    #
-    return ''.join(ll)
+# def convertStringToFileName(fileNameString, validChars=validCcpnFileNameChars,
+#                             defaultChar=defaultFileNameChar):
+#     ll = [x for x in fileNameString]
+#     for ii, char in enumerate(ll):
+#         if char not in validChars:
+#             ll[ii] = defaultChar
+#     #
+#     return ''.join(ll)
 
-
-def getCcpFileString(fileNameString):
-    """
-    Changes an input string to the one used for a component of file names.
-    """
-
-    return convertStringToFileName(fileNameString, validFileNamePartChars,
-                                   defaultFileNameChar)
+#
+# def getCcpFileString(fileNameString):
+#     """
+#     Changes an input string to the one used for a component of file names.
+#     """
+#
+#     return convertStringToFileName(fileNameString, validFileNamePartChars,
+#                                    defaultFileNameChar)
 
 
 def incrementName(name):
-    """Add '_1' to name or change suffix '_n' to '_(n+1) """
+    """Add '_1' to name or change suffix '_n' to '_(n+1)
+    """
     ll = name.rsplit('_', 1)
     if len(ll) == 2:
         try:
@@ -107,15 +106,15 @@ def incrementName(name):
     return name + '_1'
 
 
-def _incrementObjectName(project, pluralLinkName, name):
-    """ fetch an incremented name if an object in list (project.xs) has already taken it. """
-    originalName = name
-    names = [d.name for d in getattr(project, pluralLinkName) if hasattr(d, 'name')]
-    while name in names:
-        name = incrementName(name)
-    if originalName != name:
-        getLogger().info('Name:% already assigned. Renamed to %s' % (originalName, name))
-    return name
+# def _incrementObjectName(project, pluralLinkName, name):
+#     """ fetch an incremented name if an object in list (project.xs) has already taken it. """
+#     originalName = name
+#     names = [d.name for d in getattr(project, pluralLinkName) if hasattr(d, 'name')]
+#     while name in names:
+#         name = incrementName(name)
+#     if originalName != name:
+#         getLogger().info('Name:% already assigned. Renamed to %s' %(originalName, name))
+#     return name
 
 
 def recursiveImport(dirname, modname=None, ignoreModules=None, force=False):
@@ -241,7 +240,26 @@ def uniquify(sequence):
     """Get list of unique elements in sequence, in order of first appearance"""
     seen = set()
     seen_add = seen.add
-    return [x for x in sequence if x not in seen and not seen_add(x)]
+    return [x for x in sequence if x not in seen and not seen_add(x)]  # NB: not seen.add(x) is always True; i.e. this
+                                                                       # part just adds the element during the list comprehension
+
+
+#from typing import Iterable
+from collections import Iterable                            # < py38
+
+def flatten(items):
+    """Yield items from any nested iterable; see Reference.
+    Here is a general approach that applies to numbers, strings, nested lists and mixed containers.
+    From: https://stackoverflow.com/questions/952914/how-to-make-a-flat-list-out-of-list-of-lists/952952#952952
+    ref: This solution is modified from a recipe in Beazley, D. and B. Jones. Recipe 4.14, Python Cookbook 3rd
+         Ed., O'Reilly Media Inc. Sebastopol, CA: 2013.
+    """
+    for x in items:
+        if isinstance(x, Iterable) and not isinstance(x, (str, bytes)):
+            for sub_x in flatten(x):
+                yield sub_x
+        else:
+            yield x
 
 
 def isClose(a, b, relTolerance=1e-05, absTolerance=1e-08):
@@ -253,13 +271,40 @@ def isClose(a, b, relTolerance=1e-05, absTolerance=1e-08):
 
 
 def isIterable(obj) -> bool:
-    "Returns True if obj is iterable"
+    """Returns True if obj is iterable
+    """
     try:
         iter(obj)
         return True
     except TypeError:
         pass
     return False
+
+
+def indexOfMaxValue(theList):
+    """Return the index of the item in theList with the maximum value
+    :param theList: an iterable
+    :return index value or -1 for an empty list
+    """
+    if not isIterable(theList):
+        raise TypeError('indexOfMaxValue: theList is not iterable')
+    if len(theList) == 0:
+        return -1
+    idx = max( (val, i) for i,val in enumerate(theList))[1]
+    return idx
+
+
+def indexOfMinValue(theList):
+    """Return the index of the item in theList with the minimum value
+    :param theList: an iterable
+    :return index value or -1 for an empty list
+    """
+    if not isIterable(theList):
+        raise TypeError('indexOfMaxValue: theList is not iterable')
+    if len(theList) == 0:
+        return -1
+    idx = min( (val, i) for i,val in enumerate(theList))[1]
+    return idx
 
 
 def getTimeStamp():
@@ -276,7 +321,6 @@ def getUuid(programName, timeStamp=None):
 
 def name2IsotopeCode(name=None):
     """Get standard isotope code matching atom name or axisCode string
-
     """
     if not name:
         return None
@@ -285,7 +329,7 @@ def name2IsotopeCode(name=None):
     if result is None:
         if name[0].isdigit():
             ss = name.title()
-            for key in Constants.isotopeRecords:
+            for key in isotopeRecords:
                 if ss.startswith(key):
                     if name[:len(key)].isupper():
                         result = key
@@ -300,17 +344,11 @@ def isotopeCode2Nucleus(isotopeCode=None):
     if not isotopeCode:
         return None
 
-    record = Constants.isotopeRecords.get(isotopeCode)
+    record = isotopeRecords.get(isotopeCode)
     if record is None:
         return None
     else:
         return record.symbol.upper()
-
-    # for tag,val in sorted(Constants.DEFAULT_ISOTOPE_DICT.items()):
-    #   if val == isotopeCode:
-    #     return tag
-    # else:
-    #   return None
 
 
 def name2ElementSymbol(name):
@@ -329,7 +367,7 @@ def name2ElementSymbol(name):
         return name[:2]
     elif name[0].isdigit():
         ss = name.title()
-        for key, record in Constants.isotopeRecords.items():
+        for key, record in isotopeRecords.items():
             if ss.startswith(key):
                 if name[:len(key)].isupper():
                     return record.symbol.upper()
@@ -345,16 +383,16 @@ def checkIsotope(text):
     axisCodes or atom names, hence the difference to name2ElementSymbol.
     """
     defaultIsotope = '1H'
-    name = text.strip().upper()
 
-    if not name:
+    if not text:
         return defaultIsotope
 
-    if name in Constants.isotopeRecords:
+    name = text.strip().upper()
+    if name in isotopeRecords:
         # Superfluous but should speed things up
         return name
 
-    for isotopeCode in Constants.isotopeRecords:
+    for isotopeCode in isotopeRecords:
         # NB checking this first means that e.g. 'H13C' returns '13C' rather than '1H'
         if isotopeCode.upper() in name:
             return isotopeCode
@@ -581,52 +619,6 @@ def contains_whitespace(s):
 
 def contains_whitespace_nospace(s):
     return True in [c in s for c in string.whitespace if c != ' ']
-
-
-def resetSerial(apiObject, newSerial):
-    """ADVANCED Reset serial of object to newSerial, resetting parent link
-    and the nextSerial of the parent.
-
-    Raises ValueError for objects that do not have a serial
-    (or, more precisely, where the _wrappedData does not have a serial)."""
-
-    # NB, needed both from V2 NefIo and V3, hence putting nit here,
-    # even though it uses V2 objects
-
-    if not hasattr(apiObject, 'serial'):
-        raise ValueError("Cannot reset serial, %s does not have a 'serial' attribute"
-                         % apiObject)
-    downlink = apiObject.__class__._metaclass.parentRole.otherRole.name
-
-    parentDict = apiObject.parent.__dict__
-    downdict = parentDict[downlink]
-    oldSerial = apiObject.serial
-    serialDict = parentDict['_serialDict']
-
-    if newSerial == oldSerial:
-        return
-
-    elif newSerial in downdict:
-        # get the identifier of the v3 object
-        from ccpn.framework.Application import getApplication
-
-        getApp = getApplication()
-        v3obj = None
-        if getApp:
-            project = getApp.project
-            if project and apiObject in project._data2Obj:
-                v3obj = project._data2Obj[apiObject]
-        raise ValueError("Cannot reset serial to %s - value already in use (%s)" % (newSerial, v3obj or apiObject))
-
-    else:
-        maxSerial = serialDict[downlink]
-        apiObject.__dict__['serial'] = newSerial
-        downdict[newSerial] = apiObject
-        del downdict[oldSerial]
-        if newSerial > maxSerial:
-            serialDict[downlink] = newSerial
-        elif oldSerial == maxSerial:
-            serialDict[downlink] = max(downdict)
 
 
 def makeIterableList(inList=None):
@@ -1255,47 +1247,47 @@ def _compareDict(d1, d2):
 
     return True
 
-
-def _validateName(project, cls, value: str, attribName: str = 'name', allowWhitespace: bool = False, allowEmpty: bool = False,
-                  allowNone: bool = False, allowLeadingTrailingWhitespace: bool = False, allowSpace: bool = True,
-                  checkExisting: bool = True):
-    """Check that the attribName is valid
-    """
-    from ccpn.core.lib import Pid  # avoids circular imports
-
-    if value is not None:
-        if not isinstance(value, str):
-            raise TypeError('{}.{} must be a string'.format(cls.className, attribName))
-        if not value and not allowEmpty:
-            raise ValueError('{}.{} must be set'.format(cls.className, attribName))
-        if Pid.altCharacter in value:
-            raise ValueError('Character {} not allowed in {}.{}'.format(Pid.altCharacter, cls.className, attribName))
-        if allowWhitespace:
-            if not allowSpace and ' ' in value:
-                raise ValueError('space not allowed in {}.{}'.format(cls.className, attribName))
-        else:
-            if allowSpace and contains_whitespace_nospace(value):
-                raise ValueError('whitespace not allowed in {}.{}'.format(cls.className, attribName))
-            elif not allowSpace and contains_whitespace(value):
-                raise ValueError('whitespace not allowed in {}.{}'.format(cls.className, attribName))
-        if not allowLeadingTrailingWhitespace and value != value.strip():
-            raise ValueError('{}.{} cannot contain leading/trailing whitespace'.format(cls.className, attribName))
-
-    elif not allowNone:
-        raise ValueError('None not allowed in {}.{}'.format(cls.className, attribName))
-
-    # previous = project.getByRelativeId(value)
-    # if previous not in (None, cls):
-    #     raise ValueError('{} already exists'.format(previous.longPid))
-
-    if checkExisting:
-        # this is not valid for nmrAtoms
-        found = [obj for obj in getattr(project, cls._pluralLinkName, []) if getattr(obj, attribName, None) == value]
-        if found:
-            raise ValueError('{} already exists'.format(found[0].id))
-
-    # will only get here if all the tests pass
-    return True
+# GWV 14/01/2021: replaced by near similar _validateStringValue classmethod on AbtractWrapper
+# def _validateName(project, cls, value: str, attribName: str = 'name', allowWhitespace: bool = False, allowEmpty: bool = False,
+#                   allowNone: bool = False, allowLeadingTrailingWhitespace: bool = False, allowSpace: bool = True,
+#                   checkExisting: bool = True):
+#     """Check that the attribName is valid
+#     """
+#     from ccpn.core.lib import Pid # avoids circular imports
+#
+#     if value is not None:
+#         if not isinstance(value, str):
+#             raise TypeError('{}.{} must be a string'.format(cls.className, attribName))
+#         if not value and not allowEmpty:
+#             raise ValueError('{}.{} must be set'.format(cls.className, attribName))
+#         if Pid.altCharacter in value:
+#             raise ValueError('Character {} not allowed in {}.{}'.format(Pid.altCharacter, cls.className, attribName))
+#         if allowWhitespace:
+#             if not allowSpace and ' ' in value:
+#                 raise ValueError('space not allowed in {}.{}'.format(cls.className, attribName))
+#         else:
+#             if allowSpace and contains_whitespace_nospace(value):
+#                 raise ValueError('whitespace not allowed in {}.{}'.format(cls.className, attribName))
+#             elif not allowSpace and contains_whitespace(value):
+#                 raise ValueError('whitespace not allowed in {}.{}'.format(cls.className, attribName))
+#         if not allowLeadingTrailingWhitespace and value != value.strip():
+#             raise ValueError('{}.{} cannot contain leading/trailing whitespace'.format(cls.className, attribName))
+#
+#     elif not allowNone:
+#         raise ValueError('None not allowed in {}.{}'.format(cls.className, attribName))
+#
+#     # previous = project.getByRelativeId(value)
+#     # if previous not in (None, cls):
+#     #     raise ValueError('{} already exists'.format(previous.longPid))
+#
+#     if checkExisting:
+#         # this is not valid for nmrAtoms
+#         found = [obj for obj in getattr(project, cls._pluralLinkName, []) if getattr(obj, attribName, None) == value]
+#         if found:
+#             raise ValueError('{} already exists'.format(found[0].id))
+#
+#     # will only get here if all the tests pass
+#     return True
 
 
 def stringToCamelCase(label):
@@ -1305,9 +1297,12 @@ def stringToCamelCase(label):
     attr = label.translate({ord(c): None for c in whitespace})
     return attr[0].lower() + attr[1:]
 
+CAMELCASEPTN = r'((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))'
+CAMELCASEREP = r' \1'
+# alternative camelCase split = r'((?<=[a-z])[A-Z]|(?<=[A-Z])[A-Z](?=[a-z]))''
 
 def camelCaseToString(name):
-    """Change a camelCase string to string with spaces infront of capitals.
+    """Change a camelCase string to string with spaces in front of capitals.
     Groups of capitals are taken as acronyms and only the last letter of a group is separated.
     The first letter is capitalised except in the special case of a camel case string beginning
     <lowerCase,uppercase>, in which case the first lowercase letter is preserved.
@@ -1323,48 +1318,50 @@ def camelCaseToString(name):
         return label[0:1].upper() + label[1:]
 
 
-def isValidPath(projectName, stripFullPath=True, stripExtension=True):
-    """Check whether the project name is valid after stripping fullpath and extension
-    Can only contain alphanumeric characters and underscores
+# GWV 20210113: moved to Project.py as only used there and was creating circular imports
 
-    :param projectName: name of project to check
-    :param stripFullPath: set to true to remove leading directory
-    :param stripExtension: set to true to remove extension
-    :return: True if valid else False
-    """
-    if not projectName:
-        return
-
-    if isinstance(projectName, str):
-
-        name = os.path.basename(projectName) if stripFullPath else projectName
-        name = os.path.splitext(name)[0] if stripExtension else name
-
-        STRIPCHARS = '_'
-        for ss in STRIPCHARS:
-            name = name.replace(ss, '')
-
-        if name.isalnum():
-            return True
-
-
-def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
-    """Check whether the project name is valid after stripping fullpath and extension
-    Can only contain alphanumeric characters and underscores
-
-    :param projectName: name of project to check
-    :param stripFullPath: set to true to remove leading directory
-    :param stripExtension: set to true to remove extension
-    :return: True if length <= 32 else False
-    """
-    if not projectName:
-        return
-
-    if isinstance(projectName, str):
-        name = os.path.basename(projectName) if stripFullPath else projectName
-        name = os.path.splitext(name)[0] if stripExtension else name
-
-        return len(name) <= 32
+# def isValidPath(projectName, stripFullPath=True, stripExtension=True):
+#     """Check whether the project name is valid after stripping fullpath and extension
+#     Can only contain alphanumeric characters and underscores
+#
+#     :param projectName: name of project to check
+#     :param stripFullPath: set to true to remove leading directory
+#     :param stripExtension: set to true to remove extension
+#     :return: True if valid else False
+#     """
+#     if not projectName:
+#         return
+#
+#     if isinstance(projectName, str):
+#
+#         name = os.path.basename(projectName) if stripFullPath else projectName
+#         name = os.path.splitext(name)[0] if stripExtension else name
+#
+#         STRIPCHARS = '_'
+#         for ss in STRIPCHARS:
+#             name = name.replace(ss, '')
+#
+#         if name.isalnum():
+#             return True
+#
+#
+# def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
+#     """Check whether the project name is valid after stripping fullpath and extension
+#     Can only contain alphanumeric characters and underscores
+#
+#     :param projectName: name of project to check
+#     :param stripFullPath: set to true to remove leading directory
+#     :param stripExtension: set to true to remove extension
+#     :return: True if length <= 32 else False
+#     """
+#     if not projectName:
+#         return
+#
+#     if isinstance(projectName, str):
+#         name = os.path.basename(projectName) if stripFullPath else projectName
+#         name = os.path.splitext(name)[0] if stripExtension else name
+#
+#         return len(name) <= 32
 
 
 def zipCycle(*iterables, emptyDefault=None):

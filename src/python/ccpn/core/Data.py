@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import Optional
-from ccpn.util.Common import _validateName
+
 from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import Data as ApiData
@@ -177,11 +177,11 @@ class Data(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Data, changing its name and Pid.
         """
-        _validateName(self.project, Data, value=value, allowWhitespace=False)
-
+        name = self._uniqueName(project=self.project, name=value)
         # rename functions from here
         oldName = self.name
-        coreUtil._resetParentLink(self._wrappedData, 'data', {'name': value})
+        # GWV: unsure why this is different from  rename() implementations of many other classes?
+        coreUtil._resetParentLink(self._wrappedData, 'data', {'name': name})
         return (oldName,)
 
     #=========================================================================================

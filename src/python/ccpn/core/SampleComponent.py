@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-15 19:00:27 +0000 (Fri, January 15, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
+
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
 from ccpn.core.SpectrumHit import SpectrumHit
@@ -164,15 +165,6 @@ class SampleComponent(AbstractWrapperObject):
     def purity(self, value: float):
         self._wrappedData.purity = value
 
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
-
     @property
     def spectrumHits(self) -> typing.Tuple[SpectrumHit, ...]:
         """ccpn.SpectrumHits found for SampleComponent"""
@@ -286,11 +278,9 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
 
     labelling = labelling or DEFAULT_LABELLING
 
-    if not name:
-        name = SampleComponent._nextAvailableName(SampleComponent, self)
-    commonUtil._validateName(self, SampleComponent, name, checkExisting=False)
-    commonUtil._validateName(self, SampleComponent, labelling, attribName='labelling',
-                             allowNone=True, checkExisting=False)
+    name = SampleComponent._uniqueName(self.project, name=name)
+    SampleComponent._validateStringValue(attribName='labelling', value = labelling)
+
 
     if not isinstance(name, str):
         name = str(name)

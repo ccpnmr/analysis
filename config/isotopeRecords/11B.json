@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/11B.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.801
+    ],
+    [
+        "elementNumber",
+        5
+    ],
+    [
+        "gFactor",
+        1.79243
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "11B"
+    ],
+    [
+        "massNumber",
+        11
+    ],
+    [
+        "name",
+        "Boron"
+    ],
+    [
+        "quadrupoleMoment",
+        0.04059
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "B"
+    ]
+]

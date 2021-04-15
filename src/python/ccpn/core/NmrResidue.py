@@ -212,15 +212,6 @@ class NmrResidue(AbstractWrapperObject):
         May be 0. Is None for residues that are not offset."""
         return self._wrappedData.relativeOffset
 
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
-
     @property
     def residue(self) -> Residue:
         """Residue to which NmrResidue is assigned"""

@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/131Xe.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.2118
+    ],
+    [
+        "elementNumber",
+        54
+    ],
+    [
+        "gFactor",
+        0.461
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "131Xe"
+    ],
+    [
+        "massNumber",
+        131
+    ],
+    [
+        "name",
+        "Xenon"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.114
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Xe"
+    ]
+]

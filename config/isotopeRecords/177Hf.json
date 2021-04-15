@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/177Hf.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.186
+    ],
+    [
+        "elementNumber",
+        72
+    ],
+    [
+        "gFactor",
+        0.2267
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "177Hf"
+    ],
+    [
+        "massNumber",
+        177
+    ],
+    [
+        "name",
+        "Hafnium"
+    ],
+    [
+        "quadrupoleMoment",
+        3.37
+    ],
+    [
+        "spin",
+        3.5
+    ],
+    [
+        "symbol",
+        "Hf"
+    ]
+]

@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/75As.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        1.0
+    ],
+    [
+        "elementNumber",
+        33
+    ],
+    [
+        "gFactor",
+        0.95965
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "75As"
+    ],
+    [
+        "massNumber",
+        75
+    ],
+    [
+        "name",
+        "Arsenic"
+    ],
+    [
+        "quadrupoleMoment",
+        0.314
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "As"
+    ]
+]

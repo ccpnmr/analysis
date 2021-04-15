@@ -60,6 +60,7 @@ import os
 import itertools
 from collections import OrderedDict as OD
 
+import ccpn.core._implementation.resetSerial
 from ..nef import StarIo
 from . import Constants
 from .. import Common as commonUtil
@@ -483,7 +484,7 @@ class CcpnNefReader:
             self.defaultChemicalShiftList = shiftList
 
         if serial is not None:
-            commonUtil.resetSerial(shiftList, serial)
+            ccpn.core._implementation.resetSerial.resetSerial (shiftList, serial)
 
         # Read shifts loop
         loop = saveFrame.get('nef_chemical_shift') or []
@@ -527,7 +528,7 @@ class CcpnNefReader:
         nmrConstraintStore = project.findFirstNmrConstraintStore(serial=dataSetSerial)
         if nmrConstraintStore is None:
             nmrConstraintStore = project.newNmrConstraintStore(nmrProject=project.currentNmrProject)
-            commonUtil.resetSerial(nmrConstraintStore, dataSetSerial)
+            ccpn.core._implementation.resetSerial.resetSerial (nmrConstraintStore, dataSetSerial)
 
         if category == 'nef_distance_restraint_list':
             itemLength = 2
@@ -564,7 +565,7 @@ class CcpnNefReader:
 
         serial = saveFrame.get('ccpn_serial')
         if serial is not None:
-            commonUtil.resetSerial(restraintList, serial)
+            ccpn.core._implementation.resetSerial.resetSerial (restraintList, serial)
 
         restraints = {}
         # assignTags = ('chain_code', 'sequence_code', 'residue_name', 'atom_name')
@@ -610,7 +611,7 @@ class CcpnNefReader:
                 if itemLength != 1:
                     restraint = newRestraintFunc(**restraintParams)
                     # Must be reset after the fact, as serials cannot be passed in normally
-                    commonUtil.resetSerial(restraint, serial)
+                    ccpn.core._implementation.resetSerial.resetSerial (restraint, serial)
                     restraints[serial] = restraint
             elif itemLength == 1:
                 raise RuntimeError("One-resonance restraint type %s, is %s has more than one item"
@@ -633,7 +634,7 @@ class CcpnNefReader:
                 # NB if we get here restraintParams are knoown to be set
                 restraint = newRestraintFunc(resonance=fixedResonances[0][0], **restraintParams)
                 # Must be reset after the fact, as serials cannot be passed in normally
-                commonUtil.resetSerial(restraint, serial)
+                ccpn.core._implementation.resetSerial.resetSerial (restraint, serial)
                 restraints[serial] = restraint
             else:
                 for tt in itertools.product(*fixedResonances):
@@ -661,7 +662,7 @@ class CcpnNefReader:
         nmrConstraintStore = project.findFirstNmrConstraintStore(serial=dataSetSerial)
         if nmrConstraintStore is None:
             nmrConstraintStore = project.newNmrConstraintStore()
-            commonUtil.resetSerial(nmrConstraintStore, dataSetSerial)
+            ccpn.core._implementation.resetSerial.resetSerial (nmrConstraintStore, dataSetSerial)
 
         restraintList = nmrConstraintStore.newDihedralConstraintList(name=name, details=comment)
         newRestraintFunc = restraintList.newDihedralConstraint
@@ -670,7 +671,7 @@ class CcpnNefReader:
 
         serial = saveFrame.get('ccpn_serial')
         if serial is not None:
-            commonUtil.resetSerial(restraintList, serial)
+            ccpn.core._implementation.resetSerial.resetSerial (restraintList, serial)
 
         restraints = {}
 
@@ -712,7 +713,7 @@ class CcpnNefReader:
                 tt = list(itertools.product(*fixedResonances))[0]
                 restraint = newRestraintFunc(resonances=tt, **dd)
                 # Must be reset after the fact, as serials cannot be passed in normally
-                commonUtil.resetSerial(restraint, serial)
+                ccpn.core._implementation.resetSerial.resetSerial (restraint, serial)
                 restraints[serial] = restraint
 
             # Add item
@@ -1050,7 +1051,7 @@ class CcpnNefReader:
             serial = None
         peakList = dataSource.newPeakList(**peakListParams)
         if serial is not None:
-            commonUtil.resetSerial(peakList, serial)
+            ccpn.core._implementation.resetSerial.resetSerial (peakList, serial)
 
         # Load peaks
         self.load_nef_peak(peakList, saveFrame.get('nef_peak'))
@@ -1111,7 +1112,7 @@ class CcpnNefReader:
 
                 # Make new peak
                 peak = peakList.newPeak(**parameters)
-                commonUtil.resetSerial(peak, serial)
+                ccpn.core._implementation.resetSerial.resetSerial (peak, serial)
                 peaks[serial] = peak
                 result.append(peak)
 
@@ -1400,7 +1401,7 @@ class CcpnNefReader:
                                                                        resonanceGroup=resonanceGroup,
                                                                        details=comment)
             if serial:
-                commonUtil.resetSerial(resonance, serial)
+                ccpn.core._implementation.resetSerial.resetSerial (resonance, serial)
             atomMap['resonances'] = [resonance]
 
             atomSets = atomMap.get('atomSets')
@@ -1476,7 +1477,7 @@ class CcpnNefReader:
 
             if useSerial:
                 try:
-                    commonUtil.resetSerial(resonanceGroup, useSerial)
+                    ccpn.core._implementation.resetSerial.resetSerial (resonanceGroup, useSerial)
                 except ValueError:
                     print("INFO: ResonanceGroup serial number %s could not be preserved. "
                           "Data are still correct.")

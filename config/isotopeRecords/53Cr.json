@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/53Cr.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.09501
+    ],
+    [
+        "elementNumber",
+        24
+    ],
+    [
+        "gFactor",
+        -0.31636
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "53Cr"
+    ],
+    [
+        "massNumber",
+        53
+    ],
+    [
+        "name",
+        "Chromium"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.15
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Cr"
+    ]
+]

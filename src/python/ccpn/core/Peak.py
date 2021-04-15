@@ -263,15 +263,6 @@ class Peak(AbstractWrapperObject):
         else:
             self._wrappedData.annotation = value
 
-    # @property
-    # def comment(self) -> Optional[str]:
-    #     """Free-form text comment."""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
-
     @property
     def axisCodes(self) -> Tuple[str, ...]:
         """Spectrum axis codes in dimension order matching position."""

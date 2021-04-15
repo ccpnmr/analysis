@@ -301,6 +301,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
     def _queueSetSequence(self, *args, **kwds):
         """Queue changes to sequence
         """
+        # FIXME: disable ok-button if empty sequence
         value = self.sequenceEditor.toPlainText()
         if not ' ' in value:
             value = self.sequenceEditor.toPlainText()

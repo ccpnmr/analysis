@@ -1,44 +1,42 @@
-"""Spectrum  class. Gives spectrum values, including per-dimension values as tuples.
+"""Spectrum  class.
+Maintains the parameters of a spectrum, including per-dimension/axis values.
 Values that are not defined for a given dimension (e.g. sampled dimensions) are given as None.
-Reference-related values apply only to the first Reference given (which is sufficient for
-all common cases).
 
-Dimension identifiers run from 1 to the number of dimensions (e.g. 1,2,3 for a 3D).
-Per-dimension values are given in the order data are stored in the spectrum file - for
+Dimension identifiers run from 1 to the number of dimensions, i.e. dimensionCount,  (e.g. 1,2,3 for a 3D).
 CCPN data the preferred convention is to have the acquisition dimension as dimension 1.
 
-The axisCodes are used as an alternative axis identifier. They are unique strings (so they can
-b recognised even if the axes are reordered in display). The axisCodes reflect the isotope
-on the relevant axis, and match the dimension identifiers in the reference experiment templates,
-linking a dimension to the correct reference experiment dimension. They are also used to map
-automatically spectrum axes to display axes and to other spectra. By default the axis name
-is the name of the atom being measured. Axes that are linked by a onebond
-magnetisation transfer are given a lower-case suffix to show the nucleus bound to.
-Duplicate axis names are distinguished by a
-numerical suffix. The rules are best shown by example:
+Axes identifiers run from 0 to the dimensionCount-1 (e.g. 0,1,2 for a 3D)
+Per-axis values are given in the order data are stored in the spectrum file
+
+The axisCodes are used as an alternative axis identifier. These are unique strings (so they can
+be recognised even if the axes are reordered in display). The axisCodes reflect the isotope
+on the relevant axis, and can match the dimension identifiers in the reference experiment templates,
+linking a dimension to the correct reference experiment dimension. They are also used to
+automatically map spectrum display-axes between different spectra.
+
+By default the axisCodes are derived from the isotopeCodes that define the experimental data
+for each dimension. Axes that are linked by a one-bond magnetisation transfer could be given a
+lower-case suffix to show the nucleus bound to. Duplicate axis names should be distinguished
+by a numerical suffix.
+The rules are best illustrated by example:
 
 Experiment                 axisCodes
 
 1D Bromine NMR             Br
-
 3D proton NOESY-TOCSY      H, H1, H2
-
 19F-13C-HSQC               Fc, Cf
-
 15N-NOESY-HSQC OR
 15N-HSQC-NOESY:            Hn, Nh, H
-
 4D HCCH-TOCSY              Hc, Ch, Hc1, Ch1
+HNCA/CB                    H N C
+HNCO                       H, N, CO
+HCACO                      H, CA, CO
 
-HNCA/CB                    H. N. C
-
-HNCO                       Hn, Nh, CO     *(CO is treated as a separate type)*
-
-HCACO                      Hca, CAh, CO    *(CA is treated as a separate type)*
+Useful reordering methods exist to get dimensional/axis parameters in a particular order, i.e.:
+getByDimension(), setByDimension(), getByAxisCode(), setByAxisCode()
+See doc strings of these methods for detailed documentation
 
 """
-# TODO double check axis codes for HCACO, HNCO, and use of Hcn axiscodes
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -64,51 +62,55 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
-import os
 import sys
 from typing import Sequence, Tuple, Optional, Union
 from functools import partial
-import decorator
-from ccpn.util import Constants
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.Project import Project
+import numpy
+
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.api.ccp.general import DataLocation
-from ccpn.core.lib import Pid
-from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
-from ccpn.core.lib.Cache import cached
-from ccpn.util.decorators import logCommand
-from ccpn.framework.constants import CCPNMR_PREFIX
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSimple, \
-    undoStackBlocking, renameObject, undoBlock, notificationBlanking, ccpNmrV3CoreSetter
-from ccpn.util.Common import getAxisCodeMatchIndices, _validateName
-from ccpn.util.Path import Path, aPath
-from ccpn.util.Common import isIterable, incrementName
-from ccpn.util.Constants import SCALETOLERANCE
-
-# 2019010:ED test new matching
-# from ccpn.util.Common import axisCodeMapping
-from ccpn.util.Common import getAxisCodeMatch as axisCodeMapping
-
-from ccpn.util.Logging import getLogger
-
-from ccpnmodel.ccpncore.lib.Io import Formats
+# Dimensions
+# GWV next three imports are unresolved!
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FidDataDim as ApiFidDataDim
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FreqDataDim as ApiFreqDataDim
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SampledDataDim as ApiSampledDataDim
+
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.Project import Project
+from ccpn.core.lib import Pid
+from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection, \
+    getDefaultSpectrumColours
+from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSimple, \
+                                          undoStackBlocking, renameObject, undoBlock, notificationBlanking, \
+    ccpNmrV3CoreSetter, inactivity
+from ccpn.core.lib.DataStore import DataStore
+
+from ccpn.util import Constants
+from ccpn.util.Constants import SCALETOLERANCE
+from ccpn.util.Common import isIterable
+# 2019010:ED test new matching
+# from ccpn.util.Common import axisCodeMapping
+from ccpn.util.Common import getAxisCodeMatch as axisCodeMapping
+from ccpn.util.Logging import getLogger
+
+from ccpn.util.decorators import logCommand, singleton
+
+
 
 
 INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
 INCLUDENEGATIVECONTOURS = 'includeNegativeContours'
 SPECTRUMAXES = 'spectrumAxesOrdering'
 SPECTRUMPREFERREDAXISORDERING = 'spectrumPreferredAxisOrdering'
+
 SPECTRUMALIASING = 'spectrumAliasing'
 VISIBLEALIASINGRANGE = 'visibleAliasingRange'
 ALIASINGRANGE = 'aliasingRange'
 UPDATEALIASINGRANGEFLAG = '_updateAliasingRangeFlag'
 EXTENDALIASINGRANGEFLAG = 'extendAliasingRangeFlag'
-DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
 MAXALIASINGRANGE = 3
+
+DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
 SPECTRUMSERIES = 'spectrumSeries'
 SPECTRUMSERIESITEMS = 'spectrumSeriesItems'
 
@@ -120,40 +122,9 @@ DIMENSIONTYPES = [DIMENSIONFID, DIMENSIONFREQUENCY, DIMENSIONSAMPLED]
 _DIMENSIONCLASSES = {DIMENSIONFID: ApiFidDataDim, DIMENSIONFREQUENCY: ApiFreqDataDim, DIMENSIONSAMPLED: ApiSampledDataDim}
 
 
-def _cumulativeArray(array):
-    """ get total size and strides array.
-        NB assumes fastest moving index first """
-
-    ndim = len(array)
-    cumul = ndim * [0]
-    n = 1
-    for i, size in enumerate(array):
-        cumul[i] = n
-        n = n * size
-
-    return (n, cumul)
-
-
-def _arrayOfIndex(index, cumul):
-    """ Get from 1D index to point address tuple
-    NB assumes fastest moving index first
-    """
-
-    ndim = len(cumul)
-    array = ndim * [0]
-    for i in range(ndim - 1, -1, -1):
-        c = cumul[i]
-        array[i], index = divmod(index, c)
-
-    return np.array(array)
-
-
 #=========================================================================================
-# Decorators to define the attributes to be copied
+# Decorators to define the Spectrum attributes to be copied
 #=========================================================================================
-
-from ccpn.util.decorators import singleton
-
 
 @singleton
 class _includeInCopyList(list):
@@ -164,14 +135,14 @@ class _includeInCopyList(list):
     """
 
     def getNoneDimensional(self):
-        "return a list of one-dimensional attributes"
+        "return a list of one-dimensional attribute names"
         return [attr for attr, isNd in self if isNd == False]
 
     def getMultiDimensional(self):
-        "return a list of one-dimensional attributes"
+        "return a list of one-dimensional attribute names"
         return [attr for attr, isNd in self if isNd == True]
 
-    def append(self, attribute, isMultidimensional):
+    def appendItem(self, attribute, isMultidimensional):
         _t = (attribute, isMultidimensional)
         if _t not in self:
             super().append(_t)
@@ -181,7 +152,7 @@ def _includeInCopy(func):
     """Decorator to define that an non-dimensional attribute is to be included when making a copy of object
     """
     storage = _includeInCopyList()
-    storage.append(func.__name__, False)
+    storage.appendItem(func.__name__, False)
     return func
 
 
@@ -189,7 +160,7 @@ def _includeInDimensionalCopy(func):
     """Decorator to define that a dimensional attribute is to be included when making a copy of object
     """
     storage = _includeInCopyList()
-    storage.append(func.__name__, True)
+    storage.appendItem(func.__name__, True)
     return func
 
 
@@ -199,7 +170,9 @@ def _includeInDimensionalCopy(func):
 
 class Spectrum(AbstractWrapperObject):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
-    path to the stored NMR data file."""
+    path to the stored NMR data file
+    """
+    #-----------------------------------------------------------------------------------------
 
     #: Short class name, for PID.
     shortClassName = 'SP'
@@ -217,103 +190,144 @@ class Spectrum(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.DataSource._metaclass.qualifiedName()
 
-    # Internal NameSpace
+
+    _referenceSpectrumHit = None
+    _snr = None
+    #-----------------------------------------------------------------------------------------
+
+    MAXDIM = 8  # Maximum dimensionality
+
+    X_AXIS = 0
+    Y_AXIS = 1
+    Z_AXIS = 2
+    A_AXIS = 3
+    B_AXIS = 4
+    C_AXIS = 5
+    D_AXIS = 6
+    E_AXIS = 7
+    UNDEFINED_AXIS = 8
+    axisNames = {X_AXIS:"x-axis", Y_AXIS:"y-axis", Z_AXIS:"z-axis", A_AXIS:"a-axis",
+                 B_AXIS:"b-axis", C_AXIS:"c-axis", D_AXIS:"d-axis", E_AXIS:"e-axis",
+                 UNDEFINED_AXIS:"undefined"
+                }
+
+    X_DIM = 1
+    Y_DIM = 2
+    Z_DIM = 3
+    A_DIM = 4
+    B_DIM = 5
+    C_DIM = 6
+    D_DIM = 7
+    E_DIM = 8
+
+    # Isotope-dependent assignment tolerances (in ppm)
+    defaultAssignmentTolerance = 0.4
+    isotope2Tolerance = {
+        '1H' : 0.03,
+        '13C': 0.4,
+        '15N': 0.4,
+        '19F': 0.03,
+        }
+
+    #-----------------------------------------------------------------------------------------
+    # Internal NameSpace definitions
+    #-----------------------------------------------------------------------------------------
+    # Key for storing the dataStore info in the Ccpn internal parameter store
+    _DATASTORE_KEY = '_dataStore'
+
     _AdditionalAttribute = 'AdditionalAttribute'
     _ReferenceSubstancesPids = '_ReferenceSubstancesPids'
 
-    MAXDIM = 4  # Maximum dimensionality
+    #-----------------------------------------------------------------------------------------
+    # Attributes of the data structure
+    #-----------------------------------------------------------------------------------------
 
-    _PLANEDATACACHE = '_planeDataCache'  # Attribute name for the planeData cache
-    _SLICEDATACACHE = '_sliceDataCache'  # Attribute name for the slicedata cache
-    _SLICE1DDATACACHE = '_slice1DDataCache'  # Attribute name for the 1D slicedata cache
-    _REGIONDATACACHE = '_regionDataCache'  # Attribute name for the regionData cache
-    _dataCaches = [_PLANEDATACACHE, _SLICEDATACACHE, _SLICE1DDATACACHE, _REGIONDATACACHE]
+    @property
+    def peakLists(self):
+        "STUB: hot-fixed later"
+        return ()
 
-    def __init__(self, project: Project, wrappedData: Nmr.ShiftList):
+    @property
+    def multipletLists(self):
+        "STUB: hot-fixed later"
+        return ()
 
+    @property
+    def integralLists(self):
+        "STUB: hot-fixed later"
+        return ()
+
+    @property
+    def spectrumViews(self):
+        "STUB: hot-fixed later"
+        return ()
+
+    @property
+    def chemicalShiftList(self):
+        "STUB: hot-fixed later"
+        return None
+
+    @property
+    def spectrumReferences(self):
+        "STUB: hot-fixed later"
+        return None
+
+    @property
+    def spectrumHits(self):
+        "STUB: hot-fixed later"
+        return None
+
+    @property
+    def sample(self):
+        "STUB: hot-fixed later"
+        return None
+
+    # Inherited from AbstractWrapperObject
+    # @property
+    # def project(self) -> 'Project':
+    #     """The Project (root)containing the object."""
+    #     return self._project
+
+    @property
+    def _parent(self) -> Project:
+        """Parent (containing) object."""
+        return self._project
+
+    #-----------------------------------------------------------------------------------------
+
+    def __init__(self, project: Project, wrappedData: Nmr.DataSource):
+
+        super().__init__(project, wrappedData)
+
+        # 1D data references
         self._intensities = None
         self._positions = None
 
-        super().__init__(project, wrappedData)
+        # References to DataStore / DataSource instances for filePath manipulation and data reading;
+        self._dataStore = None
+        self._dataSource = None
 
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
         self._scaleChanged = False
 
-    def _infoString(self, includeDimensions=False):
-        """Return info string about self, optionally including dimensional
-        parameters
+    @property
+    def dataStore(self):
+        """A DataStore instance encoding the path and dataFormat of the (binary) spectrum data.
+        None indicates no spectrum data file path has been defined
         """
-        string = '================= %s =================\n' % self
-        string += 'path = %s\n' % self.filePath
-        for cache in self._dataCaches:
-            if hasattr(self, cache):
-                string += str(getattr(self, cache)) + '\n'
-        string += 'dimensions = %s\n' % self.dimensionCount
-        string += 'sizes = (%s)\n' % ' x '.join([str(d) for d in self.pointCounts])
-        for attr in """
-scale 
-noiseLevel 
-experimentName
-""".split():
-            value = getattr(self, attr)
-            string += '%s = %s\n' % (attr, value)
-
-        if includeDimensions:
-            string += '\n'
-            for attr in """
-dimensions
-axisCodes
-pointCounts
-isComplex
-dimensionTypes
-isotopeCodes
-measurementTypes
-spectralWidths
-spectralWidthsHz
-spectrometerFrequencies
-referencePoints
-referenceValues
-axisUnits
-foldingModes
-windowFunctions
-lorentzianBroadenings
-gaussianBroadenings
-phases0
-phases1
-assignmentTolerances
-""".split():
-                values = getattr(self, attr)
-                string += '%-25s: %s\n' % (attr,
-                                           ' '.join(['%-20s' % str(v) for v in values])
-                                           )
-        return string
-
-    def printInfoString(self, includeDimensions=False):
-        "Print the info string"
-        print(self._infoString(includeDimensions))
-
-    # CCPN properties
-    @property
-    def _apiDataSource(self) -> Nmr.DataSource:
-        """CCPN DataSource matching Spectrum"""
-        return self._wrappedData
+        return self._dataStore
 
     @property
-    def _key(self) -> str:
-        """name, regularised as used for id"""
-        return self._wrappedData.name.translate(Pid.remapSeparators)
+    def dataSource(self):
+        """A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
+        None indicates no valid spectrum data file has been defined
+        """
+        return self._dataSource
 
-    @property
-    def _localCcpnSortKey(self) -> Tuple:
-        """Local sorting key, in context of parent."""
-        dataSource = self._wrappedData
-        return (dataSource.experiment.serial, dataSource.serial)
-
-    @property
-    def _apiDataStore(self):
-        """DataStore attached to the spectrum"""
-        return self._wrappedData.dataStore
+    #-----------------------------------------------------------------------------------------
+    # Spectrum properties
+    #-----------------------------------------------------------------------------------------
 
     @property
     def name(self) -> str:
@@ -326,39 +340,37 @@ assignmentTolerances
         self.rename(value)
 
     @property
-    def _parent(self) -> Project:
-        """Parent (containing) object."""
-        return self._project
-
-    # Attributes of DataSource and Experiment:
-
-    @property
     def dimensionCount(self) -> int:
         """Number of dimensions in spectrum"""
         return self._wrappedData.numDim
 
     @property
     def dimensions(self) -> tuple:
-        """tuple of length dimensionCount with dimesnion integers; ie. (1,2,3,..).
-        Useful for mapping axisCodes: eg: self.getByAxisCodes('dimensions', ['N','C','H']
+        """Convenience: tuple of length dimensionCount with dimension integers (1-based); e.g. (1,2,3,..).
+        Useful for mapping axisCodes: eg: self.getByAxisCodes('dimensions', ['N','C','H'])
         """
         return tuple(range(1, self.dimensionCount + 1))
 
     @property
-    def indices(self) -> tuple:
-        """tuple of length dimensionCount with indices integers; ie. (0,1,2,3).
-        Useful for mapping axisCodes: eg: self.getByAxisCodes('indices', ['N','C','H']
+    def axes(self) -> tuple:
+        """Convenience: tuple of length dimensionCount with axes integers (0-based); e.g. (0,1,2,3).
+        Useful for mapping axisCodes: eg: self.getByAxisCodes('axes', ['N','C','H'])
         """
         return tuple(range(0, self.dimensionCount))
 
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
+    @property
+    def axisTriples(self) -> tuple:
+        """Convenience: return a tuple of triples (axis, axisCode, dimension) for each dimension
+
+        Useful for iterating over axis codes; eg in an H-N-CO ordered spectrum
+            for axis, axisCode, dimension in self.getByAxisCodes('axisTriples', ('N','C','H'), exactMatch=False)
+
+            would yield:
+                (1, 'N', 2)
+                (2, 'CO', 3)
+                (0, 'H', 1)
+        """
+        return tuple(z for z in zip(self.axes, self.axisCodes, self.dimensions))
 
     @property
     @_includeInCopy
@@ -491,7 +503,8 @@ assignmentTolerances
     @property
     @_includeInCopy
     def sliceColour(self) -> str:
-        """colour of 1D slices"""
+        """colour of 1D slices
+        """
         return self._wrappedData.sliceColour
 
     @sliceColour.setter
@@ -504,15 +517,28 @@ assignmentTolerances
     @_includeInCopy
     def scale(self) -> float:
         """Scaling factor for intensities and volumes.
-        Intensities and volumes should be *multiplied* by scale before comparison."""
-        return self._wrappedData.scale
+        Intensities and volumes should be *multiplied* by scale before comparison
+        """
+        value = self._wrappedData.scale
+        if value is None:
+            getLogger().warning('Scaling {} changed from None to 1.0'.format(self))
+            value = 1.0
+        if -SCALETOLERANCE < value < SCALETOLERANCE:
+            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+
+        return value
 
     @scale.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSimple()
     def scale(self, value: Union[float, int, None]):
-        if not isinstance(value, (float, int, type(None))):
-            raise TypeError('Spectrum.scale {} must be a float, integer or None'.format(self))
+        if value is None:
+            getLogger().warning('Scaling {} changed from None to 1.0'.format(self))
+            value = 1.0
+
+        if not isinstance(value, (float, int)):
+            raise TypeError('Spectrum.scale {} must be a float or integer'.format(self))
+
         if value is not None and -SCALETOLERANCE < value < SCALETOLERANCE:
             # Display a warning, but allow to be set
             getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
@@ -523,14 +549,15 @@ assignmentTolerances
         else:
             self._wrappedData.scale = float(value)
 
-        if self.dimensionCount == 1:
-            # update the intensities as the scale has changed
+        if self.dimensionCount == 1 and self._intensities is not None:
+            # some 1D data were read before; update the intensities as the scale has changed
             self._intensities = self.getSliceData()
 
     @property
     @_includeInCopy
     def spinningRate(self) -> float:
-        """NMR tube spinning rate (in Hz)."""
+        """NMR tube spinning rate (in Hz)
+        """
         return self._wrappedData.experiment.spinningRate
 
     @spinningRate.setter
@@ -539,10 +566,13 @@ assignmentTolerances
 
     @property
     @_includeInCopy
-    def noiseLevel(self) -> float:
-        """Estimated noise level for the spectrum,
-        defined as the estimated standard deviation of the points from the baseplane/baseline"""
-        return self._wrappedData.noiseLevel
+    def noiseLevel(self) -> (float, None):
+        """Noise level for the spectrum
+        """
+        noise = self._wrappedData.noiseLevel
+        if noise is None:
+            getLogger().debug2('Returning noiseLevel=None')
+        return noise
 
     @noiseLevel.setter
     def noiseLevel(self, value: float):
@@ -563,7 +593,7 @@ assignmentTolerances
         self.setParameter(self._AdditionalAttribute, propertyName, value)
 
     @property
-    def synonym(self) -> str:
+    def synonym(self) -> (str, None):
         """Systematic experiment type descriptor (CCPN system)."""
         refExperiment = self._wrappedData.experiment.refExperiment
         if refExperiment is None:
@@ -573,7 +603,7 @@ assignmentTolerances
 
     @property
     @_includeInCopy
-    def experimentType(self) -> str:
+    def experimentType(self) -> (str, None):
         """Systematic experiment type descriptor (CCPN system)."""
         refExperiment = self._wrappedData.experiment.refExperiment
         if refExperiment is None:
@@ -601,21 +631,21 @@ assignmentTolerances
                         self.experimentName = synonym
                     return
         # nothing found - error:
-        raise ValueError("No reference experiment matches name '%s'" % value)
+        raise ValueError('No reference experiment matches name "%s"' % value)
 
     @property
-    def _serial(self):
+    def _serial(self) -> int:
         """Return the _wrappedData serial
         CCPN Internal
         """
         return self._wrappedData.serial
 
-    @property
-    def _numDim(self):
-        """Return the _wrappedData numDim
-        CCPN Internal
-        """
-        return self._wrappedData.numDim
+    # @property
+    # def _numDim(self):
+    #     """Return the _wrappedData numDim
+    #     CCPN Internal
+    #     """
+    #     return self._wrappedData.numDim
 
     @property
     def experiment(self):
@@ -626,7 +656,8 @@ assignmentTolerances
     @property
     @_includeInCopy
     def experimentName(self) -> str:
-        """Common experiment type descriptor (May not be unique)."""
+        """Common experiment type descriptor (May not be unique).
+        """
         return self._wrappedData.experiment.name
 
     @experimentName.setter
@@ -638,93 +669,123 @@ assignmentTolerances
 
     @property
     def filePath(self) -> Optional[str]:
-        """Absolute path to NMR data file."""
-        xx = self._wrappedData.dataStore
-        if xx:
-            return xx.fullPath
-        else:
-            return None
+        """Path to NMR data file; can contain redirections (e.g. $DATA)
+        """
+        if self.dataStore is None:
+            raise RuntimeError('dataStore not defined')
+        return str(self.dataStore.path)
 
     @filePath.setter
+    @ccpNmrV3CoreSetter()
     def filePath(self, value: str):
 
-        apiDataStore = self._wrappedData.dataStore
-        if apiDataStore is None:
+        if self.dataStore is None:
+            raise RuntimeError('dataStore not defined')
 
-            # # the spectrum does not have an attached file
-            # numPoints = [x.numPoints for x in self._wrappedData.sortedDataDims()]
-            # self._wrappedData.addDataStore(value, numPoints=numPoints)
-            #
-            # # need to save the file
-            # from ccpn.util.Hdf5 import convertDataToHdf5
-            # convertDataToHdf5(self, value)
-            getLogger().warning("Spectrum is not stored, cannot change file path")
-            # raise ValueError("Spectrum is not stored, cannot change file path")
+        if value is None:
+            self.dataStore.path = None
+            self._dataSource = None
+            self._clearCache()
+            return
 
-        elif not value:
-            getLogger().warning("Spectrum file path cannot be set to None")
-            # raise ValueError("Spectrum file path cannot be set to None")
+        oldPath = self.dataStore.path
+        self.dataStore.path = value
+        if not self.dataStore.exists():
+            self.dataStore.errorMessage()
+            self.dataStore.path = oldPath
+            raise ValueError('Setting Spectrum.filePath to "%s"' % value)
+
+        newDataSource = self._getDataSource(self.dataStore, reportWarnings=True)
+        if newDataSource is None:
+            self.dataStore.path = oldPath
+            raise ValueError('Spectrum.filePath: incompatible "%s"' % value)
 
         else:
-            # # NOTE:ED - original method
-            # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-            # apiDataStore.repointToDataUrl(dataUrl)
-            # apiDataStore.path = value[len(dataUrl.url.path) + 1:]
-            # self._clearCache()
-            # return
+            # check some fundamental parameters
+            # check dataFormat
+            if newDataSource.dataFormat != self.dataFormat:
+                raise ValueError('Spectrum.filePath: incompatible dataFormat (%s) of "%s"' %
+                                 (newDataSource.dataFormat,value))
 
-            oldName = apiDataStore.dataUrl.name
-            newName = incrementName(oldName)
-            dataUrl = self._project._wrappedData.root.fetchDataUrl(value, name=newName)
-            apiDataStore.repointToDataUrl(dataUrl)
-            apiDataStore.path = value[len(dataUrl.url.path) + 1:]
-            self._clearCache()
+            if self.dimensionCount != newDataSource.dimensionCount:
+                self.dataStore.path = oldPath
+                raise ValueError('Spectrum.filePath: incompatible dimensionCount = %s of "%s"' %
+                                 (newDataSource.dimensionCount,value))
+
+            for idx, np in enumerate(self.pointCounts):
+                if newDataSource.pointCounts[idx] != np:
+                    self.dataStore.path = oldPath
+                    raise ValueError('Spectrum.filePath: incompatible pointsCount[%s] = %s of "%s"' %
+                                     (idx, newDataSource.pointCounts[idx], value))
+
+        self._dataSource = newDataSource
+        self.dataStore._saveInternal()
+        self._clearCache()
 
     @property
     def path(self):
         """return a Path instance defining the absolute path of filePath
         """
-        if self.filePath is None:
-            # why do we need to raise a Runtime Error! path can be None. What about simulated spectra?
-            # raise RuntimeError('filePath is not defined')
-            self.filePath = ''
-        return aPath(self.filePath)
+        if self.dataStore is None:
+            raise RuntimeError('dataStore not defined')
+        return self.dataStore.aPath()
 
-    @property
-    def isValidPath(self) -> bool:
-        """Return true if the spectrum currently points to an existent file.
-        (contents of the file are not checked)
+    def hasValidPath(self) -> bool:
+        """Return true if the spectrum's dataStore currently defines an valid dataSource object.
         """
-        if self.filePath is None:
-            return False
-        return aPath(self.filePath).exists() and aPath(self.filePath).is_file()
+        return (self.dataSource is not None)
+
+    def isEmptySpectrum(self):
+        """Return True if instance refers to an empty spectrum; i.e. as in without actual spectral data"
+        """
+        # local import to avoid cycles
+        from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+        return self.dataFormat == EmptySpectrumDataSource.dataFormat
 
     @property
-    def headerSize(self) -> Optional[int]:
-        """File header size in bytes."""
-        xx = self._wrappedData.dataStore
-        if xx:
-            return xx.headerSize
-        else:
-            return None
+    def dataFormat(self):
+        """Return the spectrum data-format identifier (e.g. Hdf5, NMRPipe)
+        """
+        if self.dataStore is None:
+            raise RuntimeError('dataStore not defined')
 
-    @property
-    def numberType(self) -> Optional[str]:
-        """Data type of numbers stored in data matrix ('int' or 'float')."""
-        xx = self._wrappedData.dataStore
-        if xx:
-            return xx.numberType
-        else:
-            return None
+        return self.dataStore.dataFormat
 
-    @property
-    def complexStoredBy(self) -> Optional[str]:
-        """Hypercomplex numbers are stored by ('timepoint', 'quadrant', or 'dimension')."""
-        xx = self._wrappedData.dataStore
-        if xx:
-            return xx.complexStoredBy
-        else:
-            return None
+
+    # @dataFormat.setter
+    # def dataFormat(self, value):
+    #     self._wrappedData.dataStore.fileType = value
+
+    # @property
+    # def headerSize(self) -> Optional[int]:
+    #     """File header size in bytes."""
+    #     xx = self._wrappedData.dataStore
+    #     if xx:
+    #         return xx.headerSize
+    #     else:
+    #         return None
+    #
+    # @property
+    # def numberType(self) -> Optional[str]:
+    #     """Data type of numbers stored in data matrix ('int' or 'float')."""
+    #     xx = self._wrappedData.dataStore
+    #     if xx:
+    #         return xx.numberType
+    #     else:
+    #         return None
+    #
+    # # NBNB TBD Should this be made modifiable? Would be a bit of work ...
+    #
+    # @property
+    # def complexStoredBy(self) -> str:
+    #     """Hypercomplex numbers are stored by ('timepoint', 'quadrant', or 'dimension')."""
+    #     xx = self._wrappedData.dataStore
+    #     if xx:
+    #         return xx.complexStoredBy
+    #     else:
+    #         return None
+    #
+    # # NBNB TBD Should this be made modifiable? Would be a bit of work ...
 
     # Attributes belonging to AbstractDataDim
 
@@ -746,12 +807,11 @@ assignmentTolerances
     def axisCodes(self) -> Tuple[Optional[str], ...]:
         """axisCode, per dimension - None if no main ExpDimRef
         """
-
-        # See if axis codes are set
-        for expDim in self._wrappedData.experiment.expDims:
-            if expDim.findFirstExpDimRef(axisCode=None) is not None:
-                self._wrappedData.experiment.resetAxisCodes()
-                break
+        # # See if axis codes are set
+        # for expDim in self._wrappedData.experiment.expDims:
+        #     if expDim.findFirstExpDimRef(axisCode=None) is not None:
+        #         self._wrappedData.experiment.resetAxisCodes()
+        #         break
 
         result = []
         for dataDim in self._wrappedData.sortedDataDims():
@@ -831,7 +891,8 @@ assignmentTolerances
         for FreqDataDims these are the points after transformation before cutting down.
 
         NB, changing the totalPointCount will *not* modify the resolution (or dwell time),
-        so the implied total width will change."""
+        so the implied total width will change.
+        """
         result = []
         for dataDim in self._wrappedData.sortedDataDims():
             if hasattr(dataDim, 'numPointsOrig'):
@@ -853,16 +914,16 @@ assignmentTolerances
             raise ValueError("totalPointCount value must have length %s, was %s" %
                              (apiDataSource.numDim, value))
 
-    @property
-    @_includeInDimensionalCopy
-    def pointOffsets(self) -> Tuple[int, ...]:
-        """index of first active point relative to total points, per dimension"""
-        return tuple(x.pointOffset if x.className != 'SampledDataDim' else None
-                     for x in self._wrappedData.sortedDataDims())
-
-    @pointOffsets.setter
-    def pointOffsets(self, value: Sequence):
-        self._setStdDataDimValue('pointOffset', value)
+    # @property
+    # @_includeInDimensionalCopy
+    # def pointOffsets(self) -> Tuple[int, ...]:
+    #     """index of first active point relative to total points, per dimension"""
+    #     return tuple(x.pointOffset if x.className != 'SampledDataDim' else None
+    #                  for x in self._wrappedData.sortedDataDims())
+    #
+    # @pointOffsets.setter
+    # def pointOffsets(self, value: Sequence):
+    #     self._setStdDataDimValue('pointOffset', value)
 
     @property
     @_includeInDimensionalCopy
@@ -904,57 +965,17 @@ assignmentTolerances
     # @dimensionTypes.setter
     # def dimensionTypes(self, value: Sequence):
     #
-    #     apiDataSource = self._wrappedData
-    #     if len(value) == apiDataSource.numDim:
+    #     if len(value) != self.dimensionCount:
+    #         raise ValueError("DimensionTypes must have length %s, was %s" % (self.dimensionCount, value))
     #
-    #         for dimValue in value:
-    #             if dimValue not in DIMENSION_TYPES:
-    #                 raise ValueError("DimensionType %s not recognised" % dimValue)
+    #     for dimType in value:
+    #         if dimType not in DIMENSIONTYPES:
+    #             raise ValueError("DimensionType %s not recognised" % dimType)
     #
-    #         for n, dataDimVal in enumerate(self._wrappedData.sortedDataDims()):
-    #             pass
+    #     values = [i for i in zip(self.pointCounts, self.pointOffsets, self.isComplex, self.valuesPerPoint)]
     #
-    #         # from NMR.Experiment - createDataSource
-    #
-    #         # self: 'Experiment', name: str, numPoints: Sequence[int], sw: Sequence[float],
-    #         # refppm: Sequence[float], refpt: Sequence[float], dataStore: 'DataStore' = None,
-    #         # scale: float = 1.0, details:str = None, numPointsOrig:Sequence[int] = None,
-    #         # pointOffset: Sequence[int] = None, isComplex:Sequence[bool] = None,
-    #         # sampledValues: Sequence[Sequence[float]] = None,
-    #         # sampledErrors: Sequence[Sequence[float]] = None,
-    #         # ** additionalParameters) -> 'DataSource':
-    #
-    #         # if not numPointsOrig:
-    #         #     numPointsOrig = numPoints
-    #         #
-    #         # if not pointOffset:
-    #         #     pointOffset = (0,) * numDim
-    #         #
-    #         # if not isComplex:
-    #         #     isComplex = (False,) * numDim
-    #         #
-    #         # for n, expDim in enumerate(self.sortedExpDims()):
-    #         #
-    #         #     numPointsOrig = expDim.numPointsOrig
-    #         #     pointOffset = expDim
-    #         #     values = sampledValues[n] if sampledValues else None
-    #         #     if values:
-    #         #         errors = sampledErrors[n] if sampledErrors else None
-    #         #         sampledDataDim = spectrum.newSampledDataDim(dim=n + 1, numPoints=numPoints[n], expDim=expDim,
-    #         #                                                     isComplex=isComplex[n], pointValues=values, pointErrors=errors)
-    #         #     else:
-    #         #         freqDataDim = spectrum.newFreqDataDim(dim=n + 1, numPoints=numPoints[n],
-    #         #                                               isComplex=isComplex[n], numPointsOrig=numPointsOrig[n],
-    #         #                                               pointOffset=pointOffset[n],
-    #         #                                               valuePerPoint=sw[n] / float(numPoints[n]), expDim=expDim)
-    #         #         expDimRef = (expDim.findFirstExpDimRef(measurementType='Shift') or expDim.findFirstExpDimRef())
-    #         #         if expDimRef:
-    #         #             freqDataDim.newDataDimRef(refPoint=refpt[n], refValue=refppm[n], expDimRef=expDimRef)
-    #
-    #
-    #             # dataDim classnames are FidDataDim, FreqDataDim, SampledDataDim
-    #     else:
-    #         raise ValueError("DimensionTypes must have length %s, was %s" % (apiDataSource.numDim, value))
+    #     for n, dataDimVal in enumerate(self._wrappedData.sortedDataDims()):
+    #         pass
 
     @property
     @_includeInDimensionalCopy
@@ -990,13 +1011,10 @@ assignmentTolerances
         """valuePerPoint for each dimension
 
         in ppm for Frequency dimensions with a single, well-defined reference
-
         None for Frequency dimensions without a single, well-defined reference
-
         in time units (seconds) for FId dimensions
-
-        None for sampled dimensions"""
-
+        None for sampled dimensions
+        """
         result = []
         for dataDim in self._wrappedData.sortedDataDims():
             if hasattr(dataDim, 'primaryDataDimRef'):
@@ -1017,7 +1035,8 @@ assignmentTolerances
     @property
     @_includeInDimensionalCopy
     def phases0(self) -> tuple:
-        """zero order phase correction (or None), per dimension. Always None for sampled dimensions."""
+        """zero order phase correction (or None), per dimension. Always None for sampled dimensions.
+        """
         return tuple(x.phase0 if x.className != 'SampledDataDim' else None
                      for x in self._wrappedData.sortedDataDims())
 
@@ -1080,36 +1099,6 @@ assignmentTolerances
     @sineWindowShifts.setter
     def sineWindowShifts(self, value: Sequence):
         self._setStdDataDimValue('sineWindowShift', value)
-
-    # Attributes belonging to ExpDimRef and DataDimRef
-
-    def _mainExpDimRefs(self) -> list:
-        """Get main API ExpDimRef (serial=1) for each dimension"""
-
-        result = []
-        for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
-            # NB MUST loop over dataDims, in case of projection spectra
-            result.append(dataDim.expDim.findFirstExpDimRef(serial=1))
-        #
-        return tuple(result)
-
-    def _setExpDimRefAttribute(self, attributeName: str, value: Sequence, mandatory: bool = True):
-        """Set main ExpDimRef attribute (serial=1) for each dimension"""
-        apiDataSource = self._wrappedData
-        if len(value) == apiDataSource.numDim:
-            for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
-                # NB MUST loop over dataDims, in case of projection spectra
-                expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
-                val = value[ii]
-                if expDimRef is None and val is not None:
-                    raise ValueError("Attempt to set attribute %s in dimension %s to %s - must be None" %
-                                     (attributeName, ii + 1, val))
-                elif val is None and mandatory:
-                    raise ValueError(
-                            "Attempt to set mandatory attribute %s to None in dimension %s: %s" %
-                            (attributeName, ii + 1, val))
-                else:
-                    setattr(expDimRef, attributeName, val)
 
     @property
     @_includeInDimensionalCopy
@@ -1343,15 +1332,14 @@ assignmentTolerances
 
     @property
     def defaultAssignmentTolerances(self):
-        """Default assignment tolerances, per dimension.
-
+        """Default assignment tolerances per dimension (in ppm), upward adjusted (if needed) for
+        digital resolution
         NB for Fid or Sampled dimensions value will be None
         """
         tolerances = [None] * self.dimensionCount
         for ii, dimensionType in enumerate(self.dimensionTypes):
             if dimensionType == 'Frequency':
-                tolerance = Constants.isotope2Tolerance.get(self.isotopeCodes[ii],
-                                                            Constants.defaultAssignmentTolerance)
+                tolerance = self.isotope2Tolerance.get(self.isotopeCodes[ii], self.defaultAssignmentTolerance)
                 tolerances[ii] = max(tolerance, self.spectralWidths[ii] / self.pointCounts[ii])
         #
         return tolerances
@@ -1425,6 +1413,7 @@ assignmentTolerances
         return tuple(ll)
 
     @property
+    @_includeInDimensionalCopy
     def axesReversed(self) -> Tuple[Optional[bool], ...]:
         """Return whether any of the axes are reversed
         May contain None for undefined axes
@@ -1483,14 +1472,14 @@ assignmentTolerances
         return tuple(result)
 
     def _setMagnetisationTransfers(self, value: Tuple[MagnetisationTransferTuple, ...]):
-        """Setter for magnetisation transfers.
-
+        """Setter for magnetisation transfers
 
         The magnetisationTransfers are deduced from the experimentType and axisCodes.
         When the experimentType is set this function is a No-op.
         Only when the experimentType is unset or does not match any known reference experiment
         does this function set the magnetisation transfers, and the corresponding values are
-        ignored if the experimentType is later set."""
+        ignored if the experimentType is later set
+        """
 
         apiExperiment = self._wrappedData.experiment
         apiRefExperiment = apiExperiment.refExperiment
@@ -1506,11 +1495,11 @@ assignmentTolerances
                     raise ValueError(
                             "Attempt to set incorrect magnetisationTransfer value %s in spectrum %s"
                             % (tt, self.pid)
-                            )
+                    )
                 apiExperiment.newExpTransfer(expDimRefs=expDimRefs, transferType=transferType,
                                              isDirect=(not isIndirect))
         else:
-            apiRefExperiment.root._logger.warning(
+            getLogger().warning(
                     """An attempt to set Spectrum.magnetisationTransfers directly was ignored
                   because the spectrum experimentType was defined.
                   Use axisCodes to set magnetisation transfers instead.""")
@@ -1876,7 +1865,50 @@ assignmentTolerances
     #     if not all(isinstance(dimVal, bool) for dimVal in values):
     #         raise ValueError("Folding values must be True/False.")
 
-    #=========================================================================================
+    @property
+    def temperature(self):
+        """The temperature of the spectrometer when the spectrum was recorded
+        """
+        if self._wrappedData.experiment:
+            return self._wrappedData.experiment.temperature
+
+    @temperature.setter
+    def temperature(self, value):
+        """The temperature of the spectrometer when the spectrum was recorded
+        """
+        if self._wrappedData.experiment:
+            self._wrappedData.experiment.temperature = value
+
+    @property
+    def preferredAxisOrdering(self):
+        """Return the preferred ordering for the axis codes when opening a new spectrumDisplay
+        """
+        order = self.getParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING)
+        if order is not None:
+            return order
+
+        # set default ordering
+        self.setParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING, None)
+        return None
+
+    @preferredAxisOrdering.setter
+    def preferredAxisOrdering(self, order):
+        """Set the preferred ordering for the axis codes when opening a new spectrumDisplay
+        """
+        if not order:
+            raise ValueError('order is not defined')
+        if not isinstance(order, tuple):
+            raise TypeError('order is not a tuple')
+        if len(order) != self.dimensionCount:
+            raise TypeError('order is not the correct length')
+        if not all(isinstance(ss, int) and ss >= 0 and ss < self.dimensionCount for ss in order):
+            raise TypeError('order elements must be integer and in (0 .. %d)' % (self.dimensionCount - 1))
+        if len(set(order)) != len(order):
+            raise ValueError('order must contain unique elements')
+
+        self.setParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING, order)
+
+    #-----------------------------------------------------------------------------------------
     # Library functions
     #-----------------------------------------------------------------------------------------
 
@@ -1976,11 +2008,8 @@ assignmentTolerances
 
         return axisOrder
 
-    def automaticIntegration(self, spectralData):
-        return self._apiDataSource.automaticIntegration(spectralData)
-
-    def estimateNoise(self):
-        return self._apiDataSource.estimateNoise()
+    # def automaticIntegration(self, spectralData):
+    #     return self._apiDataSource.automaticIntegration(spectralData)
 
     def _mapAxisCodes(self, axisCodes: Sequence[str]):
         """Map axisCodes on self.axisCodes
@@ -2006,247 +2035,7 @@ assignmentTolerances
                                  (axisCode, newAxisCodeOrder, self.axisCodes))
         return newValues
 
-    @cached(_REGIONDATACACHE, maxItems=16, debug=False)
-    def getRegionData(self, exclusionBuffer: Optional[Sequence] = None, minimumDimensionSize: int = 3, **axisDict):
-        """Return the region of the spectrum data defined by the axis limits.
-
-        Axis limits are passed in as a dict containing the axis codes and the required limits.
-        Each limit is defined as a key, value pair: (str, tuple),
-        with the tuple supplied as (min,max) axis limits in ppm.
-
-        For axisCodes that are not included, the limits will by taken from the aliasingLimits of the spectrum.
-
-        Illegal axisCodes will raise an error.
-
-        Example dict:
-
-        ::
-
-            {'Hn': (7.0, 9.0),
-             'Nh': (110, 130)
-             }
-
-        Example calling function:
-
-        ::
-
-            regionData = spectrum.getRegionData(**limitsDict)
-            regionData = spectrum.getRegionData(Hn=(7.0, 9.0), Nh=(110, 130))
-
-            and
-
-            regionData = spectrum.getRegionData()           to get all the data, this may be very large!
-
-        exclusionBuffer: defines the size to extend the region by in index units, e.g. [1, 1, 1] for a 3d array,
-                            extends the region by 1 index point in all axes.
-                            Default is 1 in all axis directions.
-                            Must be the correct length for the number of dimensions
-
-        minimumDimensionSize:   defines the minimum number of elements in each dimension that are needed
-                                for the region to be valid.
-
-                                default is 3, as mostly used for parabolic curve fitting which
-                                requires 3 points in any given dimension
-
-        The returned regionData is a tuple of regions, each of the form:
-
-                single region = (dataArray,                 numpy array containing the data
-                                intRegion,
-                                startPoints,
-                                endPoints,
-                                startPointBufferActual,
-                                endPointBufferActual,
-                                startPointIntActual,
-                                numPointInt,
-                                startPointBuffer,
-                                endPointBuffer)
-
-        :param exclusionBuffer: array of int
-        :param minimumDimensionSize: int
-        :param axisDict: dict of axis limits
-        :return: tuple of regions
-        """
-        if not self.isValidPath:
-            return
-
-        startPoint = []
-        endPoint = []
-
-        # fill with the spectrum limits first
-        regionToPick = sorted(self.spectrumLimits)
-
-        codes = axisDict.keys()
-        limits = tuple(axisDict.values())
-
-        # map from input codes to self, done this way as MAY (but shouldn't) contain any Nones
-        indices = getAxisCodeMatchIndices(self.axisCodes, codes)
-        # for n, ind in enumerate(indices):
-        #     if ind is not None:
-        #         regionToPick[n] = limits[ind]
-
-        indices = getAxisCodeMatchIndices(codes, self.axisCodes)
-        for n, ind in enumerate(indices):
-            if ind is not None:
-                regionToPick[ind] = limits[n]
-
-        # convert the region limits to point coordinates with the dataSource
-        dataDims = self._apiDataSource.sortedDataDims()
-        aliasingLimits = self.aliasingLimits
-        apiPeaks = []
-        # for ii, dataDim in enumerate(dataDims):
-        spectrumReferences = self.mainSpectrumReferences
-        if None in spectrumReferences:
-            raise ValueError("getRegionData() only works for Frequency dimensions"
-                             " with defined primary SpectrumReferences ")
-        if regionToPick is None:
-            regionToPick = self.aliasingLimits
-
-        for ii, spectrumReference in enumerate(spectrumReferences):
-            aliasingLimit0, aliasingLimit1 = aliasingLimits[ii]
-            value0 = regionToPick[ii][0]
-            value1 = regionToPick[ii][1]
-            value0, value1 = min(value0, value1), max(value0, value1)
-
-            if value1 < aliasingLimit0 or value0 > aliasingLimit1:
-                # completely outside limits
-                break
-
-                # OR find aliasing offsets and change values to inside aliasing limits
-
-            value0 = max(value0, aliasingLimit0)
-            value1 = min(value1, aliasingLimit1)
-
-            position0 = spectrumReference.valueToPoint(value0) - 1
-            position1 = spectrumReference.valueToPoint(value1) - 1
-            position0, position1 = min(position0, position1), max(position0, position1)
-
-            # not always perfect for the plane depth region
-            position0 = int(position0) + 1
-            position1 = int(position1) + 1
-
-            startPoint.append((spectrumReference.dimension, position0))
-            endPoint.append((spectrumReference.dimension, position1))
-
-        else:
-
-            # this is a for..else, completes only if all limits are within spectrum bounds
-            startPoints = [point[1] for point in sorted(startPoint)]
-            endPoints = [point[1] for point in sorted(endPoint)]
-
-            # originally from the PeakList dataSource which should be the same as the spectrum _apiDataSource
-            # dataSource = self.dataSource
-            dataSource = self._apiDataSource
-            numDim = dataSource.numDim
-
-            minLinewidth = [0.0] * numDim
-
-            # if not exclusionBuffer:
-            #     exclusionBuffer = [1] * numDim
-            # else:
-            #     if len(exclusionBuffer) != numDim:
-            #         raise ValueError('Error: getRegionData, exclusion buffer length must match dimension of spectrum')
-            #     for nDim in range(numDim):
-            #         if exclusionBuffer[nDim] < 1:
-            #             raise ValueError('Error: getRegionData, exclusion buffer must contain values >= 1')
-
-            nonAdj = 0
-            excludedRegions = []
-            excludedDiagonalDims = []
-            excludedDiagonalTransform = []
-
-            startPoint = np.array(startPoints)
-            endPoint = np.array(endPoints)
-            startPoint, endPoint = np.minimum(startPoint, endPoint), np.maximum(startPoint, endPoint)
-
-            if not exclusionBuffer:
-                startPointBuffer = startPoint
-                endPointBuffer = endPoint
-            else:
-                if len(exclusionBuffer) != numDim:
-                    raise ValueError('Error: getRegionData, exclusion buffer length must match dimension of spectrum')
-                for nDim in range(numDim):
-                    if exclusionBuffer[nDim] < 0:
-                        raise ValueError('Error: getRegionData, exclusion buffer must contain values >= 0')
-
-                # extend region by exclusionBuffer
-                bufferArray = np.array(exclusionBuffer)
-                startPointBuffer = startPoint - bufferArray
-                endPointBuffer = endPoint + bufferArray
-
-            regions = numDim * [0]
-            npts = numDim * [0]
-            for n in range(numDim):
-                start = startPointBuffer[n]
-                end = endPointBuffer[n]
-                # npts[n] = dataSource.findFirstDataDim(dim=n + 1).numPointsOrig
-                npts[n] = spectrumReferences[n].numPointsOrig
-                tile0 = start // npts[n]
-                tile1 = (end - 1) // npts[n]
-                region = regions[n] = []
-                if tile0 == tile1:
-                    region.append((start, end, tile0))
-                else:
-                    region.append((start, (tile0 + 1) * npts[n], tile0))
-                    region.append((tile1 * npts[n], end, tile1))
-                for tile in range(tile0 + 1, tile1):
-                    region.append((tile * npts[n], (tile + 1) * npts[n], tile))
-
-            peaks = []
-            objectsCreated = []
-
-            nregions = [len(region) for region in regions]
-
-            # # force there to be only one region which is the central tile containing the spectrum
-            # nregions = numDim * [1]
-
-            nregionsTotal, cumulRegions = _cumulativeArray(nregions)
-
-            # # allows there to be a repeating pattern of the spectrum tiled across the display
-            result = ()
-            for n in range(nregionsTotal):
-
-                # fix to just the first tile
-                # n = 0
-
-                array = _arrayOfIndex(n, cumulRegions)
-                chosenRegion = [regions[i][array[i]] for i in range(numDim)]
-                startPointBufferActual = np.array([cr[0] for cr in chosenRegion])
-                endPointBufferActual = np.array([cr[1] for cr in chosenRegion])
-                tile = np.array([cr[2] for cr in chosenRegion])
-                startPointBuffer = np.array([startPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
-                endPointBuffer = np.array([endPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
-
-                dataArray, intRegion = dataSource.getRegionData(startPointBuffer, endPointBuffer)
-
-                # both None implies that the dataSource is not defined
-                if dataArray is None and intRegion is None:
-                    continue
-
-                # include extra exclusion buffer information
-                startPointInt, endPointInt = intRegion
-                startPointInt = np.array(startPointInt)
-                endPointInt = np.array(endPointInt)
-                startPointIntActual = np.array([startPointInt[i] + tile[i] * npts[i] for i in range(numDim)])
-                numPointInt = endPointInt - startPointInt
-                startPointBuffer = np.maximum(startPointBuffer, startPointInt)
-                endPointBuffer = np.minimum(endPointBuffer, endPointInt)
-
-                # check that the number of elements in each dimension, skip if too small
-                if np.any(numPointInt < minimumDimensionSize):
-                    continue
-
-                result += ((dataArray, intRegion,
-                            startPoints, endPoints,
-                            startPointBufferActual, endPointBufferActual,
-                            startPointIntActual, numPointInt,
-                            startPointBuffer, endPointBuffer),)
-
-            return result  #dataArray, intRegion
-
-        # for loop fails so return empty arrays in the first element
-        return None
-
-    def getByAxisCodes(self, attributeName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
+    def getByAxisCodes(self, parameterName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
         """Return values defined by attributeName in order defined by axisCodes:
         (default order if None).
 
@@ -2254,35 +2043,28 @@ assignmentTolerances
 
         NB: Use getByDimensions for dimensions (1..dimensionCount) based access
         """
-        if not hasattr(self, attributeName):
-            raise AttributeError('Object %s does not have attribute "%s"' %
-                                 (self, attributeName)
-                                 )
+        if not hasattr(self, parameterName):
+            raise ValueError('%s does not have parameter "%s"' % (self, parameterName))
 
         if not isIterable(axisCodes):
-            raise ValueError('axisCodes is not iterable "%s"; expected list or tuple' %
-                             axisCodes
-                             )
+            raise ValueError('axisCodes is not iterable "%s"; expected list or tuple' % axisCodes)
 
         if axisCodes is not None and not exactMatch:
             axisCodes = self._mapAxisCodes(axisCodes)
 
         try:
-            values = getattr(self, attributeName)
+            values = getattr(self, parameterName)
         except AttributeError:
-            raise AttributeError('Error getting attribute "%s" from object %s' %
-                                 (attributeName, self)
-                                 )
+            raise ValueError('Error getting parameter "%s" from %s' % (parameterName, self))
         if not isIterable(values):
-            raise ValueError('Attribute "%s" of object %s is not iterable; "%s"' %
-                             (attributeName, self, values)
-                             )
+            raise ValueError('Parameter "%s" of %s is not iterable; "%s"' % (parameterName, self, values))
+
         if axisCodes is not None:
             # change to order defined by axisCodes
             values = self._reorderValues(values, axisCodes)
         return values
 
-    def setByAxisCodes(self, attributeName: str, values: Sequence, axisCodes: Sequence[str] = None, exactMatch: bool = False):
+    def setByAxisCodes(self, parameterName: str, values: Sequence, axisCodes: Sequence[str] = None, exactMatch: bool = False):
         """Set attributeName to values in order defined by axisCodes:
         (default order if None)
 
@@ -2290,19 +2072,14 @@ assignmentTolerances
 
         NB: Use setByDimensions for dimensions (1..dimensionCount) based access
         """
-        if not hasattr(self, attributeName):
-            raise AttributeError('Object %s does not have attribute "%s"' %
-                                 (self, attributeName)
-                                 )
+        if not hasattr(self, parameterName):
+            raise ValueError('%s does not have parameter "%s"' % (self, parameterName))
 
         if not isIterable(values):
-            raise ValueError('Values "%s" is not iterable' % (values)
-                             )
+            raise ValueError('Parameter "%s" of %s requires iterable; "%s"' % (parameterName, self, values))
 
         if not isIterable(axisCodes):
-            raise ValueError('axisCodes is not iterable "%s"; expected list or tuple' %
-                             axisCodes
-                             )
+            raise ValueError('axisCodes is not iterable "%s"; expected list or tuple' % axisCodes)
 
         if axisCodes is not None and not exactMatch:
             axisCodes = self._mapAxisCodes(axisCodes)
@@ -2311,20 +2088,21 @@ assignmentTolerances
             # change values to the order appropriate for spectrum
             values = self._reorderValues(values, axisCodes)
         try:
-            setattr(self, attributeName, values)
+            setattr(self, parameterName, values)
         except AttributeError:
-            raise AttributeError('Unable to set attribute "%s" of object %s to "%s"' %
-                                 (attributeName, self, values)
-                                 )
+            raise ValueError('Unable to set parameter "%s" of %s to "%s"' % (parameterName, self, values))
 
-    def getByDimensions(self, attributeName: str, dimensions: Sequence[int] = None):
-        """Return values defined by attributeName in order defined by dimensions (1..dimensionCount).
+    def getByDimensions(self, parameterName: str, dimensions: Sequence[int] = None):
+        """Return values of parameterName in order defined by dimensions (1..dimensionCount).
            (default order if None)
            NB: Use getByAxisCodes for axisCode based access
         """
-        if not hasattr(self, attributeName):
-            raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
-        values = getattr(self, attributeName)
+        if not hasattr(self, parameterName):
+            raise ValueError('Spectrum object does not have parameter "%s"' % parameterName)
+
+        values = getattr(self, parameterName)
+        if not isIterable(values):
+            raise ValueError('Parameter "%s" of %s is not iterable; "%s"' % (parameterName, self, values))
 
         if dimensions is None:
             return values
@@ -2337,110 +2115,32 @@ assignmentTolerances
                 newValues.append(values[dim - 1])
         return newValues
 
-    def setByDimensions(self, attributeName: str, values: Sequence, dimensions: Sequence[int] = None):
-        """Set attributeName to values in order defined by dimensions (1..dimensionCount).
+    def setByDimensions(self, parameterName: str, values: Sequence, dimensions: Sequence[int] = None):
+        """Set parameterName to values as defined by dimensions (1..dimensionCount).
            (default order if None)
            NB: Use setByAxisCodes for axisCode based access
         """
-        if not hasattr(self, attributeName):
-            raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
+        if not hasattr(self, parameterName):
+            raise ValueError('Spectrum object does not have parameter "%s"' % parameterName)
+
+        if not isIterable(values):
+            raise ValueError('Parameter "%s" of %s requires iterable; "%s"' % (parameterName, self, values))
 
         if dimensions is None:
-            setattr(self, attributeName, values)
-            return
+            dimensions = self.dimensions
+        if not isIterable(dimensions):
+            raise ValueError('dimensions "%s" is not iterable' % (dimensions))
 
-        newValues = []
-        for dim in dimensions:
+        newValues = getattr(self, parameterName)
+        for idx, dim in enumerate(dimensions):
             if not (1 <= dim <= self.dimensionCount):
                 raise ValueError('Invalid dimension "%d"; should be one of %s' % (dim, self.dimensions))
             else:
-                newValues.append(values[dim - 1])
-        setattr(self, attributeName, newValues)
-
-    def _clone1D(self):
-        'Clone 1D spectrum to a new spectrum.'
-        #FIXME Crude approach / hack
-
-        newSpectrum = self.project.createDummySpectrum(name=self.name, axisCodes=self.axisCodes)
-        newSpectrum._positions = self.positions
-        newSpectrum._intensities = self.intensities
-        for peakList in self.peakLists:
-            peakList.copyTo(newSpectrum)
-
-        import inspect
-
-        attr = inspect.getmembers(self, lambda a: not (inspect.isroutine(a)))
-        filteredAttr = [a for a in attr if not (a[0].startswith('__') and a[0].endswith('__')) and not a[0].startswith('_')]
-        for i in filteredAttr:
-            att, val = i
-            try:
-                setattr(newSpectrum, att, val)
-            except Exception as e:
-                # print(e, att)
-                pass
-        return newSpectrum
-
-    @deleteObject()
-    def _delete(self):
-        """Delete the spectrum wrapped data.
-        """
-        self._wrappedData.delete()
-
-    @cached.clear(_PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
-    @cached.clear(_SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
-    @cached.clear(_SLICE1DDATACACHE)  # Check if there was a slice1ddata cache, and if so, clear it
-    @cached.clear(_REGIONDATACACHE)  # Check if there was a regiondata cache, and if so, clear it
-    def _clearCache(self):
-        """Convenience to clear the cache; all action done by the decorators
-        """
-        pass
-
-    def _notifySpectrumViews(self, action):
-        for sv in self.spectrumViews:
-            sv._finaliseAction(action)
-
-    @property
-    def temperature(self):
-        """The temperature of the spectrometer when the spectrum was recorded
-        """
-        if self._wrappedData.experiment:
-            return self._wrappedData.experiment.temperature
-
-    @temperature.setter
-    def temperature(self, value):
-        """The temperature of the spectrometer when the spectrum was recorded
-        """
-        if self._wrappedData.experiment:
-            self._wrappedData.experiment.temperature = value
-
-    @property
-    def preferredAxisOrdering(self):
-        """Return the preferred ordering for the axis codes when opening a new spectrumDisplay
-        """
-        order = self.getParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING)
-        if order is not None:
-            return tuple(order)
-
-        # # set default ordering
-        # self.setParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING, None)
-        # return None
-
-    @preferredAxisOrdering.setter
-    def preferredAxisOrdering(self, order):
-        """Set the preferred ordering for the axis codes when opening a new spectrumDisplay
-        """
-        if not order:
-            raise ValueError('order is not defined')
-        if not isinstance(order, tuple):
-            raise TypeError('order is not a tuple')
-        if len(order) != self.dimensionCount:
-            raise TypeError('order is not the correct length')
-        if not all(isinstance(ss, int) and ss >= 0 and ss < self.dimensionCount for ss in order):
-            raise TypeError('order elements must be integer and in (0 .. %d)' % (self.dimensionCount - 1))
-        if len(set(order)) != len(order):
-            raise ValueError('order must contain unique elements')
-
-        self.setParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING, order)
+                newValues[dim-1] = values[idx]
+        try:
+            setattr(self, parameterName, newValues)
+        except AttributeError:
+            raise ValueError('Unable to set parameter "%s" of %s to "%s"' % (parameterName, self, values))
 
     def searchAxisCodePermutations(self, checkCodes: Tuple[str, ...]) -> Optional[Tuple[int]]:
         """Generate the permutations of the current axisCodes
@@ -2462,6 +2162,26 @@ assignmentTolerances
             n = min(len(checkCodes), len(perm))
             if n and all(pCode[0] == cCode[0] for pCode, cCode in zip(perm[:n], checkCodes[:n])):
                 return axisOrder[ii]
+
+    def _setDefaultContourValues(self, base=None, multiplier=1.41, count=10):
+        """Set default contour values
+        """
+        if base is None:
+            base = self.noiseLevel * multiplier if self.noiseLevel else 1e6
+        base = max(base, 1.0)  # Contour bases have to be > 0.0
+
+        self.positiveContourBase = base
+        self.positiveContourFactor = multiplier
+        self.positiveContourCount = count
+        self.negativeContourBase = -1.0 * base
+        self.negativeContourFactor = multiplier
+        self.negativeContourCount = count
+
+    def _setDefaultContourColours(self):
+        """Set default contour colours
+        """
+        (self.positiveContourColour, self.negativeContourColour) = getDefaultSpectrumColours(self)
+        self.sliceColour = self.positiveContourColour
 
     def _getAliasingRange(self):
         """Return the min/max aliasing range for the peakLists in the spectrum, if there are no peakLists with peaks, return None
@@ -2497,14 +2217,12 @@ assignmentTolerances
     def _copyNonDimensionalParameters(self, target):
         """Copy non-dimensional parameters from self to target
         """
-        for attr in _includeInCopyList().getNoneDimensional():
+        for parameterName in _includeInCopyList().getNoneDimensional():
             try:
-                value = getattr(self, attr)
-                setattr(target, attr, value)
+                value = getattr(self, parameterName)
+                setattr(target, parameterName, value)
             except Exception as es:
-                getLogger().error('Copying "%s" from %s to %s: %s' %
-                                  (attr, self, target, es)
-                                  )
+                getLogger().warning('Copying parameter %r from %s to %s: %s' % (parameterName, self, target, es))
 
     def copyParameters(self, axisCodes, target):
         """Copy non-dimensional and dimensional parameters for axisCodes from self to target
@@ -2512,405 +2230,520 @@ assignmentTolerances
         self._copyNonDimensionalParameters(target)
         self._copyDimensionalParameters(axisCodes, target)
 
-    #=========================================================================================
+    def estimateNoise(self):
+        """Estimate and return the noise level, or None if it cannot be
+        """
+        if self.dataSource is not None:
+            noise = self.dataSource.estimateNoise()
+        else:
+            noise = None
+        return noise
+
+    #-----------------------------------------------------------------------------------------
     # data access functions
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @logCommand(get='self')
-    def getHeight(self, ppmPositions):
+    def getIntensity(self, ppmPositions):
         """Returns the interpolated height at the ppm position
         """
-        refs = self.mainSpectrumReferences
-        if self.dimensionCount == 1:
-            pp = refs[0].valueToPoint(ppmPositions[0])
-            hs = self._intensities
-            try:
-                height = hs[int(pp) - 1] + (pp % 1) * (hs[int(pp)] - hs[int(pp) - 1])
-            except IndexError:
-                getLogger().warning('Height not found found at ppm position: (%s)'% ', '.join(map(str, ppmPositions)))
-                height = None # should it be None?
-            return height
+        # The height below is not derived from any fitting
+        # but is a weighted average of the values at the neighbouring grid points
 
-        if len(ppmPositions) != self.dimensionCount:
-            raise ValueError('Length of %s does not match number of dimensions.' % str(ppmPositions))
-        if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPositions):
-            raise ValueError('ppmPositions values must be floats.')
-
-        pointPosition = tuple(refs[dim].valueToPoint(ppm) for dim, ppm in enumerate(ppmPositions))
-        return self.getPositionValue(pointPosition)
+        getLogger().warning('This routine has been replaced with getHeight')
+        return self.getHeight(ppmPositions)
 
     @logCommand(get='self')
-    def getPositionValue(self, pointPosition):
-        """Return the value nearest to the position given in points.
+    def getHeight(self, ppmPosition):
+        """Returns the interpolated height at the ppm position
+        """
+        if len(ppmPosition) != self.dimensionCount:
+            raise ValueError('Length of %s does not match number of dimensions' % str(ppmPosition))
+        if not all(isinstance(dimVal, (int, float)) for dimVal in ppmPosition):
+            raise ValueError('ppmPositions values must be floats')
+
+        pointPosition = [self.ppm2point(p, dimension=idx+1) for idx, p in enumerate(ppmPosition)]
+        return self.getPointValue(pointPosition)
+
+    @logCommand(get='self')
+    def getPointValue(self, pointPosition):
+        """Return the value interpolated at the position given in points (1-based, float values).
         """
         if len(pointPosition) != self.dimensionCount:
             raise ValueError('Length of %s does not match number of dimensions.' % str(pointPosition))
         if not all(isinstance(dimVal, (int, float)) for dimVal in pointPosition):
             raise ValueError('position values must be floats.')
 
-        scale = self.scale if self.scale is not None else 1.0
-        if -SCALETOLERANCE < scale < SCALETOLERANCE:
-            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
+        if self.dataSource is None:
+            getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zero' % self)
+            return 0.0
 
-        pointPosition = self._apiDataSource.getPositionValue(pointPosition)
-        return pointPosition * scale if pointPosition else None
-
-    @cached(_SLICE1DDATACACHE, maxItems=1, debug=False)
-    def _get1DSliceData(self, position, sliceDim: int):
-        """Internal routine to get 1D sliceData;
-        """
-        return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
-
-    @cached(_SLICEDATACACHE, maxItems=1024, debug=False)
-    def _getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int):
-        """Internal routine to get sliceData; optimised to use (buffered) getPlaneData
-        CCPNINTERNAL: used in CcpnOpenGL
-        """
-        if not (sliceDim == xDim or sliceDim == yDim):
-            raise RuntimeError('sliceDim (%s) not in plane (%s,%s)' % (sliceDim, xDim, yDim))
-        data = self.getPlaneData(position, xDim, yDim)
-        if sliceDim == xDim:
-            slice = position[yDim - 1] - 1  # position amd dimensions are 1-based
-            return data[slice, 0:]
-        elif sliceDim == yDim:
-            slice = position[xDim - 1] - 1  # position amd dimensions are 1-based
-            return data[0:, slice]
+        value = self.dataSource.getPointValue(pointPosition)
+        return value * self.scale
 
     @logCommand(get='self')
     def getSliceData(self, position=None, sliceDim: int = 1):
-        """
-        Get a slice through position along sliceDim from the Spectrum
+        """Get a slice defined by sliceDim and a position vector
+
         :param position: An optional list/tuple of point positions (1-based);
                          defaults to [1,1,1,1]
-        :param sliceDim: Dimension of the slice (1-based)
-        :return: numpy data array
+        :param sliceDim: Dimension of the slice axis (1-based)
+
+        :return: numpy 1D data array
+
+        NB: use getSlice() method for axisCode based access
         """
-        if position is None:
-            position = [1] * self.dimensionCount
+        if self.dataSource is None:
+            getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
+            data = numpy.zeros( (self.pointCounts[sliceDim-1], ), dtype=numpy.float32)
 
-        if not isIterable(position) or len(position) < self.dimensionCount:
-            raise ValueError('sliceDim should be a iterable with length %d; got "%s"' %
-                             (self.dimensionCount, position)
-                             )
-
-        if isIterable(sliceDim) or sliceDim < 1 or sliceDim > self.dimensionCount:
-            raise ValueError('sliceDim should be a scalar in range [1-%d]; got "%s"' %
-                             (self.dimensionCount, sliceDim)
-                             )
-
-        result = None
-        scale = self.scale if self.scale is not None else 1.0
-        if -SCALETOLERANCE < scale < SCALETOLERANCE:
-            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
-
-        if self.dimensionCount == 1:
-            # 1D data
-            result = self._get1DSliceData(position=position, sliceDim=sliceDim)
-            # Make a copy in order to preserve the original data and apply scaling
-            if result is not None:
-                result = result.copy(order='K') * scale
         else:
-            # nD data; get slice via appropriate plane
-            position[sliceDim - 1] = 1  # To improve caching; position, dimensions are 1-based
-            if sliceDim > 1:
-                result = self._getSliceDataFromPlane(position=position, xDim=1, yDim=sliceDim,
-                                                     sliceDim=sliceDim)
-            else:
-                result = self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim + 1,
-                                                     sliceDim=sliceDim)
+            try:
+                position = self.dataSource.checkForValidSlice(position, sliceDim)
+                data = self.dataSource.getSliceData(position=position, sliceDim=sliceDim)
+                data = data.copy(order='K') * self.scale
 
-            # Make a copy in order to preserve the original data; do not apply scaling, as this was already done
-            # by the _getSliceDataFromPlane routine which calls getPlaneData
-            if result is not None:
-                result = result.copy(order='K')
+            except (RuntimeError, ValueError) as es:
+                getLogger().error('Spectrum.getSliceData: %s' % es)
+                raise es
 
-        # check if we have something valid to return
-        if result is None:
-            getLogger().warning('Failed to get slice data along dimension "%s" at position %s' %
-                                (sliceDim, position))
-
-        # For 1D, save as intensities attribute
-        self._intensities = result
-        return result
+        # For 1D, save as intensities attribute; TODO: remove
+        self._intensities = data
+        return data
 
     @logCommand(get='self')
-    def getSlice(self, axisCode, position, exactMatch=True):
-        """Get 1D slice along axisCode through position; sets the intensities attribute
-        :return: 1D NumPy data array
+    def getSlice(self, axisCode, position) -> numpy.array:
+        """Get a slice defined by axisCode and a position vector
+
+        :param axisCode: valid axisCode of the slice axis
+        :param position: An optional list/tuple of point positions (1-based);
+                         defaults to [1,1,1,1]
+
+        :return: numpy 1D data array
+
+        NB: use getSliceData() method for dimension based access
         """
-        sliceDim = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)
-        return self.getSliceData(position=position, sliceDim=sliceDim[0])
-
-    def _getDefaultSlicePath(self, axisCode, position):
-        "Return a default path for slice"
-        from ccpn.util.Hdf5 import HDF5_EXTENSION
-
-        slice = self.name + '_slice_%s_' % axisCode + '_'.join((str(p) for p in position))
-        _p = aPath(self.filePath)
-        return str(_p.parent / slice + HDF5_EXTENSION)
+        dimensions = self.getByAxisCodes('dimensions', [axisCode], exactMatch=True)
+        return self.getSliceData(position=position, sliceDim=dimensions[0])
 
     @logCommand(get='self')
-    def extractSliceToFile(self, axisCode, position, path=None):
-        """Extract 1d slice from self as new Spectrum; saved to path
-        (auto-generated if not given)
+    def extractSliceToFile(self, axisCode, position, path=None, dataFormat='Hdf5'):
+        """Extract 1D slice from self as new Spectrum; saved to path
         if 1D it effectively yields a copy of self
 
         :param axisCode: axiscode of slice to extract
         :param position: position vector (1-based)
-        :param path: optional path; constructed from current filePath and name of instance
+        :param path: optional path; if None, constructed from current filePath
+
         :return: Spectrum instance
         """
+        if self.dataSource is None:
+            text = 'No proper (filePath, dataFormat) set for %s; unable to extract slice' % self
+            getLogger().error(text)
+            raise RuntimeError(text)
 
-        if axisCode not in self.axisCodes:
-            raise ValueError('Invalid axisCode "%s"' % axisCode)
-        if len(position) != self.dimensionCount:
-            raise ValueError('Invalid position "%s"' % position)
+        if axisCode is None or axisCode not in self.axisCodes:
+            raise ValueError('Invalid axisCode %r, should be one of %s' % (axisCode, self.axisCodes))
 
-        if path is None:
-            path = self._getDefaultSlicePath(axisCode, position)
+        try:
+            dimensions = self.getByAxisCodes('dimensions', [axisCode])
+            self.dataSource.checkForValidSlice(position=position, sliceDim=dimensions[0])
+            newSpectrum = self._extractToFile(axisCodes=[axisCode], position=position, path=path, dataFormat=dataFormat,
+                                              tag='slice')
 
-        # Due to implementation limitations, we have to hack this:
-        # first create a dummy spectrum; read the data and store with dummy
-        # Save the data into hdf5 and reload to create a new Spectrum instance.
-        # To alleviate: we would need a newSpectrum() method, without the need for an actual
-        # spectrum, but with the option to set path, sizes etc in the model (which
-        # createDummy does not do
-        _dummy = self.project.createDummySpectrum(axisCodes=[axisCode], name='_dummy')
-        _dummy._intensities = self.getSlice(axisCode, position, exactMatch=True)
-        # copy relevant attributes
-        self.copyParameters(axisCodes=[axisCode], target=_dummy)
+        except (ValueError, RuntimeError) as es:
+            text = 'Spectrum.extractSliceToFile: %s' % es
+            raise ValueError(es)
 
-        # save as hdf5 file
-        from ccpn.util.Hdf5 import convertDataToHdf5
-
-        convertDataToHdf5(_dummy, path)
-
-        # create the api storage by destroying _dummy and re-loading the data
-        from ccpnmodel.ccpncore.lib.spectrum.formats.Hdf5 import FILE_TYPE as HDF5_TYPE
-
-        self.project.deleteObjects(_dummy)
-        newSpectrum = self.project.loadSpectrum(path=path, subType=HDF5_TYPE)[0]  # load yields a list
-        newSpectrum.axisCodes = [axisCode]  # to overRide the loadData
-        # Copy relevant attributes again
-        self.copyParameters(axisCodes=[axisCode], target=newSpectrum)
         return newSpectrum
-
-    @cached(_PLANEDATACACHE, maxItems=64, debug=False)
-    def _getPlaneData(self, position, xDim: int, yDim: int):
-        "Internal routine to improve caching: Calling routine set the positions of xDim, yDim to 1 "
-        return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
     @logCommand(get='self')
     def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2):
-        """Get a plane defined by by xDim and yDim, and a position vector ('1' based)
+        """Get a plane defined by by xDim and yDim ('1'-based), and a position vector ('1'-based)
         Dimensionality must be >= 2
 
-        :param position: A list/tuple of positions (1-based)
-        :param xDim: Dimension of the first dimension (1-based)
-        :param yDim: Dimension of the second dimension (1-based)
+        :param position: A list/tuple of point-positions (1-based)
+        :param xDim: Dimension of the first axis (1-based)
+        :param yDim: Dimension of the second axis (1-based)
+
         :return: 2D float32 NumPy array in order (yDim, xDim)
 
-        NB: use getPlane method for axisCode based access
+        NB: use getPlane() method for axisCode based access
         """
-        if self.dimensionCount < 2:
-            raise ValueError('Spectrum.getPlaneData; dimensionCount must be >= 2')
-        if xDim == yDim:
-            raise ValueError('Spectrum.getPlaneData; must have xDim != yDim')
-        dims = self.dimensions
-        if xDim not in dims:
-            raise ValueError('Spectrum.getPlaneData; invalid xDim "%s"; must one of %s' %
-                             (xDim, dims))
-        if yDim not in dims:
-            raise ValueError('Spectrum.getPlaneData; invalid yDim "%s"; must one of %s' %
-                             (yDim, dims))
-        if position is None:
-            position = [1] * self.dimensionCount
+        if self.dataSource is None:
+            getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
+            data = numpy.zeros( (self.pointCounts[yDim-1], self.pointCounts[xDim-1]), dtype=numpy.float32)
 
-        for idx, p in enumerate(position):
-            if not (1 <= p <= self.pointCounts[idx]):
-                raise ValueError('Spectrum.getPlaneData; invalid position[%d] "%d"; should be in range (%d,%d)' %
-                                 (idx, p, 1, self.pointCounts[idx]))
+        else:
+            try:
+                position = self.dataSource.checkForValidPlane(position, xDim=xDim, yDim=yDim)
+            except (RuntimeError, ValueError) as es:
+                getLogger().error('invalid arguments: %s' % es)
+                raise es
 
-        position = list(position)  # assure we have a list so we can assign below
-        # set the points of xDim, yDim to 1 as these do not matter (to improve caching)
-        position[xDim - 1] = 1  # position is 1-based
-        position[yDim - 1] = 1
+            data = self.dataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+            # Make a copy in order to preserve the original data and apply scaling
+            data = data.copy(order='K') * self.scale
 
-        scale = self.scale if self.scale is not None else 1.0
-        if -SCALETOLERANCE < scale < SCALETOLERANCE:
-            getLogger().warning('Scaling {} by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
-
-        result = self._getPlaneData(position=position, xDim=xDim, yDim=yDim)
-        # Make a copy in order to preserve the original data and apply scaling
-        result = result.copy(order='K') * scale
-
-        # check if we have something valid to return
-        if result is None:
-            raise RuntimeError('Failed to get plane data along dimensions (%s,%s) at position %s' %
-                               (xDim, yDim, position))
-
-        return result
+        return data
 
     @logCommand(get='self')
-    def getPlane(self, axisCodes: tuple, position=None, exactMatch=True):
-        """Get a plane defined by a tuple of two axisCodes, and a position vector ('1' based, defaults to first point)
-        Expand axisCodes if exactMatch=False
-        returns np-data array
+    def getPlane(self, axisCodes, position=None):
+        """Get a plane defined by axisCodes and position
+        Dimensionality must be >= 2
+
+        :param axisCodes: tuple/list of two axisCodes; expand if exactMatch=False
+        :param position: A list/tuple of point-positions (1-based)
+
+        :return: 2D float32 NumPy array in order (yDim, xDim)
+
         NB: use getPlaneData method for dimension based access
         """
         if len(axisCodes) != 2:
             raise ValueError('Invalid axisCodes %s, len should be 2' % axisCodes)
-        xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=exactMatch)
+
+        xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=True)
         return self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
-    def _getDefaultPlanePath(self, axisCodes, position):
-        "Construct a default path for plane"
-        planeStr = '_plane_' + '_'.join(axisCodes) + '_' + '_'.join([str(p) for p in position])
-        _p = aPath(self.filePath)
-        return os.path.join(str(_p.parent), _p.basename) + planeStr + '.dat'
-
     @logCommand(get='self')
-    def extractPlaneToFile(self, axisCodes: tuple, position=None, path=None):
-        """Save plane defined by a tuple of two axisCodes and position
-        to file. Save to path (auto-generated if None).
+    def extractPlaneToFile(self, axisCodes: (tuple, list), position=None, path=None, dataFormat='Hdf5'):
+        """Save a plane, defined by axisCodes and position, to path using dataFormat
+        Dimensionality must be >= 2
+
+        :param axisCodes: tuple/list of two axisCodes
+        :param position: a list/tuple of point-positions (1-based)
+        :param path: path of the resulting file; auto-generated if None
+        :param dataFormat: a data format valid for writing
 
         :returns plane as Spectrum instance
         """
-        if self.dimensionCount < 2:
-            raise RuntimeError('Cannot extract plane from 1D data (%s)' % self)
+        if self.dataSource is None:
+            text = 'No proper (filePath, dataFormat) set for %s; unable to extract plane' % self
+            getLogger().error(text)
+            raise RuntimeError(text)
 
-        if position is None:
-            position = [1] * 2
+        if axisCodes is None or len(axisCodes) != 2:
+            raise ValueError('Invalid parameter axisCodes "%s", should be two of %s' % (axisCodes, self.axisCodes))
 
-        if path is None:
-            path = self._getDefaultPlanePath(axisCodes, position)
+        try:
+            dimensions = self.getByAxisCodes('dimensions', axisCodes)
+            self.dataSource.checkForValidPlane(position=position, xDim=dimensions[0], yDim=dimensions[1])
+            newSpectrum = self._extractToFile(axisCodes=axisCodes, position=position, path=path, dataFormat=dataFormat,
+                                              tag='plane')
 
-        planeData = self.getPlane(axisCodes=axisCodes, position=position)
-        from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource import _saveNmrPipe2DHeader
+        except (ValueError, RuntimeError) as es:
+            text = 'Spectrum.extractPlaneToFile: %s' % es
+            raise ValueError(text)
 
-        with open(path, 'wb') as fp:
-            #TODO: remove dependency on filestorage on apiLayer
-            xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
-            _saveNmrPipe2DHeader(self._wrappedData, fp, xDim, yDim)
-            planeData.tofile(fp)
-
-        newSpectrum = self.project.loadSpectrum(path, subType=Formats.NMRPIPE)[0]
-        newSpectrum.axisCodes = axisCodes  # to override the loadSpectrum routine
-        self.copyParameters(axisCodes=axisCodes, target=newSpectrum)
         return newSpectrum
 
-    def allPlanes(self, axisCodes: tuple, exactMatch=True):
-        """An iterator over all planes defined by axisCodes, yielding (position, data-array) tuples
-        Expand axisCodes if exactMatch=False
-        """
-
-        if len(axisCodes) != 2:
-            raise ValueError('Invalid axisCodes %s, len should be 2' % axisCodes)
-        axisCodes = self.getByAxisCodes('axisCodes', axisCodes, exactMatch=exactMatch)  # check and optionally expand axisCodes
-        if axisCodes[0] == axisCodes[1]:
-            raise ValueError('Invalid axisCodes %s; identical' % axisCodes)
-
-        # get axisCodes of dimensions to interate over
-        iterAxisCodes = list(set(self.axisCodes) - set(axisCodes))
-        # get relevant iteration parameters
-        points = self.getByAxisCodes('pointCounts', iterAxisCodes)
-        indices = [idx - 1 for idx in self.getByAxisCodes('dimensions', iterAxisCodes)]
-        iterData = list(zip(iterAxisCodes, points, indices))
-
-        def _nextPosition(currentPosition):
-            "Return a (done, position) tuple derived from currentPosition"
-            for axisCode, point, idx in iterData:
-                if currentPosition[idx] + 1 <= point:  # still an increment to make in this dimension
-                    currentPosition[idx] += 1
-                    return (False, currentPosition)
-                else:  # reset this dimension
-                    currentPosition[idx] = 1
-            return (True, None)  # reached the end
-
-        # loop over all planes
-        position = [1] * self.dimensionCount
-        done = False
-        xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=True)
-        while not done:
-            # Using direct api getPlaneData call to reduce overhead; (all parameters have been checked)
-            # By-passes the caching
-            planeData = self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
-            yield (position, planeData)
-            done, position = _nextPosition(position)
-
     @logCommand(get='self')
-    def getProjection(self, axisCodes: tuple, method: str = 'max', threshold=None):
-        """Get projected plane defined by a tuple of two axisCodes, using method and an optional threshold
-        return projected spectrum data as NumPy data array
+    def getProjection(self, axisCodes: (tuple, list), method: str = 'max', threshold=None):
+        """Get projected plane defined by two axisCodes, using method and an optional threshold
+
+        :param axisCodes: tuple/list of two axisCodes; expand if exactMatch=False
+        :param method: 'max', 'max above threshold', 'min', 'min below threshold',
+                       'sum', 'sum above threshold', 'sum below threshold'
+        :param threshold: threshold value for relevant method
+
+        :return: projected spectrum data as 2D float32 NumPy array in order (yDim, xDim)
         """
         projectedData = _getProjection(self, axisCodes=axisCodes, method=method, threshold=threshold)
         return projectedData
 
-    def _getDefaultProjectionPath(self, axisCodes):
-        "Construct a default path for projection"
-        planeStr = '_projection_' + '_'.join(axisCodes)
-        _p = aPath(self.filePath)
-        return os.path.join(str(_p.parent), _p.basename) + planeStr + '.dat'
-
     @logCommand(get='self')
-    def extractProjectionToFile(self, axisCodes: tuple, method: str = 'max', threshold=None, path=None):
-        """Save projected plane defined by a tuple of two axisCodes, using method and an optional threshold
-        to file. Save to path (auto-generated if None) using format
-        return projected spectrum as Spectrum instance
+    def extractProjectionToFile(self, axisCodes: (tuple, list), method: str = 'max', threshold=None,
+                                path=None, dataFormat='Hdf5'):
+        """Save a projected plane, defined by axisCodes and position, using method and an optional threshold,
+        to path using dataFormat
+        Dimensionality must be >= 2
+
+        :param axisCodes: tuple/list of two axisCodes
+        :param method: 'max', 'max above threshold', 'min', 'min below threshold',
+                       'sum', 'sum above threshold', 'sum below threshold'
+        :param threshold: threshold value for relevant method
+        :param path: path of the resulting file; auto-generated if None
+        :param dataFormat: a data format valid for writing
+
+        :returns projected plane as Spectrum instance
         """
+        if self.dataSource is None:
+            text = 'No proper (filePath, dataFormat) set for %s; unable to extract plane' % self
+            getLogger().error(text)
+            raise RuntimeError(text)
+
+        if axisCodes is None or len(axisCodes) != 2:
+            raise ValueError('Invalid parameter axisCodes "%s", should be two of %s' % (axisCodes, self.axisCodes))
+
+        try:
+            xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)
+            position = [1]*self.dimensionCount
+            self.dataSource.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
+            newSpectrum = self._extractToFile(axisCodes=axisCodes, position=position, path=path, dataFormat=dataFormat,
+                                              tag='projection')
+            projectionData = self.getProjection(axisCodes=axisCodes, method=method, threshold=threshold)
+            # For writing, we need to remap the axisCodes onto the newSpectrum
+            xDim2, yDim2 = newSpectrum.getByAxisCodes('dimensions', axisCodes)
+            newSpectrum.dataSource.setPlaneData(data=projectionData, position=position, xDim=xDim2, yDim=yDim2)
+
+        except (ValueError, RuntimeError) as es:
+            text = 'Spectrum.extractProjectionToFile: %s' % es
+            raise ValueError(text)
+
+        return newSpectrum
+
+    def _clone1D(self):
+        'Clone 1D spectrum to a new spectrum.'
+        #FIXME Crude approach / hack
+
+        newSpectrum = self.project.createDummySpectrum(name=self.name, axisCodes=self.axisCodes)
+        newSpectrum._positions = self.positions
+        newSpectrum._intensities = self.intensities
+        for peakList in self.peakLists:
+            peakList.copyTo(newSpectrum)
+
+        import inspect
+
+        attr = inspect.getmembers(self, lambda a: not (inspect.isroutine(a)))
+        filteredAttr = [a for a in attr if not (a[0].startswith('__') and a[0].endswith('__')) and not a[0].startswith('_')]
+        for i in filteredAttr:
+            att, val = i
+            try:
+                setattr(newSpectrum, att, val)
+            except Exception as e:
+                # print(e, att)
+                pass
+        return newSpectrum
+
+    def _axisDictToSliceTuples(self, axisDict) -> list:
+        """Convert dict of (key,value) = (axisCode, (startPpm, stopPpm)) pairs
+        to a list of sliceTuples (1-based)
+
+        if (axisDict[axisCode] is None) ==> use spectrumLimits
+        if (startPpm is None) ==> point=1
+        if (stopPpm is None) ==> point=pointCounts[axis]
+
+        :param axisDict: dict of (axisCode, (startPpm,stopPpm)) (key,value) pairs
+        :return list of sliceTuples
+
+        CCPNINTERMAL: also used by PeakPickerABC
+        """
+        axisCodes = [ac for ac in axisDict.keys()]
+        if None in self._mapAxisCodes(axisCodes):
+            raise ValueError('Illegal axisCode in axisDict')
+
+       # augment axisDict with any missing axisCodes or replace any None values with spectrumLimits
+        for idx, ac in enumerate(self.axisCodes):
+            if ac not in axisDict or axisDict[ac] is None:
+                axisDict[ac] = self.spectrumLimits[idx]
+
+        sliceTuples = [None]*self.dimensionCount
+        for axis, ac, dim in self.axisTriples:
+            stopPpm, startPpm = axisDict.get(ac)  # to be converted to points; ppm scale runs backwards
+
+            if startPpm is None:
+                startPoint = 1
+            else:
+                startPoint = int(self.ppm2point(startPpm, axisCode=ac) + 0.5)
+
+            if stopPpm is None:
+                stopPoint = self.pointCounts[axis]
+            else:
+                stopPoint = int(self.ppm2point(stopPpm, axisCode=ac) + 0.5)
+
+            sliceTuples[axis] = (startPoint,stopPoint)
+
+        getLogger().debug('Spectrum._axisDictToSliceTuples: axisDict = %s; sliceTuples = %s' %
+                          (axisDict, sliceTuples))
+        return sliceTuples
+
+    def getRegion(self, **axisDict):
+        """
+        Return the region of the spectrum data defined by the axis limits in ppm as numpy array
+        of the same dimensionality as defined by the Spectrum instance.
+
+        Axis limits  are passed in as a dict of (axisCode, tupleLimit) key, value pairs
+        with the tupleLimit supplied as (startPpm,stopPpm) axis limits in ppm (lower ppm value first).
+
+        For axisCodes that are not included in the axisDict, the limits will by taken from the
+        spectrum limits along the relevant axis
+        For axisCodes that are None, the limits will by taken from the spectrum limits along the
+        relevant axis
+
+        Illegal axisCodes will raise an error.
+
+        Example dict:
+            {'Hn': (7.0, 9.0),
+             'Nh': (110, 130)
+             }
+
+        Example calling function:
+            regionData = spectrum.getRegion(**limitsDict)
+            regionData = spectrum.getRegion(Hn=(7.0, 9.0), Nh=(110, 130))
+
+        :param axisDict: dict of (axisCode, (startPpm,stopPpm)) key,value pairs
+        :return: numpy array
+        """
+        if not self.hasValidPath():
+            raise RuntimeError('No valid spectral datasource defined')
+        sliceTuples = self._axisDictToSliceTuples(axisDict)
+        return self.dataSource.getRegionData(sliceTuples)
+
+    def getRegionData(self, exclusionBuffer: Optional[Sequence] = None, minimumDimensionSize: int = 3, **axisDict):
+        """Return the region of the spectrum data defined by the axis limits.
+        GWV: Old routine replaced by getRegion
+        """
+        raise NotImplementedError('replace by getRegion')
+
+    def _extractToFile(self, axisCodes, position, path, dataFormat, tag):
+        """Local routine to prevent code duplication across extractSliceToFile, extractPlaneToFile,
+        extractProjectionToFile.
+        Return new spectrum instance
+        """
+        # local import to prevent cycles
+        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+
+        dimensions = self.getByAxisCodes('dimensions', axisCodes)
+
+        dataFormats = getDataFormats()
+        validFormats = [k.dataFormat for k in dataFormats.values() if k.hasWritingAbility]
+        klass = dataFormats.get(dataFormat)
+        if klass is None:
+            raise ValueError('Invalid dataFormat %r; must be one of %s' % (dataFormat, validFormats))
+        if not klass.hasWritingAbility:
+            raise ValueError('Unable to write to dataFormat %r; must be one of %s' % (dataFormat, validFormats))
+        suffix = klass.suffixes[0] if len(klass.suffixes) > 0 else '.dat'
+
+        tagStr = '%s_%s' % (tag, '_'.join(axisCodes))
+        spectrumName = '%s_%s' % (self.name, tagStr)
+        appendToFilename = '_%s_%s' % (tagStr, '_'.join([str(p) for p in position]))
+
         if path is None:
-            path = self._getDefaultProjectionPath(axisCodes)
-
-        projectedData = self.getProjection(axisCodes=axisCodes, method=method, threshold=threshold)
-
-        from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource import _saveNmrPipe2DHeader
-
-        with open(path, 'wb') as fp:
-            #TODO: remove dependency on filestorage on apiLayer
-            xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
-            _saveNmrPipe2DHeader(self._wrappedData, fp, xDim, yDim)
-            projectedData.tofile(fp)
-
-        _spectraLoaded = self.project.loadSpectrum(path, subType=Formats.NMRPIPE)
-        if _spectraLoaded and len(_spectraLoaded) == 1:
-            newSpectrum = _spectraLoaded[0]
-            newSpectrum.axisCodes = axisCodes  # to override the loadSpectrum routine
-            self.copyParameters(axisCodes=axisCodes, target=newSpectrum)
-            return newSpectrum
+            dataStore = DataStore.newFromPath(path=self.filePath, appendToName=appendToFilename,
+                                              autoVersioning=True, withSuffix=suffix)
         else:
-            raise TypeError('No spectra created')
+            dataStore = DataStore.newFromPath(path=path, autoVersioning=True, withSuffix=suffix)
 
-    def _addDataStore(self, filePath, **kwds):
-        """Add a new dataStore to the spectrum
+        newSpectrum = _extractRegionToFile(self, dimensions=dimensions, position=position,
+                                           name=spectrumName, dataStore=dataStore, dataFormat=dataFormat)
+        # add some comment as to the origin of the data
+        comment = newSpectrum.comment
+        if comment is None:
+            comment = ''
+        if len(comment) > 0:
+            comment += '; '
+        comment += '%s at (%s) from %s' % (tagStr, ','.join([str(p) for p in position]), self)
+        newSpectrum.comment = comment
+
+        return newSpectrum
+
+    #-----------------------------------------------------------------------------------------
+    # Iterators
+    #-----------------------------------------------------------------------------------------
+
+    def allPlanes(self, axisCodes: tuple, exactMatch=True):
+        """An iterator over all planes defined by axisCodes, yielding (positions, data-array) tuples
+        Expand axisCodes if exactMatch=False
+        positions are 1-based
         """
-        self._wrappedData.addDataStore(filePath, **kwds)
+        if len(axisCodes) != 2:
+            raise ValueError('Invalid axisCodes %s, len should be 2' % axisCodes)
 
-    # GWV 20190731: not used
-    # def get1dSpectrumData(self):
-    #     """Get position,scaledData numpy array for 1D spectrum.
-    #     Yields first 1D slice for nD"""
-    #     return self._apiDataSource.get1dSpectrumData()
+        axisDims = self.getByAxisCodes('dimensions', axisCodes, exactMatch=exactMatch)  # check and optionally expand axisCodes
+        if axisDims[0] == axisDims[1]:
+            raise ValueError('Invalid axisCodes %s; identical' % axisCodes)
 
-    #=========================================================================================
+        if not self.hasValidPath():
+            raise RuntimeError('No valid spectral datasource defined')
+
+        return self.dataSource.allPlanes(xDim=axisDims[0], yDim=axisDims[1])
+
+    def allSlices(self, axisCode, exactMatch=True):
+        """An iterator over all slices defined by axisCode, yielding (positions, data-array) tuples
+        positions are 1-based
+        """
+        sliceDim = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)[0]
+
+        if self.hasValidPath():
+            raise RuntimeError('No valid spectral datasource defined')
+
+        return self.dataSource.allSlices(sliceDim=sliceDim)
+
+    #-----------------------------------------------------------------------------------------
     # Implementation functions
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
+
+    def _getDataSource(self, dataStore, reportWarnings=False):
+        """Check the validity of the file defined by dataStore;
+        returns SpectrumDataSource instance or None when filePath and/or dataFormat of the
+        dataStore instance are incorrect
+        Optionally report warnings
+        """
+        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getSpectrumDataSource
+        from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+
+        if dataStore is None:
+            raise ValueError('dataStore not defined')
+        if not isinstance(dataStore, DataStore):
+            raise ValueError('dataStore has invalid type')
+
+        if dataStore.dataFormat == EmptySpectrumDataSource.dataFormat:
+            # Special case, empty spectrum
+            dataSource = EmptySpectrumDataSource(spectrum=self)
+
+        else:
+            if not dataStore.exists():
+                if reportWarnings:
+                    dataStore.warningMessage()
+                return None
+
+            dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
+            if dataSource is None and reportWarnings:
+                getLogger().warning('dataStore path "%s" is incompatible with dataFormat "%s"' %
+                                    (dataStore.aPath(), dataStore.dataFormat))
+
+        return dataSource
+
+    def _updateParameterValues(self):
+        """This method check, and if needed updates specific parameter values
+        """
+        # Quietly set some values
+        getLogger().debug2('Updating %s parameters' % self)
+        with inactivity():
+            # getting the noiseLevel by calling estimateNoise() if not defined
+            if self.noiseLevel is None:
+                self.noiseLevel = self.estimateNoise()
+
+            # Check  contourLevels, contourColours
+            if self.positiveContourCount == 0 or self.negativeContourCount == 0:
+                self._setDefaultContourValues()
+                self._setDefaultContourColours()
+            if not self.sliceColour:
+                self.sliceColour = self.positiveContourColour
 
     @classmethod
-    def _getAllWrappedData(cls, parent: Project) -> list:
-        """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
-        return list(x for y in parent._wrappedData.sortedExperiments() for x in y.sortedDataSources())
+    def _restoreObject(cls, project, apiObj):
+        """Subclassed to allow for initialisations on restore, not on creation via newSpectrum
+        """
+        spectrum = super()._restoreObject(project, apiObj)
+
+        try:
+            spectrum._dataStore = DataStore()._importFromSpectrum(spectrum)
+            spectrum._dataSource = spectrum._getDataSource(spectrum._dataStore, reportWarnings=True)
+
+        except (ValueError, RuntimeError) as es:
+            getLogger().warning('Error restoring valid data source for %s (%s)' % (spectrum, es))
+
+        # Assure a setting of crucial attributes
+        spectrum._updateParameterValues()
+        return spectrum
 
     @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename Spectrum, changing its name and Pid.
         """
-        _validateName(self.project, Spectrum, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.name = value
-        return (oldName,)
+        return self._rename(value)
 
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated spectrumViews instances
@@ -2955,11 +2788,33 @@ assignmentTolerances
             # GLSignals = GLNotifier(parent=self)
             # GLSignals.emitPaintEvent()
 
+            # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+            #
+            # GLSignals = GLNotifier(parent=self)
+            # GLSignals.emitPaintEvent()
+
+    def _clearCache(self):
+        """Clear the cache
+        """
+        if self.dataSource is not None:
+            self.dataSource.clearCache()
+
+    @deleteObject()
+    def _delete(self):
+        """Delete the spectrum wrapped data.
+        """
+        self._wrappedData.delete()
+
     @logCommand(get='self')
     def delete(self):
         """Delete Spectrum"""
         with undoBlock():
+
             self._clearCache()
+            if self.dataSource is not None:
+                self.dataSource.closeFile()
+
+            # self.deleteAllNotifiers() TODO: no longer required?
 
             # handle spectrumView ordering - this should be moved to spectrumView or spectrumDisplay via notifier?
             specDisplays = []
@@ -2992,9 +2847,9 @@ assignmentTolerances
             for sd in specViews:
                 sd[0]._removeOrderedSpectrumViewIndex(sd[1])
 
-    #=========================================================================================
-    # CCPN functions
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
+    # CCPN properties and functions
+    #-----------------------------------------------------------------------------------------
 
     def _resetPeakLists(self):
         """Delete autocreated peaklists and reset
@@ -3003,10 +2858,64 @@ assignmentTolerances
             peakList.delete()
         self._wrappedData.__dict__['_serialDict']['peakLists'] = 0
 
-    #===========================================================================================
+    @property
+    def _apiDataSource(self) -> Nmr.DataSource:
+        """ CCPN DataSource matching Spectrum"""
+        return self._wrappedData
+
+    @property
+    def _key(self) -> str:
+        """name, regularised as used for id"""
+        return self._wrappedData.name.translate(Pid.remapSeparators)
+
+    @property
+    def _localCcpnSortKey(self) -> Tuple:
+        """Local sorting key, in context of parent.
+        """
+        return (self._wrappedData.experiment.serial, self._wrappedData.serial)
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: Project) -> list:
+        """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
+        return list(x for y in parent._wrappedData.sortedExperiments() for x in y.sortedDataSources())
+
+    def _notifySpectrumViews(self, action):
+        for sv in self.spectrumViews:
+            sv._finaliseAction(action)
+
+    # Attributes belonging to ExpDimRef and DataDimRef
+
+    def _mainExpDimRefs(self) -> tuple:
+        """Get main API ExpDimRef (serial=1) for each dimension
+        """
+        result = []
+        for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
+            # NB MUST loop over dataDims, in case of projection spectra
+            result.append(dataDim.expDim.findFirstExpDimRef(serial=1))
+        return tuple(result)
+
+    def _setExpDimRefAttribute(self, attributeName: str, value: Sequence, mandatory: bool = True):
+        """Set main ExpDimRef attribute (serial=1) for each dimension"""
+        apiDataSource = self._wrappedData
+        if len(value) == apiDataSource.numDim:
+            for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
+                # NB MUST loop over dataDims, in case of projection spectra
+                expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
+                val = value[ii]
+                if expDimRef is None and val is not None:
+                    raise ValueError("Attempt to set attribute %s in dimension %s to %s - must be None" %
+                                     (attributeName, ii + 1, val))
+                elif val is None and mandatory:
+                    raise ValueError(
+                            "Attempt to set mandatory attribute %s to None in dimension %s: %s" %
+                            (attributeName, ii + 1, val))
+                else:
+                    setattr(expDimRef, attributeName, val)
+
+    #-----------------------------------------------------------------------------------------
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
-    #===========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @logCommand(get='self')
     def newPeakList(self, title: str = None, comment: str = None,
@@ -3057,7 +2966,7 @@ assignmentTolerances
     @logCommand(get='self')
     def newMultipletList(self, title: str = None,
                          symbolColour: str = None, textColour: str = None, lineColour: str = None,
-                         multipletAveraging=None,
+                         multipletAveraging = None,
                          comment: str = None, multiplets: Sequence[Union['Multiplet', str]] = None, **kwds):
         """Create new MultipletList within Spectrum.
 
@@ -3149,87 +3058,342 @@ assignmentTolerances
                                      foldingMode=foldingMode, axisUnit=axisUnit, referencePoint=referencePoint,
                                      referenceValue=referenceValue, **kwds)
 
+    #-----------------------------------------------------------------------------------------
+    # Output, printing, etc
+    #-----------------------------------------------------------------------------------------
+
+    def __str__(self):
+        return '<%s (%s)>' % (self.pid, ','.join(self.axisCodes))
+
+    def _infoString(self, includeDimensions=False):
+        """Return info string about self, optionally including dimensional
+        parameters
+        """
+        string = '================= %s =================\n' % self
+        string += 'path = %s\n' % self.filePath
+        string += 'dataFormat = %s\n' % self.dataFormat
+        string += 'dimensions = %s\n' % self.dimensionCount
+        string += 'sizes = (%s)\n' % ' x '.join([str(d) for d in self.pointCounts])
+        for attr in """
+                scale 
+                noiseLevel 
+                experimentName
+                """.split():
+            value = getattr(self, attr)
+            string += '%s = %s\n' % (attr, value)
+
+        if includeDimensions:
+            string += '\n'
+            for attr in """
+                dimensions
+                axisCodes
+                pointCounts
+                isComplex
+                dimensionTypes
+                isotopeCodes
+                measurementTypes
+                spectralWidths
+                spectralWidthsHz
+                spectrometerFrequencies
+                referencePoints
+                referenceValues
+                axisUnits
+                foldingModes
+                windowFunctions
+                lorentzianBroadenings
+                gaussianBroadenings
+                phases0
+                phases1
+                assignmentTolerances
+                """.split():
+                values = getattr(self, attr)
+                string += '%-25s: %s\n' % (attr,
+                                           ' '.join(['%-20s' % str(v) for v in values])
+                                           )
+        return string
+
+    def printParameters(self, includeDimensions=True):
+        "Print the info string"
+        print(self._infoString(includeDimensions))
+
 
 #=========================================================================================
-# Connections to parents:
+# New and empty spectra
 #=========================================================================================
 
-@newObject(Spectrum)
-def _newSpectrum(self: Project, name: str, serial: int = None) -> Spectrum:
-    """Creation of new Spectrum NOT IMPLEMENTED.
-    Use Project.loadData or Project.createDummySpectrum instead"""
-
-    raise NotImplementedError("Not implemented. Use loadSpectrum instead")
+# Hack; remove the api notifier on create
+# _notifiers = [nf for nf in Project._apiNotifiers if nf[3] == '__init__' and 'cls' in nf[1] and nf[1]['cls'] == Spectrum]
+# if len(_notifiers) == 1:
+#     Project._apiNotifiers.remove(_notifiers[0])
 
 
 @newObject(Spectrum)
-def _createDummySpectrum(self: Project, axisCodes: Sequence[str], name=None,
-                         chemicalShiftList=None, serial: int = None) -> Spectrum:
-    """Make dummy Spectrum from isotopeCodes list - without data and with default parameters.
-
-    See the Spectrum class for details.
-
-    :param self:
-    :param axisCodes:
-    :param name:
-    :param chemicalShiftList:
-    :return: a new Spectrum instance.
+def _newSpectrumFromDataSource(project, dataStore, dataSource, name) -> Spectrum:
+    """Create a new Spectrum instance with name using the data in dataStore and dataSource
+    Returns Spectrum instance or None on error
     """
-    # TODO - change so isotopeCodes can be passed in instead of axisCodes
+    if dataStore is None:
+        raise ValueError('dataStore cannot be None')
 
-    apiShiftList = chemicalShiftList._wrappedData if chemicalShiftList else None
+    if dataSource is None:
+        raise ValueError('dataSource cannot be None')
+    if dataSource.dimensionCount == 0:
+        raise ValueError('dataSource.dimensionCount = 0')
 
-    if name:
-        if Pid.altCharacter in name:
-            raise ValueError("Character %s not allowed in ccpn.Spectrum.name" % Pid.altCharacter)
+    # assure unique name
+    name = Spectrum._uniqueName(project=project, name=name)
 
-    apiSpectrum = self._wrappedData.createDummySpectrum(axisCodes, name=name,
-                                                        shiftList=apiShiftList)
-    result = self._project._data2Obj[apiSpectrum]
-    if result is None:
-        raise RuntimeError('Unable to generate new Spectrum item')
+    # check the dataSources of all spectra of the project for open file pointers to the same file
+    for ds in [sp.dataSource for sp in project.spectra if sp.hasValidPath()]:
+        if ds.path == dataStore.aPath and ds.hasOpenFile():
+            raise RuntimeError('Unable to create new Spectrum; project has existing open dataSource %s' % ds)
 
-    # newly created spectra require a peaklist
-    if not result.peakLists:
-        result.newPeakList()
+    apiProject = project._wrappedData
+    apiExperiment = apiProject.newExperiment(name=name, numDim=dataSource.dimensionCount)
 
-    return result
+    apiDataSource = apiExperiment.newDataSource(name=name,
+                                                dataStore=None,
+                                                numDim=dataSource.dimensionCount,
+                                                dataType='processed'
+                                                )
 
 
-# EJB 20181130: not sure what do with this...
-# EJB 20181210: Moved to Project.loadSpectrum, and _createDummySpectrum
-# def _spectrumMakeFirstPeakList(project: Project, dataSource: Nmr.DataSource):
-#     """Add PeakList if none is present - also IntegralList for 1D. For notifiers."""
-#     if not dataSource.findFirstPeakList(dataType='Peak'):
-#         dataSource.newPeakList()
-#
-#
-# Project._setupApiNotifier(_spectrumMakeFirstPeakList, Nmr.DataSource, 'postInit')
-# del _spectrumMakeFirstPeakList
 
-# Connections to parents:
+    # Intialise the freq/time dimensions; This seems a very complicated datastructure! (GWV)
+    # dataDim classnames are FidDataDim, FreqDataDim, SampledDataDim
+    for n, expDim in enumerate(apiExperiment.sortedExpDims()):
+        expDim.isAcquisition = False  #(dataSource.aquisitionAxisCode == dataSource.axisCodes[n]),
+        _nPoints = dataSource.pointCounts[n]
+        freqDataDim = apiDataSource.newFreqDataDim(dim=n+1, expDim=expDim,
+                                                   numPoints=_nPoints,
+                                                   numPointsOrig=_nPoints,
+                                                   pointOffset=0,
+                                                   isComplex=dataSource.isComplex[n],
+                                                   valuePerPoint=dataSource.spectralWidthsHz[n]/float(_nPoints)
+                                                   )
 
-# EJB 20181128: moved to Project
-# Project.newSpectrum = _newSpectrum
-# del _newSpectrum
-# Project.createDummySpectrum = _createDummySpectrum
-# del _createDummySpectrum
+    # Done with api generation; Create the Spectrum object
+
+    # Agggh, cannot do
+    #   spectrum = Spectrum(self, apiDataSource)
+    # as the object was magically already created
+    # This was done by Project._newApiObject, called from Nmr.DataSource.__init__ through an api notifier.
+    # This notifier is set in the AbstractWrapper class and is part of the machinery generation; i.e.
+    # _linkWrapperClasses (needs overhaul!!)
+
+    spectrum = project._data2Obj.get(apiDataSource)
+    if spectrum is None:
+        raise RuntimeError("something went wrong creating a new Spectrum instance")
+    spectrum._apiExperiment = apiExperiment
+
+    with inactivity():
+        # initialise the dimensional SpectrumReference objects
+        for dim in dataSource.dimensions:
+            n = dim-1
+            spectrum.newSpectrumReference(dimension = dim,
+                                          spectrometerFrequency = dataSource.spectrometerFrequencies[n],
+                                          isotopeCodes=(dataSource.isotopeCodes[n],),
+                                          axisCode=dataSource.axisCodes[n],
+                                          axisUnit='ppm'
+            )
+
+    # Set the references between spectrum and dataStore
+    dataStore.dataFormat = dataSource.dataFormat
+    dataStore.spectrum = spectrum
+    dataStore._saveInternal()
+    spectrum._dataStore = dataStore
+
+    # update dataSource with proper expanded path
+    dataSource.setPath(dataStore.aPath())
+
+    # Update all parameters from the dataSource to the Spectrum instance; retain the dataSource instance
+    dataSource.exportToSpectrum(spectrum, includePath=False)
+    spectrum._dataSource = dataSource
+
+    # Quietly update some essentials
+    with inactivity():
+        # Link to default (i.e. first) chemicalShiftList
+        spectrum.chemicalShiftList = project.chemicalShiftLists[0]
+        # Assure at least one peakList
+        if len(spectrum.peakLists) == 0:
+            spectrum.newPeakList()
+
+    return spectrum
+
+
+def _newEmptySpectrum(project: Project, isotopeCodes:Sequence[str], name: str='empty') -> Spectrum:
+    """Creation of new Empty Spectrum;
+    :return: Spectrum instance or None on error
+    """
+
+    # Local  to prevent circular import
+    from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+
+    if not isIterable(isotopeCodes) or len(isotopeCodes) == 0:
+        raise ValueError('invalid isotopeCodes "%s"' % isotopeCodes)
+
+    dataStore = DataStore()
+
+    # Intialise a dataSource instance
+    dataSource = EmptySpectrumDataSource()
+    if dataSource is None:
+        raise RuntimeError('Error creating empty DataSource')
+    # Fill in some of the parameters
+    dataSource.dimensionCount = len(isotopeCodes)
+    dataSource.isotopeCodes = isotopeCodes
+    dataSource._setSpectralParametersFromIsotopeCodes()
+    dataSource._assureProperDimensionality()
+
+    spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
+    spectrum._updateParameterValues()
+
+    return spectrum
+
+
+def _newSpectrum(project: Project, path: str, name: str) -> (Spectrum, None):
+    """Creation of new Spectrum;
+    :return: Spectrum instance or None on error
+    """
+
+    # Local  to prevent circular import
+    from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
+
+    logger = getLogger()
+
+    dataStore = DataStore.newFromPath(path)
+    if not dataStore.exists():
+        dataStore.errorMessage()
+        return None
+
+    _path = dataStore.aPath()
+
+    # Try to determine data format from the path and intialise a dataSource instance with parsed parameters
+    dataSource = checkPathForSpectrumFormats(path=_path)
+    if dataSource is None:
+        logger.warning('Invalid spectrum path "%s"' % path) # report the argument given
+        return None
+
+    if name is None:
+        name = _path.basename
+
+    spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
+    # Hack to trigger initialisation of contours
+    spectrum.positiveContourCount = 0
+    spectrum.negativeContourCount = 0
+    spectrum._updateParameterValues()
+
+    return spectrum
+
+
+def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=None, dataFormat = 'Hdf5') -> Spectrum:
+    """Extract a region of spectrum, defined by dimensions, position to path defined by dataStore
+    (optionally auto-generated from spectrum.path)
+
+    :param dimensions:  [dim_a, dim_b, ...];  defining dimensions to be extracted (1-based)
+    :param position, spectrum position-vector of length spectrum.dimensionCount (list, tuple; 1-based)
+    """
+    # local import to prevent cycles
+    from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+
+    getLogger().debug('Extracting from %s, dimensions=%r, position=%r, dataStore=%s, dataFormat %r' %
+                      (spectrum, dimensions, position, dataStore, dataFormat))
+
+    if spectrum is None or not isinstance(spectrum, Spectrum):
+        raise ValueError('invalid spectrum argument %r' % spectrum)
+    if spectrum.dataSource is None:
+        raise RuntimeError('No proper (filePath, dataFormat) set for %s' % spectrum)
+
+    for dim in dimensions:
+        if dim < 1 or dim > spectrum.dimensionCount:
+            raise ValueError('invalid dimnsion %r in dimensions argument (%s)' % (dim, dimensions))
+    dimensions = list(dimensions)  # assure a list
+
+    position = spectrum.dataSource.checkForValidPosition(position)
+
+    dimString = '_' + '_'.join(spectrum.getByDimensions('axisCodes', dimensions))
+    if name is None:
+        name = spectrum.name + dimString
+
+    klass = getDataFormats().get(dataFormat)
+    if klass is None:
+        raise ValueError('invalid dataFormat %r' % dataFormat)
+
+    # Do path-related stuff
+    suffix = klass.suffixes[0] if len(klass.suffixes)>0 else '.dat'
+    if dataStore is None:
+        dataStore = DataStore.newFromPath(spectrum.filePath, appendToName=dimString,
+                                          withSuffix=suffix, autoVersioning=True)
+
+    # Create a dataSource object
+    dataSource = klass(spectrum=spectrum)
+
+    disgardedDimensions = list(set(spectrum.dimensions) - set(dimensions))
+    # The dimensional parameters of spectrum were copied on initialisation
+    # remap the N-axes (as defined by the N items in the dimensions argument) onto the first N axes
+    # of the dataSource;
+    dimensionsMap = dict(zip(dimensions+disgardedDimensions, dataSource.dimensions))
+    dataSource._mapDimensionalParameters(dimensionsMap=dimensionsMap)
+    # Now reduce the dimensionality to the length of dimensions; i.e. the dimensionality of the
+    # new spectrum
+    dataSource.setDimensionCount(len(dimensions))
+
+    # create the new spectrum from the dataSource
+    newSpectrum = _newSpectrumFromDataSource(project=spectrum.project, dataStore=dataStore,
+                                             dataSource=dataSource, name=name)
+    # copy the data
+    indexMap = dict((k-1,v-1) for k,v in dimensionsMap.items())  # source -> destination
+    inverseIndexMap = dict((v-1, k-1) for k,v, in dimensionsMap.items())  # destination -> source
+
+    readSliceDim = dimensions[0]  # first retained dimension from the original data
+    writeSliceDim = 1             # which was mapped to the first dimension of the new data
+
+    sliceTuples = [(p,p) for p in position]
+    # assure full range for all dimensions, other than readSliceDim
+    for dim in dimensions[1:]:
+        sliceTuples[dim-1] = (1, spectrum.pointCounts[dim-1])
+
+    with spectrum.dataSource.openExistingFile() as input:
+        with newSpectrum.dataSource.openNewFile() as output:
+            # loop over all requested slices
+            for position, aliased in input._selectedPointsIterator(sliceTuples=sliceTuples,
+                                                                   excludeDimensions=[readSliceDim]):
+                data = input.getSliceData(position, readSliceDim)
+
+                # map the input position to the output position and write the data
+                outPosition = [position[inverseIndexMap[p]] for p in output.axes]
+                # print('>>>', position, outPosition)
+                output.setSliceData(data, outPosition, writeSliceDim)
+    # copy/set some more parameters (e.g. noiseLevel)
+    spectrum._copyNonDimensionalParameters(newSpectrum)
+    newSpectrum._updateParameterValues()
+
+    return newSpectrum
+
 
 # Additional Notifiers:
 Project._apiNotifiers.extend(
         (
-            ('_finaliseApiRename', {}, Nmr.DataSource._metaclass.qualifiedName(), 'setName'),
+# GWV: not needed?
+            # ('_finaliseApiRename', {}, Nmr.DataSource._metaclass.qualifiedName(), 'setName'),
+            #
             ('_notifyRelatedApiObject', {'pathToObject': 'dataSources', 'action': 'change'},
-             Nmr.Experiment._metaclass.qualifiedName(), ''),
+                                         Nmr.Experiment._metaclass.qualifiedName(), ''),
+
             ('_notifyRelatedApiObject', {'pathToObject': 'dataSource', 'action': 'change'},
-             Nmr.AbstractDataDim._metaclass.qualifiedName(), ''),
+                                         Nmr.AbstractDataDim._metaclass.qualifiedName(), ''),
+
             ('_notifyRelatedApiObject', {'pathToObject': 'dataDim.dataSource', 'action': 'change'},
-             Nmr.DataDimRef._metaclass.qualifiedName(), ''),
+                                         Nmr.DataDimRef._metaclass.qualifiedName(), ''),
+
             ('_notifyRelatedApiObject', {'pathToObject': 'experiment.dataSources', 'action': 'change'},
-             Nmr.ExpDim._metaclass.qualifiedName(), ''),
+                                         Nmr.ExpDim._metaclass.qualifiedName(), ''),
+
             ('_notifyRelatedApiObject', {'pathToObject': 'expDim.experiment.dataSources', 'action': 'change'},
-             Nmr.ExpDimRef._metaclass.qualifiedName(), ''),
+                                         Nmr.ExpDimRef._metaclass.qualifiedName(), ''),
+
             ('_notifyRelatedApiObject', {'pathToObject': 'nmrDataSources', 'action': 'change'},
-             DataLocation.AbstractDataStore._metaclass.qualifiedName(), ''),
-            )
+                                         DataLocation.AbstractDataStore._metaclass.qualifiedName(), ''),
+
         )
+)
+

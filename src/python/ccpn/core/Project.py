@@ -34,8 +34,7 @@ from typing import Sequence, Tuple, Union, Optional
 from collections import OrderedDict
 from time import time
 from datetime import datetime
-import traceback
-from ccpn.util.Common import isValidPath, isValidFileNameLength
+# from ccpn.util.Common import isValidPath, isValidFileNameLength
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
@@ -54,7 +53,8 @@ from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 # from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
+                                          notificationEchoBlocking
 from ccpn.util.Logging import getLogger
 
 
@@ -105,11 +105,11 @@ class Project(AbstractWrapperObject):
     _className2Class = {}
 
     # List of CCPN pre-registered api notifiers
-    # Format is (wrapperFuncName, parameterDict, apiClassName, apiFuncName
-    # The function self.wrapperFuncName(**parameterDict) will be registered
-    # in the CCPN api notifier system
-    # api notifiers are set automatically,
-    # and are cleared by self._clearAllApiNotifiers and by self.delete()
+    # Format is (wrapperFuncName, parameterDict, apiClassName, apiFuncName)
+    #
+    # The function self.wrapperFuncName(**parameterDict) will be registered in the CCPN api notifier system
+    # api notifiers are set automatically, and are cleared by self._clearAllApiNotifiers and by self.delete()
+    #
     # RESTRICTED. Direct access in core classes ONLY
     _apiNotifiers = []
 
@@ -125,6 +125,49 @@ class Project(AbstractWrapperObject):
 
     # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
     _isNew = None
+
+    #-----------------------------------------------------------------------------------------
+    # Attributes of the data structure (incomplete)
+    #-----------------------------------------------------------------------------------------
+
+    @property
+    def spectra(self):
+        "STUB: hot-fixed later"
+        return ()
+
+    @property
+    def peakLists(self):
+        "STUB: hot-fixed later"
+        return ()
+
+    @property
+    def multipletLists(self):
+        "STUB: hot-fixed later"
+        return ()
+
+    @property
+    def integralLists(self):
+        "STUB: hot-fixed later"
+        return ()
+
+    @property
+    def spectrumViews(self):
+        "STUB: hot-fixed later"
+        return ()
+
+    @property
+    def chemicalShiftLists(self):
+        "STUB: hot-fixed later"
+        return None
+
+    # Inherited from AbstractWrapperObject
+
+    # @property
+    # def project(self) -> 'Project':
+    #     """The Project (root)containing the object."""
+    #     return self._project
+
+    #-----------------------------------------------------------------------------------------
 
     # Implementation methods
     def __init__(self, wrappedData: ApiNmrProject):
@@ -167,6 +210,14 @@ class Project(AbstractWrapperObject):
 
         # Notification blanking level - to allow for nested notification disabling
         self._notificationBlanking = 0
+
+        # api 'change' notification blanking level - to allow for api 'change' call to be
+        # disabled in the _modifiedApiObject method.
+        # To be used with the apiNotificationBlanking contact manager; e.g.
+        # with apiNotificationBlanking():
+        #   do something
+        #
+        self._apiNotificationBlanking = 0
 
         # Wrapper level notifier tracking.  APPLICATION ONLY
         # {(className,action):OrderedDict(notifier:onceOnly)}
@@ -222,9 +273,19 @@ class Project(AbstractWrapperObject):
         # initialise, creating the wrapped objects
         self._initializeAll()
 
-        # 20190520:ED routines that use core objects, not sure whether the correct place
-        self._setContourColours()
-        self._setNoiseLevels()
+        self._resetUndo()
+
+        with undoStackBlocking(self.application):
+            with notificationBlanking(self.application):
+                with notificationEchoBlocking(self.application):
+                    # 20190520:ED routines that use core objects, not sure whether the correct place
+                    # GWV: it is not; the Spectrum instances need to assure they are ok after
+                    # (re-)initialisation
+                    # self._setContourColours()
+                    # self._setNoiseLevels()
+
+                    if len(self.chemicalShiftLists) == 0:
+                        self.newChemicalShiftList(name='default')
 
     def _close(self):
         self.close()
@@ -801,8 +862,9 @@ class Project(AbstractWrapperObject):
     def _modifiedApiObject(self, wrappedData):
         """ call object-has-changed notifiers
         """
-        obj = self._data2Obj[wrappedData]
-        obj._finaliseAction('change')
+        if self._apiNotificationBlanking == 0:
+            obj = self._data2Obj[wrappedData]
+            obj._finaliseAction('change')
 
     def _finaliseApiDelete(self, wrappedData):
         """Clean up after object deletion
@@ -862,32 +924,34 @@ class Project(AbstractWrapperObject):
         pathToObject is a navigation path (may contain dots) and must yield an API object
         or an iterable of API objects"""
 
-        getDataObj = self._data2Obj.get
+        if self._apiNotificationBlanking == 0:
+            getDataObj = self._data2Obj.get
 
-        target = operator.attrgetter(pathToObject)(wrappedData)
+            target = operator.attrgetter(pathToObject)(wrappedData)
 
-        # GWV: a bit too much for now; should be the highest debug level only
-        #self._project._logger.debug('%s: %s.%s = %s'
-        #                            % (action, wrappedData, pathToObject, target))
+            # GWV: a bit too much for now; should be the highest debug level only
+            #self._project._logger.debug('%s: %s.%s = %s'
+            #                            % (action, wrappedData, pathToObject, target))
 
-        if not target:
-            pass
-        elif hasattr(target, '_metaclass'):
-            if not target.isDeleted:
-                # Hack. This is an API object - only if exists
-                getDataObj(target)._finaliseAction(action)
-        else:
-            # This must be an iterable
-            for obj in target:
-                if not obj.isDeleted:
-                    getDataObj(obj)._finaliseAction(action)
+            if not target:
+                pass
+            elif hasattr(target, '_metaclass'):
+                if not target.isDeleted:
+                    # Hack. This is an API object - only if exists
+                    getDataObj(target)._finaliseAction(action)
+            else:
+                # This must be an iterable
+                for obj in target:
+                    if not obj.isDeleted:
+                        getDataObj(obj)._finaliseAction(action)
 
     def _finaliseApiRename(self, wrappedData):
         """Reset Finalise rename - called from APi object (for API notifiers)
         """
 
-        obj = self._data2Obj.get(wrappedData)
-        obj._finaliseAction('rename')
+        if self._apiNotificationBlanking == 0:
+            obj = self._data2Obj.get(wrappedData)
+            obj._finaliseAction('rename')
 
     def _modifiedLink(self, dummy, classNames: typing.Tuple[str, str]):
         """ call link-has-changed notifiers
@@ -932,169 +996,170 @@ class Project(AbstractWrapperObject):
             # reset the noise levels
             self._setNoiseLevels(alwaysSetNoise=True)
 
-    def _validateDataUrlAndFilePaths(self, newDataUrlPath=None):
-        """Perform validate operation for setting dataUrl from preferences - to be called after loading
-        """
 
-        # read the dataPath from the preferences of defined
-        project = self
-        general = self.application.preferences.general if self.application.preferences and self.application.preferences.general else None
-        autoSet = general.autoSetDataPath if general.autoSetDataPath else False
-
-        getLogger().info('Validating dataUrls and filePaths')
-
-        newDataUrlPath = newDataUrlPath if newDataUrlPath else general.dataPath \
-            if general and general.dataPath else general.userWorkingPath \
-            if general.userWorkingPath else os.path.expanduser('~')
-        newDataUrlPath = os.path.expanduser(newDataUrlPath)
-
-        def _findDataUrl(project, storeType):
-            """find the dataStores of the given type
-            """
-            dataUrl = project._apiNmrProject.root.findFirstDataLocationStore(
-                    name='standard').findFirstDataUrl(name=storeType)
-            if dataUrl:
-                return (dataUrl,)
-            else:
-                return ()
-
-        # get the dataPaths from the project
-        dataUrlData = {}
-        # dataUrlData['remoteData'] = _findDataUrl(project, 'remoteData')
-
-        # # skip setting the path if autoSetDataPath is false
-        # if autoSet:
-        #
-        #     # update dataUrl here to the value in preferences
-        #     if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
-        #         # must only be one dataUrl
-        #         primaryDataUrl = dataUrlData['remoteData'][0]
-        #         primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
-
-        # reset the dataStores
-        dataUrlData['remoteData'] = _findDataUrl(project, 'remoteData')
-        dataUrlData['insideData'] = _findDataUrl(project, 'insideData')
-        dataUrlData['alongsideData'] = _findDataUrl(project, 'alongsideData')
-        dataUrlData['otherData'] = [dataUrl for store in project._wrappedData.memopsRoot.sortedDataLocationStores()
-                                    for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
-
-        # standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
-        # stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
-        # urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
-
-        self._validateCleanUrls()
-
-        delList = set()
-        if autoSet:
-            from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl, repointToDataUrl
-
-            # NOTE:ED - must remove all other dataUrls first, otherwise the dataUrl rename won't work
-
-            # force the change of the other dataUrls
-            for spec in self.project.spectra:
-                apiDataStore = spec._wrappedData.dataStore
-                if apiDataStore is None:
-                    getLogger().warning("Spectrum is not stored, cannot change file path")
-
-                else:
-                    # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-                    dataUrlName = apiDataStore.dataUrl.name
-                    # print('>>>    dataUrlName', dataUrlName)
-                    if dataUrlName not in ('insideData', 'alongsideData', 'remoteData'):
-                        # move all other objects that are not in the correct remoteData
-                        # to the correct remoteData created above
-
-                        primaryDataUrl = dataUrlData['remoteData'][0]
-                        delList.add(apiDataStore.dataUrl)
-                        repointToDataUrl(apiDataStore, primaryDataUrl)
-
-            # force the change of the dataUrl
-            for spec in self.project.spectra:
-                apiDataStore = spec._wrappedData.dataStore
-                if apiDataStore is None:
-                    getLogger().warning("Spectrum is not stored, cannot change file path")
-
-                else:
-                    # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-                    dataUrlName = apiDataStore.dataUrl.name
-                    # print('>>>    dataUrlName', dataUrlName, newDataUrlPath)
-                    if dataUrlName == 'remoteData':
-                        # if dataUrlName not in ('insideData', 'alongsideData'):
-
-                        # force existing remoteData to the new location
-                        # a new remoteData in the correct place
-
-                        getLogger().info('>>>  validate autoset: %s' % str(apiDataStore))
-                        # delList.add(apiDataStore.dataUrl.url)
-                        apiDataStore.dataUrl.url = apiDataStore.dataUrl.url.clone(path=newDataUrlPath)
-                        # forceChangeDataStoreUrl(apiDataStore, newDataUrlPath)
-
-        for delObj in delList:
-            # print('>>>    delete', delObj)
-            delObj.delete()
-
-        self._validateCleanUrls()
-
-        # # skip setting the path if autoSetDataPath is false
-        # if autoSet:
-        #
-        #     # update dataUrl here to the value in preferences
-        #     if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
-        #         # must only be one dataUrl
-        #         getLogger().info('>>>repointing dataUrl to %s...' % newDataUrlPath)
-        #
-        #         primaryDataUrl = dataUrlData['remoteData'][0]
-        #         primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
-
-    def _validateCleanUrls(self):
-
-        # update the pointers to the urls and delete the spares
-        standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
-
-        spectraStores = [spec._wrappedData.dataStore for spec in self.project.spectra]
-        badUrls = [url for store in standardStore.sortedDataUrls() for url in store.sortedDataStores() if url not in spectraStores]
-        otherUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
-                     for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
-
-        allRemoteUrls = [url for url in standardStore.sortedDataUrls() if url.name == 'remoteData' if url.dataStores]
-        remoteUrls = [url for url in standardStore.sortedDataUrls() if url.name == 'remoteData' if not url.dataStores]
-
-        for bb in badUrls:
-            getLogger().debug2('>>>validate cleanup urls: %s' % str(bb))
-            bb.delete()
-
-        for url in otherUrls:
-            if not url.dataStores:
-                getLogger().debug2('>>>validate cleanup stores: %s' % str(url))
-                url.delete()
-
-        for bb in (allRemoteUrls + remoteUrls)[1:]:
-            getLogger().debug2('>>>validate cleanup remoteUrls: %s' % str(bb))
-            bb.delete()
-
-        # from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl
-        #
-        # for spec in self.project.spectra:
-        #     apiDataStore = spec._wrappedData.dataStore
-        #     if apiDataStore is None:
-        #         raise ValueError("Spectrum is not stored, cannot change file path")
-        #
-        #     else:
-        #         # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-        #         dataUrlName = apiDataStore.dataUrl.name
-        #         if dataUrlName == 'remoteData':
-        #
-        #             forceChangeDataStoreUrl(apiDataStore, '/Users/ejb66/Desktop/')
-
-        # # skip setting the path if autoSetDataPath is false
-        # if not autoSet:
-        #     return
-        #
-        # # update dataUrl here to the value in preferences
-        # if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
-        #     # must only be one dataUrl
-        #     primaryDataUrl = dataUrlData['remoteData'][0]
-        #     primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
+    # def _validateDataUrlAndFilePaths(self, newDataUrlPath=None):
+    #     """Perform validate operation for setting dataUrl from preferences - to be called after loading
+    #     """
+    #
+    #     # read the dataPath from the preferences of defined
+    #     project = self
+    #     general = self.application.preferences.general if self.application.preferences and self.application.preferences.general else None
+    #     autoSet = general.autoSetDataPath if general.autoSetDataPath else False
+    #
+    #     getLogger().info('Validating dataUrls and filePaths')
+    #
+    #     newDataUrlPath = newDataUrlPath if newDataUrlPath else general.dataPath \
+    #         if general and general.dataPath else general.userWorkingPath \
+    #         if general.userWorkingPath else os.path.expanduser('~')
+    #     newDataUrlPath = os.path.expanduser(newDataUrlPath)
+    #
+    #     def _findDataUrl(project, storeType):
+    #         """find the dataStores of the given type
+    #         """
+    #         dataUrl = project._apiNmrProject.root.findFirstDataLocationStore(
+    #                 name='standard').findFirstDataUrl(name=storeType)
+    #         if dataUrl:
+    #             return (dataUrl,)
+    #         else:
+    #             return ()
+    #
+    #     # get the dataPaths from the project
+    #     dataUrlData = {}
+    #     # dataUrlData['remoteData'] = _findDataUrl(project, 'remoteData')
+    #
+    #     # # skip setting the path if autoSetDataPath is false
+    #     # if autoSet:
+    #     #
+    #     #     # update dataUrl here to the value in preferences
+    #     #     if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
+    #     #         # must only be one dataUrl
+    #     #         primaryDataUrl = dataUrlData['remoteData'][0]
+    #     #         primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
+    #
+    #     # reset the dataStores
+    #     dataUrlData['remoteData'] = _findDataUrl(project, 'remoteData')
+    #     dataUrlData['insideData'] = _findDataUrl(project, 'insideData')
+    #     dataUrlData['alongsideData'] = _findDataUrl(project, 'alongsideData')
+    #     dataUrlData['otherData'] = [dataUrl for store in project._wrappedData.memopsRoot.sortedDataLocationStores()
+    #                                 for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
+    #
+    #     # standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
+    #     # stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
+    #     # urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
+    #
+    #     self._validateCleanUrls()
+    #
+    #     delList = set()
+    #     if autoSet:
+    #         from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl, repointToDataUrl
+    #
+    #         # NOTE:ED - must remove all other dataUrls first, otherwise the dataUrl rename won't work
+    #
+    #         # force the change of the other dataUrls
+    #         for spec in self.project.spectra:
+    #             apiDataStore = spec._wrappedData.dataStore
+    #             if apiDataStore is None:
+    #                 getLogger().warning("Spectrum is not stored, cannot change file path")
+    #
+    #             else:
+    #                 # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
+    #                 dataUrlName = apiDataStore.dataUrl.name
+    #                 # print('>>>    dataUrlName', dataUrlName)
+    #                 if dataUrlName not in ('insideData', 'alongsideData', 'remoteData'):
+    #                     # move all other objects that are not in the correct remoteData
+    #                     # to the correct remoteData created above
+    #
+    #                     primaryDataUrl = dataUrlData['remoteData'][0]
+    #                     delList.add(apiDataStore.dataUrl)
+    #                     repointToDataUrl(apiDataStore, primaryDataUrl)
+    #
+    #         # force the change of the dataUrl
+    #         for spec in self.project.spectra:
+    #             apiDataStore = spec._wrappedData.dataStore
+    #             if apiDataStore is None:
+    #                 getLogger().warning("Spectrum is not stored, cannot change file path")
+    #
+    #             else:
+    #                 # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
+    #                 dataUrlName = apiDataStore.dataUrl.name
+    #                 # print('>>>    dataUrlName', dataUrlName, newDataUrlPath)
+    #                 if dataUrlName == 'remoteData':
+    #                     # if dataUrlName not in ('insideData', 'alongsideData'):
+    #
+    #                     # force existing remoteData to the new location
+    #                     # a new remoteData in the correct place
+    #
+    #                     getLogger().info('>>>  validate autoset: %s' % str(apiDataStore))
+    #                     # delList.add(apiDataStore.dataUrl.url)
+    #                     apiDataStore.dataUrl.url = apiDataStore.dataUrl.url.clone(path=newDataUrlPath)
+    #                     # forceChangeDataStoreUrl(apiDataStore, newDataUrlPath)
+    #
+    #     for delObj in delList:
+    #         # print('>>>    delete', delObj)
+    #         delObj.delete()
+    #
+    #     self._validateCleanUrls()
+    #
+    #     # # skip setting the path if autoSetDataPath is false
+    #     # if autoSet:
+    #     #
+    #     #     # update dataUrl here to the value in preferences
+    #     #     if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
+    #     #         # must only be one dataUrl
+    #     #         getLogger().info('>>>repointing dataUrl to %s...' % newDataUrlPath)
+    #     #
+    #     #         primaryDataUrl = dataUrlData['remoteData'][0]
+    #     #         primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
+    #
+    # def _validateCleanUrls(self):
+    #
+    #     # update the pointers to the urls and delete the spares
+    #     standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
+    #
+    #     spectraStores = [spec._wrappedData.dataStore for spec in self.project.spectra]
+    #     badUrls = [url for store in standardStore.sortedDataUrls() for url in store.sortedDataStores() if url not in spectraStores]
+    #     otherUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
+    #                  for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
+    #
+    #     allRemoteUrls = [url for url in standardStore.sortedDataUrls() if url.name == 'remoteData' if url.dataStores]
+    #     remoteUrls = [url for url in standardStore.sortedDataUrls() if url.name == 'remoteData' if not url.dataStores]
+    #
+    #     for bb in badUrls:
+    #         getLogger().debug2('>>>validate cleanup urls: %s' % str(bb))
+    #         bb.delete()
+    #
+    #     for url in otherUrls:
+    #         if not url.dataStores:
+    #             getLogger().debug2('>>>validate cleanup stores: %s' % str(url))
+    #             url.delete()
+    #
+    #     for bb in (allRemoteUrls + remoteUrls)[1:]:
+    #         getLogger().debug2('>>>validate cleanup remoteUrls: %s' % str(bb))
+    #         bb.delete()
+    #
+    #     # from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl
+    #     #
+    #     # for spec in self.project.spectra:
+    #     #     apiDataStore = spec._wrappedData.dataStore
+    #     #     if apiDataStore is None:
+    #     #         raise ValueError("Spectrum is not stored, cannot change file path")
+    #     #
+    #     #     else:
+    #     #         # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
+    #     #         dataUrlName = apiDataStore.dataUrl.name
+    #     #         if dataUrlName == 'remoteData':
+    #     #
+    #     #             forceChangeDataStoreUrl(apiDataStore, '/Users/ejb66/Desktop/')
+    #
+    #     # # skip setting the path if autoSetDataPath is false
+    #     # if not autoSet:
+    #     #     return
+    #     #
+    #     # # update dataUrl here to the value in preferences
+    #     # if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
+    #     #     # must only be one dataUrl
+    #     #     primaryDataUrl = dataUrlData['remoteData'][0]
+    #     #     primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
 
     @logCommand('project.')
     def exportNef(self, path: str = None,
@@ -1214,6 +1279,7 @@ class Project(AbstractWrapperObject):
 
         return validList
 
+    @logCommand('project.')
     def loadData(self, path: str) -> typing.Optional[typing.List]:
         """
         Load data from path, determining type first.
@@ -1249,77 +1315,98 @@ class Project(AbstractWrapperObject):
         # scan the folder for valid data
         # validList = self.recurseAnalyseUrl(path)
 
-        dataType, subType, usePath = ioFormats.analyseUrl(path)
+        # GWV 30/11/2020
+        # First usage of new SpectrumdataSource routines
 
-        #TODO:RASMUS: Replace prints by logger calls
-        #TODO:RASMUS: Fix all return types; define properly first
-        if dataType is None:
-            # print("Skipping: file data type not recognised for %s" % usePath)
-            getLogger().warning("Skipping: file data type not recognised for %s" % usePath)
-            # raise ValueError("Skipping: file data type not recognised for %s" % usePath)
-            return None
+        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
+        from ccpn.core.lib.DataStore import DataStore
 
-        elif dataType == 'Dirs':
-            # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
-            paths = usePath
-            #TODO:RASMUS: Undefined return type
-            _loadedData = []
-            for path in paths:
-                _loadedData += self.loadData(path)
-            return _loadedData
+        getLogger().debug('Project.loadData: loading "%s"' % path)
 
-        elif not os.path.exists(usePath):
-            # print("Skipping: no file found at %s" % usePath)
-            getLogger().warning("Skipping: no file found at %s" % usePath)
-            # raise ValueError("Skipping: no file found at %s" % usePath)
-            return []
+        # Expand and check any redirections
+        dataStore = DataStore.newFromPath(path)
+        if not dataStore.exists():
+            raise FileNotFoundError('Path "%s" not found' % path)
 
-        elif dataType == 'Text':
-            # Special case - you return the text instead of a list of Pids
-            # GWV: Can't do this!! -> have to return a list of tuples: [(dataType, pid or data)]
-            # need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!
-            #TODO:RASMUS: return type is not a list
+        # check for a spectrum
+        if checkPathForSpectrumFormats( dataStore.aPath().asString() ) is not None:
 
-            return open(usePath).read()
-
-        elif dataType == 'Macro' and subType == ioFormats.PYTHON:
-            # GWV: Can't do this: have to call the routine with a flag: autoExecute=True
-            # with suspendSideBarNotifications(self, 'runMacro', usePath, quiet=False):
-            self._appBase.runMacro(usePath)
-
-        elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
-            # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-            projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
-            project = self.loadProject(projectPath, ioFormats.CCPN)
-            #TODO:RASMUS: use python tmpdir or V3 class
-            # NBNB _unpackCcpnTarfile *does* use the Python tempfile module
-            project._wrappedData.root._temporaryDirectory = temporaryDirectory
-            return [project]
+            newSpectrum  = self.newSpectrum(path=path)
+            return [newSpectrum]
 
         else:
-            # No idea what is going on here
-            #TODO: use a dictionary to define
-            funcname = '_load' + dataType
-            if funcname == '_loadProject':
-                # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-                thisProj = [self.loadProject(usePath, subType)]
-                return thisProj
 
-            elif funcname == '_loadSpectrum':
-                # NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore
-                # (NB referred to elsewhere
-                # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-                with undoBlock():
-                    thisSpec = self.loadSpectrum(usePath, subType)
-                return thisSpec
+            dataType, subType, usePath = ioFormats.analyseUrl(path)
 
-            elif hasattr(self, funcname):
-                with undoBlock():
-                    pids = getattr(self, funcname)(usePath, subType)
-                return pids
+            #TODO:RASMUS: Replace prints by logger calls
+            #TODO:RASMUS: Fix all return types; define properly first
+            if dataType is None:
+                # print("Skipping: file data type not recognised for %s" % usePath)
+                getLogger().warning("Skipping: file data type not recognised for %s" % usePath)
+                # raise ValueError("Skipping: file data type not recognised for %s" % usePath)
+                return None
+
+            elif dataType == 'Dirs':
+                # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
+                paths = usePath
+                #TODO:RASMUS: Undefined return type
+                _loadedData = []
+                for path in paths:
+                    _loadedData += self.loadData(path)
+                return _loadedData
+
+            elif not os.path.exists(usePath):
+                # print("Skipping: no file found at %s" % usePath)
+                getLogger().warning("Skipping: no file found at %s" % usePath)
+                # raise ValueError("Skipping: no file found at %s" % usePath)
+                return []
+
+            elif dataType == 'Text':
+                # Special case - you return the text instead of a list of Pids
+                # GWV: Can't do this!! -> have to return a list of tuples: [(dataType, pid or data)]
+                # need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!
+                #TODO:RASMUS: return type is not a list
+
+                return open(usePath).read()
+
+            elif dataType == 'Macro' and subType == ioFormats.PYTHON:
+                # GWV: Can't do this: have to call the routine with a flag: autoExecute=True
+                # with suspendSideBarNotifications(self, 'runMacro', usePath, quiet=False):
+                self._appBase.runMacro(usePath)
+
+            elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
+                # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
+                projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
+                project = self.loadProject(projectPath, ioFormats.CCPN)
+                #TODO:RASMUS: use python tmpdir or V3 class
+                # NBNB _unpackCcpnTarfile *does* use the Python tempfile module
+                project._wrappedData.root._temporaryDirectory = temporaryDirectory
+                return [project]
+
             else:
-                # print("Skipping: project has no function %s" % funcname)
-                getLogger().warning("Skipping: project has no function %s" % funcname)
+                # No idea what is going on here
+                #TODO: use a dictionary to define
+                funcname = '_load' + dataType
+                if funcname == '_loadProject':
+                    # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
+                    thisProj = [self.loadProject(usePath, subType)]
+                    return thisProj
+
+                # elif funcname == '_loadSpectrum':
+                #     # NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore
+                #     # (NB referred to elsewhere
+                #     # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
+                #     with undoBlock():
+                #         thisSpec = self.loadSpectrum(usePath, subType)
+                #     return thisSpec
+
+                elif hasattr(self, funcname):
+                    with undoBlock():
+                        pids = getattr(self, funcname)(usePath, subType)
+                    return pids
+                else:
+                    # print("Skipping: project has no function %s" % funcname)
+                    getLogger().warning("Skipping: project has no function %s" % funcname)
 
         return []
 
@@ -1418,56 +1505,50 @@ class Project(AbstractWrapperObject):
         else:
             raise ValueError("Project file type %s is not recognised" % subType)
 
-    @logCommand('project')
-    def loadSpectrum(self, path: str, subType: str, name=None):
-        """Load spectrum defined by path into application
-        """
-        return self._loadSpectrum(path, subType, name)
+    # @logCommand('project')
+    # def loadSpectrum(self, path: str, subType: str, name=None) -> list:
+    #     """Load spectrum defined by path into application
+    #     """
+    #     from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
+    #
+    #     # #TODO:RASMUS FIXME check for rename
+    #
+    #     try:
+    #         apiDataSource = self._wrappedData.loadDataSource(
+    #                         filePath=path, dataFileFormat=subType, name=name
+    #         )
+    #     except Exception as es:
+    #         getLogger().warning(es)
+    #         raise es
+    #
+    #     if apiDataSource is None:
+    #         return []
+    #     else:
+    #         spectrum = self._data2Obj[apiDataSource]
+    #         spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
+    #
+    #         # estimate new base contour levels
+    #         if self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:
+    #             getLogger().info("estimating noise level for spectrum %s" % str(spectrum.pid))
+    #
+    #             setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
+    #                                       setPositiveContours=True, setNegativeContours=True,
+    #                                       useSameMultiplier=True)
+    #
+    #         # set the positive/negative/slice colours
+    #         from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
+    #
+    #         (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+    #         spectrum.sliceColour = spectrum.positiveContourColour
+    #
+    #         # set the initial axis ordering
+    #         spectrum.getDefaultOrdering(None)
+    #
+    #         # if there are no peakLists then create a new one - taken from Spectrum _spectrumMakeFirstPeakList notifier
+    #         if not spectrum.peakLists:
+    #             spectrum.newPeakList()
 
-    def _loadSpectrum(self, path, subType, name=None) -> list:
-        from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
-
-        # #TODO:RASMUS FIXME check for rename
-
-        try:
-            apiDataSource = self._wrappedData.loadDataSource(
-                    filePath=str(path), dataFileFormat=subType, name=name
-                    )
-        except Exception as es:
-            getLogger().warning(str(es))
-            traceback.print_exc()
-            # raise es # why do we need this? This can be called in a loop, keep the program rolling!
-            return []
-
-        if apiDataSource is None:
-            return []
-        else:
-            spectrum = self._data2Obj[apiDataSource]
-            spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
-
-            # estimate new base contour levels
-            # if self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:
-            if not spectrum.noiseLevel:
-                getLogger().info("estimating noise level for spectrum %s" % str(spectrum.pid))
-
-                setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-                                          setPositiveContours=True, setNegativeContours=True,
-                                          useSameMultiplier=True)
-
-            # set the positive/negative/slice colours
-            from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
-
-            (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-            spectrum.sliceColour = spectrum.positiveContourColour
-
-            # set the initial axis ordering
-            spectrum.getDefaultOrdering(None)
-
-            # if there are no peakLists then create a new one - taken from Spectrum _spectrumMakeFirstPeakList notifier
-            if not spectrum.peakLists:
-                spectrum.newPeakList()
-
-            return [spectrum]
+    #         return [spectrum]
 
     def _loadLayout(self, path: str, subType: str):
         # this is a GUI only function call. Please move to the appropriate location on 3.1
@@ -1545,34 +1626,33 @@ class Project(AbstractWrapperObject):
         #
         return result
 
-    def _setContourColours(self):
-        """Set new contour colours for spectra that have not been defined
-        """
-        # 20190520:ED new code to set colours and update contour levels
-        from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
-
-        for spectrum in self.spectra:
-            if not spectrum.positiveContourColour or not spectrum.negativeContourColour:
-                # set contour colours for every spectrum
-                (spectrum.positiveContourColour,
-                 spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-            if not spectrum.sliceColour:
-                spectrum.sliceColour = spectrum.positiveContourColour
-
-    def _setNoiseLevels(self, alwaysSetNoise=False):
-        """Set noise levels for spectra that have not been defined
-        """
-        # 20190520:ED new code to set colours and update contour levels
-        from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
-
-        for spectrum in self.spectra:
-            if not spectrum.noiseLevel or alwaysSetNoise:
-                try:
-                    setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-                                              setPositiveContours=True, setNegativeContours=True,
-                                              useSameMultiplier=True)
-                except Exception as es:
-                    getLogger().warning('Cannot set noise levels for spectrum {}'.format(spectrum.pid))
+    # GWV: This is now handled in Spectrum_restoreObject
+    #
+    # def _setContourColours(self):
+    #     """Set new contour colours for spectra that have not been defined
+    #     """
+    #     # 20190520:ED new code to set colours and update contour levels
+    #     from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
+    #
+    #     for spectrum in self.spectra:
+    #         if not spectrum.positiveContourColour or not spectrum.negativeContourColour:
+    #             # set contour colours for every spectrum
+    #             (spectrum.positiveContourColour,
+    #              spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+    #         if not spectrum.sliceColour:
+    #             spectrum.sliceColour = spectrum.positiveContourColour
+    #
+    # def _setNoiseLevels(self):
+    #     """Set noise levels for spectra that have not been defined
+    #     """
+    #     # 20190520:ED new code to set colours and update contour levels
+    #     from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
+    #
+    #     for spectrum in self.spectra:
+    #         if not spectrum.noiseLevel:
+    #             setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
+    #                                       setPositiveContours=True, setNegativeContours=True,
+    #                                       useSameMultiplier=True)
 
     def getCcpCodeData(self, ccpCode, molType=None, atomType=None):
         """Get the CcpCode for molType/AtomType
@@ -1648,17 +1728,14 @@ class Project(AbstractWrapperObject):
     #     pass
 
     @logCommand('project.')
-    def newSpectrum(self, name: str):
-        """Creation of new Spectrum NOT IMPLEMENTED.
-        Use Project.loadData or Project.createDummySpectrum instead.
+    def newSpectrum(self, path:str, name: str = None):
+        """Creation of new Spectrum defined by path; optionally set name.
         """
         from ccpn.core.Spectrum import _newSpectrum
-
-        return _newSpectrum(self, name=name)
+        return _newSpectrum(self, path=path, name=name)
 
     @logCommand('project.')
-    def createDummySpectrum(self, axisCodes: Sequence[str], name=None,
-                            chemicalShiftList=None):
+    def createDummySpectrum(self, axisCodes: Sequence[str], name=None, chemicalShiftList=None):
         """
         Make dummy spectrum from isotopeCodes list - without data and with default parameters.
 
@@ -1667,11 +1744,19 @@ class Project(AbstractWrapperObject):
         :param chemicalShiftList:
         :return: a new Spectrum instance.
         """
+        raise NotImplementedError('Use Project.newEmptySpectrum')
 
-        from ccpn.core.Spectrum import _createDummySpectrum
+    @logCommand('project.')
+    def newEmptySpectrum(self, isotopeCodes: Sequence[str], name='empty'):
+        """
+        Make new Empty spectrum from isotopeCodes list - without data and with default parameters.
 
-        return _createDummySpectrum(self, axisCodes=axisCodes, name=name,
-                                    chemicalShiftList=chemicalShiftList)
+        :param isotopeCodes:
+        :param name:
+        :return: a new Spectrum instance.
+        """
+        from ccpn.core.Spectrum import _newEmptySpectrum
+        return _newEmptySpectrum(self, isotopeCodes=isotopeCodes, name=name)
 
     @logCommand('project.')
     def newNmrChain(self, shortName: str = None, isConnected: bool = False, label: str = '?',
@@ -2106,3 +2191,47 @@ class Project(AbstractWrapperObject):
         from ccpn.core.ChemicalShiftList import _getChemicalShiftList
 
         return _getChemicalShiftList(self, name=name, **kwds)
+
+
+def isValidPath(projectName, stripFullPath=True, stripExtension=True):
+    """Check whether the project name is valid after stripping fullpath and extension
+    Can only contain alphanumeric characters and underscores
+
+    :param projectName: name of project to check
+    :param stripFullPath: set to true to remove leading directory
+    :param stripExtension: set to true to remove extension
+    :return: True if valid else False
+    """
+    if not projectName:
+        return
+
+    if isinstance(projectName, str):
+
+        name = os.path.basename(projectName) if stripFullPath else projectName
+        name = os.path.splitext(name)[0] if stripExtension else name
+
+        STRIPCHARS = '_'
+        for ss in STRIPCHARS:
+            name = name.replace(ss, '')
+
+        if name.isalnum():
+            return True
+
+
+def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
+    """Check whether the project name is valid after stripping fullpath and extension
+    Can only contain alphanumeric characters and underscores
+
+    :param projectName: name of project to check
+    :param stripFullPath: set to true to remove leading directory
+    :param stripExtension: set to true to remove extension
+    :return: True if length <= 32 else False
+    """
+    if not projectName:
+        return
+
+    if isinstance(projectName, str):
+        name = os.path.basename(projectName) if stripFullPath else projectName
+        name = os.path.splitext(name)[0] if stripExtension else name
+
+        return len(name) <= 32

@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/9Be.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        1.0
+    ],
+    [
+        "elementNumber",
+        4
+    ],
+    [
+        "gFactor",
+        -0.78495
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "9Be"
+    ],
+    [
+        "massNumber",
+        9
+    ],
+    [
+        "name",
+        "Beryllium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.0529
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Be"
+    ]
+]

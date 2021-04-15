@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/157Gd.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.1565
+    ],
+    [
+        "elementNumber",
+        64
+    ],
+    [
+        "gFactor",
+        -0.2265
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "157Gd"
+    ],
+    [
+        "massNumber",
+        157
+    ],
+    [
+        "name",
+        "Gadolinium"
+    ],
+    [
+        "quadrupoleMoment",
+        1.35
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Gd"
+    ]
+]

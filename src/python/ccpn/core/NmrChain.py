@@ -131,15 +131,6 @@ class NmrChain(AbstractWrapperObject):
         (in which case the mainNmrResidues are sequentially connected)."""
         return self._wrappedData.isConnected
 
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._none2str(self._wrappedData.details)
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = self._str2none(value)
-
     @property
     def chain(self) -> Chain:
         """Chain to which NmrChain is assigned"""
@@ -356,7 +347,7 @@ class NmrChain(AbstractWrapperObject):
         elif wrappedData.code == Constants.defaultNmrChainCode:
             raise ValueError("NmrChain:%s cannot be renamed" % Constants.defaultNmrChainCode)
 
-        commonUtil._validateName(self.project, NmrChain, value=value, allowWhitespace=False)
+        value = self._uniqueName(project=self.project, name=value)
 
         # rename functions from here
         oldName = self.shortName
@@ -453,7 +444,6 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
     """
 
     nmrProject = self._apiNmrProject
-    serial = None
 
     if shortName:
         previous = self.getNmrChain(shortName.translate(Pid.remapSeparators))

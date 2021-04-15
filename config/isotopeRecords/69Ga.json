@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/69Ga.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.60108
+    ],
+    [
+        "elementNumber",
+        31
+    ],
+    [
+        "gFactor",
+        1.34439
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "69Ga"
+    ],
+    [
+        "massNumber",
+        69
+    ],
+    [
+        "name",
+        "Gallium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.171
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Ga"
+    ]
+]

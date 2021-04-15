@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/83Kr.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.1149
+    ],
+    [
+        "elementNumber",
+        36
+    ],
+    [
+        "gFactor",
+        -0.215704
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "83Kr"
+    ],
+    [
+        "massNumber",
+        83
+    ],
+    [
+        "name",
+        "Krypton"
+    ],
+    [
+        "quadrupoleMoment",
+        0.259
+    ],
+    [
+        "spin",
+        4.5
+    ],
+    [
+        "symbol",
+        "Kr"
+    ]
+]

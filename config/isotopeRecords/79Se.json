@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/79Se.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        34
+    ],
+    [
+        "gFactor",
+        -0.29
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "79Se"
+    ],
+    [
+        "massNumber",
+        79
+    ],
+    [
+        "name",
+        "Selenium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.8
+    ],
+    [
+        "spin",
+        3.5
+    ],
+    [
+        "symbol",
+        "Se"
+    ]
+]

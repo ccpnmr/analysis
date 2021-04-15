@@ -26,6 +26,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from typing import Tuple, Sequence, List
 from functools import partial
+
+import ccpn.core._implementation.resetSerial
 from ccpn.util import Common as commonUtil
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.PeakList import PeakList
@@ -36,7 +38,6 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
-from ccpn.util.Common import _incrementObjectName
 
 class ChemicalShiftList(AbstractWrapperObject):
     """An object containing Chemical Shifts. Note: the object is not a (subtype of a) Python list.
@@ -130,15 +131,6 @@ class ChemicalShiftList(AbstractWrapperObject):
     def isSimulated(self, value: bool):
         self._wrappedData.isSimulated = value
 
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
-
     @property
     def spectra(self) -> Tuple[Spectrum, ...]:
         """ccpn.Spectra that use ChemicalShiftList to store chemical shifts"""
@@ -161,8 +153,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         :param autoUpdate: automatically update according to the project changes.
         :return: a duplicated copy of itself containing all chemicalShifts.
         """
-        name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
-        ncsl = self.project.newChemicalShiftList(name)
+        # name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
+        ncsl = self.project.newChemicalShiftList()
         ncsl.spectra = self.spectra if includeSpectra else ()
         ncsl.autoUpdate = autoUpdate
         for att in ['unit', 'isSimulated', 'comment']:
@@ -180,12 +172,8 @@ class ChemicalShiftList(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename ChemicalShiftList, changing its name and Pid.
         """
-        commonUtil._validateName(self.project, ChemicalShiftList, value=value, allowWhitespace=False)
+        return self._rename(value)
 
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.name = value
-        return (oldName,)
 
     #=========================================================================================
     # CCPN functions
@@ -283,9 +271,7 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
         getByPid = self._project.getByPid
         spectra = [getByPid(x) if isinstance(x, str) else x for x in spectra]
 
-    if not name:
-        name = ChemicalShiftList._nextAvailableName(ChemicalShiftList, self)
-    commonUtil._validateName(self, ChemicalShiftList, name)
+    name = ChemicalShiftList._uniqueName(project=self, name=name)
 
     dd = {'name': name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
           'details': comment}
@@ -299,7 +285,7 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
 
     if serial is not None:
         try:
-            result.resetSerial(serial)
+            result.resetSerial (serial)
         except ValueError:
             self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
                                          % (result, serial))

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-28 18:10:00 +0000 (Thu, January 28, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-05 17:05:43 +0000 (Fri, February 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,8 @@ import time
 from functools import partial
 from ccpn.util.SafeFilename import getSafeFilename
 from ccpn.util.Path import aPath
+import ccpn.util.Logging as Logging
+
 
 def trace(f):
     def globaltrace(frame, why, arg):
@@ -257,7 +259,6 @@ def callList(func):
 # Adapted from from sandbox.Geerten.Refactored.decorators to fit current setup
 #----------------------------------------------------------------------------------------------
 
-
 def _makeLogString(prefix, addSelf, func, *args, **kwds):
     """Helper function to create the log string from func, args and kwds
 
@@ -270,11 +271,14 @@ def _makeLogString(prefix, addSelf, func, *args, **kwds):
       prefix+CLASSNAME-of-SELF+'.'+func.__name__(EXPANDED-ARGUMENTS)
 
     """
-    from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-    from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
     def obj2pid(obj):
         "Convert core objects and CcpnModules to pids; expand list, tuples, dicts but don't use recursion"
+
+        # local import to prevent circular import
+        from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+        from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+
         if isinstance(obj, (AbstractWrapperObject, CcpnModule)):
             obj = obj.pid
 
@@ -393,6 +397,7 @@ def logCommand(prefix='', get=None, isProperty=False):
     Use prefix to set the proper command context, e.g. 'application.' or 'project.'
     Use isProperty to get ' = 'args[1]
     """
+    from ccpn.core.lib.ContextManagers import notificationEchoBlocking # local to prevent circular imports
 
     @decorator.decorator
     def theDecorator(*args, **kwds):
@@ -403,7 +408,8 @@ def logCommand(prefix='', get=None, isProperty=False):
 
         application = self.project.application
         blocking = application._echoBlocking
-        if blocking == 0:
+
+        if blocking == 0 and application.ui is not None:
             _pref = prefix
             if get == 'self':
                 _pref += "get('%s')." % args[0].pid
@@ -419,11 +425,9 @@ def logCommand(prefix='', get=None, isProperty=False):
             msg = f'{logS:90}    {_trace}'
             application.ui.echoCommands([msg])
 
-        application._increaseNotificationBlocking()
-        try:
+        # increase blocking
+        with notificationEchoBlocking(application=application):
             result = func(*args, **kwds)
-        finally:
-            application._decreaseNotificationBlocking()
 
         return result
 
@@ -451,7 +455,6 @@ def timeDecorator(method):
 def timeitDecorator(method):
     """calculate execution time of a function/method
     """
-
     def timed(*args, **kwds):
         ts = time.time()
         result = method(*args, **kwds)
@@ -462,6 +465,107 @@ def timeitDecorator(method):
         return result
 
     return timed
+
+
+def debugEnter(verbosityLevel=Logging.DEBUG1):
+    """A decorator to log the invocation of the call
+    """
+
+    @decorator.decorator
+    def decoratedFunc(*args, **kwds):
+        # def debugEnter(func, *args, **kwds):
+        # to avoid potential conflicts with potential 'func' named keywords
+        func = args[0]
+        args = args[1:]
+
+        logs = _makeLogString('ENTERING: ', True, func, *args, **kwds)
+
+        # get a logger and call the correct routine depending on verbosityLevel
+        logger = getLogger()
+        if verbosityLevel == Logging.DEBUG1:
+            logger.debug(logs)
+        elif verbosityLevel == Logging.DEBUG2:
+            logger.debug2(logs)
+        elif verbosityLevel == Logging.DEBUG3:
+            logger.debug3(logs)
+        else:
+            raise ValueError('invalid verbosityLevel "%s"' % verbosityLevel)
+
+        # execute the function and return the result
+        return func(*args, **kwds)
+
+    return decoratedFunc
+
+
+def debug1Enter():
+    """Convenience"""
+    return debugEnter(verbosityLevel=Logging.DEBUG1)
+
+
+def debug2Enter():
+    """Convenience"""
+    return debugEnter(verbosityLevel=Logging.DEBUG2)
+
+
+def debug3Enter():
+    """Convenience"""
+    return debugEnter(verbosityLevel=Logging.DEBUG3)
+
+
+def debugLeave(verbosityLevel=Logging.DEBUG1):
+    """A decorator to log the invocation of the call
+    """
+
+    @decorator.decorator
+    def decoratedFunc(*args, **kwds):
+        # def debugLeave(func, *args, **kwds):
+        # to avoid potential conflicts with potential 'func' named keywords
+        func = args[0]
+        args = args[1:]
+
+        ba = inspect.signature(func).bind(*args, **kwds)
+        ba.apply_defaults()
+        allArgs = ba.arguments
+
+        #execute the function
+        result = func(*args, **kwds)
+
+        if 'self' in allArgs or 'cls' in allArgs:
+            logs = 'LEAVING: %s.%s(); result=%r' % \
+                   (args[0].__class__.__name__, func.__name__, result)
+        else:
+            logs = 'LEAVING: %s(); result=%r' % (func.__name__, result)
+
+        # get a logger and call the correct routine depending on verbosityLevel
+        logger = getLogger()
+        if verbosityLevel == Logging.DEBUG1:
+            logger.debug(logs)
+        elif verbosityLevel == Logging.DEBUG2:
+            logger.debug2(logs)
+        elif verbosityLevel == Logging.DEBUG3:
+            logger.debug3(logs)
+        else:
+            raise ValueError('invalid verbosityLevel "%s"' % verbosityLevel)
+
+        #return the function result
+        return result
+
+    return decoratedFunc
+
+
+def debug1Leave():
+    """Convenience"""
+    return debugLeave(verbosityLevel=Logging.DEBUG1)
+
+
+def debug2Leave():
+    """Convenience"""
+    return debugLeave(verbosityLevel=Logging.DEBUG2)
+
+
+def debug3Leave():
+    """Convenience"""
+    return debugLeave(verbosityLevel=Logging.DEBUG3)
 
 
 #==========================================================================================================================

@@ -45,8 +45,6 @@ PARABOLICMETHOD = 'parabolic'
 PICKINGMETHODS = (GAUSSIANMETHOD, LORENTZIANMETHOD, PARABOLICMETHOD)
 
 
-
-
 class PeakList(PMIListABC):
     """An object containing Peaks. Note: the object is not a (subtype of a) Python list.
     To access all Peak objects, use PeakList.peaks."""
@@ -129,7 +127,7 @@ class PeakList(PMIListABC):
         aliasingLimits = spectrum.aliasingLimits
         apiPeaks = []
         # for ii, dataDim in enumerate(dataDims):
-        spectrumReferences = spectrum.mainSpectrumReferences
+        spectrumReferences = spectrum.spectrumReferences
         if None in spectrumReferences:
             # TODO if we want to pick in Sampeld fo FId dimensions, this must be added
             raise ValueError("pickPeaksNd() only works for Frequency dimensions"

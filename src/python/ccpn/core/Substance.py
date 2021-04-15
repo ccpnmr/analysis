@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from collections import OrderedDict
 import typing
+
 from ccpn.util import Common as commonUtil
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
@@ -377,15 +378,6 @@ class Substance(AbstractWrapperObject):
             raise TypeError("%s type Substance has no attribute 'logPartitionCoefficient'"
                             % _apiClassNameMap.get(ss, ss))
 
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
-
     @property
     def specificAtomLabelling(self) -> typing.Dict[str, typing.Dict[str, float]]:
         """Site-specific labelling for all chains matching Substance
@@ -606,16 +598,14 @@ class Substance(AbstractWrapperObject):
         will be used. Labelling 'None'  means 'Natural abundance'"""
 
         # ejb - name should always be passed in, strange not to
-
-        oldName = self.name
         if name is None:
-            name = oldName
-        commonUtil._validateName(self.project, Substance, value=name, allowWhitespace=False, checkExisting=False)
+            name = self.name
+        oldName = self.name
+        name = self._uniqueName(project=self.project, name=name)
 
         oldLabelling = self.labelling
         apiLabeling = labelling = labelling or DEFAULT_LABELLING
-        commonUtil._validateName(self.project, Substance, value=labelling, attribName='labelling',
-                                 allowNone=True, checkExisting=False)
+        self._validateStringValue(attribName='labelling', value=labelling, allowNone=True)
 
         apiNmrProject = self.project._wrappedData
         _molComponent = apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name, labeling=apiLabeling)
@@ -742,10 +732,8 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
 
     if isinstance(name, int):
         name = str(name)
-    if name is None:
-        name = Substance._nextAvailableName(Substance, self)
-    commonUtil._validateName(self, Substance, name, allowNone=True, checkExisting=False)
-    commonUtil._validateName(self, Substance, _labelling, allowNone=True, checkExisting=False, attribName='labelling')
+    name = Substance._uniqueName(project=self, name=name)
+    self._validateStringValue(attribName='labelling', value=_labelling, allowNone=True)
 
     apiNmrProject = self._wrappedData
     apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore
@@ -901,10 +889,9 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
 
     if isinstance(name, int):
         name = str(name)
-    if name is None:
-        name = Substance._nextAvailableName(Substance, self)
-    commonUtil._validateName(self, Substance, name, allowNone=True, checkExisting=False)
-    commonUtil._validateName(self, Substance, labelling, allowNone=True, attribName='labelling', checkExisting=False)
+    name = Substance._uniqueName(project=self, name=name)
+
+    self._validateStringValue(attribName='labelling', value=labelling, allowNone=True)
 
     if not sequence:
         raise ValueError("createPolymerSubstance requires non-empty sequence")

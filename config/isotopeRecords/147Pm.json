@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/147Pm.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        61
+    ],
+    [
+        "gFactor",
+        0.737
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "147Pm"
+    ],
+    [
+        "massNumber",
+        147
+    ],
+    [
+        "name",
+        "Promethium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.74
+    ],
+    [
+        "spin",
+        3.5
+    ],
+    [
+        "symbol",
+        "Pm"
+    ]
+]

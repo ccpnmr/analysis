@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/87Rb.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.2783
+    ],
+    [
+        "elementNumber",
+        37
+    ],
+    [
+        "gFactor",
+        1.83421
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "87Rb"
+    ],
+    [
+        "massNumber",
+        87
+    ],
+    [
+        "name",
+        "Rubidium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.1335
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Rb"
+    ]
+]

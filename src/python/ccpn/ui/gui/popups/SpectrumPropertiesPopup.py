@@ -28,10 +28,16 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 from functools import partial
 from PyQt5 import QtWidgets, QtCore
 from itertools import permutations
-from collections import Iterable
+from collections import Iterable, OrderedDict
+
 from ccpn.core.Spectrum import MAXALIASINGRANGE, Spectrum
-from collections import OrderedDict
 from ccpn.ui.gui.widgets.Button import Button
+from ccpn.core.SpectrumGroup import SpectrumGroup
+from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock
+from ccpn.core.lib.ContextManagers import undoStackBlocking
+from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise
+from ccpn.core.lib.ContextManagers import queueStateChange
+
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
@@ -46,23 +52,24 @@ from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, 
     colourNameNoSpace, _setColourPulldown, getSpectrumColour
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Tabs import Tabs
-from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
-from ccpn.util.OrderedSet import OrderedSet
+from ccpn.ui.gui.popups.ValidateSpectraPopup import SpectrumValidator, SpectrumPathRow
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply, _verifyPopupApply
-from ccpn.core.lib.ContextManagers import undoStackBlocking
-from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise
-from ccpn.core.lib.ContextManagers import queueStateChange
-from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForSpectrumPopup
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import _complexAttribContainer
+
 from ccpn.util.AttrDict import AttrDict
+from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, \
+    colourNameNoSpace, _setColourPulldown, getSpectrumColour
+from ccpn.util.Logging import getLogger
+from ccpn.util.isotopes import isotopeRecords
+from ccpn.util.OrderedSet import OrderedSet
 
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
@@ -249,6 +256,11 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
 
         super().__init__(parent=parent, mainWindow=mainWindow,
                          spectrum=spectrum, title=title, **kwds)
+
+        # define first, as calling routines are dependant on existance of attributes
+        self._generalTab = None
+        self._dimensionsTab = None
+        self._contoursTab = None
 
         if spectrum.dimensionCount == 1:
             self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
@@ -487,13 +499,10 @@ class GeneralTab(Widget):
         self.commentData.textChanged.connect(partial(self._queueSpectrumCommentChange, spectrum))  # ejb - was editingFinished
         row += 1
 
-        # add validate frame
-        self._validateFrame = ValidateSpectraForSpectrumPopup(self, mainWindow=self.mainWindow, spectra=(spectrum,),
-                                                              setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
-
-        self._validateFrame._filePathCallback = self._queueSetValidateFilePath
-        self._validateFrame._dataUrlCallback = self._queueSetValidateDataUrl
-        self._validateFrame._matchFilePathWidths = self
+        self.spectrumRow = SpectrumPathRow(parentWidget=self, row=row, labelText='Path',
+                                           obj=self.spectrum,
+                                           enabled=(not self.spectrum.isEmptySpectrum())
+                                           )
         row += 1
 
         Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(row, 0))
@@ -603,7 +612,7 @@ class GeneralTab(Widget):
         self._changes.clear()
 
         with self._changes.blockChanges():
-            self._validateFrame._populate()
+            # self._validateFrame._populate()
 
             self.spectrumPidLabel.setText(self.spectrum.pid)
             self.nameData.setText(self.spectrum.name)
@@ -890,7 +899,7 @@ class DimensionsTab(Widget):
         row += 1
         Label(self, text="Minimum displayed aliasing ", grid=(row, 0), hAlign='l')
 
-        self._isotopeList = [code for code in DEFAULT_ISOTOPE_DICT.values() if code]
+        self._isotopeList = [r.isotopeCode for r in isotopeRecords.values() if r.spin > 0]  # All isotopes with a spin
 
         for i in range(dimensions):
             row = 2

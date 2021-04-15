@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:31:18 +0000 (Thu, January 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:39 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -734,7 +734,6 @@ class EnsembleData(pd.DataFrame):
 
                 self._finaliseStructureEnsemble('change')
 
-    # @logCommand__Container(get='self')
     def deleteCol(self, columnName=None):  # ejb - , *args, **kwargs):
         """
         Delete a named column from the table, the columnName must be a string and exist in the table.
@@ -772,7 +771,6 @@ class EnsembleData(pd.DataFrame):
 
                 self._finaliseStructureEnsemble('change')
 
-    # @logCommand__Container(get='self')
     def setValues(self, accessor: typing.Union[int, 'EnsembleData', pd.Series], **kwargs) -> None:
         """
         Allows you to easily set values (in place) for fields in the EnsembleData
@@ -979,7 +977,6 @@ class EnsembleData(pd.DataFrame):
 
         pass
 
-    # @logCommand__Container(get='self')
     def ccpnSort(self, *columns: str):
         """Custom sort. Sorts mixed-type columns by type, sorting None and NaN at the start
 

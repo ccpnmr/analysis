@@ -36,6 +36,7 @@ from collections import OrderedDict as OD, namedtuple
 # from collections import Counter
 from operator import attrgetter, itemgetter
 from typing import List, Union, Optional, Sequence, Tuple
+
 from ccpn.core.lib import Pid
 from ccpn.core import _coreImportOrder
 from ccpn.core.lib.CcpnNefCommon import nef2CcpnMap, saveFrameReadingOrder, _isALoop, \
@@ -6643,7 +6644,7 @@ class CcpnNefReader(CcpnNefContent):
 
     def _defaultName(self, cls, serial):
         # Get the next class name using serial, this may already exist
-        return self.project._defaultNameFromSerial(cls, serial)
+        return '%s_%s' % (cls._defaultName, serial)
 
     def fetchDataSet(self, serial: int = None):
         """Fetch DataSet with given serial.
@@ -6751,9 +6752,9 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
                                              transferData=transferData)
 
             # make new spectrum with default parameters
-            spectrum = project.createDummySpectrum(axisCodes, spectrumName,
-                                                   chemicalShiftList=spectrumParameters.get('chemicalShiftList')
-                                                   )
+            spectrum = project.newEmptySpectrum(isotopeCodes=dimensionData['isotopeCodes'], name=spectrumName)
+            spectrum.chemicalShiftList = spectrumParameters.get('chemicalShiftList')
+
             if acquisitionAxisIndex is not None:
                 spectrum.acquisitionAxisCode = axisCodes[acquisitionAxisIndex]
 

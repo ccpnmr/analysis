@@ -528,7 +528,7 @@ class Framework(NotifierBase):
 
         self.project = project
         if hasattr(self, '_mainWindow'):
-            Logging.getLogger().debug('>>>framework._initialiseProject')
+            Logging.getLogger().debug('Framework._initialiseProject>>>')
 
             project._blockSideBar = True
             self.ui.initialize(self._mainWindow)
@@ -890,6 +890,10 @@ class Framework(NotifierBase):
                     self.current.strip = self.project.strips[0]
         except Exception as e:
             getLogger().warning('Impossible to restore spectrumDisplay(s) %s' % e)
+
+        if self.current.strip is None:
+            if len(self.project.strips) > 0:
+                self.current.strip = self.project.strips[0]
 
     def get(self, identifier):
         """General method to obtain object (either gui or data) from identifier (pid, gid, obj-string)
@@ -1552,7 +1556,7 @@ class Framework(NotifierBase):
                 project = self._loadSparkyProject(path, makeNewProject=True)  # RHF - new by default
                 project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
 
-            project._validateDataUrlAndFilePaths()
+            # project._validateDataUrlAndFilePaths()
             project._checkUpgradedFromV2()
 
             if self.preferences.general.useProjectPath:
@@ -1561,8 +1565,11 @@ class Framework(NotifierBase):
                 _dialog = ProjectFileDialog(self.ui.mainWindow)
                 _dialog.initialPath = Path.Path(path).parent
 
-            if project and project._undo:
-                project._undo.clear()
+            # if project and project._undo:
+            #     project._undo.clear()
+
+            self.project = project
+
             return project
 
         # elif dataType == 'NefFile' and subType in (ioFormats.NEF):

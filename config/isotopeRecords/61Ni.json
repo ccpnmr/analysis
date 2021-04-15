@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/61Ni.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.011399
+    ],
+    [
+        "elementNumber",
+        28
+    ],
+    [
+        "gFactor",
+        -0.50001
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "61Ni"
+    ],
+    [
+        "massNumber",
+        61
+    ],
+    [
+        "name",
+        "Nickel"
+    ],
+    [
+        "quadrupoleMoment",
+        0.162
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Ni"
+    ]
+]

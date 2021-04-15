@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/209Bi.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        1.0
+    ],
+    [
+        "elementNumber",
+        83
+    ],
+    [
+        "gFactor",
+        0.9134
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "209Bi"
+    ],
+    [
+        "massNumber",
+        209
+    ],
+    [
+        "name",
+        "Bismuth"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.516
+    ],
+    [
+        "spin",
+        4.5
+    ],
+    [
+        "symbol",
+        "Bi"
+    ]
+]

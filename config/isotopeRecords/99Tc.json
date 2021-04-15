@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/99Tc.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        43
+    ],
+    [
+        "gFactor",
+        1.2632
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "99Tc"
+    ],
+    [
+        "massNumber",
+        99
+    ],
+    [
+        "name",
+        "Technetium"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.129
+    ],
+    [
+        "spin",
+        4.5
+    ],
+    [
+        "symbol",
+        "Tc"
+    ]
+]

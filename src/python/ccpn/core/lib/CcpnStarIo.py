@@ -12,7 +12,6 @@ from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
-from ccpn.util.Common import _incrementObjectName
 
 NMRSTARVersion = '3.2.1.32'
 NMRSTARV3GROUPS = od([
@@ -285,7 +284,7 @@ def makeCSLfromDF(project, df):
     nmrChains = set()
     with notificationEchoBlocking():
         chemicalShiftListName = df[Entry_ID].astype(str, errors='ignore').unique()[-1] #Mandatory tag. Values always present
-        chemicalShiftListName = _incrementObjectName(project, ChemicalShiftList._pluralLinkName, chemicalShiftListName)
+        # chemicalShiftListName = _incrementObjectName(project, ChemicalShiftList._pluralLinkName, chemicalShiftListName)
         chemicalShiftList = project.newChemicalShiftList(name=chemicalShiftListName)
         for index, row in df.iterrows():
             nmrChain = project.fetchNmrChain(row[Entity_assembly_ID])

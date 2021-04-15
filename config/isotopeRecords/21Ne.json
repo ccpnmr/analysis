@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/21Ne.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0027
+    ],
+    [
+        "elementNumber",
+        10
+    ],
+    [
+        "gFactor",
+        -0.441198
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "21Ne"
+    ],
+    [
+        "massNumber",
+        21
+    ],
+    [
+        "name",
+        "Neon"
+    ],
+    [
+        "quadrupoleMoment",
+        0.102
+    ],
+    [
+        "spin",
+        1.5
+    ],
+    [
+        "symbol",
+        "Ne"
+    ]
+]

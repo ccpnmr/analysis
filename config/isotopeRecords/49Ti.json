@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/49Ti.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0541
+    ],
+    [
+        "elementNumber",
+        22
+    ],
+    [
+        "gFactor",
+        -0.315477
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "49Ti"
+    ],
+    [
+        "massNumber",
+        49
+    ],
+    [
+        "name",
+        "Titanium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.247
+    ],
+    [
+        "spin",
+        3.5
+    ],
+    [
+        "symbol",
+        "Ti"
+    ]
+]

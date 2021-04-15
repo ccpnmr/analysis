@@ -118,15 +118,6 @@ class StructureEnsemble(AbstractWrapperObject):
         #
         value._containingObject = self
 
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._none2str(self._wrappedData.details)
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = self._str2none(value)
-
     def resetModels(self):
         """Remove models without data, add models to reflect modelNumbers present"""
         data = self.data
@@ -160,12 +151,7 @@ class StructureEnsemble(AbstractWrapperObject):
         """Rename StructureEnsemble, changing its name and Pid.
         NB, the serial remains immutable.
         """
-        commonUtil._validateName(self.project, StructureEnsemble, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.name = value
-        return (oldName,)
+        return self._rename(value)
 
     #=========================================================================================
     # CCPN functions
@@ -213,9 +199,7 @@ def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, d
     # stop circular import
     from ccpn.core.Model import Model
 
-    if not name:
-        name = StructureEnsemble._nextAvailableName(StructureEnsemble, self)
-    commonUtil._validateName(self, StructureEnsemble, name)
+    name = StructureEnsemble._uniqueName(project=self, name=name)
 
     nmrProject = self._wrappedData
 

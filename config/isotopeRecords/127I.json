@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/127I.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        1.0
+    ],
+    [
+        "elementNumber",
+        53
+    ],
+    [
+        "gFactor",
+        1.12531
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "127I"
+    ],
+    [
+        "massNumber",
+        127
+    ],
+    [
+        "name",
+        "Iodine"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.696
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "I"
+    ]
+]

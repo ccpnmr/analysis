@@ -304,12 +304,7 @@ class Chain(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Chain, changing its shortName and Pid.
         """
-        commonUtil._validateName(self.project, Chain, value=value, allowWhitespace=False, allowSpace=False)
-
-        # rename functions from here
-        oldName = self.shortName
-        self._apiChain.renameChain(value)
-        return (oldName,)
+        return self._rename(value)
 
     # def delete(self):
     #     print('>>>deleting - need to delete apiMolecules')
@@ -380,13 +375,13 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     # either string, or list/tuple of strings
     # list must all be 3 chars long if more than 1 element in list
     if not sequence:
-        raise TypeError('sequence must be defined')
+        raise ValueError('sequence must be defined')
 
     if isinstance(sequence, str):
 
         # alpha string
         if not sequence.isalpha():
-            raise TypeError('sequence contains bad characters: %s' % str(sequence))
+            raise ValueError('sequence contains bad characters: %s' % str(sequence))
 
         sequence = sequence.upper()
 
@@ -430,7 +425,7 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     if not shortName:
         shortName = apiMolSystem.nextChainCode()
     else:
-        commonUtil._validateName(self, Chain, value=shortName, allowWhitespace=False)
+        shortName = Chain._uniqueName(project=self, name=shortName)
 
     previous = self._project.getChain(shortName.translate(Pid.remapSeparators))
     if previous is not None:
@@ -440,9 +435,7 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     if compoundName is None:
         name = self._uniqueSubstanceName()
     elif apiRefComponentStore.findFirstComponent(name=compoundName) is None:
-        commonUtil._validateName(self, Chain, value=compoundName, allowWhitespace=False)
-
-        name = compoundName
+        name = Chain._uniqueName(project=self, name=compoundName)
     else:
         raise ValueError(
                 "Substance '%s' already exists. Try choosing a new molecule name.\n"

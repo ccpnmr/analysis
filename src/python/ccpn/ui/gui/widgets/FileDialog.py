@@ -346,7 +346,7 @@ class FileDialogABC(QtWidgets.QFileDialog):
 
     # overrides Qt function, which does not pay any attention to whether Cancel button selected
     def selectedFiles(self):
-        """Get the list of selected files.
+        """Return the list of selected files
         """
         if self.useNative:
             # get the selected files from the native dialog
@@ -357,10 +357,12 @@ class FileDialogABC(QtWidgets.QFileDialog):
         else:
             # use our ccpn dialog
             files = super().selectedFiles()
+            if files is None:
+                files = []
             return files
 
     def selectedFile(self):
-        """Get the first selected file.
+        """Return the first selected file.
         """
         # Qt does not have this but useful if you know you only want one file
         files = self.selectedFiles()

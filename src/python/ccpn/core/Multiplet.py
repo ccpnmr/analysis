@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
@@ -285,15 +286,6 @@ class Multiplet(AbstractWrapperObject):
     @annotation.setter
     def annotation(self, value: str):
         self._wrappedData.annotation = value
-
-    # @property
-    # def comment(self) -> Optional[str]:
-    #     """Free-form text comment."""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
 
     @property
     def slopes(self) -> List[float]:

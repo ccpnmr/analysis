@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-14 19:31:18 +0000 (Thu, January 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
+
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -35,11 +36,10 @@ from ccpn.util.Logging import getLogger
 
 
 class SpectrumReference(AbstractWrapperObject):
-    """ ADVANCED. A **SpectrumReference** holds detailed information about axes and referencing
+    """A SpectrumReference holds detailed information about axes and referencing
     needed for e.g. multple-quantum, projection, and reduced-dimensionality experiments.
 
-
-    SpectrumRefefences can only exist for Fourier transformed dimensions.
+    SpectrumRefefences can only exist for frequency dimensions.
     Required for describing experiments with assignable splittings (e.g. J-coupling, RDC),
     reduced dimensionality, more than one nucleus per axis,
     or multi-atom parameters (J-dimensions, MQ dimensions)."""
@@ -62,6 +62,9 @@ class SpectrumReference(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.DataDimRef._metaclass.qualifiedName()
+
+    def __init__(self, project, wrappedData):
+        super().__init__(project, wrappedData)
 
     # CCPN properties
     @property
@@ -143,8 +146,8 @@ class SpectrumReference(AbstractWrapperObject):
     @property
     def isotopeCodes(self) -> typing.Tuple[str, ...]:
         """Isotope identification strings for isotopes.
-        NB there can be several isotopes for e.g. J-coupling or multiple quantum coherence."""
-
+        NB there can be several isotopes for e.g. J-coupling or multiple quantum coherence.
+        """
         return self._wrappedData.expDimRef.isotopeCodes
 
     @isotopeCodes.setter
@@ -166,11 +169,11 @@ class SpectrumReference(AbstractWrapperObject):
     def axisCode(self) -> str:
         """Reference axisCode """
         expDimRef = self._wrappedData.expDimRef
-        dataDim = self._wrappedData.dataDim
+        # dataDim = self._wrappedData.dataDim
         result = expDimRef.axisCode
-        if result is None:
-            dataDim.dataSource.experiment.resetAxisCodes()
-            result = expDimRef.axisCode
+        # if result is None:
+        #     dataDim.dataSource.experiment.resetAxisCodes()
+        #     result = expDimRef.axisCode
         #
         return result
 
@@ -321,7 +324,7 @@ def _newSpectrumReference(self: Spectrum, dimension: int, spectrometerFrequency:
 
     expDimRef = dataDim.expDim.newExpDimRef(sf=spectrometerFrequency, isotopeCodes=isotopeCodes,
                                             measurementType=measurementType,
-                                            isFolded=(foldingMode != 'folded'), name=axisCode,
+                                            isFolded=(foldingMode != 'folded'), axisCode=axisCode,
                                             unit=axisUnit, minAliasedFreq=minAliasedFrequency,
                                             maxAliasedFreq=maxAliasedFrequency, )
 

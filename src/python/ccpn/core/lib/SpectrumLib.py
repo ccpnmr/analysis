@@ -245,43 +245,33 @@ def _getProjection(spectrum: 'Spectrum', axisCodes: tuple,
     return projectedData
 
 
-###################################################################################################
-##################             Baseline Correction for 1D spectra                ##################
-###################################################################################################
-
-
-"""
-14/2/2017
-
-Baseline Correction for 1D spectra.
-Multiple algorithms comparison:
-
--Asl
--Whittaker Smooth
--AirPls
--ArPls
--Lowess
--Polynomial Fit
-
-NB: Yet To be tested the newest algorithm found in literature based on machine learning:
-“Estimating complicated baselines in analytical signals using the iterative training of
-Bayesian regularized artificial neural networks. Abolfazl Valadkhani et al.
-Analytica Chimica Acta. September 2016 DOI: 10.1016/j.aca.2016.08.046
-
-"""
+#------------------------------------------------------------------------------------------------------
+#  Baseline Correction for 1D spectra
+# 14/2/2017
+#
+# Baseline Correction for 1D spectra.
+# Multiple algorithms comparison:
+#
+# -Asl
+# -Whittaker Smooth
+# -AirPls
+# -ArPls
+# -Lowess
+# -Polynomial Fit
+#
+# NB: Yet To be tested the newest algorithm found in literature based on machine learning:
+# “Estimating complicated baselines in analytical signals using the iterative training of
+# Bayesian regularized artificial neural networks. Abolfazl Valadkhani et al.
+# Analytica Chimica Acta. September 2016 DOI: 10.1016/j.aca.2016.08.046
+#
+#------------------------------------------------------------------------------------------------------
 
 from scipy.sparse import csc_matrix, eye, diags
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
 
-
-"""
-Asl algorithm
-"""
-
-
 def als(y, lam=10 ** 2, p=0.001, nIter=10):
-    """Implements an Asymmetric Least Squares Smoothing
+    """Implements an Asymmetric Least Squares (Asl) Smoothing
     baseline correction algorithm
     H C Eilers, Paul & F M Boelens, Hans. (2005). Baseline Correction with Asymmetric Least Squares Smoothing. Unpubl. Manuscr. .
 
@@ -303,16 +293,9 @@ def als(y, lam=10 ** 2, p=0.001, nIter=10):
     return z
 
 
-###################################################################################################
-
-
-"""
-Whittaker Smooth algorithm
-"""
-
-
 def WhittakerSmooth(y, w, lambda_, differences=1):
     """
+    Whittaker Smooth algorithm
     no licence, source from web
     Penalized least squares algorithm for background fitting
 
@@ -337,15 +320,9 @@ def WhittakerSmooth(y, w, lambda_, differences=1):
     return np.array(background)
 
 
-###################################################################################################
-
-"""
-airPLS algorithm
-"""
-
-
 def airPLS(y, lambda_=100, porder=1, itermax=15):
     """
+    airPLS algorithm
     no licence, source from web
     Adaptive iteratively reweighted penalized least squares for baseline fitting
 
@@ -373,16 +350,9 @@ def airPLS(y, lambda_=100, porder=1, itermax=15):
     return z
 
 
-###################################################################################################
-
-
-"""
-polynomial Fit algorithm
-"""
-
-
 def polynomialFit(x, y, order: int = 3):
     """
+    polynomial Fit algorithm
     :param x: x values
     :param y: y values
     :param order: polynomial order
@@ -392,22 +362,12 @@ def polynomialFit(x, y, order: int = 3):
     return fit
 
 
-###################################################################################################
-
-
-"""
-arPLS algorithm
-"""
-
-
 def arPLS(y, lambda_=5.e5, ratio=1.e-6, itermax=50):
     """
+    arPLS algorithm
     Baseline correction using asymmetrically reweighted penalized least squares
     smoothing.
-
     http://pubs.rsc.org/en/Content/ArticleLanding/2015/AN/C4AN01061B#!divAbstract
-
-
 
     :param y: The 1D spectrum
     :param lambda_: (Optional) Adjusts the balance between fitness and smoothness.
@@ -482,20 +442,12 @@ def arPLS(y, lambda_=5.e5, ratio=1.e-6, itermax=50):
     return z
 
 
-###################################################################################################
-
-
-"""
-Implementation of the  arPLS algorithm
-"""
-
-
 def arPLS_Implementation(y, lambdaValue=5.e4, maxValue=1e6, minValue=-1e6, itermax=10, interpolate=True):
     """
-    maxValue = maxValue of the baseline noise
-    minValue = minValue of the baseline noise
-    interpolate: Where are the peaks: interpolate the points from neighbours otherwise set them to 0.
-
+    Implementation of the  arPLS algorithm
+    :param maxValue = maxValue of the baseline noise
+    :param minValue = minValue of the baseline noise
+    :param interpolate: Where are the peaks: interpolate the points from neighbours otherwise set them to 0.
     """
 
     lenghtY = len(y)
@@ -532,6 +484,7 @@ def lowess(x, y):
     """
 
     from scipy.interpolate import interp1d
+    #FIXME: invalid import
     import statsmodels.api as sm
 
     # introduce some floats in our x-values
@@ -638,7 +591,6 @@ def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
 
 def get1DdataInRange(x, y, xRange):
     """
-
     :param x:
     :param y:
     :param xRange:
@@ -695,6 +647,16 @@ def _recurseData(ii, dataList, startCondition, endCondition):
 # endCondition = []
 # _recurseData(0, dataList, startCondition, endCondition)
 
+#------------------------------------------------------------------------------------------------------
+
+
+def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,
+                                  setPositiveContours=True, setNegativeContours=True,
+                                  useSameMultiplier=True):
+    """Calculate the noise level, base contour level and positive/negative multipliers for the given apiSpectrum
+    """
+    # NOTE:ED - method doesn't seem to be used?
+    project = apiSpectrum.topObject
 
 
 # def _setApiContourLevelsFromNoise(apiSpectrum, setNoiseLevel=True,
@@ -900,6 +862,36 @@ def getContourLevelsFromNoise(spectrum,
     return posBase, negBase, posMult, negMult, posLevels, negLevels
 
 
+def getClippedRegion(spectrum, strip, sort=False):
+    """
+    Return the clipped region, bounded by the (ppmPoint(1), ppmPoint(n)) in visible order
+
+    If sorting is True, returns a tuple(tuple(minPpm, maxPpm), ...) for each region
+    else returns tuple(tuple(ppmLeft, ppmRight), ...)
+
+    :param spectrum:
+    :param strip:
+    :return:
+    """
+
+    # calculate the visible region
+    selectedRegion = [strip.getAxisRegion(0), strip.getAxisRegion(1)]
+    for n in strip.orderedAxes[2:]:
+        selectedRegion.append((n.region[0], n.region[1]))
+
+    # use the ppmArrays to get the first/last point of the data
+    if spectrum.dimensionCount == 1:
+        ppmArrays = [spectrum.getPpmArray(dimension=1)]
+    else:
+        ppmArrays = [spectrum.getPpmArray(dimension=dim) for dim in spectrum.getByAxisCodes('dimensions', strip.axisCodes)]
+
+    # clip to the ppmArrays, not taking aliased regions into account
+    if sort:
+        return tuple(tuple(sorted(np.clip(region, np.min(limits), np.max(limits)))) for region, limits in zip(selectedRegion, ppmArrays))
+    else:
+        return tuple(tuple(np.clip(region, np.min(limits), np.max(limits))) for region, limits in zip(selectedRegion, ppmArrays))
+
+
 def getNoiseEstimateFromRegion(spectrum, strip):
     """
     Get the noise estimate from the visible region of the strip
@@ -910,51 +902,35 @@ def getNoiseEstimateFromRegion(spectrum, strip):
     """
 
     # calculate the region over which to estimate the noise
-    selectedRegion = [strip.getAxisRegion(0), strip.getAxisRegion(1)]
-    for n in strip.orderedAxes[2:]:
-        selectedRegion.append((n.region[0], n.region[1]))
-    sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
+    sortedSelectedRegion = getClippedRegion(spectrum, strip, sort=True)
 
-    # get indexing for spectrum onto strip.axisCodes
-    indices = getAxisCodeMatchIndices(spectrum.axisCodes, strip.axisCodes)
+    if spectrum.dimensionCount == 1:
+        indices = [1]
+    else:
+        indices = spectrum.getByAxisCodes('dimensions', strip.axisCodes)
 
-    if None in indices:
-        return
+    regionDict = {}
+    for idx, ac, region in zip(indices, strip.axisCodes, sortedSelectedRegion):
+        regionDict[ac] = tuple(region)
 
-    # map the spectrum selectedRegions to the strip
-    axisCodeDict = collections.OrderedDict((code, sortedSelectedRegion[indices[ii]])
-                                           for ii, code in enumerate(spectrum.axisCodes) if indices[ii] is not None)
+    # get the data
+    dataArray = spectrum.getRegion(**regionDict)
 
-    # add an exclusion buffer to ensure that getRegionData always returns a region,
-    # otherwise region may be 1 plain thick which will contradict error trapping for peak fitting
-    # (which requires at least 3 points in each dimension)
-    # exclusionBuffer = [1] * spectrum.dimensionCount
-    # however, this shouldn't be needed of the range is > valuePrePoint in each dimension
+    # calculate the noise values
+    flatData = dataArray.flatten()
 
-    foundRegions = spectrum.getRegionData(minimumDimensionSize=1, **axisCodeDict)
+    std = np.std(flatData)
+    max = np.max(flatData)
+    min = np.min(flatData)
+    mean = np.mean(flatData)
 
-    if foundRegions:
+    value = NoiseEstimateTuple(mean=mean,
+                               std=std * 1.1 if std != 0 else 1.0,
+                               min=min, max=max,
+                               noiseLevel=None)
 
-        # just use the first region
-        for region in foundRegions[:1]:
-            dataArray, intRegion, *rest = region
-
-            if dataArray.size:
-                # calculate the noise values
-                flatData = dataArray.flatten()
-
-                std = np.std(flatData)
-                max = np.max(flatData)
-                min = np.min(flatData)
-                mean = np.mean(flatData)
-
-                value = NoiseEstimateTuple(mean=mean,
-                                           std=std * 1.1 if std != 0 else 1.0,
-                                           min=min, max=max,
-                                           noiseLevel=None)
-
-                # noise function is defined here, but needs cleaning up
-                return _noiseFunc(value)
+    # noise function is defined here, but needs cleaning up
+    return _noiseFunc(value)
 
 
 def getSpectrumNoise(spectrum):
@@ -1066,9 +1042,9 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
         raise ValueError('fraction must be i the range (0, 1]')
 
     # create a list of random points in the spectrum, get only points that are not nan/inf
-    # getPositionValue is the slow bit
-    allPts = [[min(n - 2, int(n * random.random())) for n in npts] for i in range(nsamples)]
-    _list = np.array([spectrum.getPositionValue(pt) for pt in allPts], dtype=np.float32)
+    # getPointValue is the slow bit
+    allPts = [[min(n - 1, int(n * random.random()) + 1) for n in npts] for i in range(nsamples)]
+    _list = np.array([spectrum.getPointValue(pt) for pt in allPts], dtype=np.float32)
     data = _list[np.isfinite(_list)]
     fails = nsamples - len(data)
 

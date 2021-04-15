@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/207Bi.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        83
+    ],
+    [
+        "gFactor",
+        0.9092
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "207Bi"
+    ],
+    [
+        "massNumber",
+        207
+    ],
+    [
+        "name",
+        "Bismuth"
+    ],
+    [
+        "quadrupoleMoment",
+        -0.76
+    ],
+    [
+        "spin",
+        4.5
+    ],
+    [
+        "symbol",
+        "Bi"
+    ]
+]

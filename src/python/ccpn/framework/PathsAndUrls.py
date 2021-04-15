@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-12 17:55:25 +0000 (Tue, January 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:31 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,8 @@ ccpnRunTerminal                 = ccpnCodePath / 'bin' / 'runTerminal.sh'
 defaultPreferencesPath          = ccpnConfigPath / 'defaultv3settings.json'
 _ccpnPythonPath                 = Path.aPath(Path.getPythonDirectory())
 ccpnmodelPythonPath             = _ccpnPythonPath / 'ccpnmodel'
+ccpnmodelDataPythonPath         = _ccpnPythonPath / 'ccpnmodel' / 'data'
+ccpnmodelRefDataPythonPath      = _ccpnPythonPath / 'ccpnmodel' / 'data' / 'ccpnv3'
 ccpnPythonPath                  = _ccpnPythonPath / 'ccpn'
 analysisAssignPath              = ccpnPythonPath / 'AnalysisAssign'
 analysisScreenPath              = ccpnPythonPath / 'AnalysisScreen'
@@ -71,10 +73,31 @@ licensePath                     = ccpnCodePath / 'LICENSE.txt'
 
 # User settings
 userPreferencesDirectory        = Path.aPath('~/.ccpn')
+userCcpnPath                    = userPreferencesDirectory
 userPreferencesPath             = userPreferencesDirectory / 'v3settings.json'
+userCcpnDataPath                = userCcpnPath / 'data'
+userDefaultProjectPath          = userCcpnDataPath / 'default.ccpn'
+userCcpnPathSubDirectories      = ['data', 'macros', 'pipes']  # These get created by framework
 
 # Predefined layouts
 predefinedLayouts               = ccpnCodePath / 'layouts'
 
-# others
-CCPN_EXTENSION = '.ccpn'
+# others; also defined in util.Path and from there imported in Api and Implementation
+# DO NOT REMOVE and keep in sinc (for circular import reasons) (for now!)
+CCPN_DIRECTORY_SUFFIX    = '.ccpn'
+CCPN_BACKUP_SUFFIX       = '_backup'  # used by ApiLoader; deprecated
+
+# subdirectories of Projects
+CCPN_API_DIRECTORY       = 'ccpnv3'
+CCPN_ARCHIVES_DIRECTORY  = 'archives'
+CCPN_BACKUPS_DIRECTORY   = 'backups'
+CCPN_SUMMARIES_DIRECTORY = 'summaries'
+CCPN_LOGS_DIRECTORY      = 'logs'
+CCPN_DATA_DIRECTORY      = 'data'
+CCPN_PLUGINS_DIRECTORY   = 'data/plugins'
+CCPN_SPECTRA_DIRECTORY   = 'data/spectra'
+CCPN_SCRIPTS_DIRECTORY   = 'scripts'
+CCPN_STATE_DIRECTORY     = 'state'
+
+# historical
+CCPN_EXTENSION = CCPN_DIRECTORY_SUFFIX

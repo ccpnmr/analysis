@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/237Np.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        93
+    ],
+    [
+        "gFactor",
+        1.256
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "237Np"
+    ],
+    [
+        "massNumber",
+        237
+    ],
+    [
+        "name",
+        "Neptunium"
+    ],
+    [
+        "quadrupoleMoment",
+        3.87
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Np"
+    ]
+]

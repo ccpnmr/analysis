@@ -65,6 +65,7 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 from ccpn.util.Common import uniquify, camelCaseToString
 from ccpn.util import Logging
 from ccpn.util import Path
+from ccpn.util.Path import aPath
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
@@ -525,31 +526,30 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 QtWidgets.QApplication.setActiveWindow(project._mainWindow)
 
                 # if the new project contains invalid spectra then open the popup to see them
-                # badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.isValidPath]
-                badSpectra = []
-                for spectrum in project.spectra:
-                    valid = False
-                    try:
-                        valid = spectrum.isValidPath  # can raise error if None
-                    except:
-                        pass
-                    finally:
-                        if not valid:
-                            badSpectra.append(str(spectrum))
+                badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
+                # badSpectra = []
+                # for spectrum in project.spectra:
+                #     valid = False
+                #     try:
+                #         valid = spectrum.hasValidPath()  # can raise error if None
+                #     except:
+                #         pass
+                #     finally:
+                #         if not valid:
+                #             badSpectra.append(str(spectrum))
 
                 if badSpectra:
-                    showWarning('Spectrum file paths',
-                                '''Detected invalid Spectrum file path(s) for: 
-                                \n\t%s
-                                
-                                Use menu Spectrum-->Validate paths.. or "VP" shortcut to correct''' % '\n\t'.join(badSpectra)
-                                )
-                    # project.application.showValidateSpectraPopup(defaultSelected='invalid')
-                    # project.save(createFallback=False, overwriteExisting=True)
+                    text = 'Detected invalid Spectrum file path(s) for:\n\n'
+                    for sp in badSpectra:
+                        text += '%s\n' % str(sp)
+                    text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
+                    showWarning('Spectrum file paths', text)
 
-                undo = self._project._undo
-                if undo is not None:
-                    undo.markClean()
+                # # TODO: there should be no need for this; check
+                # undo = self._project._undo
+                # if undo is not None:
+                #     undo.markClean()
+
                 return project
 
             else:
@@ -629,9 +629,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                     _dialog = ProjectFileDialog(parent=self, acceptMode='open')
                     _dialog.initialPath = Path.Path(projectDir).parent
 
-            # except Exception as es:
-            #     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s' % str(projectDir))
-            #     Logging.getLogger().warning('Fatal error loading project: %s' % str(projectDir))
+                except (ValueError, RuntimeError) as es:
+                    MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s' % str(projectDir))
+                    Logging.getLogger().warning('Fatal error loading project: %s' % str(projectDir))
+                    raise es
 
             # try:
             #     project = self._loadProject(projectDir)
@@ -648,9 +649,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             #         MessageDialog.showError('loadProject', 'Fatal error loading previous project:\n%s' % str(lastValidProject))
             #         Logging.getLogger().warning('Fatal error loading previous project: %s' % str(lastValidProject))
 
-        undo = self._project._undo
-        if undo is not None:
-            undo.markClean()
+        # undo = self._project._undo
+        # if undo is not None:
+        #     undo.markClean()
+
         return project
 
     def _fillRecentProjectsMenu(self):
@@ -1286,6 +1288,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                             objs.extend(data)
 
                 except Exception as es:
-                    MessageDialog.showError('Load Data', 'loadData Error: %s' % str(es))
+                    MessageDialog.showError('Load Data', 'Loading "%s" encountered error: %s' % (url,str(es)))
                     getLogger().warning('loadData Error: %s' % str(es))
         return objs

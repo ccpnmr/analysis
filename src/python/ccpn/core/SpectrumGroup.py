@@ -36,7 +36,6 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameObject
 from ccpn.util.Logging import getLogger
 from ccpn.util.LabelledEnum import LabelledEnum
-from ccpn.util.Common import _incrementObjectName, _validateName
 
 SPECTRUMGROUP = 'spectrumGroup'
 SPECTRUMGROUPCOMMENT = 'spectrumGroupComment'
@@ -319,8 +318,8 @@ class SpectrumGroup(AbstractWrapperObject):
         self.spectra = spectra
 
     def clone(self):
-        name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
-        newSpectrumGroup = self.project.newSpectrumGroup(name=name, spectra=self.spectra)
+        # name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
+        newSpectrumGroup = self.project.newSpectrumGroup(name=self.name, spectra=self.spectra)
         attrNames = ['series', 'seriesType', 'seriesUnits', 'sliceColour',
                  'positiveContourColour', 'negativeContourColour', 'comment']
         for name in attrNames:
@@ -349,12 +348,7 @@ class SpectrumGroup(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename SpectrumGroup, changing its name and Pid.
         """
-        _validateName(self.project, SpectrumGroup, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.__dict__['name'] = value
-        return (oldName,)
+        return self._rename(value)
 
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated seriesValues instances

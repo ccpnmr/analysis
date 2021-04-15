@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/87Sr.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.07
+    ],
+    [
+        "elementNumber",
+        38
+    ],
+    [
+        "gFactor",
+        -0.24284
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "87Sr"
+    ],
+    [
+        "massNumber",
+        87
+    ],
+    [
+        "name",
+        "Strontium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.305
+    ],
+    [
+        "spin",
+        4.5
+    ],
+    [
+        "symbol",
+        "Sr"
+    ]
+]

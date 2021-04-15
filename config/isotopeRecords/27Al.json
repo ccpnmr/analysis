@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/27Al.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        1.0
+    ],
+    [
+        "elementNumber",
+        13
+    ],
+    [
+        "gFactor",
+        1.4566
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "27Al"
+    ],
+    [
+        "massNumber",
+        27
+    ],
+    [
+        "name",
+        "Aluminium"
+    ],
+    [
+        "quadrupoleMoment",
+        0.1466
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Al"
+    ]
+]

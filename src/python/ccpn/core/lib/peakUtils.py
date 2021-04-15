@@ -698,7 +698,7 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     boxWidths = np.array(boxWidths, dtype=np.int32)
 
     # get the height - remember not to use (position-1) because function does that
-    height = dataSource.getPositionValue([peakDim.position for peakDim in peakDims])
+    height = dataSource.getPointValue([peakDim.position for peakDim in peakDims])
 
     # generate a np array with the position of the peak in points rounded to integers
     position = [peakDim.position - 1 for peakDim in peakDims]  # API position starts at 1
@@ -833,6 +833,65 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
         else:
             # get the interpolated height
             peak.height = peak.peakList.spectrum.getHeight(peak.ppmPositions)
+
+def peakParabolicInterpolation(peak: 'Peak', update=False):
+    """
+    return a (position, height, heightError) tuple using parabolic interpolation
+    of the peak.position
+
+    :param peak: a core.Peak instance or Pid or valid pid-string
+    :param update: flag indicating peak position and height to be updated
+
+    :return: (position, height) tuple;  position is a list with length
+                                        spectrum.dimensionCount
+    """
+    import numpy
+    from ccpn.core.Peak import Peak
+    from ccpn.core.lib.Pid import Pid
+    from ccpn.framework.Framework import getApplication
+    from ccpn.util.Parabole import Parabole
+
+    if isinstance(peak, Peak):
+        pass
+    elif isinstance(peak, (Pid, str)):
+        _peak = getApplication().project.getByPid(peak)
+        if _peak is None:
+            raise ValueError('Error retrieving valid peak instance from "%s"' % peak)
+        peak = _peak
+    else:
+        raise ValueError('Expected a Peak, Pid or valid pid-string for the "peak" argument')
+
+    spectrum = peak.peakList.spectrum
+    spectrum.checkValidPath()
+
+    # get the position as the nearest grid point
+    position = [int(p+0.5) for p in peak.pointPosition]
+    # get the data +/-1 point along each axis
+    sliceTuples = [(p-1, p+1) for p in position] # nb: sliceTuples run [1,n] with n inclusive
+    #TODO get this via spectrum rather than datasource (once Spectrum.getRegionData is functional again)
+    data = spectrum.dataSource.getRegionData(sliceTuples)
+
+    heights = [0.0] * spectrum.dimensionCount
+    newPosition = position[:]
+    for axis in range(spectrum.dimensionCount):
+        # get the three y-values along axis, but centered for the other axes
+        slices = [slice(1,2) for d in range(spectrum.dimensionCount)]
+        slices[axis] = slice(0,3)
+        yValues = data[tuple(slices[::-1])].flatten()
+        # create points list for the Parabole method
+        point = position[axis]
+        points = [(p, yValues[i]) for i,p in enumerate((point-1, point, point+1))]
+        parabole = Parabole.fromPoints(points)
+        newPosition[axis], heights[axis] = parabole.maxValue()
+
+    arr = numpy.array(heights)
+    height = float(numpy.average(arr))
+    heightError = arr.max() - arr.min()
+    if update:
+        peak.pointPosition = newPosition
+        peak.height = height
+        peak.heightError = heightError
+    return newPosition, height, heightError
 
 
 def getSpectrumData(peak: 'Peak', halfBoxWidth: int = 3):

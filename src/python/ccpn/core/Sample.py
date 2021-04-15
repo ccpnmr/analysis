@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:22 +0000 (Sun, January 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-10 11:42:40 +0000 (Mon, April 10, 2017) $"
 
 from datetime import datetime
 from typing import Sequence, Tuple, Optional
+
 from ccpn.core.Project import Project
 from ccpn.core.PseudoDimension import PseudoDimension
 from ccpn.core.Spectrum import Spectrum
@@ -214,15 +215,6 @@ class Sample(AbstractWrapperObject):
     def columnNumber(self, value: int):
         self._wrappedData.colPosition = value
 
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
-
     @property
     def spectra(self) -> Tuple[Spectrum, ...]:
         """ccpn.Spectra acquired using
@@ -321,12 +313,7 @@ class Sample(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Sample, changing its name and Pid.
         """
-        commonUtil._validateName(self.project, Sample, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.__dict__['name'] = value
-        return (oldName,)
+        return self._rename(value)
 
     #=========================================================================================
     # CCPN functions
@@ -402,9 +389,7 @@ def _newSample(self: Project, name: str = None, pH: float = None, ionicStrength:
     :return: a new Sample instance.
     """
 
-    if not name:
-        name = Sample._nextAvailableName(Sample, self)
-    commonUtil._validateName(self, Sample, name)
+    name = Sample._uniqueName(project=self, name=name)
 
     nmrProject = self._wrappedData
     apiSampleStore = nmrProject.sampleStore

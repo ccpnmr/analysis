@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import datetime
 from typing import Optional
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore as ApiNmrConstraintStore
@@ -116,20 +117,19 @@ class DataSet(AbstractWrapperObject):
         """
         # Reading V2 project resulted in name being None; create one on the fly
         if self._wrappedData.name is None:
-            name = DataSet._nextAvailableWrappedName(DataSet, self.project)
+            name = DataSet._uniqueName(self.project)
             self._wrappedData.__dict__['name'] = name  # The only way to access this
 
         return self._wrappedData.name
 
     @name.setter
     def name(self, value: str):
-        """Set title of the DataSet.
-        """
         self.rename(value)
 
     @property
     def programName(self) -> str:
-        """Name of program performing the calculation"""
+        """Name of program performing the calculation
+        """
         return self._none2str(self._wrappedData.programName)
 
     @programName.setter
@@ -138,7 +138,8 @@ class DataSet(AbstractWrapperObject):
 
     @property
     def programVersion(self) -> Optional[str]:
-        """Version of program performing the calculation"""
+        """Version of program performing the calculation
+        """
         return self._none2str(self._wrappedData.programVersion)
 
     @programVersion.setter
@@ -171,15 +172,6 @@ class DataSet(AbstractWrapperObject):
     @uuid.setter
     def uuid(self, value: str):
         self._wrappedData.uuid = self._str2none(value)
-
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._none2str(self._wrappedData.details)
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = self._str2none(value)
 
     def _fetchFixedResonance(self, assignment: str, checkUniqueness: bool = True) -> ApiFixedResonance:
         """Fetch FixedResonance matching assignment string, creating anew if needed.
@@ -241,12 +233,7 @@ class DataSet(AbstractWrapperObject):
         """Rename DataSet, changing its name and Pid.
         NB, the serial remains immutable.
         """
-        commonUtil._validateName(self.project, DataSet, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.name = value
-        return (oldName,)
+        return self._rename(value)
 
     #=========================================================================================
     # CCPN functions
@@ -372,10 +359,7 @@ def _newDataSet(self: Project, title: str = None, name: str = None, programName:
         getLogger().warning('DataSet.title is deprecated, please use DataSet.name')
         name = title
 
-    if not name:
-        name = DataSet._nextAvailableName(DataSet, self)
-    # match the error message to the attribute
-    commonUtil._validateName(self, DataSet, value=name, attribName='title' if title else 'name')
+    name = DataSet._uniqueName(project=self, name=name)
 
     nmrProject = self._wrappedData
 

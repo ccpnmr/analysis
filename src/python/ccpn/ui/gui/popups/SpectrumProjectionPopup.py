@@ -15,6 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2021-02-22 16:19:38 +0000 (Mon, February 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-02-04 12:07:36 +0000 (Thu, February 04, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,7 +26,8 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.core.lib.SpectrumLib import PROJECTION_METHODS
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -39,7 +41,7 @@ class SpectrumProjectionPopup(ExportDialogABC):
 
     FIXEDHEIGHT = True
 
-    def __init__(self, parent=None, mainWindow=None, title='Make Spectrum Projection', **kwds):
+   def __init__(self, parent=None, mainWindow=None, title='Make Spectrum Projection', **kwds):
 
         super().__init__(parent=parent, mainWindow=mainWindow, title=title,
                          fileMode='anyFile',
@@ -74,16 +76,18 @@ class SpectrumProjectionPopup(ExportDialogABC):
     def initialise(self, userFrame):
         """Create the widgets for the userFrame
         """
-        spectrumLabel = Label(userFrame, 'Spectrum to project', grid=(0, 0))
+        # spectrum selection
+        spectrumLabel = Label(userFrame, 'Spectrum', grid=(0, 0))
         self.spectrumPulldown = PulldownList(userFrame, grid=(0, 1), callback=self._setSpectrum, gridSpan=(1, 2))
 
         # projection axis
         axisLabel = Label(userFrame, 'Projection axis', grid=(2, 0))
         self.projectionAxisPulldown = PulldownList(userFrame, grid=(2, 1), gridSpan=(1, 2), callback=self._setProjectionAxis)
         # method
-        methodLabel = Label(userFrame, 'Projection Method', grid=(4, 0))
+        methodLabel = Label(userFrame, 'Projection method', grid=(4, 0))
         self.methodPulldown = PulldownList(userFrame, grid=(4, 1), gridSpan=(1, 2), callback=self._setMethod)
         self.methodPulldown.setData(PROJECTION_METHODS)
+
         # threshold
         thresholdLabel = Label(userFrame, 'Threshold', grid=(5, 0))
         self.thresholdData = ScientificDoubleSpinBox(userFrame, grid=(5, 1), gridSpan=(1, 2), vAlign='t', min=0.1, max=1e12)
@@ -170,10 +174,9 @@ class SpectrumProjectionPopup(ExportDialogABC):
                 # if len(objs) == 0:
                 #     raise RuntimeError('Error loading "%s"' % filePath)
                 projectedSpectrum = spectrum.extractProjectionToFile(axisCodes, method=method, threshold=threshold, path=filePath)
-                if self.contourCheckBox.get():
-                    # projectedSpectrum = objs[0]
-                    projectedSpectrum.positiveContourColour = spectrum.positiveContourColour
-                    projectedSpectrum.negativeContourColour = spectrum.negativeContourColour
+                if not self.contourCheckBox.get():
+                    # settings are copied by default from the originating spectrum
+                    projectedSpectrum._setDefaultContourColours()
 
     # def _getSpectrumFile(self):
     #     if os.path.exists('/'.join(self.saveText.text().split('/')[:-1])):

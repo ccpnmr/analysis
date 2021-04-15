@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/160Tb.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.0
+    ],
+    [
+        "elementNumber",
+        65
+    ],
+    [
+        "gFactor",
+        0.5967
+    ],
+    [
+        "isRadioactive",
+        true
+    ],
+    [
+        "isotopeCode",
+        "160Tb"
+    ],
+    [
+        "massNumber",
+        160
+    ],
+    [
+        "name",
+        "Terbium"
+    ],
+    [
+        "quadrupoleMoment",
+        3.85
+    ],
+    [
+        "spin",
+        3.0
+    ],
+    [
+        "symbol",
+        "Tb"
+    ]
+]

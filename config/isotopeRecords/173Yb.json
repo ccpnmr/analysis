@@ -1,0 +1,52 @@
+[
+    [
+        "_metadata",
+        {
+            "user": "geerten",
+            "classVersion": 1.0,
+            "jsonVersion": 3.0,
+            "lastPath": "/Users/geerten/Code/CCPNv3/CcpNmr/config/isotopeRecords/173Yb.json",
+            "className": "IsotopeRecord"
+        }
+    ],
+    [
+        "abundance",
+        0.1613
+    ],
+    [
+        "elementNumber",
+        70
+    ],
+    [
+        "gFactor",
+        -0.2592
+    ],
+    [
+        "isRadioactive",
+        false
+    ],
+    [
+        "isotopeCode",
+        "173Yb"
+    ],
+    [
+        "massNumber",
+        173
+    ],
+    [
+        "name",
+        "Ytterbium"
+    ],
+    [
+        "quadrupoleMoment",
+        2.8
+    ],
+    [
+        "spin",
+        2.5
+    ],
+    [
+        "symbol",
+        "Yb"
+    ]
+]

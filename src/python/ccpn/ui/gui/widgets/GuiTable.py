@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-09 16:18:51 +0100 (Fri, April 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-16 19:16:19 +0100 (Fri, April 16, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,7 @@ from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight, TABLEFONT
 from ccpn.util.AttrDict import AttrDict
-
+import math
 
 OBJECT_CLASS = 0
 OBJECT_PARENT = 1
@@ -2360,13 +2360,35 @@ class GuiTableFrame(Frame):
 
 
 def _getValueByHeader(row, header):
+    """
+    Called from a table built with series
+
+    :param row: the Pandas series object
+    :param header: str , column header
+    :return: a value of type int, float, str. If  inf, nan or None, returns and empty str
+    """
     try:
-        return row[header]
+        value = row[header]
+        if value is None:
+            return ''
+        if isinstance(value, float):
+            if math.isnan(value) or math.isinf(value):
+                return ''
+            else:
+                return value
+        else:
+            return value
     except Exception as e:
         getLogger().warn('GuiTable error in getting a value for header %s. Check dataframe Header %s' % (header, e))
 
 
 def _setValueByHeader(row, header, value):
+    """
+    Called from a table built with series
+    :param row: the Pandas series object
+    :param header: str , column header
+
+    """
     row = row.copy()
     row[header] = value
     return row

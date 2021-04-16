@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-12 17:53:17 +0100 (Mon, April 12, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-16 16:53:01 +0100 (Fri, April 16, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -475,7 +475,7 @@ class GuiPipeline(CcpnModule, Pipeline):
                 return self.inputData
 
     def _runPipeline(self):
-        self.goButton.setEnabled(False)
+        # self.goButton.setEnabled(False)
         self.project._logger.info('Pipeline: Started.')
         self.queue = []
         if self.inputData:
@@ -496,10 +496,6 @@ class GuiPipeline(CcpnModule, Pipeline):
                                     pipe.inputData = self.inputData
                                     pipe.spectrumGroups = self.spectrumGroups
                                     result = pipe.runPipe(self.inputData)
-                                    # print(guiPipe.pipeName)
-                                    # print(guiPipe._kwargs)
-                                    # print(self._kwargs)
-                                    # time.sleep(11.3)  # seconds
                                     self.inputData = result or set()
                                 else:
                                     pipe.isActive = False
@@ -511,7 +507,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
         self.project._logger.info('Pipeline: Finished.')
         MessageDialog.showInfo('Pipeline','Finished')
-        self.goButton.setEnabled(True)
+        # self.goButton.setEnabled(True)
 
     def _closeModule(self):
         """Re-implementation of closeModule function from CcpnModule to unregister notification """

@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-22 18:19:23 +0000 (Mon, March 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-17 11:46:08 +0100 (Sat, April 17, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -294,7 +294,10 @@ class EditableRadioButtons(Widget, Base):
             layout = self.getLayout()
             layout.addWidget(button, *grid)
             if objectNames and objectNames[i]:
-                button.setObjectName(objectNames[i])
+                button.radioButton.setObjectName(objectNames[i])
+                button.radioButton.setObjectName('radioButton_'+objectNames[i])
+                button.lineEdit.setObjectName('lineEdit_'+objectNames[i])
+
             if icons and icons[i]:
                 thisIcon = icons[i]
                 if isinstance(thisIcon, str):

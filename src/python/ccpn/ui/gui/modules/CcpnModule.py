@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-25 18:46:36 +0000 (Thu, March 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-17 11:46:08 +0100 (Sat, April 17, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -59,7 +59,7 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
-from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.RadioButtons import EditableRadioButtons
 from ccpn.ui.gui.widgets.SideBar import SideBar, SideBarSearchListView
 from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
@@ -86,6 +86,7 @@ CommonWidgets = {
     PulldownList.__name__               : (PulldownList.currentText, PulldownList.set),
     RadioButtons.__name__               : (RadioButtons.get, RadioButtons.set),
     RadioButton.__name__                : (RadioButton.isChecked, RadioButton.setChecked),
+    EditableRadioButtons.__name__       : (EditableRadioButtons.getIndex, EditableRadioButtons.setIndex),
 
     Slider.__name__                     : (Slider.get, Slider.setValue),
     Spinbox.__name__                    : (Spinbox.value, Spinbox.set),

@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-25 17:05:11 +0000 (Thu, March 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2021-04-19 14:35:39 +0100 (Mon, April 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -644,6 +644,14 @@ def makeIterableList(inList=None):
         else:
             return []
 
+def flattenLists(lists):
+    """
+    Take a list of lists and concatenate into a single list.
+    Remove any Nones from the list
+    :param lists: a list of lists
+    :return: list.  a single list
+    """
+    return makeIterableList(lists)
 
 def _truncateText(text, splitter=' , ', maxWords=4):
     "Splits the text by the given splitter. If more then maxWords, it return the maxWord plus dots, otherwise just the text"

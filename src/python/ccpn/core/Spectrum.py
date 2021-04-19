@@ -52,7 +52,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-03 18:16:09 +0000 (Wed, March 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-19 19:34:10 +0100 (Mon, April 19, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -83,7 +83,7 @@ from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreS
     undoStackBlocking, renameObject, undoBlock, notificationBlanking, ccpNmrV3CoreSetter
 from ccpn.util.Common import getAxisCodeMatchIndices, _validateName
 from ccpn.util.Path import Path, aPath
-from ccpn.util.Common import isIterable, incrementName
+from ccpn.util.Common import isIterable, incrementName, _getObjectsByPids
 from ccpn.util.Constants import SCALETOLERANCE
 
 # 2019010:ED test new matching
@@ -227,6 +227,7 @@ class Spectrum(AbstractWrapperObject):
     _SLICEDATACACHE = '_sliceDataCache'  # Attribute name for the slicedata cache
     _SLICE1DDATACACHE = '_slice1DDataCache'  # Attribute name for the 1D slicedata cache
     _REGIONDATACACHE = '_regionDataCache'  # Attribute name for the regionData cache
+    _REFERENCESUBSANCESCACHE = '_referenceSubstances'
     _dataCaches = [_PLANEDATACACHE, _SLICEDATACACHE, _SLICE1DDATACACHE, _REGIONDATACACHE]
 
     def __init__(self, project: Project, wrappedData: Nmr.ShiftList):
@@ -1293,12 +1294,13 @@ assignmentTolerances
         self._setDataDimRefAttribute('refValue', value)
 
     @property
+    @cached(_REFERENCESUBSANCESCACHE, maxItems=5000, debug=False)
     def referenceSubstances(self):
         """
         :return: a list of substances
         """
         pids = self._ccpnInternalData.get(self._ReferenceSubstancesPids) or []
-        objs = [self.project.getByPid(pid) for pid in pids if pid is not None]
+        objs = _getObjectsByPids(self.project, pids)
         return objs
 
     @referenceSubstances.setter
@@ -2390,6 +2392,7 @@ assignmentTolerances
     @cached.clear(_SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
     @cached.clear(_SLICE1DDATACACHE)  # Check if there was a slice1ddata cache, and if so, clear it
     @cached.clear(_REGIONDATACACHE)  # Check if there was a regiondata cache, and if so, clear it
+    @cached.clear(_REFERENCESUBSANCESCACHE)
     def _clearCache(self):
         """Convenience to clear the cache; all action done by the decorators
         """

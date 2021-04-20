@@ -6,7 +6,8 @@ modified by Geerten 1-12/12/2016
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-26 12:43:47 +0000 (Fri, March 26, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-04-20 11:00:56 +0100 (Tue, April 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -59,7 +60,7 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
-from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.RadioButtons import EditableRadioButtons
 from ccpn.ui.gui.widgets.SideBar import SideBar, SideBarSearchListView
 from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
@@ -86,6 +87,7 @@ CommonWidgets = {
     PulldownList.__name__               : (PulldownList.currentText, PulldownList.set),
     RadioButtons.__name__               : (RadioButtons.get, RadioButtons.set),
     RadioButton.__name__                : (RadioButton.isChecked, RadioButton.setChecked),
+    EditableRadioButtons.__name__       : (EditableRadioButtons.getIndex, EditableRadioButtons.setIndex),
 
     Slider.__name__                     : (Slider.get, Slider.setValue),
     Spinbox.__name__                    : (Spinbox.value, Spinbox.set),

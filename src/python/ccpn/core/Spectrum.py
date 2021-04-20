@@ -41,7 +41,8 @@ See doc strings of these methods for detailed documentation
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -49,9 +50,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-14 19:56:58 +0100 (Wed, April 14, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-04-20 11:00:56 +0100 (Tue, April 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -87,7 +88,8 @@ from ccpn.core.lib.DataStore import DataStore
 
 from ccpn.util import Constants
 from ccpn.util.Constants import SCALETOLERANCE
-from ccpn.util.Common import isIterable
+from ccpn.util.Common import isIterable, _getObjectsByPids, getAxisCodeMatchIndices, incrementName
+from ccpn.util.Path import Path, aPath
 # 2019010:ED test new matching
 # from ccpn.util.Common import axisCodeMapping
 from ccpn.util.Common import getAxisCodeMatch as axisCodeMapping
@@ -233,6 +235,7 @@ class Spectrum(AbstractWrapperObject):
     #-----------------------------------------------------------------------------------------
 
     _DATASTORE_KEY = '_dataStore'  # Key for storing the dataStore info in the Ccpn internal parameter store of the
+    _REFERENCESUBSANCESCACHE = '_referenceSubstances'
 
     # Spectrum instance
 
@@ -1284,12 +1287,13 @@ class Spectrum(AbstractWrapperObject):
         self._setDataDimRefAttribute('refValue', value)
 
     @property
+    @cached(_REFERENCESUBSANCESCACHE, maxItems=5000, debug=False)
     def referenceSubstances(self):
         """
         :return: a list of substances
         """
         pids = self._ccpnInternalData.get(self._ReferenceSubstancesPids) or []
-        objs = [self.project.getByPid(pid) for pid in pids if pid is not None]
+        objs = _getObjectsByPids(self.project, pids)
         return objs
 
     @referenceSubstances.setter
@@ -2789,6 +2793,7 @@ class Spectrum(AbstractWrapperObject):
             # GLSignals = GLNotifier(parent=self)
             # GLSignals.emitPaintEvent()
 
+    @cached.clear(_REFERENCESUBSANCESCACHE)
     def _clearCache(self):
         """Clear the cache
         """

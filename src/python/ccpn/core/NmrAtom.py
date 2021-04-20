@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-29 14:33:25 +0100 (Mon, March 29, 2021) $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2021-04-20 12:51:42 +0100 (Tue, April 20, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -277,7 +277,7 @@ class NmrAtom(AbstractWrapperObject):
                         self.rename(name or None)
 
                     elif mergeToExisting:
-                        self.mergeNmrAtoms(result)
+                        result.mergeNmrAtoms(self)
 
                     else:
                         raise ValueError("New assignment clash with existing assignment,"
@@ -306,7 +306,7 @@ class NmrAtom(AbstractWrapperObject):
                         self.rename(name or None)
 
                 elif mergeToExisting:
-                    self.mergeNmrAtoms(result)
+                    result.mergeNmrAtoms(self)
 
                 else:
                     raise ValueError("New assignment clash with existing assignment,"

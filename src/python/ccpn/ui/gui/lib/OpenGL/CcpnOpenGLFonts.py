@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-09 19:13:27 +0000 (Tue, March 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -36,8 +36,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import LEFTBORDER, RIGHTBORDER, TOPBO
 from ccpn.util.Colour import hexToRgbRatio
 from ccpn.util.AttrDict import AttrDict
 
-
 from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
+
 
 GlyphXpos = 'Xpos'
 GlyphYpos = 'Ypos'
@@ -124,6 +124,8 @@ class CcpnGLFont():
         # nearest is the quickest gl plotting and gives a slightly brighter image
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
+        # GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST)
+        # GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST)
 
         # the following 2 lines generate a multitexture mipmap - shouldn't need here
         # GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR )
@@ -229,7 +231,8 @@ class GLString(GLVertexArray):
                  ox=0.0, oy=0.0,
                  angle=0.0, width=None, height=None,
                  GLContext=None, blendMode=True,
-                 clearArrays=False, serial=None, pixelScale=None):
+                 clearArrays=False, serial=None, pixelScale=None,
+                 alias=0):
         """
         Create a GLString object for drawing text to the GL window
         :param text:
@@ -264,6 +267,7 @@ class GLString(GLVertexArray):
         self._offset = (ox, oy)
         self._angle = (3.1415926535 / 180) * angle
         self._scale = pixelScale or GLContext.viewports.devicePixelRatio
+        self._alias = alias
         self.buildString()
 
     def buildString(self):
@@ -378,7 +382,7 @@ class GLString(GLVertexArray):
 
         # set the offsets for the characters to the desired coordinates
         self.numVertices = len(self.vertices) // 2
-        self.attribs = np.array((x + ox, y + oy) * self.numVertices, dtype=np.float32)
+        self.attribs = np.array((x + ox, y + oy, self._alias) * self.numVertices, dtype=np.float32)
         self.offsets = np.array((x, y) * self.numVertices, dtype=np.float32)
         self.stringOffset = None  # (ox, oy)
 
@@ -392,11 +396,11 @@ class GLString(GLVertexArray):
         # width = penX - glyph.advance[0] / 64.0 + glyph.size[0]
 
     def drawTextArray(self):
-        self._GLContext.globalGL._shaderProgramTex.setTextureID(self.font._parent.activeTextureNum)
+        # self._GLContext.globalGL._shaderProgramTex.setTextureID(self.font._parent.activeTextureNum)
         super().drawTextArray()
 
     def drawTextArrayVBO(self, enableClientState=False, disableClientState=False):
-        self._GLContext.globalGL._shaderProgramTex.setTextureID(self.font._parent.activeTextureNum)
+        # self._GLContext.globalGL._shaderProgramTex.setTextureID(self.font._parent.activeTextureNum)
         super().drawTextArrayVBO()
 
     def setStringColour(self, col):
@@ -409,4 +413,5 @@ class GLString(GLVertexArray):
         self.colors = np.array(self.colour * self.numVertices, dtype=np.float32)
 
     def setStringOffset(self, attrib):
-        self.attribs = self.offsets + np.array(attrib * self.numVertices, dtype=np.float32)
+        for pp in range(0, self.numVertices):
+            self.attribs[3 * pp:3 * pp + 2] = self.offsets[2 * pp:2 * pp + 2] + attrib

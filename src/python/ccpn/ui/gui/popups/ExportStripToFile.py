@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:02 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-09 19:13:27 +0000 (Tue, March 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -86,7 +86,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLWIDGET, GLPLOTBORDER, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, GLFOREGROUND, \
     GLCONTOURTHICKNESS, GLSHOWSPECTRAONPHASE, \
     GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, GLEXPORTDPI, \
-    GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS, GLDIAGONALSIDEBANDS, GLALIASENABLED, GLALIASSHADE
+    GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS, GLDIAGONALSIDEBANDS, \
+    GLALIASENABLED, GLALIASSHADE, GLALIASLABELSENABLED
 
 
 class ExportStripToFilePopup(ExportDialogABC):
@@ -572,28 +573,30 @@ class ExportStripToFilePopup(ExportDialogABC):
         contourThickness = self.application.preferences.general.contourThickness
         aliasEnabled = self.application.preferences.general.aliasEnabled
         aliasShade = self.application.preferences.general.aliasShade
+        aliasLabelsEnabled = self.application.preferences.general.aliasLabelsEnabled
         stripPadding = self.stripPaddingBox.getValue()
         exportDpi = self.exportDpiBox.getValue()
 
         if strip:
             # return the parameters
-            params = {GLFILENAME        : self.exitFilename,
-                      GLSPECTRUMDISPLAY : spectrumDisplay,
-                      GLSTRIP           : strip,
-                      GLWIDGET          : strip._CcpnGLWidget,
-                      GLPRINTTYPE       : prType,
-                      GLPAGETYPE        : pageType,
-                      GLFOREGROUND      : foregroundColour,
-                      GLBACKGROUND      : backgroundColour,
-                      GLBASETHICKNESS   : baseThickness,
-                      GLSYMBOLTHICKNESS : symbolThickness,
-                      GLCONTOURTHICKNESS: contourThickness,
-                      GLALIASENABLED    : aliasEnabled,
-                      GLALIASSHADE      : aliasShade,
-                      GLSTRIPDIRECTION  : stripDirection,
-                      GLSTRIPPADDING    : stripPadding,
-                      GLEXPORTDPI       : exportDpi,
-                      GLSELECTEDPIDS    : self.treeView.getSelectedObjectsPids()
+            params = {GLFILENAME          : self.exitFilename,
+                      GLSPECTRUMDISPLAY   : spectrumDisplay,
+                      GLSTRIP             : strip,
+                      GLWIDGET            : strip._CcpnGLWidget,
+                      GLPRINTTYPE         : prType,
+                      GLPAGETYPE          : pageType,
+                      GLFOREGROUND        : foregroundColour,
+                      GLBACKGROUND        : backgroundColour,
+                      GLBASETHICKNESS     : baseThickness,
+                      GLSYMBOLTHICKNESS   : symbolThickness,
+                      GLCONTOURTHICKNESS  : contourThickness,
+                      GLALIASENABLED      : aliasEnabled,
+                      GLALIASSHADE        : aliasShade,
+                      GLALIASLABELSENABLED: aliasLabelsEnabled,
+                      GLSTRIPDIRECTION    : stripDirection,
+                      GLSTRIPPADDING      : stripPadding,
+                      GLEXPORTDPI         : exportDpi,
+                      GLSELECTEDPIDS      : self.treeView.getSelectedObjectsPids()
                       }
             selectedList = self.treeView.getSelectedItems()
             for itemName in self.fullList:

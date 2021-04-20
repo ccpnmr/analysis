@@ -2535,7 +2535,7 @@ class Spectrum(AbstractWrapperObject):
         :param axisDict: dict of (axisCode, (startPpm,stopPpm)) (key,value) pairs
         :return list of sliceTuples
 
-        CCPNINTERMAL: also used by PeakPickerABC
+        CCPNINTERNAL: also used by PeakPickerABC
         """
         axisCodes = [ac for ac in axisDict.keys()]
         if None in self._mapAxisCodes(axisCodes):

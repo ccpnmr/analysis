@@ -590,6 +590,10 @@ class PeakList(PMIListABC):
                         excludedDiagonalDims=None, excludedDiagonalTransform=None,
                         estimateLineWidths=True):
 
+        print('>>>   pickPeaksRegion')
+
+        # NOTE:ED - put the call in spectrum?
+
         with undoBlockWithoutSideBar():
             peaks = self._pickPeaksRegion(regionToPick=regionToPick,
                                           doPos=doPos, doNeg=doNeg,
@@ -653,6 +657,8 @@ class PeakList(PMIListABC):
         :param excludedDiagonalTransform:
         :return: list of peaks.
         """
+
+        print('>>>   _pickPeaksRegion')
 
         from ccpnc.peak import Peak as CPeak
 
@@ -910,150 +916,31 @@ class PeakList(PMIListABC):
         Must be called with peaks that belong to this peakList
         """
 
-        from ccpnc.peak import Peak as CPeak
+        print('>>>   peakList.fitExistingPeaks')
 
-        assert fitMethod in PICKINGMETHODS, 'pickPeaksRegion: fitMethod = %s, must be one of ("gaussian", "lorentzian", "parabolic")' % fitMethod
-        method = PICKINGMETHODS.index(fitMethod)
+        from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
+        from ccpn.framework.Application import getApplication
 
-        allPeaksArray = None
-        allRegionArrays = []
-        regionArray = None
+        getApp = getApplication()
 
-        badPeaks = [peak for peak in peaks if peak.peakList is not self]
-        if badPeaks:
-            raise ValueError('List contains peaks that are not in the same peakList.')
+        if peaks:
 
-        for peak in peaks:
+            badPeaks = [peak for peak in peaks if peak.peakList is not self]
+            if badPeaks:
+                raise ValueError('List contains peaks that are not in the same peakList.')
 
-            peak = peak._wrappedData
+            myPeakPicker = PeakPickerNd(spectrum=self.spectrum)
+            myPeakPicker.setParameters(dropFactor=getApp.preferences.general.peakDropFactor,
+                                       fitMethod=fitMethod,
+                                       searchBoxMode=getApp.preferences.general.searchBoxMode,
+                                       searchBoxDoFit=getApp.preferences.general.searchBoxDoFit,
+                                       halfBoxSearchWidth=halfBoxSearchWidth,
+                                       halfBoxFitWidth=halfBoxFitWidth,
+                                       searchBoxWidths=getApp.preferences.general.searchBoxWidthsNd,
+                                       singularMode=singularMode
+                                       )
 
-            dataSource = peak.peakList.dataSource
-            numDim = dataSource.numDim
-            dataDims = dataSource.sortedDataDims()
-
-            peakDims = peak.sortedPeakDims()
-
-            # generate a np array with the position of the peak in points rounded to integers
-            position = [peakDim.position - 1 for peakDim in peakDims]  # API position starts at 1
-
-            # round up/down the position
-            pLower = np.floor(position).astype(np.int32)
-            pUpper = np.ceil(position).astype(np.int32)
-            position = np.round(np.array(position))
-
-            # generate a np array with the number of points per dimension
-            numPoints = [peakDim.dataDim.numPoints for peakDim in peakDims]
-            numPoints = np.array(numPoints)
-
-            # consider for each dimension on the interval [point-3,point+4>, account for min and max
-            # of each dimension
-            if fitMethod == PARABOLICMETHOD or singularMode is True:
-                firstArray = np.maximum(pLower - halfBoxSearchWidth, 0)
-                lastArray = np.minimum(pUpper + halfBoxSearchWidth, numPoints)
-            else:
-                # extra plane in each direction increases accuracy of group fitting
-                firstArray = np.maximum(pLower - halfBoxSearchWidth - 1, 0)
-                lastArray = np.minimum(pUpper + halfBoxSearchWidth + 1, numPoints)
-
-            # Cast to int for subsequent call
-            firstArray = firstArray.astype(np.int32)
-            lastArray = lastArray.astype(np.int32)
-            localRegionArray = np.array((firstArray, lastArray), dtype=np.int32)
-
-            if regionArray is not None:
-                firstArray = np.minimum(firstArray, regionArray[0])
-                lastArray = np.maximum(lastArray, regionArray[1])
-
-            # requires reshaping of the array for use with CPeak.fitParabolicPeaks
-            peakArray = position.reshape((1, numDim))
-            peakArray = peakArray.astype(np.float32)
-            regionArray = np.array((firstArray, lastArray), dtype=np.int32)
-
-            if allPeaksArray is None:
-                allPeaksArray = peakArray
-            else:
-                allPeaksArray = np.append(allPeaksArray, peakArray, axis=0)
-            allRegionArrays.append(localRegionArray)
-
-        if allPeaksArray is not None and allPeaksArray.size != 0:
-
-            # map to (0, 0)
-            regionArray = np.array((firstArray - firstArray, lastArray - firstArray))
-
-            # Get the data; note that arguments has to be castable to int?
-            dataArray, intRegion = dataSource.getRegionData(firstArray, lastArray)      # unit-scaled
-
-            # update positions relative to the corner of the data array
-            firstArray = firstArray.astype(np.float32)
-            updatePeaksArray = None
-            for pk in allPeaksArray:
-                if updatePeaksArray is None:
-                    updatePeaksArray = pk - firstArray
-                    updatePeaksArray = updatePeaksArray.reshape((1, numDim))
-                    updatePeaksArray = updatePeaksArray.astype(np.float32)
-                else:
-                    pk = pk - firstArray
-                    pk = pk.reshape((1, numDim))
-                    pk = pk.astype(np.float32)
-                    updatePeaksArray = np.append(updatePeaksArray, pk, axis=0)
-
-            try:
-                result = ()
-                # NOTE:ED - groupMode must be gaussian
-                if fitMethod == PARABOLICMETHOD and singularMode is True:
-
-                    # parabolic - generate all peaks in one operation
-                    result = CPeak.fitParabolicPeaks(dataArray, regionArray, updatePeaksArray)
-
-                else:
-                    method = 1 if fitMethod == LORENTZIANMETHOD else 0
-
-                    # currently gaussian or lorentzian
-                    if singularMode is True:
-
-                        # fit peaks individually
-                        for peakArray, localRegionArray in zip(allPeaksArray, allRegionArrays):
-                            peakArray = peakArray - firstArray
-                            peakArray = peakArray.reshape((1, numDim))
-                            peakArray = peakArray.astype(np.float32)
-                            localRegionArray = np.array((localRegionArray[0] - firstArray, localRegionArray[1] - firstArray), dtype=np.int32)
-
-                            localResult = CPeak.fitPeaks(dataArray, localRegionArray, peakArray, method)
-                            result += tuple(localResult)
-                    else:
-
-                        # fit all peaks in one operation
-                        result = CPeak.fitPeaks(dataArray, regionArray, updatePeaksArray, method)
-
-            except CPeak.error as e:
-
-                # there could be some fitting error
-                getLogger().warning("Aborting peak fit, Error for peak: %s:\n\n%s " % (peak, e))
-                return
-
-            for pkNum, peak in enumerate(peaks):
-                height, center, linewidth = result[pkNum]
-
-                # work on the _wrappedData
-                apiPeak = peak._wrappedData
-                peakDims = apiPeak.sortedPeakDims()
-
-                dataSource = apiPeak.peakList.dataSource
-                dataDims = dataSource.sortedDataDims()
-
-                for i, peakDim in enumerate(peakDims):
-                    # peakDim.position = position[i] + 1  # API position starts at 1
-
-                    newPos = min(max(center[i], 0.5), dataArray.shape[i] - 1.5)
-
-                    # NOTE:ED - ignore if out of range - might not need any more
-                    dist = abs(newPos - center[i])
-                    if dist < halfBoxSearchWidth:
-                        peakDim.position = center[i] + firstArray[i] + 1.0  # API position starts at 1
-                    peakDim.lineWidth = dataDims[i].valuePerPoint * linewidth[i]
-
-                # apiPeak.height = dataSource.scale * height
-                apiPeak.height = height
+            myPeakPicker.fitExistingPeaks(peaks)
 
     def _getAliasingRange(self):
         """Return the min/max aliasing range for the peaks in the list, if there are no peaks, return None
@@ -1155,9 +1042,6 @@ class PeakList(PMIListABC):
         """
         from ccpn.core.Peak import _newPeak  # imported here to avoid circular imports
 
-        # height now called explicitly after creating new peak
-        # if height is None and ppmPositions:
-        #     height = self.spectrum.getHeight(ppmPositions)
         return _newPeak(self, ppmPositions=ppmPositions, height=height, comment=comment, **kwds)
 
     @logCommand(get='self')

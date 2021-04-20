@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-09 19:13:27 +0000 (Tue, March 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -89,6 +89,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLExternalRegion
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
+
 
 UNITS_PPM = 'ppm'
 UNITS_HZ = 'Hz'
@@ -579,8 +580,8 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self.globalGL._shaderProgramTex.setBackground(self.background)
         self.globalGL._shaderProgramAlias.makeCurrent()
         self.globalGL._shaderProgramAlias.setBackground(self.background)
-        self.globalGL._shaderProgramAlias.setAliasShade(0.25)
-        self.globalGL._shaderProgramAlias.setAliasEnabled(True)
+        self.globalGL._shaderProgramTexAlias.makeCurrent()
+        self.globalGL._shaderProgramTexAlias.setBackground(self.background)
         if not silent:
             self.update()
         self.doneCurrent()

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:00 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-09 19:13:26 +0000 (Tue, March 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -94,7 +94,7 @@ def _calculateCenterOfMassPoints(multiplet):
                     peakPositions = [peak.pointPositions[d] for peak in _peaks]
                     position += (sum(peakPositions) / _lenPeaks,)
             else:
-                position = (sum([peak.position[0] for peak in _peaks]) / _lenPeaks,
+                position = (sum([peak.pointPositions[0] for peak in _peaks]) / _lenPeaks,
                             sum([peak.height for peak in _peaks]) / _lenPeaks)
             return position
     except:

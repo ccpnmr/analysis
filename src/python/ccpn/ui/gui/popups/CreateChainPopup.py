@@ -157,7 +157,7 @@ class CreateChainPopup(AttributeEditorPopupABC):
         self.obj.addPseudoAtoms = DefaultAddPseudoAtoms
         self.obj.addNonstereoAtoms = DefaultAddNonstereoAtoms
 
-        # attach the calbacks for the widgets
+        # attach the callbacks for the widgets
         self.moleculeEdit.textChanged.connect(self._queueSetMoleculeName)
         self.commentName.textChanged.connect(self._queueSetComment)
         self.lineEdit1a.valueChanged.connect(self._queueSetSequenceStart)

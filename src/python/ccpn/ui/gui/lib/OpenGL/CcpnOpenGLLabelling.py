@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 17:14:20 +0000 (Tue, March 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-26 17:49:29 +0000 (Fri, March 26, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,6 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_DRAW, GLRENDERM
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import getAliasSetting
 
-
 # NOTE:ED - remember these for later, may create larger vertex arrays for symbols, but should be quicker
 #       --
 #       x = np.array([1, 2, 3, -1, 5, 0, 3, 4, 4, 7, 3, 5, 9, 0, 5, 4, 3], dtype=np.uint32)
@@ -59,6 +58,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import getAliasSetting
 #       *** a = x[x != SKIPINDEX]
 
 from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
+
 
 OBJ_ISINPLANE = 0
 OBJ_ISINFLANKINGPLANE = 1
@@ -284,10 +284,10 @@ class GLLabelling():
         if obj.isDeleted:
             return
 
-        objPos = obj.ppmPositions
+        objPos = obj.pointPositions
         if not objPos:
             return
-        objLineWidths = obj.ppmLineWidths
+        objLineWidths = obj.pointLineWidths
 
         spectrum = spectrumView.spectrum
         spectrumFrequency = spectrum.spectrometerFrequencies
@@ -295,9 +295,11 @@ class GLLabelling():
         pls = self.objectList(objListView)
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-        p0 = (objPos[pIndex[0]], objPos[pIndex[1]])
-        ppmLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
+        p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+        pointLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
         frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
+        _alias = obj.aliasing
+        alias = getAliasSetting(_alias[pIndex[0]], _alias[pIndex[1]])
 
         if None in p0:
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
@@ -308,9 +310,9 @@ class GLLabelling():
         stringOffset = None
         if symbolType in (1, 2):
             # put to the top-right corner of the lineWidth
-            if ppmLineWidths[0] and ppmLineWidths[1]:
-                r = - GLDefs.STRINGSCALE * 0.5 * ppmLineWidths[0] / frequency[0]
-                w = - GLDefs.STRINGSCALE * 0.5 * ppmLineWidths[1] / frequency[1]
+            if pointLineWidths[0] and pointLineWidths[1]:
+                r = - GLDefs.STRINGSCALE * 0.5 * pointLineWidths[0]  #/ frequency[0]
+                w = - GLDefs.STRINGSCALE * 0.5 * pointLineWidths[1]  #/ frequency[1]
                 stringOffset = (r, w)
             else:
                 r = GLDefs.STRINGSCALE * r
@@ -344,7 +346,8 @@ class GLLabelling():
                                  ox=r, oy=w,
                                  colour=(*listCol, fade),
                                  GLContext=self._GLParent,
-                                 obj=obj, clearArrays=False)
+                                 obj=obj, clearArrays=False,
+                                 alias=alias)
             newString.stringOffset = stringOffset
             stringList.append(newString)
 
@@ -357,15 +360,17 @@ class GLLabelling():
         # use the first object for referencing
         obj = objectList(pls)[0]
 
-        objPos = obj.ppmPositions
+        objPos = obj.pointPositions
         if not objPos:
             return
-        objLineWidths = obj.ppmLineWidths
+        objLineWidths = obj.pointLineWidths
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-        p0 = (objPos[pIndex[0]], objPos[pIndex[1]])
-        ppmLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
+        p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+        pointLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
         frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
+        _alias = obj.aliasing
+        alias = getAliasSetting(_alias[pIndex[0]], _alias[pIndex[1]])
 
         if None in p0:
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
@@ -375,9 +380,9 @@ class GLLabelling():
 
         stringOffset = None
         if symbolType in (1, 2):
-            if ppmLineWidths[0] and ppmLineWidths[1]:
-                r = - GLDefs.STRINGSCALE * 0.5 * ppmLineWidths[0] / frequency[0]
-                w = - GLDefs.STRINGSCALE * 0.5 * ppmLineWidths[1] / frequency[1]
+            if pointLineWidths[0] and pointLineWidths[1]:
+                r = - GLDefs.STRINGSCALE * 0.5 * pointLineWidths[0]  #/ frequency[0]
+                w = - GLDefs.STRINGSCALE * 0.5 * pointLineWidths[1]  #/ frequency[1]
                 stringOffset = (r, w)
             else:
                 r = GLDefs.STRINGSCALE * r
@@ -412,7 +417,8 @@ class GLLabelling():
                                  ox=r, oy=w,
                                  colour=(*listCol, fade),
                                  GLContext=self._GLParent,
-                                 obj=obj, clearArrays=False)
+                                 obj=obj, clearArrays=False,
+                                 alias=alias)
             outString.stringOffset = stringOffset
             return outString
 
@@ -1764,89 +1770,17 @@ class GLLabelling():
     # Drawing
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def drawSymbols(self, spectrumSettings, shader=None, stackingMode=True):
+    def drawSymbols(self, spectrumView):
         """Draw the symbols to the screen
         """
         if self.strip.isDeleted:
             return
 
-        # self._spectrumSettings = spectrumSettings
-        # self.buildSymbols()
-
-        lineThickness = self._GLParent._symbolThickness
-        GL.glLineWidth(lineThickness * self._GLParent.viewports.devicePixelRatio)
-        shader.setAliasEnabled(self._GLParent._aliasEnabled)
-
-        # change to correct value for shader
-        shader.setAliasShade(self._GLParent._aliasShade / 100.0)
-
-        # # loop through the attached objListViews to the strip
-        # for spectrumView in self._GLParent._ordering:  #self._parent.spectrumViews:
-        #         if spectrumView.isDeleted:
-        #             continue
-        #     # for peakListView in spectrumView.peakListViews:
-        #     for objListView in self.listViews(spectrumView):
-        #         if spectrumView.isVisible() and objListView.isVisible():
-
         for objListView, specView in self._visibleListViews:
-            if not objListView.isDeleted and objListView in self._GLSymbols.keys():
+            if specView == spectrumView and not objListView.isDeleted and objListView in self._GLSymbols.keys():
+                self._GLSymbols[objListView].drawAliasedIndexVBO()
 
-                specSettings = self._spectrumSettings[specView]
-                pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
-                if None in pIndex:
-                    continue
-
-                # should move this to buildSpectrumSettings
-                # and emit a signal when visibleAliasingRange or foldingModes are changed
-
-                fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
-                # fx1 = specSettings[GLDefs.SPECTRUM_MINXALIAS]
-                fy0 = specSettings[GLDefs.SPECTRUM_MAXYALIAS]
-                # fy1 = specSettings[GLDefs.SPECTRUM_MINYALIAS]
-                dxAF = specSettings[GLDefs.SPECTRUM_DXAF]
-                dyAF = specSettings[GLDefs.SPECTRUM_DYAF]
-                xScale = specSettings[GLDefs.SPECTRUM_XSCALE]
-                yScale = specSettings[GLDefs.SPECTRUM_YSCALE]
-
-                specMatrix = np.array(specSettings[GLDefs.SPECTRUM_MATRIX], dtype=np.float32)
-
-                alias = specView.spectrum.visibleAliasingRange
-                folding = specView.spectrum.foldingModes
-
-                for ii in range(alias[pIndex[0]][0], alias[pIndex[0]][1] + 1, 1):
-                    for jj in range(alias[pIndex[1]][0], alias[pIndex[1]][1] + 1, 1):
-
-                        foldX = foldY = 1.0
-                        foldXOffset = foldYOffset = 0
-                        if folding[pIndex[0]] == 'mirror':
-                            foldX = pow(-1, ii)
-                            foldXOffset = -dxAF if foldX < 0 else 0
-
-                        if folding[pIndex[1]] == 'mirror':
-                            foldY = pow(-1, jj)
-                            foldYOffset = -dyAF if foldY < 0 else 0
-
-                        specMatrix[0:16] = [xScale * foldX, 0.0, 0.0, 0.0,
-                                            0.0, yScale * foldY, 0.0, 0.0,
-                                            0.0, 0.0, 1.0, 0.0,
-                                            fx0 + (ii * dxAF) + foldXOffset, fy0 + (jj * dyAF) + foldYOffset, 0.0, 1.0]
-
-                        # flipping in the same GL region -  xScale = -xScale
-                        #                                   offset = fx0-dxAF
-                        # circular -    offset = fx0 + dxAF*alias, alias = min->max
-                        shader.setMVMatrix(specMatrix)
-                        shader.setAliasPosition(ii, jj)
-                        self._GLSymbols[objListView].drawAliasedIndexVBO()
-
-                # if stackingMode:
-                #     # use the stacking matrix to offset the 1D spectra
-                #     shader.setMVMatrix(spectrumSettings[specView][GLDefs.SPECTRUM_STACKEDMATRIX])
-                # # draw the symbols
-                # self._GLSymbols[objListView].drawIndexVBO()
-
-        GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self._GLParent.viewports.devicePixelRatio)
-
-    def drawLabels(self, spectrumSettings, shader=None, stackingMode=True):
+    def drawLabels(self, spectrumView):
         """Draw the labelling to the screen
         """
         if self.strip.isDeleted:
@@ -1864,12 +1798,11 @@ class GLLabelling():
         #         if spectrumView.isVisible() and objListView.isVisible():
 
         for objListView, specView in self._visibleListViews:
-            if not objListView.isDeleted and objListView in self._GLLabels.keys():
+            if specView == spectrumView and not objListView.isDeleted and objListView in self._GLLabels.keys():
                 for drawString in self._GLLabels[objListView].stringList:
-
-                    if shader and stackingMode:
-                        # use the stacking matrix to offset the 1D spectra
-                        shader.setStackOffset(spectrumSettings[specView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET])
+                    # if shader and stackingMode:
+                    #     # use the stacking matrix to offset the 1D spectra
+                    #     shader.setStackOffset(spectrumSettings[specView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET])
 
                     # draw text
                     drawString.drawTextArrayVBO()
@@ -1988,7 +1921,7 @@ class GL1dLabelling():
             getLogger().warning(f'Object contains undefined position {obj}')
             p0 = (0.0, 0.0)
         else:
-            p0 = (objPos[0], obj.height)
+            p0 = (objPos[0] - 1, obj.height)
             if None in p0:
                 getLogger().warning(f'Object {str(obj)} contains undefined position {str(p0)}')
                 return
@@ -2153,7 +2086,7 @@ class GL1dLabelling():
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
         if not obj.pointPositions:
             return
-        p0 = (obj.pointPositions[pIndex[0]], obj.height)
+        p0 = (obj.pointPositions[pIndex[0]] - 1, obj.height)
 
         if None in p0:
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
@@ -2226,9 +2159,9 @@ class GL1dLabelling():
         r, w, symbolType, symbolWidth, _, _ = self._getSymbolWidths(spectrumView)
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-        if not obj.ppmPositions:
+        if not obj.pointPositions:
             return
-        p0 = (obj.ppmPositions[pIndex[0]], obj.height)
+        p0 = (obj.pointPositions[pIndex[0]] - 1, obj.height)
 
         if None in p0:
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
@@ -2276,46 +2209,6 @@ class GL1dLabelling():
                 drawStr.setStringOffset((r, w))
                 drawStr.updateTextArrayVBOAttribs()
 
-    # def getObjIsInVisiblePlanes(self, spectrumView, obj):
-    #     """Get the current object is in visible planes settings
-    #     """
-    #     return True, False, 0, 1.0
-
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Drawing
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def drawSymbols(self, spectrumSettings, shader=None, stackingMode=True):
-        """Draw the symbols to the screen
-        """
-        if self.strip.isDeleted:
-            return
-
-        lineThickness = self._GLParent._symbolThickness
-        GL.glLineWidth(lineThickness * self._GLParent.viewports.devicePixelRatio)
-        shader.setAliasEnabled(self._GLParent._aliasEnabled)
-
-        # change to correct value for shader
-        shader.setAliasShade(self._GLParent._aliasShade / 100.0)
-        shader.setAliasPosition(0, 0)
-
-        for objListView, specView in self._visibleListViews:
-            if not objListView.isDeleted and objListView in self._GLSymbols.keys():
-
-                specSettings = self._spectrumSettings[specView]
-
-                fx0 = specSettings[GLDefs.SPECTRUM_MAXXALIAS]
-                xScale = specSettings[GLDefs.SPECTRUM_XSCALE]
-
-                if stackingMode:
-                    _matrix = np.array(spectrumSettings[specView][GLDefs.SPECTRUM_STACKEDMATRIX])
-                else:
-                    _matrix = np.array(self._GLParent._IMatrix)
-
-                _matrix[0] = xScale
-                _matrix[12] += fx0
-
-                shader.setMVMatrix(_matrix)
-                self._GLSymbols[objListView].drawIndexVBO()
-
-        GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self._GLParent.viewports.devicePixelRatio)

@@ -56,7 +56,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget
-from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidgetAxis, GuiNdWidgetAxis
+from ccpn.ui.gui.widgets.GLAxis import Gui1dWidgetAxis, GuiNdWidgetAxis
 from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
 from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
 from ccpn.util.Logging import getLogger
@@ -429,7 +429,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        prefsGen.annotationType, prefsGen.stripArrangement,
                                                        prefsGen.symbolSizePixel, prefsGen.symbolThickness, prefsGen.symbolType,
                                                        prefsGen.xAxisUnits, prefsGen.yAxisUnits,
-                                                       prefsGen.aliasEnabled, prefsGen.aliasShade,
+                                                       prefsGen.aliasEnabled, prefsGen.aliasShade, prefsGen.aliasLabelsEnabled,
                                                        prefsGen.contourThickness,
                                                        prefsGen.zPlaneNavigationMode)
 

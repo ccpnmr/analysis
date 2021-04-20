@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-03-09 19:13:27 +0000 (Tue, March 09, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,6 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 import sys
 from PyQt5 import QtWidgets
 import numpy as np
-
 
 from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT, VBO
 
@@ -600,7 +599,7 @@ class GLVertexArray():
 
         # this is for passing extra attributes in
         GL.glEnableVertexAttribArray(1)
-        GL.glVertexAttribPointer(1, 2, GL.GL_FLOAT, GL.GL_FALSE, 0, self.attribs)
+        GL.glVertexAttribPointer(1, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, self.attribs)
 
         GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
 
@@ -751,7 +750,7 @@ class GLVertexArray():
         GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, None)
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[ATTRIB_PTR])
-        GL.glVertexAttribPointer(_attribArrayIndex, 2, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
+        GL.glVertexAttribPointer(_attribArrayIndex, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
 
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[INDEX_PTR])
         GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, None)

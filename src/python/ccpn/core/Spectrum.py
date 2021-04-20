@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 11:07:38 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-20 11:56:27 +0100 (Tue, April 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -242,37 +242,37 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def peakLists(self):
-        "STUB: hot-fixed later"
+        """STUB: hot-fixed later"""
         return ()
 
     @property
     def multipletLists(self):
-        "STUB: hot-fixed later"
+        """STUB: hot-fixed later"""
         return ()
 
     @property
     def integralLists(self):
-        "STUB: hot-fixed later"
+        """STUB: hot-fixed later"""
         return ()
 
     @property
     def spectrumViews(self):
-        "STUB: hot-fixed later"
+        """STUB: hot-fixed later"""
         return ()
 
     @property
     def chemicalShiftList(self):
-        "STUB: hot-fixed later"
+        """STUB: hot-fixed later"""
         return None
 
     @property
     def spectrumReferences(self):
-        "STUB: hot-fixed later"
+        """STUB: hot-fixed later"""
         return None
 
     @property
     def spectrumHits(self):
-        "STUB: hot-fixed later"
+        """STUB: hot-fixed later"""
         return None
 
     # Inherited from AbstractWrapperObject

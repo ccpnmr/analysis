@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 13:29:26 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-20 13:56:09 +0100 (Tue, April 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -187,7 +187,6 @@ class Spectrum(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.DataSource._metaclass.qualifiedName()
 
-
     _referenceSpectrumHit = None
     _snr = None
     #-----------------------------------------------------------------------------------------
@@ -229,8 +228,10 @@ class Spectrum(AbstractWrapperObject):
     #-----------------------------------------------------------------------------------------
     # Internal NameSpace definitions
     #-----------------------------------------------------------------------------------------
+
     # Key for storing the dataStore info in the Ccpn internal parameter store
     _DATASTORE_KEY = '_dataStore'
+    _REFERENCESUBSANCESCACHE = '_referenceSubstances'
 
     _AdditionalAttribute = 'AdditionalAttribute'
     _ReferenceSubstancesPids = '_ReferenceSubstancesPids'

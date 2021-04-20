@@ -555,17 +555,17 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     if self.userDir:
       fileTree.openDir(self.userDir)
     
-    compound = None
-    
-    if fileName:
-      compound = self.readSaveFile(fileName)
-
-    elif self.compoundFileName:  
-      compound = self.readSaveFile(self.compoundFileName)
-      
-    if not compound:
-      self.compoundFileName = None
-      self.setCompound( Compound('Unnamed') )
+    # compound = None
+    #
+    # if fileName:
+    #   compound = self.readSaveFile(fileName)
+    #
+    # elif self.compoundFileName:
+    #   compound = self.readSaveFile(self.compoundFileName)
+    #
+    # if not compound:
+    #   self.compoundFileName = None
+    #   self.setCompound( Compound('Unnamed') )
 
   def _getCompound(self):
     return self.compound

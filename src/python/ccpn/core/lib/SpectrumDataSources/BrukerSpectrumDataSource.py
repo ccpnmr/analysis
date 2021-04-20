@@ -8,18 +8,19 @@ See SpectrumDataSourceABC for a description of the methods
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:33:14 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-04-20 13:29:27 +0100 (Tue, April 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -167,10 +168,43 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         return path is not None and path.exists() and \
                path.is_dir() and len(path.globList('acqu*')) > 0
 
+    def _checkBrukerTopDir(self, path):
+        """Return True if path (of type Path) is a Bruker directory
+        """
+        if path is None or not path.exists():
+            getLogger().debug('Bruker top directory "%s": does not exist' % path)
+            return False
+        if not path.is_dir():
+            getLogger().debug('Bruker top directory "%s": is not a directory' % path)
+            return False
+        if len(path.globList('acqu*')) == 0:
+            getLogger().debug('Bruker top directory "%s": has no acqu* files' % path)
+            return False
+
+        return True
+
     def _isBrukerPdataDir(self, path):
         "Return True if path (of type Path) is a Bruker pdata directory"
         return path is not None and path.exists() and \
                path.is_dir() and len(path.globList('proc*')) > 0
+
+    def _checkBrukerPdataDir(self, path):
+        """Return True if path (of type Path) is a Bruker pdata directory
+        """
+        if path is None or not path.exists():
+            getLogger().debug('Bruker pdata directory "%s": does not exist' % path)
+            return False
+        if not path.is_dir():
+            getLogger().debug('Bruker pdata directory "%s": is not a directory' % path)
+            return False
+        if len(path.globList('proc*')) == 0:
+            getLogger().debug('Bruker pdata directory "%s": has no proc* files' % path)
+            return False
+        if len(path.globList('[1-6][r,i]*')) == 0:
+            getLogger().debug('Bruker pdata directory "%s": has no valid processed data' % path)
+            return False
+
+        return True
 
     def _getDimensionality(self, path):
         "Return dimensionality from path, which should be a BrukerTopDir"
@@ -204,7 +238,12 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         else:
             _path = Path(path)
 
-            if self._isBrukerTopDir(_path):
+            if _path.stem in self._processedDataFiles:
+                # Bruker binary processed data file
+                self._pdata = _path.parent
+                self._brukerRoot = _path.parent.parent.parent
+
+            elif self._isBrukerTopDir(_path):
                 # Bruker top directory
                 self._brukerRoot = _path
                 self._pdata = _path / 'pdata' / '1'
@@ -214,24 +253,16 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self._pdata = _path
                 self._brukerRoot = _path.parent.parent
 
-            elif _path.stem in self._processedDataFiles:
-                # Bruker binary processed data file
-                self._pdata = _path.parent
-                self._brukerRoot = _path.parent.parent.parent
-
             else:
-                logger.debug2('"%s" is not a valid path with Bruker data' % path)
+                logger.debug('"%s" does not define a valid path with Bruker data' % path)
                 return None
 
             # check the directories
-            if not self._isBrukerTopDir(self._brukerRoot):
-                logger.debug2('"%s" is not a valid path with Bruker data' % path)
+            if not self._checkBrukerTopDir(self._brukerRoot):
+                logger.debug('"%s" does not define a valid path with Bruker data' % path)
                 return None
-            if not self._isBrukerPdataDir(self._pdata):
-                logger.debug2('"%s" is not a valid path with Bruker data' % path)
-                return None
-            if len(self._pdata.globList('[1-4][r,i]*')) == 0:
-                logger.debug2('"%s" is not a valid path with Bruker data' % path)
+            if not self._checkBrukerPdataDir(self._pdata):
+                logger.debug('"%s" does not define a valid path with Bruker data' % path)
                 return None
 
             dimensionality = self._getDimensionality(self._brukerRoot)

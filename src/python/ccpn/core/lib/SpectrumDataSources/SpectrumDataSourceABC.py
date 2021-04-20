@@ -83,7 +83,8 @@ Example 3 (using Spectrum instance to make a hdf5 duplicate):
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -92,8 +93,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:00 +0000 (Tue, March 02, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-04-20 13:29:27 +0100 (Tue, April 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -546,7 +547,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return (None if self.dataFile is None else aPath(self.dataFile))
 
     def setPath(self, path, substituteSuffix=False):
-        """define valid path to a (binary) data file, if needed appends or substitutes the suffix (if defined).
+        """define valid path to a (binary) data file, if needed appends or substitutes
+        the suffix (if defined).
 
         return self or None on error
         """
@@ -1089,13 +1091,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # checking path
         if instance.setPath(path, substituteSuffix=False) is None:
-            logger.debug('%s.checkForValidFormat: setting path "%s" yielded None' %
-                         (instance.__class__.__name__, path))
+            logger.debug('path "%s" is not valid for dataFormat "%s"' %
+                         (path, instance.dataFormat))
             return None
 
         if not instance.checkPath(instance.path, mode=instance.defaultOpenReadMode):
-            logger.debug('%s.checkForValidFormat: path "%s" not valid for data format "%s"' %
-                         (instance.__class__.__name__, path, instance.dataFormat))
+            logger.debug('path "%s" is not valid for reading dataFormat "%s"' %
+                         (path, instance.dataFormat))
             return None
 
         # checking opening file and reading parameters
@@ -1104,19 +1106,19 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 pass
                 # instance.readParameters()
         except RuntimeError as es:
-            logger.debug('%s.checkForValidFormat: bailing on reading with error: "%s"' %
-                         (instance.__class__.__name__, es))
+            logger.debug('path "%s", dataFormat "%s": bailing on reading with error: "%s"' %
+                         (path, instance.dataFormat, es))
             return None
 
         # Check dimensionality; should be > 0
         if instance.dimensionCount == 0:
-            logger.debug('%s.checkForValidFormat: reading parameters from "%s" yielded dimensionCount=0' %
-                         (instance.__class__.__name__, path))
+            logger.debug('path "%s": reading parameters in dataFormat "%s" yielded dimensionCount 0' %
+                         (path, instance.dataFormat))
             return None
 
         elif instance.dimensionCount > 0:
-            logger.debug('%s.checkForValidFormat: path "%s" is valid for data format "%s"' %
-                         (instance.__class__.__name__, path, instance.dataFormat))
+            logger.debug('path "%s" is valid for dataFormat "%s"' %
+                         (path, instance.dataFormat))
             return instance  # found the file with right attributes
 
         return None

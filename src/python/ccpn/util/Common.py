@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 11:00:57 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-20 13:29:27 +0100 (Tue, April 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,7 @@ import sys
 import string
 import itertools
 from functools import partial
+from collections.abc import Iterable
 from collections import OrderedDict
 from string import whitespace
 
@@ -51,6 +52,7 @@ from ccpn.util.Logging import getLogger
 
 from ccpn.util import Constants
 from ccpn.util.isotopes import isotopeRecords
+
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt = 2000000000
@@ -188,8 +190,8 @@ def isMacOS():
 
 
 def parseSequenceCode(value):
-    """split sequence code into (seqCode,seqInsertCode, offset) tuple"""
-
+    """split sequence code into (seqCode,seqInsertCode, offset) tuple
+    """
     # sequenceCodePattern = re.compile('(\d+)?(.*?)(\+\d+|\-\d+)?$')
 
     tt = Constants.sequenceCodePattern.match(value.strip()).groups()
@@ -207,8 +209,8 @@ def parseSequenceCode(value):
 
 def splitIntFromChars(value):
     """convert a string with a leading integer optionally followed by characters
-    into an (integer,string) tuple"""
-
+    into an (integer,string) tuple
+    """
     value = value.strip()
 
     for ii in reversed(range(1, len(value) + 1)):
@@ -226,7 +228,8 @@ def splitIntFromChars(value):
 
 
 def dictionaryProduct(dict1, dict2):
-    """multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary"""
+    """multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary
+    """
     result = {}
     for key1, val1 in dict1.items():
         for key2, val2 in dict2.items():
@@ -308,7 +311,8 @@ def indexOfMinValue(theList):
 
 
 def getTimeStamp():
-    """Get iso-formtted timestamp"""
+    """Get iso-formtted timestamp
+    """
     return datetime.datetime.today().isoformat()
 
 

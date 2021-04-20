@@ -14,11 +14,11 @@ on the relevant axis, and can match the dimension identifiers in the reference e
 linking a dimension to the correct reference experiment dimension. They are also used to
 automatically map spectrum display-axes between different spectra.
 
-By default the axis name is derived from the name of the atom being measured.
-Axes that are linked by a one-bond magnetisation transfer could be given a lower-case suffix
-to show the nucleus bound to.
-Duplicate axis names should be distinguished by a numerical suffix.
-The rules are best shown by example:
+By default the axisCodes are derived from the isotopeCodes that define the experimental data
+for each dimension. Axes that are linked by a one-bond magnetisation transfer could be given a
+lower-case suffix to show the nucleus bound to. Duplicate axis names should be distinguished
+by a numerical suffix.
+The rules are best illustrated by example:
 
 Experiment                 axisCodes
 
@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 11:56:27 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-20 15:57:57 +0100 (Tue, April 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -187,10 +187,6 @@ class Spectrum(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.DataSource._metaclass.qualifiedName()
 
-    # Internal NameSpace
-    _AdditionalAttribute = 'AdditionalAttribute'
-    _ReferenceSubstancesPids = '_ReferenceSubstancesPids'
-
     _referenceSpectrumHit = None
     _snr = None
     #-----------------------------------------------------------------------------------------
@@ -230,11 +226,15 @@ class Spectrum(AbstractWrapperObject):
         }
 
     #-----------------------------------------------------------------------------------------
+    # Internal NameSpace definitions
+    #-----------------------------------------------------------------------------------------
 
-    _DATASTORE_KEY = '_dataStore'  # Key for storing the dataStore info in the Ccpn internal parameter store of the
+    # Key for storing the dataStore info in the Ccpn internal parameter store
+    _DATASTORE_KEY = '_dataStore'
     _REFERENCESUBSANCESCACHE = '_referenceSubstances'
 
-    # Spectrum instance
+    _AdditionalAttribute = 'AdditionalAttribute'
+    _ReferenceSubstancesPids = '_ReferenceSubstancesPids'
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure
@@ -272,6 +272,11 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def spectrumHits(self):
+        """STUB: hot-fixed later"""
+        return None
+
+    @property
+    def sample(self):
         """STUB: hot-fixed later"""
         return None
 
@@ -725,15 +730,9 @@ class Spectrum(AbstractWrapperObject):
         return self.dataStore.aPath()
 
     def hasValidPath(self) -> bool:
-        """Return true if the spectrum currently points to an valid dataSource object.
+        """Return true if the spectrum's dataStore currently defines an valid dataSource object.
         """
         return (self.dataSource is not None)
-
-    def checkValidPath(self):
-        """Checks for valid path and raise RuntimeError if not
-        """
-        if not self.hasValidPath():
-            raise RuntimeError('%s: No valid spectral dataSource defined' % self)
 
     def isEmptySpectrum(self):
         """Return True if instance refers to an empty spectrum; i.e. as in without actual spectral data"
@@ -2687,7 +2686,9 @@ class Spectrum(AbstractWrapperObject):
         from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 
         if dataStore is None:
-            raise RuntimeError('dataStore not defined')
+            raise ValueError('dataStore not defined')
+        if not isinstance(dataStore, DataStore):
+            raise ValueError('dataStore has invalid type')
 
         if dataStore.dataFormat == EmptySpectrumDataSource.dataFormat:
             # Special case, empty spectrum
@@ -2698,11 +2699,11 @@ class Spectrum(AbstractWrapperObject):
                 if reportWarnings:
                     dataStore.warningMessage()
                 return None
-            dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
 
-        if dataSource is None and reportWarnings:
-            getLogger().warning('data format "%s" is incompatible with path "%s"' %
-                                (dataStore.dataFormat, dataStore.path))
+            dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
+            if dataSource is None and reportWarnings:
+                getLogger().warning('dataStore path "%s" is incompatible with dataFormat "%s"' %
+                                    (dataStore.aPath(), dataStore.dataFormat))
 
         return dataSource
 
@@ -2710,7 +2711,7 @@ class Spectrum(AbstractWrapperObject):
         """This method check, and if needed updates specific parameter values
         """
         # Quietly set some values
-        getLogger().debug('Updating %s parameters' % self)
+        getLogger().debug2('Updating %s parameters' % self)
         with inactivity():
             # getting the noiseLevel by calling estimateNoise() if not defined
             if self.noiseLevel is None:
@@ -2730,7 +2731,7 @@ class Spectrum(AbstractWrapperObject):
         spectrum = super()._restoreObject(project, apiObj)
 
         try:
-            spectrum._dataStore = DataStore(spectrum=spectrum)
+            spectrum._dataStore = DataStore()._importFromSpectrum(spectrum)
             spectrum._dataSource = spectrum._getDataSource(spectrum._dataStore, reportWarnings=True)
 
         except (ValueError, RuntimeError) as es:

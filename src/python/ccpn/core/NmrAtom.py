@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:41:20 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-20 15:57:56 +0100 (Tue, April 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -503,25 +503,23 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     :param serial: optional serial number.
     :return: a new NmrAtom instance.
     """
-    from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 
     nmrProject = self._project._wrappedData
     resonanceGroup = self._wrappedData
 
     if not isinstance(name, (str, type(None))):
         raise TypeError('Name {} must be of type string (or None)'.format(name))
-    if not isinstance(isotopeCode, (str, type(None))):
-        raise TypeError('isotopeCode {} must be of type string (or None)'.format(isotopeCode))
 
     # Deal with reserved names
     # serial = None
-    if name:
-        # Check for name clashes
+    if name is None or len(name) == 0:
+        # add default as all other CCPN objects.
+        name = self._nextAvailableName(NmrAtom, self.project)
 
+    else:
+        # Check for name clashes
         previous = self.getNmrAtom(name.translate(Pid.remapSeparators))
         if previous is not None:
-            # from ccpn.util.Common import _incrementObjectName
-            # name = _incrementObjectName(self.project, NmrAtom._pluralLinkName, name)
             raise ValueError("%s already exists" % previous.longPid)
 
         # Deal with reserved names
@@ -532,6 +530,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
                 obj = nmrProject.findFirstResonance(serial=serial)
             except ValueError:
                 obj = None
+
             if obj is not None:
                 previous = self._project._data2Obj[obj]
                 if '@' in obj.name:
@@ -555,34 +554,37 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
                                 )
                     previous._finaliseAction('rename')
 
-    else:
-        # add default as all other CCPN objects. IsotopeCode should not decide here. The Gui should address.
-        name = self._nextAvailableName(NmrAtom, self.project)
+    # Always create first with unknown isotopeCode
+    dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': UnknownIsotopeCode, 'name':name}
+    # if serial is None:
+    #     dd['name'] = name
 
-    dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': UnknownIsotopeCode}
-    if serial is None:
-        dd['name'] = name
-    if comment is not None:
-        dd['details'] = comment
-
-    if isotopeCode is None:
-        if name is not None:
-            isotopeCode = DEFAULT_ISOTOPE_DICT.get(name[0]) #This should go in 3.1. We should remove any guesses.
-
-    isotopeCode = isotopeCode if isotopeCode in DEFAULT_ISOTOPE_DICT.values() else UnknownIsotopeCode
-
+    # # Create the api object
     obj = nmrProject.newResonance(**dd)
     result = self._project._data2Obj.get(obj)
-    result.isotopeCode = isotopeCode # it has to be set after the creation to avoid API errors.
     if result is None:
         raise RuntimeError('Unable to generate new NmrAtom item')
-
     if serial is not None:
         try:
             result.resetSerial(serial)
         except ValueError:
             getLogger().warning("Could not reset serial of %s to %s - keeping original value"
                                 % (result, serial))
+    #
+    # # NOTE:ED - check violated name, replaces the isotopeCode with '?' - follows v2 model check
+    # checkIsotopeCode = isotopeCode.upper()
+    # if name and not name.startswith(checkIsotopeCode):
+    #     from ccpn.util.Constants import isotopeRecords
+    # isotopeCode = isotopeCode if isotopeCode in DEFAULT_ISOTOPE_DICT.values() else UnknownIsotopeCode
+
+    # Check/set isotopeCode
+    if not isinstance(isotopeCode, (str, type(None))):
+        raise TypeError('isotopeCode {} must be of type string (or None)'.format(isotopeCode))
+    if isotopeCode is not None or len(isotopeCode) > 0:
+        result.isotopeCode = isotopeCode # it has to be set after the creation to avoid API errors.
+
+    if comment is not None and len(comment) > 0:
+        result.comment = comment
 
     return result
 

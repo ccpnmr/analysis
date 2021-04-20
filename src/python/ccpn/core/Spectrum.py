@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 11:00:56 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-20 11:07:38 +0100 (Tue, April 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -85,13 +85,10 @@ from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreS
     undoStackBlocking, renameObject, undoBlock, notificationBlanking, \
     ccpNmrV3CoreSetter, inactivity
 from ccpn.core.lib.DataStore import DataStore
+from ccpn.core.lib.Cache import cached
 
-from ccpn.util import Constants
 from ccpn.util.Constants import SCALETOLERANCE
-from ccpn.util.Common import isIterable, _getObjectsByPids, getAxisCodeMatchIndices, incrementName
-from ccpn.util.Path import Path, aPath
-# 2019010:ED test new matching
-# from ccpn.util.Common import axisCodeMapping
+from ccpn.util.Common import isIterable, _getObjectsByPids
 from ccpn.util.Common import getAxisCodeMatch as axisCodeMapping
 from ccpn.util.Logging import getLogger
 

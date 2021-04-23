@@ -1448,7 +1448,6 @@ class Project(AbstractWrapperObject):
             # estimate new base contour levels
             # if self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:
             if not spectrum.noiseLevel:
-                getLogger().info("estimating noise level for spectrum %s" % str(spectrum.pid))
 
                 setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                                           setPositiveContours=True, setNegativeContours=True,

@@ -10,8 +10,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-08 15:34:40 +0100 (Thu, April 08, 2021) $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2021-04-23 12:41:09 +0100 (Fri, April 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -59,12 +59,13 @@ from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
 from ccpn.framework.PathsAndUrls import userPreferencesPath
 from ccpn.framework.PathsAndUrls import userPreferencesDirectory
+from ccpn.framework.PathsAndUrls import macroPath
 from ccpn.ui import interfaces, defaultInterface
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog, DataFileDialog, NefFileDialog, \
-    ArchivesFileDialog, MacrosFileDialog, LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog, \
+    ArchivesFileDialog, MacrosFileDialog, CcpnMacrosFileDialog, LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog, \
     ProjectSaveFileDialog
 from ccpn.util import Logging
 from ccpn.util import Path
@@ -1351,11 +1352,11 @@ class Framework(NotifierBase):
         ms.append(('Macro', [
             ("New", self.showMacroEditor),
             (),
-            ("Open...", self.openMacroOnEditor),
+            ("Open User Macro...", self.openMacroOnEditor),
+            ("Open CCPN Macro...", self.openCcpnMacroOnEditor),
             (),
             ("Run...", self.runMacro),
             ("Run Recent", ()),
-            ("Open CCPN Macros...", self.openCcpnMacroOnEditor),
             (CCPNMACROSMENU, ([
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
@@ -2939,10 +2940,17 @@ class Framework(NotifierBase):
         Displays macro editor.
         """
         mainWindow = self.ui.mainWindow
-        self.editor = MacroEditor(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
-        self.editor._openMacroFile()
-        return self.editor
+        fType = '*.py'
+        dialog = CcpnMacrosFileDialog(parent=mainWindow, acceptMode='open', fileFilter=fType, directory=macroPath)
+        dialog._show()
+        filePath = dialog.selectedFile()
+        if filePath is not None:
+            macroEditor = MacroEditor(mainWindow=mainWindow, filePath=filePath)
+            mainWindow.moduleArea.addModule(macroEditor, position='top', relativeTo=mainWindow.moduleArea)
+        # self.editor = MacroEditor(mainWindow=mainWindow)
+        # mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
+        # self.editor._openMacroFile()
+        # return self.editor
 
     def defineUserShortcuts(self):
 

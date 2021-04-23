@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-13 15:32:10 +0000 (Sat, March 13, 2021) $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2021-04-23 12:41:09 +0100 (Fri, April 23, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -413,6 +413,10 @@ class LayoutsFileDialog(FileDialogABC):
 class MacrosFileDialog(FileDialogABC):
     _initialPath = USERMACROPATH
     _text = '{} Macro'
+
+
+class CcpnMacrosFileDialog(FileDialogABC):
+    _text = '{} CCPN Macro'
 
 
 class NefFileDialog(FileDialogABC):

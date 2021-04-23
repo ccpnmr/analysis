@@ -4,7 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -12,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-08 20:31:22 +0100 (Thu, April 08, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-04-23 14:36:21 +0100 (Fri, April 23, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,7 +45,6 @@ from ccpn.util.Common import makeIterableList
 from ccpn.util.Constants import SCALETOLERANCE
 
 
-ALIASINGCHANGED = '_aliasingChanged'
 DIMENSIONNMRATOMSCHANGED = '_dimensionNmrAtomsChanged'
 RECALCULATESHIFTVALUE = '_recalculateShiftValue'
 
@@ -287,27 +287,17 @@ class Peak(AbstractWrapperObject):
     @ccpNmrV3CoreSetter()
     def position(self, value: Sequence):
         # call api changes
-        currentAlias = []
-        newAlias = []
         assigned = set()
         ff = self._project._data2Obj.get
 
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-            currentAlias.append(peakDim.numAliasing)
-
-            _old = peakDim.position # the current pointPosition, quick to get
+            _old = peakDim.position  # the current pointPosition, quick to get
             peakDim.value = value[ii]
             peakDim.realValue = None
-            newAlias.append(peakDim.numAliasing)
 
             # log any peak assignments that have moved in this axis
             if peakDim.position != _old:
                 assigned |= set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
-
-        # aliasing may have changed here
-        if currentAlias != newAlias:
-            self._checkAliasing()
-            setattr(self, ALIASINGCHANGED, True)
 
         # set the attribute to trigger the _finaliseAction for the positions that have changed
         if assigned:
@@ -350,26 +340,16 @@ class Peak(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def pointPosition(self, value: Sequence):
-        currentAlias = []
-        newAlias = []
         assigned = set()
         ff = self._project._data2Obj.get
 
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-            currentAlias.append(peakDim.numAliasing)
-
-            _old = peakDim.position # the current pointPosition
+            _old = peakDim.position  # the current pointPosition
             peakDim.position = value[ii]
-            newAlias.append(peakDim.numAliasing)
 
             # log any peak assignments that have moved in this axis
             if peakDim.position != _old:
                 assigned |= set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
-
-        # aliasing may have changed here
-        if currentAlias != newAlias:
-            self._checkAliasing()
-            setattr(self, ALIASINGCHANGED, True)
 
         # set the attribute to trigger the _finaliseAction for the positions that have changed
         if assigned:
@@ -416,17 +396,8 @@ class Peak(AbstractWrapperObject):
         if not all(isinstance(dimVal, int) for dimVal in value):
             raise ValueError("Aliasing values must be integer.")
 
-        currentAlias = []
-        newAlias = []
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-            currentAlias.append(peakDim.numAliasing)
             peakDim.numAliasing = -1 * value[ii]
-            newAlias.append(peakDim.numAliasing)
-
-        # aliasing may/may not have changed here
-        if currentAlias != newAlias:
-            self._checkAliasing()
-            setattr(self, ALIASINGCHANGED, True)
 
     @property
     def dimensionNmrAtoms(self) -> Tuple[Tuple['NmrAtom', ...], ...]:
@@ -494,8 +465,8 @@ class Peak(AbstractWrapperObject):
                         if x.isotopeCode not in (isotopeCode, '?'):
                             msg = "IsotopeCodes mismatch between NmrAtom %s and Spectrum. " \
                                   "Consider changing NmrAtom isotopeCode from %s to %s, None, or '?'" \
-                                  " to avoid future warnings." %(x.name, x.isotopeCode, isotopeCode)
-                            getLogger().warning(msg) # don't raise errors. NmrAtoms are just labels and can be assigned to anything if user wants so.
+                                  " to avoid future warnings." % (x.name, x.isotopeCode, isotopeCode)
+                            getLogger().warning(msg)  # don't raise errors. NmrAtoms are just labels and can be assigned to anything if user wants so.
 
                 dimResonances.append(resonances)
 
@@ -669,7 +640,6 @@ class Peak(AbstractWrapperObject):
                     addUndoItem(undo=partial(cs._finaliseAction, 'delete'),
                                 redo=partial(cs._finaliseAction, 'create'))
 
-
     # alternativeNames
     assignments = assignedNmrAtoms
     assignmentsByDimensions = dimensionNmrAtoms
@@ -791,12 +761,6 @@ class Peak(AbstractWrapperObject):
             # NOTE:ED does integral need to be notified? - and reverse notifiers in multiplet/integral
 
         if action in ['change']:
-
-            # check whether the peak aliasing has changed and notify containing spectrum
-            if getattr(self, ALIASINGCHANGED, None):
-                self._aliasingChanged = False
-                self.peakList.spectrum._finaliseAction(action)
-
             # if the assignedNmrAtoms have changed then notify
             # This contains the pre-post set to handle updating the chemicalShift table
             nmrAtoms = getattr(self, DIMENSIONNMRATOMSCHANGED, None)
@@ -942,7 +906,6 @@ class Peak(AbstractWrapperObject):
                                 minDropFactor=minDropFactor, fitMethod=fitMethod,
                                 searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit)
 
-
     # def fitPositionHeightLineWidths(self):
     #     """Set the position, height and lineWidth of the Peak."""
     #     LibPeak.fitPositionHeightLineWidths(self._apiPeak)
@@ -1051,7 +1014,7 @@ class Peak(AbstractWrapperObject):
         lim = volumeIntegralLimit * FWHM / 2.0
         xxSig = np.linspace(0, lim, numPoints)
         vals = make_gauss(xxSig, sigmaX, mu, height)
-        area = 2.0*np.trapz(vals, xxSig)
+        area = 2.0 * np.trapz(vals, xxSig)
 
         # note that negative height will give negative volume
         vol = 1.0
@@ -1064,7 +1027,7 @@ class Peak(AbstractWrapperObject):
         # do I need to set the volume error?
         # self.volumeError = 1e-8
 
-    def fit(self, fitMethod = None, halfBoxSearchWidth = 2, keepPosition=False, iterations=10):
+    def fit(self, fitMethod=None, halfBoxSearchWidth=2, keepPosition=False, iterations=10):
         """
         Fit the peak to recalculate position and lineWidths.
         Use peak.estimateVolume to recalculate the volume.
@@ -1091,7 +1054,7 @@ class Peak(AbstractWrapperObject):
         originalPosition = peak.position
         lastLWsFound = []
         consecutiveSameLWsCount = 0
-        maxSameLWsCount = 3 # if the same values are found in the last x iterations, then it breaks the loop.
+        maxSameLWsCount = 3  # if the same values are found in the last x iterations, then it breaks the loop.
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
                 while iterations > 0 and consecutiveSameLWsCount <= maxSameLWsCount:
@@ -1106,16 +1069,8 @@ class Peak(AbstractWrapperObject):
                         consecutiveSameLWsCount = 0
                     lastLWsFound = peak.lineWidths
                     iterations -= 1
-        getLogger().info('Peak fit completed for %s' %peak)
+        getLogger().info('Peak fit completed for %s' % peak)
         return
-
-    def _checkAliasing(self):
-        """Recalculate the aliasing range for all peaks in the parent spectrum
-        """
-        spectrum = self.peakList.spectrum
-        alias = spectrum._getAliasingRange()
-        if alias is not None:
-            spectrum.aliasingRange = alias
 
     #===========================================================================================
     # new'Object' and other methods
@@ -1194,7 +1149,7 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.lineWidth = lineWidths[ii]
 
-    result.height = height          # use the method to store the unit-scaled value
+    result.height = height  # use the method to store the unit-scaled value
     result.volume = volume
     result.heightError = heightError
     result.volumeError = volumeError

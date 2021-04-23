@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-10 14:24:58 +0000 (Wed, March 10, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-04-23 14:36:21 +0100 (Fri, April 23, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -875,23 +876,27 @@ class DimensionsTab(Widget):
         Label(self, text="Assignment Tolerance ", grid=(row, 0), hAlign='l')
 
         row += 1
-        Label(self, text="Second cursor offset (Hz) ", grid=(row, 0), hAlign='l')
+        Label(self, text="Second Cursor Offset (Hz) ", grid=(row, 0), hAlign='l')
 
         row += 1
-        Label(self, text="Show folded contours", grid=(row, 0), hAlign='l')
+        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
+        hLine.setContentsMargins(5, 0, 0, 0)
 
         row += 1
-        label = Label(self, text="Dimension is inverted", grid=(row, 0), hAlign='l')
-        label.setEnabled(False)
+        Label(self, text="Show Aliased Regions", grid=(row, 0), hAlign='l')
 
         row += 1
-        Label(self, text="Maximum displayed aliasing ", grid=(row, 0), hAlign='l')
+        Label(self, text="Dimension is Circular", grid=(row, 0), hAlign='l')
 
         row += 1
-        Label(self, text="Minimum displayed aliasing ", grid=(row, 0), hAlign='l')
+        Label(self, text="Aliasing Limits         Upperbound", grid=(row, 0), hAlign='r')
+
+        row += 1
+        Label(self, text="Lowerbound", grid=(row, 0), hAlign='r')
 
         self._isotopeList = [code for code in DEFAULT_ISOTOPE_DICT.values() if code]
 
+        # add set of widgets for each dimension
         for i in range(dimensions):
             row = 2
             self.axisCodeEdits[i] = LineEdit(self, grid=(row, i + 1), vAlign='t', hAlign='l')
@@ -899,10 +904,8 @@ class DimensionsTab(Widget):
                                                               self.axisCodeEdits[i].text, i))
 
             row += 1
-
             self.isotopeCodePullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t')
             self.isotopeCodePullDowns[i].setData(self._isotopeList)
-
             self.isotopeCodePullDowns[i].currentIndexChanged.connect(partial(self._queueSetIsotopeCodes, spectrum, self.isotopeCodePullDowns[i].getText, i))
 
             row += 1
@@ -946,10 +949,11 @@ class DimensionsTab(Widget):
             self.spectralDoubleCursorOffset[i].valueChanged.connect(partial(self._queueSetDoubleCursorOffset, spectrum, i,
                                                                             self.spectralDoubleCursorOffset[i].textFromValue))
 
-            row += 1
+            # space
+            row += 2
             if i == 0:
                 # only need 1 checkbox in the first column
-                showFolded = spectrum.displayFoldedContours
+                spectrum.displayFoldedContours
                 self.displayedFoldedContours = CheckBox(self, grid=(row, i + 1), vAlign='t')
                 self.displayedFoldedContours.clicked.connect(partial(self._queueSetDisplayFoldedContours, spectrum, self.displayedFoldedContours.isChecked))
 
@@ -967,6 +971,7 @@ class DimensionsTab(Widget):
             self.minAliasingPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t', )
             self.minAliasingPullDowns[i].activated.connect(partial(self._queueSetMinAliasing, spectrum, self.minAliasingPullDowns[i].getText, i))
 
+        # add preferred order widgets for Nd and
         if spectrum.dimensionCount > 1:
             row += 1
             hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
@@ -1034,6 +1039,12 @@ class DimensionsTab(Widget):
         self._changes.clear()
 
         with self._changes.blockChanges():
+
+            self.aliasLim = self.spectrum.aliasingLimits
+            self.axesReversed = self.spectrum.axesReversed
+            self.specLim = tuple(sorted(spLim) for spLim in self.spectrum.spectrumLimits)
+            self.deltaLim = tuple(max(spLim) - min(spLim) for spLim in self.specLim)
+
             for i in range(self.dimensions):
                 value = self.spectrum.axisCodes[i]
                 self.axisCodeEdits[i].setText('<None>' if value is None else str(value))
@@ -1071,27 +1082,22 @@ class DimensionsTab(Widget):
                     self.displayedFoldedContours.setChecked(value)
 
                 fModes = self.spectrum.foldingModes
-                dd = {'circular': False, 'mirror': True, None: False}
+                dd = {'circular': True, 'mirror': False, None: True}  # swapped because inverted checkbox
                 self.foldingModesCheckBox[i].setChecked(dd[fModes[i]])
 
                 # pullDown for min/max aliasing
-                aliasLim = self.spectrum.visibleAliasingRange
-                aliasMaxRange = list(range(MAXALIASINGRANGE, -1, -1))
-                aliasMinRange = list(range(0, -MAXALIASINGRANGE - 1, -1))
-                aliasMaxText = [str(aa) for aa in aliasMaxRange]
-                aliasMinText = [str(aa) for aa in aliasMinRange]
+                aliasMaxRange = list(max(self.specLim[i]) + rr * self.deltaLim[i] for rr in range(MAXALIASINGRANGE, -1, -1))
+                aliasMinRange = list(min(self.specLim[i]) + rr * self.deltaLim[i] for rr in range(0, -MAXALIASINGRANGE - 1, -1))
+                aliasMaxText = [f'{MAXALIASINGRANGE - ii}   ({aa:.3f} ppm)' for ii, aa in enumerate(aliasMaxRange)]
+                aliasMinText = [f'{-ii}   ({aa:.3f} ppm)' for ii, aa in enumerate(aliasMinRange)]
 
                 self.maxAliasingPullDowns[i].setData(aliasMaxText)
-
-                if aliasLim[i][1] in aliasMaxRange:
-                    index = aliasMaxRange.index(aliasLim[i][1])
-                    self.maxAliasingPullDowns[i].setIndex(index)
+                _close = (max(self.aliasLim[i]) - max(self.specLim[i]) + self.deltaLim[i] / 2) // self.deltaLim[i]
+                self.maxAliasingPullDowns[i].setIndex(MAXALIASINGRANGE - int(_close))
 
                 self.minAliasingPullDowns[i].setData(aliasMinText)
-
-                if aliasLim[i][0] in aliasMinRange:
-                    index = aliasMinRange.index(aliasLim[i][0])
-                    self.minAliasingPullDowns[i].setIndex(index)
+                _close = (min(self.specLim[i]) - min(self.aliasLim[i]) + self.deltaLim[i] / 2) // self.deltaLim[i]
+                self.minAliasingPullDowns[i].setIndex(int(_close))
 
             if self.spectrum.dimensionCount > 1:
                 self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
@@ -1214,40 +1220,35 @@ class DimensionsTab(Widget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetMinAliasing(self, spectrum, valueGetter, dim):
-        minValue = int(valueGetter())
-        if minValue != spectrum.visibleAliasingRange[dim][0]:
+        _index = self.minAliasingPullDowns[dim].getSelectedIndex()
+        minValue = min(self.specLim[dim]) - _index * self.deltaLim[dim]
+        if abs(minValue - min(spectrum.aliasingLimits[dim])) > 1e-8:  # for rounding errors
             returnVal = partial(self._setMinAliasing, self.spectrum, dim, minValue)
-            maxValue = self.maxAliasingPullDowns[dim].get()
-            if isinstance(maxValue, int) and isinstance(minValue, int) and minValue > maxValue:
-                self.maxAliasingPullDowns[dim].select(str(minValue))
             return returnVal
 
     def _setMinAliasing(self, spectrum, dim, value):
-        alias = list(spectrum.visibleAliasingRange)
-        value = int(value)
-
+        alias = list(spectrum.aliasingLimits)
+        value = float(value)
         alias[dim] = (value, max(alias[dim][1], value))
-        spectrum.visibleAliasingRange = tuple(alias)
+        spectrum.aliasingLimits = tuple(alias)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetMaxAliasing(self, spectrum, valueGetter, dim):
-        maxValue = int(valueGetter())
-        if maxValue != spectrum.visibleAliasingRange[dim][1]:
+        _index = MAXALIASINGRANGE - self.maxAliasingPullDowns[dim].getSelectedIndex()
+        maxValue = max(self.specLim[dim]) + _index * self.deltaLim[dim]
+        if abs(maxValue - max(spectrum.aliasingLimits[dim])) > 1e-8:  # for rounding errors
             returnVal = partial(self._setMaxAliasing, spectrum, dim, maxValue)
-            minValue = self.minAliasingPullDowns[dim].get()
-            if isinstance(maxValue, int) and isinstance(minValue, int) and maxValue < minValue:
-                self.minAliasingPullDowns[dim].select(str(maxValue))
             return returnVal
 
     def _setMaxAliasing(self, spectrum, dim, value):
-        alias = list(spectrum.visibleAliasingRange)
-        value = int(value)
+        alias = list(spectrum.aliasingLimits)
+        value = float(value)
         alias[dim] = (min(alias[dim][0], value), value)
-        spectrum.visibleAliasingRange = tuple(alias)
+        spectrum.aliasingLimits = tuple(alias)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetFoldingModes(self, spectrum, valueGetter, dim):
-        dd = {True: 'mirror', False: 'circular', None: None}
+        dd = {False: 'mirror', True: 'circular', None: None}  # swapped because inverted checkbox
         value = dd[valueGetter()]
         if value != spectrum.foldingModes[dim]:
             return partial(self._setFoldingModes, spectrum, dim, value)

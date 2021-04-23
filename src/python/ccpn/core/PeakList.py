@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-23 10:16:44 +0100 (Fri, April 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-23 14:36:21 +0100 (Fri, April 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1057,8 +1057,8 @@ class PeakList(PMIListABC):
                 # apiPeak.height = dataSource.scale * height
                 apiPeak.height = height
 
-    def _getAliasingRange(self):
-        """Return the min/max aliasing range for the peaks in the list, if there are no peaks, return None
+    def getPeakAliasingRanges(self):
+        """Return the min/max aliasing values for the peaks in the list, if there are no peaks, return None
         """
         if not self.peaks:
             return None
@@ -1075,9 +1075,9 @@ class PeakList(PMIListABC):
             aliasMin = np.minimum(aliasMin, alias)
 
         # set min/max in spectrum here if peaks have been found
-        aliasRange = tuple((int(mn), int(mx)) for mn, mx in zip(aliasMin, aliasMax))
+        aliasRanges = tuple((int(mn), int(mx)) for mn, mx in zip(aliasMin, aliasMax))
 
-        return aliasRange
+        return aliasRanges
 
     @logCommand(get='self')
     def reorderPeakListAxes(self, newAxisOrder):

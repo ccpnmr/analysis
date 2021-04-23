@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-09 11:57:52 +0100 (Fri, April 09, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-04-23 14:36:21 +0100 (Fri, April 23, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -242,8 +243,8 @@ class GuiStrip(Frame):
         self.setStripNotifiers()
 
         # test aliasing notifiers
-        self._currentVisibleAliasingRange = {}
-        self._currentAliasingRange = {}
+        # self._currentVisibleAliasingRange = {}
+        # self._currentAliasingRange = {}
 
         # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
@@ -573,81 +574,15 @@ class GuiStrip(Frame):
         self.deleteAllNotifiers()
         super().close()
 
-    # GWV 20181127: changed implementation to use deleteAllNotifiers in close() method
-    # def _unregisterStrip(self):
-    #     """Unregister all notifiers
-    #     """
-    #     self._stripNotifier.unRegister()
-    #     self._peakNotifier.unRegister()
-    #     self._integralNotifier.unRegister()
-    #     self._multipletNotifier.unRegister()
-    #     self._stripLabelNotifier.unRegister()
-    #     self._droppedNotifier.unRegister()
-    #     self._moveEventNotifier.unRegister()
-
     def _updateSpectrumLabels(self, data):
         """Callback when spectra have changed
         """
         self._CcpnGLWidget._processSpectrumNotifier(data)
 
-    def _checkAliasingRange(self, spectrum):
-        """check whether the local aliasingRange has changed and entend the visible range if needed
-        """
-        newAliasingRange = spectrum.aliasingRange
-        if not self._currentAliasingRange:
-            self._currentAliasingRange[spectrum] = newAliasingRange
-
-            # update
-            with notificationBlanking():
-                vARange = spectrum.visibleAliasingRange
-                newRange = tuple((min(minL, minR), max(maxL, maxR))
-                                 for (minL, maxL), (minR, maxR) in zip(vARange, newAliasingRange))
-                spectrum.visibleAliasingRange = newRange
-
-        if spectrum in self._currentAliasingRange and self._currentAliasingRange[spectrum] != newAliasingRange:
-            self._currentAliasingRange[spectrum] = newAliasingRange
-
-            # update
-            with notificationBlanking():
-                vARange = spectrum.visibleAliasingRange
-                newRange = tuple((min(minL, minR), max(maxL, maxR))
-                                 for (minL, maxL), (minR, maxR) in zip(vARange, newAliasingRange))
-                spectrum.visibleAliasingRange = newRange
-
-    def _checkVisibleAliasingRange(self, spectrum):
-        """check whether the local visibleAliasingRange has changed and update the limits of the plane toolbar
-        """
-        newVisibleAliasingRange = spectrum.visibleAliasingRange
-        if not self._currentVisibleAliasingRange:
-            self._currentVisibleAliasingRange[spectrum] = newVisibleAliasingRange
-            # update
-            if not self.spectrumDisplay.is1D:
-                self._setZWidgets()
-
-        if spectrum in self._currentVisibleAliasingRange and self._currentVisibleAliasingRange[spectrum] != newVisibleAliasingRange:
-            # update
-            self._currentVisibleAliasingRange[spectrum] = newVisibleAliasingRange
-            if not self.spectrumDisplay.is1D:
-                self._setZWidgets()
-
     def _updateDisplayedPeaks(self, data):
         """Callback when peaks have changed
         """
         self._CcpnGLWidget._processPeakNotifier(data)
-
-        # check whether the aliasing range has changed
-        triggers = data[Notifier.TRIGGER]
-        obj = data[Notifier.OBJECT]
-
-        if isinstance(obj, Peak):
-
-            # update the peak labelling
-            if Notifier.DELETE in triggers or Notifier.CREATE in triggers:
-                # need to update the aliasing limits
-                pass
-
-            spectrum = obj.peakList.spectrum
-            self._checkVisibleAliasingRange(spectrum)
 
     def _updateDisplayedNmrAtoms(self, data):
         """Callback when nmrAtoms have changed

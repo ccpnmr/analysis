@@ -4,21 +4,24 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = ""
-__credits__ = ""
-__licence__ = ("")
-__reference__ = ("")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified$"
-__version__ = "$Revision$"
+__dateModified__ = "$dateModified: 2021-04-23 14:36:21 +0100 (Fri, April 23, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
-# Created:
+# Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
-__date__ = "$Date$"
+__date__ = "$Date: 2021-04-22 11:01:59 +0000 (Thu, April 22, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -105,16 +108,6 @@ class SetPeakAliasingPopup(CcpnDialog):
 
                 specRow += 1
 
-                self.spectraCheckBoxes[spectrum] = CheckBoxCompoundWidget(spectrumFrame,
-                                                                          grid=(specRow, 0), gridSpan=(1, dims + 2),  #vAlign='top', hAlign='left',
-                                                                          # fixedWidths=(COLWIDTH, 30),
-                                                                          orientation='left',
-                                                                          labelText='Update spectrum aliasing parameters:',
-                                                                          checked=spectrum._updateAliasingRangeFlag,
-                                                                          callback=partial(self._updateAliasingRangeFlag, spectrum)
-                                                                          )
-                specRow += 1
-
             self.spectra[peak.peakList.spectrum].add(peak)
 
         row += 1
@@ -160,81 +153,16 @@ class SetPeakAliasingPopup(CcpnDialog):
 
         self.GLSignals = GLNotifier(parent=self)
 
-    def _updateAliasingRangeFlag(self, spectrum, updateValue):
-        """Set the upateAliasingRange flag for spectra
-        """
-        if spectrum:
-            spectrum._updateAliasingRangeFlag = updateValue
-
-    def _refreshGLItems(self, spectrumUpdateList):
-        """update the display for the changed aliasing range
-        """
-        for spectrum, updateFlag in spectrumUpdateList:
-            if updateFlag:
-                alias = spectrum._getAliasingRange()
-                if alias is not None:
-
-                    # notifier handles spectrumDisplay change
-                    spectrum.visibleAliasingRange = alias
-
-        # for spectrum in self.project.spectra:
-        #
-        #     # check whether the visibleAliasingRange needs to be updated
-        #     if not spectrum._updateAliasingRangeFlag:
-        #         continue
-        #
-        #     alias = spectrum._getAliasingRange()
-        #     if alias is not None:
-        #         spectrum.visibleAliasingRange = alias
-        #         spectrum.displayFoldedContours = True
-
-            # # calculate the min/max aliasing values for the spectrum
-            # dims = spectrum.dimensionCount
-            #
-            # aliasMin = [0] * dims
-            # aliasMax = [0] * dims
-            #
-            # alias = None
-            # for peakList in spectrum.peakLists:
-            #     for peak in peakList.peaks:
-            #         alias = peak.aliasing
-            #         aliasMax = np.maximum(aliasMax, alias)
-            #         aliasMin = np.minimum(aliasMin, alias)
-            #
-            # if alias:
-            #     # set min/max in spectrum here if a peak has been found
-            #     aliasRange = tuple((int(mn), int(mx)) for mn, mx in zip(aliasMin, aliasMax))
-            #     spectrum.visibleAliasingRange = aliasRange
-            #     spectrum.displayFoldedContours = True
-
-        # emit a signal to rebuild all peaks
-        # self.GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLMULTIPLETS])
-
     def _okButton(self):
         """
         When ok button pressed: update and exit
         """
         with handleDialogApply(self):
-
-            spectrumUpdateList = tuple((spec,
-                                        spec._updateAliasingRangeFlag) for spec in self.spectra.keys())
-
-            # add item here to redraw items
-            with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=partial(self._refreshGLItems, spectrumUpdateList))
-
             for spec in self.spectra.keys():
                 # set the aliasing for the peaks
                 newAlias = tuple([int(pullDown.get()) for pullDown in self.spectraPulldowns[spec]])
 
                 for peak in self.spectra[spec]:
                     peak.aliasing = newAlias
-
-            # add item here to redraw items
-            with undoStackBlocking() as addUndoItem:
-                addUndoItem(redo=partial(self._refreshGLItems, spectrumUpdateList))
-
-            # redraw the items
-            self._refreshGLItems(spectrumUpdateList)
 
         self.accept()

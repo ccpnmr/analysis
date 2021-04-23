@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-25 17:05:10 +0000 (Thu, March 25, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-04-23 14:36:21 +0100 (Fri, April 23, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,17 +33,15 @@ from ccpn.util.LabelledEnum import LabelledEnum
 SPECTRUM_STACKEDMATRIX = 'stackedMatrix'
 SPECTRUM_STACKEDMATRIXOFFSET = 'stackedMatrixOffset'
 SPECTRUM_MATRIX = 'spectrumMatrix'
-SPECTRUM_MAXXALIAS = 'maxXAlias'
-SPECTRUM_MINXALIAS = 'minXAlias'
-SPECTRUM_MAXYALIAS = 'maxYAlias'
-SPECTRUM_MINYALIAS = 'minYAlias'
-SPECTRUM_DXAF = 'dxAF'
-SPECTRUM_DYAF = 'dyAF'
-SPECTRUM_XSCALE = 'xScale'
-SPECTRUM_YSCALE = 'yScale'
+SPECTRUM_XLIMITS = 'xLimits'
+SPECTRUM_YLIMITS = 'yLimits'
+SPECTRUM_AF = 'AF'
+SPECTRUM_SCALE = 'scale'
 SPECTRUM_POINTINDEX = 'pointIndex'
 SPECTRUM_VALUEPERPOINT = 'valuePerPoint'
 SPECTRUM_SPINNINGRATE = 'spinningRate'
+SPECTRUM_ALIASINGINDEX = 'aliasingIndex'
+SPECTRUM_FOLDINGMODE = 'foldingMode'
 
 MAINVIEW = 'mainView'
 MAINVIEWFULLWIDTH = 'mainViewFullWidth'

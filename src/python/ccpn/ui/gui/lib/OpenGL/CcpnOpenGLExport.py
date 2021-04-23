@@ -5,7 +5,8 @@ Code for exporting OpenGL stripDisplay to pdf and svg files.
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-02 13:57:32 +0000 (Tue, March 02, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-04-23 14:36:21 +0100 (Fri, April 23, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,7 +37,6 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import viewportDimensions
 from collections import OrderedDict, Iterable
 import io
 import numpy as np
-
 
 from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
 from reportlab.lib import colors
@@ -653,16 +653,16 @@ class GLExporter():
                 self._spectrumValues = spectrumView.getVisibleState(dimensionCount=2)
 
                 # get the bounding box of the spectra
-                fx0, fx1 = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
+                fxMax, fxMin = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
                 if spectrumView.spectrum.dimensionCount > 1:
-                    fy0, fy1 = self._spectrumValues[1].maxSpectrumFrequency, self._spectrumValues[1].minSpectrumFrequency
+                    fyMax, fyMin = self._spectrumValues[1].maxSpectrumFrequency, self._spectrumValues[1].minSpectrumFrequency
                     _col = spectrumView.posColours[0]
                     colour = colors.Color(*_col[0:3], alpha=alphaClip(0.5))
                 else:
                     if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:
-                        fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
+                        fyMax, fyMin = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
                     else:
-                        fy0, fy1 = 0.0, 0.0
+                        fyMax, fyMin = 0.0, 0.0
 
                     _col = spectrumView.posColours[0]
                     colour = colors.Color(*_col[0:3], alpha=alphaClip(0.5))
@@ -676,7 +676,7 @@ class GLExporter():
                 _height = self.displayScale * self.mainView.height
 
                 # generate the bounding box
-                newLine = [fx0, fy0, fx0, fy1, fx1, fy1, fx1, fy0, fx0, fy0]
+                newLine = [fxMax, fyMax, fxMax, fyMin, fxMin, fyMin, fxMin, fyMax, fxMax, fyMax]
                 for ii in range(0, len(newLine) - 2, 2):
                     # thisLine = newLine[ii:ii + 4]
 

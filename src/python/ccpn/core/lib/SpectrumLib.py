@@ -760,6 +760,7 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
     if any(x != 'Frequency' for x in spectrum.dimensionTypes):
         raise NotImplementedError("setContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
 
+    getLogger().info("estimating noise level for spectrum %s" % str(spectrum.pid))
     if setNoiseLevel:
         # get noise level using random sampling method - may be slow for large spectra
         noise = getNoiseEstimate(spectrum)

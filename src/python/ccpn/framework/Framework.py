@@ -2021,7 +2021,7 @@ class Framework(NotifierBase):
         oldPath = self.project.path
         newPath = getSaveDirectory(self.ui.mainWindow, self.preferences)
 
-        with catchExceptions(application=self, errorStringTemplate='Error saving project: %s'):
+        with catchExceptions(application=self, errorStringTemplate='Error saving project: %s', printTraceBack=True):
             if newPath:
                 # Next line unnecessary, but does not hurt
                 newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)

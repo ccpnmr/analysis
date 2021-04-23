@@ -72,6 +72,7 @@ class RestraintListEditPopup(RestraintListPopupABC):
     attributes = [('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ('Restraint Type', EntryCompoundWidget, getattr, None, None, None, {}),
+                  ('Molecule FilePath', EntryCompoundWidget, getattr, setattr, None, None, {})
                   ]
 
 
@@ -83,4 +84,5 @@ class RestraintListNewPopup(RestraintListPopupABC):
     attributes = [('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ('Restraint Type', PulldownListCompoundWidget, getattr, setattr, RestraintListPopupABC._getRestraintTypes, None, {}),
+                  ('Molecule FilePath', EntryCompoundWidget, getattr, setattr, None, None, {})
                   ]

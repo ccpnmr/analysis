@@ -2,7 +2,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -10,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-13 15:32:10 +0000 (Sat, March 13, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-04-23 17:18:03 +0100 (Fri, April 23, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -502,18 +503,18 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
             self.pulldownList.setSizeAdjustPolicy(sizeAdjustPolicy)
 
     def getText(self):
-        "Convenience: Return selected text in Pulldown"
+        """Convenience: Return selected text in Pulldown"""
         return self.pulldownList.currentText()
 
     def getIndex(self):
-        "Convenience: Return selected text in Pulldown"
+        """Convenience: Return selected text in Pulldown"""
         return self.pulldownList.getSelectedIndex()
 
     def select(self, item, blockSignals=False):
-        "Convenience: Set item in Pulldown; works with text or item"
+        """Convenience: Set item in Pulldown; works with text or item"""
 
         if blockSignals:
-            with self.blockWidgetSignals():
+            with self.blockWidgetSignals(recursive=False):
                 self.pulldownList.select(item)
         else:
             self.pulldownList.select(item)
@@ -525,7 +526,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         #     self.pulldownList.blockSignals(False)
 
     def setIndex(self, index, blockSignals=False):
-        "Convenience: set item in Pulldown by index"
+        """Convenience: set item in Pulldown by index"""
 
         if blockSignals:
             with self.blockWidgetSignals():
@@ -540,15 +541,15 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         #     self.pulldownList.blockSignals(False)
 
     def modifyTexts(self, texts):
-        "Modify the pulldown texts, retaining the current selection"
+        """Modify the pulldown texts, retaining the current selection"""
         current = self.getText()
 
         self.pulldownList.blockSignals(True)
         self.pulldownList.clear()
         self.pulldownList.setData(texts=texts)
         self.select(current, blockSignals=True)
-        self.pulldownList.update()
         self.pulldownList.blockSignals(False)
+        self.pulldownList.repaint()
 
     def getTexts(self):
         return tuple(self.pulldownList.itemText(ii) for ii in range(self.pulldownList.count()))

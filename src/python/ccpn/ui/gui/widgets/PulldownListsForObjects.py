@@ -6,8 +6,9 @@ set callback's on creation, deletion and rename
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:55 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-04-23 17:18:03 +0100 (Fri, April 23, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,7 +37,7 @@ from ccpn.core.lib.Notifiers import Notifier
 SELECT = '> Select <'
 UNDEFINED = '<Undefined>'
 
-DEBUG = False
+DEBUG = True
 
 
 class _PulldownABC(PulldownListCompoundWidget):
@@ -92,7 +93,6 @@ class _PulldownABC(PulldownListCompoundWidget):
 
         if self._attributeName is None:
             raise RuntimeError('%s: _attributeName needs to be defined for proper functioning' % self.__class__.__name__)
-
 
         self.mainWindow = mainWindow
         if self.mainWindow:
@@ -162,7 +162,6 @@ class _PulldownABC(PulldownListCompoundWidget):
                                            callback=self._updateFromCurrent
                                            )
                 self._notifier2.setDebug(DEBUG)
-
 
     @property
     def textList(self):

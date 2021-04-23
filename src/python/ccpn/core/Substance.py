@@ -561,7 +561,7 @@ class Substance(AbstractWrapperObject):
     def referenceSpectra(self, spectra):
 
         for spectrum in spectra:
-            spectrum.referenceSubstances = [self]
+            spectrum.referenceSubstances += [self]
 
     @property
     def _molecule(self):
@@ -1049,10 +1049,24 @@ def getter(self: SampleComponent) -> typing.Optional[Substance]:
     #   return self._project._data2Obj[apiComponent]
 
 
-#
+def _getSubstanceByName(self: Project, name:str=None, **kwargs) -> typing.Optional[Substance]:
+    """
+    :param self: project instance
+    :param kwargs: any substance attribute, e.g.: name, labelling etc
+    :return: substance
+    """
+    apiNmrProject = self._wrappedData
+    apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore
+    apiComponent = apiComponentStore.findFirstComponent(name=name, **kwargs)
+
+    if apiComponent is None:
+        return None
+    else:
+        return self.project._data2Obj[apiComponent]
+
+
 SampleComponent.substance = property(getter, None, None,
                                      "Substance corresponding to SampleComponent")
-
 
 ####### Moved to spectrum as referenceSubstances.
 ####### ReferenceSubstance is Deprecated from 3.0.3.

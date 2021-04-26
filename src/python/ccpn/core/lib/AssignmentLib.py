@@ -60,6 +60,63 @@ NEF_ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CG', 'CG1', 'CG2', 'CGx', 'CGy',
                           'QA', 'QB', 'QD', 'QE', 'QG', 'QH', 'QH1', 'QH2', 'QR', 'QZ'
                           ]}
 
+NEF_ATOM_NAMES_SORTED = {'alphas'      : ['CA', 'HA', 'HAx', 'HAy', 'HA2', 'HA3', 'HA%'],
+                    'betas'       : ['CB', 'HB', 'HBx', 'HBy', 'HB%', 'HB2', 'HB3'],
+                    'gammas'      : ['CG', 'CGx', 'CGy', 'CG1', 'CG2', 'HG', 'HGx', 'HGy', 'HG%', 'HG2', 'HG3'],
+                    'moreGammas'  : ['HGx%', 'HGy%', 'HG1', 'HG1x', 'HG1y', 'HG1%', 'HG12', 'HG13', 'HG1%', 'HG2%'],
+                    'deltas'      : ['CD', 'CDx', 'CDy', 'CD1', 'CD2', 'HDx', 'HDy', 'HD%', 'HD1', 'HD2', 'HD3'],
+                    'moreDeltas'  : ['HDx%', 'HDy%', 'ND1', 'ND2', 'HD1%', 'HD2%', 'HD2x', 'HD2y', 'HD21', 'HD22'],
+                    'epsilons'    : ['CE', 'CEx', 'CEy', 'CE1', 'CE2', 'HE', 'HEx', 'HEy', 'HE%', 'HE1', 'HE2', 'HE3'],
+                    'moreEpsilons': ['CE3', 'NE', 'NE1', 'NE2', 'HE2x', 'HE2y', 'HE21', 'HE22', 'HE%'],
+                    'zetas'       : ['CZ', 'CZ2', 'CZ3', 'HZ', 'HZ2', 'HZ3', 'HZ%', 'NZ'],
+                    'etas'        : ['CH2', 'HH2', 'HH1x', 'HH1y', 'HH2x', 'HH2y', 'NH1', 'NH2', 'NHx', 'NHy', 'HH21', 'HH22'],
+                    'moreEtas'    : ['HH', 'HH11', 'HH12']
+                    }
+
+
+
+PROTEIN_NEF_ATOM_NAMES = {
+    'ALA': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB%'],
+    'ARG': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HGx', 'HGy',
+            'HG2', 'HG3', 'HG%', 'CD', 'HDx', 'HDy', 'HD2', 'HD3', 'HD%', 'NE', 'HE', 'CZ', 'NHx', 'NHy',
+            'NH1', 'NH2', 'HH1x', 'HH1y', 'HH11', 'HH12', 'HH2x', 'HH2y', 'HH21', 'HH22'],
+    'ASN': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'ND2',
+            'HD2x', 'HD2y', 'HD21', 'HD22'],
+    'ASP': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG'],
+    'CYS': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'HG'],
+    'GLN': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HGx', 'HGy',
+            'HG2', 'HG3', 'HG%', 'CD', 'NE2', 'HE2x', 'HE2y', 'HE21', 'HE22'],
+    'GLU': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HGx', 'HGy',
+            'HG2', 'HG3', 'HG%', 'CD'],
+    'GLY': ['H', 'N', 'C', 'CA', 'HAx', 'HAy', 'HA2', 'HA3', 'HA%'],
+    'HIS': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'ND1', 'HD1',
+            'CD2', 'HD2', 'CE1', 'HE1', 'NE2', 'HE2'],
+    'ILE': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB', 'CG1', 'HG1x', 'HG1y',
+            'HG12', 'HG13', 'HG1%', 'CG2', 'HG2%', 'CD1', 'HD1%'],
+    'LEU': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HG', 'CDx',
+            'CDy', 'CD1', 'CD2', 'HDx%', 'HDy%', 'HD1%', 'HD2%', 'HD%'],
+    'LYS': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HGx', 'HGy',
+            'HG2', 'HG3', 'HG%', 'CD', 'HDx', 'HDy', 'HD2', 'HD3', 'HD%', 'CE', 'HEx', 'HEy', 'HE2', 'HE3',
+            'HE%', 'NZ', 'HZ%'],
+    'MET': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HGx', 'HGy',
+            'HG2', 'HG3', 'HG%', 'CE', 'HE%'],
+    'PHE': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'CDx', 'CDy',
+            'CD1', 'CD2', 'HDx', 'HDy', 'HD1', 'HD2', 'HD%', 'CEx', 'CEy', 'CE1', 'CE2', 'HEx', 'HEy',
+            'HE1', 'HE2', 'HE%', 'CZ', 'HZ'],
+    'PRO': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HGx', 'HGy',
+            'HG2', 'HG3', 'HG%', 'CD', 'HDx', 'HDy', 'HD2', 'HD3', 'HD%'],
+    'SER': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'HG'],
+    'THR': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB', 'CG2', 'HG1', 'HG2%'],
+    'TRP': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'CD1', 'CD2', 'HD1',
+            'NE1', 'HE1', 'CE2', 'CE3', 'HE3', 'CZ2', 'CZ3', 'HZ2', 'HZ3', 'CH2', 'HH2'],
+    'TYR': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'CDx', 'CDy', 'CD1',
+            'CD2', 'HDx', 'HDy', 'HD1', 'HD2', 'HD%', 'CEx', 'CEy', 'CE1', 'CE2', 'HEx', 'HEy', 'HE1', 'HE2',
+            'HE%', 'CZ', 'HH'],
+    'VAL': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB', 'CGx', 'CGy', 'CG1', 'CG2',
+            'HGx%', 'HGy%', 'HG1%', 'HG2%','HG%']
+    }
+
+
 from ccpn.util import Common as commonUtil, Constants
 from typing import Sequence
 from ccpn.core.NmrAtom import NmrAtom, UnknownIsotopeCode

@@ -37,7 +37,7 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.Sample import Sample
-# from ccpn.core.Spectrum import Spectrum
+from ccpn.core.Restraint import Restraint
 from ccpn.core.Substance import Substance
 from ccpn.core.Integral import Integral
 from ccpn.core.SpectrumGroup import SpectrumGroup
@@ -67,7 +67,8 @@ _currentClasses = {
     Sample           : {},
     SpectrumHit      : {SingularOnly: True},
     Substance        : {},
-    Multiplet        : {}
+    Multiplet        : {},
+    Restraint        : {},
     }
 
 _currentExtraFields = {

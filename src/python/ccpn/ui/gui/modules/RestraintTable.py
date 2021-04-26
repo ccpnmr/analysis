@@ -218,6 +218,7 @@ class RestraintTable(GuiTable):
                          setLayout=True,
                          autoResize=True,
                          selectionCallback=self._selectionCallback,
+                         multiSelect=True,
                          actionCallback=self._actionCallback,
                          grid=(3, 0), gridSpan=(1, 6))
         self.moduleParent = moduleParent
@@ -319,9 +320,8 @@ class RestraintTable(GuiTable):
         """
         Notifier Callback for selecting a row in the table
         """
-        restraint = data[CallBack.OBJECT]
-
-        self.current.restraint = restraint
+        restraints = self.getSelectedObjects()
+        self.current.restraints = restraints
         RestraintTableModule.currentCallback = {'object': self.restraintList, 'table': self}
 
     def _actionCallback(self, data, *args):

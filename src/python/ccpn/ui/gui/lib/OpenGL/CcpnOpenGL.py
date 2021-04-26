@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-23 14:36:21 +0100 (Fri, April 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-26 13:13:08 +0100 (Mon, April 26, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -114,7 +114,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLPeak import GLpeakNdLabelling, GLpeak1dLab
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLIntegral import GLintegralNdLabelling, GLintegral1dLabelling
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
-from ccpn.util.Common import getAxisCodeMatchIndices
+from ccpn.util.Common import getAxisCodeMatchIndices, makeIterableList
 from typing import Tuple
 from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE, AXIS_ACTIVEAXES, \
     DOUBLEAXIS_ACTIVEAXES, DOUBLEAXIS_FULLATOMNAME, DOUBLEAXIS_MATCHATOMTYPE, MOUSEDICTSTRIP
@@ -3933,57 +3933,58 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 # find the matching axisCodes to the display
                 exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
-                indices = getAxisCodeMatchIndices(mark.axisCodes, self._axisCodes[:2], exactMatch=exactMatch)
+                indices = getAxisCodeMatchIndices(mark.axisCodes, self._axisCodes[:2], exactMatch=exactMatch, allMatches=not exactMatch)
 
                 for ii, rr in enumerate(mark.rulerData):
 
-                    axisIndex = indices[ii]
+                    axisIndices = makeIterableList(indices[ii])
 
-                    if axisIndex is not None and axisIndex < 2:
+                    for axisIndex in axisIndices:
+                        if axisIndex is not None and axisIndex < 2:
 
-                        # NOTE:ED check axis units - assume 'ppm' for the minute
-                        if axisIndex == 0:
-                            # vertical ruler
-                            pos = x0 = x1 = rr.position
-                            y0 = self.axisT
-                            y1 = self.axisB
-                            textX = pos + (3.0 * self.pixelX)
-                            textY = self.axisB + (3.0 * self.pixelY)
-                        else:
-                            # horizontal ruler
-                            pos = y0 = y1 = rr.position
-                            x0 = self.axisL
-                            x1 = self.axisR
-                            textX = self.axisL + (3.0 * self.pixelX)
-                            textY = pos + (3.0 * self.pixelY)
+                            # NOTE:ED check axis units - assume 'ppm' for the minute
+                            if axisIndex == 0:
+                                # vertical ruler
+                                pos = x0 = x1 = rr.position
+                                y0 = self.axisT
+                                y1 = self.axisB
+                                textX = pos + (3.0 * self.pixelX)
+                                textY = self.axisB + (3.0 * self.pixelY)
+                            else:
+                                # horizontal ruler
+                                pos = y0 = y1 = rr.position
+                                x0 = self.axisL
+                                x1 = self.axisR
+                                textX = self.axisL + (3.0 * self.pixelX)
+                                textY = pos + (3.0 * self.pixelY)
 
-                        colour = mark.colour
-                        colR = int(colour.strip('# ')[0:2], 16) / 255.0
-                        colG = int(colour.strip('# ')[2:4], 16) / 255.0
-                        colB = int(colour.strip('# ')[4:6], 16) / 255.0
+                            colour = mark.colour
+                            colR = int(colour.strip('# ')[0:2], 16) / 255.0
+                            colG = int(colour.strip('# ')[2:4], 16) / 255.0
+                            colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-                        drawList.indices = np.append(drawList.indices, np.array((index, index + 1), dtype=np.uint32))
-                        drawList.vertices = np.append(drawList.vertices, np.array((x0, y0, x1, y1), dtype=np.float32))
-                        drawList.colors = np.append(drawList.colors, np.array((colR, colG, colB, 1.0) * 2, dtype=np.float32))
-                        drawList.attribs = np.append(drawList.attribs, (axisIndex, pos, axisIndex, pos))
+                            drawList.indices = np.append(drawList.indices, np.array((index, index + 1), dtype=np.uint32))
+                            drawList.vertices = np.append(drawList.vertices, np.array((x0, y0, x1, y1), dtype=np.float32))
+                            drawList.colors = np.append(drawList.colors, np.array((colR, colG, colB, 1.0) * 2, dtype=np.float32))
+                            drawList.attribs = np.append(drawList.attribs, (axisIndex, pos, axisIndex, pos))
 
-                        # build the string and add the extra axis code
-                        label = rr.label if rr.label else rr.axisCode
+                            # build the string and add the extra axis code
+                            label = rr.label if rr.label else rr.axisCode
 
-                        newMarkString = GLString(text=label,
-                                                 font=self.getSmallFont(),
-                                                 x=textX,
-                                                 y=textY,
-                                                 colour=(colR, colG, colB, 1.0),
-                                                 GLContext=self,
-                                                 obj=None)
-                        # this is in the attribs
-                        newMarkString.axisIndex = axisIndex
-                        newMarkString.axisPosition = pos
-                        self._marksAxisCodes.append(newMarkString)
+                            newMarkString = GLString(text=label,
+                                                     font=self.getSmallFont(),
+                                                     x=textX,
+                                                     y=textY,
+                                                     colour=(colR, colG, colB, 1.0),
+                                                     GLContext=self,
+                                                     obj=None)
+                            # this is in the attribs
+                            newMarkString.axisIndex = axisIndex
+                            newMarkString.axisPosition = pos
+                            self._marksAxisCodes.append(newMarkString)
 
-                        index += 2
-                        drawList.numVertices += 2
+                            index += 2
+                            drawList.numVertices += 2
 
             drawList.defineIndexVBO()
 

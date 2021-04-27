@@ -101,7 +101,7 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
         if self.project:
             self.cslWidget.selectFirstItem()
             self.mcWidget.selectFirstItem()
-            self.plsWidget._populate(self.plsWidget.leftList, self.project.peakLists)
+            self.plsWidget._populate(self.plsWidget.rightList, self.project.peakLists)
 
 
     def _okCallback(self):

@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import Sequence, Union
-from ccpn.util.Common import _validateName
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -65,6 +64,9 @@ class RestraintList(AbstractWrapperObject):
 
     #TODO: this needs to be explicit here
     restraintTypes = tuple(coreConstants.constraintListType2ItemLength.keys())
+
+    # Internal NameSpace
+    _MoleculeFilePath = '_MoleculeFilePath'
 
     def __init__(self, project, wrappedData):
 
@@ -246,6 +248,28 @@ class RestraintList(AbstractWrapperObject):
     def tensorResidueType(self, value: float):
         self._wrappedData.tensorResidueType = value
 
+    @property
+    def moleculeFilePath(self):
+        """
+        :return: a filePath for corresponding molecule.
+        E.g., PDB file path for displaying molecules in a molecular viewer
+        """
+        path = self._ccpnInternalData.get(self._MoleculeFilePath)
+
+        return path
+
+    @moleculeFilePath.setter
+    def moleculeFilePath(self, filePath:str=None):
+        """
+        :param filePath: a filePath for corresponding molecule
+        :return: None
+        """
+        if isinstance(self._ccpnInternalData, dict):
+            tempCcpn = self._ccpnInternalData.copy()
+            tempCcpn[self._MoleculeFilePath] = filePath
+            self._ccpnInternalData = tempCcpn
+
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -350,7 +374,7 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
                       tensorMagnitude: float = 0.0, tensorRhombicity: float = 0.0,
                       tensorIsotropicValue: float = 0.0, tensorChainCode: str = None,
                       tensorSequenceCode: str = None, tensorResidueType: str = None,
-                      serial: int = None, restraintItemLength=None) -> RestraintList:
+                      serial: int = None, restraintItemLength=None, **kwargs) -> RestraintList:
     """Create new RestraintList of type restraintType within DataSet.
 
     See the RestraintList class for details.
@@ -402,6 +426,12 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
         except ValueError:
             self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
                                          % (result, serial))
+
+    for k,v in kwargs.items():
+        try:
+            setattr(result, k, v)
+        except Exception:
+            self.project._logger.warning("Could not set %s to %s" % (k, v))
 
     return result
 

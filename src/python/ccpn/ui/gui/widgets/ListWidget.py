@@ -33,7 +33,12 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.lib.mouseEvents import _getMimeQVariant
 from ccpn.util.Constants import ccpnmrModelDataList, INTERNALQTDATA
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
-
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.Widget import Widget
 
 # GST is this really a WrapperObject ListWidget because there appear to be some
 # methods and features that are possibly quite coupled to them or some defined
@@ -498,46 +503,46 @@ class ListWidget(QtWidgets.QListWidget, Base):
         p.end()
 
 
-from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Spacer import Spacer
 
-
-class ListWidgetPair(Frame):
+class ListWidgetPair(Widget):
     """
     Define a pair of listWidgets such that information can be copied from one side
     to the other and vise-versa
     """
 
-    def __init__(self, parent=None, objects=None, callback=None,
+    def __init__(self,  parent=None,
+                 leftObjects=None,
+                 rightObjects=None,
+                 callback=None,
                  rightMouseCallback=None,
                  contextMenu=True,
                  multiSelect=True,
-                 acceptDrops=False,
-                 showMoveArrows=True,
+                 acceptDrops=True,
+                 showMoveArrows=False,
                  showMoveText=False,
-                 title='Copy Items', **kwds):
+                 leftLabel='Not included',
+                 rightLabel='Included',
+                 setLayout=True,
+                 copyDrop=False,
+                 objAttr = 'pid',
+                 **kwds):
         """
-        Initialise the pair of listWidgets
-        :param parent:
-        :param objects:
-        :param callback:
-        :param rightMouseCallback:
-        :param contextMenu:
-        :param multiSelect:
-        :param acceptDrops:
-        :param pairName:
-        :param kwds:
         """
-        Frame.__init__(self, parent, **kwds)
+        Widget.__init__(self, parent, setLayout=setLayout, **kwds)
 
-        self.title = Label(self, text=title, setLayout=True, grid=(0, 0), gridSpan=(1, 7), hAlign='l')
-        self.leftList = ListWidget(self, setLayout=True, grid=(1, 1), gridSpan=(5, 1), acceptDrops=True,
-                                   sortOnDrop=True)
-        self.rightList = ListWidget(self, setLayout=True, grid=(1, 5), gridSpan=(5, 1), acceptDrops=True,
-                                    sortOnDrop=True)
+
+        self.leftLabel = Label(self, text=leftLabel, grid=(0, 0),  hAlign='l')
+        self.leftList = ListWidget(self, contextMenu=contextMenu,
+                                   acceptDrops=acceptDrops,
+                                   copyDrop=copyDrop,
+                                   sortOnDrop=False, multiSelect=multiSelect, grid=(1, 0),)
+
+        self.rightLabel = Label(self, text=rightLabel,  grid=(0, 1),  hAlign='l')
+        self.rightList = ListWidget(self, contextMenu=contextMenu, grid=(1, 1),
+                                    acceptDrops=acceptDrops,
+                                    copyDrop=copyDrop,
+                                    sortOnDrop=False,
+                                    multiSelect=multiSelect)
 
         # set the drop source
         self.leftList.dropSource = self.rightList
@@ -566,32 +571,13 @@ class ListWidgetPair(Frame):
             self.buttons.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
             transparentStyle = "background-color: transparent; border: 0px solid transparent"
             self.buttons.setStyleSheet(transparentStyle)
+        if leftObjects:
+            self._populate(self.leftList, leftObjects, objAttr=objAttr)
+        if rightObjects:
+            self._populate(self.rightList, rightObjects, objAttr=objAttr)
 
-        # self.button = Button(self, text='',
-        #                           icon=self.rightIcon,
-        #                           callback=self._copyRight,
-        #                           grid=(3,3))
-        # self.button.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-
-        self.spacer1 = Spacer(self, 5, 5,
-                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                              grid=(0, 2), gridSpan=(1, 1))
-        self.spacer2 = Spacer(self, 5, 5,
-                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                              grid=(2, 2), gridSpan=(1, 1))
-        self.spacer3 = Spacer(self, 5, 5,
-                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                              grid=(4, 4), gridSpan=(1, 1))
-        self.spacer4 = Spacer(self, 5, 5,
-                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                              grid=(6, 4), gridSpan=(1, 1))
-
-        for i, cs in enumerate([2, 8, 1, 1, 1, 8, 2]):
-            self.getLayout().setColumnStretch(i, cs)
-
-        # self.showBorder=True
-        # self.leftList.setContentsMargins(15,15,15,15)
-        # self.rightList.setContentsMargins(15,15,15,15)
+        # self.leftList.dropped.connect(self._itemDropped)
+        # self.rightList.dropped.connect(self._itemDropped)
 
     def setListObjects(self, left):
         # self.leftObjects = left
@@ -600,18 +586,34 @@ class ListWidgetPair(Frame):
         self.objects = left
         self._populate(self.rightList, self.objects)
 
-    def _populate(self, list, objs):
+    def _populate(self, listWiget, objs, objAttr='pid'):
         """
         List the Pids of the objects in the listWidget
         :param list: target listWidget
         :param objs: list of objects with Pids
         """
-        list.clear()
+        listWiget.clear()
         if objs:
-            for item in objs:
-                item = QtWidgets.QListWidgetItem(str(item.pid))
-                list.addItem(item)
-        list.sortItems()
+            for obj in objs:
+                itemStr = None
+                if isinstance(obj, str):
+                    itemStr = str(obj)
+                else:
+                    if objAttr:
+                        att = getattr(obj, objAttr, None)
+                        itemStr = str(att)
+                if itemStr:
+                    item = QtWidgets.QListWidgetItem(itemStr)
+                    listWiget.addItem(item)
+        listWiget.sortItems()
+
+    def _itemDropped(self, data):
+
+        # onleftTexts = self.leftList.getTexts()
+
+        self.leftList._removeDuplicate()
+        self.rightList._removeDuplicate()
+
 
     def _moveLeft(self):  # not needed now
         """
@@ -666,31 +668,6 @@ class ListWidgetPair(Frame):
     def getRightList(self):
         return self.rightList.getTexts()
 
-        # RESIDUE                     ABBREVIATION                SYNONYM
-        # -----------------------------------------------------------------------------
-        # Alanine                     ALA                         A
-        # Arginine                    ARG                         R
-        # Asparagine                  ASN                         N
-        # Aspartic acid               ASP                         D
-        # ASP/ASN ambiguous           ASX                         B
-        # Cysteine                    CYS                         C
-        # Glutamine                   GLN                         Q
-        # Glutamic acid               GLU                         E
-        # GLU/GLN ambiguous           GLX                         Z
-        # Glycine                     GLY                         G
-        # Histidine                   HIS                         H
-        # Isoleucine                  ILE                         I
-        # Leucine                     LEU                         L
-        # Lysine                      LYS                         K
-        # Methionine                  MET                         M
-        # Phenylalanine               PHE                         F
-        # Proline                     PRO                         P
-        # Serine                      SER                         S
-        # Threonine                   THR                         T
-        # Tryptophan                  TRP                         W
-        # Tyrosine                    TYR                         Y
-        # Unknown                     UNK
-        # Valine                      VAL                         V
 
 
 class ListWidgetSelector(Frame):
@@ -879,6 +856,12 @@ if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
     from ccpn.ui.gui.widgets.Widget import Widget
+    from collections import namedtuple
+
+
+    lst = ['pid', 'comment', ]
+    MockPeakList = namedtuple('PeakList', lst)
+    peakLists = [MockPeakList('PL:%s'%i, 'comment_%s' %i)  for i in range(10)]
 
 
     def droppedCallback(*r):
@@ -891,12 +874,14 @@ if __name__ == '__main__':
     objects = [int, float, str, 'Green']
 
     popup = CcpnDialog(windowTitle='Test widget', setLayout=True)
-    widget = ListWidget(parent=popup, allowDuplicates=True, acceptDrops=True, grid=(0, 0))
-    widget2 = ListWidget(parent=popup, allowDuplicates=False, acceptDrops=True, grid=(0, 1))
-    widget2.dropped.connect(droppedCallback)
+    # widget = ListWidget(parent=popup, allowDuplicates=True, acceptDrops=True, grid=(0, 0))
+    # widget2 = ListWidget(parent=popup, allowDuplicates=False, acceptDrops=True, grid=(0, 1))
+    # widget2.dropped.connect(droppedCallback)
+    #
+    # for i in ['a', 'a', 'c']:
+    #     widget.addItem(i)
 
-    for i in ['a', 'a', 'c']:
-        widget.addItem(i)
+    w= ListWidgetPair(popup, leftObjects = peakLists, grid=(1,0))
     popup.show()
     popup.raise_()
     app.start()

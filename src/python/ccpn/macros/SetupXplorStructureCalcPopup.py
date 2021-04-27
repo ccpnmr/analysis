@@ -64,7 +64,7 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
 
         # enable the buttons
         self.tipText = ''
-        self.setOkButton(callback=self._okCallback, tipText =self.tipText, text='Calculate', enabled=True)
+        self.setOkButton(callback=self._okCallback, tipText =self.tipText, text='Setup', enabled=True)
         self.setCloseButton(callback=self.reject, tipText='Close')
         self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
         self.__postInit__()
@@ -119,14 +119,14 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
                 MessageDialog.showWarning('', 'Include at list a PeakList')
                 return
             # run the calculation
-            #
+            print('Running with peakLists: %s, chain: %s, CSL: %s' %(plsPids, chain.pid, csl.pid))
 
         self.accept()
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
-    app = TestApplication()
-    popup = SetupXplorStructureCalculationPopup()
+    # app = TestApplication()
+    popup = SetupXplorStructureCalculationPopup(mainWindow=mainWindow)
     popup.show()
     popup.raise_()
-    app.start()
+    # app.start()

@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-25 17:05:10 +0000 (Thu, March 25, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-04-27 15:34:01 +0100 (Tue, April 27, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -51,7 +52,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
 from ccpn.util.UserPreferences import UserPreferences
-from ccpn.util.Common import ZPlaneNavigationModes
+from ccpn.util.Common import ZPlaneNavigationModes, camelCaseToString
 from ccpn.util.Path import aPath
 from ccpn.util.Constants import AXIS_UNITS
 from ccpn.ui.gui.lib.GuiPath import PathEdit
@@ -757,8 +758,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Populate the widgets in the externalProgramsTab
         """
         with self._changes.blockChanges():
-            self.pymolPath.setText(self.preferences.externalPrograms.pymol)
-            self.PDFViewerPath.setText(self.preferences.externalPrograms.PDFViewer)
+            for external, (extPath, _, _) in self.externalPaths.items():
+                value = self.preferences.externalPrograms[external]
+                extPath.setText(value)
 
     def _setSpectrumTabWidgets(self, parent):
         """Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live
@@ -1167,29 +1169,26 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _setExternalProgramsTabWidgets(self, parent):
         """Insert a widget in here to appear in the externalPrograms Tab
         """
+        self.externalPaths = {}
+        extPrograms = sorted((camelCaseToString(k), k) for k in self.preferences.externalPrograms.keys())
 
         row = 0
-        self.pymolPathLabel = Label(parent, "Pymol Path", grid=(row, 0), )
-        self.pymolPath = PathEdit(parent, grid=(row, 1), hAlign='t')
-        self.pymolPath.setMinimumWidth(LineEditsMinimumWidth)
-        self.pymolPath.textChanged.connect(self._queueSetPymolPath)
-        # self.pymolPath.setText(self.preferences.externalPrograms.pymol)
-        self.pymolPathButton = Button(parent, grid=(row, 2), callback=self._getPymolPath, icon='icons/directory',
-                                      hPolicy='fixed')
+        for dim, (name, external) in enumerate(extPrograms):
+            Label(parent, name, grid=(row, 0), )
 
-        self.testPymolPathButton = Button(parent, grid=(row, 3), callback=self._testPymol,
-                                          text='test', hPolicy='fixed')
+            externalPath = PathEdit(parent, grid=(row, 1), hAlign='t')
+            externalPath.setMinimumWidth(LineEditsMinimumWidth)
+            externalPath.textChanged.connect(partial(self._queueSetExternalPath, external, dim))
 
-        row += 1
-        self.PDFViewerPathLabel = Label(parent, "Linux PDFViewer", grid=(row, 0), )
-        self.PDFViewerPath = PathEdit(parent, grid=(row, 1), hAlign='t')
-        self.PDFViewerPath.setMinimumWidth(LineEditsMinimumWidth)
-        self.PDFViewerPath.textChanged.connect(self._queueSetPDFViewerPath)
-        self.PDFViewerPathButton = Button(parent, grid=(row, 2), callback=self._getPDFViewerPath, icon='icons/directory',
-                                          hPolicy='fixed')
+            externalButton = Button(parent, grid=(row, 2), callback=partial(self._getExternalPath, external),
+                                    icon='icons/directory', hPolicy='fixed')
 
-        self.testPDFViewerPathButton = Button(parent, grid=(row, 3), callback=self._testPDFViewer,
-                                              text='test', hPolicy='fixed')
+            externalTestButton = Button(parent, grid=(row, 3), callback=partial(self._testExternalPath, external),
+                                        text='test', hPolicy='fixed')
+
+            self.externalPaths[external] = (externalPath, externalButton, externalTestButton)
+
+            row += 1
 
         # add spacer to stop columns changing width
         row += 1
@@ -1197,19 +1196,24 @@ class PreferencesPopup(CcpnDialogMainWidget):
                QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(row, 1), gridSpan=(1, 1))
 
-    def _testPymol(self):
-        program = self.pymolPath.get()
-        if not self._testExternalProgram(program):
-            self.sender().setText('Failed')
-        else:
-            self.sender().setText('Success')
+    def _testExternalPath(self, external):
+        if external not in self.preferences.externalPrograms:
+            raise RuntimeError(f'{external} not defined')
+        if external not in self.externalPaths:
+            raise RuntimeError(f'{external} not defined in preferences')
 
-    def _testPDFViewer(self):
-        program = self.PDFViewerPath.get()
-        if not self._testExternalProgram(program):
-            self.sender().setText('Failed')
-        else:
-            self.sender().setText('Success')
+        widgetList = self.externalPaths[external]
+        try:
+            extPath, _, _ = widgetList
+
+            program = extPath.get()
+            if not self._testExternalProgram(program):
+                self.sender().setText('Failed')
+            else:
+                self.sender().setText('Success')
+
+        except Exception as es:
+            raise RuntimeError(f'{external} does not contain the correct widgets')
 
     def _testExternalProgram(self, program):
         import subprocess
@@ -1438,56 +1442,61 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _toggleAppearanceOptions(self, option, checked):
         self.preferences.appearance[option] = checked
 
-    @queueStateChange(_verifyPopupApply)
-    def _queueSetPymolPath(self):
-        value = self.pymolPath.get()
-        if 'externalPrograms' in self.preferences:
-            if 'pymol' in self.preferences.externalPrograms:
-                if value != self.preferences.externalPrograms.pymol:
-                    self.testPymolPathButton.setText('test')
-                    return partial(self._setPymolPath, value)
-
-    def _setPymolPath(self, value):
-        if 'externalPrograms' in self.preferences:
-            if 'pymol' in self.preferences.externalPrograms:
-                self.preferences.externalPrograms.pymol = value
-                # dialog = ExecutablesFileDialog(parent=self)
-                # dialog.initialPath = aPath(value).filepath
-
-    def _getPymolPath(self):
-        # NOTE:ED - native dialog on OSX does not show contents of an .app dir.
-        dialog = ExecutablesFileDialog(parent=self, acceptMode='select', directory=str(self.pymolPath.get()))
-        dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
-        dialog._show()
-        file = dialog.selectedFile()
-        if file:
-            self.pymolPath.setText(file)
+    #~~~~~~~~~~~~~~~~~~~~~~~~`
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetPDFViewerPath(self):
-        value = self.PDFViewerPath.get()
-        if 'externalPrograms' in self.preferences:
-            if 'PDFViewer' in self.preferences.externalPrograms:
-                if value != self.preferences.externalPrograms.PDFViewer:
-                    self.testPDFViewerPathButton.setText('test')
-                    return partial(self._setPDFViewerPath, value)
+    def _queueSetExternalPath(self, external, dim):
+        """Queue the change to the correct item in preferences
+        """
+        if external not in self.preferences.externalPrograms:
+            raise RuntimeError(f'{external} not defined')
+        if external not in self.externalPaths:
+            raise RuntimeError(f'{external} not defined in preferences')
 
-    def _setPDFViewerPath(self, value):
-        if 'externalPrograms' in self.preferences:
-            if 'PDFViewer' in self.preferences.externalPrograms:
-                self.preferences.externalPrograms.PDFViewer = value
-                # # might cause a clash here
-                # dialog = ExecutablesFileDialog(parent=self)
-                # dialog.initialPath = aPath(value).filepath
+        widgetList = self.externalPaths[external]
+        try:
+            extPath, extButton, extTestButton = widgetList
 
-    def _getPDFViewerPath(self):
+            value = extPath.get()
+            oldValue = self.preferences.externalPrograms[external]
+            if value != oldValue:
+                extTestButton.setText('test')
+
+                return partial(self._setExternalPath, external, value)
+
+        except Exception as es:
+            raise RuntimeError(f'{external} does not contain the correct widgets {es}')
+
+    def _setExternalPath(self, external, value):
+        """Set the path in preferences
+        """
+        if 'externalPrograms' in self.preferences and external in self.preferences.externalPrograms:
+            self.preferences.externalPrograms[external] = value
+
+    def _getExternalPath(self, external):
+        """Get the correct path from preferences
+        """
         # NOTE:ED - native dialog on OSX does not show contents of an .app dir.
-        dialog = ExecutablesFileDialog(parent=self, acceptMode='select', directory=str(self.PDFViewerPath.get()))
-        dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
-        dialog._show()
-        file = dialog.selectedFile()
-        if file:
-            self.PDFViewerPath.setText(file)
+
+        if external not in self.preferences.externalPrograms:
+            raise RuntimeError(f'{external} not defined')
+        if external not in self.externalPaths:
+            raise RuntimeError(f'{external} not defined in preferences')
+
+        widgetList = self.externalPaths[external]
+        try:
+            extPath, _, _ = widgetList
+
+            value = extPath.get()
+            dialog = ExecutablesFileDialog(parent=self, acceptMode='select', directory=str(value))
+            dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
+            dialog._show()
+            file = dialog.selectedFile()
+            if file:
+                extPath.setText(file)
+
+        except Exception as es:
+            raise RuntimeError(f'{external} does not contain the correct widgets')
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetAutoBackupFrequency(self):

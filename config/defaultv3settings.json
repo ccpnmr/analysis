@@ -109,7 +109,11 @@
         "proxyPassword"    : ""
     },
     "externalPrograms" : {
+        "aria"      : "",
+        "cyana"     : "",
         "pymol"     : "",
+        "talos"     : "",
+        "xplor"     : "",
         "PDFViewer" : ""
     },
     "appearance"       : {

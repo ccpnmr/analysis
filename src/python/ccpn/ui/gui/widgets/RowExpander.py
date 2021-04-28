@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-28 16:45:06 +0100 (Wed, April 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-28 18:21:41 +0100 (Wed, April 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -93,7 +93,7 @@ class RowExpander(QtWidgets.QWidget):
             for rr in range(row + 1, row + span):
                 self._table.setRowHidden(rr, hidden)
 
-    def updateCellWidget(self, row, visible, setPixMap=False):
+    def updateCellWidget(self, row, visible, setPixMapState=None):
         """Update the expanded/collapsed state of the button
 
         :param row: First row of the group of spanned cells this cell is associated with
@@ -104,5 +104,8 @@ class RowExpander(QtWidgets.QWidget):
         self._button.setVisible(visible)
         self._activeRow = row
         self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, not visible)
-        if setPixMap:
-            self._button.setPixmap(self._closedPixmap)
+        if setPixMapState is not None:
+            if setPixMapState:
+                self._button.setPixmap(self._openPixmap)
+            else:
+                self._button.setPixmap(self._closedPixmap)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-28 16:45:06 +0100 (Wed, April 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-28 18:21:41 +0100 (Wed, April 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2021-04-26 11:53:10 +0100 (Mon, April 26, 2021) $"
 
 import pandas as pd
 import random
+from functools import partial
 from PyQt5 import QtWidgets, QtCore
 from collections import OrderedDict
 from itertools import zip_longest
@@ -39,6 +40,8 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.widgets.GuiTable import GuiTable, _getValueByHeader
 from ccpn.ui.gui.widgets.Column import ColumnClass
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.CompoundWidgets import RadioButtonsCompoundWidget
 from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
@@ -72,10 +75,11 @@ MERGECOLUMN = 1
 PIDCOLUMN = 1
 EXPANDERCOLUMN = 3
 SPANCOLUMNS = (0, 1, 2, 3)
+AUTOEXPANDSETTINGS = (True, False, None)
+MINSORTCOLUMN = 3
 
 
 def __ltForTableWidgetItem__(self, other):
-
     # new routine to overload TableWidgetItem that crashes when sorting None
     if self.sortMode == 'index' and hasattr(other, 'index'):
         return self.index < other.index
@@ -89,7 +93,7 @@ def __ltForTableWidgetItem__(self, other):
         # NOTE:ED - these should be defined as constants in the table header at some point
         #           _groups needs to be defined when the tables are updated to link the required groups
         # if col in [3, 6]:
-        if col > 3:
+        if col > MINSORTCOLUMN:
             table = self.tableWidget()
             if hasattr(table, '_groups'):
                 # get the names which should be column 0
@@ -139,7 +143,7 @@ class ViolationTableModule(CcpnModule):
 
     className = 'ViolationTableModule'
 
-    activePulldownClass = None # e.g., can make the table respond to current peakList
+    activePulldownClass = None  # e.g., can make the table respond to current peakList
 
     def __init__(self, mainWindow=None, name='Violation Table',
                  peakList=None, selectFirstItem=False):
@@ -158,25 +162,45 @@ class ViolationTableModule(CcpnModule):
 
         # add the settings widgets defined from the following orderedDict - test for refactored
         settingsDict = OrderedDict((('SpectrumDisplays', {'label'   : '',
-                                                         'tipText' : '',
-                                                         'callBack': None,  #self.restraintListPulldown,
-                                                         'enabled' : True,
-                                                         '_init'   : None,
-                                                         'type'    : SpectrumDisplaySelectionWidget,
-                                                         'kwds'    : {'texts'      : [],
-                                                                      'displayText': [],
-                                                                      'defaults'   : []},
-                                                         }),
+                                                          'tipText' : '',
+                                                          'callBack': None,  #self.restraintListPulldown,
+                                                          'enabled' : True,
+                                                          '_init'   : None,
+                                                          'type'    : SpectrumDisplaySelectionWidget,
+                                                          'kwds'    : {'texts'      : [],
+                                                                       'displayText': [],
+                                                                       'defaults'   : []},
+                                                          }),
                                     ('RestraintLists', {'label'   : '',
-                                                         'tipText' : '',
-                                                         'callBack': None,  #self.restraintListPulldown,
-                                                         'enabled' : True,
-                                                         '_init'   : None,
-                                                         'type'    : RestraintListSelectionWidget,
-                                                         'kwds'    : {'texts'      : [],
-                                                                      'displayText': [],
-                                                                      'defaults'   : []},
-                                                         }),
+                                                        'tipText' : '',
+                                                        'callBack': None,  #self.restraintListPulldown,
+                                                        'enabled' : True,
+                                                        '_init'   : None,
+                                                        'type'    : RestraintListSelectionWidget,
+                                                        'kwds'    : {'texts'      : [],
+                                                                     'displayText': [],
+                                                                     'defaults'   : []},
+                                                        }),
+                                    # ('autoExpand', {'label'   : '',
+                                    #                 'tipText' : '',
+                                    #                 'callBack': self._updateAutoExpand,
+                                    #                 'enabled' : True,
+                                    #                 'checked' : False,
+                                    #                 '_init'   : None,
+                                    #                 'type'    : RadioButtonsCompoundWidget,
+                                    #                 'kwds'    : {'labelText'   : 'Auto-Expand Groups',
+                                    #                              'compoundKwds': {'direction': 'h',
+                                    #                                               'hAlign'   : 'l',
+                                    #                                               'texts'    : ['Collapse', 'Expand', 'Ignore'], }
+                                    #                              }
+                                    #                 }),
+                                    ('autoExpand', {'label'   : 'Auto-expand Groups',
+                                                          'tipText' : 'Autotomatically expand/collapse groups on\nadding new restraintList, or sorting.',
+                                                          'callBack': self._updateAutoExpand,
+                                                          'enabled' : True,
+                                                          'checked' : False,
+                                                          '_init'   : None,
+                                                          }),
                                     ('sequentialStrips', {'label'   : 'Show sequential strips',
                                                           'tipText' : 'Show nmrResidue in all strips.',
                                                           'callBack': None,  #self.showNmrChainFromPulldown,
@@ -214,6 +238,7 @@ class ViolationTableModule(CcpnModule):
                                               grid=(0, 0))
         self._restraintList = self._VTwidget.checkBoxes['RestraintLists']['pulldownList']
         self._restraintList.listWidget.changed.connect(self._updateRestraintLists)
+        # self._expandSelector = self._VTwidget.checkBoxes['autoExpand']['pulldownList']
 
         # mainWidget
         self.violationTable = ViolationTableWidget(parent=self.mainWidget,
@@ -273,6 +298,10 @@ class ViolationTableModule(CcpnModule):
         restraintLists = [rList for rList in restraintLists if rList is not None]
         self.violationTable.updateRestraintLists(restraintLists)
 
+    def _updateAutoExpand(self, expand):
+        # index = self._expandSelector.getIndex()
+        self.violationTable.updateAutoExpand(expand)
+
 
 class ViolationTableWidget(GuiTable):
     """
@@ -305,6 +334,7 @@ class ViolationTableWidget(GuiTable):
         self._selectedPeakList = None
         kwds['setLayout'] = True  # Assure we have a layout with the widget
         self._restraintLists = []
+        self._autoExpand = False
 
         # Initialise the scroll widget and common settings
         self._initTableCommonWidgets(parent, **kwds)
@@ -331,6 +361,10 @@ class ViolationTableWidget(GuiTable):
         # gridHPos += 1
         # self.posUnitPulldown = PulldownList(parent=self._widget, texts=UNITS, callback=self._pulldownUnitsCallback, grid=(row, gridHPos),
         #                                     objectName='posUnits_PT')
+
+        gridHPos += 1
+        self.expandButtons = ButtonList(parent=self._widget, texts=[' Expand all', ' Collapse all'], grid=(row, gridHPos),
+                                        callbacks=[partial(self._expandAll, True), partial(self._expandAll, False), ])
 
         row += 1
         self.spacer = Spacer(self._widget, 5, 5,
@@ -464,6 +498,16 @@ class ViolationTableWidget(GuiTable):
         """
         return
 
+    def _expandAll(self, expand):
+        """Expand/collapse all groups
+        """
+        self.updateTableExpanders(expand)
+
+    def updateAutoExpand(self, expand):
+        """Set the auto-expand/collapsd state for adding new restraintLists, or sorting table
+        """
+        self._autoExpand = expand
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Subclass GuiTable
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -484,10 +528,10 @@ class ViolationTableWidget(GuiTable):
 
         try:
             _dataFrameObject = self.getDataFrameFromExpandedList(table=self,
-                                                         buildList=rowObjects,
-                                                         # colDefs=columnDefs,
-                                                         hiddenColumns=self._hiddenColumns,
-                                                         expandColumn='Restraint')
+                                                                 buildList=rowObjects,
+                                                                 # colDefs=columnDefs,
+                                                                 hiddenColumns=self._hiddenColumns,
+                                                                 expandColumn='Restraint')
 
             # populate from the Pandas dataFrame inside the dataFrameObject
             self.setTableFromDataFrameObject(dataFrameObject=_dataFrameObject, columnDefs=self.columns)
@@ -517,15 +561,15 @@ class ViolationTableWidget(GuiTable):
         allItems = []
 
         # building...
-        _buildColumns = (('#', lambda pk, rt: pk.serial),
+        _buildColumns = [('#', lambda pk, rt: pk.serial),
                          ('Peak', lambda pk, rt: pk.pid),
                          ('_object', lambda pk, rt: (pk, rt)),
-                         ('Expand', lambda pk, rt: self._downIcon),
-                         )
-        _restraintColumns = (('Restraint', lambda rt: ''),
+                         # ('Expand', lambda pk, rt: self._downIcon),
+                         ]
+        _restraintColumns = [('Restraint', lambda rt: ''),
                              ('Atoms', lambda rt: ''),
                              ('Violation', lambda rt: 0.0),
-                             )
+                             ]
 
         # define self.columns here
         # create the column objects
@@ -533,12 +577,17 @@ class ViolationTableWidget(GuiTable):
             (Header1, lambda row: _getValueByHeader(row, Header1), 'TipTex1', None, None),
             (Header2, lambda row: _getValueByHeader(row, Header2), 'TipTex2', None, None),
             (Header3, lambda row: _getValueByHeader(row, Header3), 'TipTex3', None, None),
-            (Header4, lambda row: None, 'TipTex4', None, None),
+            # (Header4, lambda row: None, 'TipTex4', None, None),
             ]
+
+        if len(self._restraintLists) > 0:
+            _buildColumns.append(('Expand', lambda pk, rt: self._downIcon))
+            _cols.append((Header4, lambda row: None, 'TipTex4', None, None))
+
         for col in range(len(self._restraintLists)):
-            _cols.append((f'Restraint{col+1}', lambda row: _getValueByHeader(row, f'Restraint{col+1}'), f'RTipTex{col+1}', None, None))
-            _cols.append((f'Atoms{col+1}', lambda row: _getValueByHeader(row, f'Atoms{col+1}'), f'ATipTex{col+1}', None, None))
-            _cols.append((f'Violation{col+1}', lambda row: _getValueByHeader(row, f'Violation{col+1}'), f'VTipTex{col+1}', None, None))
+            _cols.append((f'Restraint{col + 1}', lambda row: _getValueByHeader(row, f'Restraint{col + 1}'), f'RTipTex{col + 1}', None, None))
+            _cols.append((f'Atoms{col + 1}', lambda row: _getValueByHeader(row, f'Atoms{col + 1}'), f'ATipTex{col + 1}', None, None))
+            _cols.append((f'Violation{col + 1}', lambda row: _getValueByHeader(row, f'Violation{col + 1}'), f'VTipTex{col + 1}', None, None))
 
         self.columns = ColumnClass(_cols)
 
@@ -576,8 +625,9 @@ class ViolationTableWidget(GuiTable):
                     _resLists = OrderedDict([(res, []) for res in self._restraintLists])
                     for _res in _restraints:
                         if _res and _res.restraintList in _resLists:
-                            _atoms = self._getContributions(_res or '')
-                            _resLists[_res.restraintList].append((_res, _atoms, random.random()))
+                            _atoms = self._getContributions(_res)
+                            for _atom in _atoms:
+                                _resLists[_res.restraintList].append((_res, _atom, random.random()))
 
                     # print('~~~~~~~~~~~~~~~~~~~~~~')
                     # print('\n'.join([str(z) for z in zip_longest(*_resLists.values())]))
@@ -585,7 +635,6 @@ class ViolationTableWidget(GuiTable):
 
                         copyItem = listItem.copy()
                         for cc, rr in enumerate(val):
-
                             copyItem[f'Restraint{cc + 1}'] = rr[0].pid if rr else ''
                             copyItem[f'Atoms{cc + 1}'] = rr[1] if rr else ''
                             copyItem[f'Violation{cc + 1}'] = rr[2] if rr else 0
@@ -593,12 +642,12 @@ class ViolationTableWidget(GuiTable):
                         allItems.append(copyItem)
 
         _dataFrame = DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=self.columns.headings),
-                               # objectList=objects or [],
-                               # indexList=indexList,
-                               columnDefs=self.columns or [],
-                               hiddenColumns=hiddenColumns or [],
-                               table=table,
-                               )
+                                     # objectList=objects or [],
+                                     # indexList=indexList,
+                                     columnDefs=self.columns or [],
+                                     hiddenColumns=hiddenColumns or [],
+                                     table=table,
+                                     )
         _objects = [row for row in _dataFrame.dataFrame.itertuples()]
         _dataFrame._objects = _objects
 
@@ -627,7 +676,7 @@ class ViolationTableWidget(GuiTable):
         if len(restraint.restraintContributions) > 0:
             if restraint.restraintContributions[0].restraintItems:
                 # return restraint.restraintContributions[0].restraintItems[0]
-                return ' - '.join(restraint.restraintContributions[0].restraintItems[0])
+                return [' - '.join(rr) for rr in restraint.restraintContributions[0].restraintItems]
         else:
             return ''
 
@@ -656,9 +705,15 @@ class ViolationTableWidget(GuiTable):
         """
         self.updateTableExpanders()
 
-    def updateTableExpanders(self):
+    def updateTableExpanders(self, expandState=None):
         """Update the state of the expander buttons
         """
+        if not isinstance(expandState, (bool, type(None))):
+            raise TypeError('expandState must be bool or None')
+
+        if EXPANDERCOLUMN >= self.columnCount():
+            return
+
         rows = self.rowCount()
         _order = [self.indexFromItem(self.item(ii, MERGECOLUMN)).data() for ii in range(rows)]
         if not _order:
@@ -668,11 +723,11 @@ class ViolationTableWidget(GuiTable):
 
         row = rowCount = 0
         lastRow = _order[row]
-        _DEFAULT = True
+        _expand = self._autoExpand if expandState is None else expandState
 
         for i in range(0, rows):
 
-            nextRow = _order[i + 1] if i < (rows - 1) else None # catch the last group, otherwise need try/except
+            nextRow = _order[i + 1] if i < (rows - 1) else None  # catch the last group, otherwise need try/except
 
             if lastRow == nextRow:
                 rowCount += 1
@@ -684,14 +739,14 @@ class ViolationTableWidget(GuiTable):
                 self.setRowHidden(row, False)
 
                 _widg = self.cellWidget(row, EXPANDERCOLUMN)
-                _widg.updateCellWidget(row, True, True)
+                _widg.updateCellWidget(row, True, setPixMapState=_expand)
 
                 for rr in range(row + 1, row + rowCount):
-                    self.setRowHidden(rr, True and _DEFAULT)
+                    self.setRowHidden(rr, not _expand)
                     _widg = self.cellWidget(rr, EXPANDERCOLUMN)
                     _widg.updateCellWidget(rr, False)
 
-                self.setRowHidden(row + rowCount, True and _DEFAULT)
+                self.setRowHidden(row + rowCount, not _expand)
                 _widg = self.cellWidget(row + rowCount, EXPANDERCOLUMN)
                 _widg.updateCellWidget(row + rowCount, False)
 

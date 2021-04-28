@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-28 15:54:46 +0100 (Wed, April 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-28 16:45:06 +0100 (Wed, April 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -60,7 +60,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight, TABLEFONT
 from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.RowExpander2 import RowExpander
+from ccpn.ui.gui.widgets.RowExpander import RowExpander
 import math
 
 OBJECT_CLASS = 0
@@ -1178,6 +1178,11 @@ GuiTable::item::selected {
         self.clear()
         self.appendData(data)
         self._rawData = data
+
+    def setDataFromSearchWidget(self, dataFrame):
+        """Set the data for the table from the search widget
+        """
+        self.setData(dataFrame.values)
 
     @contextmanager
     def _guiTableUpdate(self, dataFrameObject, resize=True):

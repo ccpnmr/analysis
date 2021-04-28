@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-28 18:21:41 +0100 (Wed, April 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-28 19:59:02 +0100 (Wed, April 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,29 +32,20 @@ from functools import partial
 from PyQt5 import QtWidgets, QtCore
 from collections import OrderedDict
 from itertools import zip_longest
-from pyqtgraph.widgets.TableWidget import _defersort, TableWidgetItem
+from pyqtgraph.widgets.TableWidget import TableWidgetItem
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.widgets.GuiTable import GuiTable, _getValueByHeader
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.CompoundWidgets import RadioButtonsCompoundWidget
-from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
 from ccpn.core.PeakList import PeakList
-from ccpn.core.Peak import Peak
-from ccpn.core.Restraint import Restraint
-from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.RestraintList import RestraintList
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.CallBack import CallBack
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget, \
     RestraintListSelectionWidget, SpectrumDisplaySelectionWidget
-from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintListPulldown
-from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT, \
-    DATAFRAME_INDEX, DATAFRAME_PID
+from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.ui.gui.widgets.Icon import Icon
 
 
@@ -95,27 +86,30 @@ def __ltForTableWidgetItem__(self, other):
         # if col in [3, 6]:
         if col > MINSORTCOLUMN:
             table = self.tableWidget()
-            if hasattr(table, '_groups'):
+            if getattr(table, '_groups', None):
                 # get the names which should be column 0
                 dataSelf = table.indexFromItem(table.item(self.row(), PIDCOLUMN)).data()
                 dataOther = table.indexFromItem(table.item(other.row(), PIDCOLUMN)).data()
 
-                # # if just need ascending/descending - group and subgroup
-                # if dataSelf != dataOther:  # different name -> sort by min/max of each group
-                #     if table.horizontalHeader().sortIndicatorOrder() == QtCore.Qt.AscendingOrder:
-                #         return table._groups[dataSelf]['min'][col] < table._groups[dataOther]['min'][col]
-                #     else:
-                #         return table._groups[dataSelf]['max'][col] < table._groups[dataOther]['max'][col]
+                try:
+                    # # if need ascending/descending - group and subgroup
+                    # if dataSelf != dataOther:  # different name -> sort by min/max of each group
+                    #     if table.horizontalHeader().sortIndicatorOrder() == QtCore.Qt.AscendingOrder:
+                    #         return table._groups[dataSelf]['min'][col] < table._groups[dataOther]['min'][col]
+                    #     else:
+                    #         return table._groups[dataSelf]['max'][col] < table._groups[dataOther]['max'][col]
 
-                # if need groups ascending/descending - subgroup always max->min
-                if dataSelf != dataOther:  # different name -> sort by min/max of each group
-                    return table._groups[dataSelf]['max'][col] < table._groups[dataOther]['max'][col]
+                    # if need groups ascending/descending - subgroup always max->min
+                    if dataSelf != dataOther:  # different name -> sort by min/max of each group
+                        return table._groups[dataSelf]['max'][col] < table._groups[dataOther]['max'][col]
 
-                else:
-                    if table.horizontalHeader().sortIndicatorOrder() == QtCore.Qt.AscendingOrder:
-                        return (universalSortKey(self.value) > universalSortKey(other.value))
                     else:
-                        return (universalSortKey(self.value) < universalSortKey(other.value))
+                        if table.horizontalHeader().sortIndicatorOrder() == QtCore.Qt.AscendingOrder:
+                            return (universalSortKey(self.value) > universalSortKey(other.value))
+                        else:
+                            return (universalSortKey(self.value) < universalSortKey(other.value))
+                except Exception as es:
+                    getLogger().warning(f'error sorting table on {dataSelf}({dataSelf in table._groups}):{dataOther}({dataOther in table._groups})')
 
         return (universalSortKey(self.value) < universalSortKey(other.value))
 
@@ -195,12 +189,12 @@ class ViolationTableModule(CcpnModule):
                                     #                              }
                                     #                 }),
                                     ('autoExpand', {'label'   : 'Auto-expand Groups',
-                                                          'tipText' : 'Autotomatically expand/collapse groups on\nadding new restraintList, or sorting.',
-                                                          'callBack': self._updateAutoExpand,
-                                                          'enabled' : True,
-                                                          'checked' : False,
-                                                          '_init'   : None,
-                                                          }),
+                                                    'tipText' : 'Autotomatically expand/collapse groups on\nadding new restraintList, or sorting.',
+                                                    'callBack': self._updateAutoExpand,
+                                                    'enabled' : True,
+                                                    'checked' : False,
+                                                    '_init'   : None,
+                                                    }),
                                     ('sequentialStrips', {'label'   : 'Show sequential strips',
                                                           'tipText' : 'Show nmrResidue in all strips.',
                                                           'callBack': None,  #self.showNmrChainFromPulldown,
@@ -294,8 +288,12 @@ class ViolationTableModule(CcpnModule):
         """Update the selected restraintLists
         """
         restraintLists = self._restraintList.getTexts()
-        restraintLists = [self.project.getByPid(rList) for rList in restraintLists]
-        restraintLists = [rList for rList in restraintLists if rList is not None]
+        if '<all>' in restraintLists:
+            restraintLists = self.project.restraintLists
+        else:
+            restraintLists = [self.project.getByPid(rList) for rList in restraintLists]
+            restraintLists = [rList for rList in restraintLists if rList is not None and isinstance(rList, RestraintList)]
+
         self.violationTable.updateRestraintLists(restraintLists)
 
     def _updateAutoExpand(self, expand):
@@ -355,13 +353,6 @@ class ViolationTableWidget(GuiTable):
                                          callback=self._pulldownPLcallback,
                                          )
 
-        # # create widgets for selection of position units
-        # gridHPos += 1
-        # self.posUnitPulldownLabel = Label(parent=self._widget, text=' Position Unit', grid=(row, gridHPos))
-        # gridHPos += 1
-        # self.posUnitPulldown = PulldownList(parent=self._widget, texts=UNITS, callback=self._pulldownUnitsCallback, grid=(row, gridHPos),
-        #                                     objectName='posUnits_PT')
-
         gridHPos += 1
         self.expandButtons = ButtonList(parent=self._widget, texts=[' Expand all', ' Collapse all'], grid=(row, gridHPos),
                                         callbacks=[partial(self._expandAll, True), partial(self._expandAll, False), ])
@@ -395,7 +386,6 @@ class ViolationTableWidget(GuiTable):
 
         self.setTableNotifiers(tableClass=PeakList,
                                className=self.attributeName,
-                               changeFunc=self._updateAllModule,
                                pullDownWidget=self.pLwidget,
                                moduleParent=moduleParent)
 
@@ -405,6 +395,7 @@ class ViolationTableWidget(GuiTable):
         # update method for ccpn sorting with groups
         TableWidgetItem.__lt__ = __ltForTableWidgetItem__
         self.horizontalHeader().sectionClicked.connect(self.onSectionClicked)
+        self.horizontalHeader().setMinimumSectionSize(32)
 
         self._downIcon = Icon('icons/caret-grey-down')
         self._rightIcon = Icon('icons/caret-grey-right')
@@ -424,16 +415,12 @@ class ViolationTableWidget(GuiTable):
         self._restraintLists = restraintLists
         self._updateTable()
 
-    def _updateAllModule(self, data=None):
-        """Updates the table and the settings widgets
-        """
-        self._updateTable()
-
     def _updateTable(self, useSelectedPeakList=True, peaks=None, peakList=None):
         """Display the restraints on the table for the selected PeakList.
         Obviously, If the restraint has not been previously deleted and flagged isDeleted
         """
         self._selectedPeakList = self.project.getByPid(self.pLwidget.getText())
+        self._groups = None
 
         if useSelectedPeakList:
             if self._selectedPeakList:
@@ -452,10 +439,7 @@ class ViolationTableWidget(GuiTable):
             else:
                 self.clear()
 
-        self.horizontalHeader().setMinimumSectionSize(32)
         self.updateTableExpanders()
-        self.resizeColumnsToContents()
-        self.resizeRowsToContents()
 
     def _selectPeakList(self, peakList=None):
         """Manually select a PeakList from the pullDown
@@ -491,7 +475,7 @@ class ViolationTableWidget(GuiTable):
         return
 
     def _pulldownPLcallback(self, data):
-        self._updateAllModule()
+        self._updateTable()
 
     def _processDroppedItems(self, data):
         """CallBack for Drop events
@@ -535,7 +519,6 @@ class ViolationTableWidget(GuiTable):
 
             # populate from the Pandas dataFrame inside the dataFrameObject
             self.setTableFromDataFrameObject(dataFrameObject=_dataFrameObject, columnDefs=self.columns)
-            self._updateGroups(_dataFrameObject.dataFrame)
 
         except Exception as es:
             getLogger().warning('Error populating table', str(es))
@@ -544,6 +527,42 @@ class ViolationTableWidget(GuiTable):
         finally:
             self._highLightObjs(objs)
             self.project.unblankNotification()
+
+    def setTableFromDataFrameObject(self, dataFrameObject, columnDefs=None):
+        """Populate the table from a Pandas dataFrame
+        """
+
+        with self._tableBlockSignals('setTableFromDataFrameObject'):
+
+            # get the currently selected objects
+            objs = self.getSelectedObjects()
+
+            self._dataFrameObject = dataFrameObject
+
+            with self._guiTableUpdate(dataFrameObject):
+                if not dataFrameObject.dataFrame.empty:
+                    self.setData(dataFrameObject.dataFrame.values)
+                    self._updateGroups(dataFrameObject.dataFrame)
+
+                else:
+                    # set a dummy row of the correct length
+                    self.setData([list(range(len(dataFrameObject.headings)))])
+                    self._groups = None
+
+                # store the current headings, in case table is cleared, to stop table jumping
+                self._defaultHeadings = dataFrameObject.headings
+                self._defaultHiddenColumns = dataFrameObject.hiddenColumns
+
+                if columnDefs:
+                    for col, colFormat in enumerate(columnDefs.formats):
+                        if colFormat is not None:
+                            self.setFormat(colFormat, column=col)
+
+            # highlight them back again
+            self._highLightObjs(objs)
+
+        # outside of the with to spawn a repaint
+        self.show()
 
     def getDataFrameFromExpandedList(self, table=None,
                                      buildList=None,
@@ -564,7 +583,6 @@ class ViolationTableWidget(GuiTable):
         _buildColumns = [('#', lambda pk, rt: pk.serial),
                          ('Peak', lambda pk, rt: pk.pid),
                          ('_object', lambda pk, rt: (pk, rt)),
-                         # ('Expand', lambda pk, rt: self._downIcon),
                          ]
         _restraintColumns = [('Restraint', lambda rt: ''),
                              ('Atoms', lambda rt: ''),
@@ -577,7 +595,6 @@ class ViolationTableWidget(GuiTable):
             (Header1, lambda row: _getValueByHeader(row, Header1), 'TipTex1', None, None),
             (Header2, lambda row: _getValueByHeader(row, Header2), 'TipTex2', None, None),
             (Header3, lambda row: _getValueByHeader(row, Header3), 'TipTex3', None, None),
-            # (Header4, lambda row: None, 'TipTex4', None, None),
             ]
 
         if len(self._restraintLists) > 0:
@@ -592,28 +609,12 @@ class ViolationTableWidget(GuiTable):
         self.columns = ColumnClass(_cols)
 
         if buildList:
-
-            # for col, obj in enumerate(buildList):
-            #     listItem = OrderedDict()
-            #     for header in colDefs.columns:
-            #         listItem[header.headerText] = header.getValue(obj)
-            #
-            #     allItems.append(listItem)
-            #     objects.append((obj, None))
-
-            # NEED TO BUILD SEPARATELY AND THEN DISPLAY USING THE COLDEFS ((peakObj, restraintObj))
-
             for col, obj in enumerate(buildList):
 
                 if not obj.restraints or len(self._restraintLists) < 1:
-
                     listItem = OrderedDict()
                     for headerText, func in _buildColumns:
                         listItem[headerText] = func(obj, None)
-                    # for col in range(len(self._restraintLists)):
-                    #     listItem[f'Atoms{col+1}'] = ''
-                    #     listItem[f'Violation{col+1}'] = ''
-
                     allItems.append(listItem)
 
                 else:
@@ -629,10 +630,7 @@ class ViolationTableWidget(GuiTable):
                             for _atom in _atoms:
                                 _resLists[_res.restraintList].append((_res, _atom, random.random()))
 
-                    # print('~~~~~~~~~~~~~~~~~~~~~~')
-                    # print('\n'.join([str(z) for z in zip_longest(*_resLists.values())]))
                     for val in zip_longest(*_resLists.values()):
-
                         copyItem = listItem.copy()
                         for cc, rr in enumerate(val):
                             copyItem[f'Restraint{cc + 1}'] = rr[0].pid if rr else ''
@@ -656,14 +654,12 @@ class ViolationTableWidget(GuiTable):
     def refreshTable(self):
         # subclass to refresh the groups
         self.setTableFromDataFrameObject(self._dataFrameObject)
-        self._updateGroups(self._dataFrameObject.dataFrame)
         self.updateTableExpanders()
 
     def setDataFromSearchWidget(self, dataFrame):
         """Set the data for the table from the search widget
         """
         self.setData(dataFrame.values)
-
         self._updateGroups(dataFrame)
         self.updateTableExpanders()
 
@@ -673,12 +669,14 @@ class ViolationTableWidget(GuiTable):
         CCPN-INTERNAL: Return number of peaks assigned to NmrAtom in Experiments and PeakLists
         using ChemicalShiftList
         """
-        if len(restraint.restraintContributions) > 0:
-            if restraint.restraintContributions[0].restraintItems:
-                # return restraint.restraintContributions[0].restraintItems[0]
-                return [' - '.join(rr) for rr in restraint.restraintContributions[0].restraintItems]
-        else:
-            return ''
+        return [' - '.join(ri) for rc in restraint.restraintContributions for ri in rc.restraintItems]
+
+        # if len(restraint.restraintContributions) > 0:
+        #     if restraint.restraintContributions[0].restraintItems:
+        #         # return restraint.restraintContributions[0].restraintItems[0]
+        #         return [' - '.join(rr) for rr in restraint.restraintContributions[0].restraintItems]
+        # else:
+        #     return ''
 
     @staticmethod
     def _getSortedContributions(restraint):

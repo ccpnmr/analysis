@@ -156,7 +156,7 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
     FIXEDWIDTH = True
     FIXEDHEIGHT = False
 
-    title = 'Setup Xplor-NHI Structure Calculation (Alpha)'
+    title = 'Setup Xplor-NIH Structure Calculation (Alpha)'
     def __init__(self, parent=None, mainWindow=None, title=title,  **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title,
                          size=(500, 10), minimumSize=None, **kwds)
@@ -256,3 +256,4 @@ if __name__ == '__main__':
     popup.show()
     popup.raise_()
     # app.start()
+

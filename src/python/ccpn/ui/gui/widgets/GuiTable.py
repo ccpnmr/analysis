@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-26 11:45:51 +0100 (Mon, April 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-28 15:54:46 +0100 (Wed, April 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -59,6 +59,8 @@ from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight, TABLEFONT
 from ccpn.util.AttrDict import AttrDict
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.RowExpander2 import RowExpander
 import math
 
 OBJECT_CLASS = 0
@@ -403,6 +405,9 @@ GuiTable::item::selected {
 
         self.itemSelectionChanged.connect(self._itemSelectionChanged)
 
+        self._downIcon = Icon('icons/caret-grey-down')
+        self._rightIcon = Icon('icons/caret-grey-right')
+
     def _tableSelectionChangedCallback(self, selected, deselected):
         self._tableSelectionChanged.emit(self.getSelectedObjects() or [])
 
@@ -732,9 +737,46 @@ GuiTable::item::selected {
                 self.setItem(row, col, item)
                 item.setValue('')  # values are in the pulldown. Otherwise they are inserted inside the cell as str in a long list
 
+            elif isinstance(val, Icon) and val in (self._downIcon, self._rightIcon):
+
+                # add a RowExpander widget to the cell - requires setting up after sorting the table
+                _expander = RowExpander(self, item)
+                self.setCellWidget(row, col, _expander)
+                self.setItem(row, col, item)
+                item.setValue('')
+
+            elif isinstance(val, RowExpander):
+
+                # add a RowExpander widget to the cell - requires setting up after sorting the table
+                # need to update the rowExpander parent
+                self.setCellWidget(row, col, val)
+                val._tableItem = item
+                self.setItem(row, col, item)
+                item.setValue('')
+
             else:
                 self.setItem(row, col, item)
                 item.setValue(val)
+
+    def _expandCell(self, itemWidget, item):
+        _itemRow = item.row()
+        row = itemWidget._activeRow
+        span = self.rowSpan(_itemRow, 0) # 0)
+        if row is None:
+            return
+
+        if span > 1:
+            # a group of rows
+            if self.isRowHidden(row + 1): # (row + 1)
+                _hidden = False
+                itemWidget.setPixmap(self._downIcon.pixmap(12, 12))
+            else:
+                _hidden = True
+                itemWidget.setPixmap(self._rightIcon.pixmap(12, 12))
+
+            for rr in range(row + 1, row + span):
+            # for rr in range(row - span + 2, row + 1):
+                self.setRowHidden(rr, _hidden)
 
     def _selectionTableCallback(self, itemSelection, mouseDrag=True):
         """Handler when selection has changed on the table
@@ -2396,12 +2438,11 @@ def _setValueByHeader(row, header, value):
 
 
 if __name__ == '__main__':
-    from ccpn.ui.gui.widgets.Icon import Icon
 
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
     from ccpn.util import Colour
-    from ccpn.ui.gui.widgets.Column import ColumnClass, Column
+    from ccpn.ui.gui.widgets.Column import ColumnClass
 
 
     app = TestApplication()

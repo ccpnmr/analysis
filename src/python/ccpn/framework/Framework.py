@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-23 14:39:58 +0100 (Fri, April 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-28 15:54:46 +0100 (Wed, April 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1310,6 +1310,7 @@ class Framework(NotifierBase):
             ("Multiplet Table", partial(self.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')]),
             ("Restraint Table", partial(self.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
             ("Structure Table", partial(self.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
+            ("Violation Table", partial(self.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
             (),
             ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
             ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
@@ -2774,6 +2775,23 @@ class Framework(NotifierBase):
 
         mainWindow.moduleArea.addModule(notesEditorModule, position=position, relativeTo=relativeTo)
         return notesEditorModule
+
+    @logCommand('application.')
+    def showViolationTable(self,
+                               position: str = 'bottom',
+                               relativeTo: CcpnModule = None,
+                               peakList=None, selectFirstItem=False):
+        """Displays violation table.
+        """
+        from ccpn.ui.gui.modules.ViolationTable import ViolationTableModule
+
+        mainWindow = self.ui.mainWindow
+        if not relativeTo:
+            relativeTo = mainWindow.moduleArea
+        violationTableModule = ViolationTableModule(mainWindow=mainWindow, peakList=peakList, selectFirstItem=selectFirstItem)
+
+        mainWindow.moduleArea.addModule(violationTableModule, position=position, relativeTo=relativeTo)
+        return violationTableModule
 
     def showPrintSpectrumDisplayPopup(self):
         """Show the print spectrumDisplay dialog

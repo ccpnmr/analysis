@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-28 15:54:46 +0100 (Wed, April 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-04-29 14:21:53 +0100 (Thu, April 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2468,12 +2468,8 @@ class Framework(NotifierBase):
             if spectra:
                 from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
 
-                if self.current.strip:
-                    popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-                    popup.exec_()
-                else:
-                    getLogger().warning('Pick Nd Peaks, no strip selected')
-                    MessageDialog.showWarning('Pick Nd Peaks', 'No strip selected')
+                popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+                popup.exec_()
             else:
                 getLogger().warning('Peak Picking: Project has no Nd Specta.')
                 MessageDialog.showWarning('Peak Picking', 'Project has no Nd Spectra.')

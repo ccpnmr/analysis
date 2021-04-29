@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import os
 from PyQt5 import QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -37,10 +38,14 @@ from ccpn.core.Restraint import Restraint
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
-
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.Button import Button
+import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
+from ccpn.ui.gui.widgets import MessageDialog
 
 logger = getLogger()
 ALL = '<all>'
+PymolScriptName = 'Restraint_Pymol_Template.py'
 
 
 class RestraintTableModule(CcpnModule):
@@ -189,6 +194,7 @@ class RestraintTable(GuiTable):
                                        lambda restraint, value: RestraintTable._setComment(restraint, value), None)
                                       ])  # [Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
 
+
         row = 0
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
@@ -198,14 +204,20 @@ class RestraintTable(GuiTable):
         gridHPos = 0
         self.rtWidget = RestraintListPulldown(parent=self._widget,
                                               mainWindow=self.mainWindow, default=None,
-                                              grid=(row, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                              grid=(row, gridHPos), minimumWidths=(0, 100),
                                               showSelectName=True,
                                               sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                               callback=self._selectionPulldownCallback)
+        gridHPos += 1
+        self.showOnViewerButton = Button(self._widget, tipText='Show on Molecular Viewer',
+                                         icon=Icon('icons/showStructure'),
+                                         callback=self._showOnMolecularViewer,
+                                         grid=(row, gridHPos), hAlign='l')
         row += 1
+        gridHPos += 1
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-                             grid=(row, gridHPos + 1), gridSpan=(1, 1))
+                             grid=(row, gridHPos), gridSpan=(1,2))
 
         # initialise the currently attached dataFrame
         self._hiddenColumns = ['Pid']
@@ -288,6 +300,24 @@ class RestraintTable(GuiTable):
         """
         self.rtWidget.select(restraintList.pid)
         self._update(restraintList)
+
+    def _showOnMolecularViewer(self):
+
+        restraintList = self.rtWidget.getSelectedObject()
+        restraints = self.getSelectedObjects() or []
+
+        if restraintList is not None:
+            pymolScriptPath = os.path.join(self.application.pymolScriptsPath, PymolScriptName)
+            pdbPath = restraintList.moleculeFilePath
+            if pdbPath is None:
+                MessageDialog.showWarning('No Molecule File found', 'Add a molecule file path to the RestraintList from SideBar.')
+                return
+            pymolScriptPath = pyMolUtil._restraints2PyMolFile(pymolScriptPath, pdbPath, restraints)
+            pyMolUtil.runPymolWithScript(self.application, pymolScriptPath)
+
+        if not restraintList:
+            MessageDialog.showWarning('Nothing to show', 'Select a RestraintList first')
+
 
     def _updateCallback(self, data):
         """
@@ -391,14 +421,25 @@ class RestraintTable(GuiTable):
     @staticmethod
     def _getContributions(restraint):
         """
-        CCPN-INTERNAL: Return number of peaks assigned to NmrAtom in Experiments and PeakLists
-        using ChemicalShiftList
+        CCPN-INTERNAL:  Get the first pair of atoms Ids from the first restraintContribution of a restraint.
+        Empty str if not atoms.
         """
-        if len(restraint.restraintContributions) > 0:
-            if restraint.restraintContributions[0].restraintItems:
-                return ' - '.join(restraint.restraintContributions[0].restraintItems[0])
+        atomPair = RestraintTable.getFirstRestraintAtomsPair(restraint)
+        if atomPair:
+             return ' - '.join([a.id for a in atomPair])
         else:
             return ''
+
+    @staticmethod
+    def getFirstRestraintAtomsPair(restraint):
+        """ Get the first pair of atoms from the first restraintContribution of a restraint."""
+        atomPair = []
+        if len(restraint.restraintContributions) > 0:
+            if len(restraint.restraintContributions[0].restraintItems) > 0:
+                atomPair = [restraint.project.getAtom(x) for x in restraint.restraintContributions[0].restraintItems[0]]
+                if all(atomPair):
+                    return atomPair
+        return atomPair
 
     @staticmethod
     def _getRestraintPeakCount(restraint):

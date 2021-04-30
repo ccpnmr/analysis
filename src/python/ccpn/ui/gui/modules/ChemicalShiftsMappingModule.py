@@ -120,7 +120,7 @@ from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.modules.NmrResidueTable import _CSMNmrResidueTable, KD, Deltas
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.modules.PyMolUtil import _chemicalShiftMappingPymolTemplate
+from ccpn.ui.gui.modules.PyMolUtil import _CSMSelection2PyMolFile
 from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio, navigateToNmrResidueInDisplay
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import concentrationUnits
@@ -1312,9 +1312,9 @@ class ChemicalShiftsMapping(CcpnModule):
     colourAboveThreshold = hexToRgb(self.aboveBrush)
     colourBelowThreshold = hexToRgb(self.belowBrush)
     colourMissing = hexToRgb(self.disappearedPeakBrush)
-    scriptPath = _chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
-                                                   missingdResidues, colourMissing, colourAboveThreshold, colourBelowThreshold,
-                                                   selection)
+    scriptPath = _CSMSelection2PyMolFile(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
+                                         missingdResidues, colourMissing, colourAboveThreshold, colourBelowThreshold,
+                                         selection)
     try:
       self.pymolProcess = subprocess.Popen(pymolPath+' -r '+scriptPath,
                        shell=True,

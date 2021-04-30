@@ -312,7 +312,7 @@ class RestraintTable(GuiTable):
             if pdbPath is None:
                 MessageDialog.showWarning('No Molecule File found', 'Add a molecule file path to the RestraintList from SideBar.')
                 return
-            pymolScriptPath = pyMolUtil._restraints2PyMolFile(pymolScriptPath, pdbPath, restraints)
+            pymolScriptPath = pyMolUtil._restraintsSelection2PyMolFile(pymolScriptPath, pdbPath, restraints)
             pyMolUtil.runPymolWithScript(self.application, pymolScriptPath)
 
         if not restraintList:

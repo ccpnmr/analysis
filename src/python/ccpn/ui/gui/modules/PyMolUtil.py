@@ -256,13 +256,12 @@ def _restraintsSelection2PyMolFile(pymolScriptPath, pdbPath, restraints):
                 cmd('cmd.select', selectionName, selection=selection)
                 cmd('cmd.pseudoatom', object=pseudoAtomName, selection=selection, name=atom.name,
                     chain=atom.residue.chain.name, resn=atom.residue.residueType, resi=atom.residue.sequenceCode,
-                    color=pseudoAtomColour, label=atom.name,state=-1)
+                    color=pseudoAtomColour, label=atom.id,state=-1)
                 cmd('cmd.delete', selectionName)
                 cmd('cmd.select', name=_selName, selection=pseudoAtomName)
                 cmd('cmd.show', atomShape, selection=_selName)
                 cmd('cmd.show', residueShape, selection=sticksSelection)
                 cmd('cmd.color', residueColour, sticksSelection)
-
                 selAtoms[_selName] = atom
             else: # Do normal atom
                 _selection = f'{atom.residue.chain.name}/{atom.residue.sequenceCode}/{atom.name}'
@@ -271,6 +270,7 @@ def _restraintsSelection2PyMolFile(pymolScriptPath, pdbPath, restraints):
                 cmd('cmd.show', atomShape, selection=_selName)
                 cmd('cmd.show', residueShape, selection=sticksSelection)
                 cmd('cmd.color', residueColour, sticksSelection)
+                cmd('cmd.label', selection=f'{atom.residue.sequenceCode}/{atom.name}', expression=list([atom.id]))# can't get a better way of showing the label!
 
         if len(list(selAtoms.keys())) == 2:
             distanceName = 'RS_%s' % rID

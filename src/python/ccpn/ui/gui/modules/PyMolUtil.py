@@ -270,7 +270,7 @@ def _restraintsSelection2PyMolFile(pymolScriptPath, pdbPath, restraints):
                 cmd('cmd.show', atomShape, selection=_selName)
                 cmd('cmd.show', residueShape, selection=sticksSelection)
                 cmd('cmd.color', residueColour, sticksSelection)
-                cmd('cmd.label', selection=f'{atom.residue.sequenceCode}/{atom.name}', expression=list([atom.id]))# can't get a better way of showing the label!
+                cmd('cmd.label', selection=f'{atom.residue.sequenceCode}/{atom.name}', expression='str("%s")' %atom.id)
 
         if len(list(selAtoms.keys())) == 2:
             distanceName = 'RS_%s' % rID

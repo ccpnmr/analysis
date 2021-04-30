@@ -249,7 +249,7 @@ class RestraintTable(GuiTable):
                                tableSelection='restraintList',
                                pullDownWidget=self.RLcolumns,
                                callBackClass=Restraint,
-                               selectCurrentCallBack=None,
+                               selectCurrentCallBack=self._selectOnTableCurrentRestraintNotifierCallback,
                                moduleParent=moduleParent)
 
         # Initialise the notifier for processing dropped items
@@ -301,6 +301,21 @@ class RestraintTable(GuiTable):
         self.rtWidget.select(restraintList.pid)
         self._update(restraintList)
 
+    def _selectOnTableCurrentRestraintNotifierCallback(self, data):
+        """
+        callback from a notifier to select the current Restraints
+        :param data:
+        """
+        currentRestraints = data['value']
+        self._selectOnTableCurrentRestraints(currentRestraints)
+
+    def _selectOnTableCurrentRestraints(self, currentRestraints):
+        """
+        highlight  current Restraints on the opened table
+        """
+        self.highlightObjects(currentRestraints)
+
+
     def _showOnMolecularViewer(self):
 
         restraintList = self.rtWidget.getSelectedObject()
@@ -345,6 +360,7 @@ class RestraintTable(GuiTable):
         self.populateTable(rowObjects=restraintList.restraints,
                            columnDefs=self.RLcolumns
                            )
+        self._highLightObjs(self.current.restraints)
 
     def _selectionCallback(self, data, *args):
         """

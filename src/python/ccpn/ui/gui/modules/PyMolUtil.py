@@ -59,79 +59,79 @@ def _getDefaultScriptHeader():
 
 class CodeBlock():
 
-  """
-  A class to concatenate multiple code lines for an easy export to file.
-  Used for creating dynamically scripting files to be handled by external programs.
-  Usage:
-
-    CB = CodeBlock()
-    CB.addImport('from x import y')
-    CB.addCmd('myFunc','astring', myStr='BB', myBool=True, myInt=22, myFloat=1.3)
-    CB.toFile('~/testScript.py')
-    print(str(CB))
-    out:
-      from x import y
-      myFunc("astring", myStr="BB", myBool=True, myInt=22, myFloat=1.3)
-  """
-
-  def __init__(self):
-    self._block = deque()
-    self._fileHeader = _getDefaultScriptHeader()
-
-  def __str__(self):
     """
-    A string representation of the code block.
-    Imports appear at the top, if added with addImport method.
+    A class to concatenate multiple code lines for an easy export to file.
+    Used for creating dynamically scripting files to be handled by external programs.
+    Usage:
+
+      CB = CodeBlock()
+      CB.addImport('from x import y')
+      CB.addCmd('myFunc','astring', myStr='BB', myBool=True, myInt=22, myFloat=1.3)
+      CB.toFile('~/testScript.py')
+      print(str(CB))
+      out:
+        from x import y
+        myFunc("astring", myStr="BB", myBool=True, myInt=22, myFloat=1.3)
     """
-    result = f'"""{self._fileHeader}\n""" \n\n'
-    result += """\n""".join(self._block)
-    return result
 
-  @property
-  def fileHeader(self):
-      """The message that will appear on top of the file, before any code."""
-      return self._fileHeader
+    def __init__(self):
+        self._block = deque()
+        self._fileHeader = _getDefaultScriptHeader()
 
-  @fileHeader.setter
-  def fileHeader(self, text):
-      self._fileHeader = text
+    def __str__(self):
+        """
+        A string representation of the code block.
+        Imports appear at the top, if added with addImport method.
+        """
+        result = f'"""{self._fileHeader}\n""" \n\n'
+        result += """\n""".join(self._block)
+        return result
 
-  def toFile(self, filePath):
-    """
-    dump block to a file
-    """
-    with open(filePath, 'w') as f:
-      f.write(str(self))
+    @property
+    def fileHeader(self):
+        """The message that will appear on top of the file, before any code."""
+        return self._fileHeader
 
-  def addCmd(self, funcName:str, *args, **kwargs):
-    """
-    add a function call to the block.
-    :param funcName: the function name to be called in the script
-    :param args: any arg that the func needs, in the same original signature order and format.
-    :param kwargs: any kwargs that the func needs, in any order but with the correct formatting.
-    
-    E.g.: 
-        addCmd('cmd.pseudoatom','theName', resn='PSD', pos=None, q=0.0, mode='rms', quiet=1)
-        
-    """
-    _args   = ",".join(filter(None, (f"""'{v}'""" for v in args)))
-    f = []
-    for k, v in kwargs.items():
-      if isinstance(v, str):
-        a = f"""{k}='{v}'""" # wrap with quotes if the value format is a string
-      else: # make sure the value format is maintained correctly
-        a = f"""{k}={v}"""
-      f.append(a)
-    _kwargs = ", ".join(filter(None, f ))
-    _all = ", ".join(filter(None, [_args, _kwargs]))
-    cmd  = f"""{funcName}({_all})"""
-    self._block.append(cmd)
+    @fileHeader.setter
+    def fileHeader(self, text):
+        self._fileHeader = text
 
-  def addImport(self, theImport,  *args, **kwargs):
-    self._block.appendleft(f"""{theImport}""")
+    def toFile(self, filePath):
+        """
+        dump block to a file
+        """
+        with open(filePath, 'w') as f:
+            f.write(str(self))
 
-  def addFreeLine(self, line):
-    self._block.append(f"""{line}""")
+    def addCmd(self, funcName:str, *args, **kwargs):
+        """
+        add a function call to the block.
+        :param funcName: the function name to be called in the script
+        :param args: any arg that the func needs, in the same original signature order and format.
+        :param kwargs: any kwargs that the func needs, in any order but with the correct formatting.
+
+        E.g.:
+            addCmd('cmd.pseudoatom','theName', resn='PSD', pos=None, q=0.0, mode='rms', quiet=1)
+
+        """
+        _args   = ",".join(filter(None, (f"""'{v}'""" for v in args)))
+        f = []
+        for k, v in kwargs.items():
+            if isinstance(v, str):
+                a = f"""{k}='{v}'""" # wrap with quotes if the value format is a string
+            else: # make sure the value format is maintained correctly
+                a = f"""{k}={v}"""
+            f.append(a)
+        _kwargs = ", ".join(filter(None, f ))
+        _all = ", ".join(filter(None, [_args, _kwargs]))
+        cmd  = f"""{funcName}({_all})"""
+        self._block.append(cmd)
+
+    def addImport(self, theImport,  *args, **kwargs):
+        self._block.appendleft(f"""{theImport}""")
+
+    def addFreeLine(self, line):
+        self._block.append(f"""{line}""")
 
 
 
@@ -140,77 +140,77 @@ class CodeBlock():
 ####################################################################################
 
 def runPymolWithScript(application, pymolScriptPath):
-  """
-  run pymol executing a script
-  """
+    """
+    run pymol executing a script
+    """
 
-  mainWindow = application.ui.mainWindow
-  pymolAppPath = application.preferences.externalPrograms.pymol
+    mainWindow = application.ui.mainWindow
+    pymolAppPath = application.preferences.externalPrograms.pymol
 
-  if not os.path.exists(pymolAppPath):
-    ok = MessageDialog.showOkCancelWarning('Molecular Viewer not Set', 'Select the executable file on preferences')
-    if ok:
-      from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
+    if not os.path.exists(pymolAppPath):
+        ok = MessageDialog.showOkCancelWarning('Molecular Viewer not Set', 'Select the executable file on preferences')
+        if ok:
+            from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
 
-      pp = PreferencesPopup(parent=mainWindow, mainWindow=mainWindow,
-                            preferences=application.preferences)
-      pp.tabWidget.setCurrentIndex(pp.tabWidget.count() - 1)
-      pp.exec_()
-      return
+            pp = PreferencesPopup(parent=mainWindow, mainWindow=mainWindow,
+                                  preferences=application.preferences)
+            pp.tabWidget.setCurrentIndex(pp.tabWidget.count() - 1)
+            pp.exec_()
+            return
 
-  try:
-    pymolProcess = subprocess.Popen(pymolAppPath + ' -r ' + pymolScriptPath,
-                                    shell=True,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE)
-  except Exception as e:
-    getLogger().warning('Pymol not started. Check executable.', e)
+    try:
+        pymolProcess = subprocess.Popen(pymolAppPath + ' -r ' + pymolScriptPath,
+                                        shell=True,
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
+    except Exception as e:
+        getLogger().warning('Pymol not started. Check executable.', e)
 
 
 def _CSMSelection2PyMolFile(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
                             missingdResidues, colourMissing, colourAboveThreshold,
                             colourBelowThreshold, selection):
 
-  """
-  _CCPNnmr Internal. Used in ChemicalShift mapping Module
-  This creates a file with a PyMol script to mirror the chemical shift mapping module selections etc..."""
+    """
+    _CCPNnmr Internal. Used in ChemicalShift mapping Module
+    This creates a file with a PyMol script to mirror the chemical shift mapping module selections etc..."""
 
-  _mapDict = {
-              'above': {
-                      'colour'  : colourAboveThreshold,
-                      'residues': aboveThresholdResidues,
-                       },
-              'below': {
-                      'colour'  : colourBelowThreshold,
-                      'residues': belowThresholdResidues,
-                       },
-              'missing': {
-                      'colour'  : colourMissing,
-                      'residues': missingdResidues,
-                      }
-             }
-  if os.path.exists(pdbPath):
-    codeBlock = CodeBlock()
-    imp = codeBlock.addImport
-    cmd = codeBlock.addCmd
-    imp('from pymol import cmd')
-    cmd('cmd.load', pdbPath)
-    cmd('cmd.hide', 'lines')
-    cmd('cmd.show', 'cartoon')
-    cmd('cmd.color', 'white')
+    _mapDict = {
+        'above': {
+            'colour'  : colourAboveThreshold,
+            'residues': aboveThresholdResidues,
+            },
+        'below': {
+            'colour'  : colourBelowThreshold,
+            'residues': belowThresholdResidues,
+            },
+        'missing': {
+            'colour'  : colourMissing,
+            'residues': missingdResidues,
+            }
+        }
+    if os.path.exists(pdbPath):
+        codeBlock = CodeBlock()
+        imp = codeBlock.addImport
+        cmd = codeBlock.addCmd
+        imp('from pymol import cmd')
+        cmd('cmd.load', pdbPath)
+        cmd('cmd.hide', 'lines')
+        cmd('cmd.show', 'cartoon')
+        cmd('cmd.color', 'white')
 
-    for cond in _mapDict:
-        if len(_mapDict.get(cond).get('residues', [])) > 0:
-            cmd('cmd.select',    f'{cond}Threshold',      f'res {_mapDict.get(cond).get("residues")}')
-            cmd('cmd.set_color', f'{cond.upper()}Colour', f'{_mapDict.get(cond).get("colour")}')
-            cmd('cmd.color',     f'{cond.upper()}Colour', f'{cond}Threshold')
-    if len(selection) > 0:
-        cmd('cmd.select', 'Selected', f'res {selection}')
-    else:
-        cmd('cmd.deselect')
+        for cond in _mapDict:
+            if len(_mapDict.get(cond).get('residues', [])) > 0:
+                cmd('cmd.select',    f'{cond}Threshold',      f'res {_mapDict.get(cond).get("residues")}')
+                cmd('cmd.set_color', f'{cond.upper()}Colour', f'{_mapDict.get(cond).get("colour")}')
+                cmd('cmd.color',     f'{cond.upper()}Colour', f'{cond}Threshold')
+        if len(selection) > 0:
+            cmd('cmd.select', 'Selected', f'res {selection}')
+        else:
+            cmd('cmd.deselect')
 
-    codeBlock.toFile(filePath)
-  return filePath
+        codeBlock.toFile(filePath)
+    return filePath
 
 
 def _restraintsSelection2PyMolFile(pymolScriptPath, pdbPath, restraints):
@@ -240,52 +240,52 @@ def _restraintsSelection2PyMolFile(pymolScriptPath, pdbPath, restraints):
     cmd('cmd.hide', 'lines')
 
     for restraint in restraints:
-      rID = str(restraint.serial)
-      atomPair = rt.RestraintTable.getFirstRestraintAtomsPair(restraint)
-      selAtoms = {}
-      for i, atom in enumerate(atomPair):
-        _selName = f'Sel_RS_{rID}_{"Atom"}_{str(i+1)}'
-        sticksSelection = f'{atom.residue.chain.name}/{atom.residue.sequenceCode}/'
-        if atom.componentAtoms: # Do PseudoAtoms:
-          atomGroup = [ag for ag in atom.componentAtoms if not ag.componentAtoms]
-          subAtoms = [sa for ag in atom.componentAtoms for sa in ag.componentAtoms if ag.componentAtoms]  #E.g. for VAL HG% -> will include all atoms HG11,12,13 and HG21,22,23
-          atomNames = '+'.join([singleAtom.name for singleAtom in list(set(atomGroup + subAtoms))])
-          selectionName =  f'Temp_Sel_RS_{rID}_{str(i+1)}'
-          selection = f'{atom.residue.chain.name}/{atom.residue.sequenceCode}/{atomNames}'
-          pseudoAtomName = f'RS_{rID}_{"PSA"}_{str(i+1)}'  # can't put symbols on Pymol objects.
-          cmd('cmd.select', selectionName, selection=selection)
-          cmd('cmd.pseudoatom', object=pseudoAtomName, selection=selection, name=atom.name,
-                          chain=atom.residue.chain.name, resn=atom.residue.residueType, resi=atom.residue.sequenceCode,
-                          color=pseudoAtomColour, label=atom.name,state=-1)
-          cmd('cmd.delete', selectionName)
-          cmd('cmd.select', name=_selName, selection=pseudoAtomName)
-          cmd('cmd.show', atomShape, selection=_selName)
-          cmd('cmd.show', residueShape, selection=sticksSelection)
-          cmd('cmd.color', residueColour, sticksSelection)
+        rID = str(restraint.serial)
+        atomPair = rt.RestraintTable.getFirstRestraintAtomsPair(restraint)
+        selAtoms = {}
+        for i, atom in enumerate(atomPair):
+            _selName = f'Sel_RS_{rID}_{"Atom"}_{str(i+1)}'
+            sticksSelection = f'{atom.residue.chain.name}/{atom.residue.sequenceCode}/'
+            if atom.componentAtoms: # Do PseudoAtoms:
+                atomGroup = [ag for ag in atom.componentAtoms if not ag.componentAtoms]
+                subAtoms = [sa for ag in atom.componentAtoms for sa in ag.componentAtoms if ag.componentAtoms]  #E.g. for VAL HG% -> will include all atoms HG11,12,13 and HG21,22,23
+                atomNames = '+'.join([singleAtom.name for singleAtom in list(set(atomGroup + subAtoms))])
+                selectionName =  f'Temp_Sel_RS_{rID}_{str(i+1)}'
+                selection = f'{atom.residue.chain.name}/{atom.residue.sequenceCode}/{atomNames}'
+                pseudoAtomName = f'RS_{rID}_{"PSA"}_{str(i+1)}'  # can't put symbols on Pymol objects.
+                cmd('cmd.select', selectionName, selection=selection)
+                cmd('cmd.pseudoatom', object=pseudoAtomName, selection=selection, name=atom.name,
+                    chain=atom.residue.chain.name, resn=atom.residue.residueType, resi=atom.residue.sequenceCode,
+                    color=pseudoAtomColour, label=atom.name,state=-1)
+                cmd('cmd.delete', selectionName)
+                cmd('cmd.select', name=_selName, selection=pseudoAtomName)
+                cmd('cmd.show', atomShape, selection=_selName)
+                cmd('cmd.show', residueShape, selection=sticksSelection)
+                cmd('cmd.color', residueColour, sticksSelection)
 
-          selAtoms[_selName] = atom
-        else: # Do normal atom
-          _selection = f'{atom.residue.chain.name}/{atom.residue.sequenceCode}/{atom.name}'
-          cmd('cmd.select', name=_selName, selection=_selection)
-          selAtoms[_selName] = atom
-          cmd('cmd.show', atomShape, selection=_selName)
-          cmd('cmd.show', residueShape, selection=sticksSelection)
-          cmd('cmd.color', residueColour, sticksSelection)
+                selAtoms[_selName] = atom
+            else: # Do normal atom
+                _selection = f'{atom.residue.chain.name}/{atom.residue.sequenceCode}/{atom.name}'
+                cmd('cmd.select', name=_selName, selection=_selection)
+                selAtoms[_selName] = atom
+                cmd('cmd.show', atomShape, selection=_selName)
+                cmd('cmd.show', residueShape, selection=sticksSelection)
+                cmd('cmd.color', residueColour, sticksSelection)
 
-      if len(list(selAtoms.keys())) == 2:
-        distanceName = 'RS_%s' % rID
-        selNames = list(selAtoms.keys())
-        cmd('cmd.distance', name=distanceName, selection1=selNames[0], selection2=selNames[1])
-        cmd('cmd.color', distColour, distanceName)
-        for selName in selNames:
-          cmd('cmd.delete', selName)
+        if len(list(selAtoms.keys())) == 2:
+            distanceName = 'RS_%s' % rID
+            selNames = list(selAtoms.keys())
+            cmd('cmd.distance', name=distanceName, selection1=selNames[0], selection2=selNames[1])
+            cmd('cmd.color', distColour, distanceName)
+            for selName in selNames:
+                cmd('cmd.delete', selName)
 
     codeBlock.toFile(pymolScriptPath)
     return pymolScriptPath
 
 # def _randomColour():
-  # https://pymolwiki.org/index.php/Color_Values
-  # colour = random.choice(list(brightColours.keys()))
-  # colourName = brightColours[colour]
-  # cmd('cmd.set_color', colourName, hexToRgb(colour))
-  # cmd('cmd.color', colourName, distanceName)
+# https://pymolwiki.org/index.php/Color_Values
+# colour = random.choice(list(brightColours.keys()))
+# colourName = brightColours[colour]
+# cmd('cmd.set_color', colourName, hexToRgb(colour))
+# cmd('cmd.color', colourName, distanceName)

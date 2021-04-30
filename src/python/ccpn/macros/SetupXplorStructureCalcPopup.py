@@ -31,23 +31,29 @@ import ccpn.ui.gui.widgets.CompoundWidgets as cw
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown, ChemicalShiftListPulldown, ChainPulldown
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetPair
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets import MessageDialog
 import os
 import datetime
 from distutils.dir_util import copy_tree
+from ccpn.ui.gui.widgets.FileDialog import OtherFileDialog
+from ccpn.framework.Application import getApplication
 
-# Path for Xplor NIH executable. Those calculations are
-# Local Mac:
-#xplorPath='/Users/eliza/Projects/xplor-nih-3.2/bin/xplor'
-xplorPath = application.preferences.externalPrograms.get('xplor')
+application = getApplication()
+if application:
+    # Path for Xplor NIH executable. Those calculations are
+    # Local Mac:
+    #xplorPath='/Users/eliza/Projects/xplor-nih-3.2/bin/xplor'
+    xplorPath = application.preferences.externalPrograms.get('xplor')
 
-# This is an example folder from Xplor NIH distribution with scripts necessary for running calculations
-pathToXplorFiles = '/Users/eliza/Projects/xplor-nih-3.2/eginput/pasd/nef'
+    # This is an example folder from Xplor NIH distribution with scripts necessary for running calculations
+    pathToXplorFiles = '/Users/eliza/Projects/xplor-nih-3.2/eginput/pasd/nef'
 
-# Path for TalosN executable (depending where the calculation is run).
-#talosnPath='/home/eapa2/applications/talos-n/talosn'
-talosnPath=application.preferences.externalPrograms.get('talos')
+    # Path for TalosN executable (depending where the calculation is run).
+    #talosnPath='/home/eapa2/applications/talos-n/talosn'
+    talosnPath=application.preferences.externalPrograms.get('talos')
 
 
 def setupDirForXplorRun(project, path, name, peakLists, chemShiftList):
@@ -180,15 +186,18 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
     def _createWidgets(self):
 
         row = 0
-
-
+        self.pathLabel = Label(self.mainWidget, text="Xplor Run Directory", grid=(row, 0))
+        self.pathData = PathEdit(self.mainWidget, grid=(row, 1), vAlign='t', )
+        self.pathDataButton = Button(self.mainWidget, grid=(row, 2), callback=self._getPathFromDialog,
+                                           icon='icons/directory', hPolicy='fixed')
+        row += 1
         self.plsLabel = Label(self.mainWidget, text='Select PeakLists', grid=(row, 0),  vAlign='l')
-        self.plsWidget = ListWidgetPair(self.mainWidget, grid=(row, 1), hAlign='l')
+        self.plsWidget = ListWidgetPair(self.mainWidget, grid=(row, 1), gridSpan=(1,3), hAlign='l')
 
         row += 1
         self.cslWidget = ChemicalShiftListPulldown(parent=self.mainWidget,
                                          mainWindow=self.mainWindow,
-                                         grid=(row, 0), gridSpan=(1,2),
+                                         grid=(row, 0), gridSpan=(1,3),
                                          showSelectName=True,
                                          minimumWidths=(0, 100),
                                          sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
@@ -210,12 +219,19 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
             self.mcWidget.selectFirstItem()
             self.plsWidget._populate(self.plsWidget.rightList, self.project.peakLists)
 
+    def _getPathFromDialog(self):
+        dialog = OtherFileDialog(parent=self.mainWindow, _useDirectoryOnly=True,)
+        dialog._show()
+        path = dialog.selectedFile()
+        if path:
+            self.pathData.setText(str(path))
 
     def _okCallback(self):
         if self.project:
             csl = self.cslWidget.getSelectedObject()
             chain = self.mcWidget.getSelectedObject()
             plsPids = self.plsWidget.rightList.getTexts()
+            pathRun = self.pathData.get()
             if not csl:
                 MessageDialog.showWarning('', 'Select a ChemicalShift List')
                 return
@@ -226,9 +242,9 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
                 MessageDialog.showWarning('', 'Include at list a PeakList')
                 return
             # run the calculation
-            print('Running with peakLists: %s, chain: %s, CSL: %s' %(plsPids, chain.pid, csl.pid))
+            print('Running with peakLists: %s, chain: %s, CSL: %s. Run Dir: %s' %(plsPids, chain.pid, csl.pid, pathRun))
             xplorRunDirectorySetUp(self.project,
-                                   pathToXplorRunDirectory = '/Users/eliza/Documents/e_projects/xplor/h1gl',
+                                   pathToXplorRunDirectory = pathRun,
                                    peakLists = plsPids,
                                    chemShiftList = csl.pid)
         self.accept()

@@ -47,8 +47,8 @@ ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', '
               '15N': ['N', 'ND1', 'NE', 'NE1', 'NE2', 'NH1', 'NH2', 'NZ']
               }
 
-NEF_ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CG', 'CG1', 'CG2', 'CGx', 'CGy',
-                          'CD', 'CD1', 'CD2', 'CDx', 'CDy', 'CE', 'CE1', 'CE2', 'CE3',
+NEF_ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CG', 'CG1', 'CG2', 'CGx', 'CGy', 'CG%',
+                          'CD', 'CD1', 'CD2', 'CDx', 'CDy', 'CD%', 'CE', 'CE1', 'CE2', 'CE3',
                           'CEx', 'CEy', 'CZ', 'CZ2', 'CZ3', 'CH2'],
                   '15N': ['N', 'ND1', 'ND2', 'NE', 'NE1', 'NE2', 'NZ', 'NH1', 'NH2', 'NHx', 'NHy'],
                   '1H' : ['H', 'HA', 'HA2', 'HA3', 'HAx', 'HAy', 'HA%', 'HB', 'HB2', 'HB3', 'HBx', 'HBy',
@@ -62,9 +62,9 @@ NEF_ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CG', 'CG1', 'CG2', 'CGx', 'CGy',
 
 NEF_ATOM_NAMES_SORTED = {'alphas'      : ['CA', 'HA', 'HAx', 'HAy', 'HA2', 'HA3', 'HA%'],
                     'betas'       : ['CB', 'HB', 'HBx', 'HBy', 'HB%', 'HB2', 'HB3'],
-                    'gammas'      : ['CG', 'CGx', 'CGy', 'CG1', 'CG2', 'HG', 'HGx', 'HGy', 'HG%', 'HG2', 'HG3'],
+                    'gammas'      : ['CG', 'CGx', 'CGy', 'CG1', 'CG2', 'CG%', 'HG', 'HGx', 'HGy', 'HG%', 'HG2', 'HG3'],
                     'moreGammas'  : ['HGx%', 'HGy%', 'HG1', 'HG1x', 'HG1y', 'HG1%', 'HG12', 'HG13', 'HG1%', 'HG2%'],
-                    'deltas'      : ['CD', 'CDx', 'CDy', 'CD1', 'CD2', 'HDx', 'HDy', 'HD%', 'HD1', 'HD2', 'HD3'],
+                    'deltas'      : ['CD', 'CDx', 'CDy', 'CD1', 'CD2', 'CD%' 'HDx', 'HDy', 'HD%', 'HD1', 'HD2', 'HD3'],
                     'moreDeltas'  : ['HDx%', 'HDy%', 'ND1', 'ND2', 'HD1%', 'HD2%', 'HD2x', 'HD2y', 'HD21', 'HD22'],
                     'epsilons'    : ['CE', 'CEx', 'CEy', 'CE1', 'CE2', 'HE', 'HEx', 'HEy', 'HE%', 'HE1', 'HE2', 'HE3'],
                     'moreEpsilons': ['CE3', 'NE', 'NE1', 'NE2', 'HE2x', 'HE2y', 'HE21', 'HE22', 'HE%'],

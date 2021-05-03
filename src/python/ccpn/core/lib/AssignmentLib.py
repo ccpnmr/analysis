@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-23 17:18:03 +0100 (Fri, April 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-03 19:05:23 +0100 (Mon, May 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -62,9 +62,9 @@ NEF_ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CG', 'CG1', 'CG2', 'CGx', 'CGy', 'CG
 
 NEF_ATOM_NAMES_SORTED = {'alphas'      : ['CA', 'HA', 'HAx', 'HAy', 'HA2', 'HA3', 'HA%'],
                     'betas'       : ['CB', 'HB', 'HBx', 'HBy', 'HB%', 'HB2', 'HB3'],
-                    'gammas'      : ['CG', 'CGx', 'CGy', 'CG1', 'CG2', 'CG%', 'HG', 'HGx', 'HGy', 'HG%', 'HG2', 'HG3'],
+                    'gammas'      : ['CG', 'CGx', 'CGy', 'CG%', 'CG1', 'CG2', 'HG', 'HGx', 'HGy', 'HG%', 'HG2', 'HG3'],
                     'moreGammas'  : ['HGx%', 'HGy%', 'HG1', 'HG1x', 'HG1y', 'HG1%', 'HG12', 'HG13', 'HG1%', 'HG2%'],
-                    'deltas'      : ['CD', 'CDx', 'CDy', 'CD1', 'CD2', 'CD%' 'HDx', 'HDy', 'HD%', 'HD1', 'HD2', 'HD3'],
+                    'deltas'      : ['CD', 'CDx', 'CDy', 'CD%', 'CD1', 'CD2', 'HDx', 'HDy', 'HD%', 'HD1', 'HD2', 'HD3'],
                     'moreDeltas'  : ['HDx%', 'HDy%', 'ND1', 'ND2', 'HD1%', 'HD2%', 'HD2x', 'HD2y', 'HD21', 'HD22'],
                     'epsilons'    : ['CE', 'CEx', 'CEy', 'CE1', 'CE2', 'HE', 'HEx', 'HEy', 'HE%', 'HE1', 'HE2', 'HE3'],
                     'moreEpsilons': ['CE3', 'NE', 'NE1', 'NE2', 'HE2x', 'HE2y', 'HE21', 'HE22', 'HE%'],
@@ -94,7 +94,7 @@ PROTEIN_NEF_ATOM_NAMES = {
     'ILE': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB', 'CG1', 'HG1x', 'HG1y',
             'HG12', 'HG13', 'HG1%', 'CG2', 'HG2%', 'CD1', 'HD1%'],
     'LEU': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HG', 'CDx',
-            'CDy', 'CD1', 'CD2', 'HDx%', 'HDy%', 'HD1%', 'HD2%', 'HD%'],
+            'CDy', 'CD%', 'CD1', 'CD2', 'HDx%', 'HDy%', 'HD1%', 'HD2%', 'HD%'],
     'LYS': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HGx', 'HGy',
             'HG2', 'HG3', 'HG%', 'CD', 'HDx', 'HDy', 'HD2', 'HD3', 'HD%', 'CE', 'HEx', 'HEy', 'HE2', 'HE3',
             'HE%', 'NZ', 'HZ%'],
@@ -112,7 +112,7 @@ PROTEIN_NEF_ATOM_NAMES = {
     'TYR': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'CDx', 'CDy', 'CD1',
             'CD2', 'HDx', 'HDy', 'HD1', 'HD2', 'HD%', 'CEx', 'CEy', 'CE1', 'CE2', 'HEx', 'HEy', 'HE1', 'HE2',
             'HE%', 'CZ', 'HH'],
-    'VAL': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB', 'CGx', 'CGy', 'CG1', 'CG2',
+    'VAL': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB', 'CGx', 'CGy', 'CG%', 'CG1', 'CG2',
             'HGx%', 'HGy%', 'HG1%', 'HG2%','HG%']
     }
 

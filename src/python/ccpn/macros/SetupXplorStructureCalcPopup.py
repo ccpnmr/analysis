@@ -6,19 +6,22 @@ Alpha version of a popup for setting up a structure calculation using Xplor-NIH 
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
 __modifiedBy__ = "$Author: Luca Mureddu $"
 __dateModified__ = "$Date: 2021-04-27 16:04:57 +0100 (Tue, April 27, 2021) $"
-__version__ = "$Revision$"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-05-03 19:05:23 +0100 (Mon, May 03, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
-# Created:
+# Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2021-04-27 16:04:57 +0100 (Tue, April 27, 2021) $"
@@ -49,7 +52,9 @@ if application:
     xplorPath = application.preferences.externalPrograms.get('xplor')
 
     # This is an example folder from Xplor NIH distribution with scripts necessary for running calculations
-    pathToXplorFiles = '/Users/eliza/Projects/xplor-nih-3.2/eginput/pasd/nef'
+    pathToXplorBinary = application.preferences.externalPrograms.get('xplor')
+    xplorRootDirectory = os.path.dirname(os.path.dirname(pathToXplorBinary))
+    pathToXplorFiles = os.path.join(xplorRootDirectory, 'eginput','pasd','nef')
 
     # Path for TalosN executable (depending where the calculation is run).
     #talosnPath='/home/eapa2/applications/talos-n/talosn'
@@ -156,7 +161,7 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
     FIXEDWIDTH = True
     FIXEDHEIGHT = False
 
-    title = 'Setup Xplor-NHI Structure Calculation (Alpha)'
+    title = 'Setup Xplor-NIH Structure Calculation (Alpha)'
     def __init__(self, parent=None, mainWindow=None, title=title,  **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title,
                          size=(500, 10), minimumSize=None, **kwds)
@@ -256,3 +261,4 @@ if __name__ == '__main__':
     popup.show()
     popup.raise_()
     # app.start()
+

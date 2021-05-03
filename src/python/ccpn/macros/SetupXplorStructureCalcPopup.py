@@ -49,7 +49,9 @@ if application:
     xplorPath = application.preferences.externalPrograms.get('xplor')
 
     # This is an example folder from Xplor NIH distribution with scripts necessary for running calculations
-    pathToXplorFiles = '/Users/eliza/Projects/xplor-nih-3.2/eginput/pasd/nef'
+    pathToXplorBinary = application.preferences.externalPrograms.get('xplor')
+    xplorRootDirectory = os.path.dirname(os.path.dirname(pathToXplorBinary))
+    pathToXplorFiles = os.path.join(xplorRootDirectory, 'eginput','pasd','nef')
 
     # Path for TalosN executable (depending where the calculation is run).
     #talosnPath='/home/eapa2/applications/talos-n/talosn'

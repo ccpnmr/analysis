@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-26 13:13:08 +0100 (Mon, April 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-04 12:12:58 +0100 (Tue, May 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2431,7 +2431,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     self._drawDeltaOffset = True
 
         if self.mousePressInLabel(mx, my, top):
-            self._draggingLabel = True
+            self._draggingLabel = False # True to enable dragging of label
 
         else:
             # check if the corner buttons have been pressed

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-28 15:54:46 +0100 (Wed, April 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-04 17:48:24 +0100 (Tue, May 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -127,7 +127,7 @@ class DataFrameObject(object):
     def table(self, table=None):
         self._table = table
 
-    def find(self, table, text, column=DATAFRAME_PID):
+    def find(self, table, text, column=DATAFRAME_PID, multiRow=False):
         model = table.model()
 
         # change column to correct index
@@ -141,23 +141,31 @@ class DataFrameObject(object):
 
         # search for 'text'
         if columnNum is not None:
-            start = model.index(0, columnNum)
-            matches = model.match(
-                    start, QtCore.Qt.DisplayRole,
-                    text, 1, QtCore.Qt.MatchExactly)
+            if multiRow:
+                start = model.index(0, columnNum)
+                matches = model.match(
+                        start, QtCore.Qt.DisplayRole,
+                        text, -1, QtCore.Qt.MatchExactly)
+                return [mm.row() for mm in matches]
 
-            # start = model.index(0, columnNum)
-            # matches2 = model.match(
-            #   start, QtCore.Qt.UserRole,
-            #   text, 1, QtCore.Qt.MatchExactly)
-            #
-            # print ([table.item(rr, columnNum).value for rr in range(table.rowCount())])
+            else:
+                start = model.index(0, columnNum)
+                matches = model.match(
+                        start, QtCore.Qt.DisplayRole,
+                        text, 1, QtCore.Qt.MatchExactly)
 
-            if matches:
-                return matches[0].row()
-                # # index.row(), index.column()
-                # self.table.selectionModel().select(
-                #   index, QtGui.QItemSelectionModel.Select)
+                # start = model.index(0, columnNum)
+                # matches2 = model.match(
+                #   start, QtCore.Qt.UserRole,
+                #   text, 1, QtCore.Qt.MatchExactly)
+                #
+                # print ([table.item(rr, columnNum).value for rr in range(table.rowCount())])
+
+                if matches:
+                    return matches[0].row()
+                    # # index.row(), index.column()
+                    # self.table.selectionModel().select(
+                    #   index, QtGui.QItemSelectionModel.Select)
 
         return None
 

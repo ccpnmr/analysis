@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-07 19:07:09 +0100 (Wed, April 07, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-04 17:48:24 +0100 (Tue, May 04, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -938,6 +939,12 @@ class NefDictFrame(Frame):
                                                  # tableColourFunc=table_ccpn_additional_data)
                                                  tableColourFunc=None)
 
+    handleSaveFrames['ccpn_distance_restraint_violation_list'] = partial(handle_treeView_selection,
+                                                             prefix='ccpn_distance_restraint_violation_',
+                                                             mappingCode='ccpn_distance_restraint_violation_list',
+                                                             errorCode='ccpn_distance_restraint_violation_list',
+                                                             tableColourFunc=None)
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     _setBadSaveFrames['nef_sequence'] = partial(_set_bad_saveframe,
@@ -1049,6 +1056,12 @@ class NefDictFrame(Frame):
                                                  # tableColourFunc=table_ccpn_additional_data)
                                                  tableColourFunc=None)
 
+    _setBadSaveFrames['ccpn_distance_restraint_violation_list'] = partial(_set_bad_saveframe,
+                                                             prefix='ccpn_distance_restraint_violation_',
+                                                             mappingCode='ccpn_distance_restraint_violation_list',
+                                                             errorCode='ccpn_distance_restraint_violation_list',
+                                                             tableColourFunc=None)
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     applyCheckBoxes['nef_sequence'] = partial(apply_checkBox_item,
@@ -1148,6 +1161,11 @@ class NefDictFrame(Frame):
                                                          prefix='ccpn_internal_data_',
                                                          mappingCode='ccpn_additional_data',
                                                          )
+
+    applyCheckBoxes['ccpn_distance_restraint_violation_list'] = partial(apply_checkBox_item,
+                                                             prefix='ccpn_distance_restraint_violation_',
+                                                             mappingCode='ccpn_distance_restraint_violation_list',
+                                                             )
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

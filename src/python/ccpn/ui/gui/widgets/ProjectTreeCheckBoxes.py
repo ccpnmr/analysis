@@ -2,7 +2,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-07 19:07:09 +0100 (Wed, April 07, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-04 17:48:25 +0100 (Tue, May 04, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -412,6 +413,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         PeakCluster._pluralLinkName,
         'restraintLinks',
         'additionalData',
+        'restraintViolations',
         ]
 
     lockedItems = {
@@ -441,6 +443,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         # 'ccpn_peak_cluster_serial'          : (PeakCluster._pluralLinkName, PeakCluster.className),
         'nef_peak_restraint_links'   : ('restraintLinks','RestraintLink'),
         'ccpn_additional_data'       : ('additionalData', 'internalData'),
+        'ccpn_distance_restraint_violation_list'       : ('restraintViolations', 'restraintViolation'),
         }
 
     # defines the names of the saveframe loops that are displayed
@@ -466,6 +469,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         PeakCluster._pluralLinkName      : ['ccpn_peak_cluster_list', 'ccpn_peak_cluster', 'ccpn_peak_cluster_peaks'],
         'restraintLinks'                 : ['nef_peak_restraint_link'],
         'additionalData'                 : ['ccpn_internal_data'],
+        'restraintViolations'            : ['ccpn_distance_restraint_violation_list', 'ccpn_distance_restraint_violation'],
         }
 
     nefProjectToHandlerMapping = {
@@ -487,6 +491,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         PeakCluster._pluralLinkName      : None,
         'restraintLinks'                 : None,
         'additionalData'                 : 'ccpn_internal_data',
+        'restraintViolations'            : None,
         }
 
     contents = {}
@@ -719,6 +724,8 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     contents['nef_peak_restraint_links'] = content_list  # content_ccpn_notes
 
     contents['ccpn_additional_data'] = content_list
+
+    contents['ccpn_distance_restraint_violation_list'] = content_list  # content_nef_restraint_list
 
     def _fillFunc(self, project, saveFrame, *args, **kwds):
         saveFrameName = saveFrame['sf_category']

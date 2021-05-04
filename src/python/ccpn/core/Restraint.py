@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-28 15:49:22 +0100 (Wed, April 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-04 17:48:24 +0100 (Tue, May 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -285,10 +285,12 @@ def getter(self: Peak) -> Tuple[Restraint, ...]:
     getDataObj = self._project._data2Obj.get
     result = []
     apiPeak = self._wrappedData
-    for restraintList in self._project.restraintLists:
-        for apiRestraint in restraintList._wrappedData.constraints:
-            if apiPeak in apiRestraint.peaks:
-                result.append(getDataObj(apiRestraint))
+    # for restraintList in self._project.restraintLists:
+    #     for apiRestraint in restraintList._wrappedData.constraints:
+    #         if apiPeak in apiRestraint.peaks:
+    #             result.append(getDataObj(apiRestraint))
+    result = [getDataObj(apiRestraint) for restraintList in self._project.restraintLists
+              for apiRestraint in restraintList._wrappedData.constraints if apiPeak in apiRestraint.peaks]
     return tuple(sorted(result))
 
 

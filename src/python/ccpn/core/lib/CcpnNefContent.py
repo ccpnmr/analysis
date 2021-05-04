@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-07 19:07:09 +0100 (Wed, April 07, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-04 17:48:24 +0100 (Tue, May 04, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -735,6 +736,67 @@ class CcpnNefContent:
     contents['nef_dihedral_restraint_list'] = content_nef_restraint_list
     contents['nef_rdc_restraint_list'] = content_nef_restraint_list
     contents['ccpn_restraint_list'] = content_nef_restraint_list
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def content_ccpn_restraint_violation(self, restraintList: RestraintList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+                              itemLength: int = None) -> Optional[OrderedSet]:
+        """Get the contents for ccpn_restraint_violation loops
+        """
+        result = OrderedSet()
+
+        if itemLength is None:
+            self.error('Undefined restraint item length', loop, None)
+            return None
+
+        mapping = nef2CcpnMap.get(loop.name) or {}
+        max = itemLength + 1
+        multipleAttributes = OD((
+            ('chainCodes', tuple('chain_code_%s' % ii for ii in range(1, max))),
+            ('sequenceCodes', tuple('sequence_code_%s' % ii for ii in range(1, max))),
+            ('residueTypes', tuple('residue_name_%s' % ii for ii in range(1, max))),
+            ('atomNames', tuple('atom_name_%s' % ii for ii in range(1, max))),
+            ))
+
+        for row in loop.data:
+            serial = row.get('restraint_id')
+
+            result.add(serial)
+
+        return result
+
+    contents['ccpn_distance_restraint_violation'] = partial(content_ccpn_restraint_violation, itemLength=2)
+
+    def content_ccpn_restraint_violation_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        """Get the contents of ccpn_distance_restraint_violation_list saveFrame
+        """
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+
+        # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
+        name = framecode[len(category) + 1:]
+        dataSetSerial = saveFrame.get('ccpn_dataset_serial')
+        if dataSetSerial is not None:
+            ss = '`%s`' % dataSetSerial
+            if name.startswith(ss):
+                name = name[len(ss):]
+
+        # ejb - need to remove the rogue `n` at the beginning of the name if it exists
+        #       as it is passed into the namespace and gets added iteratively every save
+        #       next three lines remove all occurrences of `n` from name
+        import re
+
+        regex = u'\`\d*`+?'
+        name = re.sub(regex, '', name)  # substitute with ''
+
+        result = {category: (name,)}
+
+        self._contentLoops(project, saveFrame)
+        self.updateContent(saveFrame, result)
+
+    contents['ccpn_distance_restraint_violation_list'] = content_ccpn_restraint_violation_list  # could be _contentLoops
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def content_nef_sequence(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame) -> OrderedSet:
         """get contents of the nef_sequence loop"""

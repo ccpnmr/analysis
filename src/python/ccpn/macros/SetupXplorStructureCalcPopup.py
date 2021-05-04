@@ -43,8 +43,20 @@ import datetime
 from distutils.dir_util import copy_tree
 from ccpn.ui.gui.widgets.FileDialog import OtherFileDialog
 from ccpn.framework.Application import getApplication
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+
+if (application.preferences.externalPrograms.get('xplor') is None) or (len(application.preferences.externalPrograms.get('xplor')) <2):
+    showWarning('XPLOR PATH NOT SET UP', 'Please make sure you have set the path in preferences.')
+    sys.exit()
+if (application.preferences.externalPrograms.get('talos') is None) or (len(application.preferences.externalPrograms.get('talos')) <2):
+    showWarning('TALOS PATH NOT SET UP', 'Please make sure you have set the path in preferences.')
+    sys.exit()
+
+
 
 application = getApplication()
+
+
 if application:
     # Path for Xplor NIH executable. Those calculations are
     # Local Mac:

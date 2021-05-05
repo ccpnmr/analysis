@@ -277,7 +277,8 @@ class TipOfTheDayWindow(QWizard):
 
         self.setWizardStyle(QWizard.ModernStyle)
 
-        self._dont_show_tips_button = QCheckBox(PLACE_HOLDER)
+        if not standalone:
+            self._dont_show_tips_button = QCheckBox(PLACE_HOLDER)
         self._random_tip_button = QPushButton(PLACE_HOLDER)
 
         self.setOption(HAVE_RANDOM_TIP_BUTTON, True)
@@ -285,7 +286,12 @@ class TipOfTheDayWindow(QWizard):
 
         self.setOption(QWizard.HaveNextButtonOnLastPage, True)
 
-        self.setButton(DONT_SHOW_TIPS_BUTTON, self._dont_show_tips_button)
+        if not standalone:
+            self.setButton(DONT_SHOW_TIPS_BUTTON, self._dont_show_tips_button)
+            if dont_show_tips:
+                self._dont_show_tips_button.setCheckState(Qt.Checked)
+            self._dont_show_tips_button.stateChanged.connect(self._dont_show_clicked)
+
         self.setButton(RANDOM_TIP_BUTTON, self._random_tip_button)
 
         self.button(BUTTON_IDS[DEFAULTS[DEFAULT]]).setAutoDefault(True)
@@ -297,6 +303,12 @@ class TipOfTheDayWindow(QWizard):
             self.setButtonText(button, text)
 
         layout = [BUTTON_IDS[button] for button in DEFAULTS[self._mode][LAYOUT]]
+
+        if standalone:
+            position = layout.index(DONT_SHOW_TIPS_BUTTON)
+            if position >= 0:
+                del layout[position]
+
         self.setButtonLayout(layout)
 
         self.setWindowTitle(DEFAULTS[self._mode][TITLE])
@@ -312,6 +324,11 @@ class TipOfTheDayWindow(QWizard):
 
         self._centre_window()
 
+    def _dont_show_clicked(self, state):
+        if state == Qt.Checked:
+            self.dont_show.emit(True)
+        else:
+            self.dont_show.emit(False)
 
     def _current_page_index(self):
         return self._page_list.index(self.currentId())

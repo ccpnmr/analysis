@@ -14,6 +14,8 @@ from PyQt5.QtWidgets import QApplication, QWizard, QWizardPage, QCheckBox, QPush
 
 RANDOM_TIP_BUTTON = QWizard.CustomButton1
 DONT_SHOW_TIPS_BUTTON = QWizard.CustomButton2
+HAVE_RANDOM_TIP_BUTTON = QWizard.HaveCustomButton1
+HAVE_DONT_SHOW_TIPS_BUTTON = QWizard.HaveCustomButton2
 
 MODE_TIP_OF_THE_DAY = 'TIP_OF_THE_DAY'
 MODE_OVERVIEW = 'OVERVIEW'
@@ -277,8 +279,8 @@ class TipOfTheDayWindow(QWizard):
         self._dont_show_tips_button = QCheckBox(PLACE_HOLDER)
         self._random_tip_button = QPushButton(PLACE_HOLDER)
 
-        self.setOption(QWizard.HaveCustomButton1, True)
-        self.setOption(QWizard.HaveCustomButton2, True)
+        self.setOption(HAVE_RANDOM_TIP_BUTTON, True)
+        self.setOption(HAVE_DONT_SHOW_TIPS_BUTTON, not standalone)
 
         self.setOption(QWizard.HaveNextButtonOnLastPage, True)
 

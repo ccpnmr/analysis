@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-04 17:48:25 +0100 (Tue, May 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-05 01:55:01 +0100 (Wed, May 05, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -225,6 +225,8 @@ GuiTable::item::selected {
     MINSORTCOLUMN = 0
     enableMultiColumnSort = False
     applySortToGroups = False
+
+    PRIMARYCOLUMN = 'Pid'
 
     def __init__(self, parent=None,
                  mainWindow=None,
@@ -1600,7 +1602,7 @@ GuiTable::item::selected {
                             _header = self.horizontalHeaderItem(col)
                             if _header:
                                 colName = _header.text()
-                                if colName == 'Pid':
+                                if colName == self.PRIMARYCOLUMN:
                                     if row not in rows:
                                         rows.append(row)
                                         objIndex = model.model().data(iSelect)

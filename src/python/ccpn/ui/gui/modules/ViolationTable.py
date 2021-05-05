@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-04 17:48:24 +0100 (Tue, May 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-05 01:55:01 +0100 (Wed, May 05, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -277,6 +277,8 @@ class ViolationTableWidget(GuiTable):
     # groups are always max->min
     applySortToGroups = False
 
+    PRIMARYCOLUMN = 'Peak'
+
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, multiSelect=True,
                  actionCallback=None, selectionCallback=None, **kwds):
         """
@@ -477,12 +479,12 @@ class ViolationTableWidget(GuiTable):
         """
         peaks = data[CallBack.OBJECT]
 
-        print(f'>>> _selectionCallback  {peaks}')
-
         if peaks is None:
             self.current.clearPeaks()
+            self.current.clearRestraints()
         else:
             self.current.peaks = peaks
+            self.current.restraints = list(set(res for pk in peaks for res in pk.restraints))
 
     def _pulldownPLcallback(self, data):
         self._updateTable()

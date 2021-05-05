@@ -100,6 +100,10 @@
         "traceIncludeNegative"                 : false,
         "aliasEnabled"                         : true,
         "aliasShade"                           : 20,
+        "stripArrangement"                     : 0,
+        "showTipOfTheDay"                      : false,
+        "firstTimeShowKeyConcepts"             : true,
+        "seenTipsOfTheDay"                     : []
         "aliasLabelsEnabled"                   : true,
         "stripArrangement"                     : 0
     },

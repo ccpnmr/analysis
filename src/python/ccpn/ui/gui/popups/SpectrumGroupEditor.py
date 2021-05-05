@@ -53,6 +53,8 @@ from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Constants import ALL_UNITS
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 import traceback
+import pandas as pd
+from collections import defaultdict
 
 DEFAULTSPACING = (3, 3)
 TABMARGINS = (1, 10, 1, 5)  # l, t, r, b
@@ -68,6 +70,9 @@ GENERALTABND_LABEL = 'General Nd'
 SERIES_LABEL = 'Series'
 MAX_WIDGET_COUNT = 50 # For severe speed issues. If a SG contains more Spectra than this value, widgets are not created.
 TAB_WARNING_MSG ='This option is not available for Spectrum Groups containing more than %s spectra.' %MAX_WIDGET_COUNT
+_PidsHeader = 'Pids'
+_WidgetsHeader = 'Widgets'
+_ValuesHeader = 'Values'
 
 class SpectrumGroupEditor(_GroupEditorPopupABC):
     """
@@ -764,8 +769,8 @@ class SeriesFrame(Frame):
         reorderLabel = Label(self, text='Reorder spectra by series', grid=(self._row, self._col), hAlign='l')
         self._orderButtons = ButtonList(self, texts=['Ascending','Descending'],
                                         icons=[Icon('icons/sort-up'),Icon('icons/sort-down')],
-                                        callbacks=[partial(self._reorderSpectraBySeries, False),
-                                                   partial(self._reorderSpectraBySeries, True)],
+                                        callbacks=[partial(self._reorderSpectraBySeries, True),
+                                                   partial(self._reorderSpectraBySeries, False)],
                                         grid=(self._row, self._col + 1))
         self._row += 1
 
@@ -822,14 +827,35 @@ class SeriesFrame(Frame):
         # get colours from the lineEdit and copy to the plainTextEdit
         # yourWidget.palette().highlight().color().name()?
 
-    def _reorderSpectraBySeries(self, reverse=True):
-        idx = self.seriesType.getIndex()
-        ll = sorted(self._editors.items(), key=lambda item: item[1].get(), reverse=reverse)
-        dd = OrderedDict((k, v.get()) for k, v in ll)
-        self._parent._groupedObjects = [i.pid for i in dd.keys()]
-        for v, e in zip(dd.values(), self._editors.values()):
-            e.set(v)
-        self.seriesType.setIndex(idx)
+    def _getDFfromSeriesWidgets(self):
+        dd = defaultdict(list)
+        for sp, widget in self._editors.items():
+            dd[_WidgetsHeader].append(widget)
+            dd[_ValuesHeader].append(widget.get())
+            dd[_PidsHeader].append(sp.pid)
+        df = pd.DataFrame(dd)
+        return df
+
+    def _reorderSpectraBySeries(self, ascending=True):
+        """
+        Sort on-the-fly all widgets based on Series lineEdit values.
+        To sort a spectrumGroup object by Series (using the terminal), use the method
+        "SpectrumGroup > sortSpectraBySeries() "
+        """
+        selType =  self.seriesType.get()
+        isNumericTab = selType == SeriesTypes.INTEGER.description or selType == SeriesTypes.FLOAT.description
+
+        df = self._getDFfromSeriesWidgets()
+        if isNumericTab: # set _ValuesHeader to numeric and ignore potential errors (empty boxes, or str conversion)
+            df[_ValuesHeader] = pd.to_numeric(df[_ValuesHeader], errors='coerce') #  errors='coerce' is essential here!
+        sortedDf = df.sort_values(by=_ValuesHeader, ascending=ascending) # do sorting
+
+        for i, row in sortedDf.iterrows():
+            widget = row[_WidgetsHeader]
+            widget.set(str(row[_ValuesHeader]))
+        self._parent._groupedObjects = list(sortedDf[_PidsHeader].values)
+
+        self.seriesType.set(selType)
 
     def _setDisabledSeriesTab(self):
 

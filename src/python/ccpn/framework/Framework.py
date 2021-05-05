@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: varioustoxins $"
-__dateModified__ = "$dateModified: 2021-05-05 20:18:38 +0100 (Wed, May 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-05 20:38:11 +0100 (Wed, May 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import time as systime
 
+from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 
 # how frequently to check if license dialog has closed when waiting to show the tip of the day
 WAIT_EVENT_LOOP_EMPTY = 0

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-26 12:43:47 +0000 (Fri, March 26, 2021) $"
+__modifiedBy__ = "$modifiedBy: varioustoxins $"
+__dateModified__ = "$dateModified: 2021-05-05 20:31:38 +0100 (Wed, May 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -26,14 +26,15 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 import os
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets, QtCore, QtGui, Qt
 from functools import partial
-from copy import deepcopy
+from copy import deepcopy, copy
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.LineEdit import LineEdit, PasswordEdit
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -567,15 +568,60 @@ class PreferencesPopup(CcpnDialogMainWidget):
             setattr(self, FONTDATAFORMAT.format(num), _data)
 
         row += 1
-        self.glFontSizeLabel = Label(parent, text="SpectrumDisplay Font Size", grid=(row, 0))
+        self.glFontSizeLabel = Label(parent, text="Spectrum Display Font Size", grid=(row, 0))
         self.glFontSizeData = PulldownList(parent, grid=(row, 1), hAlign='l')
         self.glFontSizeData.setMinimumWidth(PulldownListsMinimumWidth)
         self.glFontSizeData.currentIndexChanged.connect(self._queueChangeGLFontSize)
+
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+
+        row += 1
+        self.showTipsAtStartUplabel = Label(parent, text="Show tips of the day at startup", grid=(row, 0))
+        self.showTipsAtStartUp = CheckBox(parent, grid=(row, 1))
+        self.showTipsAtStartUp.toggled.connect(self._queueSetShowTipsAtStartUp)
+
+        row += 1
+        self.showAllTipsLabel = Label(parent, text="Clear tip history\n (show all tips on next restart)", grid=(row, 0))
+        self.showAllTips = CheckBox(parent, grid=(row, 1))
+        self.showAllTips.clicked.connect(self._queueShowAllTips)
 
         row += 1
         Spacer(parent, 15, 2,
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(row, 1), gridSpan=(1, 1))
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueShowAllTips(self):
+        if self.showAllTips.isChecked() and (len(self.preferences.general.seenTipsOfTheDay) != 0):
+            return partial(self._setShowAllTips, True)
+        else:
+            return partial(self._setShowAllTips, False)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetShowTipsAtStartUp(self):
+        value = self.showTipsAtStartUp.isChecked()
+        if value != self.preferences.general.showTipOfTheDay:
+            return partial(self._setShowTipsAtStartup, value)
+
+    def _setShowTipsAtStartup(self, state):
+        self.preferences.general.showTipOfTheDay = state
+
+    def _setShowAllTips(self, showAllTips):
+        if showAllTips:
+            self.preferences.general.seenTipsOfTheDay.clear()
+            self.preferences.general.seenTipsOfTheDay.extend(self._shownTips)
+        else:
+            self.preferences.general.seenTipsOfTheDay.clear()
+
+    # def _queueClearSeenTips(self):
+    #     #GST in this case the default should be no, but we can't do this yet... as yesNo doesn't support it
+    #     #    also yes now sould allow custom button names and have default and action button separated...
+    #     result = showYesNo(parent=self, title="Reset Seen tips", message="Are you sure you want to clear the seen tips list")
+    #     if result:
+    #         self.preferences.general.seenTipsOfTheDay.clear()
+
 
     def _populateAppearanceTab(self):
         """Populate the widgets in the appearanceTab
@@ -593,6 +639,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         self.glFontSizeData.addItems([str(val) for val in _OLDGLFONT_SIZES])
         self.glFontSizeData.setCurrentIndex(self.glFontSizeData.findText(str(self.preferences.appearance.spectrumDisplayFontSize)))
+
+        self.showTipsAtStartUp.setChecked(self.preferences.general.showTipOfTheDay)
+
+        if len(self.preferences.general.seenTipsOfTheDay) == 0:
+            self.showAllTips.setEnabled(False)
+        self.showAllTips.setChecked(False)
+        self._shownTips = copy(self.preferences.general.seenTipsOfTheDay)
+
 
     def _populate(self):
         """Populate the widgets in the tabs

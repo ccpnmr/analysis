@@ -2,8 +2,7 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -12,7 +11,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: varioustoxins $"
-__dateModified__ = "$dateModified: 2021-05-05 20:55:50 +0100 (Wed, May 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-05 22:11:53 +0100 (Wed, May 05, 2021) $"
 __version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
@@ -965,6 +964,18 @@ class Framework(NotifierBase):
 
     def _displayTipOfTheDay(self, standalone=False):
 
+        # tip of the day allocated standalone already
+        if self._tip_of_the_day and standalone and self._tip_of_the_day.isStandalone():
+            self._tip_of_the_day.show()
+            self._tip_of_the_day.raise_()
+
+        # tip of the day hanging around from startup
+        elif self._tip_of_the_day and standalone and not self._tip_of_the_day.isStandalone():
+
+            self._tip_of_the_day.hide()
+            self._tip_of_the_day.deleteLater()
+            self._tip_of_the_day = None
+
         if not self._tip_of_the_day:
             dont_show_tips = not self.preferences['general']['showTipOfTheDay']
 
@@ -978,8 +989,8 @@ class Framework(NotifierBase):
             if not standalone:
                 self._tip_of_the_day.seen_tips.connect(self._tip_of_the_day_seen_tips_callback)
 
-        self._tip_of_the_day.show()
-        self._tip_of_the_day.raise_()
+            self._tip_of_the_day.show()
+            self._tip_of_the_day.raise_()
 
     def _tip_of_the_day_dont_show_callback(self, dont_show):
         self.preferences['general']['showTipOfTheDay'] = not dont_show

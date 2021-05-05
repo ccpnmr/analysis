@@ -428,8 +428,14 @@ class TipOfTheDayWindow(QWizard):
             self._disable_random_tips()
 
         if len(self._page_list) == 0:
+
+            if self._mode == MODE_OVERVIEW:
+                header = "Note: the overview is not correctly configured..."
+            else:
+                header = "All Tips viewed: no more tips to show..."
+
             info_page = {
-                HEADER: "Note: the overview is not correctly configured...",
+                HEADER: header,
 
                 TYPE: "simple-html",
 

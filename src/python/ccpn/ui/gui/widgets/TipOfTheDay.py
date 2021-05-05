@@ -78,6 +78,7 @@ class Dots(QGraphicsView):
         self._whiteBrush = QBrush(QColor('transparent'))
 
         self.setStyleSheet("border-width: 0px; border-style: solid;")
+        self.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform | QPainter.HighQualityAntialiasing)
 
     def _assure_children(self):
         error = self._length - len(self.items())

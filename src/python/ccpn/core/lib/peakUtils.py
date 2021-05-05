@@ -600,6 +600,7 @@ def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPerce
     # yScaled = ys / interc  # scales y to have values 0-1
     # poptScaled, pcov  = curve_fit(aFunc, xs, yScaled)
     yScaled = (ys - np.min(ys)) / (np.max(ys) - np.min(ys))
+    yScaled[np.isnan(yScaled)] = 0 # cannot fit nans
     popt, pcov = curve_fit(exponenial_func, xs, yScaled, p0=popt)
     interc, slope = popt
     xfRange = np.max(xs) - np.min(xs)

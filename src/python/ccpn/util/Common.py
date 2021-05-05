@@ -694,6 +694,16 @@ def _getChildren(obj, path=None):
 def percentage(percent, whole):
     return (percent * whole) / 100.0
 
+def _fillListToLenght(aList, desiredLength, fillingValue = None):
+    """
+    Appends Nones to list to get length of list equal to the desiredLength.
+    If the starting list is longer than the desiredLength: raise AttributeError
+    """
+    diffLenght = desiredLength - len(aList)
+    if diffLenght < 0:
+        raise AttributeError('The given list has a longer length than the desiredLength.')
+    return aList + [fillingValue] * diffLenght
+
 
 def splitDataFrameWithinRange(dataframe, column1, column2, minX, maxX, minY, maxY):
     """

@@ -124,7 +124,7 @@ from ccpn.ui.gui.modules.PyMolUtil import _CSMSelection2PyMolFile
 from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio, navigateToNmrResidueInDisplay
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import concentrationUnits
-from ccpn.util.Common import splitDataFrameWithinRange
+from ccpn.util.Common import splitDataFrameWithinRange, _fillListToLenght
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.CallBack import CallBack
@@ -775,7 +775,11 @@ class ChemicalShiftsMapping(CcpnModule):
               self._seriesUnit = sg.seriesUnits
             else:
               concentrationsValues = [i for i in range(len(spectra))]
+            if len(deltas) < len(concentrationsValues):
+              deltas = _fillListToLenght(deltas, len(concentrationsValues), np.nan)
             df = pd.DataFrame([deltas], index=[nmrResidue], columns=concentrationsValues)
+            if len(peaksPids) < len(concentrationsValues):
+              peaksPids = _fillListToLenght(peaksPids, len(concentrationsValues), '')
             dfPeaks = pd.DataFrame([peaksPids], index=[nmrResidue], columns=concentrationsValues)
             df = df.replace(np.nan, 0)
             values.append(df)
@@ -1387,6 +1391,7 @@ class ChemicalShiftsMapping(CcpnModule):
     if bindingCurves is None:
       return
 
+    bindingCurves = bindingCurves.replace(np.nan, 0)
     self.fittingLine.hide()
     ### the actual fitting call
     xs, ys, xf, yf, *popt = _fitExpDecayCurve(bindingCurves)

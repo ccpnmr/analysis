@@ -12,6 +12,7 @@ from PyQt5.QtGui import QPixmap, QBrush, QColor, QPainter, QPen
 from PyQt5.QtWidgets import QApplication, QWizard, QWizardPage, QCheckBox, QPushButton, QLabel, QGridLayout, \
     QSizePolicy, QFrame, QTextBrowser, QGraphicsScene, QGraphicsView
 
+
 RANDOM_TIP_BUTTON = QWizard.CustomButton1
 DONT_SHOW_TIPS_BUTTON = QWizard.CustomButton2
 HAVE_RANDOM_TIP_BUTTON = QWizard.HaveCustomButton1
@@ -275,6 +276,7 @@ class TipOfTheDayWindow(QWizard):
         self._id_page = {}
         self._page_path_to_perma_id = {}
         self._seen_perma_ids = set(seen_perma_ids)
+        self._standalone = standalone
 
         self._mode = mode
 
@@ -326,6 +328,9 @@ class TipOfTheDayWindow(QWizard):
         random.seed(1)
 
         self._centre_window()
+
+    def isStandalone(self):
+        return self._standalone
 
     def _dont_show_clicked(self, state):
         if state == Qt.Checked:

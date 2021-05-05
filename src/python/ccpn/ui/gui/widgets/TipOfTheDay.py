@@ -541,4 +541,6 @@ if __name__ == '__main__':
     wizard = TipOfTheDayWindow(mode=MODE_TIP_OF_THE_DAY)
 
     wizard.show()
+    wizard.exec_()
+
     sys.exit(app.exec())

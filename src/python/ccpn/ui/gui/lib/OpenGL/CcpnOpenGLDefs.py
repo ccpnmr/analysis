@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-06 15:28:24 +0100 (Thu, May 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,7 @@ SPECTRUM_VALUEPERPOINT = 'valuePerPoint'
 SPECTRUM_SPINNINGRATE = 'spinningRate'
 SPECTRUM_ALIASINGINDEX = 'aliasingIndex'
 SPECTRUM_FOLDINGMODE = 'foldingMode'
-# SPECTRUM_REGIONBOUNDS = 'regionBounds'
+SPECTRUM_REGIONBOUNDS = 'regionBounds'
 
 MAINVIEW = 'mainView'
 MAINVIEWFULLWIDTH = 'mainViewFullWidth'

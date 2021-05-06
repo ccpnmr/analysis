@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-06 15:28:24 +0100 (Thu, May 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -636,6 +636,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.setYRegion(float(self._maxY), float(self._minY))
             self.update()
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # def _buildSpectrumSetting(self, spectrumView, stackCount=0):
     #     # if spectrumView.spectrum.headerSize == 0:
     #     #     return
@@ -777,6 +778,7 @@ class CcpnGLWidget(QOpenGLWidget):
     #     self._minX = min(self._minX, fxMin)
     #     self._maxY = max(self._maxY, fyMax)
     #     self._minY = min(self._minY, fyMin)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def refreshDevicePixelRatio(self):
         """refresh the devicePixelRatio for the viewports
@@ -3372,8 +3374,9 @@ class CcpnGLWidget(QOpenGLWidget):
         GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
         GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
         GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-        GL.glDisableVertexAttribArray(self._attribArrayIndex)
+        GL.glDisableVertexAttribArray(_attribArrayIndex)
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # def drawSpectra(self):
     #     if self.strip.isDeleted:
     #         return
@@ -3465,7 +3468,7 @@ class CcpnGLWidget(QOpenGLWidget):
     #
     #     # reset lineWidth
     #     GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
-    #
+    # #
     # def buildBoundingBoxes(self):
     #     # NOTE:ED - routine below should be split into build/draw
     #     pass
@@ -3521,6 +3524,7 @@ class CcpnGLWidget(QOpenGLWidget):
     #
     #         # reset lineWidth
     #         GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def buildGrid(self):
         """Build the grids for the mainGrid and the bottom/right axes

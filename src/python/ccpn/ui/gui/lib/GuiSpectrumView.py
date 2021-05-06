@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-06 15:28:24 +0100 (Thu, May 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,8 +37,7 @@ from typing import Optional, Tuple
 
 SpectrumViewParams = collections.namedtuple('SpectrumViewParams', 'valuePerPoint pointCount minAliasedFrequency maxAliasedFrequency '
                                                                   'minSpectrumFrequency maxSpectrumFrequency axisReversed '
-                                                                  'spectralWidth aliasingIndex foldingMode '
-                                                                  'visibleAlias regionBounds')
+                                                                  'spectralWidth aliasingIndex foldingMode regionBounds')
 TraceParameters = collections.namedtuple('TraceParameters', 'inRange pointPositions startPoint, endPoint')
 
 
@@ -145,15 +144,15 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
             aliasingIndex = (int((minAliasedFrequency - minSpectrumFrequency + spectralWidth / 2) // spectralWidth),
                              int((maxAliasedFrequency - maxSpectrumFrequency + spectralWidth / 2) // spectralWidth))
             foldingMode = (_spectrum.foldingModes)[ii]
-            # visibleAlias = (self.spectrum.visibleAliasingRange)[ii]
-            # regionBounds = tuple(minSpectrumFrequency + ii * (maxSpectrumFrequency - minSpectrumFrequency) for ii in range(visibleAlias[0], visibleAlias[1] + 2))
+            _visibleAlias = (self.spectrum.aliasingValues)[ii]
+            regionBounds = tuple(minSpectrumFrequency + ii * (maxSpectrumFrequency - minSpectrumFrequency)
+                                 for ii in range(_visibleAlias[0], _visibleAlias[1] + 2))
 
             return SpectrumViewParams(valuePerPoint, pointCount,
                                       minAliasedFrequency, maxAliasedFrequency,
                                       minSpectrumFrequency, maxSpectrumFrequency,
                                       axisReversed, spectralWidth, aliasingIndex,
-                                      foldingMode)
-                                      # visibleAlias, regionBounds)
+                                      foldingMode, regionBounds)
 
     def getTraceParameters(self, position, dim):
         # dim  = spectrumView index, i.e. 0 for X, 1 for Y

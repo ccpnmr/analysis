@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-23 17:18:03 +0100 (Fri, April 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-06 15:43:15 +0100 (Thu, May 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.core.lib.Notifiers import Notifier
 SELECT = '> Select <'
 UNDEFINED = '<Undefined>'
 
-DEBUG = True
+DEBUG = False
 
 
 class _PulldownABC(PulldownListCompoundWidget):
@@ -345,7 +345,7 @@ class _PulldownABC(PulldownListCompoundWidget):
 
     @staticmethod
     def onDestroyed(widget):
-        if DEBUG: sys.stderr.write('>>> being destroyed:\n', widget)
+        if DEBUG: sys.stderr.write('>>> %s being destroyed:\n' % widget)
 
 
 #==========================================================================================================

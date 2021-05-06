@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-25 16:26:00 +0000 (Mon, January 25, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 11:39:08 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -602,9 +603,9 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                                             showCopyOptions=True if len(spectra1d) > 1 else False,
                                             copyToSpectra=spectra1d)
 
-                self._colourTabs1d.addTab(contoursTab, spec.name) #this indent looks wrong
-                contoursTab.setContentsMargins(*TABMARGINS)
-                contoursTab._populateColour()
+                    self._colourTabs1d.addTab(contoursTab, spec.name) #this indent looks wrong
+                    contoursTab.setContentsMargins(*TABMARGINS)
+                    contoursTab._populateColour()
 
         # set the visibility of the general 1d tab
         index = self._tabWidget.indexOf(self._generalTabWidget1d)
@@ -655,9 +656,9 @@ class SpectrumGroupEditor(_GroupEditorPopupABC):
                                               showCopyOptions=True if len(spectraNd) > 1 else False,
                                               copyToSpectra=spectraNd)
 
-                self._colourTabsNd.addTab(contoursTab, spec.name)
-                contoursTab.setContentsMargins(*TABMARGINS)
-                contoursTab._populateColour()
+                    self._colourTabsNd.addTab(contoursTab, spec.name)
+                    contoursTab.setContentsMargins(*TABMARGINS)
+                    contoursTab._populateColour()
 
         # set the visibility of the general 1d tab
         index = self._tabWidget.indexOf(self._generalTabWidgetNd)

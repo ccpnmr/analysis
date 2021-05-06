@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-26 17:49:29 +0000 (Fri, March 26, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 11:45:21 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,10 +36,15 @@ from OpenGL import GL
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import pyqtSlot, Qt
 
-from Common import getAxisCodeMatchIndices
-from Constants import AXIS_FULLATOMNAME, AXIS_ACTIVEAXES, MOUSEDICTSTRIP, AXIS_MATCHATOMTYPE, DOUBLEAXIS_MATCHATOMTYPE, DOUBLEAXIS_FULLATOMNAME, DOUBLEAXIS_ACTIVEAXES
-from Logging import getLogger
-from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA, CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, CCPNGLWIDGET_HARDSHADE
+from ccpn.util.Common import getAxisCodeMatchIndices
+from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_ACTIVEAXES, MOUSEDICTSTRIP, \
+    AXIS_MATCHATOMTYPE, DOUBLEAXIS_MATCHATOMTYPE, DOUBLEAXIS_FULLATOMNAME, \
+    DOUBLEAXIS_ACTIVEAXES
+from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_BACKGROUND, \
+    CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, \
+    CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA, \
+    CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, CCPNGLWIDGET_HARDSHADE
 from ccpn.ui.gui.lib.GuiStrip import STRIP_MINIMUMHEIGHT, STRIP_MINIMUMWIDTH, AxisMenu
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import ZOOMHISTORYSTORE, CURSOR_SOURCE_NONE, CURSOR_SOURCE_OTHER, ZOOMTIMERDELAY, CURSOR_SOURCE_SELF

@@ -12,8 +12,11 @@ from PyQt5.QtGui import QPixmap, QBrush, QColor, QPainter, QPen
 from PyQt5.QtWidgets import QApplication, QWizard, QWizardPage, QCheckBox, QPushButton, QLabel, QGridLayout, \
     QSizePolicy, QFrame, QTextBrowser, QGraphicsScene, QGraphicsView
 
+
 RANDOM_TIP_BUTTON = QWizard.CustomButton1
 DONT_SHOW_TIPS_BUTTON = QWizard.CustomButton2
+HAVE_RANDOM_TIP_BUTTON = QWizard.HaveCustomButton1
+HAVE_DONT_SHOW_TIPS_BUTTON = QWizard.HaveCustomButton2
 
 MODE_TIP_OF_THE_DAY = 'TIP_OF_THE_DAY'
 MODE_OVERVIEW = 'OVERVIEW'
@@ -76,6 +79,7 @@ class Dots(QGraphicsView):
         self._whiteBrush = QBrush(QColor('transparent'))
 
         self.setStyleSheet("border-width: 0px; border-style: solid;")
+        self.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform | QPainter.HighQualityAntialiasing)
 
     def _assure_children(self):
         error = self._length - len(self.items())
@@ -261,28 +265,38 @@ def _read_text_from_field_or_file(data, field):
 
 class TipOfTheDayWindow(QWizard):
     dont_show = pyqtSignal(bool)
+    seen_tips = pyqtSignal(list)
 
-    def __init__(self, parent=None, mode=MODE_TIP_OF_THE_DAY):
+    def __init__(self, parent=None, seen_perma_ids=(), dont_show_tips=False, standalone=False, mode=MODE_TIP_OF_THE_DAY):
         super(TipOfTheDayWindow, self).__init__(parent=parent)
 
         self._page_list = []
         self._id_path = {}
         self._visited_pages = set()
         self._id_page = {}
+        self._page_path_to_perma_id = {}
+        self._seen_perma_ids = set(seen_perma_ids)
+        self._standalone = standalone
 
         self._mode = mode
 
         self.setWizardStyle(QWizard.ModernStyle)
 
-        self._dont_show_tips_button = QCheckBox(PLACE_HOLDER)
+        if not standalone:
+            self._dont_show_tips_button = QCheckBox(PLACE_HOLDER)
         self._random_tip_button = QPushButton(PLACE_HOLDER)
 
-        self.setOption(QWizard.HaveCustomButton1, True)
-        self.setOption(QWizard.HaveCustomButton2, True)
+        self.setOption(HAVE_RANDOM_TIP_BUTTON, True)
+        self.setOption(HAVE_DONT_SHOW_TIPS_BUTTON, not standalone)
 
         self.setOption(QWizard.HaveNextButtonOnLastPage, True)
 
-        self.setButton(DONT_SHOW_TIPS_BUTTON, self._dont_show_tips_button)
+        if not standalone:
+            self.setButton(DONT_SHOW_TIPS_BUTTON, self._dont_show_tips_button)
+            if dont_show_tips:
+                self._dont_show_tips_button.setCheckState(Qt.Checked)
+            self._dont_show_tips_button.stateChanged.connect(self._dont_show_clicked)
+
         self.setButton(RANDOM_TIP_BUTTON, self._random_tip_button)
 
         self.button(BUTTON_IDS[DEFAULTS[DEFAULT]]).setAutoDefault(True)
@@ -294,6 +308,12 @@ class TipOfTheDayWindow(QWizard):
             self.setButtonText(button, text)
 
         layout = [BUTTON_IDS[button] for button in DEFAULTS[self._mode][LAYOUT]]
+
+        if standalone:
+            position = layout.index(DONT_SHOW_TIPS_BUTTON)
+            if position >= 0:
+                del layout[position]
+
         self.setButtonLayout(layout)
 
         self.setWindowTitle(DEFAULTS[self._mode][TITLE])
@@ -309,6 +329,14 @@ class TipOfTheDayWindow(QWizard):
 
         self._centre_window()
 
+    def isStandalone(self):
+        return self._standalone
+
+    def _dont_show_clicked(self, state):
+        if state == Qt.Checked:
+            self.dont_show.emit(True)
+        else:
+            self.dont_show.emit(False)
 
     def _current_page_index(self):
         return self._page_list.index(self.currentId())
@@ -334,9 +362,15 @@ class TipOfTheDayWindow(QWizard):
 
                 identifier_pattern = os.path.join(directory_name, *identifier_parts)
 
-                files.extend(glob(identifier_pattern))
+                tip_file_list = glob(identifier_pattern)
 
-        files = [pathlib.Path(file) for file in files]
+                file_parts = dict([(pathlib.Path(file_path), file_path[len(directory_name)+1:]) for file_path in tip_file_list])
+
+                file_parts = self._filter_dict_by_values(file_parts, self._seen_perma_ids)
+
+                self._page_path_to_perma_id.update(file_parts)
+
+                files.extend(file_parts.keys())
 
         results = []
         for file in files:
@@ -353,6 +387,13 @@ class TipOfTheDayWindow(QWizard):
         results.sort(key=itemgetter(ORDER))
 
         return results
+
+    def _filter_dict_by_values(self, in_dict, filter_values):
+        filtered_file_parts = {}
+        for file_path, perma_id in in_dict.items():
+            if not perma_id in filter_values:
+                filtered_file_parts[file_path] = perma_id
+        return filtered_file_parts
 
     def setup_page_from_tip_file(self, tip_file):
         tip_type = tip_file[TYPE]
@@ -425,8 +466,14 @@ class TipOfTheDayWindow(QWizard):
             self._disable_random_tips()
 
         if len(self._page_list) == 0:
+
+            if self._mode == MODE_OVERVIEW:
+                header = "Note: the overview is not correctly configured..."
+            else:
+                header = "All Tips viewed: no more tips to show..."
+
             info_page = {
-                HEADER: "Note: the overview is not correctly configured...",
+                HEADER: header,
 
                 TYPE: "simple-html",
 
@@ -517,14 +564,24 @@ class TipOfTheDayWindow(QWizard):
     def done(self, result):
         super(TipOfTheDayWindow, self).done(result)
 
+        self.seen_tips.emit(self._get_seen_tips_perma_ids())
+
+    def _get_seen_tips_perma_ids(self):
+        seen_tips = self._get_seen_tips()
+        perma_ids = [self._page_path_to_perma_id[tip_path] for tip_path in seen_tips]
+        return perma_ids
+
+    def _get_seen_tips(self):
         seen_tips = []
         for page_id in self._visited_pages:
             if page_id in self._id_path:
                 seen_tips.append(self._id_path[page_id][PATH])
+        return seen_tips
 
     def _page_visited(self, page_id):
         if page_id != -1:
             self._visited_pages.add(page_id)
+            self.seen_tips.emit(self._get_seen_tips_perma_ids())
 
     def showEvent(self, event: QtGui.QShowEvent) -> None:
         self._centre_window()
@@ -538,4 +595,6 @@ if __name__ == '__main__':
     wizard = TipOfTheDayWindow(mode=MODE_TIP_OF_THE_DAY)
 
     wizard.show()
+    wizard.exec_()
+
     sys.exit(app.exec())

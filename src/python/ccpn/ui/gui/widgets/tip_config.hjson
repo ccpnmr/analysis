@@ -68,8 +68,8 @@
                 CancelButton
         ],
         IDENTIFIERS: [
-            tip_*.json
-            */tip_*.json
+            overview_*.json
+            */overview_*.json
         ],
         EMPTY_TEXT: '''<DOCTYPE html>
                         <html>
@@ -98,7 +98,7 @@
         '''
 
         DIRECTORIES: [
-            /Users/garythompson/Dropbox/git/ccpnmr/ccpnmr_3.0.3.edge_gwv6/src/python/ccpn/ui/gui/widgets/tips
+            /Users/garythompson/Dropbox/git/ccpnmr/ccpnmr_3.0.3.edge_gwv6/src/python/ccpn/ui/gui/widgets/overviews
         ],
         USE_DOTS: true
 

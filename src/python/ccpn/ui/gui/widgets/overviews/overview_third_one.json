@@ -1,0 +1,17 @@
+{
+  "header": "title_tip_third_one.txt",
+
+  "styles": {
+    "style_file": "test_styles.txt",
+    "para": "'margin-right: 20px;font-size: 14pt;'",
+    "red": "'color: red;'"
+  },
+
+  "color": "white",
+
+  "order":  1,
+
+  "type": "simple-html",
+
+  "contents" : ["test.html"]
+}

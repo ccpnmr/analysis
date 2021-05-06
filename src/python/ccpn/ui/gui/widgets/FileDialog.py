@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-12 19:39:18 +0100 (Mon, April 12, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:51 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -416,6 +417,10 @@ class LayoutsFileDialog(FileDialogABC):
 class MacrosFileDialog(FileDialogABC):
     _initialPath = USERMACROPATH
     _text = '{} Macro'
+
+
+class CcpnMacrosFileDialog(FileDialogABC):
+    _text = '{} CCPN Macro'
 
 
 class NefFileDialog(FileDialogABC):

@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-12 19:39:18 +0100 (Mon, April 12, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:51 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -54,6 +55,7 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Common import getAxisCodeMatchIndices, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Base import SignalBlocking
 from ccpn.core.Chain import Chain
+from ccpn.core.RestraintList import RestraintList
 
 
 ALL = '<all>'
@@ -1170,7 +1172,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
 
 
 class _SpectrumRow(Frame):
-    "Class to make a spectrum row"
+    """Class to make a spectrum row"""
 
     def __init__(self, parent, application, spectrum, spectrumDisplay, row=0, startCol=0, visible=True, **kwds):
         super().__init__(parent, **kwds)
@@ -1223,7 +1225,7 @@ class _SpectrumRow(Frame):
 SETTINGSCHECKBOX = 'checkBox'
 
 
-class SequenceGraphSettings(Widget):  #, _commonSettings):
+class ModuleSettingsWidget(Widget):  #, _commonSettings):
 
     def __init__(self, parent=None,
                  mainWindow=None,
@@ -1255,12 +1257,10 @@ class SequenceGraphSettings(Widget):  #, _commonSettings):
         # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
         # underpinning the addNotifier call does not allow for it either
         row = 0
-        texts = [ALL] + defaultListItem.pid if defaultListItem else ([ALL] + displayText)
-
-        self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[])
-
-        row += 1
-        self.chainsWidget = ChainSelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[], defaults=[ALL])
+        # texts = [ALL] + defaultListItem.pid if defaultListItem else ([ALL] + displayText)
+        # self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[])
+        # row += 1
+        # self.chainsWidget = ChainSelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=[ALL], displayText=[], defaults=[ALL])
 
         self.checkBoxes = {}
         if settingsDict:
@@ -1273,11 +1273,16 @@ class SequenceGraphSettings(Widget):  #, _commonSettings):
             for item, data in settingsDict.items():
                 row += 1
                 if 'type' in data:
-                    newItem = ChemicalShiftListPulldown(self, self.mainWindow, grid=(row, 0),
-                                                        showSelectName=False,
-                                                        # fixedWidths=(colwidth, colwidth, colwidth),
-                                                        callback=data['callBack'] if 'callBack' in data else None
-                                                        )
+                    widgetType = data['type']
+                    if 'kwds' in data:
+                        newItem = widgetType(self, self.mainWindow, grid=(row, 0),
+                                                            callback=data['callBack'] if 'callBack' in data else None,
+                                                            **data['kwds'],
+                                                            )
+                    else:
+                        newItem = widgetType(self, self.mainWindow, grid=(row, 0),
+                                                            callback=data['callBack'] if 'callBack' in data else None,
+                                                            **{})
 
                     self.checkBoxes[item] = {'pulldownList': newItem,
                                              'item'        : item,
@@ -1389,8 +1394,17 @@ class SpectrumDisplaySelectionWidget(ListCompoundWidget):
         if not texts:
             texts = [ALL] + defaultListItem.pid if defaultListItem else ([ALL] + displayText)
 
+        # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
-        self.application = mainWindow.application
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = None
+            self.project = None
+            self.current = None
+
         self._displayWidgetChangedCallback = displayWidgetChangedCallback
         self._selectDisplayInListCallback = callback
 
@@ -1458,7 +1472,7 @@ class ObjectSelectionWidget(ListCompoundWidget):
     def __init__(self, parent=None, mainWindow=None, vAlign='top', stretch=(0, 0), hAlign='left',
                  vPolicy='minimal', fixedWidths=(None, None, None), orientation='left',
                  labelText=None, tipText=None,
-                 texts=None, callback=None, displayWidgetChangedCallback=None,
+                 texts=None, callback=None, objectWidgetChangedCallback=None,
                  defaultListItem=None, displayText=[],
                  **kwds):
 
@@ -1468,11 +1482,15 @@ class ObjectSelectionWidget(ListCompoundWidget):
         if not texts:
             texts = [ALL] + defaultListItem.pid if defaultListItem else ([ALL] + displayText)
 
-        self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self._displayWidgetChangedCallback = displayWidgetChangedCallback
-        self._selectDisplayInListCallback = callback
+        if mainWindow:
+            self.mainWindow = mainWindow
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+        else:
+            self.mainWindow = self.application = self.project = None
+
+        self._objectWidgetChangedCallback = objectWidgetChangedCallback
+        self._selectObjectInListCallback = callback
 
         labelText = labelText or 'Select {}:'.format((self.KLASS._pluralLinkName).capitalize())
         tipText = tipText or 'Set active {} for module:'.format((self.KLASS._pluralLinkName).capitalize())
@@ -1481,37 +1499,37 @@ class ObjectSelectionWidget(ListCompoundWidget):
                          vAlign=vAlign, stretch=stretch, hAlign=hAlign, vPolicy=vPolicy,
                          fixedWidths=fixedWidths, orientation=orientation,
                          labelText=labelText, tipText=tipText, texts=texts,
-                         callback=self._selectDisplayInList, **kwds)
+                         callback=self._selectObjectInList, **kwds)
 
         # default to 5 rows
         self.setFixedHeights((None, None, 5 * getFontHeight()))
-        self.setPreSelect(self._fillDisplayWidget)
+        self.setPreSelect(self._fillPulldownListWidget)
 
         # handle signals when the items in the displaysWidget have changed
         model = self.listWidget.model()
-        model.rowsInserted.connect(self._displayWidgetChanged)
-        model.rowsRemoved.connect(self._displayWidgetChanged)
-        self.listWidget.cleared.connect(self._displayWidgetChanged)
+        model.rowsInserted.connect(self._objectWidgetChanged)
+        model.rowsRemoved.connect(self._objectWidgetChanged)
+        self.listWidget.cleared.connect(self._objectWidgetChanged)
 
-    def _selectDisplayInList(self):
-        """Handle clicking items in display selection
+    def _selectObjectInList(self):
+        """Handle clicking items in object selection
         """
-        if self._selectDisplayInListCallback:
-            self._selectDisplayInListCallback()
+        if self._selectObjectInListCallback:
+            self._selectObjectInListCallback()
 
-    def _displayWidgetChanged(self):
-        """Handle adding/removing items from display selection
+    def _objectWidgetChanged(self):
+        """Handle adding/removing items from object selection
         """
-        if self._displayWidgetChangedCallback:
-            self._displayWidgetChangedCallback()
+        if self._objectWidgetChangedCallback:
+            self._objectWidgetChangedCallback()
 
     def _changeAxisCode(self):
         """Handle clicking the axis code buttons
         """
         pass
 
-    def _fillDisplayWidget(self):
-        """Fill the display box with the currently available spectrumDisplays
+    def _fillPulldownListWidget(self):
+        """Fill the pulldownList with the currently available objects
         """
         ll = ['> select-to-add <'] + [ALL]
         if self.project:
@@ -1519,12 +1537,12 @@ class ObjectSelectionWidget(ListCompoundWidget):
         self.pulldownList.setData(texts=ll)
 
     def _getDisplays(self):
-        """Return list of displays to navigate - if needed
+        """Return list of objects to navigate - if needed
         """
         pass
 
     def _getObjects(self):
-        """Return list of objects in the selection
+        """Return list of objects in the listWidget selection
         """
         if not self.project:
             return []
@@ -1542,6 +1560,10 @@ class ObjectSelectionWidget(ListCompoundWidget):
 
 class ChainSelectionWidget(ObjectSelectionWidget):
     KLASS = Chain
+
+
+class RestraintListSelectionWidget(ObjectSelectionWidget):
+    KLASS = RestraintList
 
 
 if __name__ == '__main__':

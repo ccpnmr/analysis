@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:57 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:48 +0100 (Thu, May 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -101,10 +101,6 @@ SPECTRUMAXES = 'spectrumAxesOrdering'
 SPECTRUMPREFERREDAXISORDERING = 'spectrumPreferredAxisOrdering'
 
 SPECTRUMALIASING = 'spectrumAliasing'
-VISIBLEALIASINGRANGE = 'visibleAliasingRange'
-ALIASINGRANGE = 'aliasingRange'
-UPDATEALIASINGRANGEFLAG = '_updateAliasingRangeFlag'
-EXTENDALIASINGRANGEFLAG = 'extendAliasingRangeFlag'
 MAXALIASINGRANGE = 3
 
 DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
@@ -1581,143 +1577,21 @@ class Spectrum(AbstractWrapperObject):
         self.setParameter(SPECTRUMALIASING, DISPLAYFOLDEDCONTOURS, value)
 
     @property
-    def _updateAliasingRangeFlag(self):
-        """Return whether the aliasingRange needs to be updated when aliasing
-        of peaks has changed - from spectrumProperties popup
+    def aliasingValues(self) -> Optional[Tuple[Tuple, ...]]:
+        """Return a tuple of the aliasing values in each dimension, as multiples of the spectral width.
+        This is a derived property from the aliasingLimits.
         """
-        alias = self.getParameter(SPECTRUMALIASING, UPDATEALIASINGRANGEFLAG)
-        if alias is not None:
-            return alias
+        _alias = self.aliasingLimits
+        _limits = self.spectrumLimits
 
-        # set default values in the ccpnInternal store
-        alias = True
+        values = []
+        for alias, lim in zip(_alias, _limits):
+            width = abs(max(lim) - min(lim))
+            minA, maxA = min(alias), max(alias)
+            minLim, maxLim = min(lim), max(lim)
+            values.append((int((minA - minLim + width / 2) // width), int((maxA - maxLim + width / 2) // width)))
 
-        # don't need to notify this - it can be set every time if needed
-        with notificationBlanking():
-            self.setParameter(SPECTRUMALIASING, UPDATEALIASINGRANGEFLAG, alias)
-        return alias
-
-    @_updateAliasingRangeFlag.setter
-    def _updateAliasingRangeFlag(self, value):
-        """Set whether the aliasingRange needs to be updated when aliasing
-        of peaks has changed
-        """
-        if not isinstance(value, bool):
-            raise ValueError("_updateAliasingRangeFlag must be True/False.")
-
-        self.setParameter(SPECTRUMALIASING, UPDATEALIASINGRANGEFLAG, value)
-
-    @property
-    def extendAliasingRangeFlag(self):
-        """Return whether the aliasingRange needs to be extended when aliasing
-        of peaks has changed - from spectrumProperties popup
-        """
-        alias = self.getParameter(SPECTRUMALIASING, EXTENDALIASINGRANGEFLAG)
-        if alias is not None:
-            return alias
-
-        # set default values in the ccpnInternal store
-        alias = True
-
-        # don't need to notify this - it can be set every time if needed
-        with notificationBlanking():
-            self.setParameter(SPECTRUMALIASING, EXTENDALIASINGRANGEFLAG, alias)
-        return alias
-
-    @extendAliasingRangeFlag.setter
-    def extendAliasingRangeFlag(self, value):
-        """Set whether the aliasingRange needs to be extended when aliasing
-        of peaks has changed
-        """
-        if not isinstance(value, bool):
-            raise ValueError("extendAliasingRangeFlag must be True/False.")
-
-        self.setParameter(SPECTRUMALIASING, EXTENDALIASINGRANGEFLAG, value)
-
-    @property
-    def visibleAliasingRange(self) -> Optional[Tuple[Tuple, ...]]:
-        """Return a tuple of the aliasing range in each dimension, or None of not set
-        """
-        alias = self.getParameter(SPECTRUMALIASING, VISIBLEALIASINGRANGE)
-        if alias is not None:
-            return tuple(tuple(rr) for rr in alias)
-
-        # set default values in the ccpnInternal store
-        alias = ((0, 0),) * self.dimensionCount
-
-        # don't need to notify this - it can be set every time if needed
-        with notificationBlanking():
-            self.setParameter(SPECTRUMALIASING, VISIBLEALIASINGRANGE, alias)
-        return alias
-
-    @visibleAliasingRange.setter
-    def visibleAliasingRange(self, values: Tuple[Tuple, ...]):
-        """Set the aliasing range for each of the spectrum dimensions
-        Must be a tuple matching the number of dimension.
-        Each element is a tuple of the form (min, max)
-        where min/max are integer in the range -3 -> +3
-
-            e.g. visibleAliasingRange = ((0, 0), (-1, 1), ...)
-
-        visibleAliasingRange is clipped to ±3
-        """
-        tupleError = 'Visible aliasing values must be tuple(tuple(min:int, max:int), tuple(min:int, max:int), ...)'
-
-        # error checking that the tuples are correctly defined
-        if len(values) != self.dimensionCount:
-            raise ValueError("Length of {} does not match number of dimensions ({})".format(values, self.dimensionCount))
-        if not all(isinstance(dimVal, Tuple) and len(dimVal) == 2 for dimVal in values):
-            raise ValueError(tupleError)
-        if not all(isinstance(dimVal[0], int) and isinstance(dimVal[1], int) for dimVal in values):
-            raise ValueError(tupleError)
-        if not all(dimVal[0] <= dimVal[1] for dimVal in values):
-            raise ValueError(tupleError)
-
-        clippedRange = ()
-        for alias in values:
-            clippedRange += ((max(-MAXALIASINGRANGE, alias[0]),
-                              min(MAXALIASINGRANGE, alias[1])),)
-
-        self.setParameter(SPECTRUMALIASING, VISIBLEALIASINGRANGE, clippedRange)
-
-    @property
-    @_includeInDimensionalCopy
-    def aliasingRange(self) -> Optional[Tuple[Tuple, ...]]:
-        """Return a tuple of the aliasing range in each dimension, or None of not set
-        """
-        alias = self.getParameter(SPECTRUMALIASING, ALIASINGRANGE)
-        if alias is not None:
-            return tuple(tuple(rr) for rr in alias)
-
-        # set default values in the ccpnInternal store
-        alias = ((0, 0),) * self.dimensionCount
-
-        # don't need to notify this - it can be set every time if needed
-        with notificationBlanking():
-            self.setParameter(SPECTRUMALIASING, ALIASINGRANGE, alias)
-        return alias
-
-    @aliasingRange.setter
-    def aliasingRange(self, values: Tuple[Tuple, ...]):
-        """Set the currentAliasingRange for each of the spectrum dimensions
-        Must be a tuple matching the number of dimension.
-        Each element is a tuple of the form (min, max)
-
-            e.g. aliasingRange = ((0, 0), (-1, 1), ...)
-        """
-        tupleError = 'Aliasing values must be tuple(tuple(min:int, max:int), tuple(min:int, max:int), ...)'
-
-        # error checking that the tuples are correctly defined
-        if len(values) != self.dimensionCount:
-            raise ValueError("Length of {} does not match number of dimensions ({})".format(values, self.dimensionCount))
-        if not all(isinstance(dimVal, Tuple) and len(dimVal) == 2 for dimVal in values):
-            raise ValueError(tupleError)
-        if not all(isinstance(dimVal[0], int) and isinstance(dimVal[1], int) for dimVal in values):
-            raise ValueError(tupleError)
-        if not all(dimVal[0] <= dimVal[1] for dimVal in values):
-            raise ValueError(tupleError)
-
-        self.setParameter(SPECTRUMALIASING, ALIASINGRANGE, values)
+        return tuple(values)
 
     @property
     def _seriesItems(self):
@@ -2182,24 +2056,24 @@ class Spectrum(AbstractWrapperObject):
         (self.positiveContourColour, self.negativeContourColour) = getDefaultSpectrumColours(self)
         self.sliceColour = self.positiveContourColour
 
-    def _getAliasingRange(self):
-        """Return the min/max aliasing range for the peakLists in the spectrum, if there are no peakLists with peaks, return None
+    def getPeakAliasingRanges(self):
+        """Return the min/max aliasing Values for the peakLists in the spectrum, if there are no peakLists with peaks, return None
         """
         # get the aliasingRanges for non-empty peakLists
-        aliasRanges = [peakList._getAliasingRange() for peakList in self.peakLists if peakList.peaks]
+        aliasRanges = [peakList.getPeakAliasingRanges() for peakList in self.peakLists if peakList.peaks]
 
         if aliasRanges:
             # if there is only one then return it (for clarity)
             if len(aliasRanges) == 1:
                 return aliasRanges[0]
 
-            # get the range from all the peakLists
-            newRange = list(aliasRanges[0])
+            # get the value from all the peakLists
+            newRanges = list(aliasRanges[0])
             for ii, alias in enumerate(aliasRanges[1:]):
                 if alias is not None:
-                    newRange = tuple((min(minL, minR), max(maxL, maxR)) for (minL, maxL), (minR, maxR) in zip(alias, newRange))
+                    newRanges = tuple((min(minL, minR), max(maxL, maxR)) for (minL, maxL), (minR, maxR) in zip(alias, newRanges))
 
-            return newRange
+            return newRanges
 
     def _copyDimensionalParameters(self, axisCodes, target):
         """Copy dimensional parameters for axisCodes from self to target

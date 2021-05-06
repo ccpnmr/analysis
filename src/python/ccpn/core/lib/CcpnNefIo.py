@@ -4,7 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-09 10:45:12 +0100 (Fri, April 09, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:48 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,6 +31,7 @@ import sys
 import time
 import typing
 import re
+import pandas as pd
 from functools import partial
 from datetime import datetime
 from collections import OrderedDict as OD, namedtuple
@@ -106,6 +108,7 @@ COMPLEXES = 'complexes'
 SPECTRUMGROUPS = 'spectrumGroups'
 NOTES = 'notes'
 PEAKCLUSTERS = 'peakClusters'
+VIOLATIONLISTS = 'violationLists'
 
 POSITIONCERTAINTY = 'position_uncertainty_'
 POSITIONCERTAINTYLEN = len(POSITIONCERTAINTY)
@@ -137,6 +140,7 @@ NAMETOOBJECTMAPPING = {'nef_chemical_shift_list'    : ChemicalShiftList,
                        'nef_dihedral_restraint_list': RestraintList,
                        'nef_rdc_restraint_list'     : RestraintList,
                        'ccpn_restraint_list'        : RestraintList,
+                       'ccpn_distance_restraint_violation_list'        : RestraintList,
                        'ccpn_notes'                 : Note,
                        }
 
@@ -4150,6 +4154,7 @@ class CcpnNefReader(CcpnNefContent):
     renames['ccpn_note'] = rename_ccpn_note
     renames['ccpn_peak_cluster_list'] = rename_ccpn_peak_cluster_list
     renames['ccpn_substance'] = rename_ccpn_substance
+    renames['ccpn_distance_restraint_violation_list'] = rename_saveframe
 
     def load_nef_chemical_shift(self, parent: ChemicalShiftList, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame):
         """load nef_chemical_shift loop"""
@@ -4500,6 +4505,147 @@ class CcpnNefReader(CcpnNefContent):
     verifiers['nef_dihedral_restraint'] = verify_nef_restraint
     verifiers['nef_rdc_restraint'] = verify_nef_restraint
     verifiers['ccpn_restraint'] = verify_nef_restraint
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def load_ccpn_restraint_violation_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        """Serves to load ccpn_restraint_violation_list"""
+
+        # Get ccpn-to-nef mapping for saveframe
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        mapping = nef2CcpnMap.get(category) or {}
+
+        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+        self._updateStringParameters(parameters)
+
+        print('>>>> LOADING VIOLATIONS')
+
+        if category == 'ccpn_distance_restraint_violation_list':
+            restraintType = 'Distance'
+            itemLength = 2
+        else:
+            return
+        # elif category == 'nef_dihedral_restraint_list':
+        #     restraintType = 'Dihedral'
+        # elif category == 'nef_rdc_restraint_list':
+        #     restraintType = 'Rdc'
+        # else:
+        #     restraintType = saveFrame.get('restraint_type')
+        #     if not restraintType:
+        #         self.warning("Missing restraint_type for saveFrame %s - value was %s" %
+        #                      (framecode, restraintType),
+        #                      saveFrame)
+        #         return
+        parameters['restraintType'] = restraintType
+        namePrefix = restraintType[:3].capitalize() + '-'
+
+        # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
+        name = framecode[len(category) + 1:]
+        dataSetName = saveFrame.get('ccpn_dataset')
+
+        # ejb - need to remove the rogue `n` at the beginning of the name if it exists
+        #       as it is passed into the namespace and gets added iteratively every save
+        #       next three lines remove all occurrences of `n` from name
+        name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
+
+        run_id = parameters.get('runID')
+
+        restraintId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (dataSetName, name))
+        previous = project.getObjectsByPartialId(className='RestraintList', idStartsWith=restraintId)
+
+        # need to fix the names here... cannot contain '.'
+
+        # previous = dataSet.getRestraintList(name)
+        if previous and len(previous) == 1:
+            dataSet = previous[0].dataSet
+        else:
+            dataSet = project.newDataSet()
+
+        # read list
+        parameters['name'] = name
+
+        # create a data item with the same name as the restraintList
+        result = dataSet.getData(name) or dataSet.newData(name)
+
+        # Load loops, with object as parent
+        for loopName in loopNames:
+            loop = saveFrame.get(loopName)
+            if loop:
+                importer = self.importers[loopName]
+                if loopName.endswith('_restraint_violation'):
+                    # NBNB HACK: the restrain loop reader needs an itemLength.
+                    # There are no other loops currently, but if there ever is they will not need this
+                    # itemLength = saveFrame.get('restraint_item_length')
+
+                    # if loop and hasattr(loop, 'data'):
+                    importer(self, result, loop, saveFrame, run_id, itemLength)
+                else:
+                    # if loop and hasattr(loop, 'data'):
+                    importer(self, result, loop, saveFrame)
+        #
+        # result.setParameter(run_id, _df)
+
+        return result
+
+
+    importers['ccpn_distance_restraint_violation_list'] = load_ccpn_restraint_violation_list
+
+    def verify_ccpn_restraint_violation_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        """Serves to verify ccpn_restraint_violation_list"""
+        # Get ccpn-to-nef mapping for saveframe
+        # _rowErrors = saveFrame._rowErrors[saveFrame.name] = OrderedSet()
+
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        mapping = nef2CcpnMap.get(category) or {}
+
+        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+
+    verifiers['ccpn_distance_restraint_violation_list'] = verify_ccpn_restraint_violation_list
+
+    def load_ccpn_restraint_violation(self, dataSet: DataSet, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
+                           run_id: str = '', itemLength: int = None):
+        """Serves to load ccpn_distance_restraint_violation loops"""
+
+        if loop and loop.data:
+            # if loop.data exists then load as a pandas dataFrame
+            _df = pd.DataFrame(loop.data)
+
+            atomCols = None
+            for ii in range(itemLength):
+                # add new columns - concatenate to give atom IDs to compare with restraintItems
+                atomCol = _df[f'chain_code_{ii+1}'].map(str) + '.' + \
+                            _df[f'sequence_code_{ii+1}'].map(str) + '.' + \
+                            _df[f'residue_name_{ii+1}'].map(str) + '.' + \
+                            _df[f'atom_name_{ii+1}'].map(str)
+
+                # insert into the dataFrame
+                _df[f'atom{ii+1}'] = atomCol
+
+                if atomCols is None:
+                    atomCols = atomCol
+                else:
+                    atomCols = atomCols + ' - ' + atomCol
+
+            if atomCols is not None:
+                _df[f'atoms'] = [' - '.join(sorted(st.split(' - '))) if st else None for st in atomCols]
+
+            # vset3 = [v for k, v in p1.groupby(['model_id'])]
+            # pd.concat([v.reset_index()['violation'] for v in vset3], axis=1).agg(['sum', 'mean', 'min', 'max', lambda x : sum(x > 0.3), lambda x : sum(x > 0.3)], axis=1)
+
+            dataSet.setParameter(run_id, _df)
+
+    importers['ccpn_distance_restraint_violation'] = load_ccpn_restraint_violation
+
+    def verify_ccpn_restraint_violation(self, restraintList: RestraintList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+                             name=None, itemLength: int = None):
+        """Verify the contents of ccpn_distance_restraint_violation loops"""
+        result = []
+
+    verifiers['ccpn_distance_restraint_violation'] = verify_ccpn_restraint_violation
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def load_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
 

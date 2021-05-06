@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:57 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:48 +0100 (Thu, May 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -61,12 +61,13 @@ from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
 from ccpn.framework.PathsAndUrls import userPreferencesPath
 from ccpn.framework.PathsAndUrls import userPreferencesDirectory
+from ccpn.framework.PathsAndUrls import macroPath
 from ccpn.ui import interfaces, defaultInterface
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog, DataFileDialog, NefFileDialog, \
-    ArchivesFileDialog, MacrosFileDialog, LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog, \
+    ArchivesFileDialog, MacrosFileDialog, CcpnMacrosFileDialog, LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog, \
     ProjectSaveFileDialog
 from ccpn.util import Logging
 from ccpn.util import Path
@@ -1314,6 +1315,7 @@ class Framework(NotifierBase):
             ("Multiplet Table", partial(self.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')]),
             ("Restraint Table", partial(self.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
             ("Structure Table", partial(self.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
+            ("Violation Table", partial(self.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
             (),
             ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
             ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
@@ -1357,11 +1359,11 @@ class Framework(NotifierBase):
         ms.append(('Macro', [
             ("New", self.showMacroEditor),
             (),
-            ("Open...", self.openMacroOnEditor),
+            ("Open User Macro...", self.openMacroOnEditor),
+            ("Open CCPN Macro...", self.openCcpnMacroOnEditor),
             (),
             ("Run...", self.runMacro),
             ("Run Recent", ()),
-            ("Open CCPN Macros...", self.openCcpnMacroOnEditor),
             (CCPNMACROSMENU, ([
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
@@ -2028,7 +2030,7 @@ class Framework(NotifierBase):
         oldPath = self.project.path
         newPath = getSaveDirectory(self.ui.mainWindow, self.preferences)
 
-        with catchExceptions(application=self, errorStringTemplate='Error saving project: %s'):
+        with catchExceptions(application=self, errorStringTemplate='Error saving project: %s', printTraceBack=True):
             if newPath:
                 # Next line unnecessary, but does not hurt
                 newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
@@ -2474,12 +2476,8 @@ class Framework(NotifierBase):
             if spectra:
                 from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
 
-                if self.current.strip:
-                    popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-                    popup.exec_()
-                else:
-                    getLogger().warning('Pick Nd Peaks, no strip selected')
-                    MessageDialog.showWarning('Pick Nd Peaks', 'No strip selected')
+                popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+                popup.exec_()
             else:
                 getLogger().warning('Peak Picking: Project has no Nd Specta.')
                 MessageDialog.showWarning('Peak Picking', 'Project has no Nd Spectra.')
@@ -2782,6 +2780,23 @@ class Framework(NotifierBase):
         mainWindow.moduleArea.addModule(notesEditorModule, position=position, relativeTo=relativeTo)
         return notesEditorModule
 
+    @logCommand('application.')
+    def showViolationTable(self,
+                               position: str = 'bottom',
+                               relativeTo: CcpnModule = None,
+                               peakList=None, selectFirstItem=False):
+        """Displays violation table.
+        """
+        from ccpn.ui.gui.modules.ViolationTable import ViolationTableModule
+
+        mainWindow = self.ui.mainWindow
+        if not relativeTo:
+            relativeTo = mainWindow.moduleArea
+        violationTableModule = ViolationTableModule(mainWindow=mainWindow, peakList=peakList, selectFirstItem=selectFirstItem)
+
+        mainWindow.moduleArea.addModule(violationTableModule, position=position, relativeTo=relativeTo)
+        return violationTableModule
+
     def showPrintSpectrumDisplayPopup(self):
         """Show the print spectrumDisplay dialog
         """
@@ -2948,10 +2963,13 @@ class Framework(NotifierBase):
         Displays macro editor.
         """
         mainWindow = self.ui.mainWindow
-        self.editor = MacroEditor(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
-        self.editor._openMacroFile()
-        return self.editor
+        fType = '*.py'
+        dialog = CcpnMacrosFileDialog(parent=mainWindow, acceptMode='open', fileFilter=fType, directory=macroPath)
+        dialog._show()
+        filePath = dialog.selectedFile()
+        if filePath is not None:
+            macroEditor = MacroEditor(mainWindow=mainWindow, filePath=filePath)
+            mainWindow.moduleArea.addModule(macroEditor, position='top', relativeTo=mainWindow.moduleArea)
 
     def defineUserShortcuts(self):
 

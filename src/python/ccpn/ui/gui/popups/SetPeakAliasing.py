@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:02 +0000 (Tue, March 02, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -117,7 +118,7 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
                 self.spectraPulldowns[spectrum] = []
                 Label(spectrumFrame, text=' aliasing:', grid=(specRow, 1))
 
-                visibleAlias = spectrum.visibleAliasingRange
+                visibleAlias = spectrum.aliasingValues
 
                 for dim in range(dims):
                     aliasRange = list(range(visibleAlias[dim][1], visibleAlias[dim][0] - 1, -1))
@@ -130,18 +131,6 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
                     # peaks could disappear from all views
 
                 specRow += 1
-
-                self.spectraCheckBoxes[spectrum] = CheckBoxCompoundWidget(spectrumFrame,
-                                                                          grid=(specRow, 0), gridSpan=(1, dims + 2),  #vAlign='top', hAlign='left',
-                                                                          # fixedWidths=(COLWIDTH, 30),
-                                                                          orientation='left',
-                                                                          labelText='Update spectrum aliasing parameters:',
-                                                                          checked=spectrum._updateAliasingRangeFlag,
-                                                                          callback=partial(self._updateAliasingRangeFlag, spectrum),
-                                                                          )
-                specRow += 1
-                # NOTE:ED - disable for now
-                self.spectraCheckBoxes[spectrum].setVisible(False)
 
             self.spectra[peak.peakList.spectrum].add(peak)
 
@@ -182,50 +171,16 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
                     # just set to 0
                     self.spectraPulldowns[spectrum][dim].select('0')
 
-    def _updateAliasingRangeFlag(self, spectrum, updateValue):
-        """Set the upateAliasingRange flag for spectra
-        """
-        # NOTE:ED - disable for now - aliasing should be defined by the spectrum
-        return
-        # if spectrum:
-        #     spectrum._updateAliasingRangeFlag = updateValue
-
-    def _refreshGLItems(self, spectrumUpdateList):
-        """update the display for the changed aliasing range
-        """
-        # NOTE:ED - disable for now - aliasing should be defined by the spectrum
-        return
-        # for spectrum, updateFlag in spectrumUpdateList:
-        #     if updateFlag:
-        #         alias = spectrum._getAliasingRange()
-        #         if alias is not None:
-        #             # notifier handles spectrumDisplay change
-        #             spectrum.visibleAliasingRange = alias
-
     def _okButton(self):
         """
         When ok button pressed: update and exit
         """
         with handleDialogApply(self):
-
-            spectrumUpdateList = tuple((spec, spec._updateAliasingRangeFlag) for spec in self.spectra.keys())
-
-            # # add item here to redraw items
-            # with undoStackBlocking() as addUndoItem:
-            #     addUndoItem(undo=partial(self._refreshGLItems, spectrumUpdateList))
-
             for spec in self.spectra.keys():
                 # set the aliasing for the peaks
                 newAlias = tuple([int(pullDown.get()) for pullDown in self.spectraPulldowns[spec]])
 
                 for peak in self.spectra[spec]:
                     peak.aliasing = newAlias
-
-            # # add item here to redraw items
-            # with undoStackBlocking() as addUndoItem:
-            #     addUndoItem(redo=partial(self._refreshGLItems, spectrumUpdateList))
-            #
-            # # redraw the items
-            # self._refreshGLItems(spectrumUpdateList)
 
         self.accept()

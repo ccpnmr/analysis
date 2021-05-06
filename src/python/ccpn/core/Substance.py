@@ -4,7 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-09 10:45:11 +0100 (Fri, April 09, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:48 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -553,7 +554,7 @@ class Substance(AbstractWrapperObject):
     def referenceSpectra(self, spectra):
 
         for spectrum in spectra:
-            spectrum.referenceSubstances = [self]
+            spectrum.referenceSubstances += [self]
 
     @property
     def _molecule(self):
@@ -1036,10 +1037,24 @@ def getter(self: SampleComponent) -> typing.Optional[Substance]:
     #   return self._project._data2Obj[apiComponent]
 
 
-#
+def _getSubstanceByName(self: Project, name:str=None, **kwargs) -> typing.Optional[Substance]:
+    """
+    :param self: project instance
+    :param kwargs: any substance attribute, e.g.: name, labelling etc
+    :return: substance
+    """
+    apiNmrProject = self._wrappedData
+    apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore
+    apiComponent = apiComponentStore.findFirstComponent(name=name, **kwargs)
+
+    if apiComponent is None:
+        return None
+    else:
+        return self.project._data2Obj[apiComponent]
+
+
 SampleComponent.substance = property(getter, None, None,
                                      "Substance corresponding to SampleComponent")
-
 
 ####### Moved to spectrum as referenceSubstances.
 ####### ReferenceSubstance is Deprecated from 3.0.3.

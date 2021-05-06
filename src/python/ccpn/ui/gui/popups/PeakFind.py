@@ -4,8 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:23 +0100 (Tue, September 22, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -56,68 +57,68 @@ class PeakFindPopup(CcpnDialog):
         self.application = self.mainWindow.application
         self.current = self.application.current
 
-        if self.current.strip and not self.current.strip.isDeleted:
-            if not self.current.strip.spectra[-1].peakLists:
+        # if self.current.strip and not self.current.strip.isDeleted:
+        # if not self.current.strip.spectra[-1].peakLists:
+        #
+        #     # if there is no peaklist then create a new one
+        #     self.current.strip.spectra[0].newPeakList()
+        #     showInfo(str(self.windowTitle()), "Current selected spectrum '%s' has no peakList:"
+        #                                       "New peakList '%s' inserted"
+        #              % (str(self.current.strip.spectra[0].pid),
+        #                 str(self.current.strip.spectra[0].peakLists[0].pid)))
 
-                # if there is no peaklist then create a new one
-                self.current.strip.spectra[0].newPeakList()
-                showInfo(str(self.windowTitle()), "Current selected spectrum '%s' has no peakList:"
-                                                  "New peakList '%s' inserted"
-                         % (str(self.current.strip.spectra[0].pid),
-                            str(self.current.strip.spectra[0].peakLists[0].pid)))
+        self.peakListLabel = Label(self, text="PeakList ", grid=(0, 0))
+        self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 2), hAlign='l', callback=self._selectPeakList)
 
-            self.peakListLabel = Label(self, text="PeakList ", grid=(0, 0))
-            self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 2), hAlign='l', callback=self._selectPeakList)
+        self.checkBoxWidget = Frame(self, setLayout=True, grid=(1,0), gridSpan=(1,6))
 
-            self.checkBoxWidget = Frame(self, setLayout=True, grid=(1,0), gridSpan=(1,6))
+        Label(self.checkBoxWidget, 'Pick', grid=(0, 0))
+        self.spectrumContourSelect = RadioButtons(self.checkBoxWidget, grid=(0, 1), texts=['Positive only', 'Negative only', 'Both'],
+                                                  selectedInd=2, callback=None, direction='h',
+                                                  hAlign='l',
+                                                  tipTexts=['Only pick positive peaks', 'Only pick negative peaks', 'Pick all peaks'],
+                                                  )
+        self.checkBox1, self.checkBox2, self.checkBox3 = self.spectrumContourSelect.radioButtons
 
-            Label(self.checkBoxWidget, 'Pick', grid=(0, 0))
-            self.spectrumContourSelect = RadioButtons(self.checkBoxWidget, grid=(0, 1), texts=['Positive only', 'Negative only', 'Both'],
-                                                      selectedInd=2, callback=None, direction='h',
-                                                      hAlign='l',
-                                                      tipTexts=['Only pick positive peaks', 'Only pick negative peaks', 'Pick all peaks'],
+        self.limitsFrame = Frame(parent=self, setLayout=True, spacing=(5, 0),
+                                   showBorder=False, fShape='noFrame',
+                                   grid=(2, 0), gridSpan=(1,6))
+
+        self.estimateFrame = Frame(parent=self, setLayout=True, spacing=(5, 0),
+                                   showBorder=False, fShape='noFrame',
+                                   grid=(3, 0), gridSpan=(1,6))
+
+        self.estimateLineWidths = CheckBoxCompoundWidget(self.estimateFrame,
+                                                         grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                                                         # fixedWidths=(COLWIDTH, 30),
+                                                         orientation='right',
+                                                         labelText='Estimate Line Widths',
+                                                         checked=True
+                                                         )
+        self.estimateVolumes = CheckBoxCompoundWidget(self.estimateFrame,
+                                                      grid=(0, 1), vAlign='top', stretch=(0, 0), hAlign='left',
+                                                      # fixedWidths=(COLWIDTH, 30),
+                                                      orientation='right',
+                                                      labelText='Estimate Peak Volumes',
+                                                      checked=True
                                                       )
-            self.checkBox1, self.checkBox2, self.checkBox3 = self.spectrumContourSelect.radioButtons
 
-            self.limitsFrame = Frame(parent=self, setLayout=True, spacing=(5, 0),
-                                       showBorder=False, fShape='noFrame',
-                                       grid=(2, 0), gridSpan=(1,6))
+        self.addSpacer(5, 5, expandX=True, expandY=True, grid=(4,5))
+        self.buttonBox = ButtonList(self, grid=(5, 3), gridSpan=(1, 3), texts=['Cancel', 'Find Peaks'],
+                                    callbacks=[self.reject, self._pickPeaks])
 
-            self.estimateFrame = Frame(parent=self, setLayout=True, spacing=(5, 0),
-                                       showBorder=False, fShape='noFrame',
-                                       grid=(3, 0), gridSpan=(1,6))
+        self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists
+                                       if peakList.spectrum.dimensionCount != 1])
+        if self.current is not None and self.current.strip is not None and len(self.current.strip.spectra) > 0:
+            self.peakListPulldown.select(self.current.strip.spectra[-1].peakLists[-1].pid)
+        self.peakList = self.project.getByPid(self.peakListPulldown.currentText())
 
-            self.estimateLineWidths = CheckBoxCompoundWidget(self.estimateFrame,
-                                                             grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                                                             # fixedWidths=(COLWIDTH, 30),
-                                                             orientation='right',
-                                                             labelText='Estimate Line Widths',
-                                                             checked=True
-                                                             )
-            self.estimateVolumes = CheckBoxCompoundWidget(self.estimateFrame,
-                                                          grid=(0, 1), vAlign='top', stretch=(0, 0), hAlign='left',
-                                                          # fixedWidths=(COLWIDTH, 30),
-                                                          orientation='right',
-                                                          labelText='Estimate Peak Volumes',
-                                                          checked=True
-                                                          )
+        # populate the estimateFrame
+        self._updateContents()
 
-            self.addSpacer(5, 5, expandX=True, expandY=True, grid=(4,5))
-            self.buttonBox = ButtonList(self, grid=(5, 3), gridSpan=(1, 3), texts=['Cancel', 'Find Peaks'],
-                                        callbacks=[self.reject, self._pickPeaks])
-
-            self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists
-                                           if peakList.spectrum.dimensionCount != 1])
-            if self.current is not None and self.current.strip is not None and len(self.current.strip.spectra) > 0:
-                self.peakListPulldown.select(self.current.strip.spectra[-1].peakLists[-1].pid)
-            self.peakList = self.project.getByPid(self.peakListPulldown.currentText())
-
-            # populate the estimateFrame
-            self._updateContents()
-
-            self.setFixedSize(self.sizeHint())
-        else:
-            self.close()
+        self.setFixedSize(self.sizeHint())
+        # else:
+        #     self.close()
 
     def _selectPeakList(self, item):
         self.peakList = self.project.getByPid(item)

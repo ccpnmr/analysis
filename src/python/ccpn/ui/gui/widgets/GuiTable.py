@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 11:00:57 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:51 +0100 (Thu, May 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,8 +31,7 @@ import pandas as pd
 import os
 from time import time_ns
 from pyqtgraph import TableWidget
-from pyqtgraph.widgets.TableWidget import _defersort, TableWidgetItem
-from ccpn.core.lib.CcpnSorting import universalSortKey
+from pyqtgraph.widgets.TableWidget import _defersort
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT, \
     DATAFRAME_INDEX, DATAFRAME_PID
@@ -45,6 +44,7 @@ from ccpn.ui.gui.widgets.FileDialog import TablesFileDialog
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets.SearchWidget import attachSearchWidget
+from ccpn.ui.gui.widgets.TableSorting import CcpnTableWidgetItem
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Common import makeIterableList
 from functools import partial
@@ -59,23 +59,13 @@ from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight, TABLEFONT
 from ccpn.util.AttrDict import AttrDict
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.RowExpander import RowExpander
 import math
+
 
 OBJECT_CLASS = 0
 OBJECT_PARENT = 1
-
-
-def __ltForTableWidgetItem__(self, other):
-    # new routine to overload TableWidgetItem that crashes when sorting None
-    if self.sortMode == 'index' and hasattr(other, 'index'):
-        return self.index < other.index
-    if self.sortMode == 'value' and hasattr(other, 'value'):
-        return (universalSortKey(self.value) < universalSortKey(other.value))
-    else:
-        if self.text() and other.text():
-            return (universalSortKey(self.text()) < universalSortKey(other.text()))
-        else:
-            return False
 
 
 def __sortByColumn__(self, col, newOrder):
@@ -226,6 +216,18 @@ GuiTable::item::selected {
     color: %(GUITABLE_SELECTED_FOREGROUND)s;
 }"""
 
+    # define the class for the table widget items
+    ITEMKLASS = CcpnTableWidgetItem
+    MERGECOLUMN = 0
+    PIDCOLUMN = 0
+    EXPANDERCOLUMN = 0
+    SPANCOLUMNS = ()
+    MINSORTCOLUMN = 0
+    enableMultiColumnSort = False
+    applySortToGroups = False
+
+    PRIMARYCOLUMN = 'Pid'
+
     def __init__(self, parent=None,
                  mainWindow=None,
                  dataFrameObject=None,  # collate into a single object that can be changed quickly
@@ -254,9 +256,11 @@ GuiTable::item::selected {
         super().__init__(parent)
         Base._init(self, **kwds)
 
+        self.itemClass = self.ITEMKLASS
+
         self._parent = parent
 
-        # set the application specfic links
+        # set the application specific links
         self.mainWindow = mainWindow
         self.application = None
         self.project = None
@@ -330,7 +334,7 @@ GuiTable::item::selected {
         self._enableDelete = enableDelete
         self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
         self._enableSearch = enableSearch
-        self._rightClickedTableItem = None # last selected item in a table before raising the context menu. Enabled with mousePress event filter
+        self._rightClickedTableItem = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
 
         # populate if a dataFrame has been passed in
         if dataFrameObject:
@@ -383,8 +387,8 @@ GuiTable::item::selected {
         self._currentSorted = False
         self._newSorted = False
 
-        # update method for ccpn sorting
-        TableWidgetItem.__lt__ = __ltForTableWidgetItem__
+        # # update method for ccpn sorting
+        # TableWidgetItem.__lt__ = __ltForTableWidgetItem__
 
         _header.setHighlightSections(self.font().bold())
         setWidgetFont(self, name=TABLEFONT)
@@ -402,6 +406,9 @@ GuiTable::item::selected {
         self._currentRow = None
 
         self.itemSelectionChanged.connect(self._itemSelectionChanged)
+
+        self._downIcon = Icon('icons/caret-grey-down')
+        self._rightIcon = Icon('icons/caret-grey-right')
 
     def _tableSelectionChangedCallback(self, selected, deselected):
         self._tableSelectionChanged.emit(self.getSelectedObjects() or [])
@@ -732,9 +739,46 @@ GuiTable::item::selected {
                 self.setItem(row, col, item)
                 item.setValue('')  # values are in the pulldown. Otherwise they are inserted inside the cell as str in a long list
 
+            elif isinstance(val, Icon) and val in (self._downIcon, self._rightIcon):
+
+                # add a RowExpander widget to the cell - requires setting up after sorting the table
+                _expander = RowExpander(self, item)
+                self.setCellWidget(row, col, _expander)
+                self.setItem(row, col, item)
+                item.setValue('')
+
+            elif isinstance(val, RowExpander):
+
+                # add a RowExpander widget to the cell - requires setting up after sorting the table
+                # need to update the rowExpander parent
+                self.setCellWidget(row, col, val)
+                val._tableItem = item
+                self.setItem(row, col, item)
+                item.setValue('')
+
             else:
                 self.setItem(row, col, item)
                 item.setValue(val)
+
+    def _expandCell(self, itemWidget, item):
+        _itemRow = item.row()
+        row = itemWidget._activeRow
+        span = self.rowSpan(_itemRow, 0)  # 0)
+        if row is None:
+            return
+
+        if span > 1:
+            # a group of rows
+            if self.isRowHidden(row + 1):  # (row + 1)
+                _hidden = False
+                itemWidget.setPixmap(self._downIcon.pixmap(12, 12))
+            else:
+                _hidden = True
+                itemWidget.setPixmap(self._rightIcon.pixmap(12, 12))
+
+            for rr in range(row + 1, row + span):
+                # for rr in range(row - span + 2, row + 1):
+                self.setRowHidden(rr, _hidden)
 
     def _selectionTableCallback(self, itemSelection, mouseDrag=True):
         """Handler when selection has changed on the table
@@ -766,7 +810,7 @@ GuiTable::item::selected {
         else:
             if not objList:
                 return
-            if set(objList or []) == set(self._lastSelection or []): # pd.Series should never reach here or will crash here. Cannot use set([series])== because Series are mutable, thus they cannot be hashed
+            if set(objList or []) == set(self._lastSelection or []):  # pd.Series should never reach here or will crash here. Cannot use set([series])== because Series are mutable, thus they cannot be hashed
                 return
 
         self._lastSelection = objList
@@ -1052,7 +1096,7 @@ GuiTable::item::selected {
     def _copySelectedCell(self):
         i = self.currentItem()
         if i is not None:
-            text = i.text()
+            text = i.text().strip()
             df = pd.DataFrame([text])
             df.to_clipboard(index=False, header=False)
 
@@ -1136,6 +1180,11 @@ GuiTable::item::selected {
         self.clear()
         self.appendData(data)
         self._rawData = data
+
+    def setDataFromSearchWidget(self, dataFrame):
+        """Set the data for the table from the search widget
+        """
+        self.setData(dataFrame.values)
 
     @contextmanager
     def _guiTableUpdate(self, dataFrameObject, resize=True):
@@ -1499,8 +1548,8 @@ GuiTable::item::selected {
             if not h.isSectionHidden(i) and h.sectionViewportPosition(i) >= 0:
                 if self.getSelectedRows():
                     self.scrollTo(self.model().index(self.getSelectedRows()[0], i),
-                                  self.EnsureVisible) # doesn't dance around so much
-                                  # self.PositionAtCenter)
+                                  self.EnsureVisible)  # doesn't dance around so much
+                    # self.PositionAtCenter)
                     break
 
     def getSelectedRows(self):
@@ -1550,15 +1599,17 @@ GuiTable::item::selected {
                             valuesDict[h].append(v)
 
                         else:
-                            colName = self.horizontalHeaderItem(col).text()
-                            if colName == 'Pid':
-                                if row not in rows:
-                                    rows.append(row)
-                                    objIndex = model.model().data(iSelect)
+                            _header = self.horizontalHeaderItem(col)
+                            if _header:
+                                colName = _header.text()
+                                if colName == self.PRIMARYCOLUMN:
+                                    if row not in rows:
+                                        rows.append(row)
+                                        objIndex = model.model().data(iSelect)
 
-                                    obj = self.project.getByPid(objIndex)
-                                    if obj:
-                                        selectedObjects.append(obj)
+                                        obj = self.project.getByPid(objIndex)
+                                        if obj:
+                                            selectedObjects.append(obj)
             if valuesDict:
                 selectedObjects = [row for i, row in pd.DataFrame(valuesDict).iterrows()]
 
@@ -1764,13 +1815,15 @@ GuiTable::item::selected {
                     # find the columns containing the objects and the indexing
                     objCol = indCol = None
                     for cc in range(self.columnCount()):
-                        colName = self.horizontalHeaderItem(cc).text()
-                        if colName == DATAFRAME_INDEX:
-                            indCol = cc
-                            # print (DATAFRAME_INDEX, cc)
-                        elif colName == DATAFRAME_OBJECT:
-                            objCol = cc
-                            # print (DATAFRAME_OBJECT, cc)
+                        _header = self.horizontalHeaderItem(cc)
+                        if _header:
+                            colName = _header.text()
+                            if colName == DATAFRAME_INDEX:
+                                indCol = cc
+                                # print (DATAFRAME_INDEX, cc)
+                            elif colName == DATAFRAME_OBJECT:
+                                objCol = cc
+                                # print (DATAFRAME_OBJECT, cc)
                     if objCol and indCol:
                         # print ('INDEXING')
                         # print (multipleAttr)
@@ -2396,12 +2449,10 @@ def _setValueByHeader(row, header, value):
 
 
 if __name__ == '__main__':
-    from ccpn.ui.gui.widgets.Icon import Icon
-
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
     from ccpn.util import Colour
-    from ccpn.ui.gui.widgets.Column import ColumnClass, Column
+    from ccpn.ui.gui.widgets.Column import ColumnClass
 
 
     app = TestApplication()

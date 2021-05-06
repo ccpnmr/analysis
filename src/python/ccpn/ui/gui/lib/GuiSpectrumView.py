@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,7 +36,8 @@ from typing import Optional, Tuple
 
 
 SpectrumViewParams = collections.namedtuple('SpectrumViewParams', 'valuePerPoint pointCount minAliasedFrequency maxAliasedFrequency '
-                                                                  'minSpectrumFrequency maxSpectrumFrequency '
+                                                                  'minSpectrumFrequency maxSpectrumFrequency axisReversed '
+                                                                  'spectralWidth aliasingIndex foldingMode '
                                                                   'visibleAlias regionBounds')
 TraceParameters = collections.namedtuple('TraceParameters', 'inRange pointPositions startPoint, endPoint')
 
@@ -107,22 +109,51 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         self._finaliseAction('change')
 
     def _getSpectrumViewParams(self, axisDim: int) -> Optional[Tuple]:
-        """Get position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency
-        for axisDimth axis (zero-origin)"""
+        """Get parameters for axisDim'th axis (zero-origin) of spectrum.
+
+        Returns None or namedTuple of the form:
+
+            valuePerPoint:              ppm width spanning a point value
+            pointCount,                 number of points in the dimension
+            minAliasingFrequency,       minimum aliasing frequency
+            maxAliasingFrequency,       maximum aliasing frequency
+                                        aliasing frequencies define the span of the spectrum
+                                        beyond the range of the defined points
+            minSpectrumFrequency,       minimum spectrum frequency
+            maxSpectrumFrequency,       minimum spectrum frequency
+                                        spectrum frequencies defined the ppm positions of points n, and (n + pointCount)
+            axisReversed,               True of the pointn corresponds to the maximum spectrum frequency
+            spectralWidth,              maxSpectrumFrequency - minSpectrumFrequency
+            aliasingIndex               a tuple (min, max) defining how many integer multiples the aliasing frequencies span the spectrum
+                                        (0, 0) implies the aliasing range matches the spectral range
+
+                                        (s, t) implies:
+                                            the minimum limit = minSpectrumFrequency - 's' spectral widths - should always be negative or zero
+                                            the maximum limit = maxSpectrumFrequency + 't' spectral widths - should always be positive or zero
+            foldingMode                 is the type of folding 'circular', 'mirror' or None
+        """
 
         ii = self.dimensionOrdering[axisDim]
         if ii is not None:
-            minAliasedFrequency, maxAliasedFrequency = (self.spectrum.aliasingLimits)[ii]
-            minSpectrumFrequency, maxSpectrumFrequency = sorted(self.spectrum.spectrumLimits[ii])
-            pointCount = (self.spectrum.pointCounts)[ii]
-            valuePerPoint = (self.spectrum.valuesPerPoint)[ii]
-            visibleAlias = (self.spectrum.visibleAliasingRange)[ii]
-            regionBounds = tuple(minSpectrumFrequency + ii * (maxSpectrumFrequency - minSpectrumFrequency) for ii in range(visibleAlias[0], visibleAlias[1] + 2))
+            _spectrum = self.spectrum
+            minAliasedFrequency, maxAliasedFrequency = (_spectrum.aliasingLimits)[ii]
+            minSpectrumFrequency, maxSpectrumFrequency = sorted(_spectrum.spectrumLimits[ii])
+            pointCount = (_spectrum.pointCounts)[ii]
+            valuePerPoint = (_spectrum.valuesPerPoint)[ii]
+            axisReversed = (_spectrum.axesReversed)[ii]
+            spectralWidth = maxSpectrumFrequency - minSpectrumFrequency
+            aliasingIndex = (int((minAliasedFrequency - minSpectrumFrequency + spectralWidth / 2) // spectralWidth),
+                             int((maxAliasedFrequency - maxSpectrumFrequency + spectralWidth / 2) // spectralWidth))
+            foldingMode = (_spectrum.foldingModes)[ii]
+            # visibleAlias = (self.spectrum.visibleAliasingRange)[ii]
+            # regionBounds = tuple(minSpectrumFrequency + ii * (maxSpectrumFrequency - minSpectrumFrequency) for ii in range(visibleAlias[0], visibleAlias[1] + 2))
 
             return SpectrumViewParams(valuePerPoint, pointCount,
                                       minAliasedFrequency, maxAliasedFrequency,
                                       minSpectrumFrequency, maxSpectrumFrequency,
-                                      visibleAlias, regionBounds)
+                                      axisReversed, spectralWidth, aliasingIndex,
+                                      foldingMode)
+                                      # visibleAlias, regionBounds)
 
     def getTraceParameters(self, position, dim):
         # dim  = spectrumView index, i.e. 0 for X, 1 for Y

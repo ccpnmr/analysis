@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:58 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -249,8 +249,8 @@ class GuiStrip(Frame):
         self.setStripNotifiers()
 
         # test aliasing notifiers
-        self._currentVisibleAliasingRange = {}
-        self._currentAliasingRange = {}
+        # self._currentVisibleAliasingRange = {}
+        # self._currentAliasingRange = {}
 
         # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
@@ -597,64 +597,64 @@ class GuiStrip(Frame):
         """
         self._CcpnGLWidget._processSpectrumNotifier(data)
 
-    def _checkAliasingRange(self, spectrum):
-        """check whether the local aliasingRange has changed and entend the visible range if needed
-        """
-        newAliasingRange = spectrum.aliasingRange
-        if not self._currentAliasingRange:
-            self._currentAliasingRange[spectrum] = newAliasingRange
-
-            # update
-            with notificationBlanking():
-                vARange = spectrum.visibleAliasingRange
-                newRange = tuple((min(minL, minR), max(maxL, maxR))
-                                 for (minL, maxL), (minR, maxR) in zip(vARange, newAliasingRange))
-                spectrum.visibleAliasingRange = newRange
-
-        if spectrum in self._currentAliasingRange and self._currentAliasingRange[spectrum] != newAliasingRange:
-            self._currentAliasingRange[spectrum] = newAliasingRange
-
-            # update
-            with notificationBlanking():
-                vARange = spectrum.visibleAliasingRange
-                newRange = tuple((min(minL, minR), max(maxL, maxR))
-                                 for (minL, maxL), (minR, maxR) in zip(vARange, newAliasingRange))
-                spectrum.visibleAliasingRange = newRange
-
-    def _checkVisibleAliasingRange(self, spectrum):
-        """check whether the local visibleAliasingRange has changed and update the limits of the plane toolbar
-        """
-        newVisibleAliasingRange = spectrum.visibleAliasingRange
-        if not self._currentVisibleAliasingRange:
-            self._currentVisibleAliasingRange[spectrum] = newVisibleAliasingRange
-            # update
-            if not self.spectrumDisplay.is1D:
-                self._setZWidgets()
-
-        if spectrum in self._currentVisibleAliasingRange and self._currentVisibleAliasingRange[spectrum] != newVisibleAliasingRange:
-            # update
-            self._currentVisibleAliasingRange[spectrum] = newVisibleAliasingRange
-            if not self.spectrumDisplay.is1D:
-                self._setZWidgets()
+    # def _checkAliasingRange(self, spectrum):
+    #     """check whether the local aliasingRange has changed and entend the visible range if needed
+    #     """
+    #     newAliasingRange = spectrum.aliasingRange
+    #     if not self._currentAliasingRange:
+    #         self._currentAliasingRange[spectrum] = newAliasingRange
+    #
+    #         # update
+    #         with notificationBlanking():
+    #             vARange = spectrum.visibleAliasingRange
+    #             newRange = tuple((min(minL, minR), max(maxL, maxR))
+    #                              for (minL, maxL), (minR, maxR) in zip(vARange, newAliasingRange))
+    #             spectrum.visibleAliasingRange = newRange
+    #
+    #     if spectrum in self._currentAliasingRange and self._currentAliasingRange[spectrum] != newAliasingRange:
+    #         self._currentAliasingRange[spectrum] = newAliasingRange
+    #
+    #         # update
+    #         with notificationBlanking():
+    #             vARange = spectrum.visibleAliasingRange
+    #             newRange = tuple((min(minL, minR), max(maxL, maxR))
+    #                              for (minL, maxL), (minR, maxR) in zip(vARange, newAliasingRange))
+    #             spectrum.visibleAliasingRange = newRange
+    #
+    # def _checkVisibleAliasingRange(self, spectrum):
+    #     """check whether the local visibleAliasingRange has changed and update the limits of the plane toolbar
+    #     """
+    #     newVisibleAliasingRange = spectrum.visibleAliasingRange
+    #     if not self._currentVisibleAliasingRange:
+    #         self._currentVisibleAliasingRange[spectrum] = newVisibleAliasingRange
+    #         # update
+    #         if not self.spectrumDisplay.is1D:
+    #             self._setZWidgets()
+    #
+    #     if spectrum in self._currentVisibleAliasingRange and self._currentVisibleAliasingRange[spectrum] != newVisibleAliasingRange:
+    #         # update
+    #         self._currentVisibleAliasingRange[spectrum] = newVisibleAliasingRange
+    #         if not self.spectrumDisplay.is1D:
+    #             self._setZWidgets()
 
     def _updateDisplayedPeaks(self, data):
         """Callback when peaks have changed
         """
         self._CcpnGLWidget._processPeakNotifier(data)
 
-        # check whether the aliasing range has changed
-        triggers = data[Notifier.TRIGGER]
-        obj = data[Notifier.OBJECT]
-
-        if isinstance(obj, Peak):
-
-            # update the peak labelling
-            if Notifier.DELETE in triggers or Notifier.CREATE in triggers:
-                # need to update the aliasing limits
-                pass
-
-            spectrum = obj.peakList.spectrum
-            self._checkVisibleAliasingRange(spectrum)
+        # # check whether the aliasing range has changed
+        # triggers = data[Notifier.TRIGGER]
+        # obj = data[Notifier.OBJECT]
+        #
+        # if isinstance(obj, Peak):
+        #
+        #     # update the peak labelling
+        #     if Notifier.DELETE in triggers or Notifier.CREATE in triggers:
+        #         # need to update the aliasing limits
+        #         pass
+        #
+        #     spectrum = obj.peakList.spectrum
+        #     self._checkVisibleAliasingRange(spectrum)
 
     def _updateDisplayedNmrAtoms(self, data):
         """Callback when nmrAtoms have changed

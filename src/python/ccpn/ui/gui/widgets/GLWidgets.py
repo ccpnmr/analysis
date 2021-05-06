@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-12 15:35:36 +0100 (Mon, April 12, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:51 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1431,54 +1432,54 @@ class Gui1dWidget(CcpnGLWidget):
         # set defaults for undefined spectra
         if not self._spectrumValues[0].pointCount:
             dx = -1.0 if self.INVERTXAXIS else -1.0
-            fx0, fx1 = 1.0, -1.0
-            dxAF = fx0 - fx1
+            fxMax, fxMin = 1.0, -1.0
+            dxAF = fxMax - fxMin
             xScale = dx * dxAF
 
             dy = -1.0 if self.INVERTYAXIS else -1.0
-            fy0, fy1 = 1.0, -1.0
-            dyAF = fy0 - fy1
+            fyMax, fyMin = 1.0, -1.0
+            dyAF = fyMax - fyMin
             yScale = dy * dyAF
 
-            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fx0 - fx1))
-            self._maxXRange = max(self._maxXRange, (fx0 - fx1))
-            self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fy0 - fy1))
-            self._maxYRange = max(self._maxYRange, (fy0 - fy1))
+            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fxMax - fxMin))
+            self._maxXRange = max(self._maxXRange, (fxMax - fxMin))
+            self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fyMax - fyMin))
+            self._maxYRange = max(self._maxYRange, (fyMax - fyMin))
 
         else:
 
             # get the bounding box of the spectra
             dx = -1.0 if self.INVERTXAXIS else -1.0  # self.sign(self.axisR - self.axisL)
-            fx0, fx1 = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
+            fxMax, fxMin = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
 
             # check tolerances
-            if not self._widthsChangedEnough((fx0, 0.0), (fx1, 0.0), tol=1e-10):
-                fx0, fx1 = 1.0, -1.0
+            if not self._widthsChangedEnough((fxMax, 0.0), (fxMin, 0.0), tol=1e-10):
+                fxMax, fxMin = 1.0, -1.0
 
-            dxAF = fx0 - fx1
+            dxAF = fxMax - fxMin
             xScale = dx * dxAF / self._spectrumValues[0].pointCount
 
             dy = -1.0 if self.INVERTYAXIS else -1.0  # dy = self.sign(self.axisT - self.axisB)
 
             if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:
-                fy0 = float(np.max(spectrumView.spectrum.intensities))
-                fy1 = float(np.min(spectrumView.spectrum.intensities))
+                fyMax = float(np.max(spectrumView.spectrum.intensities))
+                fyMin = float(np.min(spectrumView.spectrum.intensities))
             else:
-                fy0, fy1 = 0.0, 0.0
+                fyMax, fyMin = 0.0, 0.0
 
             # check tolerances
-            if not self._widthsChangedEnough((fy0, 0.0), (fy1, 0.0), tol=1e-10):
-                fy0, fy1 = 1.0, -1.0
+            if not self._widthsChangedEnough((fyMax, 0.0), (fyMin, 0.0), tol=1e-10):
+                fyMax, fyMin = 1.0, -1.0
 
-            dyAF = fy0 - fy1
+            dyAF = fyMax - fyMin
             yScale = dy * dyAF / 1.0
 
             # set to 1D limits to twice the width of the spectrum and the intensity limit
-            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fx0 - fx1) / max(self._spectrumValues[0].pointCount, self.SPECTRUMXZOOM))
-            self._maxXRange = max(self._maxXRange, (fx0 - fx1))
-            # self._minYRange = min(self._minYRange, 3.0 * (fy0 - fy1) / self.SPECTRUMYZOOM)
+            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fxMax - fxMin) / max(self._spectrumValues[0].pointCount, self.SPECTRUMXZOOM))
+            self._maxXRange = max(self._maxXRange, (fxMax - fxMin))
+            # self._minYRange = min(self._minYRange, 3.0 * (fyMax - fyMin) / self.SPECTRUMYZOOM)
             self._minYRange = min(self._minYRange, self._intensityLimit)
-            self._maxYRange = max(self._maxYRange, (fy0 - fy1))
+            self._maxYRange = max(self._maxYRange, (fyMax - fyMin))
 
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
 
@@ -1501,28 +1502,24 @@ class Gui1dWidget(CcpnGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
                                                                               0.0, yScale, 0.0, 0.0,
                                                                               0.0, 0.0, 1.0, 0.0,
-                                                                              fx0, fy0, 0.0, 1.0]
+                                                                              fxMax, fyMax, 0.0, 1.0]
         # setup information for the horizontal/vertical traces
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MAXXALIAS] = fx0
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MINXALIAS] = fx1
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MAXYALIAS] = fy0
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MINYALIAS] = fy1
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DXAF] = dxAF
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DYAF] = dyAF
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XSCALE] = xScale
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XLIMITS] = (fxMin, fxMax)
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YLIMITS] = (fyMin, fyMax)
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_AF] = (dxAF, dyAF)
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_SCALE] = (xScale, yScale)
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_SPINNINGRATE] = spectrumView.spectrum.spinningRate
 
         indices = getAxisCodeMatchIndices(self.strip.axisCodes, spectrumView.spectrum.axisCodes)
         # only need the axes for this spectrum
         indices = indices[:spectrumView.spectrum.dimensionCount]
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
-        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds,)
+        # self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_REGIONBOUNDS] = (self._spectrumValues[0].regionBounds,)
 
-        self._maxX = max(self._maxX, fx0)
-        self._minX = min(self._minX, fx1)
-        self._maxY = max(self._maxY, fy0)
-        self._minY = min(self._minY, fy1)
+        self._maxX = max(self._maxX, fxMax)
+        self._minX = min(self._minX, fxMin)
+        self._maxY = max(self._maxY, fyMax)
+        self._minY = min(self._minY, fyMin)
 
     def initialiseTraces(self):
         # set up the arrays and dimension for showing the horizontal/vertical traces

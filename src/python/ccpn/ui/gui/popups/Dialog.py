@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:59 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -204,13 +204,13 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
         # set the fixed sized policies as required
         if self.FIXEDWIDTH:
-            self.setFixedWidth(_size.width())
+            self.setFixedWidth(max(_size.width(), _minimumSize.width()))
         elif minimumSize:
             # set minimumSize from settings
             self.setMinimumWidth(_minimumSize.width())
         
         if self.FIXEDHEIGHT:
-            self.setFixedHeight(_size.height())
+            self.setFixedHeight(max(_size.height(), _minimumSize.height()))
         elif minimumSize:
             # set minimumSize from settings
             self.setMinimumHeight(_minimumSize.height())

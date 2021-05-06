@@ -4,7 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:38:48 +0000 (Mon, March 01, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:47 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -64,6 +65,9 @@ class RestraintList(AbstractWrapperObject):
 
     #TODO: this needs to be explicit here
     restraintTypes = tuple(coreConstants.constraintListType2ItemLength.keys())
+
+    # Internal NameSpace
+    _MoleculeFilePath = '_MoleculeFilePath'
 
     def __init__(self, project, wrappedData):
 
@@ -236,6 +240,28 @@ class RestraintList(AbstractWrapperObject):
     def tensorResidueType(self, value: float):
         self._wrappedData.tensorResidueType = value
 
+    @property
+    def moleculeFilePath(self):
+        """
+        :return: a filePath for corresponding molecule.
+        E.g., PDB file path for displaying molecules in a molecular viewer
+        """
+        path = self._ccpnInternalData.get(self._MoleculeFilePath)
+
+        return path
+
+    @moleculeFilePath.setter
+    def moleculeFilePath(self, filePath:str=None):
+        """
+        :param filePath: a filePath for corresponding molecule
+        :return: None
+        """
+        if isinstance(self._ccpnInternalData, dict):
+            tempCcpn = self._ccpnInternalData.copy()
+            tempCcpn[self._MoleculeFilePath] = filePath
+            self._ccpnInternalData = tempCcpn
+
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -335,7 +361,7 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
                       tensorMagnitude: float = 0.0, tensorRhombicity: float = 0.0,
                       tensorIsotropicValue: float = 0.0, tensorChainCode: str = None,
                       tensorSequenceCode: str = None, tensorResidueType: str = None,
-                      serial: int = None, restraintItemLength=None) -> RestraintList:
+                      serial: int = None, restraintItemLength=None, **kwargs) -> RestraintList:
     """Create new RestraintList of type restraintType within DataSet.
 
     See the RestraintList class for details.
@@ -385,6 +411,12 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
         except ValueError:
             self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
                                          % (result, serial))
+
+    for k,v in kwargs.items():
+        try:
+            setattr(result, k, v)
+        except Exception:
+            self.project._logger.warning("Could not set %s to %s" % (k, v))
 
     return result
 

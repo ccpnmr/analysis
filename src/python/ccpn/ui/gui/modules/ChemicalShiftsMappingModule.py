@@ -59,7 +59,8 @@ Module Documentation
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -68,8 +69,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:34 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -120,11 +121,11 @@ from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.modules.NmrResidueTable import _CSMNmrResidueTable, KD, Deltas
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.modules.PyMolUtil import _chemicalShiftMappingPymolTemplate
+from ccpn.ui.gui.modules.PyMolUtil import _CSMSelection2PyMolFile
 from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio, navigateToNmrResidueInDisplay
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import concentrationUnits
-from ccpn.util.Common import splitDataFrameWithinRange
+from ccpn.util.Common import splitDataFrameWithinRange, _fillListToLenght
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.CallBack import CallBack
@@ -775,7 +776,11 @@ class ChemicalShiftsMapping(CcpnModule):
               self._seriesUnit = sg.seriesUnits
             else:
               concentrationsValues = [i for i in range(len(spectra))]
+            if len(deltas) < len(concentrationsValues):
+              deltas = _fillListToLenght(deltas, len(concentrationsValues), np.nan)
             df = pd.DataFrame([deltas], index=[nmrResidue], columns=concentrationsValues)
+            if len(peaksPids) < len(concentrationsValues):
+              peaksPids = _fillListToLenght(peaksPids, len(concentrationsValues), '')
             dfPeaks = pd.DataFrame([peaksPids], index=[nmrResidue], columns=concentrationsValues)
             df = df.replace(np.nan, 0)
             values.append(df)
@@ -1312,9 +1317,9 @@ class ChemicalShiftsMapping(CcpnModule):
     colourAboveThreshold = hexToRgb(self.aboveBrush)
     colourBelowThreshold = hexToRgb(self.belowBrush)
     colourMissing = hexToRgb(self.disappearedPeakBrush)
-    scriptPath = _chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
-                                                   missingdResidues, colourMissing, colourAboveThreshold, colourBelowThreshold,
-                                                   selection)
+    scriptPath = _CSMSelection2PyMolFile(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
+                                         missingdResidues, colourMissing, colourAboveThreshold, colourBelowThreshold,
+                                         selection)
     try:
       self.pymolProcess = subprocess.Popen(pymolPath+' -r '+scriptPath,
                        shell=True,
@@ -1387,6 +1392,7 @@ class ChemicalShiftsMapping(CcpnModule):
     if bindingCurves is None:
       return
 
+    bindingCurves = bindingCurves.replace(np.nan, 0)
     self.fittingLine.hide()
     ### the actual fitting call
     xs, ys, xf, yf, *popt = _fitExpDecayCurve(bindingCurves)

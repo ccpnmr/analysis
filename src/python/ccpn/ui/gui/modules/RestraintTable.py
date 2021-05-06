@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-18 13:29:08 +0000 (Thu, March 18, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import os
 from PyQt5 import QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -37,10 +39,14 @@ from ccpn.core.Restraint import Restraint
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
-
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.Button import Button
+import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
+from ccpn.ui.gui.widgets import MessageDialog
 
 logger = getLogger()
 ALL = '<all>'
+PymolScriptName = 'Restraint_Pymol_Template.py'
 
 
 class RestraintTableModule(CcpnModule):
@@ -189,6 +195,7 @@ class RestraintTable(GuiTable):
                                        lambda restraint, value: RestraintTable._setComment(restraint, value), None)
                                       ])  # [Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
 
+
         row = 0
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
@@ -198,14 +205,20 @@ class RestraintTable(GuiTable):
         gridHPos = 0
         self.rtWidget = RestraintListPulldown(parent=self._widget,
                                               mainWindow=self.mainWindow, default=None,
-                                              grid=(row, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                              grid=(row, gridHPos), minimumWidths=(0, 100),
                                               showSelectName=True,
                                               sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                               callback=self._selectionPulldownCallback)
+        gridHPos += 1
+        self.showOnViewerButton = Button(self._widget, tipText='Show on Molecular Viewer',
+                                         icon=Icon('icons/showStructure'),
+                                         callback=self._showOnMolecularViewer,
+                                         grid=(row, gridHPos), hAlign='l')
         row += 1
+        gridHPos += 1
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-                             grid=(row, gridHPos + 1), gridSpan=(1, 1))
+                             grid=(row, gridHPos), gridSpan=(1,2))
 
         # initialise the currently attached dataFrame
         self._hiddenColumns = ['Pid']
@@ -218,6 +231,7 @@ class RestraintTable(GuiTable):
                          setLayout=True,
                          autoResize=True,
                          selectionCallback=self._selectionCallback,
+                         multiSelect=True,
                          actionCallback=self._actionCallback,
                          grid=(3, 0), gridSpan=(1, 6))
         self.moduleParent = moduleParent
@@ -236,7 +250,7 @@ class RestraintTable(GuiTable):
                                tableSelection='restraintList',
                                pullDownWidget=self.RLcolumns,
                                callBackClass=Restraint,
-                               selectCurrentCallBack=None,
+                               selectCurrentCallBack=self._selectOnTableCurrentRestraintNotifierCallback,
                                moduleParent=moduleParent)
 
         # Initialise the notifier for processing dropped items
@@ -288,6 +302,39 @@ class RestraintTable(GuiTable):
         self.rtWidget.select(restraintList.pid)
         self._update(restraintList)
 
+    def _selectOnTableCurrentRestraintNotifierCallback(self, data):
+        """
+        callback from a notifier to select the current Restraints
+        :param data:
+        """
+        currentRestraints = data['value']
+        self._selectOnTableCurrentRestraints(currentRestraints)
+
+    def _selectOnTableCurrentRestraints(self, currentRestraints):
+        """
+        highlight  current Restraints on the opened table
+        """
+        self.highlightObjects(currentRestraints)
+
+
+    def _showOnMolecularViewer(self):
+
+        restraintList = self.rtWidget.getSelectedObject()
+        restraints = self.getSelectedObjects() or []
+
+        if restraintList is not None:
+            pymolScriptPath = os.path.join(self.application.pymolScriptsPath, PymolScriptName)
+            pdbPath = restraintList.moleculeFilePath
+            if pdbPath is None:
+                MessageDialog.showWarning('No Molecule File found', 'Add a molecule file path to the RestraintList from SideBar.')
+                return
+            pymolScriptPath = pyMolUtil._restraintsSelection2PyMolFile(pymolScriptPath, pdbPath, restraints)
+            pyMolUtil.runPymolWithScript(self.application, pymolScriptPath)
+
+        if not restraintList:
+            MessageDialog.showWarning('Nothing to show', 'Select a RestraintList first')
+
+
     def _updateCallback(self, data):
         """
         Notifier callback for updating the table
@@ -314,14 +361,14 @@ class RestraintTable(GuiTable):
         self.populateTable(rowObjects=restraintList.restraints,
                            columnDefs=self.RLcolumns
                            )
+        self._highLightObjs(self.current.restraints)
 
     def _selectionCallback(self, data, *args):
         """
         Notifier Callback for selecting a row in the table
         """
-        restraint = data[CallBack.OBJECT]
-
-        self.current.restraint = restraint
+        restraints = self.getSelectedObjects()
+        self.current.restraints = restraints
         RestraintTableModule.currentCallback = {'object': self.restraintList, 'table': self}
 
     def _actionCallback(self, data, *args):
@@ -391,14 +438,25 @@ class RestraintTable(GuiTable):
     @staticmethod
     def _getContributions(restraint):
         """
-        CCPN-INTERNAL: Return number of peaks assigned to NmrAtom in Experiments and PeakLists
-        using ChemicalShiftList
+        CCPN-INTERNAL:  Get the first pair of atoms Ids from the first restraintContribution of a restraint.
+        Empty str if not atoms.
         """
-        if len(restraint.restraintContributions) > 0:
-            if restraint.restraintContributions[0].restraintItems:
-                return ' - '.join(restraint.restraintContributions[0].restraintItems[0])
+        atomPair = RestraintTable.getFirstRestraintAtomsPair(restraint)
+        if atomPair:
+             return ' - '.join([a.id for a in atomPair])
         else:
             return ''
+
+    @staticmethod
+    def getFirstRestraintAtomsPair(restraint):
+        """ Get the first pair of atoms from the first restraintContribution of a restraint."""
+        atomPair = []
+        if len(restraint.restraintContributions) > 0:
+            if len(restraint.restraintContributions[0].restraintItems) > 0:
+                atomPair = [restraint.project.getAtom(x) for x in restraint.restraintContributions[0].restraintItems[0]]
+                if all(atomPair):
+                    return atomPair
+        return atomPair
 
     @staticmethod
     def _getRestraintPeakCount(restraint):

@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-18 13:29:07 +0000 (Thu, March 18, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:48 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -46,8 +47,8 @@ ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', '
               '15N': ['N', 'ND1', 'NE', 'NE1', 'NE2', 'NH1', 'NH2', 'NZ']
               }
 
-NEF_ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CG', 'CG1', 'CG2', 'CGx', 'CGy',
-                          'CD', 'CD1', 'CD2', 'CDx', 'CDy', 'CE', 'CE1', 'CE2', 'CE3',
+NEF_ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CG', 'CG1', 'CG2', 'CGx', 'CGy', 'CG%',
+                          'CD', 'CD1', 'CD2', 'CDx', 'CDy', 'CD%', 'CE', 'CE1', 'CE2', 'CE3',
                           'CEx', 'CEy', 'CZ', 'CZ2', 'CZ3', 'CH2'],
                   '15N': ['N', 'ND1', 'ND2', 'NE', 'NE1', 'NE2', 'NZ', 'NH1', 'NH2', 'NHx', 'NHy'],
                   '1H' : ['H', 'HA', 'HA2', 'HA3', 'HAx', 'HAy', 'HA%', 'HB', 'HB2', 'HB3', 'HBx', 'HBy',
@@ -58,6 +59,63 @@ NEF_ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CG', 'CG1', 'CG2', 'CGx', 'CGy',
                           'HH', 'HH11', 'HH12', 'HH1x', 'HH1y', 'HH2', 'HH21', 'HH22', 'HH2x', 'HH2y',
                           'QA', 'QB', 'QD', 'QE', 'QG', 'QH', 'QH1', 'QH2', 'QR', 'QZ'
                           ]}
+
+NEF_ATOM_NAMES_SORTED = {'alphas'      : ['CA', 'HA', 'HAx', 'HAy', 'HA2', 'HA3', 'HA%'],
+                    'betas'       : ['CB', 'HB', 'HBx', 'HBy', 'HB%', 'HB2', 'HB3'],
+                    'gammas'      : ['CG', 'CGx', 'CGy', 'CG%', 'CG1', 'CG2', 'HG', 'HGx', 'HGy', 'HG%', 'HG2', 'HG3'],
+                    'moreGammas'  : ['HGx%', 'HGy%', 'HG1', 'HG1x', 'HG1y', 'HG1%', 'HG12', 'HG13', 'HG1%', 'HG2%'],
+                    'deltas'      : ['CD', 'CDx', 'CDy', 'CD%', 'CD1', 'CD2', 'HDx', 'HDy', 'HD%', 'HD1', 'HD2', 'HD3'],
+                    'moreDeltas'  : ['HDx%', 'HDy%', 'ND1', 'ND2', 'HD1%', 'HD2%', 'HD2x', 'HD2y', 'HD21', 'HD22'],
+                    'epsilons'    : ['CE', 'CEx', 'CEy', 'CE1', 'CE2', 'HE', 'HEx', 'HEy', 'HE%', 'HE1', 'HE2', 'HE3'],
+                    'moreEpsilons': ['CE3', 'NE', 'NE1', 'NE2', 'HE2x', 'HE2y', 'HE21', 'HE22', 'HE%'],
+                    'zetas'       : ['CZ', 'CZ2', 'CZ3', 'HZ', 'HZ2', 'HZ3', 'HZ%', 'NZ'],
+                    'etas'        : ['CH2', 'HH2', 'HH1x', 'HH1y', 'HH2x', 'HH2y', 'NH1', 'NH2', 'NHx', 'NHy', 'HH21', 'HH22'],
+                    'moreEtas'    : ['HH', 'HH11', 'HH12']
+                    }
+
+
+
+PROTEIN_NEF_ATOM_NAMES = {
+    'ALA': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB%'],
+    'ARG': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HGx', 'HGy',
+            'HG2', 'HG3', 'HG%', 'CD', 'HDx', 'HDy', 'HD2', 'HD3', 'HD%', 'NE', 'HE', 'CZ', 'NHx', 'NHy',
+            'NH1', 'NH2', 'HH1x', 'HH1y', 'HH11', 'HH12', 'HH2x', 'HH2y', 'HH21', 'HH22'],
+    'ASN': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'ND2',
+            'HD2x', 'HD2y', 'HD21', 'HD22'],
+    'ASP': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG'],
+    'CYS': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'HG'],
+    'GLN': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HGx', 'HGy',
+            'HG2', 'HG3', 'HG%', 'CD', 'NE2', 'HE2x', 'HE2y', 'HE21', 'HE22'],
+    'GLU': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HGx', 'HGy',
+            'HG2', 'HG3', 'HG%', 'CD'],
+    'GLY': ['H', 'N', 'C', 'CA', 'HAx', 'HAy', 'HA2', 'HA3', 'HA%'],
+    'HIS': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'ND1', 'HD1',
+            'CD2', 'HD2', 'CE1', 'HE1', 'NE2', 'HE2'],
+    'ILE': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB', 'CG1', 'HG1x', 'HG1y',
+            'HG12', 'HG13', 'HG1%', 'CG2', 'HG2%', 'CD1', 'HD1%'],
+    'LEU': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HG', 'CDx',
+            'CDy', 'CD%', 'CD1', 'CD2', 'HDx%', 'HDy%', 'HD1%', 'HD2%', 'HD%'],
+    'LYS': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HGx', 'HGy',
+            'HG2', 'HG3', 'HG%', 'CD', 'HDx', 'HDy', 'HD2', 'HD3', 'HD%', 'CE', 'HEx', 'HEy', 'HE2', 'HE3',
+            'HE%', 'NZ', 'HZ%'],
+    'MET': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HGx', 'HGy',
+            'HG2', 'HG3', 'HG%', 'CE', 'HE%'],
+    'PHE': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'CDx', 'CDy',
+            'CD1', 'CD2', 'HDx', 'HDy', 'HD1', 'HD2', 'HD%', 'CEx', 'CEy', 'CE1', 'CE2', 'HEx', 'HEy',
+            'HE1', 'HE2', 'HE%', 'CZ', 'HZ'],
+    'PRO': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'HGx', 'HGy',
+            'HG2', 'HG3', 'HG%', 'CD', 'HDx', 'HDy', 'HD2', 'HD3', 'HD%'],
+    'SER': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'HG'],
+    'THR': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB', 'CG2', 'HG1', 'HG2%'],
+    'TRP': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'CD1', 'CD2', 'HD1',
+            'NE1', 'HE1', 'CE2', 'CE3', 'HE3', 'CZ2', 'CZ3', 'HZ2', 'HZ3', 'CH2', 'HH2'],
+    'TYR': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HBx', 'HBy', 'HB2', 'HB3', 'HB%', 'CG', 'CDx', 'CDy', 'CD1',
+            'CD2', 'HDx', 'HDy', 'HD1', 'HD2', 'HD%', 'CEx', 'CEy', 'CE1', 'CE2', 'HEx', 'HEy', 'HE1', 'HE2',
+            'HE%', 'CZ', 'HH'],
+    'VAL': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB', 'CGx', 'CGy', 'CG%', 'CG1', 'CG2',
+            'HGx%', 'HGy%', 'HG1%', 'HG2%','HG%']
+    }
+
 
 from ccpn.util import Common as commonUtil, Constants
 from typing import Sequence
@@ -187,13 +245,17 @@ def getNmrAtomPrediction(ccpCode: str, value: float, isotopeCode: str, strict: b
     tot = sum(predictions.values())
     refinedPredictions = {}
     for key, value in predictions.items():
-        if strict:
-            if value > 1e-3:
-                v = int(value / tot * 100)
+        try:
+            if strict:
+                if value > 1e-3:
+                    v = int(value / tot * 100)
+                else:
+                    v = 0
             else:
-                v = 0
-        else:
-            v = int(value / tot * 100)
+                v = int(value / tot * 100)
+        except Exception as es:
+            v = 0
+
         if v > 0:
             refinedPredictions[key] = v
 
@@ -956,6 +1018,7 @@ def _matchAxesToNmrAtomNames(axisCodes, nmrAtomNames, exactMatch: bool = False, 
                         dd[ax].append(naName)
     return dd
 
+
 def _matchAxesToNmrAtomIsotopeCode(peak, nmrAtoms):
     """
     Make a dict of matching axisCodes, nmrAtomNames based on common isotopeCodes between nmrAtom-spectrum isotopeCode.
@@ -978,6 +1041,7 @@ def _matchAxesToNmrAtomIsotopeCode(peak, nmrAtoms):
                 if not nmrAtom.isotopeCode or nmrAtom.isotopeCode == UnknownIsotopeCode:
                     dd[axisCode].append(nmrAtom.name)
     return dd
+
 
 def _getNmrAtomForName(nmrAtoms, nmrAtomName):
     """
@@ -1020,8 +1084,8 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
     # group peaks with exact axisCodes match so in case of multiple options we don't need a popup for similar peaks.
     peakGroups = defaultdict(list)
     for obj in peaks:
-        axs = tuple(sorted(x for x in list(obj.axisCodes))) # Please don't sort/match simply by first letter code here
-                                                            # or it defeat the purpose of all filters done below.
+        axs = tuple(sorted(x for x in list(obj.axisCodes)))  # Please don't sort/match simply by first letter code here
+        # or it defeat the purpose of all filters done below.
         peakGroups[axs].append(obj)
     # we could add a warning in case many groups.
     for peakGroup in peakGroups.values():
@@ -1046,13 +1110,13 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
             _ambNmrAtomNames = [name for name in matchedNmrAtomNames if name in ambiguousAxisNmrAtomNames]
 
             ## fill unambiguousNmrAtomsDict and ambiguousNmrAtomsDict dicts.
-            if len(_unambAxisNmrAtomNames) == 1 and len(matchedNmrAtomNames) == 1: # nothing ambiguous, 1:1 {'H': ['H']}
+            if len(_unambAxisNmrAtomNames) == 1 and len(matchedNmrAtomNames) == 1:  # nothing ambiguous, 1:1 {'H': ['H']}
                 na = _getNmrAtomForName(nmrAtoms, _unambAxisNmrAtomNames[0])
                 unambiguousNmrAtomsDict[axisCode].add(na)
-            if len(matchedNmrAtomNames) > 1: # make sure nothing appereas as ambiguous and unambiguous. If this happens, keep only as ambiguous {'Hn': ['H', 'M1']} M1 with 1H isotope code
+            if len(matchedNmrAtomNames) > 1:  # make sure nothing appereas as ambiguous and unambiguous. If this happens, keep only as ambiguous {'Hn': ['H', 'M1']} M1 with 1H isotope code
                 _nmrAtoms = list(map(lambda x: _getNmrAtomForName(nmrAtoms, x), matchedNmrAtomNames))
                 ambiguousNmrAtomsDict[axisCode].update(_nmrAtoms)
-            if len(_unambAxisNmrAtomNames) > 1: # one axis but multiple nmrAtoms. 1:many {'Hn': ['H', 'Hn']}
+            if len(_unambAxisNmrAtomNames) > 1:  # one axis but multiple nmrAtoms. 1:many {'Hn': ['H', 'Hn']}
                 _nmrAtoms = list(map(lambda x: _getNmrAtomForName(nmrAtoms, x), _unambAxisNmrAtomNames))
                 ambiguousNmrAtomsDict[axisCode].update(_nmrAtoms)
             if len(_ambNmrAtomNames) >= 1:  # multiple axes and multiple nmrAtoms. many:many {'Hn': ['H',...], 'Hc': ['H',...]}
@@ -1061,8 +1125,10 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms, exactMatch=False, overwrite=False):
 
         _assignPeakFromNmrAtomDict(peakGroup, unambiguousNmrAtomsDict, ambiguousNmrAtomsDict, overwrite=overwrite)
 
+
 def _finaliseAssignment(peak, axisCode4NmrAtomsDict, overwrite=False):
     from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+
     with undoBlockWithoutSideBar():
         for _axisCode, _nmrAtoms in axisCode4NmrAtomsDict.items():
             oldNmrAtoms = []
@@ -1076,7 +1142,7 @@ def _finaliseAssignment(peak, axisCode4NmrAtomsDict, overwrite=False):
 
 
 def _assignPeakFromNmrAtomDict(peaks, unambiguousNmrAtomsDict, ambiguousNmrAtomsDict,
-                               overwrite=False,):
+                               overwrite=False, ):
     """
     assign peaks by axisCode based on unambiguousNmrAtomsDict and ambiguousNmrAtomsDict dictionaries
     Dicts Key: the axisCode; Dicts value: a list of matching NmrAtom assignable for that axisCode
@@ -1093,13 +1159,15 @@ def _assignPeakFromNmrAtomDict(peaks, unambiguousNmrAtomsDict, ambiguousNmrAtoms
         return
     if ambiguousNmrAtomsDict or unambiguousNmrAtomsDict:
         from ccpn.ui.gui.popups.AssignAmbiguousNmrAtomsPopup import AssignNmrAtoms4AxisCodesPopup
-        w = AssignNmrAtoms4AxisCodesPopup(None, axisCode4NmrAtomsDict= ambiguousNmrAtomsDict,
-                                          checkedAxisCode4NmrAtomsDict = unambiguousNmrAtomsDict, peaks=peaks)
+
+        w = AssignNmrAtoms4AxisCodesPopup(None, axisCode4NmrAtomsDict=ambiguousNmrAtomsDict,
+                                          checkedAxisCode4NmrAtomsDict=unambiguousNmrAtomsDict, peaks=peaks)
         result = w.exec_()
         if result:
             axisCode4NmrAtomsDict = w.getSelectedObjects()
             for peak in peaks:
                 _finaliseAssignment(peak, axisCode4NmrAtomsDict, overwrite=overwrite)
+
 
 def _assignNmrResiduesToPeaks(peaks, nmrResidues):
     """

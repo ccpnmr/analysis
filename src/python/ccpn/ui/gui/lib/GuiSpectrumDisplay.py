@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:57 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -62,6 +62,7 @@ from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChange
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import ZPlaneNavigationModes
 from ccpn.util import Colour
+from ccpn.core.Substance import Substance
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
@@ -576,10 +577,11 @@ class GuiSpectrumDisplay(CcpnModule):
                 action.setText(spectrum.name)
                 setWidgetFont(action, size='SMALL')
 
-            # check the visibleAliasing here and update planeToolbar
-            for strip in self.strips:
-                strip._checkAliasingRange(spectrum)
-                strip._checkVisibleAliasingRange(spectrum)
+            # update planeToolbars
+            if not self.is1D:
+                for strip in self.strips:
+                    # NOTE:ED - may need to fire update here if this forces a change to the z-plane
+                    strip._setZWidgets()
 
             self._refreshSpectrumView(spectrum)
 
@@ -1068,6 +1070,7 @@ class GuiSpectrumDisplay(CcpnModule):
         nmrChains = []
         nmrResidues = []
         nmrAtoms = []
+        substances = []
 
         for pid in pids:
             obj = self.project.getByPid(pid)
@@ -1102,7 +1105,8 @@ class GuiSpectrumDisplay(CcpnModule):
                 success = True
             elif obj is not None and isinstance(obj, NmrAtom):
                 nmrAtoms.append(obj)
-
+            elif obj is not None and isinstance(obj, Substance):
+                substances.append(obj)
             elif obj is not None and isinstance(obj, NmrResidue):
                 nmrResidues.append(obj)
 
@@ -1127,6 +1131,9 @@ class GuiSpectrumDisplay(CcpnModule):
         if nmrAtoms:
             with undoBlockWithoutSideBar():
                 self._handleNmrAtoms(nmrAtoms)
+        if substances:
+            with undoBlockWithoutSideBar():
+                self._handleSubstances(substances)
 
         return success
 
@@ -1231,6 +1238,36 @@ class GuiSpectrumDisplay(CcpnModule):
                 # mark all nmrResidues.nmrAtoms to the window
                 for nmrResidue in nmrResidues:
                     self._createNmrResidueMarks(nmrResidue)
+
+    def _handleSubstances(self, substances):
+        # get the widget that is under the cursor, SHOULD be guiWidget
+        # if selected peaks, will add the substance Name as peak.annotation
+        point = QtGui.QCursor.pos()
+        destStrip = QtWidgets.QApplication.widgetAt(point)
+
+        if destStrip and isinstance(destStrip, CcpnGLWidget):
+            objectsClicked = destStrip.getObjectsUnderMouse()
+
+            if objectsClicked is None:
+                return
+
+            if PEAKSELECT in objectsClicked or MULTIPLETSELECT in objectsClicked:
+                # dropped onto a peak or multiplet
+                # dropping onto a multiplet will apply to all attached peaks
+                # Set substance name to peak.annotation
+                peaks = set(self.current.peaks)
+                for mult in self.current.multiplets:
+                    peaks = peaks | set(mult.peaks)
+                for substance in substances:
+                    for peak in peaks:
+                        # make sure is not duplicating any existing annotation, and is appending not replacing.
+                        annotation = ', '.join(filter(None, set([peak.annotation, substance.name])))
+                        peak.annotation = annotation
+
+            elif not objectsClicked:
+                # function not defined yet
+                showWarning('Dropped Substance(s).','Action not implemented yet' )
+
 
     def _handleNmrAtoms(self, nmrAtoms):
 

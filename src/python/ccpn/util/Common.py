@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:59 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:51 +0100 (Thu, May 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -690,6 +690,16 @@ def _getChildren(obj, path=None):
 
 def percentage(percent, whole):
     return (percent * whole) / 100.0
+
+def _fillListToLenght(aList, desiredLength, fillingValue = None):
+    """
+    Appends Nones to list to get length of list equal to the desiredLength.
+    If the starting list is longer than the desiredLength: raise AttributeError
+    """
+    diffLenght = desiredLength - len(aList)
+    if diffLenght < 0:
+        raise AttributeError('The given list has a longer length than the desiredLength.')
+    return aList + [fillingValue] * diffLenght
 
 
 def splitDataFrameWithinRange(dataframe, column1, column2, minX, maxX, minY, maxY):

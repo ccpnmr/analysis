@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-12 19:39:18 +0100 (Mon, April 12, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,31 +26,33 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.util.Logging import getLogger
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 
 
-class ColumnViewSettingsPopup(CcpnDialog):
-    # def __init__(self, table=None, parent=None, hideColumns=None, title='Column Settings', **kwds):
+class ColumnViewSettingsPopup(CcpnDialogMainWidget):
+
+    FIXEDHEIGHT = False
+    FIXEDWIDTH = True
+    USESCROLLWIDGET = True
+
     def __init__(self, dataFrameObject=None, parent=None, hideColumns=None, title='Column Settings', **kwds):
-        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
-        self.setContentsMargins(5, 5, 5, 5)
+        super().__init__(parent, setLayout=True, windowTitle=title, minimumSize=(250, 250), **kwds)
+
         self.dataFrameObject = dataFrameObject
-        # self.widgetColumnViewSettings = ColumnViewSettings(parent=self, table=table, hideColumns=hideColumns, grid=(0,0))
-        self.widgetColumnViewSettings = ColumnViewSettings(parent=self, dataFrameObject=dataFrameObject, grid=(0, 0))
-        buttons = ButtonList(self, texts=['Close'], callbacks=[self._close], grid=(1, 0), hAlign='c')
-        self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.widgetColumnViewSettings = ColumnViewSettings(self.mainWidget, dataFrameObject=dataFrameObject, grid=(0, 0))
+
+        self.setCloseButton(callback=self._close, tipText='Close')
+        self.setDefaultButton(self.CLOSEBUTTON)
+        self.__postInit__()
 
     def _close(self):
-        'Save the hidden columns to the table class. So it remembers when you open again the popup'
+        """Save the hidden columns to the table class. So it remembers when you open again the popup
+        """
         hiddenColumns = self.widgetColumnViewSettings._getHiddenColumns()
         self.dataFrameObject.hiddenColumns = hiddenColumns
         self.reject()
@@ -60,24 +63,20 @@ SEARCH_MODES = ['Literal', 'Case Sensitive Literal', 'Regular Expression']
 CheckboxTipText = 'Select column to be visible on the table.'
 
 
-class ColumnViewSettings(Widget):
+class ColumnViewSettings(Frame):
     """ hide show check boxes corresponding to the table columns """
 
     def __init__(self, parent=None, dataFrameObject=None, direction='v', hideColumns=None, **kwds):
         super().__init__(parent, setLayout=True, **kwds)
+
         self.direction = direction
-        # self.table = table
         self.dataFrameObject = dataFrameObject
         self.checkBoxes = []
-        # self.hiddenColumns = []
-        # self.hideColumns = hideColumns or []      # list of column names
         self._hideColumnWidths = {}
-        self.filterLabel = Label(self, 'Display Columns', grid=(0, 0), vAlign='t', hAlign='l')
-        self.widgetFrame = Frame(self, setLayout=True, margins=(5,5,5,5))
-        self.scrollArea = ScrollArea(self, setLayout=True, grid=(1, 0))
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setWidget(self.widgetFrame)
-        # self.widgetFrame.getLayout().setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        self.filterLabel = Label(self, text='Display Columns', grid=(0, 0))
+        self.widgetFrame = Frame(self, setLayout=True, margins=(5,5,5,5), grid=(1, 0))
+        Spacer(self, 5, 5, 'fixed', 'expanding', grid=(2, 0))
+
         self.initCheckBoxes()
 
     def initCheckBoxes(self):
@@ -100,13 +99,7 @@ class ColumnViewSettings(Widget):
                                       checked=True if colum not in hiddenColumns else False,
                                       hAlign='l', tipText=CheckboxTipText, )
 
-                    cb.setMinimumSize(cb.sizeHint() * 1.3)
-
                     self.checkBoxes.append(cb)
-                    # if colum not in self.hideColumns:
-                    #   self._showColumn(i, colum)
-                    # else:
-                    #   self._hideColumn(i, colum)
 
     def _getHiddenColumns(self):
         return self.dataFrameObject.hiddenColumns
@@ -114,7 +107,6 @@ class ColumnViewSettings(Widget):
     def checkBoxCallBack(self):
         currentCheckBox = self.sender()
         name = currentCheckBox.text()
-        # i = self.table._columns.index(name)
         i = self.dataFrameObject.headings.index(name)
 
         checkedBoxes = []
@@ -128,7 +120,8 @@ class ColumnViewSettings(Widget):
                 self._showColumn(i, name)
             else:
                 self._hideColumn(i, name)
-        else:  #always display at least one columns, disables the last checkbox
+        else:
+            # always display at least one columns, disables the last checkbox
             currentCheckBox.setEnabled(False)
             currentCheckBox.setChecked(True)
 
@@ -141,22 +134,18 @@ class ColumnViewSettings(Widget):
         self.initCheckBoxes()
 
     def _hideColumn(self, i, name):
-        self.dataFrameObject.table.hideColumn(i)  #self.table.getColumnInt(columnName=name))
-        # self._hideColumnWidths[name] = self.table.columnWidth(self.table.getColumnInt(columnName=name))
+        self.dataFrameObject.table.hideColumn(i)
         if name not in self.dataFrameObject.hiddenColumns:
             self.dataFrameObject.hiddenColumns.append(name)
-        # self.hiddenColumns.append(name)
 
     def _showColumn(self, i, name):
-        self.dataFrameObject.table.showColumn(i)  #self.table.getColumnInt(columnName=name))
-        # if name in self._hideColumnWidths:
-        #   self.table.setColumnWidth(self.table.getColumnInt(columnName=name), self._hideColumnWidths[name])
+        self.dataFrameObject.table.showColumn(i)
         self.dataFrameObject.table.resizeColumnToContents(i)
         if name in self.dataFrameObject.hiddenColumns:
             self.dataFrameObject.hiddenColumns.remove(name)
 
     def showColumns(self):
-        # hide the columns in the list
+        # show/hide the columns in the list
         columns = self.dataFrameObject.headings
 
         for i, colName in enumerate(columns):

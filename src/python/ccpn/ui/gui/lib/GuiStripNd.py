@@ -24,7 +24,8 @@ showStripLabel(doShow:bool):  show/hide the stripLabel
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -33,8 +34,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-12 19:39:17 +0100 (Mon, April 12, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -506,22 +507,12 @@ class GuiStripNd(GuiStrip):
                 if _index is None:
                     continue
 
-                _alias = spectrumView.spectrum.visibleAliasingRange[_index]
+                _minAliasedFrequency, _maxAliasedFrequency = sorted(spectrumView.spectrum.aliasingLimits[_index])  # ppm limits (min, max) sorted for clarity
                 _minSpectrumFrequency, _maxSpectrumFrequency = sorted(spectrumView.spectrum.spectrumLimits[_index])
                 _valuePerPoint = spectrumView.spectrum.valuesPerPoint[_index]
-                freqRange = _maxSpectrumFrequency - _minSpectrumFrequency
 
-                # sign is in the aliasingRange - wrong dim - check indices defined
-                _minSpectrumFrequency += (freqRange * _alias[0])
-                _maxSpectrumFrequency += (freqRange * _alias[1])
-
-                if _minSpectrumFrequency is not None:
-                    if minAliasedFrequency is None or _minSpectrumFrequency < minAliasedFrequency:
-                        minAliasedFrequency = _minSpectrumFrequency
-
-                if _maxSpectrumFrequency is not None:
-                    if maxAliasedFrequency is None or _maxSpectrumFrequency > maxAliasedFrequency:
-                        maxAliasedFrequency = _maxSpectrumFrequency
+                minAliasedFrequency = min(_minAliasedFrequency, _minSpectrumFrequency) if _minAliasedFrequency is not None else _minSpectrumFrequency
+                maxAliasedFrequency = max(_maxAliasedFrequency, _maxSpectrumFrequency) if _maxAliasedFrequency is not None else _maxSpectrumFrequency
 
                 if minZPlaneSize is None or _valuePerPoint < minZPlaneSize:
                     minZPlaneSize = _valuePerPoint

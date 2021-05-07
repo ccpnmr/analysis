@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-07 15:26:22 +0100 (Fri, May 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-07 15:55:18 +0100 (Fri, May 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1936,7 +1936,7 @@ class CcpnNefReader(CcpnNefContent):
         nmrDataExtent = StarIo.parseNefFile(path)
         dataBlocks = list(nmrDataExtent.values())
         if len(dataBlocks) > 1:
-            print('More than one datablock in a NEF file is not allowed.  Using the first and discarding the rest.')
+            getLogger().warning('More than one datablock in a NEF file is not allowed.  Using the first and discarding the rest.')
         dataBlock = dataBlocks[0]
 
         # Initialise afresh for every file read
@@ -2033,7 +2033,7 @@ class CcpnNefReader(CcpnNefContent):
     #
     #             verifier = self.verifiers.get(sf_category)
     #             if verifier is None:
-    #                 print("    unknown saveframe category", sf_category, saveFrameName)
+    #                 getLogger().warning('    Unknown saveframe category {sf_category} {saveFrameName}')
     #             else:
     #                 result = verifier(self, project, saveFrame)
     #
@@ -2604,7 +2604,7 @@ class CcpnNefReader(CcpnNefContent):
 
                 importer = self.importers.get(sf_category)
                 if importer is None:
-                    print("WARNING, unknown saveframe category", sf_category, saveFrameName)
+                    getLogger().warning(f'Unknown saveframe category {sf_category}: {saveFrameName}')
                 else:
                     # NB - newObject may be project, for some saveframes.
 
@@ -2635,7 +2635,7 @@ class CcpnNefReader(CcpnNefContent):
                                  if x not in (nef2CcpnMap.get(sf_category) or {})
                                  and x not in ('sf_category', 'sf_framecode')]
                     if extraTags:
-                        print("WARNING - unused tags in saveframe %s: %s" % (saveFrameName, extraTags))
+                        getLogger().warning(f'Unused tags in saveframe {saveFrameName}: {extraTags}')
                         # TODO put here function that stashes data in object, or something
 
         # Put metadata in main dataset
@@ -2645,7 +2645,7 @@ class CcpnNefReader(CcpnNefContent):
         getLogger().debug('Loaded NEF file, time = %.2fs' % (t2 - t0))
 
         for msg in self.warnings:
-            print('====> ', msg)
+            getLogger().warning(f'====> {msg}')
         self.project = None
 
     def importNewNMRStarProject(self, project: Project, dataBlock: StarIo.NmrDataBlock,
@@ -2696,7 +2696,7 @@ class CcpnNefReader(CcpnNefContent):
 
                 importer = self.importers.get(sf_category)
                 if importer is None:
-                    print("WARNING, unknown saveframe category", sf_category, saveFrameName)
+                    getLogger().warning(f'Unknown saveframe category {sf_category}: {saveFrameName}')
                 else:
                     # NB - newObject may be project, for some saveframes.
 
@@ -2716,7 +2716,7 @@ class CcpnNefReader(CcpnNefContent):
                                  if x not in (nef2CcpnMap.get(sf_category) or {})
                                  and x not in ('sf_category', 'sf_framecode')]
                     if extraTags:
-                        print("WARNING - unused tags in saveframe %s: %s" % (saveFrameName, extraTags))
+                        getLogger().warning(f'Unused tags in saveframe {saveFrameName}: {extraTags}')
                         # TODO put here function that stashes data in object, or something
 
         # Put metadata in main dataset
@@ -2726,7 +2726,7 @@ class CcpnNefReader(CcpnNefContent):
         getLogger().debug('Loaded NEF file, time = %.2fs' % (t2 - t0))
 
         for msg in self.warnings:
-            print('====> ', msg)
+            getLogger().warning(f'====> {msg}')
         self.project = None
 
     def _verifyLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, addLoopAttribs=None,
@@ -6540,7 +6540,7 @@ class CcpnNefReader(CcpnNefContent):
 
     def load_ccpn_dataset(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
 
-        print("ccpn_dataset reading is not implemented yet")
+        getLogger().warning('ccpn_dataset reading is not implemented yet')
 
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']

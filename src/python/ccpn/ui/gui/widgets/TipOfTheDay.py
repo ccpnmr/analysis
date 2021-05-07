@@ -1,4 +1,33 @@
-import hjson
+"""
+Module Documentation here
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-05-07 09:53:45 +0100 (Fri, May 07, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: varioustoxins $"
+__date__ = "$Date: 2021-05-06 18:21:23 +0100 (Thu, May 6, 2021) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
+# import hjson
+import json as hjson
 import os
 import pathlib
 import sys
@@ -8,10 +37,15 @@ import random
 
 from PyQt5 import QtGui
 from PyQt5.QtCore import pyqtSignal, Qt, QRectF, QPointF
-from PyQt5.QtGui import QPixmap, QBrush, QColor, QPainter, QPen
+from PyQt5.QtGui import QPixmap, QBrush, QColor, QPainter
 from PyQt5.QtWidgets import QApplication, QWizard, QWizardPage, QCheckBox, QPushButton, QLabel, QGridLayout, \
     QSizePolicy, QFrame, QTextBrowser, QGraphicsScene, QGraphicsView
 
+from ccpn.framework.PathsAndUrls import tipOfTheDayConfig
+
+
+# HJSON_ERROR = hjson.HjsonDecodeError
+HJSON_ERROR = hjson.JSONDecodeError
 
 RANDOM_TIP_BUTTON = QWizard.CustomButton1
 DONT_SHOW_TIPS_BUTTON = QWizard.CustomButton2
@@ -20,7 +54,6 @@ HAVE_DONT_SHOW_TIPS_BUTTON = QWizard.HaveCustomButton2
 
 MODE_TIP_OF_THE_DAY = 'TIP_OF_THE_DAY'
 MODE_OVERVIEW = 'OVERVIEW'
-
 
 TITLE = 'TITLE'
 BUTTONS = 'BUTTONS'
@@ -50,17 +83,18 @@ MAX_ORDER = sys.maxsize
 
 STYLE_FILE = 'style_file'
 
-tip_defaults_file = pathlib.Path(__file__).parent.absolute() / "tip_config.hjson"
+# tip_defaults_file = pathlib.Path(__file__).parent.absolute() / "tip_config.json"
+tip_defaults_file = tipOfTheDayConfig
 DEFAULTS = hjson.loads(open(tip_defaults_file, 'r').read())
 
 BUTTON_IDS = {
-    'Random': RANDOM_TIP_BUTTON,
-    'Stretch': QWizard.Stretch,
-    'Dont_show': DONT_SHOW_TIPS_BUTTON,
-    'BackButton': QWizard.BackButton,
-    'NextButton': QWizard.NextButton,
+    'Random'      : RANDOM_TIP_BUTTON,
+    'Stretch'     : QWizard.Stretch,
+    'Dont_show'   : DONT_SHOW_TIPS_BUTTON,
+    'BackButton'  : QWizard.BackButton,
+    'NextButton'  : QWizard.NextButton,
     'CancelButton': QWizard.CancelButton
-}
+    }
 
 
 class Dots(QGraphicsView):
@@ -72,7 +106,7 @@ class Dots(QGraphicsView):
         self._pos = 0
         self._length = 0
 
-        self.setFixedHeight(self._dot_size*2)
+        self.setFixedHeight(self._dot_size * 2)
 
         self.setScene(QGraphicsScene())
         self._blackBrush = QBrush(QColor('black'))
@@ -93,17 +127,16 @@ class Dots(QGraphicsView):
         items = self.items()
         dot_size_2 = self._dot_size / 2
         for i in range(self._length):
-
             gaps = self._length / 2
             dots = self._length
 
-            total = dots+gaps
+            total = dots + gaps
             width = total * self._dot_size
-            width_2 = width/2
+            width_2 = width / 2
 
             x_center = center.x() - width_2
 
-            items[i].setPos(QPointF(x_center + i * self._dot_size * 2, center.y()-dot_size_2))
+            items[i].setPos(QPointF(x_center + i * self._dot_size * 2, center.y() - dot_size_2))
 
     def setLength(self, length):
         self._length = length
@@ -136,14 +169,13 @@ class TipPage(QWizardPage):
             self._dots.show()
 
     def setupPage(self):
-
         divider = ""
         if HAS_DIVIDER in self._data and self._data[HAS_DIVIDER]:
 
             divider_width = '1px'
             divider_color = '#a9a9a9'
             if DIVIDER_WIDTH in self._data:
-                divider_width =  self._data[DIVIDER_WIDTH]
+                divider_width = self._data[DIVIDER_WIDTH]
             if DIVIDER_COLOR in self._data:
                 divider_color = self._data[DIVIDER_COLOR]
 
@@ -151,7 +183,6 @@ class TipPage(QWizardPage):
 
         if COLOR in self._data:
             if COLOR in self._data:
-
                 stylesheet = f"background-color: {self._data[COLOR]}; {divider}"
 
                 self.parent().setStyleSheet(stylesheet)
@@ -169,9 +200,8 @@ class TipPage(QWizardPage):
         self.setupPage()
 
     def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
-
         if self._data[USE_DOTS]:
-            self._dots.setGeometry(0, self.height()-self._dots.height(), self.width(), self._dots.height())
+            self._dots.setGeometry(0, self.height() - self._dots.height(), self.width(), self._dots.height())
             self._dots.raise_()
 
 
@@ -187,11 +217,9 @@ class PictureTipPage(TipPage):
         return QPixmap(str(path))
 
     def initializePage(self) -> None:
-
         super(PictureTipPage, self).initializePage()
 
         if not self._label:
-
             self._picture = self._load_from_path(self._data[CONTENTS][0])
             self._label = QLabel(self)
             self._label.setPixmap(self._picture)
@@ -222,7 +250,6 @@ class SimpleHtmlTipPage(TipPage):
         return text
 
     def initializePage(self) -> None:
-
         super(SimpleHtmlTipPage, self).initializePage()
 
         if not self._text_browser:
@@ -239,8 +266,8 @@ class SimpleHtmlTipPage(TipPage):
 
 TIP_PAGE_TYPE_TO_HANDLER = {
     SIMPLE_HTML: SimpleHtmlTipPage,
-    PICTURE: PictureTipPage
-}
+    PICTURE    : PictureTipPage
+    }
 
 
 # wizard pages: picture, html, movie (not implemented yet)
@@ -347,24 +374,22 @@ class TipOfTheDayWindow(QWizard):
         try:
             with open(path, 'r') as file_h:
                 result = hjson.loads(file_h.read())
-        except (EnvironmentError, hjson.HjsonDecodeError) as e:
+        except (EnvironmentError, HJSON_ERROR) as e:
             print(f"WARNING: couldn't load tip file {path} because {e}")
 
         return result
 
     def _load_tip_file_data(self):
-
         files = []
         for directory_name in DEFAULTS[self._mode][DIRECTORIES]:
 
             identifiers = [identifier.split('/') for identifier in DEFAULTS[self._mode][IDENTIFIERS]]
             for identifier_parts in identifiers:
-
                 identifier_pattern = os.path.join(directory_name, *identifier_parts)
 
                 tip_file_list = glob(identifier_pattern)
 
-                file_parts = dict([(pathlib.Path(file_path), file_path[len(directory_name)+1:]) for file_path in tip_file_list])
+                file_parts = dict([(pathlib.Path(file_path), file_path[len(directory_name) + 1:]) for file_path in tip_file_list])
 
                 file_parts = self._filter_dict_by_values(file_parts, self._seen_perma_ids)
 
@@ -450,11 +475,9 @@ class TipOfTheDayWindow(QWizard):
         return styles
 
     def _load_pages(self):
-
         tip_files = self._load_tip_file_data()
 
         for tip_file in tip_files:
-
             page = self.setup_page_from_tip_file(tip_file)
 
             tip_id = self.addPage(page)
@@ -473,23 +496,18 @@ class TipOfTheDayWindow(QWizard):
                 header = "All Tips viewed: no more tips to show..."
 
             info_page = {
-                HEADER: header,
-
-                TYPE: "simple-html",
-
+                HEADER  : header,
+                TYPE    : "simple-html",
                 CONTENTS: DEFAULTS[self._mode][EMPTY_TEXT],
-                
-                PATH: pathlib.Path(os.path.realpath(__file__)),
-
-                USE_DOTS:  False
-            }
+                PATH    : pathlib.Path(os.path.realpath(__file__)),
+                USE_DOTS: False
+                }
 
             page = self.setup_page_from_tip_file(info_page)
             tip_id = self.addPage(page)
             self._page_list.append(tip_id)
 
     def nextId(self) -> int:
-
         current_id = self.currentId()
         if len(self._page_list) and current_id in self._page_list:
             index = self._page_list.index(current_id)
@@ -518,7 +536,6 @@ class TipOfTheDayWindow(QWizard):
 
     # https://stackoverflow.com/questions/42324399/how-to-center-a-qdialog-in-qt
     def _centre_window(self):
-
         host = self.parentWidget()
 
         if host:
@@ -545,7 +562,6 @@ class TipOfTheDayWindow(QWizard):
             self._random_tip()
 
     def _random_tip(self):
-
         available_ids = list(self._unvisited_page_ids())
         next_id = random.choice(available_ids)
 

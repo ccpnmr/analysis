@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 18:19:50 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-07 09:53:45 +0100 (Fri, May 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1528,6 +1528,7 @@ class Framework(NotifierBase):
 
             ("Show Tip of the Day", partial(self._displayTipOfTheDay, standalone=True)),
             ("Key Concepts", self._displayKeyConcepts),
+            ("Show Shortcuts", self.showShortcuts),
             ("Show API Documentation", self.showVersion3Documentation),
             ("Show License", self.showCcpnLicense),
             (),

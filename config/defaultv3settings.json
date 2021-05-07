@@ -103,9 +103,8 @@
         "stripArrangement"                     : 0,
         "showTipOfTheDay"                      : false,
         "firstTimeShowKeyConcepts"             : true,
-        "seenTipsOfTheDay"                     : []
-        "aliasLabelsEnabled"                   : true,
-        "stripArrangement"                     : 0
+        "seenTipsOfTheDay"                     : [],
+        "aliasLabelsEnabled"                   : true
     },
     "proxySettings"    : {
         "verifySSL"        : true,

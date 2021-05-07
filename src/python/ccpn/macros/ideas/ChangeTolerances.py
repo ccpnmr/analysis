@@ -11,7 +11,7 @@
 # Specify the new tolerances (interactively later on)
 newTolerances = {'new1HTol': 0.05, 'new15NTol': 0.6, 'new13CTol': 0.6}
 
-
+"""
 # Loop through all spectra (later on the spectra chosen by the user)
 for each spectrum:
     newValues=[]
@@ -25,3 +25,4 @@ for each spectrum:
     # Assign new tolerances to spectrum
     spectrum.assignmentTolerances = [newValues]
 
+"""

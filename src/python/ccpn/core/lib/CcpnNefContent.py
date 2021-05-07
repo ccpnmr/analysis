@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-04 17:48:24 +0100 (Tue, May 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-07 15:26:22 +0100 (Fri, May 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -206,7 +206,7 @@ class CcpnNefContent:
                 # componentName = Pid.IDSEP.join(('' if x is None else str(x)) for x in result)
                 components.add(result)
             except Exception as es:
-                print('>>>>>> content_ccpn_sample_component {}'.format(es))
+                self.error('>>> content_ccpn_sample_component {}'.format(es), loop, None)
 
         return components
 

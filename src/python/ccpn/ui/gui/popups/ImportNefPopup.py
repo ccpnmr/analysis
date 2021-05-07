@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-04 17:48:24 +0100 (Tue, May 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-07 15:26:23 +0100 (Fri, May 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -107,7 +107,7 @@ class NefDictFrame(Frame):
 
     DEFAULTMARGINS = (8, 8, 8, 8)  # l, t, r, b
 
-    def __init__(self, parent=None, mainWindow=None,
+    def __init__(self, parent=None, mainWindow=None, nefImporterClass=None,
                  nefObject=None, enableCheckBoxes=False, enableRename=False,
                  enableFilterFrame=False, enableMouseMenu=False, pathName=None,
                  showBorder=True, borderColour=None, _splitterMargins=DEFAULTMARGINS, **kwds):
@@ -128,6 +128,7 @@ class NefDictFrame(Frame):
             self.project = None
             self._nefReader = None
             self._nefWriter = None
+
         self._primaryProject = True
         self.showBorder = showBorder
         self._borderColour = borderColour or QtGui.QColor(getColours()[BORDERNOFOCUS])
@@ -136,6 +137,7 @@ class NefDictFrame(Frame):
         self._enableFilterFrame = enableFilterFrame
         self._enableMouseMenu = enableMouseMenu
         self._pathName = pathName
+        self._nefImporterClass = nefImporterClass
 
         # set the nef object - nefLoader/nefDict
         self._initialiseNefLoader(nefObject, _ignoreError=True)
@@ -209,7 +211,7 @@ class NefDictFrame(Frame):
             self._primaryProject = False
         elif isinstance(nefObject, Project):
             self.project = nefObject
-            self._nefLoader = Nef.NefImporter(errorLogging=Nef.el.NEF_STANDARD, hidePrefix=True)
+            self._nefLoader = self._nefImporterClass(errorLogging=Nef.el.NEF_STANDARD, hidePrefix=True)
             self._nefWriter = CcpnNefIo.CcpnNefWriter(self.project)
             self._nefDict = self._nefLoader._nefDict = self._nefWriter.exportProject(expandSelection=True, pidList=None)
 
@@ -1279,7 +1281,7 @@ class NefDictFrame(Frame):
         Assumes that the nef loaders may not be initialised if called from outside of Analysis
         """
         if not self._nefLoader:
-            self._nefLoader = Nef.NefImporter(errorLogging=Nef.el.NEF_STANDARD, hidePrefix=True)
+            self._nefLoader = self._nefImporterClass(errorLogging=Nef.el.NEF_STANDARD, hidePrefix=True)
 
             if not self.project:
                 raise TypeError('Project is not defined')
@@ -1339,7 +1341,7 @@ class ImportNefPopup(CcpnDialogMainWidget):
     DEFAULTMARGINS = (5, 5, 5, 5)
 
     def __init__(self, parent=None, mainWindow=None, title='Import Nef', size=(1000, 700),
-                 nefObjects=(), **kwds):
+                 nefImporterClass=None, nefObjects=(), **kwds):
         """
         Initialise the main form
 
@@ -1361,6 +1363,10 @@ class ImportNefPopup(CcpnDialogMainWidget):
             self.application = None
             self.project = None
         self._size = size
+
+        if not isinstance(nefImporterClass, type(Nef.NefImporter)):
+            raise RuntimeError(f'{nefImporterClass} must be of type {Nef.NefImporter}')
+        self._nefImporterClass = nefImporterClass
 
         # create a list of nef dictionary objects
         self.setNefObjects(nefObjects)
@@ -1394,6 +1400,7 @@ class ImportNefPopup(CcpnDialogMainWidget):
 
             # add a new nefDictFrame for each of the objects in the list (project or nefImporter)
             newWindow = NefDictFrame(self, mainWindow=self.mainWindow, grid=(0, 0), showBorder=True,
+                                     nefImporterClass=self._nefImporterClass,
                                      # nefObject=obj,
                                      # enableCheckBoxes=enableCheckBoxes,
                                      # enableRename=enableRename,
@@ -1516,7 +1523,7 @@ if __name__ == '__main__':
 
 
     class MyProgramme(Framework):
-        "My first app"
+        """My first app"""
         pass
 
 

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-29 14:21:53 +0100 (Thu, April 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-07 15:26:23 +0100 (Fri, May 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1879,11 +1879,12 @@ class Framework(NotifierBase):
             NEFFRAMEKEY_IMPORT, NEFFRAMEKEY_ENABLEMOUSEMENU, NEFFRAMEKEY_PATHNAME, \
             NEFFRAMEKEY_ENABLEFILTERFRAME, NEFFRAMEKEY_ENABLECHECKBOXES
         from ccpn.util.nef import NefImporter as Nef
+        from ccpn.util.CcpnNefImporter import CcpnNefImporter
         from ccpn.framework.PathsAndUrls import nefValidationPath
 
         # dataBlock = self.nefReader.getNefData(path)
 
-        _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
+        _loader = CcpnNefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
         _loader.loadFile(path)
         _loader.loadValidateDictionary(nefValidationPath)
 
@@ -1891,6 +1892,7 @@ class Framework(NotifierBase):
         selection = None
 
         dialog = ImportNefPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                nefImporterClass=CcpnNefImporter,
                                 nefObjects=({NEFFRAMEKEY_IMPORT: self.project,
                                              },
                                             {NEFFRAMEKEY_IMPORT           : _loader,

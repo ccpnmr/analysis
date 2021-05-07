@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-04 17:48:24 +0100 (Tue, May 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-07 15:26:22 +0100 (Fri, May 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,7 @@ from ccpn.core.lib import Pid
 from ccpn.core import _coreImportOrder
 from ccpn.core.lib.CcpnNefCommon import nef2CcpnMap, saveFrameReadingOrder, _isALoop, \
     saveFrameWritingOrder, _parametersFromLoopRow, _traverse, _stripSpectrumName, _stripSpectrumSerial
+from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.util import Common as commonUtil
 from ccpn.util import Constants
 from ccpn.util import jsonIo
@@ -4530,8 +4531,6 @@ class CcpnNefReader(CcpnNefContent):
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
         self._updateStringParameters(parameters)
 
-        print('>>>> LOADING VIOLATIONS')
-
         if category == 'ccpn_distance_restraint_violation_list':
             restraintType = 'Distance'
             itemLength = 2
@@ -4640,7 +4639,7 @@ class CcpnNefReader(CcpnNefContent):
                     atomCols = atomCols + ' - ' + atomCol
 
             if atomCols is not None:
-                _df[f'atoms'] = [' - '.join(sorted(st.split(' - '))) if st else None for st in atomCols]
+                _df[f'atoms'] = [' - '.join(sorted(st.split(' - '), key=universalSortKey)) if st else None for st in atomCols]
 
             # vset3 = [v for k, v in p1.groupby(['model_id'])]
             # pd.concat([v.reset_index()['violation'] for v in vset3], axis=1).agg(['sum', 'mean', 'min', 'max', lambda x : sum(x > 0.3), lambda x : sum(x > 0.3)], axis=1)
@@ -5678,7 +5677,6 @@ class CcpnNefReader(CcpnNefContent):
     def load_nef_peak_restraint_links(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """load nef_peak_restraint_links saveFrame"""
 
-        print('>>>> LOAD RESTRAINTS')
         mapping = nef2CcpnMap.get('nef_peak_restraint_links') or {}
         for tag, ccpnTag in mapping.items():
             if ccpnTag == _isALoop:

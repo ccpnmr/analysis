@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-07 15:26:23 +0100 (Fri, May 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-10 18:47:36 +0100 (Mon, May 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -205,7 +205,7 @@ class NefDictFrame(Frame):
 
         self._nefLoader = None
         self._nefDict = None
-        if isinstance(nefObject, Nef.NefImporter):
+        if isinstance(nefObject, self._nefImporterClass):
             self._nefLoader = nefObject
             self._nefDict = nefObject._nefDict
             self._primaryProject = False
@@ -579,7 +579,7 @@ class NefDictFrame(Frame):
         # check if the current saveFrame exists; i.e., category exists as row = [0]
         item = self.nefTreeView.findSection(name, parentGroup)
         if not item:
-            print('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
+            getLogger().debug2('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
             return
         itemName = item.data(0, 0)
 
@@ -601,7 +601,7 @@ class NefDictFrame(Frame):
         # check if the current saveFrame exists; i.e., category exists as row = [0]
         item = self.nefTreeView.findSection(name, parentGroup)
         if not item:
-            # print('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
+            getLogger().debug2('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
             return
         itemName = item.data(0, 0)
 
@@ -621,7 +621,7 @@ class NefDictFrame(Frame):
 
         item = self.nefTreeView.findSection(name, parentGroup)
         if not item:
-            # print('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
+            getLogger().debug2('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
             return
         itemName = item.data(0, 0)
         saveFrame = item.data(1, 0)
@@ -935,17 +935,17 @@ class NefDictFrame(Frame):
                                                  tableColourFunc=None)
 
     handleSaveFrames['ccpn_internal_data'] = partial(handle_treeView_selection,
-                                                 prefix='ccpn_internal_data_',
-                                                 mappingCode='ccpn_additional_data',
-                                                 errorCode='ccpn_additional_data',
-                                                 # tableColourFunc=table_ccpn_additional_data)
-                                                 tableColourFunc=None)
+                                                     prefix='ccpn_internal_data_',
+                                                     mappingCode='ccpn_additional_data',
+                                                     errorCode='ccpn_additional_data',
+                                                     # tableColourFunc=table_ccpn_additional_data)
+                                                     tableColourFunc=None)
 
     handleSaveFrames['ccpn_distance_restraint_violation_list'] = partial(handle_treeView_selection,
-                                                             prefix='ccpn_distance_restraint_violation_',
-                                                             mappingCode='ccpn_distance_restraint_violation_list',
-                                                             errorCode='ccpn_distance_restraint_violation_list',
-                                                             tableColourFunc=None)
+                                                                         prefix='ccpn_distance_restraint_violation_',
+                                                                         mappingCode='ccpn_distance_restraint_violation_list',
+                                                                         errorCode='ccpn_distance_restraint_violation_list',
+                                                                         tableColourFunc=None)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1052,17 +1052,17 @@ class NefDictFrame(Frame):
                                                   tableColourFunc=None)
 
     _setBadSaveFrames['ccpn_internal_data'] = partial(_set_bad_saveframe,
-                                                 prefix='ccpn_internal_data_',
-                                                 mappingCode='ccpn_additional_data',
-                                                 errorCode='ccpn_additional_data',
-                                                 # tableColourFunc=table_ccpn_additional_data)
-                                                 tableColourFunc=None)
+                                                      prefix='ccpn_internal_data_',
+                                                      mappingCode='ccpn_additional_data',
+                                                      errorCode='ccpn_additional_data',
+                                                      # tableColourFunc=table_ccpn_additional_data)
+                                                      tableColourFunc=None)
 
     _setBadSaveFrames['ccpn_distance_restraint_violation_list'] = partial(_set_bad_saveframe,
-                                                             prefix='ccpn_distance_restraint_violation_',
-                                                             mappingCode='ccpn_distance_restraint_violation_list',
-                                                             errorCode='ccpn_distance_restraint_violation_list',
-                                                             tableColourFunc=None)
+                                                                          prefix='ccpn_distance_restraint_violation_',
+                                                                          mappingCode='ccpn_distance_restraint_violation_list',
+                                                                          errorCode='ccpn_distance_restraint_violation_list',
+                                                                          tableColourFunc=None)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1160,14 +1160,14 @@ class NefDictFrame(Frame):
                                                          )
 
     applyCheckBoxes['ccpn_internal_data'] = partial(apply_checkBox_item,
-                                                         prefix='ccpn_internal_data_',
-                                                         mappingCode='ccpn_additional_data',
-                                                         )
+                                                    prefix='ccpn_internal_data_',
+                                                    mappingCode='ccpn_additional_data',
+                                                    )
 
     applyCheckBoxes['ccpn_distance_restraint_violation_list'] = partial(apply_checkBox_item,
-                                                             prefix='ccpn_distance_restraint_violation_',
-                                                             mappingCode='ccpn_distance_restraint_violation_list',
-                                                             )
+                                                                        prefix='ccpn_distance_restraint_violation_',
+                                                                        mappingCode='ccpn_distance_restraint_violation_list',
+                                                                        )
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1364,9 +1364,9 @@ class ImportNefPopup(CcpnDialogMainWidget):
             self.project = None
         self._size = size
 
-        if not isinstance(nefImporterClass, type(Nef.NefImporter)):
+        if not isinstance(nefImporterClass, (type(Nef.NefImporter), type(None))):
             raise RuntimeError(f'{nefImporterClass} must be of type {Nef.NefImporter}')
-        self._nefImporterClass = nefImporterClass
+        self._nefImporterClass = nefImporterClass if nefImporterClass else Nef.NefImporter
 
         # create a list of nef dictionary objects
         self.setNefObjects(nefObjects)

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-07 09:53:45 +0100 (Fri, May 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-11 09:59:06 +0100 (Tue, May 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -139,7 +139,7 @@ def _ccpnExceptionhook(type, value, tback):
 sys.excepthook = _ccpnExceptionhook
 
 
-def _strList(inlist:list, maxlen:int=80) -> list:
+def _strList(inlist: list, maxlen: int = 80) -> list:
     outstr = ''
     # skip = False  # print commas and ampersand
     lencount = maxlen
@@ -1999,10 +1999,13 @@ class Framework(NotifierBase):
             NEFFRAMEKEY_IMPORT, NEFFRAMEKEY_ENABLEMOUSEMENU, NEFFRAMEKEY_PATHNAME, \
             NEFFRAMEKEY_ENABLEFILTERFRAME, NEFFRAMEKEY_ENABLECHECKBOXES
         from ccpn.util.nef import NefImporter as Nef
+        from ccpn.util.CcpnNefImporter import CcpnNefImporter
         from ccpn.framework.PathsAndUrls import nefValidationPath
 
         # dataBlock = self.nefReader.getNefData(path)
 
+        # the loader can be subclassed if required, and the type passed as nefImporterClass
+        # _loader = CcpnNefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
         _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
         _loader.loadFile(path)
         _loader.loadValidateDictionary(nefValidationPath)
@@ -2011,6 +2014,7 @@ class Framework(NotifierBase):
         selection = None
 
         dialog = ImportNefPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                # nefImporterClass=CcpnNefImporter,
                                 nefObjects=({NEFFRAMEKEY_IMPORT: self.project,
                                              },
                                             {NEFFRAMEKEY_IMPORT           : _loader,
@@ -2894,9 +2898,9 @@ class Framework(NotifierBase):
 
     @logCommand('application.')
     def showViolationTable(self,
-                               position: str = 'bottom',
-                               relativeTo: CcpnModule = None,
-                               peakList=None, selectFirstItem=False):
+                           position: str = 'bottom',
+                           relativeTo: CcpnModule = None,
+                           peakList=None, selectFirstItem=False):
         """Displays violation table.
         """
         from ccpn.ui.gui.modules.ViolationTable import ViolationTableModule

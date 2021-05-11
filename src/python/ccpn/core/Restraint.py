@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:47 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-11 09:59:05 +0100 (Tue, May 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -319,12 +319,14 @@ def _newRestraint(self: RestraintList, figureOfMerit: float = None, comment: str
     :param serial: optional serial number.
     :return: a new Restraint instance.
     """
+    dd = {'figureOfMerit': figureOfMerit, 'vectorLength': vectorLength, 'details': comment,}
+
     if peaks:
         getByPid = self._project.getByPid
         peaks = [(getByPid(x) if isinstance(x, str) else x) for x in peaks]
-
-    dd = {'figureOfMerit': figureOfMerit, 'vectorLength': vectorLength, 'details': comment,
-          'peaks': [pk._wrappedData for pk in peaks]}
+        apiPeaks = [pk._wrappedData for pk in peaks if isinstance(pk, Peak)]
+        if apiPeaks:
+            dd['peaks'] = apiPeaks
 
     apiRestraint = self._wrappedData.newGenericConstraint(**dd)
     result = self._project._data2Obj.get(apiRestraint)
@@ -382,7 +384,8 @@ def _createSimpleRestraint(self: RestraintList, comment: str = None, figureOfMer
     if peaks:
         getByPid = self._project.getByPid
         peaks = [(getByPid(x) if isinstance(x, str) else x) for x in peaks]
-        values['peaks'] = tuple(x.pid for x in peaks)
+        # this doesn't appear to be used
+        values['peaks'] = tuple(pk.pid for pk in peaks if isinstance(pk, Peak))
 
     restraint = self.newRestraint(comment=comment, peaks=peaks, figureOfMerit=figureOfMerit,
                                   vectorLength=vectorLength, )

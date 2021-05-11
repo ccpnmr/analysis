@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:51 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-11 09:59:06 +0100 (Tue, May 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -456,10 +456,11 @@ GuiTable::item::selected {
             if _disableScroll:
                 self._scrollOverride = True
 
-            _widgetState.enabledState = self.updatesEnabled()
-            _widgetState.rootBlocker = QtCore.QSignalBlocker(self)
+            # use the Qt widget to block signals - selectionModel must also be blocked
             _widgetState.modelBlocker = QtCore.QSignalBlocker(self.selectionModel())
-            self.setUpdatesEnabled(False)
+            _widgetState.rootBlocker = QtCore.QSignalBlocker(self)
+            # _widgetState.enabledState = self.updatesEnabled()
+            # self.setUpdatesEnabled(False)
 
             if blanking and self.project:
                 if self.project:
@@ -479,10 +480,10 @@ GuiTable::item::selected {
                     if self.project:
                         self.project.unblankNotification()
 
-                self.setUpdatesEnabled(_widgetState.enabledState)
-                _widgetState.rootBlocker = None
                 _widgetState.modelBlocker = None
-                _widgetState.enabledState = None
+                _widgetState.rootBlocker = None
+                # self.setUpdatesEnabled(_widgetState.enabledState)
+                # _widgetState.enabledState = None
 
                 if _disableScroll:
                     self._scrollOverride = False

@@ -1,15 +1,15 @@
 import sys
-from enum import IntEnum
-from itertools import zip_longest
 
-from PyQt5 import QtGui, QtCore
+
+from PyQt5 import QtGui
 from PyQt5.QtCore import QPointF, QRectF, Qt, QTimer, QObject, QRect, QPoint, pyqtProperty
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QLinearGradient, QBrush, QFont, QFontMetrics, QCursor, \
-    QGuiApplication, QPolygon, QPolygonF, QPixmap, QPalette
+    QGuiApplication
 from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsItem, QGraphicsItemGroup, QGraphicsRectItem, QLabel, \
-    QWidget, QGraphicsObject, QStyleOption, QStyle, QStylePainter, QCheckBox, QVBoxLayout, QLineEdit
+    QWidget, QGraphicsObject, QCheckBox, QLineEdit, QFormLayout
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
+from SpeechBalloon import SpeechBalloon
 
 # class MyGraphicsScene(QGraphicsScene):
 #     def drawBackground(self, painter, rect):
@@ -20,7 +20,7 @@ from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 #
 #         super(MyGraphicsScene, self).drawBackground(painter, rect)
 #         painter.fillRect(rect, myBrush)
-from icecream import ic
+
 
 # TODO cleanup code
 # * TODO set values - done
@@ -29,9 +29,11 @@ from icecream import ic
 # * TODO bubble should display formatted value - done
 # * TODO system should broadcast converted values - done
 # - TODO adapt balloon to size of children
-# TODO remove 'arbitary' fudge factors
+# TODO remove 'arbitrary' fudge factors
 # TODO off by 1 error on handle balloon position
 # TODO when dragging handles balloon position overruns
+# TODO support for mouse wheel
+# TODO add timer to display balloon window
 # TODO pull request
 
 
@@ -42,18 +44,14 @@ LEFT = 0
 RIGHT = 1
 BOTH = 2
 
-class DoubleRangeView(QGraphicsView):
 
+class DoubleRangeView(QGraphicsView):
     # signals
     valuesChanged = pyqtSignal(int, int, name='valuesChanged')
     displayValues = pyqtSignal(object, object, name='displayValues')
     rangeChanged = pyqtSignal(int, int, name='rangeChanged')
     sliderPressed = pyqtSignal(int, name='sliderPressed')
     sliderReleased = pyqtSignal(int, name='sliderReleased')
-
-
-    # not implememented
-    # void	actionTriggered(int action)
 
     def __init__(self):
 
@@ -62,10 +60,9 @@ class DoubleRangeView(QGraphicsView):
         self._slider = Slider()
         self._slider.setName('slider')
 
-        self._balloon = SpeechBalloon(owner=self)
+        self._balloon = SpeechBalloon(owner=self, ontop=True)
         self._balloon.setStyleSheet('color: gray;')
         self._balloon.setGeometry(200, 200, 70, 30)
-
 
         label = MyLabel('test', parent=self._balloon)
         label.setAlignment(Qt.AlignCenter)
@@ -108,18 +105,18 @@ class DoubleRangeView(QGraphicsView):
 
         self.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform | QPainter.HighQualityAntialiasing)
 
-
         QApplication.instance().applicationStateChanged.connect(self._change_activation)
 
         self.setMouseTracking(True)
 
-    def setvalueConverter(self, converter):
+    def setValueConverter(self, converter):
         """
         takes a value an converts it for display
         :param converter: function taking a single value and returning a single value
         :return:
         """
         self._value_converter = converter
+
     def setValueFormatter(self, formatter):
         """
         takes a value and formats it to a string for display
@@ -128,6 +125,12 @@ class DoubleRangeView(QGraphicsView):
         """
         self._value_formatter = formatter
 
+    def _swapMinMaxIfRequired(self):
+        if self._min_value > self._max_value:
+            self._max_value, self._min_value = self._min_value, self._max_value
+
+        print('WARNING: min and max values inverted in double slider: correcting ')
+
     @pyqtProperty(float)
     def minValue(self):
         return self._min_value
@@ -135,6 +138,8 @@ class DoubleRangeView(QGraphicsView):
     @minValue.setter
     def setMinValue(self, value):
         self._min_value = value
+
+        self._swapMinMaxIfRequired()
 
         #TODO: update controls
 
@@ -146,6 +151,8 @@ class DoubleRangeView(QGraphicsView):
     def setMaxValue(self, value):
         self._max_value = value
 
+        self._swapMinMaxIfRequired()
+
         # TODO: update controls
 
     @pyqtProperty(float)
@@ -153,8 +160,8 @@ class DoubleRangeView(QGraphicsView):
         return self._single_unit_move
 
     @pageStep.setter
-    def pageStep(self, pageStep):
-        self._single_unit_move = pageStep
+    def pageStep(self, page_step):
+        self._single_unit_move = page_step
 
         # pageStep: int
         # TODO: single step
@@ -166,7 +173,6 @@ class DoubleRangeView(QGraphicsView):
     def _calculate_min_max_handle_centre_positions(self, global_system=True):
         scene_rect = self.sceneRect()
         if global_system:
-
             global_pos = self.mapToGlobal(scene_rect.topLeft().toPoint())
             # ic(global_pos)
             scene_rect = QRect(global_pos, scene_rect.size().toSize())
@@ -180,11 +186,11 @@ class DoubleRangeView(QGraphicsView):
     def setValues(self, left_value, right_value):
         self._values = [left_value, right_value]
         self._calculate_min_max_pixel_ranges()
-        min_position,max_position = self._min_max_handle_positions()
+        min_position, max_position = self._min_max_handle_positions()
 
         proportions = self._proportions_from_values((left_value, right_value))
 
-        position_range = max_position-min_position
+        position_range = max_position - min_position
         positions = []
         for proportion in proportions:
             positions.append(min_position + (proportion * position_range))
@@ -199,24 +205,22 @@ class DoubleRangeView(QGraphicsView):
         left_slider_position = positions[LEFT] - centre_min_width_2 - (self._slider._handle_left.width() / 2) + 0.5
         right_slider_position = positions[RIGHT] + centre_min_width_2 + (self._slider._handle_right.width() / 2) + 0.5
 
-
-        self._slider._handle_left.setPos(QPointF(left_slider_position,self._slider._handle_left.pos().y()))
+        self._slider._handle_left.setPos(QPointF(left_slider_position, self._slider._handle_left.pos().y()))
         self._slider._handle_right.setPos(right_slider_position, self._slider._handle_right.pos().y())
 
         self._slider.addToGroup(self._slider._handle_left)
         self._slider.addToGroup(self._slider._handle_right)
 
-        self._slider._centre.setText('%i' % ((right_value-left_value) + 1))
+        self._slider._centre.setText('%i' % ((right_value - left_value) + 1))
 
         self._slider._expand_centre()
 
-
-    @pyqtProperty(int,int)
+    @pyqtProperty(int, int)
     def range(self):
         return self._min_value, self._max_value
 
     @range.setter
-    def setRange(self, min_value,max_value):
+    def setRange(self, min_value, max_value):
         if min_value > max_value:
             min_value, max_value = max_value, min_value
         self._min_value = min_value
@@ -240,25 +244,24 @@ class DoubleRangeView(QGraphicsView):
         if orig_values != updated_values:
             self.setValues(*updated_values)
 
-
     def _handle_rects_from_positions(self, positions):
 
         centre_min_width_2 = self._slider._centre.min_width()
 
         left_handle = self._slider._handle_left
         left_rect = left_handle.rect().translated(0, 0)
-        left_rect.setLeft(positions[0] - left_handle.width()-centre_min_width_2)
-        left_rect.setRight( left_rect.left() + left_handle.width())
+        left_rect.setLeft(positions[0] - left_handle.width() - centre_min_width_2)
+        left_rect.setRight(left_rect.left() + left_handle.width())
 
         right_handle = self._slider._handle_right
-        right_rect = right_handle.rect().translated(0,0)
-        right_rect.setRight(positions[1] + right_handle.width()-centre_min_width_2)
+        right_rect = right_handle.rect().translated(0, 0)
+        right_rect.setRight(positions[1] + right_handle.width() - centre_min_width_2)
         right_rect.setLeft(right_rect.right() - right_handle.width())
 
         return left_rect, right_rect
 
     def _proportions_from_values(self, values):
-        value_range = self._max_value -  self._min_value
+        value_range = self._max_value - self._min_value
 
         result = []
         for value in values:
@@ -269,7 +272,6 @@ class DoubleRangeView(QGraphicsView):
     # sliderDown: bool
     # sliderPosition: int
     # tracking: bool
-
 
     def _change_activation(self, state):
         if state != Qt.ApplicationActive:
@@ -322,15 +324,13 @@ class DoubleRangeView(QGraphicsView):
 
         size = values[RIGHT] - values[LEFT]
 
-        self._slider._centre.setText(str(int(size+1)))
+        self._slider._centre.setText(str(int(size + 1)))
 
         self._values = values
 
         self.valuesChanged.emit(int(values[LEFT]), int(values[RIGHT]))
         display_values = [self._calculate_display_value(value) for value in values]
         self.displayValues.emit(*display_values)
-
-
 
     def _calculate_values(self):
         """
@@ -437,7 +437,7 @@ class DoubleRangeView(QGraphicsView):
             event.ignore()
 
         super(DoubleRangeView, self).mousePressEvent(event)
-        
+
     def mouseReleaseEvent(self, event):
 
         if self._enabled:
@@ -445,7 +445,6 @@ class DoubleRangeView(QGraphicsView):
             super(DoubleRangeView, self).mouseReleaseEvent(event)
             if not event.isAccepted():
                 self.single_click_move(event)
-
 
             if self._repeat_timer:
                 self._repeat_timer.stop()
@@ -459,7 +458,7 @@ class DoubleRangeView(QGraphicsView):
             Calculate the minimum and maximum positions of the handles
             either in the scene or global coordinate system
 
-            :param global_system: if True use global coordinate system other sceene
+            :param global_system: if True use global coordinate system other scene
             :return: float,float min_position, maximum_position
         """
         centre_width_2 = self._slider._centre.min_width() / 2
@@ -477,8 +476,9 @@ class DoubleRangeView(QGraphicsView):
         scene_left = scene_top_left.x()
         scene_right = scene_bottom_right.x()
 
-        return scene_left + slider_width_left + centre_width_2-0.5, scene_right - slider_width_right - centre_width_2-0.5
-
+        min_width = scene_left + slider_width_left + centre_width_2 - 0.5
+        max_width = scene_right - slider_width_right - centre_width_2 - 0.5
+        return min_width, max_width
 
     def _position_to_value(self, pos):
         """
@@ -495,7 +495,6 @@ class DoubleRangeView(QGraphicsView):
 
         return (proportion * (self._max_value - self._min_value)) + 1
 
-
     def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
 
         pos = event.pos()
@@ -511,7 +510,7 @@ class DoubleRangeView(QGraphicsView):
             if self._slider._long_click_state == self._slider.INSIDE:
                 min_x, max_x = self._calculate_min_max_handle_centre_positions(global_system=True)
             else:
-                #TODO: needs limiting by position of handles...
+                # TODO: needs limiting by position of handles...
                 min_x, max_x = self._min_max_handle_positions(global_system=True)
 
             event_x = event.globalPos().x()
@@ -543,7 +542,6 @@ class DoubleRangeView(QGraphicsView):
                     value_string = '%4.1f' % value
                 self._balloon.children()[0].setText(value_string)
 
-        
         return super(DoubleRangeView, self).mouseMoveEvent(event)
 
     def _calculate_display_value(self, value):
@@ -577,8 +575,8 @@ class DoubleRangeView(QGraphicsView):
         elif pos.x() > self._slider.sceneBoundingRect().center().x():
             x_offset = move
 
-        slider_rect = self._slider.sceneBoundingRect().translated(0,0)
-        slider_rect.translate(QPointF(x_offset,0))
+        slider_rect = self._slider.sceneBoundingRect().translated(0, 0)
+        slider_rect.translate(QPointF(x_offset, 0))
 
         dist = pos.x() - slider_rect.center().x()
 
@@ -586,13 +584,13 @@ class DoubleRangeView(QGraphicsView):
             x_offset = dist
         self._slider._offset_slider(x_offset, self._slider.scenePos(), self._slider.sceneRect())
 
-
     def setEnabled(self, enabled):
         self._enabled = enabled
         self._slider.setEnabled(enabled)
         self._track.setEnabled(enabled)
-        if enabled == False:
+        if not enabled:
             self._balloon.hide()
+
 
 class Named:
     def __init__(self):
@@ -621,11 +619,11 @@ class GraphicsRoundedRectItem(QGraphicsRectItem, Named):
         #     qt_graphicsItem_highlightSelected(this, painter, option);
 
     def shape(self) -> QtGui.QPainterPath:
-
         path = QPainterPath()
         path.addRoundedRect(self.rect(), self._x_radius, self._y_radius)
 
         return path
+
 
 class Track(GraphicsRoundedRectItem, Named):
 
@@ -651,11 +649,9 @@ class Track(GraphicsRoundedRectItem, Named):
 
         super(Track, self).paint(painter, option, target_widget)
 
-
         if self._line_pos and self.isEnabled():
 
             if self._marker_is_visible():
-
                 painter.setPen(self._marker_pen)
                 painter.setClipping(True)
                 painter.setClipPath(self.shape())
@@ -664,7 +660,6 @@ class Track(GraphicsRoundedRectItem, Named):
                 top = self.rect().top()
 
                 painter.drawLine(QPointF(self._line_pos, bottom), QPointF(self._line_pos, top))
-
 
     def _marker_is_visible(self):
         return (self.rect().left() + self._x_radius) < self._line_pos < (self.rect().right() - self._x_radius)
@@ -706,6 +701,8 @@ class Slider(QGraphicsItemGroup, Named):
 
         self._enabled = True
 
+        self._last_mouse_scene = None
+        self._long_click_rect = None
 
     def setHighlighted(self, highlighted):
         self._handle_left.setHighlighted(highlighted)
@@ -833,14 +830,11 @@ class Slider(QGraphicsItemGroup, Named):
                         break
 
                     if child == self._handle_left:
-                        # ic('left')
                         self.parent().sliderPressed.emit(LEFT)
 
             self._widget_rect = self.sceneRect()
             self._widget_pos = self.scenePos()
             self._long_click_pos = event.scenePos()
-
-
 
             if handle_click:
                 event.accept()
@@ -848,7 +842,6 @@ class Slider(QGraphicsItemGroup, Named):
                 self._long_click_timer.setSingleShot(True)
                 self._long_click_timer.timeout.connect(self._long_clicked)
                 self._long_click_timer.start(1000)
-
 
                 self._long_click_state = self.WAIT
 
@@ -908,7 +901,7 @@ class Slider(QGraphicsItemGroup, Named):
 
                 max_pos, min_pos = self._min_max_x_for_handle(self._last_click_widget)
 
-                new_rect = self._long_click_rect.translated(0,0)
+                new_rect = self._long_click_rect.translated(0, 0)
                 new_rect.translate(offset)
 
                 if new_rect.left() < min_pos:
@@ -921,7 +914,6 @@ class Slider(QGraphicsItemGroup, Named):
                 offset = offset.x() + correction
 
                 self.offset_handle(offset)
-
 
             elif self._long_click_state != self.INSIDE:
                 event.accept()
@@ -936,18 +928,18 @@ class Slider(QGraphicsItemGroup, Named):
         else:
             event.ignore()
 
-    def _min_max_x_for_handle(self, widget):
+    def _min_max_x_for_handle(self, target_widget):
         centre_min_width = self._centre.min_width()
         # min and max positions allowing for positions of other handle
         # measurements from left edge... [**not consistent**]
-        # TODO: make consistent! we should always do all positionin and measurements
+        # TODO: make consistent! we should always do all position in and measurements
         # from the virtual centre of the handle and then map to handles
         #   left: handle.right + min_width_centre/2
         #   right handle.left - min_width_centre/2
-        if widget == self._handle_left:
+        if target_widget == self._handle_left:
             min_pos = self.scene().sceneRect().left()
             max_pos = self._handle_right.sceneRect().left() - centre_min_width - self._handle_left.width()
-        elif widget == self._handle_right:
+        elif target_widget == self._handle_right:
             min_pos = self._handle_left.sceneRect().right() + centre_min_width
             max_pos = self.scene().sceneRect().right() - self._handle_right.width()
         else:
@@ -1025,18 +1017,8 @@ class Slider(QGraphicsItemGroup, Named):
         self._last_click_widget.setHighlighted(True)
         self._last_click_widget.update()
 
-    # def paint(self, painter, option, widget):
-    #     # print('0iujfge =0w9uv0=9ui=09iu ew t0', QPointF(self.rect().center().x(), self.rect().top()), QPointF(self.rect().center().x(), self.rect().bottom()))
-    #     super(Slider, self).paint(painter,option, widget)
-    #     pen = QPen(QColor('orange'))
-    #     pen.setWidth(2)
-    #     painter.setPen(pen)
-    #
-    #     painter.drawLine(QPointF(self.rect().center().x(), self.rect().top()-4), QPointF(self.rect().center().x(), self.rect().bottom()+4))
-
 
 # noinspection PyMethodOverriding - draw method signature wrong
-
 class GraphicsItemBase(QGraphicsObject):
     def __init__(self, parent=None):
         super(GraphicsItemBase, self).__init__(parent=parent)
@@ -1061,13 +1043,12 @@ class GraphicsItemBase(QGraphicsObject):
         return self.mapRectToScene(self.rect())
 
     def boundingRect(self):
-
         pen_2 = self._pen_width / 2.0
         new_result = self.rect().adjusted(-pen_2, -pen_2, pen_2, pen_2)
 
         return new_result
 
-    
+
 class Centre(GraphicsItemBase, Named):
     def __init__(self, width=None, parent=None):
         super(Centre, self).__init__(parent=parent)
@@ -1164,7 +1145,7 @@ class HandleItem(GraphicsItemBase, Named):
         self._grip_offset = 1.25
         self._orientation = orientation
 
-        self._higlighted = False
+        self._highlighted = False
 
         self._highlight_color = '#b9bbe0'  # '#686dbe'
 
@@ -1179,19 +1160,19 @@ class HandleItem(GraphicsItemBase, Named):
 
         if self._orientation == LEFT:
             position = self.mapToScene(self.rect().topRight()).x()
-        elif self._orientation ==  RIGHT:
+        elif self._orientation == RIGHT:
             position = self.mapToScene(self.rect().bottomLeft()).x()
         else:
-            msg = f"""Unexpected error: bad orientation expected one of [LEFT,RIGHT] got {self._orientation }"""
-            raise Exception()
+            msg = f"""Unexpected error: bad orientation expected one of [LEFT,RIGHT] got {self._orientation}"""
+            raise Exception(msg)
 
         return position
 
     def highlighted(self):
-        return self._higlighted
+        return self._highlighted
 
     def setHighlighted(self, highlighted):
-        self._higlighted = highlighted
+        self._highlighted = highlighted
 
     def width(self):
         return self._width
@@ -1204,7 +1185,7 @@ class HandleItem(GraphicsItemBase, Named):
         # could do with context manager
         painter.save()
 
-        if self._higlighted:
+        if self._highlighted:
             brush = QBrush(QColor(self._highlight_color))
         else:
             gradient = QLinearGradient(QPointF(0, -15), QPointF(0.0, 15))
@@ -1280,8 +1261,6 @@ class SelectArgument(QObject):
         self.output.emit(args[self._index])
 
 
-
-
 class MyApplication(QApplication):
     def __init__(self, arg):
         super(MyApplication, self).__init__(arg)
@@ -1291,10 +1270,10 @@ class MyApplication(QApplication):
 
     def _update(self):
         pos = QCursor.pos()
-        window = self.activeWindow()
+        target_window = self.activeWindow()
 
         if window:
-            window.move_pointer_to(pos)
+            target_window.move_pointer_to(pos)
 
 
 class MyLabel(QLabel):
@@ -1328,7 +1307,7 @@ class ConvertToInt(QObject):
         value = None
         try:
             value = self._converter(arg)
-        except:
+        except ValueError:
             pass
         if value:
             self.output.emit(value)
@@ -1345,7 +1324,6 @@ class BufferTillEnter(QObject):
         self.output.emit(self._buffer)
 
     def input(self, value):
-
         self._buffer = value
 
 
@@ -1364,13 +1342,16 @@ class SetOneOf(QObject):
             results = self._target()
         elif isinstance(self._target, (pyqtProperty, property)):
             results = self._target.__get__(self._instance, self._instance.__class__)
+        else:
+            raise Exception('unexpected')
 
         # ic(results)
         results = list(results)
         results[self._index] = value
-
+        results = [int(result) for result in results]
         # ic(results)
         self.output.emit(*results)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -1398,17 +1379,17 @@ if __name__ == '__main__':
     lineEdit1 = QLineEdit()
     lineEdit2 = QLineEdit()
 
-    v_layout = QVBoxLayout()
-    v_layout.addWidget(label1)
-    v_layout.addWidget(label2)
-    v_layout.addWidget(label3)
-    v_layout.addWidget(label4)
-    v_layout.addWidget(label5)
-    v_layout.addWidget(label6)
-    v_layout.addWidget(lineEdit1)
-    v_layout.addWidget(lineEdit2)
-    v_layout.addWidget(label6)
-    v_layout.addWidget(check)
+    v_layout = QFormLayout()
+    v_layout.addRow('Left Value [signal]', label1)
+    v_layout.addRow('Right Value [signal]', label2)
+    v_layout.addRow('Min Value [signal]', label3)
+    v_layout.addRow('Max Value [signal]', label4)
+    v_layout.addRow('Derived value left [signal]', label5)
+    v_layout.addRow('Derived value right[signal]', label6)
+    v_layout.addRow('Left Value [set]', lineEdit1)
+    v_layout.addRow('Right Value [set]', lineEdit2)
+
+    v_layout.addRow('Enabled', check)
 
     container = QWidget()
     container.setLayout(v_layout)
@@ -1426,7 +1407,7 @@ if __name__ == '__main__':
 
     view = DoubleRangeView()
 
-    view.setvalueConverter(lambda x: (x * -1.2))
+    view.setValueConverter(lambda x: (x * -1.2))
     view.setValueFormatter(lambda x: "%4.3f" % x)
 
     argument_0 = SelectArgument(0)
@@ -1463,16 +1444,16 @@ if __name__ == '__main__':
 
     int_1 = ConvertToInt()
     buffer_1 = BufferTillEnter()
-    select_first = SetOneOf(0, target=DoubleRangeView.values, instance = view)
+    select_first = SetOneOf(0, target=DoubleRangeView.values, instance=view)
     lineEdit1.textEdited.connect(buffer_1.input)
     lineEdit1.returnPressed.connect(buffer_1.trigger)
-    buffer_1.output.connect( int_1.input)
+    buffer_1.output.connect(int_1.input)
     int_1.output.connect(select_first.input)
     select_first.output.connect(view.setValues)
 
     int_2 = ConvertToInt()
     buffer_2 = BufferTillEnter()
-    select_second = SetOneOf(1, target=DoubleRangeView.values, instance = view)
+    select_second = SetOneOf(1, target=DoubleRangeView.values, instance=view)
     lineEdit2.textEdited.connect(buffer_2.input)
     lineEdit2.returnPressed.connect(buffer_2.trigger)
     buffer_2.output.connect(int_2.input)
@@ -1483,6 +1464,5 @@ if __name__ == '__main__':
     bar.addWidget(view)
 
     window.show()
-
 
     app.exec_()

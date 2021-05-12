@@ -37,10 +37,14 @@ class SpeechBalloon(QWidget):
          +------+
     """
 
-    def __init__(self, side=Side.BOTTOM, percentage=50, owner=None, parent=None):
+    def __init__(self, side=Side.BOTTOM, percentage=50, owner=None, parent=None, ontop=False):
 
         super(SpeechBalloon, self).__init__(parent)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+
+        flags = Qt.FramelessWindowHint
+        if ontop:
+            flags |= Qt.WindowStaysOnTopHint
+        self.setWindowFlags(flags)
         self.setAttribute(Qt.WA_NoSystemBackground)
 
         self._pointer_height = 10

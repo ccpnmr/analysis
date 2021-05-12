@@ -216,7 +216,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     def modules(self):
         """Return tuple of modules currently displayed
         """
-        return tuple([m for m in self.moduleArea.modules.values()])
+        return tuple(self.moduleArea.ccpnModules)
 
     def _setupNotifiers(self):
         """Setup notifiers connecting gui to current and project

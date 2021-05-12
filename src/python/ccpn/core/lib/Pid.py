@@ -353,3 +353,8 @@ class Pid(str):
         if hasattr(klass, 'className') and self.type == klass.className:
             return True
         return False
+
+    def toClipboard(self):
+        """ Copy a single quoted Pid to clipboard. """
+        from util.Common import copyToClipboard
+        copyToClipboard([self])

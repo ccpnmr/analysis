@@ -970,12 +970,12 @@ class Framework(NotifierBase):
         if obj:
             return obj
         else:
-            modules = [module for module in self.ui.mainWindow.modules if module.pid == pid] if isinstance(self.ui, Gui) else None
-            return modules[0] if modules else None
+            if isinstance(self.ui, Gui):
+                return self.ui.mainWindow.moduleArea.modules.get(Pid(pid).id)
 
     def getByGid(self, gid):
         "Convenience"
-        return self.ui.getByGid(gid)
+        return self.getByPid(gid)
 
     # def _startCommandBlock(self, command: str, quiet: bool = False, **objectParameters):
     #     """Start block for command echoing, set undo waypoint, and echo command to ui and logger

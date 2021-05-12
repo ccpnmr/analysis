@@ -312,7 +312,7 @@ class Gui(Ui):
 
     #TODO:RASMUS: should discuss how application should deal with it
     def getByGid(self, gid):
-        return self.application.project.getByPid(gid)
+        return self.application.getByGid(gid)
 
     def _execUpdates(self):
         sys.stderr.write('==> Gui update\n')

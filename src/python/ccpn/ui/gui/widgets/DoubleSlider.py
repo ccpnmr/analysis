@@ -125,6 +125,12 @@ class DoubleRangeView(QGraphicsView):
         """
         self._value_formatter = formatter
 
+    def _swapMinMaxIfRequired(self):
+        if self._min_value > self._max_value:
+            self._max_value, self._min_value = self._min_value, self._max_value
+
+        print('WARNING: min and max values inverted in double slider: correcting ')
+
     @pyqtProperty(float)
     def minValue(self):
         return self._min_value
@@ -132,6 +138,8 @@ class DoubleRangeView(QGraphicsView):
     @minValue.setter
     def setMinValue(self, value):
         self._min_value = value
+
+        self._swapMinMaxIfRequired()
 
         #TODO: update controls
 
@@ -142,6 +150,8 @@ class DoubleRangeView(QGraphicsView):
     @maxValue.setter
     def setMaxValue(self, value):
         self._max_value = value
+
+        self._swapMinMaxIfRequired()
 
         # TODO: update controls
 

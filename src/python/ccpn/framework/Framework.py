@@ -974,7 +974,7 @@ class Framework(NotifierBase):
                 if PREFIXSEP in pid:
                     pid = Pid(pid)
                     if pid:
-                        return self.ui.mainWindow.moduleArea.modules.get(pid.id)
+                        return self.ui.mainWindow.moduleArea.modules.get(Pid(pid).id)
 
     def getByGid(self, gid):
         "Convenience"

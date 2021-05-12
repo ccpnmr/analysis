@@ -168,7 +168,7 @@ settingsWidgetPositions = {
 ALL = '<all>'
 DoubleUnderscore = '__'
 
-PidLongClassName = 'Module'
+PidClassName = 'Module'
 PidShortClassName = 'MO'
 
 
@@ -1200,6 +1200,15 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         super().resizeEvent(ev)
 
 
+    def __repr__(self):
+        return f'<{PidClassName}:{self.name()}>'
+
+    @property
+    def pid(self) -> str:
+        """Identifier for the object, unique within the project - added to give label to ccpnModules
+        """
+        from ccpn.core.lib.Pid import Pid
+        return Pid(f'{PidShortClassName}:{self.name()}')
 
 
 class CcpnModuleLabel(DockLabel):

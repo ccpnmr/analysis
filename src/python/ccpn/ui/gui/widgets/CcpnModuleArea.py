@@ -114,12 +114,13 @@ class CcpnModuleArea(ModuleArea, DropBase):
         self.mainWindow = mainWindow  # a link back to the parent MainWindow
         self.application = getApplication()  # this will enable to create testing ModuleArea/Modules without mainWindow/project/application
 
-        self.modules = self.docks
+
         self.moveModule = self.moveDock
         self.setContentsMargins(0, 0, 0, 0)
         self.currentModuleNames = []
         self._modulesNames = {}
         self._ccpnModules = []
+        self._modules = {}  # don't use self.docks, is not updated when removing docks
 
         # self.setAcceptDrops(True) GWV not needed; handled by DropBase init
 
@@ -295,6 +296,18 @@ class CcpnModuleArea(ModuleArea, DropBase):
         if self is not None:
             ccpnModules = list(self.findAll()[1].values())
             return ccpnModules
+
+    @property
+    def modules(self) -> dict:
+        """return all current modules in area as a dictionary. Don't use self.docks"""
+        return self._modules
+
+    @ccpnModules.getter
+    def modules(self):
+        if self is not None:
+            modules = self.findAll()[1]
+            return modules
+        return {}
 
     def repopulateModules(self):
         """

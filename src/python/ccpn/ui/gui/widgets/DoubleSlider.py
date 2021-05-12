@@ -691,6 +691,8 @@ class Slider(QGraphicsItemGroup, Named):
 
         self._enabled = True
 
+        self._last_mouse_scene = None
+        self._long_click_rect = None
 
     def setHighlighted(self, highlighted):
         self._handle_left.setHighlighted(highlighted)

@@ -1096,11 +1096,12 @@ GuiTable::item::selected {
             self.searchWidget.show()
 
     def _copySelectedCell(self):
+        from util.Common import copyToClipboard
         i = self.currentItem()
         if i is not None:
             text = i.text().strip()
-            df = pd.DataFrame([text])
-            df.to_clipboard(index=False, header=False)
+            copyToClipboard([text])
+
 
     def deleteObjFromTable(self):
         selected = self.getSelectedObjects()

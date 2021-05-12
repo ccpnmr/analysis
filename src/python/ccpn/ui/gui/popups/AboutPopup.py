@@ -66,7 +66,7 @@ class AboutPopup(CcpnDialog):
     self.label.setPixmap(QtGui.QPixmap(pathPNG))
 
     self.buttons = ButtonList(self, texts=['Close', 'Copy'],
-                                      callbacks=[self.accept, self.copyToClipboard],
+                                      callbacks=[self.accept, self._copyToClipboard],
                                       tipTexts=['Close window', 'Copy text to clipboard'],
                                       grid=(1, 0), hAlign='r')
 
@@ -74,11 +74,10 @@ class AboutPopup(CcpnDialog):
     self.setMaximumSize(self.maximumWidth(), self.maximumHeight())
     # CcpnDialog.fixedSize(self)
 
-  def copyToClipboard(self):
+  def _copyToClipboard(self):
     """TEXT being copied on the clipboard """
-    cb = QtWidgets.QApplication.clipboard()
-    cb.clear(mode=cb.Clipboard)
-    cb.setText(TEXT, mode=cb.Clipboard)
+    from util.Common import copyToClipboard
+    copyToClipboard([TEXT])
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication

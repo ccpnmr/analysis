@@ -166,6 +166,9 @@ settingsWidgetPositions = {
 ALL = '<all>'
 DoubleUnderscore = '__'
 
+PidClassName = 'Module'
+PidShortClassName = 'MO'
+
 
 class CcpnModule(Dock, DropBase, NotifierBase):
     """
@@ -1092,13 +1095,14 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     #=========================================================================================
 
     def __repr__(self):
-        return "<Module:%s>" % self.name()
+        return f'<{PidClassName}:{self.name()}>'
 
     @property
     def pid(self) -> str:
         """Identifier for the object, unique within the project - added to give label to ccpnModules
         """
-        return "Module:%s" % self.name()
+        from ccpn.core.lib.Pid import Pid
+        return Pid(f'{PidShortClassName}:{self.name()}')
 
 
 class CcpnModuleLabel(DockLabel):
@@ -1234,6 +1238,9 @@ class CcpnModuleLabel(DockLabel):
             }""" % (bg, fg, self.labelRadius, self.labelRadius)
             self.setStyleSheet(self.hStyle)
 
+    def _copyPidToClipboard(self):
+        self.module.pid.toClipboard()
+
     def _createContextMenu(self):
 
         contextMenu = Menu('', self, isFloatWidget=True)
@@ -1241,6 +1248,8 @@ class CcpnModuleLabel(DockLabel):
         if len(self.module.mainWindow.moduleArea.ccpnModules) > 1:
             contextMenu.addAction('Close Others', partial(self.module.mainWindow.moduleArea._closeOthers, self.module))
             contextMenu.addAction('Close All', self.module.mainWindow.moduleArea._closeAll)
+        contextMenu.addSeparator()
+        contextMenu.addAction('Copy Pid to clipboard', self._copyPidToClipboard)
 
         # add option to hide the module (but not close) - add a hide icon?
         contextMenu.addSeparator()

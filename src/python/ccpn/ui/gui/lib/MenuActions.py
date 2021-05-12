@@ -476,11 +476,8 @@ class OpenItemABC():
         :param objs:
         Copy to clipboard quoted pids
         """
-        import pandas as pd
-        pids = [str(obj.pid) for obj in objs]
-        text = '{}'.format(', '.join(["'{}'".format(item) for item in pids]))
-        df = pd.DataFrame([text])
-        df.to_clipboard(index=False, header=False)
+        from util.Common import copyToClipboard
+        copyToClipboard(objs)
 
 
 class _openItemChemicalShiftListTable(OpenItemABC):

@@ -1,14 +1,13 @@
 import sys
-from enum import IntEnum
-from itertools import zip_longest
 
-from PyQt5 import QtGui, QtCore
+
+from PyQt5 import QtGui
 from PyQt5.QtCore import QPointF, QRectF, Qt, QTimer, QObject, QRect, QPoint, pyqtProperty
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QLinearGradient, QBrush, QFont, QFontMetrics, QCursor, \
-    QGuiApplication, QPolygon, QPolygonF, QPixmap, QPalette
+    QGuiApplication
 from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsItem, QGraphicsItemGroup, QGraphicsRectItem, QLabel, \
-    QWidget, QGraphicsObject, QStyleOption, QStyle, QStylePainter, QCheckBox, QVBoxLayout, QLineEdit, QFormLayout
+    QWidget, QGraphicsObject, QCheckBox, QLineEdit, QFormLayout
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 from SpeechBalloon import SpeechBalloon
 

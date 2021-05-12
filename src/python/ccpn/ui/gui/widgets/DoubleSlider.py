@@ -1402,16 +1402,16 @@ if __name__ == '__main__':
     lineEdit2 = QLineEdit()
 
     v_layout = QFormLayout()
-    v_layout.addRow('Left Value [signal]',label1)
-    v_layout.addRow('Right Value [signal]',label2)
-    v_layout.addRow('Min Value [signal]',label3)
-    v_layout.addRow('Max Value [signal]',label4)
-    v_layout.addRow('Derived value left [signal]',label5)
-    v_layout.addRow('Derived value right[signal]',label6)
-    v_layout.addRow('Left Value [set]',lineEdit1)
-    v_layout.addRow('Right Value [set]',lineEdit2)
+    v_layout.addRow('Left Value [signal]', label1)
+    v_layout.addRow('Right Value [signal]', label2)
+    v_layout.addRow('Min Value [signal]', label3)
+    v_layout.addRow('Max Value [signal]', label4)
+    v_layout.addRow('Derived value left [signal]', label5)
+    v_layout.addRow('Derived value right[signal]', label6)
+    v_layout.addRow('Left Value [set]', lineEdit1)
+    v_layout.addRow('Right Value [set]', lineEdit2)
 
-    v_layout.addRow('Enabled',check)
+    v_layout.addRow('Enabled', check)
 
     container = QWidget()
     container.setLayout(v_layout)
@@ -1466,16 +1466,16 @@ if __name__ == '__main__':
 
     int_1 = ConvertToInt()
     buffer_1 = BufferTillEnter()
-    select_first = SetOneOf(0, target=DoubleRangeView.values, instance = view)
+    select_first = SetOneOf(0, target=DoubleRangeView.values, instance=view)
     lineEdit1.textEdited.connect(buffer_1.input)
     lineEdit1.returnPressed.connect(buffer_1.trigger)
-    buffer_1.output.connect( int_1.input)
+    buffer_1.output.connect(int_1.input)
     int_1.output.connect(select_first.input)
     select_first.output.connect(view.setValues)
 
     int_2 = ConvertToInt()
     buffer_2 = BufferTillEnter()
-    select_second = SetOneOf(1, target=DoubleRangeView.values, instance = view)
+    select_second = SetOneOf(1, target=DoubleRangeView.values, instance=view)
     lineEdit2.textEdited.connect(buffer_2.input)
     lineEdit2.returnPressed.connect(buffer_2.trigger)
     buffer_2.output.connect(int_2.input)
@@ -1486,6 +1486,5 @@ if __name__ == '__main__':
     bar.addWidget(view)
 
     window.show()
-
 
     app.exec_()

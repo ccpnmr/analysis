@@ -88,7 +88,7 @@ WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 #                                    defaultFileNameChar)
 
 
-def incrementName(name):
+def incrementName(name, startsFrom:int=1):
     """Add '_1' to name or change suffix '_n' to '_(n+1)
     """
     ll = name.rsplit('_', 1)

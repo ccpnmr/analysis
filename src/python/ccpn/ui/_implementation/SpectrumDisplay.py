@@ -550,8 +550,24 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     # Add name, setting and insuring uniqueness if necessary
     if name is None:
         if is1D:
-            name = ''.join(['1D_', axisCodes[0]])
+            name = ''.join(['1D_', axisCodes[0]]) + '_1'
         else:
+            title = ''.join([str(x)[0:1] for x in axisCodes]) + '_1'
+    elif Pid.altCharacter in title:
+        raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
+
+    # display = self.getSpectrumDisplay(title)
+    while self.getSpectrumDisplay(title):
+        title = commonUtil.incrementName(title)
+    displayPars['name'] = title
+
+    if independentStrips:
+        # Create FreeStripDisplay
+        apiSpectrumDisplay = apiTask.newFreeDisplay(**displayPars)
+    else:
+        # Create Boundstrip/Nostrip display and first strip
+        displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
+        apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
             name = ''.join(['%dD_' % spectrum.dimensionCount] + [str(x)[0:1] for x in axisCodes])
     name = SpectrumDisplay._uniqueApiName(project, name)
     displayPars['name'] = name

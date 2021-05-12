@@ -207,6 +207,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     settingsPosition = 'top'
     settingsMinimumSizes = (100, 50)
     _restored = False
+    _onlySingleInstance = False
 
     # _instances = set()
 
@@ -262,9 +263,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         # Logging.getLogger().debug('module:"%s"' % (name,))
         self.mainWindow = mainWindow
         self.closeFunc = closeFunc
-        self._nameSplitter = ':'  #used to create the serial
-        self._serial = None
-        self._titleName = None  # name without serial
+        self._nameSplitter = '_'  # used to create the serial
+        self._serial = None       # int after the nameSplitter
+        self._titleName = None    # name without serial
         CcpnModule.moduleName = name
 
         # from ccpn.framework.Application import getApplication
@@ -565,24 +566,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             return title
         else:
             return moduleName
-
-    @property
-    def serial(self):
-        return self._serial
-
-    @serial.setter
-    def serial(self, value):
-        if isinstance(value, str):
-            try:
-                value = int(value)
-                return
-            except Exception as e:
-                getLogger().warnig('Cannot set attribute %s' % e)
-        if isinstance(value, int):
-            self._serial = value
-            return
-        else:
-            getLogger().warning('Cannot set attribute. Serial must be an Int type')
 
     @property
     def widgetsState(self):
@@ -1099,10 +1082,34 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
     @property
     def pid(self) -> str:
-        """Identifier for the object, unique within the project - added to give label to ccpnModules
+        """
+        Identifier for the object, unique within the project - added to give label to ccpnModules
         """
         from ccpn.core.lib.Pid import Pid
-        return Pid(f'{PidShortClassName}:{self.name()}')
+        return Pid(f'{PidShortClassName}:{self.id}')
+
+    @property
+    def id(self):
+        """
+        Effectively the Module name.  Without Class name and serial
+        """
+        return self.titleName
+
+    @property
+    def serial(self):
+        """
+        The progressive number after the name
+        """
+        if self._onlySingleInstance:
+            return 1
+        serial = self.name().split(self._nameSplitter)[-1]
+        try:
+            self._serial = int(serial)
+            return self._serial
+        except Exception as e:
+            getLogger().warnig('Cannot get serial for module %s.' % self.moduleName, e)
+
+
 
 
 class CcpnModuleLabel(DockLabel):

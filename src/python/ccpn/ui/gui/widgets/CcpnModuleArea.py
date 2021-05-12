@@ -47,6 +47,7 @@ from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
 from ccpn.ui.gui.widgets.Font import getFont
 from functools import partial
 from ccpn.framework.Application import getApplication
+from ccpn.util.Common import incrementName
 
 
 ModuleArea = DockArea
@@ -269,22 +270,13 @@ class CcpnModuleArea(ModuleArea, DropBase):
             # means all modules are pop-out, so paint the label in the main module area
             self._paint(ev)
 
-    def _updateModuleNames(self):
-        for module in self.ccpnModules:
-            self._setSerial(module)
 
-    def _setSerial(self, module):
-        if module.className in self._modulesNames:
-            if [m.className for m in self.ccpnModules].count(module.className) == 0:
-                self._modulesNames[module.className] = []
-            if isinstance(self._modulesNames[module.className], list):
-                self._modulesNames[module.className].append(module.name())
-        else:
-            self._modulesNames.update({module.className: [module.name()]})
-
-        if module.className in self._modulesNames:
-            if not module.serial:
-                module.serial = len(list(set(self._modulesNames[module.className])))
+    def _incrementModuleName(self, name):
+        """ fetch an incremented name if not already taken. """
+        names = list(self.modules.keys()) + [name] # add name so it will start from 1
+        while name in names:
+            name = incrementName(name)
+        return name
 
     @property
     def ccpnModules(self) -> list:
@@ -337,13 +329,11 @@ class CcpnModuleArea(ModuleArea, DropBase):
                 oldModule.toggleMaximised()
                 wasMaximised = True
 
-        self._updateModuleNames()
-
         if not module._restored:
             if not isinstance(module, GuiSpectrumDisplay):  #
-                self._setSerial(module)
-                newName = module.titleName + module._nameSplitter + str(module.serial)
-                module.rename(newName)
+                nextAvailableName = self._incrementModuleName(module.titleName)
+                if not module._onlySingleInstance:
+                    module.rename(nextAvailableName)
 
         # test that only one instance of the module is opened
         if hasattr(type(module), '_alreadyOpened'):

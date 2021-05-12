@@ -592,7 +592,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
         # Create Boundstrip/Nostrip display and first strip
         displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
         apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
-            name = ''.join(['%dD_' % spectrum.dimensionCount] + [str(x)[0:1] for x in axisCodes])
+            name = ''.join(['%dD_' % spectrum.dimensionCount] + [str(x)[0:1] for x in axisCodes]) + '_1'
     name = SpectrumDisplay._uniqueApiName(project, name)
     displayPars['name'] = name
 

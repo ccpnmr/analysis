@@ -270,27 +270,12 @@ class CcpnModuleArea(ModuleArea, DropBase):
             # means all modules are pop-out, so paint the label in the main module area
             self._paint(ev)
 
-    def _isValidName(self, name):
-        """
-        Check if the name is not already taken or is not None, empty str
-        """
-        from ccpn.ui.gui.modules.CcpnModule import PidShortClassName, PidLongClassName
-        from ui._implementation.SpectrumDisplay import SpectrumDisplay
-        ll = [PidLongClassName, PidShortClassName,
-              SpectrumDisplay.shortClassName,
-              SpectrumDisplay.shortClassName]
-        takenNames = [m.pid for m in self.modules.values()]
-        tests = [name in takenNames]
-        tests += [x+':'+name in takenNames for x in ll]
-        tests += [isinstance(name, str)]
-        return not any(tests)
 
-
-    def _incrementModuleName(self, name, splitter):
+    def _incrementModuleName(self, name):
         """ fetch an incremented name if not already taken. """
         names = list(self.modules.keys()) + [name] # add name so it will start from 1
         while name in names:
-            name = incrementName(name, splitter)
+            name = incrementName(name)
         return name
 
     @property
@@ -346,7 +331,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
         if not module._restored:
             if not isinstance(module, GuiSpectrumDisplay):  #
-                nextAvailableName = self._incrementModuleName(module.titleName, module._nameSplitter)
+                nextAvailableName = self._incrementModuleName(module.titleName)
                 if not module._onlySingleInstance:
                     module.rename(nextAvailableName)
 

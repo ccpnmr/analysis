@@ -1205,10 +1205,34 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
     @property
     def pid(self) -> str:
-        """Identifier for the object, unique within the project - added to give label to ccpnModules
+        """
+        Identifier for the object, unique within the project - added to give label to ccpnModules
         """
         from ccpn.core.lib.Pid import Pid
-        return Pid(f'{PidShortClassName}:{self.name()}')
+        return Pid(f'{PidShortClassName}:{self.id}')
+
+    @property
+    def id(self):
+        """
+        Effectively the Module name.  Without Class name and serial
+        """
+        return self.titleName
+
+    @property
+    def serial(self):
+        """
+        The progressive number after the name
+        """
+        if self._onlySingleInstance:
+            return 1
+        serial = self.name().split(self._nameSplitter)[-1]
+        try:
+            self._serial = int(serial)
+            return self._serial
+        except Exception as e:
+            getLogger().warnig('Cannot get serial for module %s.' % self.moduleName, e)
+
+
 
 
 class CcpnModuleLabel(DockLabel):

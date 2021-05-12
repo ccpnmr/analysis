@@ -877,31 +877,3 @@ def loadModules(paths):
                 traceback.print_tb(err.__traceback__)
                 getLogger().warning('Error Loading Module %s. %s' % (name, str(err)))
     return modules
-
-
-def copyToClipboard(items):
-    """
-    :param items: a list of items to be copied to Clipboard.
-                  Each value is single quoted if a str (Pid if an AbstractWrapperObject instance),
-                  or preserved the format for other cases. All values are comma separated.
-
-    Not to use for nested lists or complex structures, in that case use Pandas "DataFrame.to_clipboard" directly.
-
-    """
-    import pandas as pd
-    from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-
-    texts = []
-    for i in items:
-        if isinstance(i, AbstractWrapperObject):
-            txt = f"""'{i.pid}'""" # wrap a Pid with quotes if the format is of instance AbstractWrapperObject
-        elif isinstance(i, str):
-            txt = f"""'{i}'"""     # wrap with quotes if the format is a string
-        else:
-            txt = f"""{i}"""       # otherwise preserve the format (e.g. floats, int...)
-        texts.append(txt)
-    values = '{}'.format(', '.join(sorted(set(texts), key=texts.index)))
-    df = pd.DataFrame([values])
-    df.to_clipboard(index=False, header=False)
-    getLogger().info("Copied to clipboard: %s" %values)
-

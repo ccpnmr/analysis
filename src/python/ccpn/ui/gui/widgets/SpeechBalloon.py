@@ -310,8 +310,8 @@ class SpeechBalloon(QWidget):
 
 class DoubleLabel(QFrame):
 
-    def __init__(self, parent=None):
-        super(DoubleLabelWidget, self).__init__(parent=parent)
+    def __init__(self, text=[''], parent=None):
+        super(DoubleLabel, self).__init__(parent=parent)
 
         layout = QGridLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -362,8 +362,30 @@ class DoubleLabel(QFrame):
 
         width = max(width_x, width_y)
 
-        self._labels[LEFT_WIDGET].setFixedWidth(width)
-        self._labels[RIGHT_WIDGET].setFixedWidth(width)
+        self._labels[LEFT_LABEL].setFixedWidth(width)
+        self._labels[RIGHT_LABEL].setFixedWidth(width)
+
+        self.update()
+
+    def setLabels(self, text):
+        if len(text) not in (1, 2):
+            raise ValueError("Error double label supports 1 or 2 labels")
+
+        if len(text) == 1:
+            self.setLabelVisible(LEFT_LABEL, False)
+            self.setLabelVisible(MIDDLE_LABEL, True)
+            self.setLabelVisible(RIGHT_LABEL, False)
+
+            self.setLabelText(MIDDLE_LABEL, text[0])
+        else:
+            self.setLabelVisible(LEFT_LABEL, True)
+            self.setLabelVisible(MIDDLE_LABEL, True)
+            self.setLabelVisible(RIGHT_LABEL, True)
+
+            self.setLabelText(LEFT_LABEL, text[0])
+            self.setLabelText(MIDDLE_LABEL, self._separator)
+            self.setLabelText(RIGHT_LABEL, text[1])
+
 
     @staticmethod
     def _check_widget_index(widget_id):
@@ -395,8 +417,7 @@ class MousePositionLabel(DoubleLabel):
         x = '%i' % ev.x()
         y = '%i' % ev.y()
 
-        self.setLabelText(LEFT_WIDGET, x)
-        self.setLabelText(RIGHT_WIDGET, y)
+        self.setLabels([x,y])
 
 
 if __name__ == '__main__':

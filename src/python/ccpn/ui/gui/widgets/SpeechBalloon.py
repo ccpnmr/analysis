@@ -62,6 +62,7 @@ class SpeechBalloon(QWidget):
         layout = QGridLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
+        layout.setSizeConstraint(QLayout.SetFixedSize)
         self.setLayout(layout)
 
         self._pointer_height = 10
@@ -74,11 +75,6 @@ class SpeechBalloon(QWidget):
         self._pen_width = 0
 
         self._owner = owner
-
-        layout = QGridLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSizeConstraint(QLayout.SetFixedSize)
-        self.setLayout(layout)
 
         self.setMargins()
 

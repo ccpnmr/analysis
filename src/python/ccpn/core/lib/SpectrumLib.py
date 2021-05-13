@@ -4,7 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -12,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-26 10:35:19 +0000 (Fri, March 26, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-05-13 19:27:55 +0100 (Thu, May 13, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,6 +29,7 @@ import collections
 import math
 import random
 import numpy as np
+from typing import Tuple
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.util.Common import percentage, getAxisCodeMatchIndices
 from ccpn.util.Logging import getLogger
@@ -565,9 +567,6 @@ def nmrGlueBaselineCorrector(data, wd=20):
 
     data = ng.process.proc_bl.baseline_corrector(data, wd=wd)
     return data
-
-
-from typing import Tuple
 
 
 def _getDefaultApiSpectrumColours(spectrum: 'Spectrum') -> Tuple[str, str]:

@@ -308,7 +308,7 @@ class SpeechBalloon(QWidget):
             self._owner.leaveEvent(a0)
 
 
-class DoubleLabelWidget(QFrame):
+class DoubleLabel(QFrame):
 
     def __init__(self, parent=None):
         super(DoubleLabelWidget, self).__init__(parent=parent)
@@ -380,7 +380,8 @@ class DoubleLabelWidget(QFrame):
             self._labels[MIDDLE_LABEL].setMargin(0)
 
 
-class MousePositionLabel(DoubleLabelWidget):
+
+class MousePositionLabel(DoubleLabel):
     def __init__(self, parent=None):
         super(MousePositionLabel, self).__init__(parent=parent)
         self.timer = QTimer()

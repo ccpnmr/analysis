@@ -74,6 +74,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, TextEditorC
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
 CommonWidgets = {
@@ -655,8 +656,15 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
 
     def rename(self, newName):
-        self.label.setText(newName)
-        self._name = newName
+       self._rename(newName)
+
+    def _rename(self, newName):
+        if self.area:
+            if self.area._isValidName(newName):
+                self.label.setText(newName)
+                self._name = newName
+            else:
+                showWarning('Could not rename module', 'Name already taken: %s' % newName)
 
     def event(self, event):
         """
@@ -1086,7 +1094,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         Identifier for the object, unique within the project - added to give label to ccpnModules
         """
         from ccpn.core.lib.Pid import Pid
-        return Pid(f'{PidShortClassName}:{self.id}')
+        return Pid(f'{PidShortClassName}:{self.name()}')
 
     @property
     def id(self):

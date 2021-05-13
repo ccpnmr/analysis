@@ -271,6 +271,23 @@ class SpectrumDisplay(AbstractWrapperObject):
         if len(self.strips) > 0:  # strips
             return [x.spectrum for x in self.orderedSpectrumViews(self.strips[0].spectrumViews)]
 
+    def rename(self, name):
+        getLogger().warning(' Cannot rename spectrum Display. Feature not implemented yet.')
+        return
+        # cannot set yet because API constraints. Also missing notifiers.
+        from ccpn.util.Common import _validateName
+        try:
+            if not self.project.getSpectrumDisplay(name):
+                guiModule = self.project.getByPid(self.pid)
+                isValidName = _validateName(self.project, SpectrumDisplay, value=name, allowWhitespace=False)
+                self._wrappedData.name = name
+                if guiModule: # just rename the label on the Gui. Could be done via notifiers (to be implemented)
+                    guiModule._rename(f'{self.className}:{name}')
+
+        except Exception as err:
+            getLogger().warning('Cannot rename spectrum Display', err)
+            getLogger().exception(str(err))
+
     # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # # ejb - orderedSpectrumViews, orderedSpectra
     # # store the current orderedSpectrumViews in the internal data store

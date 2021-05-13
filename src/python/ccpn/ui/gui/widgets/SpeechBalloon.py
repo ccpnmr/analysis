@@ -17,6 +17,13 @@ class Side(IntEnum):
     RIGHT = 2
     BOTTOM = 3
 
+
+DEFAULT_SEPARATOR = '|'
+LEFT_WIDGET = 0
+MIDDLE_WIDGET = 1
+RIGHT_WIDGET = 2
+
+
 class MyApplication(QApplication):
     def __init__(self, arg):
         super(MyApplication, self).__init__(arg)

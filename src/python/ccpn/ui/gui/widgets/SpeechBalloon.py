@@ -369,8 +369,6 @@ class DoubleLabel(QFrame):
         self._labels[LEFT_LABEL].setFixedWidth(width)
         self._labels[RIGHT_LABEL].setFixedWidth(width)
 
-        self.update()
-
     def setLabels(self, text):
         if len(text) not in (1, 2):
             raise ValueError("Error double label supports 1 or 2 labels")

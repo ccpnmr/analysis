@@ -98,7 +98,7 @@ class SpeechBalloon(QWidget):
     def pointerWidth(self):
         return self._pointer_width
 
-    @pointerHeight.setter
+    @pointerWidth.setter
     def pointerWidth(self, width):
         self._pointer_width = width
         self.update()

@@ -51,6 +51,11 @@ class SpeechBalloon(QWidget):
         self.setWindowFlags(flags)
         self.setAttribute(Qt.WA_NoSystemBackground)
 
+        layout = QGridLayout()
+        layout.setContentsMargins(0,0,0,0)
+        layout.setSpacing(0)
+        self.setLayout(layout)
+
         self._pointer_height = 10
         self._pointer_width = 20
         self._pointer_side = side
@@ -61,6 +66,15 @@ class SpeechBalloon(QWidget):
         self._pen_width = 0
 
         self._owner = owner
+
+        layout = QGridLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSizeConstraint(QLayout.SetFixedSize)
+        self.setLayout(layout)
+
+        self.setMargins()
+
+
 
     @pyqtProperty(int)
     def cornerRadius(self):
@@ -262,15 +276,22 @@ class SpeechBalloon(QWidget):
 
         self.setGeometry(QRect(pos - offset, self.geometry().size()))
 
-    def set_central_widget(self, central_widget):
-        children = self.children()
-        if len(children) == 0:
-            children.append(central_widget)
-        else:
-            children[0] = central_widget
+    def setCentralWidget(self, central_widget):
 
-        display_rect = self._local_display_rect()
-        children[0].setGeometry(display_rect)
+        self.layout().addWidget(central_widget, 0, 0)
+
+    def centralWidget(self):
+        children = [child for child in self.children() if isinstance(child,QWidget)]
+        result = children[0] if len(children) else None
+        return result
+
+    def setMargins(self):
+        self.layout().setContentsMargins(0, 0, 0, 0)
+        corner_margin = self._corner_radius / sqrt(2)
+        corner_margin = int(ceil(corner_margin))
+        new_margins = [corner_margin, ] * 4
+        new_margins[self._pointer_side] += self._pointer_height
+        self.layout().setContentsMargins(*new_margins)
 
     def leaveEvent(self, a0: QtCore.QEvent) -> None:
         if self._owner:

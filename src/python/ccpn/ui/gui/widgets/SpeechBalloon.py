@@ -58,6 +58,7 @@ class SpeechBalloon(QWidget):
         self._percentage = percentage / 100.0
 
         self._corner_radius = 3
+        self._pen_width = 0
 
         self._owner = owner
 
@@ -138,6 +139,7 @@ class SpeechBalloon(QWidget):
 
         brush = QBrush(bgColor)
         pen = QPen(fgColor)
+        pen.setWidth(self._pen_width)
         painter.fillPath(painterPath, brush)
         painter.strokePath(painterPath, pen)
 

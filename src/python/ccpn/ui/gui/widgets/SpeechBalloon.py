@@ -307,14 +307,13 @@ if __name__ == '__main__':
     app = MyApplication(sys.argv)
 
     window2 = SpeechBalloon()
-    window2.cornerRadius = 1
-    window2.setGeometry(200, 200, 50, 30)
+    window2.cornerRadius = 3
 
     app.setActiveWindow(window2)
 
-    label = QLabel('test', parent=window2)
-    label.setAlignment(Qt.AlignCenter)
-    window2.set_central_widget(label)
+    label = MousePositionLabel(parent=window2)
+
+    window2.setCentralWidget(label)
     window2.show()
 
     app.exec_()

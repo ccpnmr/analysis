@@ -83,6 +83,7 @@ class SpeechBalloon(QWidget):
     @cornerRadius.setter
     def cornerRadius(self, radius):
         self._corner_radius = radius
+        self.update()
 
     @pyqtProperty(int)
     def pointerHeight(self):
@@ -91,6 +92,7 @@ class SpeechBalloon(QWidget):
     @pointerHeight.setter
     def pointerHeight(self, height):
         self._pointer_height = height
+        self.update()
 
     @pyqtProperty(int)
     def pointerWidth(self):
@@ -99,6 +101,7 @@ class SpeechBalloon(QWidget):
     @pointerHeight.setter
     def pointerWidth(self, width):
         self._pointer_width = width
+        self.update()
 
     @pyqtProperty(Side)
     def pointerSide(self):
@@ -107,6 +110,7 @@ class SpeechBalloon(QWidget):
     @pointerSide.setter
     def pointerSide(self, side):
         self._pointer_side = side
+        self.update()
 
     @pyqtProperty(float)
     def pointerSideOffset(self):
@@ -115,6 +119,7 @@ class SpeechBalloon(QWidget):
     @pointerSideOffset.setter
     def pointerSideOffset(self, percentage):
         self._percentage = percentage
+        self.update()
 
     def _calc_display_rect(self):
         result = self._calc_usable_rect()

@@ -38,6 +38,7 @@ class MyApplication(QApplication):
         if window:
             window.move_pointer_to(pos)
 
+
 class SpeechBalloon(QWidget):
     """
         inspired by but not sharing any code with FUKIDASHI
@@ -48,18 +49,18 @@ class SpeechBalloon(QWidget):
          +------+
     """
 
-    def __init__(self, side=Side.BOTTOM, percentage=50, owner=None, parent=None, ontop=False):
+    def __init__(self, side=Side.BOTTOM, percentage=50, owner=None, parent=None, on_top=False):
 
         super(SpeechBalloon, self).__init__(parent)
 
         flags = Qt.FramelessWindowHint
-        if ontop:
+        if on_top:
             flags |= Qt.WindowStaysOnTopHint
         self.setWindowFlags(flags)
         self.setAttribute(Qt.WA_NoSystemBackground)
 
         layout = QGridLayout()
-        layout.setContentsMargins(0,0,0,0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         self.setLayout(layout)
 
@@ -80,8 +81,6 @@ class SpeechBalloon(QWidget):
         self.setLayout(layout)
 
         self.setMargins()
-
-
 
     @pyqtProperty(int)
     def cornerRadius(self):
@@ -143,7 +142,7 @@ class SpeechBalloon(QWidget):
 
     def _calc_usable_rect(self):
 
-        # this allows for anti-aliaising
+        # this allows for anti-aliasing
         return self.frameGeometry().adjusted(1, 1, -1, -1)
 
     def _calc_local_usable_rect(self):
@@ -183,23 +182,25 @@ class SpeechBalloon(QWidget):
 
         pointer_width_2 = int(self._pointer_width / 2)
 
+        pointer_pos = None
         if self._pointer_side in (Side.TOP, Side.BOTTOM):
             min_pos_x = pointer_width_2 + self._corner_radius
             max_pos_x = width - pointer_width_2 - self._corner_radius
             pointer_pos_x = int(min_pos_x + ((max_pos_x - min_pos_x) * self._percentage))
+
+            if self._pointer_side == Side.TOP:
+                pointer_pos = QPoint(pointer_pos_x, top - pointer_height)
+            elif self._pointer_side == Side.BOTTOM:
+                pointer_pos = QPoint(pointer_pos_x, bottom + pointer_height)
         else:
             min_pos_y = self._corner_radius + pointer_width_2
             max_pos_y = height - pointer_width_2 - self._corner_radius
             pointer_pos_y = int(min_pos_y + ((max_pos_y - min_pos_y) * self._percentage))
 
-        if self._pointer_side == Side.TOP:
-            pointer_pos = QPoint(pointer_pos_x, top - pointer_height)
-        elif self._pointer_side == Side.BOTTOM:
-            pointer_pos = QPoint(pointer_pos_x, bottom + pointer_height)
-        elif self._pointer_side == Side.LEFT:
-            pointer_pos = QPoint(left - pointer_height, pointer_pos_y)
-        elif self._pointer_side == Side.RIGHT:
-            pointer_pos = QPoint(right + pointer_height, pointer_pos_y)
+            if self._pointer_side == Side.LEFT:
+                pointer_pos = QPoint(left - pointer_height, pointer_pos_y)
+            elif self._pointer_side == Side.RIGHT:
+                pointer_pos = QPoint(right + pointer_height, pointer_pos_y)
 
         return pointer_pos
 
@@ -220,6 +221,7 @@ class SpeechBalloon(QWidget):
         pointer_width_2 = int(self._pointer_width / 2)
 
         pointer_pos = self._get_pointer_position()
+        pointer_points = None
         if self._pointer_side == Side.TOP:
             pointer_points = [QPoint(pointer_pos.x() - pointer_width_2, top),
                               pointer_pos,
@@ -293,7 +295,7 @@ class SpeechBalloon(QWidget):
         self.layout().addWidget(central_widget, 0, 0)
 
     def centralWidget(self):
-        children = [child for child in self.children() if isinstance(child,QWidget)]
+        children = [child for child in self.children() if isinstance(child, QWidget)]
         result = children[0] if len(children) else None
         return result
 
@@ -308,6 +310,7 @@ class SpeechBalloon(QWidget):
     def leaveEvent(self, a0: QtCore.QEvent) -> None:
         if self._owner:
             self._owner.leaveEvent(a0)
+
 
 class DoubleLabelWidget(QFrame):
 
@@ -329,7 +332,7 @@ class DoubleLabelWidget(QFrame):
         left_label.setMargin(self._margin)
         self._labels[LEFT_WIDGET] = left_label
 
-        center_label = QLabel(DEFAULT_SEPARAROR)
+        center_label = QLabel(DEFAULT_SEPARATOR)
         center_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(center_label, 0, 1)
         self._labels[MIDDLE_WIDGET] = center_label
@@ -366,7 +369,8 @@ class DoubleLabelWidget(QFrame):
         self._labels[LEFT_WIDGET].setFixedWidth(width)
         self._labels[RIGHT_WIDGET].setFixedWidth(width)
 
-    def _check_widget_index(self, widget_id):
+    @staticmethod
+    def _check_widget_index(widget_id):
         if widget_id < LEFT_WIDGET or widget_id > RIGHT_WIDGET:
             raise ValueError('Error widget id should be one of  LEFT_WIDGET, MIDDLE_WIDGET or RIGHT_WIDGET')
 
@@ -374,15 +378,16 @@ class DoubleLabelWidget(QFrame):
         self._check_widget_index(widget_id)
         self._labels[widget_id].setVisible(visible)
 
-        if self._labels[LEFT_WIDGET].isVisible() == False and self._labels[LEFT_WIDGET].isVisible() ==  False:
+        if not self._labels[LEFT_WIDGET].isVisible() and not self._labels[LEFT_WIDGET].isVisible():
             self._labels[MIDDLE_WIDGET].setMargin(self._margin)
         else:
             self._labels[MIDDLE_WIDGET].setMargin(0)
 
+
 class MousePositionLabel(DoubleLabelWidget):
     def __init__(self, parent=None):
-        super(MousePositionLabel, self).__init__( parent=parent)
-        self.timer=QTimer()
+        super(MousePositionLabel, self).__init__(parent=parent)
+        self.timer = QTimer()
         self.timer.timeout.connect(self.get_position)
         self.timer.setInterval(50)
         self.timer.start()
@@ -395,6 +400,7 @@ class MousePositionLabel(DoubleLabelWidget):
 
         self.setLabelText(LEFT_WIDGET, x)
         self.setLabelText(RIGHT_WIDGET, y)
+
 
 if __name__ == '__main__':
     app = MyApplication(sys.argv)

@@ -343,6 +343,10 @@ class DoubleLabel(QFrame):
 
         self._max_digit_width = self._get_max_digit_width()
 
+        self._separator = DEFAULT_SEPARATOR
+
+        self.setLabels(text)
+
     def _get_max_digit_width(self):
         self._font = self._labels[LEFT_LABEL].font()
         self._font_metrics = QFontMetrics(self._font)
@@ -400,7 +404,6 @@ class DoubleLabel(QFrame):
             self._labels[MIDDLE_LABEL].setMargin(self._margin)
         else:
             self._labels[MIDDLE_LABEL].setMargin(0)
-
 
 
 class MousePositionLabel(DoubleLabel):

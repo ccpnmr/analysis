@@ -302,6 +302,92 @@ class SpeechBalloon(QWidget):
         if self._owner:
             self._owner.leaveEvent(a0)
 
+class DoubleLabelWidget(QFrame):
+
+    def __init__(self, parent=None):
+        super(DoubleLabelWidget, self).__init__(parent=parent)
+
+        layout = QGridLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        # if you ever allow this to be set you will need to
+        # call setLabelText to reset the text widths
+        self._margin = 2
+
+        self._labels = [None] * 3
+        left_label = QLabel()
+        left_label.setAlignment(Qt.AlignRight)
+        layout.addWidget(left_label, 0, 0)
+        left_label.setMargin(self._margin)
+        self._labels[LEFT_WIDGET] = left_label
+
+        center_label = QLabel(DEFAULT_SEPARAROR)
+        center_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(center_label, 0, 1)
+        self._labels[MIDDLE_WIDGET] = center_label
+
+        right_label = QLabel()
+        right_label.setAlignment(Qt.AlignLeft)
+        right_label.setMargin(self._margin)
+        layout.addWidget(right_label, 0, 2)
+        self._labels[RIGHT_WIDGET] = right_label
+
+        self.setLayout(layout)
+
+        self._max_digit_width = self._get_max_digit_width()
+
+    def _get_max_digit_width(self):
+        self._font = self._labels[LEFT_WIDGET].font()
+        self._font_metrics = QFontMetrics(self._font)
+        widths = [self._font_metrics.boundingRect(digit).width() for digit in list('01234567890-')]
+        return max(widths)
+
+    def setLabelText(self, widget_id, text):
+        self._check_widget_index(widget_id)
+
+        self._labels[widget_id].setText(text)
+
+        x = self._labels[LEFT_WIDGET].text()
+        y = self._labels[RIGHT_WIDGET].text()
+
+        width_x = (self._max_digit_width * len(x)) + self._margin * 2
+        width_y = (self._max_digit_width * len(y)) + self._margin * 2
+
+        width = max(width_x, width_y)
+
+        self._labels[LEFT_WIDGET].setFixedWidth(width)
+        self._labels[RIGHT_WIDGET].setFixedWidth(width)
+
+    def _check_widget_index(self, widget_id):
+        if widget_id < LEFT_WIDGET or widget_id > RIGHT_WIDGET:
+            raise ValueError('Error widget id should be one of  LEFT_WIDGET, MIDDLE_WIDGET or RIGHT_WIDGET')
+
+    def setLabelVisible(self, widget_id, visible):
+        self._check_widget_index(widget_id)
+        self._labels[widget_id].setVisible(visible)
+
+        if self._labels[LEFT_WIDGET].isVisible() == False and self._labels[LEFT_WIDGET].isVisible() ==  False:
+            self._labels[MIDDLE_WIDGET].setMargin(self._margin)
+        else:
+            self._labels[MIDDLE_WIDGET].setMargin(0)
+
+class MousePositionLabel(DoubleLabelWidget):
+    def __init__(self, parent=None):
+        super(MousePositionLabel, self).__init__( parent=parent)
+        self.timer=QTimer()
+        self.timer.timeout.connect(self.get_position)
+        self.timer.setInterval(50)
+        self.timer.start()
+
+    def get_position(self):
+        ev = QCursor.pos()
+
+        x = '%i' % ev.x()
+        y = '%i' % ev.y()
+
+        self.setLabelText(LEFT_WIDGET, x)
+        self.setLabelText(RIGHT_WIDGET, y)
 
 if __name__ == '__main__':
     app = MyApplication(sys.argv)

@@ -326,25 +326,25 @@ class DoubleLabelWidget(QFrame):
         left_label.setAlignment(Qt.AlignRight)
         layout.addWidget(left_label, 0, 0)
         left_label.setMargin(self._margin)
-        self._labels[LEFT_WIDGET] = left_label
+        self._labels[LEFT_LABEL] = left_label
 
         center_label = QLabel(DEFAULT_SEPARATOR)
         center_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(center_label, 0, 1)
-        self._labels[MIDDLE_WIDGET] = center_label
+        self._labels[MIDDLE_LABEL] = center_label
 
         right_label = QLabel()
         right_label.setAlignment(Qt.AlignLeft)
         right_label.setMargin(self._margin)
         layout.addWidget(right_label, 0, 2)
-        self._labels[RIGHT_WIDGET] = right_label
+        self._labels[RIGHT_LABEL] = right_label
 
         self.setLayout(layout)
 
         self._max_digit_width = self._get_max_digit_width()
 
     def _get_max_digit_width(self):
-        self._font = self._labels[LEFT_WIDGET].font()
+        self._font = self._labels[LEFT_LABEL].font()
         self._font_metrics = QFontMetrics(self._font)
         widths = [self._font_metrics.boundingRect(digit).width() for digit in list('01234567890-')]
         return max(widths)
@@ -354,8 +354,8 @@ class DoubleLabelWidget(QFrame):
 
         self._labels[widget_id].setText(text)
 
-        x = self._labels[LEFT_WIDGET].text()
-        y = self._labels[RIGHT_WIDGET].text()
+        x = self._labels[LEFT_LABEL].text()
+        y = self._labels[RIGHT_LABEL].text()
 
         width_x = (self._max_digit_width * len(x)) + self._margin * 2
         width_y = (self._max_digit_width * len(y)) + self._margin * 2
@@ -367,17 +367,17 @@ class DoubleLabelWidget(QFrame):
 
     @staticmethod
     def _check_widget_index(widget_id):
-        if widget_id < LEFT_WIDGET or widget_id > RIGHT_WIDGET:
+        if widget_id < LEFT_LABEL or widget_id > RIGHT_LABEL:
             raise ValueError('Error widget id should be one of  LEFT_WIDGET, MIDDLE_WIDGET or RIGHT_WIDGET')
 
     def setLabelVisible(self, widget_id, visible):
         self._check_widget_index(widget_id)
         self._labels[widget_id].setVisible(visible)
 
-        if not self._labels[LEFT_WIDGET].isVisible() and not self._labels[LEFT_WIDGET].isVisible():
-            self._labels[MIDDLE_WIDGET].setMargin(self._margin)
+        if not self._labels[LEFT_LABEL].isVisible() and not self._labels[LEFT_LABEL].isVisible():
+            self._labels[MIDDLE_LABEL].setMargin(self._margin)
         else:
-            self._labels[MIDDLE_WIDGET].setMargin(0)
+            self._labels[MIDDLE_LABEL].setMargin(0)
 
 
 class MousePositionLabel(DoubleLabelWidget):

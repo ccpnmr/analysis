@@ -19,9 +19,9 @@ class Side(IntEnum):
 
 
 DEFAULT_SEPARATOR = '|'
-LEFT_WIDGET = 0
-MIDDLE_WIDGET = 1
-RIGHT_WIDGET = 2
+LEFT_LABEL = 0
+MIDDLE_LABEL = 1
+RIGHT_LABEL = 2
 
 
 class MyApplication(QApplication):

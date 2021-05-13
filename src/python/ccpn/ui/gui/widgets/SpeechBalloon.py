@@ -1,10 +1,14 @@
+import string
 import sys
 from enum import IntEnum
+from math import sqrt, ceil, floor
 
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import QRectF, Qt, QRect, QPoint, pyqtProperty, QTimer
-from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QBrush, QPolygon, QPolygonF, QPixmap, QPalette, QCursor
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget
+from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QBrush, QPolygon, QPolygonF, QPixmap, QPalette, QCursor, \
+    QGuiApplication, QFontMetrics
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QLayout, QTableWidget, QTableWidgetItem, QFrame
+from icecream import ic
 
 
 class Side(IntEnum):

@@ -25,7 +25,7 @@ from SpeechBalloon import SpeechBalloon, DoubleLabel
 # * TODO cleanup code - done
 # * TODO set values - done
 # * TODO set ranges - done
-# TODO dragging handles specialise bubble code
+# * TODO dragging handles specialise bubble code - done
 # * TODO bubble should display formatted value - done
 # * TODO system should broadcast converted values - done
 # - TODO adapt balloon to size of children
@@ -34,11 +34,11 @@ from SpeechBalloon import SpeechBalloon, DoubleLabel
 # - TODO when dragging handles balloon position overruns - done
 # TODO support for mouse wheel
 # TODO add timer to display balloon window
-# TODO pull request
-# TODO signals not firing on value changes from properties
+# * TODO pull request - done
+# * done TODO signals not firing on value changes from properties
 # TODO demo values should update on typing
-# TODO setting left and right values wrong way round via text controls swaps handles!
-# TODO setting left and right values wrong way round via text controls gives negative gap!
+# * TODO setting left and right values wrong way round via text controls swaps handles! - done
+# * TODO setting left and right values wrong way round via text controls gives negative gap! -done
 
 CCPN_PURPLE = '#686dbe'
 OFF_LINE_COLOUR = '#dbdbdb'

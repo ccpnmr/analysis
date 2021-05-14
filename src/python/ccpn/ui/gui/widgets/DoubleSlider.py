@@ -21,8 +21,8 @@ from SpeechBalloon import SpeechBalloon
 #         super(MyGraphicsScene, self).drawBackground(painter, rect)
 #         painter.fillRect(rect, myBrush)
 
-
-# TODO cleanup code
+# TODO disabled state centre widget line wrong color
+# * TODO cleanup code - done
 # * TODO set values - done
 # * TODO set ranges - done
 # TODO dragging handles specialise bubble code
@@ -31,11 +31,14 @@ from SpeechBalloon import SpeechBalloon
 # - TODO adapt balloon to size of children
 # TODO remove 'arbitrary' fudge factors
 # TODO off by 1 error on handle balloon position
-# TODO when dragging handles balloon position overruns
+# - TODO when dragging handles balloon position overruns - done
 # TODO support for mouse wheel
 # TODO add timer to display balloon window
 # TODO pull request
-
+# TODO signals not firing on value changes from properties
+# TODO demo values should update on typing
+# TODO setting left and right values wrong way round via text controls swaps handles!
+# TODO setting left and right values wrong way round via text controls gives negative gap!
 
 CCPN_PURPLE = '#686dbe'
 OFF_LINE_COLOUR = '#dbdbdb'

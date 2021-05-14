@@ -75,7 +75,7 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.core.lib.Pid import Pid
+from ccpn.core.lib.Pid import Pid, PREFIXSEP
 
 
 CommonWidgets = {
@@ -419,9 +419,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         """
         if self._onlySingleInstance:
             return 1
-        serial = self.name().split(self._nameSplitter)[-1]
+        pidPrefix, baseName, serialName = self._getModuleNameBlocks()
         try:
-            self._serial = int(serial)
+            self._serial = int(serialName)
             return self._serial
         except Exception as e:
             getLogger().warnig('Cannot get serial for module %s.' % self.moduleName, e)
@@ -467,20 +467,51 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     # Widget Methods
     #=========================================================================================
 
+    def _getModuleNameBlocks(self):
+        """
+
+        split name in the blocks:
+            Pid prefix (short or long)
+            Name
+            Serial
+        return a tuple
+
+        """
+        name = self.name()
+        pidPrefix = ''
+        baseName = ''
+        serialName = ''
+        splitter = self._nameSplitter
+        prefixSplit = name.split(PREFIXSEP)
+        if len(prefixSplit) > 1:
+            pidPrefix = prefixSplit[0]
+            name = PREFIXSEP.join(prefixSplit[0:]) #just in rare case there are multiple "prefixSplit"
+
+        nameSplit = name.split(splitter)
+        if len(nameSplit) > 1:
+            baseName, serialName = splitter.join(nameSplit[:-1]), nameSplit[-1]
+
+        if not baseName:
+            baseName = name
+        return (pidPrefix, baseName, serialName)
+
     def rename(self, newName):
         """
         Rename the label module.
         """
-        self._rename(newName)
+        self._renameModule(newName)
 
-    def _rename(self, newName):
+    def _renameModule(self, newName):
         """ CCPN internal called by SpectrumDisplay"""
+
         if self.area:
             if self.area._isValidName(newName):
                 self.label.setText(newName)
                 self._name = newName
+                return newName
             else:
-                showWarning('Could not rename module', 'Name already taken: %s' % newName)
+                showWarning('Could not rename module', 'Please use a different name')
+                return self._name
 
     def restoreWidgetsState(self, **widgetsState):
         """
@@ -1374,8 +1405,10 @@ class CcpnModuleLabel(DockLabel):
         #align = self.alignment()
         # GWV adjusted
         align = QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter
-
-        self.hint = p.drawText(rgn, align, self.text())
+        pidPrefix, baseName, serialName = self.module._getModuleNameBlocks()
+        serialLabel = f'({serialName})' if serialName else ''
+        label = f'{baseName} {serialLabel}'
+        self.hint = p.drawText(rgn, align, label)
         p.end()
 
         if self.orientation == 'vertical':

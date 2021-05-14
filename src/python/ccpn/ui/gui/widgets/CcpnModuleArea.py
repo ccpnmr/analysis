@@ -272,18 +272,17 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
     def _isValidName(self, name):
         """
-        Check if the name is not already taken
+        Check if the name is not already taken or is not None, empty str
         """
         from ccpn.ui.gui.modules.CcpnModule import PidShortClassName, PidLongClassName
         from ui._implementation.SpectrumDisplay import SpectrumDisplay
-
         ll = [PidLongClassName, PidShortClassName,
               SpectrumDisplay.shortClassName,
               SpectrumDisplay.shortClassName]
         takenNames = [m.pid for m in self.modules.values()]
         tests = [name in takenNames]
         tests += [x+':'+name in takenNames for x in ll]
-
+        tests += [isinstance(name, str)]
         return not any(tests)
 
 

@@ -168,7 +168,7 @@ settingsWidgetPositions = {
 ALL = '<all>'
 DoubleUnderscore = '__'
 
-PidClassName = 'Module'
+PidLongClassName = 'Module'
 PidShortClassName = 'MO'
 
 
@@ -783,63 +783,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 else:
                     setattr(self, DoubleUnderscore + widget.__class__.__name__ + str(count), widget)
 
-    @widgetsState.getter
-    def widgetsState(self):
-        """return  {"variableName":"value"}  of all gui Variables  """
-        widgetsState = {}
-        self._setNestedWidgetsAttrToModule()
-        for varName, varObj in vars(self).items():
-            if isinstance(varObj, _PulldownABC):
-                widgetsState[varName] = varObj.getText()
-                continue
-            if varObj.__class__.__name__ in CommonWidgets.keys():
-                try:  # try because widgets can be dynamically deleted
-                    widgetsState[varName] = getattr(varObj, CommonWidgets[varObj.__class__.__name__][0].__name__)()
-                except Exception as es:
-                    getLogger().debug(f'Error {es} - {varName}')
-        # self._kwargs = collections.OrderedDict(sorted(widgetsState.items()))
-
-        return collections.OrderedDict(sorted(widgetsState.items()))
-
-    def restoreWidgetsState(self, **widgetsState):
-        """
-        Restore the gui params. To Call it: _setParams(**{"variableName":"value"})
-
-        This is automatically called after every restoration and after the module has been initialised.
-        Subclass this for a custom behaviour. for example custom callback after the widgets have been restored.
-        Subclass like this:
-               def restoreWidgetsState(self, **widgetsState):
-                  super(TheModule, self).restoreWidgetsState(**widgetsState) #First restore as default
-                  #  do some stuff
-
-        :param widgetsState:
-        """
-
-        self._setNestedWidgetsAttrToModule()
-        widgetsState = collections.OrderedDict(sorted(widgetsState.items()))
-        for variableName, value in widgetsState.items():
-            try:
-                widget = getattr(self, str(variableName))
-                if isinstance(widget, _PulldownABC):
-                    widget.select(value)
-                    continue
-                if widget.__class__.__name__ in CommonWidgets.keys():
-                    setWidget = getattr(widget, CommonWidgets[widget.__class__.__name__][1].__name__)
-                    setWidget(value)
-
-            except Exception as e:
-                getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
-
-    def rename(self, newName):
-       self._rename(newName)
-
-    def _rename(self, newName):
-        if self.area:
-            if self.area._isValidName(newName):
-                self.label.setText(newName)
-                self._name = newName
-            else:
-                showWarning('Could not rename module', 'Name already taken: %s' % newName)
 
     def event(self, event):
         """

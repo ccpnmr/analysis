@@ -274,10 +274,10 @@ class CcpnModuleArea(ModuleArea, DropBase):
         """
         Check if the name is not already taken
         """
-        from ccpn.ui.gui.modules.CcpnModule import PidShortClassName, PidClassName
+        from ccpn.ui.gui.modules.CcpnModule import PidShortClassName, PidLongClassName
         from ui._implementation.SpectrumDisplay import SpectrumDisplay
 
-        ll = [PidClassName, PidShortClassName,
+        ll = [PidLongClassName, PidShortClassName,
               SpectrumDisplay.shortClassName,
               SpectrumDisplay.shortClassName]
         takenNames = [m.pid for m in self.modules.values()]
@@ -287,11 +287,11 @@ class CcpnModuleArea(ModuleArea, DropBase):
         return not any(tests)
 
 
-    def _incrementModuleName(self, name):
+    def _incrementModuleName(self, name, splitter):
         """ fetch an incremented name if not already taken. """
         names = list(self.modules.keys()) + [name] # add name so it will start from 1
         while name in names:
-            name = incrementName(name)
+            name = incrementName(name, splitter)
         return name
 
     @property
@@ -347,7 +347,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
         if not module._restored:
             if not isinstance(module, GuiSpectrumDisplay):  #
-                nextAvailableName = self._incrementModuleName(module.titleName)
+                nextAvailableName = self._incrementModuleName(module.titleName, module._nameSplitter)
                 if not module._onlySingleInstance:
                     module.rename(nextAvailableName)
 

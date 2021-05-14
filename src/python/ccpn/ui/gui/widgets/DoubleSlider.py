@@ -184,7 +184,10 @@ class DoubleRangeView(QGraphicsView):
 
         return min_x, max_x
 
-    # @values.setter
+    @values.setter
+    def _setValues(self, left_value, right_value):
+        self.setValues(left_value, right_value)
+
     def setValues(self, left_value, right_value):
         self._values = [left_value, right_value]
         if left_value > right_value:
@@ -1474,6 +1477,7 @@ if __name__ == '__main__':
     buffer_2.output.connect(int_2.input)
     int_2.output.connect(select_second.input)
     select_second.output.connect(view.setValues)
+
 
     view.setEnabled(True)
     bar.addWidget(view)

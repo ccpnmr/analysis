@@ -61,7 +61,7 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
-from ccpn.core.lib.Pid import Pid
+from ccpn.core.lib.Pid import Pid, PREFIXSEP
 
 from ccpn.framework.Application import getApplication
 from ccpn.framework import Version
@@ -971,7 +971,10 @@ class Framework(NotifierBase):
             return obj
         else:
             if isinstance(self.ui, Gui):
-                return self.ui.mainWindow.moduleArea.modules.get(Pid(pid).id)
+                if PREFIXSEP in pid:
+                    pid = Pid(pid)
+                    if pid:
+                        return self.ui.mainWindow.moduleArea.modules.get(pid.id)
 
     def getByGid(self, gid):
         "Convenience"

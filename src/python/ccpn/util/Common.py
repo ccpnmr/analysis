@@ -88,19 +88,19 @@ WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 #                                    defaultFileNameChar)
 
 
-def incrementName(name, startsFrom:int=1):
+def incrementName(name, split:str='_'):
     """Add '_1' to name or change suffix '_n' to '_(n+1)
     """
-    ll = name.rsplit('_', 1)
+    ll = name.rsplit(split, 1)
     if len(ll) == 2:
         try:
             ll[1] = str(int(ll[1]) + 1)
-            return '_'.join(ll)
+            return split.join(ll)
 
         except ValueError:
             pass
 
-    return name + '_1'
+    return name + split + '1'
 
 
 # def _incrementObjectName(project, pluralLinkName, name):

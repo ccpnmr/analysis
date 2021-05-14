@@ -168,9 +168,13 @@ class DoubleRangeView(QGraphicsView):
         # pageStep: int
         # TODO: single step
 
-    @pyqtProperty(int, int)
+    @pyqtProperty(tuple)
     def values(self):
         return tuple(self._values)
+
+    @values.setter
+    def values(self, values):
+        self.setValues(values)
 
     def _calculate_min_max_handle_centre_positions(self, global_system=True):
         scene_rect = self.sceneRect()
@@ -184,14 +188,12 @@ class DoubleRangeView(QGraphicsView):
 
         return min_x, max_x
 
-    @values.setter
-    def _setValues(self, left_value, right_value):
-        self.setValues(left_value, right_value)
-
-    def setValues(self, left_value, right_value):
-        self._values = [left_value, right_value]
+    def setValues(self, values):
+        left_value, right_value = values
         if left_value > right_value:
             left_value, right_value = right_value, left_value
+
+        self._values = [left_value, right_value]
 
         self._calculate_min_max_pixel_ranges()
         min_position, max_position = self._min_max_handle_positions()
@@ -1346,7 +1348,7 @@ class BufferTillEnter(QObject):
 
 
 class SetOneOf(QObject):
-    output = pyqtSignal(int, int)
+    output = pyqtSignal(tuple)
 
     def __init__(self, index, target=None, instance=None):
         super(SetOneOf, self).__init__()
@@ -1368,7 +1370,7 @@ class SetOneOf(QObject):
         results[self._index] = value
         results = [int(result) for result in results]
         # ic(results)
-        self.output.emit(*results)
+        self.output.emit(tuple(results))
 
 
 if __name__ == '__main__':
@@ -1478,7 +1480,7 @@ if __name__ == '__main__':
     int_2.output.connect(select_second.input)
     select_second.output.connect(view.setValues)
 
-
+    view.values = 10, 20
     view.setEnabled(True)
     bar.addWidget(view)
 

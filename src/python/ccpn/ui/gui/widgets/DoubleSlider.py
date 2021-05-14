@@ -9,7 +9,7 @@ from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QLinearGradient, Q
 from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsItem, QGraphicsItemGroup, QGraphicsRectItem, QLabel, \
     QWidget, QGraphicsObject, QCheckBox, QLineEdit, QFormLayout
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
-from SpeechBalloon import SpeechBalloon
+from SpeechBalloon import SpeechBalloon, DoubleLabel
 
 # class MyGraphicsScene(QGraphicsScene):
 #     def drawBackground(self, painter, rect):
@@ -63,13 +63,12 @@ class DoubleRangeView(QGraphicsView):
         self._slider = Slider()
         self._slider.setName('slider')
 
-        self._balloon = SpeechBalloon(owner=self, ontop=True)
+        self._balloon = SpeechBalloon(owner=self, on_top=True)
         self._balloon.setStyleSheet('color: gray;')
         # self._balloon.setGeometry(200, 200, 70, 30)
 
-        label = MyLabel('test', parent=self._balloon)
-        label.setAlignment(Qt.AlignCenter)
-        self._balloon.set_central_widget(label)
+        label = DoubleLabel(parent=self._balloon)
+        self._balloon.setCentralWidget(label)
         self._balloon.setAttribute(Qt.WA_ShowWithoutActivating)
 
         self._single_unit_move = 10
@@ -538,12 +537,21 @@ class DoubleRangeView(QGraphicsView):
             else:
                 display_value = self._calculate_display_value(value)
 
-            if display_value:
+            if self._slider.sceneRect().contains(scene_pos)  and self._slider._long_click_state == self._slider.OUTSIDE \
+               or self._slider._long_click_state == self._slider.SINGLE:
+                values = list(self._values)
+                if values[0] == values[1]:
+                    values = [values[0]]
+
+                display_values = [self._value_formatter(self._value_converter(value)) for value in values]
+                self._balloon.centralWidget().setLabels(display_values)
+
+            elif display_value:
                 if self._value_formatter:
                     value_string = self._value_formatter(display_value)
                 else:
                     value_string = '%4.1f' % value
-                self._balloon.children()[0].setText(value_string)
+                self._balloon.centralWidget().setLabels([value_string])
 
         return super(DoubleRangeView, self).mouseMoveEvent(event)
 
@@ -671,6 +679,7 @@ class Track(GraphicsRoundedRectItem, Named):
 class Slider(QGraphicsItemGroup, Named):
     OUTSIDE = 'outside'
     INSIDE = 'inside'
+    SINGLE = 'single'
     WAIT = 'wait'
 
     def __init__(self):
@@ -851,7 +860,7 @@ class Slider(QGraphicsItemGroup, Named):
 
             else:
                 event.accept()
-                self._long_click_state = self.OUTSIDE
+                self._long_click_state = self.SINGLE
 
                 super(Slider, self).mousePressEvent(event)
 
@@ -876,11 +885,13 @@ class Slider(QGraphicsItemGroup, Named):
 
         super(Slider, self).mouseReleaseEvent(event)
 
+        self._long_click_state = self.OUTSIDE
+
     def _cancel_long_click(self):
         if self._long_click_timer:
             self._long_click_timer.stop()
             self._long_click_timer = None
-            self._long_click_state = self.OUTSIDE
+            self._long_click_state = self.SINGLE
 
     def mouseMoveEvent(self, event):
 
@@ -892,7 +903,7 @@ class Slider(QGraphicsItemGroup, Named):
             if self._long_click_state == self.WAIT:
                 if (self._long_click_pos - scene_pos).manhattanLength() >= QApplication.startDragDistance():
                     self._cancel_long_click()
-                    self._long_click_state = self.OUTSIDE
+                    self._long_click_state = self.SINGLE
                     super(Slider, self).mouseMoveEvent(event)
 
             elif self._long_click_state == self.INSIDE:

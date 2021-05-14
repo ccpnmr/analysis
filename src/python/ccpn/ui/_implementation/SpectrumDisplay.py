@@ -275,17 +275,19 @@ class SpectrumDisplay(AbstractWrapperObject):
     def rename(self, name):
 
         oldName = self.title
-        from ccpn.util.Common import _validateName
         try:
             if not self.project.getSpectrumDisplay(name):
                 guiModule = self.project.getByPid(self.pid)
-                isValidName = _validateName(self.project, SpectrumDisplay, value=name, allowWhitespace=False)
                 # self._wrappedData.name = name  # cannot set yet because API constraints. Also missing notifiers.
-                self._wrappedData.__dict__['name'] = name
-                self._id = name
                 if guiModule: # just rename the label on the Gui. Could be done via notifiers (to be implemented)
-                    guiModule._rename(f'{self.className}:{name}')
-                return (oldName,)
+                    name = guiModule._renameModule(f'{self.className}:{name}')
+                    self._wrappedData.__dict__['name'] = name
+                    self._id = name
+                    return (oldName,)
+            else:
+                msg = 'Cannot rename spectrum Display. Name already taken: %s' %name
+                getLogger().warning(msg)
+                raise RuntimeError(msg)
 
         except Exception as err:
             getLogger().warning('Cannot rename spectrum Display', err)

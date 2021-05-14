@@ -87,7 +87,7 @@ class Ui(NotifierBase):
         # We want to give some feedback; sometimes this takes a while (e.g. poor internet)
         # sys.stderr.write('==> Checking registration ... \n')
         sys.stderr.flush()  # It seems to be necessary as without the output comes after the registration screen
-
+        sys.stderr.write('==> Checking registration on server\n' )
         # check local registration details
         if not (self._isRegistered and self._termsConditions):
             # call the subclassed register method

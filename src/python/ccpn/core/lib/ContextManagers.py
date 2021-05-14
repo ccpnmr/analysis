@@ -39,7 +39,9 @@ from ccpn.core.lib import Util as coreUtil
 from inspect import signature, Parameter
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
-
+import time
+import signal
+import sys
 
 @contextmanager
 def echoCommand(obj, funcName, *params, values=None, defaults=None,
@@ -591,6 +593,44 @@ def waypointBlocking(application=None):
     finally:
         # clean up after blocking undo items
         undo.decreaseWaypointBlocking()
+
+
+class Timeout:
+
+    """
+    A simple No-UI context manager to wrap a long operation, which is not necessarily a loop.
+
+    -- Do an operation until time runs out --
+
+    ========================================
+
+    Usage:
+        # -- Single thread -- #
+        with timeout(seconds=60, timeoutMessage='time is over') as t:
+            # do a long operation   # if not finished before time runs out then it stops ...
+
+    ========================================
+
+    """
+
+    def __init__(self, seconds:int=60, timeoutMessage:str = ""):
+
+        self.seconds = int(seconds)
+        self.timeoutMessage = timeoutMessage
+
+    def _timeout_handler(self, signum, frame):
+        getLogger().warning(self.timeoutMessage)
+        raise TimeoutError(self.timeoutMessage)
+
+    def __enter__(self):
+        signal.signal(signal.SIGALRM, self._timeout_handler)  # Set handler for SIGALRM
+        signal.alarm(self.seconds)  # start countdown for SIGALRM to be raised
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        signal.alarm(0)  # Cancel SIGALRM if it's scheduled
+        return exc_type is TimeoutError  # Suppress TimeoutError
+
+
 
 
 CURRENT_ATTRIBUTE_NAME = '_currentAttributeName'

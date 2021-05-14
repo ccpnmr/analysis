@@ -229,14 +229,16 @@ def checkServer(registrationDict, version='3'):
 
     except Exception as e:
         logger = Logging.getLogger()
-        logger.warning('Could not check registration on server.')
+        logger.warning('Could not check registration on server.', e)
+        logger.exception(e)
 
 
 def checkInternetConnection():
     try:
         return Url.checkInternetConnection()
 
-    except:
+    except Exception as e:
+        Logging.getLogger().exception(e)
         return False
 
 

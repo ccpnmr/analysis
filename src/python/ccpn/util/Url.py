@@ -129,30 +129,32 @@ def fetchUrl(url, data=None, headers=None, timeout=2.0, proxySettings=None, deco
     """Fetch url request from the server
     """
     import logging
+    from core.lib.ContextManagers import Timeout as timer
+    timeoutMessage = 'Could not connect to server. Check connection'
+    with timer(seconds=timeout or 2, timeoutMessage=timeoutMessage):
+        urllib3_logger = logging.getLogger('urllib3')
+        urllib3_logger.setLevel(logging.CRITICAL)
 
-    urllib3_logger = logging.getLogger('urllib3')
-    urllib3_logger.setLevel(logging.CRITICAL)
+        if not proxySettings:
 
-    if not proxySettings:
+            # read the proxySettings from the preferences
+            from ccpn.util.UserPreferences import UserPreferences
 
-        # read the proxySettings from the preferences
-        from ccpn.util.UserPreferences import UserPreferences
-
-        _userPreferences = UserPreferences(readPreferences=True)
-        if _userPreferences.proxyDefined:
-            proxyNames = ['useProxy', 'proxyAddress', 'proxyPort', 'useProxyPassword',
-                          'proxyUsername', 'proxyPassword', 'verifySSL']
-            proxySettings = {}
-            for name in proxyNames:
-                proxySettings[name] = _userPreferences._getPreferencesParameter(name)
+            _userPreferences = UserPreferences(readPreferences=True)
+            if _userPreferences.proxyDefined:
+                proxyNames = ['useProxy', 'proxyAddress', 'proxyPort', 'useProxyPassword',
+                              'proxyUsername', 'proxyPassword', 'verifySSL']
+                proxySettings = {}
+                for name in proxyNames:
+                    proxySettings[name] = _userPreferences._getPreferencesParameter(name)
 
 
-    response = fetchHttpResponse('POST', url, data=data, headers=headers,
-                                 proxySettings=proxySettings)
+        response = fetchHttpResponse('POST', url, data=data, headers=headers,
+                                     proxySettings=proxySettings)
 
-    # if response:
-    #     ll = len(response.data)
-    #     print('>>>>>>responseUrl', proxySettings, response.data[0:min(ll, 20)])
+        # if response:
+        #     ll = len(response.data)
+        #     print('>>>>>>responseUrl', proxySettings, response.data[0:min(ll, 20)])
 
     return response.data.decode('utf-8') if decodeResponse else response
 
@@ -185,6 +187,7 @@ def checkInternetConnection():
         return True
 
     except Exception as es:
+        getLogger().exception(es)
         return False
 
 

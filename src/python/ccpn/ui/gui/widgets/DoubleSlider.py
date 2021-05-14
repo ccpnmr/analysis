@@ -837,7 +837,6 @@ class Slider(QGraphicsItemGroup, Named):
                         self._last_click_widget = child
                         self._long_click_rect = child.sceneRect()
                         self._long_click_widget_pos = child.pos()
-                        self._last_click_widget = child
                         break
 
                     if child == self._handle_left:

@@ -187,6 +187,9 @@ class DoubleRangeView(QGraphicsView):
     # @values.setter
     def setValues(self, left_value, right_value):
         self._values = [left_value, right_value]
+        if left_value > right_value:
+            left_value, right_value = right_value, left_value
+
         self._calculate_min_max_pixel_ranges()
         min_position, max_position = self._min_max_handle_positions()
 

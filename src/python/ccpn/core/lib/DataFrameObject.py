@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-04 17:48:24 +0100 (Tue, May 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-14 15:21:08 +0100 (Fri, May 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -333,7 +333,7 @@ class DataFrameObject(object):
     def changeObject(self, obj):
         # row = self.find(self._table, str(obj.pid), column=DATAFRAME_PID)
         row = self.findObject(self._table, obj, column='_object')
-        _update = False
+        # _update = False
         if row is not None:
             self._table.silenceCallBack = True
 
@@ -366,6 +366,8 @@ class DataFrameObject(object):
             # finally:
             self._table.silenceCallBack = False
             return True
+
+        return False
 
     def objectExists(self, obj):
         return self.find(self._table, str(obj.pid), column=DATAFRAME_PID) is not None

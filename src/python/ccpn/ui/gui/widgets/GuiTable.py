@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-10 12:31:42 +0100 (Mon, May 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-14 15:21:08 +0100 (Fri, May 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1920,7 +1920,7 @@ GuiTable::item::selected {
                     _update = self._dataFrameObject.changeObject(row)
 
                     # TODO:ED it may not already be in the list - check indexing
-                    if not _update:
+                    if not _update and '_calledFromCell' not in data:
                         if self._tableData['tableSelection']:
                             tSelect = getattr(self, self._tableData['tableSelection'])
                             if tSelect:
@@ -1946,7 +1946,7 @@ GuiTable::item::selected {
                     #         _update = True
 
                 except Exception as es:
-                    getLogger().debug2('Error updating row in table')
+                    getLogger().debug2(f'Error updating row in table   {es}')
 
             elif trigger == Notifier.RENAME:
                 # get the old pid before the rename

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-13 19:27:55 +0100 (Thu, May 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-14 10:50:16 +0100 (Fri, May 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1088,7 +1088,7 @@ class DimensionsTab(Widget):
         # get the nucleus codes from the current isotope codes
         refDimensions = self._referenceDimensions or self.spectrum.referenceExperimentDimensions
 
-        if self.spectrum.experimentType is None:
+        if (self._referenceExperiment or self.spectrum.experimentType) is None:
             _referenceLists = [['', val] if val else ['',] for val in refDimensions]
             _refDimensions = [val if val else '' for val in refDimensions]
 

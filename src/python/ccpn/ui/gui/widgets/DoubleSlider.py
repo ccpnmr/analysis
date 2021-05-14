@@ -65,7 +65,7 @@ class DoubleRangeView(QGraphicsView):
 
         self._balloon = SpeechBalloon(owner=self, ontop=True)
         self._balloon.setStyleSheet('color: gray;')
-        self._balloon.setGeometry(200, 200, 70, 30)
+        # self._balloon.setGeometry(200, 200, 70, 30)
 
         label = MyLabel('test', parent=self._balloon)
         label.setAlignment(Qt.AlignCenter)

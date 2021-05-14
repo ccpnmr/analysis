@@ -692,7 +692,6 @@ class Slider(QGraphicsItemGroup, Named):
         self._long_click_pos = None
         self._long_click_state = self.OUTSIDE
         self._long_click_widget_pos = None
-        self._widget_click_rect = None
         # self._widget_pos = {}
         self._widget_rect = None
         self._widget_pos = None

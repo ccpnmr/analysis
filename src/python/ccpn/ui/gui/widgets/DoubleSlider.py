@@ -9,7 +9,7 @@ from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QLinearGradient, Q
 from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsItem, QGraphicsItemGroup, QGraphicsRectItem, QLabel, \
     QWidget, QGraphicsObject, QCheckBox, QLineEdit, QFormLayout
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
-from SpeechBalloon import SpeechBalloon
+from SpeechBalloon import SpeechBalloon, DoubleLabel
 
 # class MyGraphicsScene(QGraphicsScene):
 #     def drawBackground(self, painter, rect):
@@ -21,21 +21,24 @@ from SpeechBalloon import SpeechBalloon
 #         super(MyGraphicsScene, self).drawBackground(painter, rect)
 #         painter.fillRect(rect, myBrush)
 
-
-# TODO cleanup code
+# TODO disabled state centre widget line wrong color
+# * TODO cleanup code - done
 # * TODO set values - done
 # * TODO set ranges - done
-# TODO dragging handles specialise bubble code
+# * TODO dragging handles specialise bubble code - done
 # * TODO bubble should display formatted value - done
 # * TODO system should broadcast converted values - done
 # - TODO adapt balloon to size of children
 # TODO remove 'arbitrary' fudge factors
 # TODO off by 1 error on handle balloon position
-# TODO when dragging handles balloon position overruns
+# - TODO when dragging handles balloon position overruns - done
 # TODO support for mouse wheel
 # TODO add timer to display balloon window
-# TODO pull request
-
+# * TODO pull request - done
+# * done TODO signals not firing on value changes from properties
+# TODO demo values should update on typing
+# * TODO setting left and right values wrong way round via text controls swaps handles! - done
+# * TODO setting left and right values wrong way round via text controls gives negative gap! -done
 
 CCPN_PURPLE = '#686dbe'
 OFF_LINE_COLOUR = '#dbdbdb'
@@ -60,13 +63,12 @@ class DoubleRangeView(QGraphicsView):
         self._slider = Slider()
         self._slider.setName('slider')
 
-        self._balloon = SpeechBalloon(owner=self, ontop=True)
+        self._balloon = SpeechBalloon(owner=self, on_top=True)
         self._balloon.setStyleSheet('color: gray;')
-        self._balloon.setGeometry(200, 200, 70, 30)
+        # self._balloon.setGeometry(200, 200, 70, 30)
 
-        label = MyLabel('test', parent=self._balloon)
-        label.setAlignment(Qt.AlignCenter)
-        self._balloon.set_central_widget(label)
+        label = DoubleLabel(parent=self._balloon)
+        self._balloon.setCentralWidget(label)
         self._balloon.setAttribute(Qt.WA_ShowWithoutActivating)
 
         self._single_unit_move = 10
@@ -166,9 +168,13 @@ class DoubleRangeView(QGraphicsView):
         # pageStep: int
         # TODO: single step
 
-    @pyqtProperty(int, int)
+    @pyqtProperty(tuple)
     def values(self):
         return tuple(self._values)
+
+    @values.setter
+    def values(self, values):
+        self.setValues(values)
 
     def _calculate_min_max_handle_centre_positions(self, global_system=True):
         scene_rect = self.sceneRect()
@@ -182,9 +188,13 @@ class DoubleRangeView(QGraphicsView):
 
         return min_x, max_x
 
-    # @values.setter
-    def setValues(self, left_value, right_value):
+    def setValues(self, values):
+        left_value, right_value = values
+        if left_value > right_value:
+            left_value, right_value = right_value, left_value
+
         self._values = [left_value, right_value]
+
         self._calculate_min_max_pixel_ranges()
         min_position, max_position = self._min_max_handle_positions()
 
@@ -535,12 +545,21 @@ class DoubleRangeView(QGraphicsView):
             else:
                 display_value = self._calculate_display_value(value)
 
-            if display_value:
+            if self._slider.sceneRect().contains(scene_pos)  and self._slider._long_click_state == self._slider.OUTSIDE \
+               or self._slider._long_click_state == self._slider.SINGLE:
+                values = list(self._values)
+                if values[0] == values[1]:
+                    values = [values[0]]
+
+                display_values = [self._value_formatter(self._value_converter(value)) for value in values]
+                self._balloon.centralWidget().setLabels(display_values)
+
+            elif display_value:
                 if self._value_formatter:
                     value_string = self._value_formatter(display_value)
                 else:
                     value_string = '%4.1f' % value
-                self._balloon.children()[0].setText(value_string)
+                self._balloon.centralWidget().setLabels([value_string])
 
         return super(DoubleRangeView, self).mouseMoveEvent(event)
 
@@ -668,6 +687,7 @@ class Track(GraphicsRoundedRectItem, Named):
 class Slider(QGraphicsItemGroup, Named):
     OUTSIDE = 'outside'
     INSIDE = 'inside'
+    SINGLE = 'single'
     WAIT = 'wait'
 
     def __init__(self):
@@ -692,7 +712,6 @@ class Slider(QGraphicsItemGroup, Named):
         self._long_click_pos = None
         self._long_click_state = self.OUTSIDE
         self._long_click_widget_pos = None
-        self._widget_click_rect = None
         # self._widget_pos = {}
         self._widget_rect = None
         self._widget_pos = None
@@ -826,7 +845,6 @@ class Slider(QGraphicsItemGroup, Named):
                         self._last_click_widget = child
                         self._long_click_rect = child.sceneRect()
                         self._long_click_widget_pos = child.pos()
-                        self._last_click_widget = child
                         break
 
                     if child == self._handle_left:
@@ -849,7 +867,7 @@ class Slider(QGraphicsItemGroup, Named):
 
             else:
                 event.accept()
-                self._long_click_state = self.OUTSIDE
+                self._long_click_state = self.SINGLE
 
                 super(Slider, self).mousePressEvent(event)
 
@@ -874,11 +892,13 @@ class Slider(QGraphicsItemGroup, Named):
 
         super(Slider, self).mouseReleaseEvent(event)
 
+        self._long_click_state = self.OUTSIDE
+
     def _cancel_long_click(self):
         if self._long_click_timer:
             self._long_click_timer.stop()
             self._long_click_timer = None
-            self._long_click_state = self.OUTSIDE
+            self._long_click_state = self.SINGLE
 
     def mouseMoveEvent(self, event):
 
@@ -890,7 +910,7 @@ class Slider(QGraphicsItemGroup, Named):
             if self._long_click_state == self.WAIT:
                 if (self._long_click_pos - scene_pos).manhattanLength() >= QApplication.startDragDistance():
                     self._cancel_long_click()
-                    self._long_click_state = self.OUTSIDE
+                    self._long_click_state = self.SINGLE
                     super(Slider, self).mouseMoveEvent(event)
 
             elif self._long_click_state == self.INSIDE:
@@ -1328,7 +1348,7 @@ class BufferTillEnter(QObject):
 
 
 class SetOneOf(QObject):
-    output = pyqtSignal(int, int)
+    output = pyqtSignal(tuple)
 
     def __init__(self, index, target=None, instance=None):
         super(SetOneOf, self).__init__()
@@ -1350,7 +1370,7 @@ class SetOneOf(QObject):
         results[self._index] = value
         results = [int(result) for result in results]
         # ic(results)
-        self.output.emit(*results)
+        self.output.emit(tuple(results))
 
 
 if __name__ == '__main__':
@@ -1360,34 +1380,34 @@ if __name__ == '__main__':
 
     widget = QWidget()
 
-    label1 = QLabel()
-    label1.setText('unknown')
-    label2 = QLabel()
-    label2.setText('unknown')
+    left_value_display = QLabel()
+    left_value_display.setText('unknown')
+    right_value_display = QLabel()
+    right_value_display.setText('unknown')
     check = QCheckBox()
 
-    label3 = QLabel()
-    label3.setText('unknown')
-    label4 = QLabel()
-    label4.setText('unknown')
+    min_value_display = QLabel()
+    min_value_display.setText('unknown')
+    max_value_display = QLabel()
+    max_value_display.setText('unknown')
 
-    label5 = QLabel()
-    label5.setText('unknown')
-    label6 = QLabel()
-    label6.setText('unknown')
+    left_derived_value_display = QLabel()
+    left_derived_value_display.setText('unknown')
+    right_derived_value_display = QLabel()
+    right_derived_value_display.setText('unknown')
 
-    lineEdit1 = QLineEdit()
-    lineEdit2 = QLineEdit()
+    left_value_edit = QLineEdit()
+    right_value_edit = QLineEdit()
 
     v_layout = QFormLayout()
-    v_layout.addRow('Left Value [signal]', label1)
-    v_layout.addRow('Right Value [signal]', label2)
-    v_layout.addRow('Min Value [signal]', label3)
-    v_layout.addRow('Max Value [signal]', label4)
-    v_layout.addRow('Derived value left [signal]', label5)
-    v_layout.addRow('Derived value right[signal]', label6)
-    v_layout.addRow('Left Value [set]', lineEdit1)
-    v_layout.addRow('Right Value [set]', lineEdit2)
+    v_layout.addRow('Left Value [signal]', left_value_display)
+    v_layout.addRow('Right Value [signal]', right_value_display)
+    v_layout.addRow('Min Value [signal]', min_value_display)
+    v_layout.addRow('Max Value [signal]', max_value_display)
+    v_layout.addRow('Derived value left [signal]', left_derived_value_display)
+    v_layout.addRow('Derived value right[signal]', right_derived_value_display)
+    v_layout.addRow('Left Value [set]', left_value_edit)
+    v_layout.addRow('Right Value [set]', right_value_edit)
 
     v_layout.addRow('Enabled', check)
 
@@ -1428,25 +1448,25 @@ if __name__ == '__main__':
     check.setChecked(True)
     check.stateChanged.connect(view.setEnabled)
 
-    argument_0.output.connect(label1.setNum)
-    argument_1.output.connect(label2.setNum)
-    argument_2.output.connect(label3.setNum)
-    argument_3.output.connect(label4.setNum)
-    argument_4.output.connect(label5.setNum)
-    argument_5.output.connect(label6.setNum)
+    argument_0.output.connect(left_value_display.setNum)
+    argument_1.output.connect(right_value_display.setNum)
+    argument_2.output.connect(min_value_display.setNum)
+    argument_3.output.connect(max_value_display.setNum)
+    argument_4.output.connect(left_derived_value_display.setNum)
+    argument_5.output.connect(right_derived_value_display.setNum)
 
     str_1 = ConvertToStr()
     str_2 = ConvertToStr()
     argument_0.output.connect(str_1.input)
     argument_1.output.connect(str_2.input)
-    str_1.output.connect(lineEdit1.setText)
-    str_2.output.connect(lineEdit2.setText)
+    str_1.output.connect(left_value_edit.setText)
+    str_2.output.connect(right_value_edit.setText)
 
     int_1 = ConvertToInt()
     buffer_1 = BufferTillEnter()
     select_first = SetOneOf(0, target=DoubleRangeView.values, instance=view)
-    lineEdit1.textEdited.connect(buffer_1.input)
-    lineEdit1.returnPressed.connect(buffer_1.trigger)
+    left_value_edit.textEdited.connect(buffer_1.input)
+    left_value_edit.returnPressed.connect(buffer_1.trigger)
     buffer_1.output.connect(int_1.input)
     int_1.output.connect(select_first.input)
     select_first.output.connect(view.setValues)
@@ -1454,12 +1474,13 @@ if __name__ == '__main__':
     int_2 = ConvertToInt()
     buffer_2 = BufferTillEnter()
     select_second = SetOneOf(1, target=DoubleRangeView.values, instance=view)
-    lineEdit2.textEdited.connect(buffer_2.input)
-    lineEdit2.returnPressed.connect(buffer_2.trigger)
+    right_value_edit.textEdited.connect(buffer_2.input)
+    right_value_edit.returnPressed.connect(buffer_2.trigger)
     buffer_2.output.connect(int_2.input)
     int_2.output.connect(select_second.input)
     select_second.output.connect(view.setValues)
 
+    view.values = 10, 20
     view.setEnabled(True)
     bar.addWidget(view)
 

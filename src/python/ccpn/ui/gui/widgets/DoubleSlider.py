@@ -293,7 +293,7 @@ class DoubleRangeView(QGraphicsView):
         super(DoubleRangeView, self).showEvent(event)
         self.rangeChanged.emit(self._min_value, self._max_value)
         self.valuesChanged.emit(*self._values)
-        display_values = [self._calculate_display_value(value) for value in self._values]
+        display_values = self._calculate_display_value(self._values)
         self.displayValues.emit(*display_values)
 
     def _calculate_min_max_pixel_ranges(self):
@@ -509,17 +509,22 @@ class DoubleRangeView(QGraphicsView):
 
     def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
 
-        pos = event.pos()
-        scene_pos = self.mapToScene(pos)
-        item_pos = self._track.mapFromScene(scene_pos)
-        self._track._line_pos = item_pos.x()
-        self._track.update()
-
         if self._enabled:
+            pos = event.pos()
+            scene_pos = self.mapToScene(pos)
+            item_pos = self._track.mapFromScene(scene_pos)
+            slider_scene_rect = self._slider.sceneRect()
+
+            self._track._line_pos = item_pos.x()
+            self._track.update()
+
+            slider_state = self._slider._long_click_state
+            last_click_widget = self._slider._last_click_widget
+
             control_rect = self.geometry()
             control_rect = QRect(self.mapToGlobal(control_rect.topLeft()), control_rect.size())
 
-            if self._slider._long_click_state == self._slider.INSIDE:
+            if slider_state == self._slider.INSIDE:
                 min_x, max_x = self._calculate_min_max_handle_centre_positions(global_system=True)
             else:
                 # TODO: needs limiting by position of handles...
@@ -533,35 +538,28 @@ class DoubleRangeView(QGraphicsView):
 
             balloon_pos = QPoint(int(event_x), int(control_rect.top() - 4))
 
-            value = self._position_to_value(balloon_pos.x())
-
             self._balloon.show()
             self._balloon.move_pointer_to(balloon_pos)
 
-            display_value = None
-            if self._slider._long_click_state == self._slider.INSIDE:
-                if self._slider._last_click_widget == self._slider._handle_left:
-                    display_value = self._values[LEFT]
-                elif self._slider._last_click_widget == self._slider._handle_right:
-                    display_value = self._values[RIGHT]
-            else:
-                display_value = self._calculate_display_value(value)
-
-            if self._slider.sceneRect().contains(scene_pos)  and self._slider._long_click_state == self._slider.OUTSIDE \
-               or self._slider._long_click_state == self._slider.SINGLE:
+            if slider_state == self._slider.INSIDE:
+                if last_click_widget == self._slider._handle_left:
+                    values = [self._values[LEFT]]
+                elif last_click_widget == self._slider._handle_right:
+                    values = [self._values[RIGHT]]
+            elif slider_scene_rect.contains(scene_pos) and slider_state == self._slider.OUTSIDE:
                 values = list(self._values)
-                if values[0] == values[1]:
-                    values = [values[0]]
+            elif slider_state == self._slider.SINGLE:
+                values = list(self._values)
+            else:
+                values = [self._position_to_value(event_x)]
 
-                display_values = [self._value_formatter(self._value_converter(value)) for value in values]
-                self._balloon.centralWidget().setLabels(display_values)
+            if len(values) == 2 and (values[0] == values[1]):
+                values = [values[0]]
 
-            elif display_value:
-                if self._value_formatter:
-                    value_string = self._value_formatter(display_value)
-                else:
-                    value_string = '%4.1f' % value
-                self._balloon.centralWidget().setLabels([value_string])
+            display_values = self._calculate_display_value(values)
+            display_strings = ['%4.1f' % value for value in display_values]
+
+            self._balloon.centralWidget().setLabels(display_strings)
 
         return super(DoubleRangeView, self).mouseMoveEvent(event)
 

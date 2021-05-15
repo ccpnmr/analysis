@@ -293,7 +293,7 @@ class DoubleRangeView(QGraphicsView):
         super(DoubleRangeView, self).showEvent(event)
         self.rangeChanged.emit(self._min_value, self._max_value)
         self.valuesChanged.emit(*self._values)
-        display_values = self._calculate_display_value(self._values)
+        display_values = self._calculate_display_values(self._values)
         self.displayValues.emit(*display_values)
 
     def _calculate_min_max_pixel_ranges(self):
@@ -341,7 +341,7 @@ class DoubleRangeView(QGraphicsView):
         self._values = values
 
         self.valuesChanged.emit(int(values[LEFT]), int(values[RIGHT]))
-        display_values = [self._calculate_display_value(value) for value in values]
+        display_values = self._calculate_display_values(values)
         self.displayValues.emit(*display_values)
 
     def _calculate_values(self):
@@ -556,18 +556,20 @@ class DoubleRangeView(QGraphicsView):
             if len(values) == 2 and (values[0] == values[1]):
                 values = [values[0]]
 
-            display_values = self._calculate_display_value(values)
+            display_values = self._calculate_display_values(values)
             display_strings = ['%4.1f' % value for value in display_values]
 
             self._balloon.centralWidget().setLabels(display_strings)
 
         return super(DoubleRangeView, self).mouseMoveEvent(event)
 
-    def _calculate_display_value(self, value):
-        display_value = value
+    def _calculate_display_values(self, values):
+        result = list(values)
+
         if self._value_converter:
-            display_value = self._value_converter(display_value)
-        return display_value
+            for i, value in enumerate(values):
+                result[i] = self._value_converter(value)
+        return result
 
     def leaveEvent(self, event):
         super(DoubleRangeView, self).leaveEvent(event)

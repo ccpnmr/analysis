@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 14:27:27 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-17 15:51:34 +0100 (Mon, May 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -25,17 +25,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import time as systime
 
-from PyQt5.QtWidgets import QApplication
-
-from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
-
-# how frequently to check if license dialog has closed when waiting to show the tip of the day
-WAIT_EVENT_LOOP_EMPTY = 0
-WAIT_LICENSE_DIALOG_CLOSE_TIME = 100
 
 if not hasattr(systime, 'clock'):
     # NOTE:ED - quick patch to fix bug in pyqt 5.9
     systime.clock = systime.process_time
+
+# how frequently to check if license dialog has closed when waiting to show the tip of the day
+WAIT_EVENT_LOOP_EMPTY = 0
+WAIT_LICENSE_DIALOG_CLOSE_TIME = 100
 
 import json
 import logging
@@ -48,6 +45,7 @@ import re
 import subprocess
 from typing import Union
 from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication
 from distutils.dir_util import copy_tree
 from functools import partial
 
@@ -76,6 +74,7 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog, DataFileDialog, NefFileDialog, \
     ArchivesFileDialog, MacrosFileDialog, CcpnMacrosFileDialog, LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog, \
     ProjectSaveFileDialog
+from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
@@ -921,13 +920,12 @@ class Framework(NotifierBase):
                 self.current.strip = self.project.strips[0]
 
         # GST slightly complicated as we have to wait for anay license or other
-        # starup dialogs to close before we display tip of the day
+        # startup dialogs to close before we display tip of the day
         self._tip_of_the_day_wait_dialogs = (RegisterPopup,)
         self._startupShowTipofTheDay()
 
     def _startupShowTipofTheDay(self):
         if self._shouldDisplayTipOfTheDay():
-
             self._initial_show_timer = QTimer(parent=self._mainWindow)
             self._initial_show_timer.timeout.connect(self._startupDisplayTipOfTheDayCallback)
             self._initial_show_timer.setInterval(0)
@@ -946,7 +944,7 @@ class Framework(NotifierBase):
         is_first_time_tip_of_the_day = self.preferences['general'].setdefault('firstTimeShowKeyConcepts', True)
 
         # GST this waits till any inhibiting dialogs aren't show and then awaits till the event loop is empty
-        # effectivley it sweaps between waiting for WAIT_LICENSE_DIALOG_CLOSE_TIME or until the event loop is empty
+        # effectively it swaps between waiting for WAIT_LICENSE_DIALOG_CLOSE_TIME or until the event loop is empty
         if not self._canTipOfTheDayShow() or self._initial_show_timer.interval() == WAIT_LICENSE_DIALOG_CLOSE_TIME:
             if self._initial_show_timer.interval() == WAIT_EVENT_LOOP_EMPTY:
                 self._initial_show_timer.setInterval(WAIT_LICENSE_DIALOG_CLOSE_TIME)
@@ -1006,13 +1004,12 @@ class Framework(NotifierBase):
     def _tip_of_the_day_dont_show_callback(self, dont_show):
         self.preferences['general']['showTipOfTheDay'] = not dont_show
 
-    def _tip_of_the_day_seen_tips_callback(self,seen_tips):
+    def _tip_of_the_day_seen_tips_callback(self, seen_tips):
         seen_tip_list = self.preferences['general']['seenTipsOfTheDay']
         previous_seen_tips = set(seen_tip_list)
         previous_seen_tips.update(seen_tips)
         seen_tip_list.clear()
         seen_tip_list.extend(previous_seen_tips)
-
 
     def _shouldDisplayTipOfTheDay(self):
         return self.preferences['general'].setdefault('showTipOfTheDay', True)

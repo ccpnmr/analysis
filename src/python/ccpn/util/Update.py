@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-12 11:01:03 +0000 (Fri, February 12, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-17 23:48:44 +0100 (Mon, May 17, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -74,27 +75,6 @@ def lastModifiedTime(filePath):
     return os.stat(filePath).st_mtime
 
 
-def calcHashCode(filePath):
-    if not os.path.isfile(filePath):
-        return 0
-
-    if not os.access(filePath, os.R_OK):
-        return 0
-
-    # fp = open(filePath, 'rU', encoding='utf-8')
-    try:
-        with open(filePath, 'rb') as fp:
-            data = fp.read()
-    except:
-        data = ''
-
-    h = hashlib.md5()
-    # h.update(data.encode('utf-8'))
-    h.update(data)
-
-    return h.hexdigest()
-
-
 def isBinaryFile(fileName):
     """Check whether the fileName is a binary file (not always guaranteed)
     Doesn't check for a fullPath
@@ -128,6 +108,30 @@ def isBinaryData(data):
         isBinary = bool(firstData.translate(None, textchars))
 
         return isBinary
+
+
+def calcHashCode(filePath):
+    if not os.path.isfile(filePath):
+        return 0
+
+    if not os.access(filePath, os.R_OK):
+        return 0
+
+    try:
+        if isBinaryFile(filePath):
+            with open(filePath, 'rb') as fp:
+                data = fp.read()
+        else:
+            with open(filePath, 'r', encoding='utf-8') as fp:
+                data = fp.read()
+            data = bytes(data, 'utf-8')
+    except Exception as es:
+        data = ''
+
+    h = hashlib.md5()
+    h.update(data)
+
+    return h.hexdigest()
 
 
 def fetchUrl(url, data=None, headers=None, timeout=2.0, decodeResponse=True):

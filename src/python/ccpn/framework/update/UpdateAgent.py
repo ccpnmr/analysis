@@ -4,8 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-16 18:59:07 +0100 (Thu, April 16, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-05-17 23:48:44 +0100 (Mon, May 17, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,7 +34,7 @@ import shutil
 import sys
 
 from datetime import datetime
-from ccpn.util.Update import isBinaryData, DELETEHASHCODE
+from ccpn.util.Update import isBinaryData, DELETEHASHCODE, isBinaryFile
 from ccpn.framework.PathsAndUrls import ccpn2Url
 
 from ccpn.util import Path
@@ -79,10 +80,15 @@ def calcHashCode(filePath):
         return 0
 
     try:
-        with open(filePath, 'rb') as fp:
-            data = fp.read()
+        if isBinaryFile(filePath):
+            with open(filePath, 'rb') as fp:
+                data = fp.read()
+        else:
+            with open(filePath, 'r', encoding='utf-8') as fp:
+                data = fp.read()
+            data = bytes(data, 'utf-8')
     except:
-        getLogger().warning('error reading data, not Unicode')
+        getLogger().warning(f'error generating hashcode for {filePath}')
         data = ''
 
     h = hashlib.md5()

@@ -8,8 +8,9 @@ from ccpn.core.lib.Undo import _deleteAllApiObjects, restoreOriginalLinks, no_op
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -18,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-04-15 18:25:38 +0100 (Wed, April 15, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-05-17 14:27:27 +0100 (Mon, May 17, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -430,11 +431,14 @@ class Undo(deque):
         else:
             undoTo = max(self.nextIndex - 2, -1)
 
-        # block addition of items while operating
-        self._blocked = True
         from ccpn.core.lib.ContextManagers import undoBlock
 
-        try:
+        if self.application._disableUndoException:
+            # mode is activated with switch --disable-undo-exception
+
+            # block addition of items while operating
+            self._blocked = True
+
             with undoBlock():
                 undoCall = redoCall = None
                 for n in range(self.nextIndex - 1, undoTo, -1):
@@ -444,17 +448,37 @@ class Undo(deque):
                         undoCall()
                 self.nextIndex = undoTo + 1
 
-        except Exception as e:
-            from ccpn.util.Logging import getLogger
-
-            getLogger().warning("Error while undoing (%s). Undo stack is cleared." % e)
-            if self._debug:
-                print("UNDO DEBUG: error in undo. Last undo function was:", undoCall)
-                raise
-            self.clear()
-        finally:
             # Added by Rasmus March 2015. Surely we need to reset self._blocked?
             self._blocked = False
+
+        else:
+            # block addition of items while operating
+            self._blocked = True
+
+            try:
+                with undoBlock():
+                    undoCall = redoCall = None
+                    for n in range(self.nextIndex - 1, undoTo, -1):
+                        undoCall, redoCall = self[n]
+
+                        if undoCall:
+                            undoCall()
+                    self.nextIndex = undoTo + 1
+
+            except Exception as e:
+                from ccpn.util.Logging import getLogger
+
+                getLogger().warning("Error while undoing (%s). Undo stack is cleared." % e)
+                if self.application._ccpnLogging:
+                    self._logObjects()
+                if self._debug:
+                    print("UNDO DEBUG: error in undo. Last undo function was:", undoCall)
+                    raise
+                self.clear()
+
+            finally:
+                # Added by Rasmus March 2015. Surely we need to reset self._blocked?
+                self._blocked = False
 
         self.undoChanged.call(lambda x: x(UndoEvents.UNDO_UNDO))
 
@@ -478,11 +502,14 @@ class Undo(deque):
         else:
             redoTo = min(self.nextIndex, len(self))
 
-        # block addition of items while operating
-        self._blocked = True
         from ccpn.core.lib.ContextManagers import undoBlock
 
-        try:
+        if self.application._disableUndoException:
+            # mode is activated with switch --disable-undo-exception
+
+            # block addition of items while operating
+            self._blocked = True
+
             with undoBlock():
                 for n in range(self.nextIndex, redoTo + 1):
                     undoCall, redoCall = self[n]
@@ -491,17 +518,35 @@ class Undo(deque):
                         redoCall()
                 self.nextIndex = redoTo + 1
 
-        except Exception as e:
-            from ccpn.util.Logging import getLogger
-
-            getLogger().warning("Error while redoing (%s). Undo stack is cleared." % e)
-            if self._debug:
-                print("REDO DEBUG: error in redo. Last redo call was:", redoCall)
-                raise
-            self.clear()
-        finally:
             # Added by Rasmus March 2015. Surely we need to reset self._blocked?
             self._blocked = False
+
+        else:
+            # block addition of items while operating
+            self._blocked = True
+
+            try:
+                with undoBlock():
+                    for n in range(self.nextIndex, redoTo + 1):
+                        undoCall, redoCall = self[n]
+
+                        if redoCall:
+                            redoCall()
+                    self.nextIndex = redoTo + 1
+
+            except Exception as e:
+                from ccpn.util.Logging import getLogger
+
+                getLogger().warning("Error while redoing (%s). Undo stack is cleared." % e)
+                if self.application._ccpnLogging:
+                    self._logObjects()
+                if self._debug:
+                    print("REDO DEBUG: error in redo. Last redo call was:", redoCall)
+                    raise
+                self.clear()
+            finally:
+                # Added by Rasmus March 2015. Surely we need to reset self._blocked?
+                self._blocked = False
 
         self.undoChanged.call(lambda x: x(UndoEvents.UNDO_REDO))
 
@@ -550,3 +595,51 @@ class Undo(deque):
             ll.pop()
 
         self._newItemCount = 0
+
+    def _logObjects(self):
+        """Ccpn Internal - log objects under review to the logger
+        Activated with switch --ccpn-logging
+        """
+        _project = self.application.project
+        _log = getLogger().debug
+        
+        # list the peak info
+        _log('peakDims ~~~~~~~~~~~')
+        _log('\n'.join([str(pk) for pk in _project.peaks]))
+        pks = [pk._wrappedData for pk in _project.peaks]
+        for pk in pks:
+            for pkDim in pk.sortedPeakDims():
+                _log(f'{pkDim}')
+                for pkDimContrib in pkDim.sortedPeakDimContribs():
+                    _log(f'    {pkDimContrib}   {pkDimContrib.resonance}')
+
+        _log('peakContribs ~~~~~~~~~~~')
+        for pk in pks:
+            for pkContrib in pk.sortedPeakContribs():
+                _log(f'  {pkContrib}')
+                for pkDimContrib in pkContrib.sortedPeakDimContribs():
+                    _log(f'    {pkDimContrib}   {pkDimContrib.resonance}')
+
+        _log('shifts ~~~~~~~~~~~')
+        _log('\n'.join([str(sh) for sh in _project.chemicalShifts]))
+        shifts = [sh._wrappedData for sh in _project.chemicalShifts]
+        for sh in _project.chemicalShifts:
+            _log(f'    {sh}    {sh.nmrAtom}')
+        for sh in shifts:
+            _log(f'   {sh}   {sh.isDeleted}  {sh.resonance}')
+
+        _log('resonanceGroups ~~~~~~~~~~~')
+        _log('\n'.join([str(res) for res in _project.nmrResidues]))
+        ress = [res._wrappedData for res in _project.nmrResidues]
+        for res in ress:
+            _log(f'   {res}')
+
+        _log('resonances ~~~~~~~~~~~')
+        _log('\n'.join([str(res) for res in _project.nmrAtoms]))
+        ress = [res._wrappedData for res in _project.nmrAtoms]
+        for res in ress:
+            _log(f'   {res}')
+            for sh in res.sortedShifts():
+                _log(f'       {sh}')
+
+        

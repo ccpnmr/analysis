@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-11 09:59:06 +0100 (Tue, May 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-17 14:27:27 +0100 (Mon, May 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1361,7 +1361,12 @@ GuiTable::item::selected {
             for col, obj in enumerate(buildList):
                 listItem = OrderedDict()
                 for header in colDefs.columns:
-                    listItem[header.headerText] = header.getValue(obj)
+                    try:
+                        listItem[header.headerText] = header.getValue(obj)
+                    except Exception as es:
+                        # NOTE:ED - catch any nasty surprises in tables
+                        getLogger().warning(f'Error creating table information {es}')
+                        listItem[header.headerText] = None
 
                 allItems.append(listItem)
                 objects.append(obj)
@@ -1920,7 +1925,7 @@ GuiTable::item::selected {
                     _update = self._dataFrameObject.changeObject(row)
 
                     # TODO:ED it may not already be in the list - check indexing
-                    if not _update:
+                    if not _update and '_calledFromCell' not in data:
                         if self._tableData['tableSelection']:
                             tSelect = getattr(self, self._tableData['tableSelection'])
                             if tSelect:
@@ -1946,7 +1951,7 @@ GuiTable::item::selected {
                     #         _update = True
 
                 except Exception as es:
-                    getLogger().debug2('Error updating row in table')
+                    getLogger().debug2(f'Error updating row in table   {es}')
 
             elif trigger == Notifier.RENAME:
                 # get the old pid before the rename

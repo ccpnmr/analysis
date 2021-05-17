@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-17 14:27:27 +0100 (Mon, May 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 from functools import partial
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import permutations
 from collections import Iterable, OrderedDict
 
@@ -41,7 +41,7 @@ from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -56,7 +56,6 @@ from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply, _verifyPopupApply
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -277,6 +276,7 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
             self.tabWidget.addTab(self._generalTab, "General")
             self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
             self.tabWidget.addTab(self._contoursTab, "Contours")
+            self.tabWidget.setCurrentIndex(2)
 
         # don't forget to call postInit to finish initialise
         self.__postInit__()
@@ -297,6 +297,15 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
                 self._dimensionsTab._populateDimension()
             if self._contoursTab:
                 self._contoursTab._populateColour()
+
+    def _revertClicked(self):
+        """Revert button signal comes here
+        Revert (roll-back) the state of the project to before the popup was opened
+        """
+        # reset the references so that the pulldowns return to correct state
+        self._dimensionsTab._referenceExperiment = None
+        self._dimensionsTab._referenceDimensions = None
+        super()._revertClicked()
 
     def _getChangeState(self):
         """Get the change state from the popup tabs
@@ -525,7 +534,7 @@ class GeneralTab(Widget):
                                   callback=partial(self._queueSetSpectrumColour, spectrum), icon='icons/colours')
             row += 1
 
-            Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(row, 0))
+            Label(self, text="Reference Experiment Type ", vAlign='t', hAlign='l', grid=(row, 0))
             self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(row, 1))
             spButton = Button(self, grid=(row, 2),
                               callback=partial(self._raiseExperimentFilterPopup, spectrum),
@@ -561,13 +570,16 @@ class GeneralTab(Widget):
             row += 1
 
         else:
-            Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(row, 0))
+            _specLabel = Label(self, text="Reference Experiment Type ", vAlign='t', hAlign='l', grid=(row, 0))
             self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(row, 1))
-            spButton = Button(self, grid=(row, 2),
+            _specButton = Button(self, grid=(row, 2),
                               callback=partial(self._raiseExperimentFilterPopup, spectrum),
                               hPolicy='fixed', icon='icons/applications-system')
 
             self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
+            _specLabel.setVisible(False)
+            self.spectrumType.setVisible(False)
+            _specButton.setVisible(False)
             row += 1
 
             Label(self, text="Spinning rate (Hz)", grid=(row, 0), hAlign='l')
@@ -826,6 +838,8 @@ class DimensionsTab(Widget):
         self.spectrum = spectrum
         self.dimensions = dimensions
         self._changes = ChangeDict()
+        self._referenceExperiment = None
+        self._referenceDimensions = None
 
         Label(self, text="Dimension ", grid=(1, 0), hAlign='l', vAlign='t', )
 
@@ -835,6 +849,7 @@ class DimensionsTab(Widget):
 
         self.axisCodeEdits = [i for i in range(dimensions)]
         self.isotopeCodePullDowns = [i for i in range(dimensions)]
+        self.referenceDimensionPullDowns = [i for i in range(dimensions)]
 
         self._pointCountsLabels = [i for i in range(dimensions)]
         self._dimensionTypesLabels = [i for i in range(dimensions)]
@@ -856,6 +871,16 @@ class DimensionsTab(Widget):
 
         row += 1
         Label(self, text="Isotope Code ", grid=(row, 0), vAlign='t', hAlign='l')
+
+        row += 1
+        _specLabel = Label(self, text="Reference Experiment Type ", grid=(row, 0), vAlign='t', hAlign='l')
+
+        row += 1
+        _refLabel = Label(self, text="Reference Experiment Dimensions ", grid=(row, 0), vAlign='t', hAlign='l')
+
+        row += 1
+        hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
+        hLine.setContentsMargins(5, 0, 0, 0)
 
         row += 1
         Label(self, text="Point Counts ", grid=(row, 0), vAlign='t', hAlign='l')
@@ -906,13 +931,41 @@ class DimensionsTab(Widget):
         for i in range(dimensions):
             row = 2
             self.axisCodeEdits[i] = LineEdit(self, grid=(row, i + 1), vAlign='t', hAlign='l')
-            self.axisCodeEdits[i].textChanged.connect(partial(self._queueSetAxisCodes, spectrum,
-                                                              self.axisCodeEdits[i].text, i))
+            self.axisCodeEdits[i].textChanged.connect(partial(self._queueSetAxisCodes, spectrum, ))
+                                                              # self.axisCodeEdits[i].text, i))
 
             row += 1
             self.isotopeCodePullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t')
             self.isotopeCodePullDowns[i].setData(self._isotopeList)
             self.isotopeCodePullDowns[i].currentIndexChanged.connect(partial(self._queueSetIsotopeCodes, spectrum, self.isotopeCodePullDowns[i].getText, i))
+
+            row += 1
+            if i == 0:
+                # reference experiment type
+                self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(row, i + 1), gridSpan=(1, dimensions))
+                _specButton = Button(self, grid=(row, i + 1 + dimensions),
+                                  callback=partial(self._raiseExperimentFilterPopup, spectrum),
+                                  hPolicy='fixed', icon='icons/applications-system')
+                # Added to account for renaming of experiments
+                self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
+
+                if self.dimensions < 2:
+                    # hide as not required for 1d
+                    _specLabel.setVisible(False)
+                    self.spectrumType.setVisible(False)
+                    _specButton.setVisible(False)
+                    _refLabel.setVisible(False)
+
+            row += 1
+            # reference axis codes
+            _refPullDown = self.referenceDimensionPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t')
+            self.referenceDimensionPullDowns[i].currentIndexChanged.connect(partial(self._queueSetReferenceDimensions, spectrum, )) #self.referenceDimensionPullDowns[i].getText, i))
+            if self.dimensions < 2:
+                # hide as not required for 1d
+                _refPullDown.setVisible(False)
+
+            row += 1
+            # line spacer
 
             row += 1
             self._pointCountsLabels[i] = Label(self, grid=(row, i + 1), vAlign='t', hAlign='l')
@@ -1037,6 +1090,76 @@ class DimensionsTab(Widget):
     def _fillPullDowns(self):
         pass
 
+    def _populateReferenceDimensions(self):
+        """Populate the references dimensions from the current experiment and the current value
+        """
+        # get the nucleus codes from the current isotope codes
+        refDimensions = self._referenceDimensions or self.spectrum.referenceExperimentDimensions
+
+        if (self._referenceExperiment or self.spectrum.experimentType) is None:
+            _referenceLists = [['', val] if val else ['',] for val in refDimensions]
+            _refDimensions = [val if val else '' for val in refDimensions]
+
+            for ii, (refList, ref) in enumerate(zip(_referenceLists, _refDimensions)):
+                self.referenceDimensionPullDowns[ii].setData(refList)
+                self.referenceDimensionPullDowns[ii].setIndex(refList.index(ref))
+
+        else:
+            _referenceLists = [['',] for val in refDimensions]
+            _refDimensions = [val if val else '' for val in refDimensions]
+
+            # get the permutations of the available experiment dimensions
+            matches = self.spectrum.getAvailableReferenceExperimentDimensions(_experimentType=self._referenceExperiment)
+            if matches:
+                for ac in matches:
+                    for ii in range(self.dimensions):
+                        if ac[ii] not in _referenceLists[ii]:
+                            _referenceLists[ii].append(ac[ii])
+
+            for ii, (refList, ref, combo) in enumerate(zip(_referenceLists, _refDimensions, self.referenceDimensionPullDowns)):
+                if ref not in refList:
+                    model = combo.model()
+
+                    refList.append(ref)
+                    combo.setData(list(refList))
+
+                    self.referenceDimensionPullDowns[ii].set(ref)
+                    color = QtGui.QColor('red')
+                    model.item(len(refList) - 1).setForeground(color)
+
+                else:
+                    combo.setData(list(refList))
+                    combo.set(ref)
+
+                index = combo.currentIndex()
+                model = combo.model()
+                item = model.item(index)
+                if item is not None:
+                    color = item.foreground().color()
+                    # use the palette to change the colour of the selection text - may not match for other themes
+                    palette = combo.palette()
+                    palette.setColor(QtGui.QPalette.Text, color)
+                    combo.setPalette(palette)
+                    # combo.setStyleSheet('PulldownList { padding: 3px 3px 3px 3px; combobox-popup: 0; color: red; }')
+
+    def _populateExperimentType(self):
+        """Populate the experimentType pulldown
+        """
+        from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
+
+        experimentTypes = _getExperimentTypes(self.spectrum.project, self.spectrum)
+        texts = ('',) + tuple(experimentTypes.keys()) if experimentTypes else ()
+        objects = ('',) + tuple(experimentTypes.values()) if experimentTypes else ()
+        self.spectrumType.setData(texts=texts, objects=objects)
+
+        text = self.spectrum.experimentName
+        if experimentTypes and text not in experimentTypes:
+            text = self.spectrum.experimentType
+        text = priorityNameRemapping.get(text, text)
+        self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
+
+        self._referenceExperiment = text
+
     def _populateDimension(self):
         """Populate dimensions tab from self.spectrum
         Blocking to be performed by tab container
@@ -1109,6 +1232,9 @@ class DimensionsTab(Widget):
                 self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
                 self._populatePreferredOrder()
 
+            self._populateExperimentType()
+            self._populateReferenceDimensions()
+
     def _getChangeState(self):
         """Get the change state from the parent widget
         """
@@ -1137,20 +1263,19 @@ class DimensionsTab(Widget):
         spectrum.doubleCrosshairOffsets = doubleCrosshairOffsets
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetAxisCodes(self, spectrum, valueGetter, dim):
-        value = valueGetter()
-        if value != spectrum.axisCodes[dim]:
-            return partial(self._setAxisCodes, spectrum, dim, value)
+    def _queueSetAxisCodes(self, spectrum, ): #valueGetter, dim): # dim required to make the changeState unique per dim
+        # set the axisCodes in single operation
+        value = tuple(val.text() for val in self.axisCodeEdits)
+        if value != spectrum.axisCodes:
+            return partial(self._setAxisCodes, spectrum ,value) #, dim, value)
 
         # repopulate the preferred axis order pulldown
         self._fillPreferredWidgetFromAxisTexts()
 
-    def _setAxisCodes(self, spectrum, dim, value):
-        axisCodes = list(spectrum.axisCodes)
-        axisCodes[dim] = str(value)
-        spectrum.axisCodes = axisCodes
+    def _setAxisCodes(self, spectrum, value):
         showWarning('Change Axis Code', 'Caution is advised when changing axis codes\n'
                                         'It can adversely affect spectrumDisplays and peak/integral/multiplet lists.')
+        spectrum.axisCodes = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetIsotopeCodes(self, spectrum, valueGetter, dim):
@@ -1164,6 +1289,55 @@ class DimensionsTab(Widget):
         spectrum.isotopeCodes = isotopeCodes
         showWarning('Change Isotope Code', 'Caution is advised when changing isotope codes\n'
                                            'It can adversely affect spectrumDisplays and peak/integral/multiplet lists.')
+
+    def _raiseExperimentFilterPopup(self, spectrum):
+        from ccpn.ui.gui.popups.ExperimentFilterPopup import ExperimentFilterPopup
+
+        popup = ExperimentFilterPopup(parent=self.mainWindow, mainWindow=self.mainWindow, spectrum=spectrum)
+        popup.exec_()
+        self.spectrumType.select(popup.expType)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetSpectrumType(self, spectrum, value):
+        if self.spectrumType.getObject():
+            expType = self.spectrumType.objects[value]
+            if expType != spectrum.experimentType:
+                self._referenceExperiment = expType
+                with self.blockWidgetSignals():
+                    self._populateReferenceDimensions()
+                return partial(self._setSpectrumType, spectrum, expType)
+
+    def _setSpectrumType(self, spectrum, expType):
+        spectrum.experimentType = expType
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetReferenceDimensions(self, spectrum, ): #valueGetter, dim):
+        # set the referenceDimensions in single operation
+        value = tuple(val.getText() or None for val in self.referenceDimensionPullDowns)
+
+        _refDims = []
+        # set colour depending on selection
+        for ii, combo in enumerate(self.referenceDimensionPullDowns):
+            index = combo.currentIndex()
+            model = combo.model()
+            item = model.item(index)
+            if item is not None:
+                color = item.foreground().color()
+                # use the palette to change the colour of the selection text - may not work for other themes
+                palette = combo.palette()
+                palette.setColor(QtGui.QPalette.Text, color)
+                combo.setPalette(palette)
+            _refDims.append(combo.getText() or None)
+
+        self._referenceDimensions = tuple(_refDims)
+
+        if value != spectrum.referenceExperimentDimensions:
+            return partial(self._setReferenceDimensions, spectrum, value) #, dim, value)
+
+    def _setReferenceDimensions(self, spectrum, value): #, dim, value):
+        """Set the value for a single referenceDimension
+        - this can lead to non-unique values"""
+        spectrum.referenceExperimentDimensions = value
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

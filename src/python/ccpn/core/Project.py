@@ -4,7 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-09 10:45:11 +0100 (Fri, April 09, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-17 14:27:27 +0100 (Mon, May 17, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,6 +45,8 @@ from ccpnmodel.ccpncore.memops import Notifiers
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
 from ccpnmodel.ccpncore.lib.molecule import MoleculeQuery
 from ccpnmodel.ccpncore.lib.spectrum import NmrExpPrototype
+from ccpnmodel.ccpncore.api.ccp.nmr.NmrExpPrototype import RefExperiment
+from ccpnmodel.ccpncore.lib import Constants
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
@@ -528,6 +531,18 @@ class Project(AbstractWrapperObject):
             self._implExperimentTypeMap = result
         #
         return result
+
+    def _getReferenceExperimentFromType(self, value) -> Optional[RefExperiment]:
+        """Search for a reference experiment matching name
+        """
+        if value is None:
+            return
+
+        # nmrExpPrototype = self._wrappedData.root.findFirstNmrExpPrototype(name=value) # Why not findFirst instead of looping all sortedNmrExpPrototypes
+        for nmrExpPrototype in self._wrappedData.root.sortedNmrExpPrototypes():
+            for refExperiment in nmrExpPrototype.sortedRefExperiments():
+                if refExperiment.name == value:
+                    return refExperiment
 
     @property
     def shiftAveraging(self):

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:48 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-17 14:27:27 +0100 (Mon, May 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ import collections
 import math
 import random
 import numpy as np
+from typing import Tuple
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.util.Common import percentage, getAxisCodeMatchIndices
 from ccpn.util.Logging import getLogger
@@ -519,9 +520,6 @@ def nmrGlueBaselineCorrector(data, wd=20):
 
     data = ng.process.proc_bl.baseline_corrector(data, wd=wd)
     return data
-
-
-from typing import Tuple
 
 
 def _getDefaultApiSpectrumColours(spectrum: 'Spectrum') -> Tuple[str, str]:

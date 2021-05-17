@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:48 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-17 14:27:27 +0100 (Mon, May 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -66,6 +66,7 @@ import numpy as np
 import sys
 from typing import Sequence, Tuple, Optional, Union
 from functools import partial
+from itertools import permutations
 import numpy
 
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
@@ -1157,7 +1158,74 @@ class Spectrum(AbstractWrapperObject):
                 else:
                     expDimRef.isotopeCodes = (val,)
         else:
-            raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
+            raise ValueError("isotopeCodes must have length %s, was %s" % (apiDataSource.numDim, value))
+
+    @property
+    @_includeInDimensionalCopy
+    def referenceExperimentDimensions(self) -> Tuple[Optional[str], ...]:
+        """dimensions of reference experiment - None if no code"""
+        result = []
+        for dataDim in self._wrappedData.sortedDataDims():
+            expDim = dataDim.expDim
+            if expDim is None:
+                result.append(None)
+            else:
+                referenceExperimentDimension = (expDim.ccpnInternalData and expDim.ccpnInternalData.get('expDimToRefExpDim')) or None
+                result.append(referenceExperimentDimension)
+
+        return tuple(result)
+
+    @referenceExperimentDimensions.setter
+    @ccpNmrV3CoreSetter()
+    def referenceExperimentDimensions(self, values: Sequence):
+        apiDataSource = self._wrappedData
+
+        if not isinstance(values, (tuple, list)):
+            raise ValueError('referenceExperimentDimensions must be a list or tuple')
+        if len(values) != apiDataSource.numDim:
+            raise ValueError('referenceExperimentDimensions must have length %s, was %s' % (apiDataSource.numDim, values))
+        if not all(isinstance(dimVal, (str, type(None))) for dimVal in values):
+            raise ValueError('referenceExperimentDimensions must be str, None')
+        _vals = [val for val in values if val is not None]
+        if len(_vals) != len(set(_vals)):
+            raise ValueError('referenceExperimentDimensions must be unique')
+
+        for ii, (dataDim, val) in enumerate(zip(apiDataSource.sortedDataDims(), values)):
+            expDim = dataDim.expDim
+            if expDim is None and val is not None:
+                raise ValueError('Cannot set referenceExperimentDimension %s in dimension %s' % (val, ii + 1))
+            else:
+                _update = {'expDimToRefExpDim': val}
+                _ccpnInt = expDim.ccpnInternalData
+                if _ccpnInt is None:
+                    expDim.ccpnInternalData = _update
+                else:
+                    _expDimCID = expDim.ccpnInternalData.copy()
+                    _ccpnInt.update(_update)
+                    expDim.ccpnInternalData = _ccpnInt
+
+    def getAvailableReferenceExperimentDimensions(self, _experimentType=None):
+        """Return list of available reference experiment dimensions based on spectrum isotopeCodes
+        """
+        _refExperiment = None
+        if _experimentType is not None:
+            # search for the named reference experiment
+            _refExperiment = self.project._getReferenceExperimentFromType(_experimentType)
+
+        # get the nucleus codes from the current isotope codes
+        nCodes = tuple(val.strip('0123456789') for val in self.isotopeCodes)
+
+        # match against the current reference experiment or passed in value
+        apiExperiment = self._wrappedData.experiment
+        apiRefExperiment = _refExperiment or apiExperiment.refExperiment
+
+        # get the permutations of the axisCodes and nucleusCodes
+        axisCodePerms = permutations(apiRefExperiment.axisCodes)
+        nucleusPerms = permutations(apiRefExperiment.nucleusCodes)
+
+        # return only those that match the current nucleusCodes (from isotopeCodes)
+        result = [ac for ac, nc in zip(axisCodePerms, nucleusPerms) if nCodes == nc]
+        return result
 
     @property
     @_includeInDimensionalCopy

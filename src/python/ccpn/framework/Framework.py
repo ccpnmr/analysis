@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-10 18:47:36 +0100 (Mon, May 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-17 13:07:13 +0100 (Mon, May 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -241,6 +241,13 @@ def defineProgramArguments():
     parser.add_argument('--debug1', dest='debug', action='store_true', help='Set logging level to debug1 (=debug)')
     parser.add_argument('--debug2', dest='debug2', action='store_true', help='Set logging level to debug2')
     parser.add_argument('--debug3', dest='debug3', action='store_true', help='Set logging level to debug3')
+
+    # Ccpn logging options - traceback can sometimes be masked in undo/redo
+    # --disable-undo-exception removes the try:except to allow full traceback to occur
+    parser.add_argument('--disable-undo-exception', dest='disableUndoException', action='store_true', help='Disable exception wrapping undo/redo actions, reserved for high-level debugging.')
+    # log information at end of undo/redo if exception occurs (not called if --disable-undo-exception set), calls _logObjects
+    parser.add_argument('--ccpn-logging', dest='ccpnLogging', action='store_true', help='Additional logging of some ccpn objects, reserved for high-level debugging.')
+
     parser.add_argument('projectPath', nargs='?', help='Project path')
 
     return parser
@@ -388,6 +395,8 @@ class Framework(NotifierBase):
         self.feedbackPopup = None
         self.submitMacroPopup = None
         self.updatePopup = None
+        self._disableUndoException = getattr(self.args, 'disableUndoException', False)
+        self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
     @property
     def _isInDebugMode(self) -> bool:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-23 14:36:21 +0100 (Fri, April 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-17 13:07:13 +0100 (Mon, May 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -434,8 +434,12 @@ class Peak(AbstractWrapperObject):
         return self.dimensionNmrAtoms
 
     @_dimensionNmrAtoms.setter
-    @ccpNmrV3CoreSetter()
+    # @ccpNmrV3CoreSetter() # not required
     def _dimensionNmrAtoms(self, value: Sequence):
+        """Assign by Dimensions
+        Ccpn Internal:used by assignDimension/dimensionNmrAtoms - not to be called elsewhere
+        Doesn't need undoBlock/CoreSetter as this is taken care of by calling method
+        """
 
         if not isinstance(value, Sequence):
             raise ValueError("dimensionNmrAtoms must be sequence of list/tuples")
@@ -563,9 +567,12 @@ class Peak(AbstractWrapperObject):
         return self.assignedNmrAtoms
 
     @_assignedNmrAtoms.setter
-    @ccpNmrV3CoreSetter()
+    # @ccpNmrV3CoreSetter() # not required
     def _assignedNmrAtoms(self, value: Sequence):
-
+        """Assign by Contributions
+        Ccpn Internal: used by assignedNmrAtoms - not to be called elsewhere
+        Doesn't need undoBlock/CoreSetter as this is taken care of by calling method
+        """
         if not isinstance(value, Sequence):
             raise ValueError("assignedNmrAtoms must be set to a sequence of list/tuples")
 
@@ -725,14 +732,14 @@ class Peak(AbstractWrapperObject):
             self._dimensionNmrAtoms = dimensionNmrAtoms
             _csNew = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt.chemicalShifts]))
             _deleteChemShifts(_cs)
-            for cs in _cs:
+            for cs in _cs - _csNew:
                 cs._finaliseAction('change')
             for cs in _csNew - _cs:
                 cs._finaliseAction('create')
 
             # add notifiers to stack
             with undoStackBlocking(application=_app) as addUndoItem:
-                for cs in _cs:
+                for cs in _cs - _csNew:
                     addUndoItem(redo=partial(cs._finaliseAction, 'change'))
                 for cs in _csNew - _cs:
                     addUndoItem(undo=partial(cs._finaliseAction, 'delete'),

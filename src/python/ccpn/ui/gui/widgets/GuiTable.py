@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-14 15:21:08 +0100 (Fri, May 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-17 13:07:13 +0100 (Mon, May 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1361,7 +1361,12 @@ GuiTable::item::selected {
             for col, obj in enumerate(buildList):
                 listItem = OrderedDict()
                 for header in colDefs.columns:
-                    listItem[header.headerText] = header.getValue(obj)
+                    try:
+                        listItem[header.headerText] = header.getValue(obj)
+                    except Exception as es:
+                        # NOTE:ED - catch any nasty surprises in tables
+                        getLogger().warning(f'Error creating table information {es}')
+                        listItem[header.headerText] = None
 
                 allItems.append(listItem)
                 objects.append(obj)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-14 15:21:08 +0100 (Fri, May 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-17 13:07:13 +0100 (Mon, May 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -223,7 +223,11 @@ class DataFrameObject(object):
                 # the object doesn't exist in list, so can be added
                 listDict = OrderedDict()
                 for header in self._columnDefinitions.columns:
-                    listDict[header.headerText] = header.getValue(obj)
+                    try:
+                        listDict[header.headerText] = header.getValue(obj)
+                    except Exception as es:
+                        getLogger().warning(f'Error creating table information {es}')
+                        listDict[header.headerText] = None
 
                 if self._dataFrame.empty:
                     # need to create a new dataFrame, table with index of 0

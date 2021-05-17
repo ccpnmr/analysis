@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:56 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-17 15:00:08 +0100 (Mon, May 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -580,7 +580,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     # Check/set isotopeCode
     if not isinstance(isotopeCode, (str, type(None))):
         raise TypeError('isotopeCode {} must be of type string (or None)'.format(isotopeCode))
-    if isotopeCode is not None or len(isotopeCode) > 0:
+    if isotopeCode:
         result.isotopeCode = isotopeCode # it has to be set after the creation to avoid API errors.
 
     if comment is not None and len(comment) > 0:

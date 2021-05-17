@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 15:51:34 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-17 16:14:03 +0100 (Mon, May 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -117,22 +117,22 @@ ScriptsDirName = 'scripts'
 MacrosDirName = 'macros'
 
 
-def _ccpnExceptionhook(type, value, tback):
+def _ccpnExceptionhook(ccpnType, value, tback):
     """This because PyQT raises and catches exceptions,
     but doesn't pass them along instead makes the program crashing miserably.
     """
     application = getApplication()
     if application and application._isInDebugMode:
-        sys.stderr.write('_ccpnExceptionhook: type = %s\n' % type)
+        sys.stderr.write('_ccpnExceptionhook: type = %s\n' % ccpnType)
         sys.stderr.write('_ccpnExceptionhook: value = %s\n' % value)
         sys.stderr.write('_ccpnExceptionhook: tback = %s\n' % tback)
 
     if application and application.hasGui:
-        title = str(type)[8:-2] + ':'
+        title = str(ccpnType)[8:-2] + ':'
         text = str(value)
         MessageDialog.showError(title=title, message=text)
 
-    sys.__excepthook__(type, value, tback)
+    sys.__excepthook__(ccpnType, value, tback)
 
 
 sys.excepthook = _ccpnExceptionhook

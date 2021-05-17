@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 13:07:13 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-17 15:09:10 +0100 (Mon, May 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -433,7 +433,7 @@ class Undo(deque):
 
         from ccpn.core.lib.ContextManagers import undoBlock
 
-        if self.application._disableUndoException:
+        if self.application and self.application._disableUndoException:
             # mode is activated with switch --disable-undo-exception
 
             # block addition of items while operating
@@ -469,7 +469,7 @@ class Undo(deque):
                 from ccpn.util.Logging import getLogger
 
                 getLogger().warning("Error while undoing (%s). Undo stack is cleared." % e)
-                if self.application._ccpnLogging:
+                if self.application and self.application._ccpnLogging:
                     self._logObjects()
                 if self._debug:
                     print("UNDO DEBUG: error in undo. Last undo function was:", undoCall)
@@ -504,7 +504,7 @@ class Undo(deque):
 
         from ccpn.core.lib.ContextManagers import undoBlock
 
-        if self.application._disableUndoException:
+        if self.application and self.application._disableUndoException:
             # mode is activated with switch --disable-undo-exception
 
             # block addition of items while operating
@@ -538,7 +538,7 @@ class Undo(deque):
                 from ccpn.util.Logging import getLogger
 
                 getLogger().warning("Error while redoing (%s). Undo stack is cleared." % e)
-                if self.application._ccpnLogging:
+                if self.application and self.application._ccpnLogging:
                     self._logObjects()
                 if self._debug:
                     print("REDO DEBUG: error in redo. Last redo call was:", redoCall)
@@ -600,46 +600,45 @@ class Undo(deque):
         """Ccpn Internal - log objects under review to the logger
         Activated with switch --ccpn-logging
         """
-        _project = self.application.project
-        _log = getLogger().debug
-        
-        # list the peak info
-        _log('peakDims ~~~~~~~~~~~')
-        _log('\n'.join([str(pk) for pk in _project.peaks]))
-        pks = [pk._wrappedData for pk in _project.peaks]
-        for pk in pks:
-            for pkDim in pk.sortedPeakDims():
-                _log(f'{pkDim}')
-                for pkDimContrib in pkDim.sortedPeakDimContribs():
-                    _log(f'    {pkDimContrib}   {pkDimContrib.resonance}')
+        if self.application and self.application.project:
+            _project = self.application.project
+            _log = getLogger().debug
 
-        _log('peakContribs ~~~~~~~~~~~')
-        for pk in pks:
-            for pkContrib in pk.sortedPeakContribs():
-                _log(f'  {pkContrib}')
-                for pkDimContrib in pkContrib.sortedPeakDimContribs():
-                    _log(f'    {pkDimContrib}   {pkDimContrib.resonance}')
+            # list the peak info
+            _log('peakDims ~~~~~~~~~~~')
+            _log('\n'.join([str(pk) for pk in _project.peaks]))
+            pks = [pk._wrappedData for pk in _project.peaks]
+            for pk in pks:
+                for pkDim in pk.sortedPeakDims():
+                    _log(f'{pkDim}')
+                    for pkDimContrib in pkDim.sortedPeakDimContribs():
+                        _log(f'    {pkDimContrib}   {pkDimContrib.resonance}')
 
-        _log('shifts ~~~~~~~~~~~')
-        _log('\n'.join([str(sh) for sh in _project.chemicalShifts]))
-        shifts = [sh._wrappedData for sh in _project.chemicalShifts]
-        for sh in _project.chemicalShifts:
-            _log(f'    {sh}    {sh.nmrAtom}')
-        for sh in shifts:
-            _log(f'   {sh}   {sh.isDeleted}  {sh.resonance}')
+            _log('peakContribs ~~~~~~~~~~~')
+            for pk in pks:
+                for pkContrib in pk.sortedPeakContribs():
+                    _log(f'  {pkContrib}')
+                    for pkDimContrib in pkContrib.sortedPeakDimContribs():
+                        _log(f'    {pkDimContrib}   {pkDimContrib.resonance}')
 
-        _log('resonanceGroups ~~~~~~~~~~~')
-        _log('\n'.join([str(res) for res in _project.nmrResidues]))
-        ress = [res._wrappedData for res in _project.nmrResidues]
-        for res in ress:
-            _log(f'   {res}')
+            _log('shifts ~~~~~~~~~~~')
+            _log('\n'.join([str(sh) for sh in _project.chemicalShifts]))
+            shifts = [sh._wrappedData for sh in _project.chemicalShifts]
+            for sh in _project.chemicalShifts:
+                _log(f'    {sh}    {sh.nmrAtom}')
+            for sh in shifts:
+                _log(f'   {sh}   {sh.isDeleted}  {sh.resonance}')
 
-        _log('resonances ~~~~~~~~~~~')
-        _log('\n'.join([str(res) for res in _project.nmrAtoms]))
-        ress = [res._wrappedData for res in _project.nmrAtoms]
-        for res in ress:
-            _log(f'   {res}')
-            for sh in res.sortedShifts():
-                _log(f'       {sh}')
+            _log('resonanceGroups ~~~~~~~~~~~')
+            _log('\n'.join([str(res) for res in _project.nmrResidues]))
+            ress = [res._wrappedData for res in _project.nmrResidues]
+            for res in ress:
+                _log(f'   {res}')
 
-        
+            _log('resonances ~~~~~~~~~~~')
+            _log('\n'.join([str(res) for res in _project.nmrAtoms]))
+            ress = [res._wrappedData for res in _project.nmrAtoms]
+            for res in ress:
+                _log(f'   {res}')
+                for sh in res.sortedShifts():
+                    _log(f'       {sh}')

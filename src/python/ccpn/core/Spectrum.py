@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 14:27:27 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-17 14:50:08 +0100 (Mon, May 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1204,7 +1204,7 @@ class Spectrum(AbstractWrapperObject):
                     _ccpnInt.update(_update)
                     expDim.ccpnInternalData = _ccpnInt
 
-    def getAvailableReferenceExperimentDimensions(self, _experimentType=None):
+    def getAvailableReferenceExperimentDimensions(self, _experimentType=None) -> tuple:
         """Return list of available reference experiment dimensions based on spectrum isotopeCodes
         """
         _refExperiment = None
@@ -1219,13 +1219,17 @@ class Spectrum(AbstractWrapperObject):
         apiExperiment = self._wrappedData.experiment
         apiRefExperiment = _refExperiment or apiExperiment.refExperiment
 
-        # get the permutations of the axisCodes and nucleusCodes
-        axisCodePerms = permutations(apiRefExperiment.axisCodes)
-        nucleusPerms = permutations(apiRefExperiment.nucleusCodes)
+        if apiRefExperiment:
+            # get the permutations of the axisCodes and nucleusCodes
+            axisCodePerms = permutations(apiRefExperiment.axisCodes)
+            nucleusPerms = permutations(apiRefExperiment.nucleusCodes)
 
-        # return only those that match the current nucleusCodes (from isotopeCodes)
-        result = [ac for ac, nc in zip(axisCodePerms, nucleusPerms) if nCodes == nc]
-        return result
+            # return only those that match the current nucleusCodes (from isotopeCodes)
+            result = tuple(ac for ac, nc in zip(axisCodePerms, nucleusPerms) if nCodes == nc)
+            return result
+
+        else:
+            return ()
 
     @property
     @_includeInDimensionalCopy

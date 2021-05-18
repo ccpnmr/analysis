@@ -564,8 +564,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     #   compound = self.readSaveFile(self.compoundFileName)
     #
     # if not compound:
-    #   self.compoundFileName = None
-    #   self.setCompound( Compound('Unnamed') )
+    self.compoundFileName = None
+    self.setCompound( Compound('Unnamed') )
 
   def _getCompound(self):
     return self.compound

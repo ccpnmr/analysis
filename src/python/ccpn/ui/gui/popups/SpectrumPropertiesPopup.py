@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-14 10:50:16 +0100 (Fri, May 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-19 15:50:39 +0100 (Wed, May 19, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1310,16 +1310,20 @@ class DimensionsTab(Widget):
         _refDims = []
         # set colour depending on selection
         for ii, combo in enumerate(self.referenceDimensionPullDowns):
+            _text = combo.getText() or None
+            _refDims.append(_text)
+
             index = combo.currentIndex()
             model = combo.model()
             item = model.item(index)
             if item is not None:
                 color = item.foreground().color()
+                if len([True for _combo in self.referenceDimensionPullDowns if _text and _text == _combo.getText()]) > 1:
+                    color = QtGui.QColor('red')
                 # use the palette to change the colour of the selection text - may not work for other themes
                 palette = combo.palette()
                 palette.setColor(QtGui.QPalette.Text, color)
                 combo.setPalette(palette)
-            _refDims.append(combo.getText() or None)
 
         self._referenceDimensions = tuple(_refDims)
 

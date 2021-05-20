@@ -551,11 +551,11 @@ class Substance(AbstractWrapperObject):
     @property
     def referenceSpectra(self) -> typing.Tuple[Spectrum, ...]:
         """Reference Spectra acquired for Substance"""
-        _referenceSpectra = []
-        for spectum in self.project.spectra:
-            if self in spectum.referenceSubstances:
-                _referenceSpectra.append(spectum)
-        return tuple(_referenceSpectra)
+        _referenceSpectra = tuple([sp for sp in self.project.spectra if self in sp.referenceSubstances])
+        # _referenceSpectra = tuple(filter(lambda sp: self in sp.referenceSubstances, self.project.spectra)) # just an alternative way to a loop
+
+        return _referenceSpectra
+
 
     @referenceSpectra.setter
     def referenceSpectra(self, spectra):

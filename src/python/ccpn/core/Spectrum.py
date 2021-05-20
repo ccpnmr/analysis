@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 14:48:32 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-20 16:58:52 +0100 (Thu, May 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -350,14 +350,26 @@ assignmentTolerances
         """
         return tuple(range(0, self.dimensionCount))
 
-    # @property
-    # def comment(self) -> str:
-    #     """Free-form text comment"""
-    #     return self._wrappedData.details
-    #
-    # @comment.setter
-    # def comment(self, value: str):
-    #     self._wrappedData.details = value
+    @property
+    def axes(self) -> tuple:
+        """Convenience: tuple of length dimensionCount with axes integers (0-based); e.g. (0,1,2,3).
+        Useful for mapping axisCodes: eg: self.getByAxisCodes('axes', ['N','C','H'])
+        """
+        return tuple(range(0, self.dimensionCount))
+
+    @property
+    def axisTriples(self) -> tuple:
+        """Convenience: return a tuple of triples (axis, axisCode, dimension) for each dimension
+
+        Useful for iterating over axis codes; eg in an H-N-CO ordered spectrum
+            for axis, axisCode, dimension in self.getByAxisCodes('axisTriples', ('N','C','H'), exactMatch=False)
+
+            would yield:
+                (1, 'N', 2)
+                (2, 'CO', 3)
+                (0, 'H', 1)
+        """
+        return tuple(z for z in zip(self.axes, self.axisCodes, self.dimensions))
 
     @property
     @_includeInCopy
@@ -1582,7 +1594,7 @@ assignmentTolerances
                 apiExperiment.newExpTransfer(expDimRefs=expDimRefs, transferType=transferType,
                                              isDirect=(not isIndirect))
         else:
-            apiRefExperiment.root._logger.warning(
+            getLogger().warning(
                     """An attempt to set Spectrum.magnetisationTransfers directly was ignored
                   because the spectrum experimentType was defined.
                   Use axisCodes to set magnetisation transfers instead.""")

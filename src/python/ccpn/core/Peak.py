@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 13:07:13 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-20 16:58:52 +0100 (Thu, May 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
     ccpNmrV3CoreSetter, undoBlock, undoBlockWithoutSideBar, undoStackBlocking
 from ccpn.util.Logging import getLogger
-from ccpn.util.Common import makeIterableList
+from ccpn.util.Common import makeIterableList, isIterable
 from ccpn.util.Constants import SCALETOLERANCE
 
 
@@ -744,6 +744,121 @@ class Peak(AbstractWrapperObject):
                 for cs in _csNew - _cs:
                     addUndoItem(undo=partial(cs._finaliseAction, 'delete'),
                                 redo=partial(cs._finaliseAction, 'create'))
+
+    def getByAxisCodes(self, attributeName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
+        """Return values defined by attributeName in order defined by axisCodes:
+        (default order if None).
+
+        Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
+
+        NB: Use getByDimensions for dimensions (1..dimensionCount) based access
+        """
+        if not hasattr(self, attributeName):
+            raise AttributeError('Object %s does not have attribute "%s"' %
+                                 (self, attributeName)
+                                 )
+
+        if not isIterable(axisCodes):
+            raise ValueError('axisCodes is not iterable "%s"; expected list or tuple' %
+                             axisCodes
+                             )
+
+        if axisCodes is not None and not exactMatch:
+            axisCodes = self.spectrum._mapAxisCodes(axisCodes)
+
+        try:
+            values = getattr(self, attributeName)
+        except AttributeError:
+            raise AttributeError('Error getting attribute "%s" from object %s' %
+                                 (attributeName, self)
+                                 )
+        if not isIterable(values):
+            raise ValueError('Attribute "%s" of object %s is not iterable; "%s"' %
+                             (attributeName, self, values)
+                             )
+        if axisCodes is not None:
+            # change to order defined by axisCodes
+            values = self.spectrum._reorderValues(values, axisCodes)
+        return values
+
+    def setByAxisCodes(self, attributeName: str, values: Sequence, axisCodes: Sequence[str] = None, exactMatch: bool = False):
+        """Set attributeName to values in order defined by axisCodes:
+        (default order if None)
+
+        Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
+
+        NB: Use setByDimensions for dimensions (1..dimensionCount) based access
+        """
+        if not hasattr(self, attributeName):
+            raise AttributeError('Object %s does not have attribute "%s"' %
+                                 (self, attributeName)
+                                 )
+
+        if not isIterable(values):
+            raise ValueError('Values "%s" is not iterable' % (values)
+                             )
+
+        if not isIterable(axisCodes):
+            raise ValueError('axisCodes is not iterable "%s"; expected list or tuple' %
+                             axisCodes
+                             )
+
+        if axisCodes is not None and not exactMatch:
+            axisCodes = self.spectrum._mapAxisCodes(axisCodes)
+
+        if axisCodes is not None:
+            # change values to the order appropriate for spectrum
+            values = self.spectrum._reorderValues(values, axisCodes)
+        try:
+            setattr(self, attributeName, values)
+        except AttributeError:
+            raise AttributeError('Unable to set attribute "%s" of object %s to "%s"' %
+                                 (attributeName, self, values)
+                                 )
+
+    def getByDimensions(self, attributeName: str, dimensions: Sequence[int] = None):
+        """Return values defined by attributeName in order defined by dimensions (1..dimensionCount).
+           (default order if None)
+           NB: Use getByAxisCodes for axisCode based access
+        """
+        if not hasattr(self, attributeName):
+            raise AttributeError('Object %s does not have attribute "%s"' %
+                                 (self, attributeName)
+                                 )
+        values = getattr(self, attributeName)
+
+        if dimensions is None:
+            return values
+
+        newValues = []
+        for dim in dimensions:
+            if not (1 <= dim <= self.spectrum.dimensionCount):
+                raise ValueError('Invalid dimension "%d"; should be one of %s' % (dim, self.spectrum.dimensions))
+            else:
+                newValues.append(values[dim - 1])
+        return newValues
+
+    def setByDimensions(self, attributeName: str, values: Sequence, dimensions: Sequence[int] = None):
+        """Set attributeName to values in order defined by dimensions (1..dimensionCount).
+           (default order if None)
+           NB: Use setByAxisCodes for axisCode based access
+        """
+        if not hasattr(self, attributeName):
+            raise AttributeError('Object %s does not have attribute "%s"' %
+                                 (self, attributeName)
+                                 )
+
+        if dimensions is None:
+            setattr(self, attributeName, values)
+            return
+
+        newValues = []
+        for dim in dimensions:
+            if not (1 <= dim <= self.spectrum.dimensionCount):
+                raise ValueError('Invalid dimension "%d"; should be one of %s' % (dim, self.spectrum.dimensions))
+            else:
+                newValues.append(values[dim - 1])
+        setattr(self, attributeName, newValues)
 
     #=========================================================================================
     # Implementation functions

@@ -69,6 +69,10 @@ class Tabs(QtWidgets.QTabWidget, Base):
         if self._tabBarClickCallback and callable(self._tabBarClickCallback):
             self._tabBarClickCallback(index)
 
+    @property
+    def tabs(self):
+        return self.children()
+
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
@@ -92,6 +96,7 @@ if __name__ == '__main__':
     for i in range(5):
         Label(tab2Frame, "Example tab 2", grid=(i, 0))
     tabWidget.addTab(tab2Frame, 'Tab2')
+
 
     popup.show()
     popup.raise_()

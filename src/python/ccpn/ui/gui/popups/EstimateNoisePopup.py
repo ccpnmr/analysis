@@ -57,7 +57,7 @@ ESTIMATEAUTO = 'estimateAuto'
 
 class EstimateNoisePopup(CcpnDialogMainWidget):
     """
-    Class to implement a ppopup for estimating noise in a set of spectra
+    Class to implement a popup for estimating noise in a set of spectra
     """
 
     def __init__(self, parent=None, mainWindow=None, title='Estimate Noise',
@@ -319,7 +319,10 @@ class NoiseTab(Widget):
 
         row += 1
         self.noiseLevelButtons = ButtonList(self, grid=(row, 2), callbacks=[self._setNoiseLevel],
-                                            texts=['Set noiseLevel'])
+                                            texts=['Set Noise Level'])
+        row += 1
+        self.noiseLevelToAllButtons = ButtonList(self, grid=(row, 2), callbacks=[self._setNoiseLevelToAll],
+                                            texts=['Set Noise Level To All'])
 
         # remember the row for subclassed Nd below
         self.row = row
@@ -387,6 +390,21 @@ class NoiseTab(Widget):
         self.spectrum.noiseLevel = value
         self.spectrum.negativeNoiseLevel = -value if value > 0 else value * 2
         self._populate()
+
+    def _setNoiseLevelToAll(self):
+        """
+        Set the noise level from the current tab to all spectra.
+        """
+        from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+
+        spectra = self._parent.orderedSpectra
+        value = float(self.noiseLevelSpinBox.value())
+        with undoBlockWithoutSideBar():
+            for spectrum in spectra:
+                spectrum.noiseLevel = value
+                spectrum.negativeNoiseLevel = -value if value > 0 else value * 2
+        for tab in self._parent._noiseTab:
+            tab._populate()
 
     def _storeWidgetState(self):
         """Store the state of the checkBoxes between popups

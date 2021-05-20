@@ -311,7 +311,7 @@ class NoiseTab(Widget):
         self.noiseLevelSpinBox.setMaximum(1e12)
         self.noiseLevelSpinBox.setMinimum(0.1)
         self.noiseLevelSpinBox.setMinimumCharacters(15)
-        self.recalculateLevelsButton = Button(self, grid=(row, 2), callback=self._estimateNoise, text='Estimate Noise')
+        self.recalculateLevelsButton = Button(self, grid=(row, 2), callback=self._estimateNoise, text='Re-estimate Noise')
 
         row += 1
         Label(self, text='Current Noise Level', grid=(row, 0), vAlign='c', hAlign='l')

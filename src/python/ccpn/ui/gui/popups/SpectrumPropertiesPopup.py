@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-19 15:50:39 +0100 (Wed, May 19, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-20 11:02:22 +0100 (Thu, May 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -870,7 +870,8 @@ class DimensionsTab(Widget):
         row += 1
         _refLabel = Label(self, text="Reference Experiment Dimensions ", grid=(row, 0), vAlign='t', hAlign='l')
 
-        row += 1
+        row += 2
+        # spacer for extra button
         hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
         hLine.setContentsMargins(5, 0, 0, 0)
 
@@ -955,6 +956,17 @@ class DimensionsTab(Widget):
             if self.dimensions < 2:
                 # hide as not required for 1d
                 _refPullDown.setVisible(False)
+
+            row += 1
+            if i == 0:
+                # button to copy to axis Codes
+                _copyBox = Frame(self, setLayout=True, grid=(row, i + 1), gridSpan=(1, dimensions))
+                _copyButton = Button(_copyBox, text='Copy to Axis Codes', grid=(0, 0), hAlign='r',
+                                     callback=self._copyReferenceExperiments,
+                                     tipText='Copy all non-empty reference experiment dimensions to axis codes')
+                if self.dimensions < 2:
+                    # hide as not required for 1d
+                    _copyBox.setVisible(False)
 
             row += 1
             # line spacer
@@ -1334,6 +1346,20 @@ class DimensionsTab(Widget):
         """Set the value for a single referenceDimension
         - this can lead to non-unique values"""
         spectrum.referenceExperimentDimensions = value
+
+    def _copyReferenceExperiments(self):
+        """Copy the reference experiment dimensions to the axisCode lineEdits
+        """
+        # get list of all non-empty reference experiments
+        _texts = [_combo.getText() for _combo in self.referenceDimensionPullDowns if _combo.getText()]
+        if len(_texts) != len(set(_texts)):
+            showWarning('Copy to Axis Codes', 'Reference experiment dimensions contains duplicates')
+
+        else:
+            for axisEdit, refPulldown in zip(self.axisCodeEdits, self.referenceDimensionPullDowns):
+                _text = refPulldown.getText() or None
+                if _text:
+                    axisEdit.set(_text)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

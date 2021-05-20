@@ -6,7 +6,8 @@ Currently this is peaks and multiplets
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-26 17:49:29 +0000 (Fri, March 26, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-20 19:34:35 +0100 (Thu, May 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -267,12 +268,12 @@ class GLLabelling():
 
         try:
             r = self._GLParent.symbolX * np.sign(self._GLParent.pixelX)
-            pr = r / vPP[pIndex[0]]
+            pr = abs(r / vPP[pIndex[0]])
         except:
             pr = r
         try:
             w = self._GLParent.symbolY * np.sign(self._GLParent.pixelY)
-            pw = w / vPP[pIndex[1]]
+            pw = abs(w / vPP[pIndex[1]])
         except:
             pw = w
 
@@ -305,14 +306,14 @@ class GLLabelling():
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
             return
 
-        r, w, symbolType, symbolWidth, _, _ = self._getSymbolWidths(spectrumView)
+        _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
         stringOffset = None
         if symbolType in (1, 2):
             # put to the top-right corner of the lineWidth
             if pointLineWidths[0] and pointLineWidths[1]:
-                r = - GLDefs.STRINGSCALE * 0.5 * pointLineWidths[0]  #/ frequency[0]
-                w = - GLDefs.STRINGSCALE * 0.5 * pointLineWidths[1]  #/ frequency[1]
+                r = GLDefs.STRINGSCALE * 0.5 * pointLineWidths[0]  #/ frequency[0]
+                w = GLDefs.STRINGSCALE * 0.5 * pointLineWidths[1]  #/ frequency[1]
                 stringOffset = (r, w)
             else:
                 r = GLDefs.STRINGSCALE * r
@@ -376,7 +377,7 @@ class GLLabelling():
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
             return
 
-        r, w, symbolType, symbolWidth, _, _ = self._getSymbolWidths(spectrumView)
+        _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
         stringOffset = None
         if symbolType in (1, 2):
@@ -1403,7 +1404,7 @@ class GLLabelling():
     def _rescaleLabels(self, spectrumView=None, objListView=None, drawList=None):
         """Rescale all labels to the new dimensions of the screen
         """
-        r, w, symbolType, symbolWidth, _, _ = self._getSymbolWidths(spectrumView)
+        _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
         # NOTE:ED - could add in the peakItem offset at this point
 
@@ -2156,7 +2157,7 @@ class GL1dLabelling():
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
 
-        r, w, symbolType, symbolWidth, _, _ = self._getSymbolWidths(spectrumView)
+        _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
         if not obj.pointPositions:
@@ -2203,7 +2204,7 @@ class GL1dLabelling():
 
         if symbolType == 0 or symbolType == 3:  # a cross/plus
 
-            r, w, _, symbolWidth, _, _ = self._getSymbolWidths(spectrumView)
+            _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
             for drawStr in drawList.stringList:
                 drawStr.setStringOffset((r, w))

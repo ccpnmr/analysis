@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-20 10:15:15 +0100 (Thu, May 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-20 16:31:35 +0100 (Thu, May 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1019,6 +1019,8 @@ class DimensionsTab(Widget):
             row += 1
             self.foldingModesCheckBox[i] = CheckBox(self, grid=(row, i + 1), vAlign='t')
             self.foldingModesCheckBox[i].clicked.connect(partial(self._queueSetFoldingModes, spectrum, self.foldingModesCheckBox[i].isChecked, i))
+            # disabled until getRegion correctly fetches mirrored regions
+            self.foldingModesCheckBox[i].setEnabled(False)
 
             # max aliasing
             row += 1

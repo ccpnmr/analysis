@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 15:28:24 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-20 10:15:15 +0100 (Thu, May 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -460,6 +460,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.visiblePlaneDimIndices = {}
         self._visibleSpectrumViewsChange = False
         self._matchingIsotopeCodes = False
+        self._visibleOrderingDict = {}
+        self._visibleOrderingAxisCodes = ()
 
         self.viewports = None
 
@@ -779,6 +781,8 @@ class CcpnGLWidget(QOpenGLWidget):
     #     self._maxY = max(self._maxY, fyMax)
     #     self._minY = min(self._minY, fyMin)
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        self._buildAxisCodesWithWildCards()
 
     def refreshDevicePixelRatio(self):
         """refresh the devicePixelRatio for the viewports
@@ -3630,6 +3634,59 @@ class CcpnGLWidget(QOpenGLWidget):
         else:
             return ''
 
+    def _buildSingleWildCard(self, _axisCodes):
+        """Buld the axisCode appending wildcard as required
+        """
+        _code = ''
+        if _axisCodes:
+            _maxLen = max(len(ax) for ax in _axisCodes)
+            _chs = [a for a in zip(*_axisCodes)]
+            for ch in _chs:
+                chSet = set(ch)
+                if len(chSet) == 1:
+                    _code += ch[0]
+                else:
+                    _code += '*'
+                    break
+            else:
+                if len(_code) < _maxLen:
+                    _code += '*'
+        _code = _code or '*'
+
+        return _code
+
+    def _buildAxisCodesWithWildCards(self):
+        """Build the visible axis codes from the visible spectra appending wildcard as required
+        """
+        _visibleSpec = [(specView, self._spectrumSettings[specView]) for specView in self._ordering
+                        if not specView.isDeleted and specView.isVisible() and
+                        specView in self._spectrumSettings]
+        _firstVisible = ((self._ordering[0], self._spectrumSettings[self._ordering[0]]),) if self._ordering and not self._ordering[0].isDeleted and self._ordering[0] in self._spectrumSettings else ()
+        self._visibleOrderingDict = _visibleSpec or _firstVisible
+
+        # quick fix to take the set of matching letters from the spectrum axisCodes - append a '*' to denote trailing differences
+        if self.spectrumDisplay.is1D:
+            # get the x-axis codes for 1d
+            _axisCodes = [spec.spectrum.axisCodes[0] for spec, settings in self._visibleOrderingDict]
+            _axisWildCards = (self._buildSingleWildCard(_axisCodes),
+                              self.axisCodes[1] or '*')
+        else:
+            dim = len(self.spectrumDisplay.axisCodes)
+            _axisWildCards = []
+            for axis in range(dim):
+                # get the correct x-axis mapped axis codes for Nd
+                _axisCodes = []
+                for spec, settings in self._visibleOrderingDict:
+                    try:
+                        _axisCodes.append(spec.spectrum.axisCodes[settings[GLDefs.SPECTRUM_POINTINDEX][axis]])
+                    except Exception as es:
+                        # can skip for now
+                        pass
+                _code = self._buildSingleWildCard(_axisCodes)
+                _axisWildCards.append(_code)
+
+        self._visibleOrderingAxisCodes = _axisWildCards
+
     def buildAxisLabels(self, refresh=False):
         # build axes labelling
         if refresh or self.axesChanged:
@@ -3662,7 +3719,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                          obj=None))
 
                 # append the axisCode
-                self._axisXLabelling.append(GLString(text=self.axisCodes[0],
+                self._axisXLabelling.append(GLString(text=self._visibleOrderingAxisCodes[0] if self._visibleOrderingAxisCodes else '*',
                                                      font=smallFont,
                                                      x=GLDefs.AXISTEXTXOFFSET * self.deltaX,
                                                      y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * smallFont.charHeight,
@@ -3698,7 +3755,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                          obj=None))
 
                 # append the axisCode
-                self._axisYLabelling.append(GLString(text=self.axisCodes[1],
+                self._axisYLabelling.append(GLString(text=self._visibleOrderingAxisCodes[1] if self._visibleOrderingAxisCodes and len(self._visibleOrderingAxisCodes) > 1 else '*',
                                                      font=smallFont,
                                                      x=self.AXIS_OFFSET,
                                                      y=1.0 - (GLDefs.TITLEYOFFSET * smallFont.charHeight * self.deltaY),

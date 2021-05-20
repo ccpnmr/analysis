@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 15:28:24 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-20 10:15:15 +0100 (Thu, May 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -188,6 +188,9 @@ class GuiNdWidget(CcpnGLWidget):
         self.visiblePlaneList = {}
         self.visiblePlaneListPointValues = {}
         self.visiblePlaneDimIndices = {}
+
+        # generate the new axis labels based on the visible spectrum axisCodes
+        self._buildAxisCodesWithWildCards()
 
         minList = [self._spectrumSettings[sp][SPECTRUM_VALUEPERPOINT] if SPECTRUM_VALUEPERPOINT in self._spectrumSettings[sp] else None
                    for sp in self._ordering if sp in self._spectrumSettings]
@@ -506,7 +509,7 @@ class GuiNdWidget(CcpnGLWidget):
                     fyMin, _ = specSettings[GLDefs.SPECTRUM_YLIMITS]
                     dxAF, dyAF = specSettings[GLDefs.SPECTRUM_AF]
                     alias = specSettings[GLDefs.SPECTRUM_ALIASINGINDEX]
-                    
+
                     _posColour = spectrumView.posColours[0]
                     col = (*_posColour[0:3], 0.5)
 
@@ -830,6 +833,8 @@ class GuiNdWidget(CcpnGLWidget):
         self._maxY = max(self._maxY, fyMax)
         self._minY = min(self._minY, fyMin)
 
+        self._buildAxisCodesWithWildCards()
+
     def initialiseTraces(self):
         # set up the arrays and dimension for showing the horizontal/vertical traces
         for spectrumView in self._ordering:  # strip.spectrumViews:
@@ -1131,6 +1136,9 @@ class Gui1dWidget(CcpnGLWidget):
         # set the first visible, or the first in the ordered list
         self._firstVisible = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
             0].isDeleted else None
+
+        # generate the new axis labels based on the visible spectrum axisCodes
+        self._buildAxisCodesWithWildCards()
 
         # update the labelling lists
         self._GLPeaks.setListViews(self._ordering)
@@ -1527,6 +1535,8 @@ class Gui1dWidget(CcpnGLWidget):
         self._minX = min(self._minX, fxMin)
         self._maxY = max(self._maxY, fyMax)
         self._minY = min(self._minY, fyMin)
+
+        self._buildAxisCodesWithWildCards()
 
     def initialiseTraces(self):
         # set up the arrays and dimension for showing the horizontal/vertical traces

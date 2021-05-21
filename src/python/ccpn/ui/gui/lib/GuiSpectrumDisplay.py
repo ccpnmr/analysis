@@ -1242,31 +1242,44 @@ class GuiSpectrumDisplay(CcpnModule):
     def _handleSubstances(self, substances):
         # get the widget that is under the cursor, SHOULD be guiWidget
         # if selected peaks, will add the substance Name as peak.annotation
-        point = QtGui.QCursor.pos()
-        destStrip = QtWidgets.QApplication.widgetAt(point)
+        peaks = set(self.current.peaks)
+        replaceAnnotation = True
+        for mult in self.current.multiplets:
+            peaks = peaks | set(mult.peaks)
+        if peaks:
+            for substance in substances:
+                annotation = substance.name
+                for peak in peaks:
+                    if not replaceAnnotation: # if want appending instead of replacing
+                        annotation = ', '.join(filter(None, set([peak.annotation, substance.name]))) # Filter to make sure is not duplicating any existing annotation
+                    peak.annotation = annotation
 
-        if destStrip and isinstance(destStrip, CcpnGLWidget):
-            objectsClicked = destStrip.getObjectsUnderMouse()
-
-            if objectsClicked is None:
-                return
-
-            if PEAKSELECT in objectsClicked or MULTIPLETSELECT in objectsClicked:
-                # dropped onto a peak or multiplet
-                # dropping onto a multiplet will apply to all attached peaks
-                # Set substance name to peak.annotation
-                peaks = set(self.current.peaks)
-                for mult in self.current.multiplets:
-                    peaks = peaks | set(mult.peaks)
-                for substance in substances:
-                    for peak in peaks:
-                        # make sure is not duplicating any existing annotation, and is appending not replacing.
-                        annotation = ', '.join(filter(None, set([peak.annotation, substance.name])))
-                        peak.annotation = annotation
-
-            elif not objectsClicked:
-                # function not defined yet
-                showWarning('Dropped Substance(s).','Action not implemented yet' )
+        # # FIXME below still doesn't work if in stack mode
+        # point = QtGui.QCursor.pos()
+        # destStrip = QtWidgets.QApplication.widgetAt(point)
+        #
+        # if destStrip and isinstance(destStrip, CcpnGLWidget):
+        #     objectsClicked = destStrip.getObjectsUnderMouse()
+        #
+        #     if objectsClicked is None:
+        #         return
+        #
+        #     if PEAKSELECT in objectsClicked or MULTIPLETSELECT in objectsClicked:
+        #         # dropped onto a peak or multiplet
+        #         # dropping onto a multiplet will apply to all attached peaks
+        #         # Set substance name to peak.annotation
+        #         peaks = set(self.current.peaks)
+        #         for mult in self.current.multiplets:
+        #             peaks = peaks | set(mult.peaks)
+        #         for substance in substances:
+        #             for peak in peaks:
+        #                 # make sure is not duplicating any existing annotation, and is appending not replacing.
+        #                 annotation = ', '.join(filter(None, set([peak.annotation, substance.name])))
+        #                 peak.annotation = annotation
+        #
+        #     elif not objectsClicked:
+        #         # function not defined yet
+        #         showWarning('Dropped Substance(s).','Action not implemented yet' )
 
 
     def _handleNmrAtoms(self, nmrAtoms):

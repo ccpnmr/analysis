@@ -1,0 +1,35 @@
+
+#=========================================================================================
+# General CCPN Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ =   ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ =   ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+
+#=========================================================================================
+# Macro Created by:
+#=========================================================================================
+__author__ = "$Author: Ccpn $"
+__date__ = "$Date: 2021-05-20 12:34:46 +0100 (Thu, May 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
+__Title__ = "The title"
+__Category__ = "Any,"
+__tags__ = ("Many", )
+__Description__ = """ A Short Description """
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
+
+
+if __name__ == '__main__':
+    import time
+    # Print the right-now time in the correct format. Ready to copy and paste on the __date__ field.
+    t = time.strftime('%Y-%m-%d %H:%M:%S %z (%a, %B %d, %Y)')
+    print('\n==========  date and time for header ========== \n')
+    print(f'__date__ = "$Date: {t} $"')
+    print('\n===============================================')

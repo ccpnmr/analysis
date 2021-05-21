@@ -198,7 +198,7 @@ class PeakList(PMIListABC):
         """
         from ccpn.core.lib.peakUtils import simple1DPeakPicker, _1DregionsFromLimits
 
-
+        peaks = []
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
                 spectrum = self.spectrum
@@ -223,6 +223,8 @@ class PeakList(PMIListABC):
                     if minIrange < height < maxIrange:
                         if position not in currentPositions:
                             peak = self.newPeak(ppmPositions=[position], height=height)
+                            peaks.append(peak)
+        return peaks
 
 
     def pickPeaks1d_(self, dataRange, intensityRange=None, size: int = 3, mode: str = 'wrap') -> List['Peak']:

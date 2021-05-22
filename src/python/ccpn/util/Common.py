@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:51 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-22 05:34:06 +0100 (Sat, May 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -48,7 +48,6 @@ from string import whitespace
 from ccpn.util.LabelledEnum import LabelledEnum
 from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
 from ccpn.util.FrozenDict import FrozenDict
-from ccpn.util.Logging import getLogger
 
 from ccpn.util import Constants
 from ccpn.util.isotopes import isotopeRecords
@@ -58,6 +57,7 @@ from ccpn.util.isotopes import isotopeRecords
 maxRandomInt = 2000000000
 
 WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
+
 
 # # valid characters for file names
 # # NB string.ascii_letters and string.digits are not compatible
@@ -243,11 +243,8 @@ def uniquify(sequence):
     seen = set()
     seen_add = seen.add
     return [x for x in sequence if x not in seen and not seen_add(x)]  # NB: not seen.add(x) is always True; i.e. this
-                                                                       # part just adds the element during the list comprehension
+    # part just adds the element during the list comprehension
 
-
-#from typing import Iterable
-from collections import Iterable                            # < py38
 
 def flatten(items):
     """Yield items from any nested iterable; see Reference.
@@ -293,7 +290,7 @@ def indexOfMaxValue(theList):
         raise TypeError('indexOfMaxValue: theList is not iterable')
     if len(theList) == 0:
         return -1
-    idx = max( (val, i) for i,val in enumerate(theList))[1]
+    idx = max((val, i) for i, val in enumerate(theList))[1]
     return idx
 
 
@@ -306,7 +303,7 @@ def indexOfMinValue(theList):
         raise TypeError('indexOfMaxValue: theList is not iterable')
     if len(theList) == 0:
         return -1
-    idx = min( (val, i) for i,val in enumerate(theList))[1]
+    idx = min((val, i) for i, val in enumerate(theList))[1]
     return idx
 
 
@@ -456,80 +453,6 @@ def reorder(values, axisCodes, refAxisCodes):
     return result
 
 
-def _axisCodeMapIndices(axisCodes, refAxisCodes):
-    """get mapping tuple so that axisCodes[result[ii]] matches refAxisCodes[ii]
-    all axisCodes must match, but result can contain None if refAxisCodes is longer
-    if axisCodes contain duplicates, you will get one of possible matches"""
-
-    #CCPNINTERNAL - used in multiple places to map display order and spectrum order
-
-    lenDifference = len(refAxisCodes) - len(axisCodes)
-    if lenDifference < 0:
-        return None
-
-    # Set up match matrix
-    matches = []
-    for code in axisCodes:
-        matches.append([axisCodesCompare(code, x, mismatch=-999999) for x in refAxisCodes])
-
-    # find best mapping
-    maxScore = sum(len(x) for x in axisCodes)
-    bestscore = -1
-    results = None
-    values = list(range(len(axisCodes))) + [None] * lenDifference
-    for permutation in itertools.permutations(values):
-        score = 0
-        for ii, jj in enumerate(permutation):
-            if jj is not None:
-                score += matches[jj][ii]
-        if score > bestscore:
-            bestscore = score
-            results = [permutation]
-        elif score == maxScore:
-            # it cannot get any higher
-            results.append(permutation)
-    #
-    if results:
-        # Pick the first of the equally good matches as the default answer
-        result = results[0]
-        if len(results) > 1:
-            # Multiple matches - try to select on pairs of bound atoms
-            # NB we do not need to be rigorous as this is only used to resolve ambiguity
-            # NB this is necessary to do a correct match of e.g. Hc, Ch, H to Hc, Hc1, Ch1
-            boundCodeDicts = []
-            for tryCodes in axisCodes, refAxisCodes:
-                boundCodes = {}
-                boundCodeDicts.append(boundCodes)
-                for ii, code in enumerate(tryCodes):
-                    if len(code) > 1:
-                        for jj in range(ii + 1, len(tryCodes)):
-                            code2 = tryCodes[jj]
-                            if len(code2) > 1:
-                                if (code[0].isupper() and code[0].lower() == code2[1] and
-                                        code2[0].isupper() and code2[0].lower() == code[1] and
-                                        code[2:] == code2[2:]):
-                                    # Matches pair of bound atoms - e.g. Hc1, Ch1
-                                    boundCodes[tryCodes.index(code)] = tryCodes.index(code2)
-                                    boundCodes[tryCodes.index(code2)] = tryCodes.index(code)
-
-            if boundCodeDicts[0] and boundCodeDicts[1]:
-                # bound pairs on both sides - check for matching pairs
-                bestscore = -1
-                for permutation in results:
-                    score = 0
-                    for idx1, idx2 in boundCodeDicts[1].items():
-                        target = permutation[idx1]
-                        if target is not None and target == boundCodeDicts[0].get(permutation[idx2]):
-                            score += 1
-                    if score > bestscore:
-                        bestscore = score
-                        result = permutation
-    else:
-        result = None
-    #
-    return result
-
-
 def axisCodesCompare(code, code2, mismatch=0):
     """Score code, code2 for matching. Score is length of common prefix, or 'mismatch' if None"""
 
@@ -572,6 +495,11 @@ def doAxisCodesMatch(axisCodes, refAxisCodes):
     if len(axisCodes) != len(refAxisCodes):
         return False
 
+    for code1, code2 in zip(axisCodes, refAxisCodes):
+        if not _matchSingleAxisCode(code1, code2):
+            return False
+
+    return True
     for ii, code in enumerate(axisCodes):
         if not axisCodesCompare(code, refAxisCodes[ii]):
             return False
@@ -641,6 +569,7 @@ def makeIterableList(inList=None):
         else:
             return []
 
+
 def flattenLists(lists):
     """
     Take a list of lists and concatenate into a single list.
@@ -650,8 +579,9 @@ def flattenLists(lists):
     """
     return makeIterableList(lists)
 
+
 def _truncateText(text, splitter=' , ', maxWords=4):
-    "Splits the text by the given splitter. If more then maxWords, it return the maxWord plus dots, otherwise just the text"
+    """Splits the text by the given splitter. If more then maxWords, it return the maxWord plus dots, otherwise just the text"""
     words = text.split(splitter)
     if len(words) > maxWords:
         return splitter.join(words[:maxWords]) + ' ...'
@@ -691,7 +621,8 @@ def _getChildren(obj, path=None):
 def percentage(percent, whole):
     return (percent * whole) / 100.0
 
-def _fillListToLenght(aList, desiredLength, fillingValue = None):
+
+def _fillListToLenght(aList, desiredLength, fillingValue=None):
     """
     Appends Nones to list to get length of list equal to the desiredLength.
     If the starting list is longer than the desiredLength: raise AttributeError
@@ -765,77 +696,6 @@ class LocalFormatter(string.Formatter):
 stdLocalFormatter = LocalFormatter()
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 20190507:ED new routines to match axis codes and return dict or indices
-
-def _matchSingleAxisCode(code1: str = None, code2: str = None, exactMatch: bool = False, allowLowercase=True) -> int:
-    """number of matching characters
-    code1, code2 = strings
-    e.g. 'Hn1', 'H1'
-
-    Compare single axis codes
-
-    Must always be upper case first letter
-
-    more matching letters = higher code
-    difference in length reduces match
-
-    'Jab' matches 'J' or 'Jab...', but NOT 'Ja...'      ie, 1 or 3 or more letter match
-
-    MQ gets no match
-
-    Hn* always matches Hcn*
-
-    :param code1: first axis code to compare
-    :param code2: second axis code to compare
-    :param exactMatch: only allow exact matches, True/False
-    :return: score based on the match
-    """
-    # undefined codes
-    if not code1 or not code2 or (code1[0].islower() and code2[0].islower() and not allowLowercase):
-        return 0
-
-    # if exactMatch is True then only test for exact match
-    if exactMatch:
-        return code1 == code2
-
-    ms = [a for a in zip(code1, code2)]  # zips to the shortest string
-    ss = 0
-
-    # add extra tests from v2.4
-    if code1.startswith('MQ') or code2.startswith('MQ'):
-        return 0
-    # char followed by digit already accounted for
-
-    # get count of matching characters - more characters -> higher score
-    for a, b in ms:
-        if a != b:
-            break
-        ss += 1
-
-    # another v2.4 test
-    if ss:
-        if ((code1.startswith('Hn') and code2.startswith('Hcn')) or
-                (code1.startswith('Hcn') and code2.startswith('Hn'))):
-            # Hn must always match Hcn, give it a high score
-            ss += 500
-
-        if code1.startswith('J'):
-            if ss == 2:  # must be a 1, or (3 or more) letter match
-                return 0
-
-        ss += _matchSingleAxisCodeLength(code1, code2)
-    return (1000 + ss) if ss else 0
-
-
-def _matchSingleAxisCodeLength(code1, code2):
-    """return a score based on the mismatch in length
-    """
-    lenDiff = abs(len(code1) - len(code2))
-
-    return (100 + 800 // (lenDiff + 1))
-
-
 def _SortByMatch(item):
     """quick sorting key for axisCode match tuples
     """
@@ -872,7 +732,153 @@ def sortObjectByName(objs, reverse=True):
     objs.sort(key=_naturalKeyObjs, reverse=reverse)
 
 
-def getAxisCodeMatch(axisCodes, refAxisCodes, exactMatch=False, allMatches=False) -> OrderedDict:
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 20190507:ED new routines to match axis codes and return dict or indices
+
+def _matchSingleAxisCodeLength(code1, code2):
+    """return a score based on the mismatch in length
+    """
+    lenDiff = abs(len(code1) - len(code2))
+
+    return (100 + 800 // (lenDiff + 1))
+
+
+def _matchSingleAxisCode(code1: str = None, code2: str = None, exactMatch: bool = False, allowLowercase=True, mismatch=0) -> int:
+    """number of matching characters
+    code1, code2 = strings
+    e.g. 'Hn1', 'H1'
+
+    Compare single axis codes
+
+    Must always be upper case first letter
+
+    more matching letters = higher code
+    difference in length reduces match
+
+    'Jab' matches 'J' or 'Jab...', but NOT 'Ja...'      ie, 1 or 3 or more letter match
+
+    MQ gets no match
+
+    Hn* always matches Hcn*
+
+    :param code1: first axis code to compare
+    :param code2: second axis code to compare
+    :param exactMatch: only allow exact matches, True/False
+    :return: score based on the match
+    """
+    if mismatch > 0:
+        raise ValueError('mismatch cannot be greater than 0')
+
+    # undefined codes
+    if not code1 or not code2 or (code1[0].islower() and code2[0].islower() and not allowLowercase):
+        return mismatch
+
+    # if exactMatch is True then only test for exact match
+    if exactMatch:
+        return code1 == code2
+
+    ms = [a for a in zip(code1, code2)]  # zips to the shortest string
+    ss = 0
+
+    # add extra tests from v2.4
+    if code1.startswith('MQ') or code2.startswith('MQ'):
+        return mismatch
+    # char followed by digit already accounted for
+
+    # get count of matching characters - more characters -> higher score
+    for a, b in ms:
+        if a != b:
+            break
+        ss += 1
+
+    # another v2.4 test
+    if ss:
+        if ((code1.startswith('Hn') and code2.startswith('Hcn')) or
+                (code1.startswith('Hcn') and code2.startswith('Hn'))):
+            # Hn must always match Hcn, give it a high score
+            ss += 500
+
+        if code1.startswith('J'):
+            if ss == 2:  # must be a 1, or (3 or more) letter match
+                return mismatch
+
+        ss += _matchSingleAxisCodeLength(code1, code2)
+    return (1000 + ss) if ss else mismatch
+
+
+def _axisCodeMapIndices(axisCodes, refAxisCodes, checkBoundAtoms=True, allMatches=False, exactMatch=False):
+    """get mapping tuple so that axisCodes[result[ii]] matches refAxisCodes[ii]
+    all axisCodes must match, but result can contain None if refAxisCodes is longer
+    if axisCodes contain duplicates, you will get one of possible matches
+    """
+    # CCPNINTERNAL - used in multiple places to map display order and spectrum order
+
+    mismatch = -1000
+    lenDifference = len(refAxisCodes) - len(axisCodes)
+    # if lenDifference < 0:
+    #     return None
+
+    # get the individual scores for the matching axisCodes
+    matches = []
+    for code in axisCodes:
+        matches.append([_matchSingleAxisCode(code, x, exactMatch=exactMatch, mismatch=mismatch) for x in refAxisCodes])
+
+    values = list(range(len(axisCodes))) + [None] * lenDifference
+    print(f' perm {matches}    {values}')
+    _results = []
+    for perm in itertools.permutations(values):
+        perm = list(perm)
+        score = 0
+        for ii, jj in enumerate(perm):
+            if jj is not None and ii < len(refAxisCodes):
+                _score = matches[jj][ii]
+                score += _score
+                if _score < 0:
+                    perm[ii] = None
+        if score > 0:
+            _results.append((score, tuple(perm)))
+
+    if _results:
+        if checkBoundAtoms:
+            # bound atoms matching - make a dict of matching atoms in axisCodes and refAxisCodes
+            boundCodeDicts = []
+            for tryCodes in axisCodes, refAxisCodes:
+                boundCodes = {}
+                boundCodeDicts.append(boundCodes)
+                for ii, code in enumerate(tryCodes):
+                    if len(code) > 1:
+                        for jj in range(ii + 1, len(tryCodes)):
+                            code2 = tryCodes[jj]
+                            if len(code2) > 1:
+                                # purely matching by checking the upper/lowerCase characters in the string
+                                if (code[0].isupper() and code[0].lower() == code2[1] and
+                                        code2[0].isupper() and code2[0].lower() == code[1] and
+                                        code[2:] == code2[2:]):
+                                    # Matches pair of bound atoms - e.g. match Hc - Ch, or Hc1 - Ch1
+                                    boundCodes[tryCodes.index(code)] = tryCodes.index(code2)
+                                    boundCodes[tryCodes.index(code2)] = tryCodes.index(code)
+
+            if boundCodeDicts[0] and boundCodeDicts[1]:
+                # bound pairs on both sides - check for matching pairs
+                _bounds = []
+                for score, perm in _results:
+                    for idx1, idx2 in boundCodeDicts[1].items():
+                        target = perm[idx1]
+                        if target is not None and target == boundCodeDicts[0].get(perm[idx2]):
+                            # if there is a match then increase the score
+                            score *= 2
+                            break
+                    _bounds.append((score, perm))
+                _results = _bounds
+
+        _results = sorted(_results, reverse=True, key=lambda val: val[0])
+        if allMatches:
+            return tuple(res[1] for res in _results if res)
+        else:
+            return _results and _results[0] and _results[0][1]
+
+
+def getAxisCodeMatch(axisCodes, refAxisCodes, exactMatch=False, allMatches=False, checkBoundAtoms=False) -> OrderedDict:
     """Return an OrderedDict containing the mapping from the refAxisCodes to axisCodes
 
     There may be multiple matches, or None for each axis code.
@@ -897,7 +903,7 @@ def getAxisCodeMatch(axisCodes, refAxisCodes, exactMatch=False, allMatches=False
 
     for similar repeated axis codes, possibly from matching isotopeCodes:
 
-        getAxisCodeMatch(('Nh', 'H'), ('H', 'H1', 'N'), allMatches=True)
+        getAxisCodeMatch(('Nh', 'H'), ('H', 'H1', 'N'), allMatches=False)
 
         ->  { 'Nh':   'N'
               'H' :   'H'
@@ -910,24 +916,43 @@ def getAxisCodeMatch(axisCodes, refAxisCodes, exactMatch=False, allMatches=False
             }
     """
 
-    found = OrderedDict()
-    for ii, code1 in enumerate(axisCodes):
-        foundCodes = []
-        for jj, code2 in enumerate(refAxisCodes):
+    _found = OrderedDict()
+    _matches = _axisCodeMapIndices(axisCodes, refAxisCodes, checkBoundAtoms=checkBoundAtoms, allMatches=allMatches, exactMatch=exactMatch)
+    if allMatches:
+        for _match in _matches or ():
+            for ii, ind in enumerate(_match):
+                if ind is not None and ii < len(refAxisCodes):
+                    if axisCodes[ind] in _found:
+                        if refAxisCodes[ii] not in _found[axisCodes[ind]]:
+                            _found[axisCodes[ind]] += (refAxisCodes[ii],)
+                    else:
+                        _found[axisCodes[ind]] = (refAxisCodes[ii], )
+        return OrderedDict([(axis, _found.get(axis) or ()) for axis in axisCodes])
 
-            match = _matchSingleAxisCode(code1, code2, exactMatch=exactMatch)
-            if match:
-                foundCodes.append((code2, jj, match))
+    elif _matches:
+        # _matches is a single item
+        for ii, ind in enumerate(_matches):
+            if ind is not None and ii < len(refAxisCodes):
+                _found[axisCodes[ind]] = refAxisCodes[ii]
+        return OrderedDict([(axis, _found.get(axis)) for axis in axisCodes])
 
-        if allMatches:
-            found[code1] = tuple(mm[0] for mm in sorted(foundCodes, key=_SortByMatch))
-        else:
-            found[code1] = sorted(foundCodes, key=_SortByMatch)[0][0] if foundCodes else None
+    # for ii, code1 in enumerate(axisCodes):
+    #     foundCodes = []
+    #     for jj, code2 in enumerate(refAxisCodes):
+    #
+    #         match = _matchSingleAxisCode(code1, code2, exactMatch=exactMatch)
+    #         if match:
+    #             foundCodes.append((code2, jj, match))
+    #
+    #     if allMatches:
+    #         found[code1] = tuple(mm[0] for mm in sorted(foundCodes, key=_SortByMatch))
+    #     else:
+    #         found[code1] = sorted(foundCodes, key=_SortByMatch)[0][0] if foundCodes else None
+    #
+    # return found
 
-    return found
 
-
-def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatches=False):
+def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatches=False, checkBoundAtoms=False):
     """Return a tuple containing the indices for each axis code in axisCodes in refAxisCodes
 
     Only the best match is returned for each code, elements not found in refAxisCodes will be marked as 'None'
@@ -948,21 +973,27 @@ def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatche
 
     """
 
-    found = []
-    for ii, code1 in enumerate(axisCodes):
-        foundCodes = []
-        for jj, code2 in enumerate(refAxisCodes):
+    _found = OrderedDict()
+    _matches = _axisCodeMapIndices(axisCodes, refAxisCodes, checkBoundAtoms=checkBoundAtoms, allMatches=allMatches, exactMatch=exactMatch)
+    if allMatches:
+        for _match in _matches or ():
+            for ii, ind in enumerate(_match):
+                if ind is not None and ii < len(refAxisCodes):
+                    if axisCodes[ind] in _found:
+                        if ii not in _found[axisCodes[ind]]:
+                            _found[axisCodes[ind]] += (ii,)
+                    else:
+                        _found[axisCodes[ind]] = (ii, )
+        return tuple(_found.get(axis) or () for axis in axisCodes)
 
-            match = _matchSingleAxisCode(code1, code2, exactMatch=exactMatch)
-            if match:
-                foundCodes.append((code2, jj, match))
+    elif _matches:
+        # _matches is a single item
+        for ii, ind in enumerate(_matches):
+            if ind is not None and ii < len(refAxisCodes):
+                _found[axisCodes[ind]] = ii
+        return tuple(_found.get(axis) for axis in axisCodes)
 
-        if allMatches:
-            found.append(tuple(mm[1] for mm in sorted(foundCodes, key=_SortByMatch)))
-        else:
-            found.append(sorted(foundCodes, key=_SortByMatch)[0][1] if foundCodes else None)
-
-    return tuple(found)
+    return ()
 
 
 class PrintFormatter(object):
@@ -1202,47 +1233,6 @@ class ZPlaneNavigationModes(LabelledEnum):
     INSTRIP = 2, 'In Strip', 'instrip'
 
 
-if __name__ == '__main__':
-    """Test the output from the printFormatter and recover as the python object
-    """
-
-    testDict = {
-        "Boolean2"  : True,
-        "DictOuter" : {
-            "ListSet"    : [[0, {1, 2, 3, 4, 5.00000000001, 'more strings'}],
-                            [0, 1000000.0],
-                            ['Another string', 0.0]],
-            "String1"    : 'this is a string',
-            "nestedLists": [[0, 0],
-                            [0, 1 + 2.00000001j],
-                            [0, (1, 2, 3, 4, 5, 6), OrderedDict((
-                                ("ListSetInner", [[0, OrderedSet([1, 2, 3, 4, 5.00000001, 'more inner strings'])],
-                                                  [0, 1000000.0],
-                                                  {'Another inner string', 0.0}]),
-                                ("String1Inner", 'this is an inner string'),
-                                ("nestedListsInner", [[0, 0],
-                                                      [0, 1 + 2.00000001j],
-                                                      [0, (1, 2, 3, 4, 5, 6)]])
-                                ))
-                             ]]
-            },
-        "nestedDict": {
-            "nestedDictItems": FrozenDict({
-                "floatItem": 1.23000001,
-                "frozen"   : frozenset([67, 78]),
-                "frOrdered": FrozenOrderedSet([34, 45])
-                })
-            },
-        "Boolean1"  : (True, None, False),
-        }
-
-    pretty = PrintFormatter()
-    dd = pretty(testDict)
-    print('dataDict string: \n{}'.format(dd))
-    recover = pretty.literal_eval(dd)
-    print('Recovered python object: {} '.format(recover))
-
-
 def _compareDict(d1, d2):
     """Compare the keys in two dictionaries
     Routine is recursive, empty dicts are ignored
@@ -1269,6 +1259,7 @@ def _compareDict(d1, d2):
                 return False
 
     return True
+
 
 # GWV 14/01/2021: replaced by near similar _validateStringValue classmethod on AbtractWrapper
 # def _validateName(project, cls, value: str, attribName: str = 'name', allowWhitespace: bool = False, allowEmpty: bool = False,
@@ -1320,8 +1311,11 @@ def stringToCamelCase(label):
     attr = label.translate({ord(c): None for c in whitespace})
     return attr[0].lower() + attr[1:]
 
+
 CAMELCASEPTN = r'((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))'
 CAMELCASEREP = r' \1'
+
+
 # alternative camelCase split = r'((?<=[a-z])[A-Z]|(?<=[A-Z])[A-Z](?=[a-z]))''
 
 def camelCaseToString(name):
@@ -1415,3 +1409,44 @@ def _getObjectsByPids(project, pids):
 
 def _getPidsFromObjects(objs):
     return list(filter(None, map(lambda x: x.pid, objs)))
+
+
+if __name__ == '__main__':
+    """Test the output from the printFormatter and recover as the python object
+    """
+
+    testDict = {
+        "Boolean2"  : True,
+        "DictOuter" : {
+            "ListSet"    : [[0, {1, 2, 3, 4, 5.00000000001, 'more strings'}],
+                            [0, 1000000.0],
+                            ['Another string', 0.0]],
+            "String1"    : 'this is a string',
+            "nestedLists": [[0, 0],
+                            [0, 1 + 2.00000001j],
+                            [0, (1, 2, 3, 4, 5, 6), OrderedDict((
+                                ("ListSetInner", [[0, OrderedSet([1, 2, 3, 4, 5.00000001, 'more inner strings'])],
+                                                  [0, 1000000.0],
+                                                  {'Another inner string', 0.0}]),
+                                ("String1Inner", 'this is an inner string'),
+                                ("nestedListsInner", [[0, 0],
+                                                      [0, 1 + 2.00000001j],
+                                                      [0, (1, 2, 3, 4, 5, 6)]])
+                                ))
+                             ]]
+            },
+        "nestedDict": {
+            "nestedDictItems": FrozenDict({
+                "floatItem": 1.23000001,
+                "frozen"   : frozenset([67, 78]),
+                "frOrdered": FrozenOrderedSet([34, 45])
+                })
+            },
+        "Boolean1"  : (True, None, False),
+        }
+
+    pretty = PrintFormatter()
+    dd = pretty(testDict)
+    print('dataDict string: \n{}'.format(dd))
+    recover = pretty.literal_eval(dd)
+    print('Recovered python object: {} '.format(recover))

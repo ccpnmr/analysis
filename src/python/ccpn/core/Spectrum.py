@@ -1915,7 +1915,7 @@ class Spectrum(AbstractWrapperObject):
 
     def getDefaultOrdering(self, axisOrder):
         if not axisOrder:
-            axisOption = self.project.application.preferences.general.axisOrderingOptions
+            # axisOption = self.project.application.preferences.general.axisOrderingOptions
 
             preferredAxisOrder = self.preferredAxisOrdering
             if preferredAxisOrder is not None:
@@ -2448,10 +2448,10 @@ class Spectrum(AbstractWrapperObject):
         return newSpectrum
 
     def _clone1D(self):
-        'Clone 1D spectrum to a new spectrum.'
+        """Clone 1D spectrum to a new spectrum."""
         #FIXME Crude approach / hack
 
-        newSpectrum = project.newEmptySpectrum(isotopeCodes=self.isotopeCodes, name=self.name)
+        newSpectrum = self.project.newEmptySpectrum(isotopeCodes=self.isotopeCodes, name=self.name)
         newSpectrum._positions = self.positions
         newSpectrum._intensities = self.intensities
         for peakList in self.peakLists:

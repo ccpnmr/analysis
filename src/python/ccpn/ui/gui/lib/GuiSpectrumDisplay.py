@@ -797,6 +797,12 @@ class GuiSpectrumDisplay(CcpnModule):
         GLSignals.emitPaintEvent()
 
     @property
+    def visibleSpectra(self):
+        """List of spectra currently visible in the spectrumDisplay
+        """
+        return [sv.spectrum for sv in self.orderedSpectrumViews(self.spectrumViews) if sv.isVisible()]
+
+    @property
     def isGrouped(self):
         """Return whether the spectrumDisplay contains grouped spectra
         """
@@ -1242,17 +1248,20 @@ class GuiSpectrumDisplay(CcpnModule):
     def _handleSubstances(self, substances):
         # get the widget that is under the cursor, SHOULD be guiWidget
         # if selected peaks, will add the substance Name as peak.annotation
+
         peaks = set(self.current.peaks)
         replaceAnnotation = True
         for mult in self.current.multiplets:
             peaks = peaks | set(mult.peaks)
         if peaks:
-            for substance in substances:
-                annotation = substance.name
-                for peak in peaks:
-                    if not replaceAnnotation: # if want appending instead of replacing
-                        annotation = ', '.join(filter(None, set([peak.annotation, substance.name]))) # Filter to make sure is not duplicating any existing annotation
-                    peak.annotation = annotation
+            with undoBlockWithoutSideBar():
+                for substance in substances:
+                    annotation = substance.name
+                    for peak in peaks:
+                        if peak.peakList.spectrum in self.visibleSpectra:
+                            if not replaceAnnotation: # if want appending instead of replacing
+                                annotation = ', '.join(filter(None, set([peak.annotation, substance.name]))) # Filter to make sure is not duplicating any existing annotation
+                            peak.annotation = annotation
 
         # # FIXME below still doesn't work if in stack mode
         # point = QtGui.QCursor.pos()

@@ -1466,6 +1466,7 @@ class Framework(NotifierBase):
             okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
                                                                  phrase='create a new')
             if okToContinue:
+                self.ui.mainWindow.moduleArea._closeAll()
                 project = self.newProject()
                 if project is None:
                     raise RuntimeError('Unable to create new project')

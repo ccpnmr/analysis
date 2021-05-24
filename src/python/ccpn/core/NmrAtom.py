@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 15:00:08 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-24 19:35:20 +0100 (Mon, May 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -514,7 +514,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     # serial = None
     if name is None or len(name) == 0:
         # add default as all other CCPN objects.
-        name = self._nextAvailableName(NmrAtom, self.project)
+        name = NmrAtom._uniqueName(self.project)
 
     else:
         # Check for name clashes

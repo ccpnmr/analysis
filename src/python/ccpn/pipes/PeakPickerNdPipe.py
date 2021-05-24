@@ -97,10 +97,10 @@ class PeakPickerNdPipe(SpectraPipe):
         }
 
     def runPipe(self, spectra):
-        '''
+        """
         :param data:
         :return:
-        '''
+        """
 
         negativePeaks = self._kwargs[NegativePeaks]
         dropFactor = self._kwargs[DropFactor]

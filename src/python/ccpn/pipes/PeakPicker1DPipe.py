@@ -85,10 +85,10 @@ class PeakPicker1DPipe(SpectraPipe):
               }
 
     def runPipe(self, spectra):
-        '''
+        """
         :param data:
         :return:
-        '''
+        """
         getLogger().info(self._startedInfo)
         if ExcludeRegions in self.pipeline._kwargs:
             excludeRegions = self.pipeline._kwargs[ExcludeRegions]

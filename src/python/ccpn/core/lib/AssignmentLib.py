@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:48 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-24 19:40:02 +0100 (Mon, May 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -966,8 +966,9 @@ def sameAxisCodes(peaks: typing.List[Peak], dim: int):
         spectrum0 = spectra.pop()
         axisCode = spectrum0.axisCodes[dim]
         for spectrum in spectra:
-            if not commonUtil.axisCodesCompare(spectrum.axisCodes[dim], axisCode, 1):
+            if not commonUtil.doAxisCodesMatch(spectrum.axisCodes[dim], axisCode):
                 return False
+
     return True
 
 

@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-22 05:34:06 +0100 (Sat, May 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-24 19:40:02 +0100 (Mon, May 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -413,31 +413,6 @@ def checkIsotope(text):
     return result
 
 
-def axisCodeMatch(axisCode, refAxisCodes):
-    """Get refAxisCode that best matches axisCode """
-    for ii, indx in enumerate(_axisCodeMapIndices([axisCode], refAxisCodes)):
-        if indx == 0:
-            # We have a match
-            return refAxisCodes[ii]
-    else:
-        return None
-
-
-def axisCodeMapping(axisCodes, refAxisCodes):
-    """get {axisCode:refAxisCode} mapping dictionary
-    all axisCodes must match, or dictionary will be empty
-    NB a series of single-letter axisCodes (e.g. 'N', 'HCN') can be passed in as a string"""
-    result = {}
-    mapIndices = _axisCodeMapIndices(axisCodes, refAxisCodes)
-    if mapIndices:
-        for ii, refAxisCode in enumerate(refAxisCodes):
-            indx = mapIndices[ii]
-            if indx is not None:
-                result[axisCodes[indx]] = refAxisCode
-    #
-    return result
-
-
 def reorder(values, axisCodes, refAxisCodes):
     """reorder values in axisCode order to refAxisCode order, by matching axisCodes
 
@@ -451,60 +426,6 @@ def reorder(values, axisCodes, refAxisCodes):
     result = list(values[x] for x in remapping)
     #
     return result
-
-
-def axisCodesCompare(code, code2, mismatch=0):
-    """Score code, code2 for matching. Score is length of common prefix, or 'mismatch' if None"""
-
-    if not code or not code2 or code[0] != code2[0]:
-        score = mismatch
-    elif code == code2:
-        score = len(code)
-    elif code[0].islower():
-        # 'fidX...' 'delay', etc. must match exactly
-        score = mismatch
-    elif code.startswith('MQ'):
-        # 'MQxy...' must match exactly
-        score = mismatch
-    elif len(code) == 1 or code[1].isdigit() or len(code2) == 1 or code2[1].isdigit():
-        # Match against a single upper-case letter on one side. Always OK
-        score = 1
-    else:
-        # Partial match of two strings with at least two significant chars each
-        score = len(os.path.commonprefix((code, code2))) or mismatch
-        if score == 1:
-            # Only first letter matches, second does not
-            if ((code.startswith('Hn') and code2.startswith('Hcn')) or
-                    (code.startswith('Hcn') and code2.startswith('Hn'))):
-                # Hn must matches Hcn
-                score = 2
-            else:
-                # except as above we need at least two char match
-
-                # TODO:ED check matching codes when each contain more than 1 character; dict?
-                score = 3  #mismatch
-        elif code.startswith('J') and score == 2:
-            # 'Jab' matches 'J' or 'Jab...', but NOT 'Ja...'
-            score = mismatch
-    #
-    return score
-
-
-def doAxisCodesMatch(axisCodes, refAxisCodes):
-    """Return True if axisCodes match refAxisCodes else False"""
-    if len(axisCodes) != len(refAxisCodes):
-        return False
-
-    for code1, code2 in zip(axisCodes, refAxisCodes):
-        if not _matchSingleAxisCode(code1, code2):
-            return False
-
-    return True
-    for ii, code in enumerate(axisCodes):
-        if not axisCodesCompare(code, refAxisCodes[ii]):
-            return False
-    #
-    return True
 
 
 def stringifier(*fields, **options):
@@ -734,6 +655,7 @@ def sortObjectByName(objs, reverse=True):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 20190507:ED new routines to match axis codes and return dict or indices
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def _matchSingleAxisCodeLength(code1, code2):
     """return a score based on the mismatch in length
@@ -775,7 +697,7 @@ def _matchSingleAxisCode(code1: str = None, code2: str = None, exactMatch: bool 
 
     # if exactMatch is True then only test for exact match
     if exactMatch:
-        return code1 == code2
+        return 1100 if (code1 == code2) else 0
 
     ms = [a for a in zip(code1, code2)]  # zips to the shortest string
     ss = 0
@@ -815,8 +737,6 @@ def _axisCodeMapIndices(axisCodes, refAxisCodes, checkBoundAtoms=True, allMatche
 
     mismatch = -1000
     lenDifference = len(refAxisCodes) - len(axisCodes)
-    # if lenDifference < 0:
-    #     return None
 
     # get the individual scores for the matching axisCodes
     matches = []
@@ -824,7 +744,6 @@ def _axisCodeMapIndices(axisCodes, refAxisCodes, checkBoundAtoms=True, allMatche
         matches.append([_matchSingleAxisCode(code, x, exactMatch=exactMatch, mismatch=mismatch) for x in refAxisCodes])
 
     values = list(range(len(axisCodes))) + [None] * lenDifference
-    print(f' perm {matches}    {values}')
     _results = []
     for perm in itertools.permutations(values):
         perm = list(perm)
@@ -832,9 +751,9 @@ def _axisCodeMapIndices(axisCodes, refAxisCodes, checkBoundAtoms=True, allMatche
         for ii, jj in enumerate(perm):
             if jj is not None and ii < len(refAxisCodes):
                 _score = matches[jj][ii]
-                score += _score
-                if _score < 0:
+                if _score <= 0:
                     perm[ii] = None
+                score += _score
         if score > 0:
             _results.append((score, tuple(perm)))
 
@@ -926,7 +845,7 @@ def getAxisCodeMatch(axisCodes, refAxisCodes, exactMatch=False, allMatches=False
                         if refAxisCodes[ii] not in _found[axisCodes[ind]]:
                             _found[axisCodes[ind]] += (refAxisCodes[ii],)
                     else:
-                        _found[axisCodes[ind]] = (refAxisCodes[ii], )
+                        _found[axisCodes[ind]] = (refAxisCodes[ii],)
         return OrderedDict([(axis, _found.get(axis) or ()) for axis in axisCodes])
 
     elif _matches:
@@ -935,21 +854,6 @@ def getAxisCodeMatch(axisCodes, refAxisCodes, exactMatch=False, allMatches=False
             if ind is not None and ii < len(refAxisCodes):
                 _found[axisCodes[ind]] = refAxisCodes[ii]
         return OrderedDict([(axis, _found.get(axis)) for axis in axisCodes])
-
-    # for ii, code1 in enumerate(axisCodes):
-    #     foundCodes = []
-    #     for jj, code2 in enumerate(refAxisCodes):
-    #
-    #         match = _matchSingleAxisCode(code1, code2, exactMatch=exactMatch)
-    #         if match:
-    #             foundCodes.append((code2, jj, match))
-    #
-    #     if allMatches:
-    #         found[code1] = tuple(mm[0] for mm in sorted(foundCodes, key=_SortByMatch))
-    #     else:
-    #         found[code1] = sorted(foundCodes, key=_SortByMatch)[0][0] if foundCodes else None
-    #
-    # return found
 
 
 def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatches=False, checkBoundAtoms=False):
@@ -983,7 +887,7 @@ def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatche
                         if ii not in _found[axisCodes[ind]]:
                             _found[axisCodes[ind]] += (ii,)
                     else:
-                        _found[axisCodes[ind]] = (ii, )
+                        _found[axisCodes[ind]] = (ii,)
         return tuple(_found.get(axis) or () for axis in axisCodes)
 
     elif _matches:
@@ -994,6 +898,31 @@ def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatche
         return tuple(_found.get(axis) for axis in axisCodes)
 
     return ()
+
+
+def axisCodeMatch(axisCode, refAxisCodes):
+    """Get refAxisCode that best matches axisCode """
+    for ii, indx in enumerate(_axisCodeMapIndices([axisCode], refAxisCodes)):
+        if indx == 0:
+            # We have a match
+            return refAxisCodes[ii]
+    else:
+        return None
+
+
+def doAxisCodesMatch(axisCodes, refAxisCodes):
+    """Return True if axisCodes match refAxisCodes else False"""
+    if len(axisCodes) != len(refAxisCodes):
+        return False
+
+    for code1, code2 in zip(axisCodes, refAxisCodes):
+        if not _matchSingleAxisCode(code1, code2):
+            return False
+
+    return True
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 class PrintFormatter(object):

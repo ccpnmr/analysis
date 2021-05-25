@@ -4,8 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-22 09:33:24 +0100 (Tue, September 22, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-05-25 19:09:05 +0100 (Tue, May 25, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -92,40 +93,50 @@ class DialogButtonBox(QtWidgets.QDialogButtonBox, Base):
         else:
             self.setOrientation(QtCore.Qt.Vertical)
 
+        self._userButtonDict = {}
         if buttons:
-            buttonTypes = reduce(or_, buttons)
+            # set the standard buttons - will be in OS specific order
+            buttonTypes = reduce(or_, [btn for btn in buttons if not isinstance(btn, str)])
             self.setStandardButtons(buttonTypes)
+
+            for button in [btn for btn in buttons if isinstance(btn, str)]:
+                # add 'AcceptRole' buttons for user defined buttons - store in user dict
+                newButton = self.addButton(button, QtWidgets.QDialogButtonBox.AcceptRole)
+                self._userButtonDict[button] = newButton
 
             if callbacks:
                 for button, callback, text, tipText, icon, enabledState, visibleState in \
                         zip(buttons, callbacks, texts, tipTexts, icons, enabledStates, visibleStates):
 
                     thisButton = self.button(button)
-                    if callback is not None:
-                        thisButton.clicked.connect(callback)
-                    if text is not None:
-                        thisButton.setText(text)
-                        if not text:
-                            # reduce the padding to give a better shape
-                            thisButton.setStyleSheet('QPushButton { padding: 0px 2px 0px 2px; }')
+                    if thisButton:
+                        if callback is not None:
+                            thisButton.clicked.connect(callback)
+                        if text is not None:
+                            thisButton.setText(text)
+                            if not text:
+                                # reduce the padding to give a better shape
+                                thisButton.setStyleSheet('QPushButton { padding: 0px 2px 0px 2px; }')
 
-                    if tipText is not None:
-                        thisButton.setToolTip(tipText)
+                        if tipText is not None:
+                            thisButton.setToolTip(tipText)
 
-                    if enableIcons and icon is not None:                                # filename or pixmap
-                        thisButton.setIcon(Icon(icon))
-                        # NOTE: sometimes this causes the button to reset its stylesheet
-                        thisButton.setIconSize(QtCore.QSize(22, 22))
+                        if enableIcons and icon is not None: # filename or pixmap
+                            thisButton.setIcon(Icon(icon))
+                            # NOTE: sometimes this causes the button to reset its stylesheet
+                            thisButton.setIconSize(QtCore.QSize(22, 22))
 
-                    if enabledState is not None:
-                        thisButton.setEnabled(enabledState)
-                    if visibleState is not None:
-                        thisButton.setVisible(visibleState)
+                        if enabledState is not None:
+                            thisButton.setEnabled(enabledState)
+                        if visibleState is not None:
+                            thisButton.setVisible(visibleState)
 
-                    thisButton.setMinimumHeight(24)
+                        thisButton.setMinimumHeight(24)
+                        setWidgetFont(thisButton, )
 
             if defaultButton is not None:
                 self._parent.setDefaultButton(self.button(defaultButton))
 
-            for button in buttons:
-                setWidgetFont(self.button(button), )
+    def button(self, which: 'QtWidgets.QDialogButtonBox.StandardButton') -> QtWidgets.QPushButton:
+        # subclass 'button' to allow searching for user buttons in _userButtonDict before standardButtons
+        return (self._userButtonDict.get(which) if isinstance(which, str) else None) or super().button(which)

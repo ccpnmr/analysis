@@ -1,8 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-05-25 19:09:05 +0100 (Tue, May 25, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -23,16 +24,18 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import re
-from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED, getNmrResiduePrediction
-from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget, CheckBoxCompoundWidget
-from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC, _attribContainer
-from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.NmrResidue import NmrResidue, _getNmrResidue
+from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED, getNmrResiduePrediction
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC, _attribContainer
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget, CheckBoxCompoundWidget
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.OrderedSet import OrderedSet
 
 
 REMOVEPERCENT = '( ?\d+.?\d* ?%)+'
 MERGE = 'merge'
 CREATE = 'create'
+DEASSIGN = 'deassign'
 
 
 def _getResidueTypeProb(self, currentNmrResidue):
@@ -87,67 +90,141 @@ class NmrResidueEditPopup(AttributeEditorPopupABC):
     attributes = [('Pid', EntryCompoundWidget, getattr, None, None, None, {}),
                   ('NmrChain', PulldownListCompoundWidget, getattr, setattr, _getNmrChainList, None, {}),
                   ('Sequence Code', EntryCompoundWidget, getattr, setattr, None, None, {}),
-                  ('Create New', CheckBoxCompoundWidget, None, None, None, None, {'checked': False}),
+                  # ('Create New', CheckBoxCompoundWidget, None, None, None, None, {'checked': False, 'checkable':True}),
                   ('Residue Type', PulldownListCompoundWidget, getattr, setattr, _getResidueTypeProb, _checkNmrResidue, {}),
-                  ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {'checked': False}),
+                  ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {'checked': False, 'checkable':True}),
+                  # ('Deassign', CheckBoxCompoundWidget, None, None, None, None, {'checked': False, 'checkable':True}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ]
 
     # hWidth = 120
 
+    # def __init__(self, *args, **kwds):
+    #     super().__init__(*args, **kwds)
+    #     self.deassign.checkBox.clicked.connect(self._deassignCallBack)
+    #     self.mergetoExisting.checkBox.clicked.connect(self._mergetoExistingCallBack)
+
+    def __postInit__(self):
+        """post initialise functions - required as may need to insert more objects into dialog
+        """
+        # add a new button to deassign/disconnect nmrResidue
+        self.setUserButton(callback=self._userCallback, tipText='Deassign the nmrResidue and return to the default nmrChain NC:@-', text='Deassign', enabled=True)
+
+        super().__postInit__()
+
+        self._userButton = self.dialogButtons.button(self.USERBUTTON)
+        self._userButton.setEnabled(True)
+        self._deassignClicked = False
+
+    # def _deassignCallBack(self, *args):
+    #     """Handle clicking the deassign checkBox
+    #     - they are mutually exclusive
+    #     """
+    #     if self.deassign.isChecked():
+    #         self.mergetoExisting.set(False)
+    #
+    # def _mergetoExistingCallBack(self, *args):
+    #     """Handle clicking the mergetoExisting checkBox
+    #     - they are mutually exclusive
+    #     """
+    #     if self.mergetoExisting.isChecked():
+    #         self.deassign.set(False)
+
+    def _userCallback(self, *args):
+        """Handle deassign/disconnect selected nmrResidue
+        """
+        with self.handleUserClicked() as error:
+            # # deassign/disconnect the nmrResidue - nmrChains are split, and nmrResidue is returned to the pool
+            # _seqCode = self.sequenceCode.getText()
+            # _resType = re.sub(REMOVEPERCENT, '', self.residueType.getText())
+            # if _seqCode:
+            #     showWarning(str(self.windowTitle()), 'To deassign the nmrResidue, please leave the sequenceCode blank.')
+            #     error.errorValue = True
+            # else:
+            #     self.obj.disconnect()
+            #     if _seqCode or _resType:
+            #         # reset the sequenceCode/residueType
+            #         self.obj.moveToNmrChain(sequenceCode=_seqCode, residueType=_resType)
+
+            self.obj.disconnect()
+
+        # self._deassignClicked = True
+        # self._okClicked()
+        # self._deassignClicked = False
+
     def _applyAllChanges(self, changes):
         """Apply all changes - move nmrResidue to new chain as required
         """
+        # if self._deassignClicked:
+        #     print('   beep')
+        #     if self.sequenceCode.getText():
+        #         raise RuntimeError('To deassign the nmrResidue, please leave the sequenceCode blank.')
+        #     else:
+        #         self.obj.disconnect()
+        #         return
+
         merge = self.mergetoExisting.isChecked()
-        create = self.createNew.isChecked()
+        create = False # self.createNew.isChecked()
+        deassign = False # self.deassign.isChecked()
 
-        _chainId = self.nmrChain.getText()
-        _chainPid = 'NC:{}'.format(self.nmrChain.getText())
+        if deassign:
+            pass
+            # if self.sequenceCode.getText():
+            #     raise RuntimeError('To deassign the nmrResidue, please leave the sequenceCode blank.')
+            # else:
+            #     self.obj.disconnect()
 
-        # create a new nmrChain as required
-        _nmrChain = self.project.fetchNmrChain(_chainId)
-
-        # find the existing nmrResidue
-        destNmrResidue = _getNmrResidue(_nmrChain,
-                                        self.sequenceCode.getText(),
-                                        re.sub(REMOVEPERCENT, '', self.residueType.getText())) if _nmrChain else None
-
-        if destNmrResidue and (self.obj != destNmrResidue):
-            # move to an existing nmrResidue requires a merge
-            if not merge:
-                # raise error to notify popup
-                raise ValueError('Cannot move NmrResidue to an existing NmrResidue without merging')
-
-            destNmrResidue.mergeNmrResidues(self.obj)
-            destNmrResidue.comment = self.comment.getText()
         else:
-            if not create or (self.obj == destNmrResidue):
-                # assign to a new nmrResidue, includes changing just the residueType
-                self.obj.moveToNmrChain(_chainPid,
-                                        self.sequenceCode.getText(),
-                                        re.sub(REMOVEPERCENT, '', self.residueType.getText())
-                                        )
+            _chainId = self.nmrChain.getText()
+            _chainPid = 'NC:{}'.format(self.nmrChain.getText())
+
+            # create a new nmrChain as required
+            _nmrChain = self.project.fetchNmrChain(_chainId)
+
+            # find the existing nmrResidue
+            destNmrResidue = _getNmrResidue(_nmrChain,
+                                            self.sequenceCode.getText(),
+                                            re.sub(REMOVEPERCENT, '', self.residueType.getText())) if _nmrChain else None
+
+            if destNmrResidue and (self.obj != destNmrResidue):
+                # move to an existing nmrResidue requires a merge
+                if not merge:
+                    # raise error to notify popup
+                    raise ValueError('Cannot move NmrResidue to an existing NmrResidue without merging')
+
+                destNmrResidue.mergeNmrResidues(self.obj)
+                destNmrResidue.comment = self.comment.getText()
             else:
-                # fetch a new residue, sequenceCode has changed
-                self.obj = _nmrChain.fetchNmrResidue(self.sequenceCode.getText(),
-                                                     re.sub(REMOVEPERCENT, '', self.residueType.getText())
-                                                     )
-            self.obj.comment = self.comment.getText()
+                if not create or (self.obj == destNmrResidue):
+                    # assign to a new nmrResidue, includes changing just the residueType
+                    self.obj.moveToNmrChain(_chainPid,
+                                            self.sequenceCode.getText(),
+                                            re.sub(REMOVEPERCENT, '', self.residueType.getText())
+                                            )
+                else:
+                    # fetch a new residue, sequenceCode has changed
+                    self.obj = _nmrChain.fetchNmrResidue(self.sequenceCode.getText(),
+                                                         re.sub(REMOVEPERCENT, '', self.residueType.getText())
+                                                         )
+                self.obj.comment = self.comment.getText()
 
     def storeWidgetState(self):
         """Store the state of the checkBoxes between popups
         """
         merge = self.mergetoExisting.isChecked()
-        create = self.createNew.isChecked()
+        # create = self.createNew.isChecked()
+        # deassign = self.deassign.isChecked()
 
         NmrResidueEditPopup._storedState[MERGE] = merge
-        NmrResidueEditPopup._storedState[CREATE] = create
+        # NmrResidueEditPopup._storedState[CREATE] = create
+        # NmrResidueEditPopup._storedState[DEASSIGN] = deassign
 
     def restoreWidgetState(self):
         """Restore the state of the checkBoxes
         """
         self.mergetoExisting.set(NmrResidueEditPopup._storedState.get(MERGE, False))
-        self.createNew.set(NmrResidueEditPopup._storedState.get(CREATE, False))
+        # self.createNew.set(NmrResidueEditPopup._storedState.get(CREATE, False))
+        # self.deassign.set(NmrResidueEditPopup._storedState.get(DEASSIGN, False))
 
     def _setValue(self, attr, setFunction, value):
         """Not needed here - subclass so does no operation

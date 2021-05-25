@@ -29,6 +29,7 @@ __date__ = "$Date: 2017-05-10 16:04:41 +0000 (Wed, May 10, 2017) $"
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
+from ccpn.util.Logging import getLogger
 
 
 class PythonConsoleModule(CcpnModule):
@@ -61,7 +62,7 @@ class PythonConsoleModule(CcpnModule):
         row = 0
         self.settingsEditorCheckBox = CheckBox(self.settingsWidget, checked=True, text='Show logging window', callback=self._toggleTextEditor,
                                                grid=(row, 0))
-        self._toggleTextEditor(False)
+        # self._toggleTextEditor(False)
 
         row += 1
         self.settingsLoggingCheckBox = CheckBox(self.settingsWidget, checked=True, text='Enable logging', callback=self._toggleLogging,
@@ -69,15 +70,18 @@ class PythonConsoleModule(CcpnModule):
 
         # make the widget visible, it is hidden when first instantiated
         self.pythonConsoleWidget.show()
-        self.pythonConsoleWidget.textEditor.show()
+        self._toggleTextEditor(True)
 
-    def _toggleTextEditor(self, value):
+    def _toggleTextEditor(self, isVisible):
         """Show/hide the logging window in the python console
         """
-        if value:
-            self.pythonConsoleWidget.textEditor.show()
-        else:
-            self.pythonConsoleWidget.textEditor.hide()
+        try:
+            if isVisible:
+                self.pythonConsoleWidget.textEditor.show()
+            else:
+                self.pythonConsoleWidget.textEditor.hide()
+        except RuntimeError as runError:
+            getLogger().warning('PythonConsole module Error: %s'%runError)
 
     def _toggleLogging(self, value):
         """Enable/disable logging to the logging window of the python console

@@ -83,10 +83,10 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     
     menuBar = self.menuBar() # QtWidgets.QMenuBar()
     fileMenu = Menu(menuBar, '&File')
-    importMenu = Menu(menuBar, '&Import')
-    exportMenu = Menu(menuBar, 'E&xport')
     editMenu = Menu(menuBar, '&Edit')
     viewMenu = Menu(menuBar, '&View')
+    importMenu = Menu(menuBar, '&Import')
+    exportMenu = Menu(menuBar, 'E&xport')
     helpMenu = Menu(menuBar, '&Help')
     
     # Menu items

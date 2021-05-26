@@ -279,10 +279,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                                                 spectrumAttribute=None,
                                                                 hasSetterInSpectrumClass=False
                                                                 )
+    # internal data scale (e.g. as used by Bruker)
     dataScale = CFloat(default_value=1.0).tag(                  isDimensional=False,
                                                                 doCopy=True,
-                                                                spectrumAttribute='scale',
-                                                                hasSetterInSpectrumClass=True
+                                                                spectrumAttribute=None,
+                                                                hasSetterInSpectrumClass=False
                                                                 )
     sampledValues = List(default_value=[]).tag(                 isDimensional=False,
                                                                 doCopy=True,
@@ -1303,7 +1304,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         elif self.isBlocked:
             position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
-            return self._readBlockedPlane(xDim=xDim, yDim=yDim, position=position)
+            data = self._readBlockedPlane(xDim=xDim, yDim=yDim, position=position)
+            data *= self.dataScale
+            return data
 
         else:
             raise NotImplementedError('Not implemented')
@@ -1341,7 +1344,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         elif self.isBlocked:
             position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
-            return self._readBlockedSlice(sliceDim=sliceDim, position=position)
+            data = self._readBlockedSlice(sliceDim=sliceDim, position=position)
+            data *= self.dataScale
+            return data
 
         else:
             raise NotImplementedError('Not implemented')
@@ -1387,7 +1392,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         elif self.isBlocked:
             position = self.checkForValidPosition(position)
-            return self._readBlockedPoint(position)
+            data = self._readBlockedPoint(position)
+            data *= self.dataScale
+            return data
 
         else:
             # piggyback on getSliceData
@@ -1566,6 +1573,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         else:
             self.checkForValidRegion(sliceTuples, aliasingFlags)
+            # No need to scale, as _getRegionData relies on getSliceData, which is already scaled
             regionData = self._getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
 
         return regionData

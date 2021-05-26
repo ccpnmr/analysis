@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-19 15:56:41 +0100 (Wed, May 19, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-26 09:01:52 +0100 (Wed, May 26, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -4635,14 +4635,14 @@ class CcpnGLWidget(QOpenGLWidget):
                 return
 
             deltaOffset = 0
-            newCoords = ' %s: %s\n %s: %s' % (self._axisOrder[0], self.XMode(cursorX),
-                                              self._axisOrder[1], self.YMode(cursorY))
+            newCoords = ' %s: %s\n %s: %s' % (self._visibleOrderingAxisCodes[0], self.XMode(cursorX),
+                                              self._visibleOrderingAxisCodes[1], self.YMode(cursorY))
 
             smallFont = self.getSmallFont()
 
             if self._drawDeltaOffset:
-                newCoords += '\n d%s: %s\n d%s: %s' % (self._axisOrder[0], self.XMode(cursorX - startX),
-                                                       self._axisOrder[1], self.YMode(cursorY - startY))
+                newCoords += '\n d%s: %s\n d%s: %s' % (self._visibleOrderingAxisCodes[0], self.XMode(cursorX - startX),
+                                                       self._visibleOrderingAxisCodes[1], self.YMode(cursorY - startY))
                 deltaOffset = smallFont.charHeight * 2.0 * self.pixelY
 
             mx, my = cursorCoordinate[0], cursorCoordinate[1] - deltaOffset

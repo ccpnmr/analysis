@@ -144,8 +144,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.DataSource._metaclass.qualifiedName()
 
-    _referenceSpectrumHit = None
-    _snr = None
     #-----------------------------------------------------------------------------------------
 
     # 'local' definitions of constants; defining defs in SpectrumLib to prevent circular imports

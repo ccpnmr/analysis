@@ -353,7 +353,7 @@ lightDefaultSpectrumColours = OrderedDict([('#6B8E23', 'olivedrab'),
                                            ('#32CD32', 'limegreen'),
                                            ])
 
-# set of colours that have higher saturation
+# set of colours that have higher saturation + new CCPN colours
 brightColours = OrderedDict([('#000000', 'black'),
                              ('#696969', 'dimgray'),
                              ('#696969', 'dimgrey'),
@@ -460,9 +460,13 @@ brightColours = OrderedDict([('#000000', 'black'),
                              ('#FF69B4', 'hotpink'),
                              ('#DB7093', 'palevioletred'),
                              ('#DC143C', 'crimson'),
+                             ('#6A3B71', 'CCPNpurple'),
+                             ('#2F705C', 'CCPNgreen'),
+                             ('#BD9D46', 'CCPNyellow'),
+                             ('#0C4F83', 'CCPNblue'),
                              ])
 
-# all colours defined in the matplotlib colourspace
+# all colours defined in the matplotlib colourspace + new CCPN colours
 allColours = OrderedDict([('#000000', 'black'),
                           ('#696969', 'dimgray'),
                           ('#696969', 'dimgrey'),
@@ -610,7 +614,11 @@ allColours = OrderedDict([('#000000', 'black'),
                           ('#DB7093', 'palevioletred'),
                           ('#DC143C', 'crimson'),
                           ('#FFC0CB', 'pink'),
-                          ('#FFB6C1', 'lightpink')
+                          ('#FFB6C1', 'lightpink'),
+                          ('#6A3B71', 'CCPNpurple'),
+                          ('#2F705C', 'CCPNgreen'),
+                          ('#BD9D46', 'CCPNyellow'),
+                          ('#0C4F83', 'CCPNblue'),
                           ])
 
 # default color schemes

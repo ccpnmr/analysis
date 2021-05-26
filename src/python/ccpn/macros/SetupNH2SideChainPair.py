@@ -28,17 +28,18 @@ NAtom = 'ND/E1'
 H1Atom = 'HD/E21'
 H2Atom = 'HD/E22'
 
-peak1NNmrAtom = peak1.assignmentsByDimensions[NDim][0]
-peak1HNmrAtom = peak1.assignmentsByDimensions[HDim][0]
-peak1NmrRes = peak1NNmrAtom.nmrResidue
-peak2NmrRes = peak2.assignmentsByDimensions[NDim][0].nmrResidue
+with undoBlock():
+    peak1NNmrAtom = peak1.assignmentsByDimensions[NDim][0]
+    peak1HNmrAtom = peak1.assignmentsByDimensions[HDim][0]
+    peak1NmrRes = peak1NNmrAtom.nmrResidue
+    peak2NmrRes = peak2.assignmentsByDimensions[NDim][0].nmrResidue
 
-peak1NNmrAtom.rename(value = NAtom)
-peak1HNmrAtom.rename(value = H1Atom)
-peak1NmrRes.residueType = resType
+    peak1NNmrAtom.rename(value = NAtom)
+    peak1HNmrAtom.rename(value = H1Atom)
+    peak1NmrRes.residueType = resType
 
-peak2NmrRes.delete()
+    peak2NmrRes.delete()
 
-peak2HNmrAtom = peak1NmrRes.fetchNmrAtom(name=H2Atom)
-peak2.assignDimension(axisCode='H', value = peak2HNmrAtom)
-peak2.assignDimension(axisCode='N', value = peak1NNmrAtom)
+    peak2HNmrAtom = peak1NmrRes.fetchNmrAtom(name=H2Atom)
+    peak2.assignDimension(axisCode='H', value = peak2HNmrAtom)
+    peak2.assignDimension(axisCode='N', value = peak1NNmrAtom)

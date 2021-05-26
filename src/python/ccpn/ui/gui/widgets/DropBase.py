@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:51 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-26 19:50:50 +0100 (Wed, May 26, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -83,7 +83,7 @@ class DropBase:
 
     def dragEnterEvent(self, event):
 
-        self.checkForBadDragEvent(event)
+        # self.checkForBadDragEvent(event)
 
         parentModule = self._findModule()
 
@@ -271,29 +271,29 @@ class DropBase:
 
         return data
 
-    def checkForBadDragEvent(self, ev):
-
-        from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModule
-
-        parentModule = self._findModule()
-        if isinstance(ev.source(), CcpnModule) and self is not parentModule:
-            if not hasattr(self, 'badDragEnter'):
-                className = self.__class__.__name__
-
-                eventType = ''
-                if isinstance(ev, QtGui.QDragMoveEvent):
-                    eventType = 'move'
-                elif isinstance(ev, QtGui.QDragEnterEvent):
-                    eventType = 'enter'
-
-                getLogger().debug('received drag %s from %s which is not a module %i' % (eventType, className, id(self)))
-
-                self.badDragEnter = True
+    # def checkForBadDragEvent(self, ev):
+    #
+    #     from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModule
+    #
+    #     parentModule = self._findModule()
+    #     if isinstance(ev.source(), CcpnModule) and self is not parentModule:
+    #         if not hasattr(self, 'badDragEnter'):
+    #             className = self.__class__.__name__
+    #
+    #             eventType = ''
+    #             if isinstance(ev, QtGui.QDragMoveEvent):
+    #                 eventType = 'move'
+    #             elif isinstance(ev, QtGui.QDragEnterEvent):
+    #                 eventType = 'enter'
+    #
+    #             getLogger().debug('received drag %s from %s which is not a module %i' % (eventType, className, id(self)))
+    #
+    #             self.badDragEnter = True
 
     def dragMoveEvent(self, ev):
         """drag move event that propagates through all the widgets
         """
-        self.checkForBadDragEvent(ev)
+        # self.checkForBadDragEvent(ev)
 
         parentModule = self._findModule()
 

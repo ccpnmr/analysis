@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:56 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-26 19:50:50 +0100 (Wed, May 26, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -825,6 +825,9 @@ class NmrResidue(AbstractWrapperObject):
         creating new connected NmrChains as necessary"""
         apiResonanceGroup = self._wrappedData
         apiNmrChain = apiResonanceGroup.directNmrChain
+        if not apiNmrChain:
+            raise ValueError("Offset NmrResidue %s cannot be disconnected" % self)
+
         defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
 
         if apiNmrChain is None:

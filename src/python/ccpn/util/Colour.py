@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-12 18:01:39 +0000 (Fri, March 12, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-26 19:50:50 +0100 (Wed, May 26, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -353,7 +354,7 @@ lightDefaultSpectrumColours = OrderedDict([('#6B8E23', 'olivedrab'),
                                            ('#32CD32', 'limegreen'),
                                            ])
 
-# set of colours that have higher saturation
+# set of colours that have higher saturation + new CCPN colours
 brightColours = OrderedDict([('#000000', 'black'),
                              ('#696969', 'dimgray'),
                              ('#696969', 'dimgrey'),
@@ -460,9 +461,13 @@ brightColours = OrderedDict([('#000000', 'black'),
                              ('#FF69B4', 'hotpink'),
                              ('#DB7093', 'palevioletred'),
                              ('#DC143C', 'crimson'),
+                             ('#6A3B71', 'CCPNpurple'),
+                             ('#2F705C', 'CCPNgreen'),
+                             ('#BD9D46', 'CCPNyellow'),
+                             ('#0C4F83', 'CCPNblue'),
                              ])
 
-# all colours defined in the matplotlib colourspace
+# all colours defined in the matplotlib colourspace + new CCPN colours
 allColours = OrderedDict([('#000000', 'black'),
                           ('#696969', 'dimgray'),
                           ('#696969', 'dimgrey'),
@@ -610,7 +615,11 @@ allColours = OrderedDict([('#000000', 'black'),
                           ('#DB7093', 'palevioletred'),
                           ('#DC143C', 'crimson'),
                           ('#FFC0CB', 'pink'),
-                          ('#FFB6C1', 'lightpink')
+                          ('#FFB6C1', 'lightpink'),
+                          ('#6A3B71', 'CCPNpurple'),
+                          ('#2F705C', 'CCPNgreen'),
+                          ('#BD9D46', 'CCPNyellow'),
+                          ('#0C4F83', 'CCPNblue'),
                           ])
 
 # default color schemes

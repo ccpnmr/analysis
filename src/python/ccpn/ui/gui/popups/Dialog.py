@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-26 19:50:50 +0100 (Wed, May 26, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -68,6 +68,8 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
     CANCELBUTTON = QtWidgets.QDialogButtonBox.Cancel
     DISCARDBUTTON = QtWidgets.QDialogButtonBox.Discard
     APPLYBUTTON = QtWidgets.QDialogButtonBox.Apply
+    USERBUTTON = '_userButton'
+    USERBUTTON2 = '_userButton2'
     OKBUTTON = QtWidgets.QDialogButtonBox.Ok
     HELPBUTTON = QtWidgets.QDialogButtonBox.Help
     DEFAULTBUTTON = CLOSEBUTTON
@@ -291,12 +293,22 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                                enabledStates=enabled, visibleStates=visible)
 
     def setUserButton(self, callback=None, text=None,
-                      tipText='Apply changes to all spectra',
+                      tipText='User action',
                       icon='icons/orange-apply',
                       enabled=True, visible=True):
-        """Add an Apply button to the dialog box
+        """Add a User button to the dialog box
         """
-        return self._addButton(buttons=self.APPLYBUTTON, callbacks=callback,
+        return self._addButton(buttons=self.USERBUTTON, callbacks=callback,
+                               texts=text, tipTexts=tipText, icons=icon,
+                               enabledStates=enabled, visibleStates=visible)
+
+    def setUserButton2(self, callback=None, text=None,
+                      tipText='User action 2',
+                      icon='icons/orange-apply',
+                      enabled=True, visible=True):
+        """Add 2nd User button to the dialog box
+        """
+        return self._addButton(buttons=self.USERBUTTON2, callbacks=callback,
                                texts=text, tipTexts=tipText, icons=icon,
                                enabledStates=enabled, visibleStates=visible)
 
@@ -399,6 +411,33 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         """Help button signal comes here
         """
         pass
+
+    @contextmanager
+    def handleUserClicked(self):
+        """Context manager to handle user actions in dialogs.
+        """
+        # handle clicking of a user button
+        with handleDialogApply(self) as error:
+
+            # add item here to redraw items
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=self._refreshGLItems)
+
+            # pass control to the calling function -user can set errorValue to stop accept
+            yield error
+
+            # add item here to redraw items
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=self._refreshGLItems)
+
+            # redraw the items
+            self._refreshGLItems()
+
+        # check for any errors
+        if error.errorValue:
+            return False
+
+        self.accept()
 
     def _applyAllChanges(self, changes):
         """Execute the Apply/OK functions

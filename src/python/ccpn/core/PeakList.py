@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-23 14:36:21 +0100 (Fri, April 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-27 16:46:39 +0100 (Thu, May 27, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -109,6 +109,12 @@ class PeakList(PMIListABC):
                     plv._finaliseAction(action)
         except Exception as es:
             raise RuntimeError('Error _finalising peakListViews: %s' % str(es))
+
+    def delete(self):
+        """Delete peakList
+        """
+        # call the delete method from the parent class
+        self._parent._deletePeakList(self)
 
     #=========================================================================================
     # CCPN functions

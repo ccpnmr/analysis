@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-20 16:58:52 +0100 (Thu, May 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-27 16:46:39 +0100 (Thu, May 27, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2297,7 +2297,7 @@ assignmentTolerances
         setattr(self, attributeName, newValues)
 
     def _clone1D(self):
-        'Clone 1D spectrum to a new spectrum.'
+        """Clone 1D spectrum to a new spectrum."""
         #FIXME Crude approach / hack
 
         newSpectrum = self.project.createDummySpectrum(name=self.name, axisCodes=self.axisCodes)
@@ -2319,11 +2319,12 @@ assignmentTolerances
                 pass
         return newSpectrum
 
-    @deleteObject()
-    def _delete(self):
-        """Delete the spectrum wrapped data.
-        """
-        self._wrappedData.delete()
+    # in baseclass
+    # @deleteObject()
+    # def _delete(self):
+    #     """Delete the spectrum wrapped data.
+    #     """
+    #     self._wrappedData.delete()
 
     @cached.clear(_PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
     @cached.clear(_SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
@@ -2931,6 +2932,31 @@ assignmentTolerances
 
             for sd in specViews:
                 sd[0]._removeOrderedSpectrumViewIndex(sd[1])
+
+    def _deleteChild(self, child):
+        """Delete child object
+        child is Pid or V3 object
+        If child exists and is a valid child then delete otherwise log a warning
+        """
+        child = self.project.getByPid(child) if isinstance(child, str) else child
+
+        if child and child in self._getChildrenByClass(child):
+            # only delete objects that are valid children - calls private _delete
+            # so now infinite loop with baseclass delete
+            child._delete()
+        elif child:
+            getLogger().warning(f'{child} not deleted - not child of {self}')
+        else:
+            getLogger().warning(f'{child} not deleted')
+
+    def _deletePeakList(self, child):
+        """Delete child object and ensure that there always exists at least one peakList
+        """
+        with undoBlock():
+            self._deleteChild(child)
+            if not self.peakLists:
+                # if there are no peakLists then create another (there must always be one)
+                self.newPeakList()
 
     #=========================================================================================
     # CCPN functions

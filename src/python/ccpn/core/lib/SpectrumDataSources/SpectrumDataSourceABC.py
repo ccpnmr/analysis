@@ -148,7 +148,7 @@ def getDataFormats() -> OrderedDict:
     from ccpn.core.lib.SpectrumDataSources.NmrViewSpectrumDataSource import NmrViewSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.NmrPipeSpectrumDataSource import NmrPipeSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
-    return SpectrumDataSourceABC._dataFormats
+    return SpectrumDataSourceABC._spectrumDataFormats
 
 
 def getSpectrumDataSource(path, dataFormat):
@@ -182,6 +182,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
     ABC for NMR spectral data sources reading/writing
     """
 
+    classVersion = 1.0  # For json saving
+
     MAXDIM = Spectrum.MAXDIM  # currently set to 8
 
     X_AXIS = Spectrum.X_AXIS
@@ -203,8 +205,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
     C_DIM = Spectrum.C_DIM
     D_DIM = Spectrum.D_DIM
     E_DIM = Spectrum.E_DIM
-
-    dataType = numpy.float32   # numpy data format of the resulting slice, plane, region data
 
     #=========================================================================================
     # to be subclassed
@@ -229,16 +229,18 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
     # data formats
     #=========================================================================================
-    # A dict of registered dataFormat: filled by _registerFormat classmethod, called once after
-    # each definition of a new derived class (e.g. Hdf5SpectrumDataSource)
-    _dataFormats = OrderedDict()
+    dataType = numpy.float32   # numpy data format of the resulting slice, plane, region data
+
+    # A dict of registered spectrum data formats: filled by _registerFormat classmethod, called
+    # once after each definition of a new derived class (e.g. Hdf5SpectrumDataSource)
+    _spectrumDataFormats = OrderedDict()
 
     @classmethod
     def _registerFormat(cls):
         "register cls.dataFormat"
-        if cls.dataFormat in SpectrumDataSourceABC._dataFormats:
+        if cls.dataFormat in SpectrumDataSourceABC._spectrumDataFormats:
             raise RuntimeError('dataFormat "%s" was already registered' % cls.dataFormat)
-        SpectrumDataSourceABC._dataFormats[cls.dataFormat] = cls
+        SpectrumDataSourceABC._spectrumDataFormats[cls.dataFormat] = cls
 
     #=========================================================================================
     # parameter definitions and mappings onto the Spectrum class

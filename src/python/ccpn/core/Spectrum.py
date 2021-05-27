@@ -69,6 +69,7 @@ from functools import partial
 from itertools import permutations
 import numpy
 
+from ccpn.util.Path import aPath
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.api.ccp.general import DataLocation
 # Dimensions
@@ -87,6 +88,8 @@ from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreS
     ccpNmrV3CoreSetter, inactivity
 from ccpn.core.lib.DataStore import DataStore
 from ccpn.core.lib.Cache import cached
+
+from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY
 
 from ccpn.util.Constants import SCALETOLERANCE
 from ccpn.util.Common import isIterable, _getObjectsByPids
@@ -684,16 +687,14 @@ class Spectrum(AbstractWrapperObject):
             self._clearCache()
             return
 
-        oldPath = self.dataStore.path
-        self.dataStore.path = value
-        if not self.dataStore.exists():
-            self.dataStore.errorMessage()
-            self.dataStore.path = oldPath
+        newDataStore = DataStore.newFromPath(path=value, dataFormat=self.dataFormat)
+        if not newDataStore.exists():
+            newDataStore.errorMessage()
             raise ValueError('Setting Spectrum.filePath to "%s"' % value)
+        newDataStore.spectrum = self
 
-        newDataSource = self._getDataSource(self.dataStore, reportWarnings=True)
+        newDataSource = self._getDataSource(newDataStore, reportWarnings=True)
         if newDataSource is None:
-            self.dataStore.path = oldPath
             raise ValueError('Spectrum.filePath: incompatible "%s"' % value)
 
         else:
@@ -704,19 +705,19 @@ class Spectrum(AbstractWrapperObject):
                                  (newDataSource.dataFormat, value))
 
             if self.dimensionCount != newDataSource.dimensionCount:
-                self.dataStore.path = oldPath
                 raise ValueError('Spectrum.filePath: incompatible dimensionCount = %s of "%s"' %
                                  (newDataSource.dimensionCount, value))
 
             for idx, np in enumerate(self.pointCounts):
                 if newDataSource.pointCounts[idx] != np:
-                    self.dataStore.path = oldPath
                     raise ValueError('Spectrum.filePath: incompatible pointsCount[%s] = %s of "%s"' %
                                      (idx, newDataSource.pointCounts[idx], value))
-
+        # we found a valid new file
         self._dataSource = newDataSource
-        self.dataStore._saveInternal()
+        self._dataStore = newDataStore
+        self._dataStore._saveInternal()
         self._clearCache()
+        self._saveSpectrumMetaData()
 
     @property
     def path(self):
@@ -2465,7 +2466,7 @@ class Spectrum(AbstractWrapperObject):
             att, val = i
             try:
                 setattr(newSpectrum, att, val)
-            except Exception as e:
+            except AttributeError:
                 # print(e, att)
                 pass
         return newSpectrum
@@ -2677,8 +2678,13 @@ class Spectrum(AbstractWrapperObject):
         spectrum = super()._restoreObject(project, apiObj)
 
         try:
+            # Restore the dataStore info
             spectrum._dataStore = DataStore()._importFromSpectrum(spectrum)
+            # Restore the dataSource info
             spectrum._dataSource = spectrum._getDataSource(spectrum._dataStore, reportWarnings=True)
+
+            # save the spectrum metadata
+            spectrum._saveSpectrumMetaData()
 
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid data source for %s (%s)' % (spectrum, es))
@@ -2692,13 +2698,44 @@ class Spectrum(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Spectrum, changing its name and Pid.
         """
-        return self._rename(value)
+        self._deleteSpectrumMetaData()
+        result = self._rename(value)
+        self._saveSpectrumMetaData()
+        return result
+
+    def _saveSpectrumMetaData(self):
+        """Save the spectrum metadata in the project/state/spectra for optional future reference
+        """
+        _tmpPath = aPath(self.project.path).fetchDir(CCPN_STATE_DIRECTORY, self._pluralLinkName)
+        if self._dataStore is not None:
+            self._dataStore.save(_tmpPath / self.name + '_dataStore.json')
+        if self._dataSource is not None:
+            self._dataSource.save(_tmpPath / self.name + '_dataSource.json')
+
+    def _deleteSpectrumMetaData(self):
+        """Delete the spectrum metadata in the project/state/spectra
+        """
+        _tmpPath = aPath(self.project.path).joinpath(CCPN_STATE_DIRECTORY, self._pluralLinkName)
+        if self._dataStore is not None:
+            _path = _tmpPath / self.name + '_dataStore.json'
+            if _path.exists():
+                _path.removeFile()
+        if self._dataSource is not None:
+            _path = _tmpPath / self.name + '_dataSource.json'
+            if _path.exists():
+                _path.removeFile()
 
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated spectrumViews instances
         """
         if not super()._finaliseAction(action):
             return
+
+        if action == 'create':
+            self._saveSpectrumMetaData()
+
+        if action == 'delete':
+            self._deleteSpectrumMetaData()
 
         # notify peak/integral/multiplet list
         if action in ['create', 'delete']:
@@ -2754,6 +2791,8 @@ class Spectrum(AbstractWrapperObject):
     def delete(self):
         """Delete Spectrum"""
         with undoBlock():
+
+            # self._deleteSpectrumMetaData()
 
             self._clearCache()
             if self.dataSource is not None:

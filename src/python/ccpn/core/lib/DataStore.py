@@ -259,7 +259,7 @@ class DataStore(CcpNmrJson):
 
     @classmethod
     def newFromPath(cls, path, autoRedirect=False, autoVersioning=False,
-                         appendToName=None, withSuffix=None):
+                         appendToName=None, withSuffix=None, dataFormat=None):
         """Create and return a new instance from path; optionally append to name and set suffix
         """
         _p = Path(path)
@@ -274,6 +274,9 @@ class DataStore(CcpNmrJson):
 
         instance = cls(autoRedirect=autoRedirect, autoVersioning=autoVersioning)
         instance.path = _p
+
+        instance.dataFormat= dataFormat
+
         return instance
 
     def hasPathDefined(self):

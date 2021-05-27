@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-20 17:01:27 +0100 (Thu, May 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-27 17:07:38 +0100 (Thu, May 27, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -929,12 +929,13 @@ class Peak(AbstractWrapperObject):
                         cs._finaliseAction(action)
             setattr(self, RECALCULATESHIFTVALUE, None)
 
-    @deleteObject()
-    def _delete(self):
-        """Delete object, with all contained objects and underlying data.
-        """
-        self.deleteAllNotifiers()
-        self._wrappedData.delete()
+    # in baseclass
+    # @deleteObject()
+    # def _delete(self):
+    #     """Delete object, with all contained objects and underlying data.
+    #     """
+    #     self.deleteAllNotifiers()
+    #     self._wrappedData.delete()
 
     def delete(self):
         """Delete a peak."""

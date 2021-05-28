@@ -141,8 +141,10 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
                 dataSetKwds.setdefault('compression', self.defaultCompressionMode)
                 dataSetKwds.setdefault('fletcher32', False)
 
-            self.fp.create_dataset(SPECTRUM_DATASET_NAME, self.pointCounts[::-1], dtype=self.dataType,
-                                   chunks=True, **dataSetKwds)
+            self.fp.create_dataset(SPECTRUM_DATASET_NAME, self.pointCounts[::-1],
+                                   dtype=self.dataType, chunks=True,
+                                   track_times=False,  # to assure same hash after opening/storing
+                                   **dataSetKwds)
             self.blockSizes = tuple(self.spectrumData.chunks[::-1])
             self.writeParameters()
 

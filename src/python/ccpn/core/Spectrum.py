@@ -2452,7 +2452,7 @@ class Spectrum(AbstractWrapperObject):
         'Clone 1D spectrum to a new spectrum.'
         #FIXME Crude approach / hack
 
-        newSpectrum = project.newEmptySpectrum(isotopeCodes=self.isotopeCodes, name=self.name)
+        newSpectrum = self.project.newEmptySpectrum(isotopeCodes=self.isotopeCodes, name=self.name)
         newSpectrum._positions = self.positions
         newSpectrum._intensities = self.intensities
         for peakList in self.peakLists:

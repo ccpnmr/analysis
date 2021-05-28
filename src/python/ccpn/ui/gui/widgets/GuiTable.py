@@ -36,6 +36,7 @@ from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT, \
     DATAFRAME_INDEX, DATAFRAME_PID
 
+from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
@@ -1040,13 +1041,13 @@ GuiTable::item::selected {
             return visCol
 
     def _setContextMenu(self, enableExport=True, enableDelete=True):
-        self.tableMenu = QtWidgets.QMenu()
+        self.tableMenu = Menu('', self, isFloatWidget=True)
         setWidgetFont(self.tableMenu, )
         self.tableMenu.addAction("Copy clicked cell value", self._copySelectedCell)
         if enableExport:
             self.tableMenu.addAction("Export Visible Table", partial(self.exportTableDialog, exportAll=False))
         if enableExport:
-            self.tableMenu.addAction("Export All", partial(self.exportTableDialog, exportAll=True))
+            self.tableMenu.addAction("Export All Columns", partial(self.exportTableDialog, exportAll=True))
         if enableDelete:
             self.tableMenu.addAction("Delete", self.deleteObjFromTable)
 

@@ -74,6 +74,32 @@ class Menu(QtWidgets.QMenu, Base):
         QtWidgets.QMenu.addMenu(self, menu)
         return menu
 
+    def getItems(self):
+        dd = {i.text(): i for i in self.actions()}
+        return dd
+
+    def getActionByName(self, name):
+        """
+        Given a name return the menu action
+        """
+        return self.getItems().get(name, None)
+
+    def moveActionBelowName(self, action, targetActionName):
+        """
+        Move a action below a pre-existing name
+        """
+        targetAction = self.getActionByName(targetActionName)
+        if targetAction:
+            self.insertAction(action, targetAction)
+
+    def moveActionAboveName(self, action, targetActionName):
+        """
+        Move a action above a pre-existing name
+        """
+        targetAction = self.getActionByName(targetActionName)
+        if targetAction:
+            self.insertAction(targetAction, action)
+
 
 class MenuBar(QtWidgets.QMenuBar):
     def __init__(self, parent):

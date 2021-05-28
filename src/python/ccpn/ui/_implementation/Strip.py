@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-24 19:40:02 +0100 (Mon, May 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-28 16:26:13 +0100 (Fri, May 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -374,8 +374,8 @@ class Strip(AbstractWrapperObject):
         return result
 
     @logCommand(get='self')
-    def peakPickPosition(self, ppmPositions: List[float]) -> Tuple[Tuple[Peak, ...], Tuple[PeakList, ...]]:
-        """Pick peak at position for all spectra currently displayed in strip.
+    def createPeak(self, ppmPositions: List[float]) -> Tuple[Tuple[Peak, ...], Tuple[PeakList, ...]]:
+        """Create peak at position for all spectra currently displayed in strip.
         """
         result = []
         peakLists = []
@@ -397,7 +397,7 @@ class Strip(AbstractWrapperObject):
                     peakList = thisPeakListView.peakList
 
                     # pick the peak in this peakList
-                    pk = spectrum.pickPeak(peakList, **axisDict)
+                    pk = spectrum.createPeak(peakList, **axisDict)
                     if pk:
                         result.append(pk)
                         peakLists.append(peakList)
@@ -408,12 +408,13 @@ class Strip(AbstractWrapperObject):
         return tuple(result), tuple(peakLists)
 
     @logCommand(get='self')
-    def peakPickRegion(self, ppmRegions: List[List[float]]) -> Tuple[Peak, ...]:
+    def pickPeaks(self, ppmRegions: List[List[float]]) -> Tuple[Peak, ...]:
         """Peak pick all spectra currently displayed in strip in selectedRegion.
         """
         # selectedRegion is rounded before-hand to 3 dp.
         result = []
 
+        # get settings from preferences
         minDropFactor = self.application.preferences.general.peakDropFactor
         fitMethod = self.application.preferences.general.peakFittingMethod
 
@@ -425,30 +426,36 @@ class Strip(AbstractWrapperObject):
             for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
 
                 spectrum = spectrumView.spectrum
+
                 # get the list of visible peakLists
-                validPeakListViews = (pp for pp in spectrumView.peakListViews if pp.isVisible())
+                validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isVisible()]
+                if not validPeakListViews:
+                    continue
 
-                # apply the peak picker
-                from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
+                myPeakPicker = spectrum.peakPicker
+                if not myPeakPicker:
+                    getLogger().warning(f'peakPicker not defined for {spectrum}')
+                    continue
 
-                myPeakPicker = PeakPickerNd(spectrum=spectrum)
+                # get parameters to apply to peak picker
+                positiveThreshold = spectrum.positiveContourBase if spectrumView.displayPositiveContours else None
+                negativeThreshold = spectrum.negativeContourBase if spectrumView.displayNegativeContours else None
+
+                # set any additional parameters
                 myPeakPicker.setParameters(dropFactor=minDropFactor,
-                                           positiveThreshold=spectrum.positiveContourBase if spectrumView.displayPositiveContours else None,
-                                           negativeThreshold=spectrum.negativeContourBase if spectrumView.displayNegativeContours else None,
                                            fitMethod=fitMethod
                                            )
-
-                spectrum.setPeakPicker(myPeakPicker)
 
                 for thisPeakListView in validPeakListViews:
                     peakList = thisPeakListView.peakList
 
                     # pick the peak in this peakList
-                    newPeaks = spectrum.pickPeaks(peakList, **axisDict)
+                    newPeaks = spectrum.pickPeaks(peakList, positiveThreshold, negativeThreshold, **axisDict)
                     if newPeaks:
                         result.extend(newPeaks)
 
             return tuple(result)
+
 
 @newObject(Strip)
 def _newStrip(self):

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-24 19:34:08 +0100 (Mon, May 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-28 16:26:13 +0100 (Fri, May 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,11 +29,16 @@ __date__ = "$Date: 2021-01-13 10:28:41 +0000 (Wed, Jan 13, 2021) $"
 #=========================================================================================
 
 from collections import OrderedDict
-
+from copy import deepcopy
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.lib.peakUtils import peakParabolicInterpolation
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 from ccpn.util.Logging import getLogger
+
+
+PEAKPICKERSTORE = 'peakPickerStore'
+PEAKPICKER = 'peakPicker'
+PEAKPICKERPARAMETERS = 'peakPickerParameters'
 
 
 class SimplePeak(object):
@@ -74,6 +79,22 @@ class PeakPickerABC(object):
     defaultPointExtension = 1  # points to extend the region to pick on either side
     onlyFor1D = False
 
+    # list of CCPN attributes that need to be restored when the spectrum is loaded
+    _attributes = ['dimensionCount',
+                   'pointExtension',
+                   'autoFit',
+                   'sliceTuples',
+                   'dropFactor',
+                   'fitMethod',
+                   'positiveThreshold',
+                   'negativeThreshold',
+                   ]
+
+    # list of user peakPicker attributes that need to be stored/restored
+    # this cannot contain items that are not JSON serialisable
+    # call self._storeAttributes at the end of methods that change any values
+    attributes = []
+
     #=========================================================================================
     # data formats
     #=========================================================================================
@@ -85,8 +106,42 @@ class PeakPickerABC(object):
     def register(cls):
         """register cls.peakPickerType"""
         if cls.peakPickerType in PeakPickerABC._peakPickers:
-            raise RuntimeError('PeakPicker "%s" was already registered' % cls.peakPickerType)
+            getLogger().debug(f'{cls.peakPickerType} already registered')
+            return
+            # raise RuntimeError('PeakPicker "%s" was already registered' % cls.peakPickerType)
         PeakPickerABC._peakPickers[cls.peakPickerType] = cls
+        getLogger().info(f'Registering peakPicker class {cls.peakPickerType}')
+
+    @classmethod
+    def getPeakPickerClass(cls, peakPickerType):
+        """Return classtype if PeakPicker defined by peakPickerType has been registered
+
+        :param peakPickerType: type str; reference to peakPickerType of peakPicker class
+        :return: class referenced by peakPickerType if it has been registered otherwise None
+        """
+        if not isinstance(peakPickerType, str):
+            raise ValueError(f'{peakPickerType} must be of type str')
+        return PeakPickerABC._peakPickers.get(peakPickerType)
+
+    @classmethod
+    def isRegistered(cls, peakPickerType):
+        """Return True if a PeakPicker class if type peakPickerType is registered
+
+        :param peakPickerType: type str; reference to peakPickerType of peakPicker class
+        :return: True if class referenced by peakPickerType if it has been registered
+        """
+        return cls.getPeakPickerClass(peakPickerType) is not None
+
+    @classmethod
+    def createPeakPicker(cls, peakPickerType, spectrum, *args, **kwds):
+        """Return instance of class if PeakPicker defined by peakPickerType has been registered
+
+        :param peakPickerType: type str; reference to peakPickerType of peakPicker class
+        :return: new instance of class if registered else None
+        """
+        klass = cls.getPeakPickerClass(peakPickerType)
+        if klass:
+            return klass(spectrum, *args, **kwds)
 
     #=========================================================================================
 
@@ -112,6 +167,12 @@ class PeakPickerABC(object):
         self.lastPickedPeaks = None
         self.sliceTuples = None
 
+        # default parameters for all peak pickers
+        self.dropFactor = None
+        self.fitMethod = None
+        self.positiveThreshold = None
+        self.negativeThreshold = None
+
     def setParameters(self, **parameters):
         """
         Set parameters as attributes of self
@@ -120,6 +181,37 @@ class PeakPickerABC(object):
         """
         for key, value in parameters.items():
             setattr(self, key, value)
+
+        self._storeAttributes()
+
+    def _storePeakPickerType(self):
+        """Store peakPickerType attribute that is required when a project is reloaded
+        """
+        self.spectrum.setParameter(PEAKPICKERSTORE, PEAKPICKER, self.peakPickerType)
+
+    def _storeAttributes(self):
+        """Store important peakPicker attributes that need restoring when a project is reloaded
+        User attributes are listed in self.attributes at the head of the peakPicker class
+        """
+        if self.spectrum is None:
+            raise RuntimeError('%s._storeAttributes: spectrum not defined' % self.__class__.__name__)
+
+        values = {k: v
+                  for k, v in self.__dict__.items()
+                  if k in (self._attributes + self.attributes)}
+        values = deepcopy(values)
+        # could use JSON here
+        self.spectrum.setParameter(PEAKPICKERSTORE, PEAKPICKERPARAMETERS, values)
+        self.spectrum.setParameter(PEAKPICKERSTORE, PEAKPICKER, self.peakPickerType)
+
+    def _clearAttributes(self):
+        """Remove the peak picker settings from the spectrum
+        """
+        if self.spectrum is None:
+            raise RuntimeError('%s._clearAttributes: spectrum not defined' % self.__class__.__name__)
+
+        self.spectrum.setParameter(PEAKPICKERSTORE, PEAKPICKER, None)
+        self.spectrum.setParameter(PEAKPICKERSTORE, PEAKPICKERPARAMETERS, None)
 
     def findPeaks(self, data) -> list:
         """find the peaks in data (type numpy-array) and return as a list of SimplePeak instances
@@ -140,7 +232,7 @@ class PeakPickerABC(object):
         """
         raise NotImplementedError('%s.findPeaks should be implemented' % self.__class__.__name__)
 
-    def pickPeaks(self, axisDict, peakList) -> list:
+    def pickPeaks(self, axisDict, peakList, positiveThreshold=None, negativeThreshold=None) -> list:
         """
         :param axisDict: Axis limits  are passed in as a dict of (axisCode, tupleLimit) key, value
                          pairs with the tupleLimit supplied as (start,stop) axis limits in ppm
@@ -154,6 +246,10 @@ class PeakPickerABC(object):
         if not self.spectrum.hasValidPath():
             raise RuntimeError('%s.pickPeaks: spectrum %s, No valid spectral datasource defined' %
                                (self.__class__.__name__, self.spectrum))
+
+        # store the threshold values
+        self.positiveThreshold = positiveThreshold
+        self.negativeThreshold = negativeThreshold
 
         self.sliceTuples = self.spectrum._axisDictToSliceTuples(axisDict)
 
@@ -175,6 +271,7 @@ class PeakPickerABC(object):
             self.lastPickedPeaks = peaks
             corePeaks = self._createCorePeaks(peaks, peakList)
 
+        self._storeAttributes()
         return corePeaks
 
     def _createCorePeaks(self, peaks, peakList) -> list:
@@ -197,10 +294,13 @@ class PeakPickerABC(object):
                 if pk.height is None:
                     # height was not defined; get the interpolated value from the data
                     pk.height = self.spectrum.dataSource.getPointValue(pointPositions)
-                cPeak = peakList.newPeak(pointPositions=pointPositions, height=pk.height, volume=pk.volume, pointLineWidths=pk.lineWidths)
-                if self.autoFit:
-                    peakParabolicInterpolation(cPeak, update=True)
-                corePeaks.append(cPeak)
+
+                if (self.positiveThreshold and pk.height > self.positiveThreshold) or \
+                        (self.negativeThreshold and pk.height < self.negativeThreshold):
+                    cPeak = peakList.newPeak(pointPositions=pointPositions, height=pk.height, volume=pk.volume, pointLineWidths=pk.lineWidths)
+                    if self.autoFit:
+                        peakParabolicInterpolation(cPeak, update=True)
+                    corePeaks.append(cPeak)
 
         return corePeaks
 

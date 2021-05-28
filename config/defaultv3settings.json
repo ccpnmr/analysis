@@ -104,7 +104,9 @@
         "showTipOfTheDay"                      : false,
         "firstTimeShowKeyConcepts"             : true,
         "seenTipsOfTheDay"                     : [],
-        "aliasLabelsEnabled"                   : true
+        "aliasLabelsEnabled"                   : true,
+        "peakPicker1d"                         : null,
+        "peakPickerNd"                         : null
     },
     "proxySettings"    : {
         "verifySSL"        : true,

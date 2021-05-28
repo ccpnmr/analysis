@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-26 19:50:50 +0100 (Wed, May 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-28 16:26:14 +0100 (Fri, May 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -638,149 +638,149 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.setYRegion(float(self._maxY), float(self._minY))
             self.update()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # def _buildSpectrumSetting(self, spectrumView, stackCount=0):
-    #     # if spectrumView.spectrum.headerSize == 0:
-    #     #     return
-    #
-    #     self._spectrumSettings[spectrumView] = {}
-    #
-    #     self._spectrumValues = spectrumView.getVisibleState()
-    #
-    #     # set defaults for undefined spectra
-    #     if not self._spectrumValues[0].pointCount:
-    #         dx = -1.0 if self.INVERTXAXIS else -1.0
-    #         fxMax, fxMin = 1.0, -1.0
-    #         dxAF = fxMax - fxMin
-    #         xScale = dx * dxAF
-    #
-    #         dy = -1.0 if self.INVERTYAXIS else -1.0
-    #         fyMax, fyMin = 1.0, -1.0
-    #         dyAF = fyMax - fyMin
-    #         yScale = dy * dyAF
-    #         xAliasingIndex = (0, 0)
-    #         yAliasingIndex = (0, 0)
-    #         xFoldingMode = yFoldingMode = None
-    #
-    #         self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fxMax - fxMin))
-    #         self._maxXRange = max(self._maxXRange, (fxMax - fxMin))
-    #         self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fyMax - fyMin))
-    #         self._maxYRange = max(self._maxYRange, (fyMax - fyMin))
-    #
-    #     else:
-    #
-    #         # get the bounding box of the spectra
-    #         dx = -1.0 if self.INVERTXAXIS else -1.0  # self.sign(self.axisR - self.axisL)
-    #         fxMax, fxMin = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
-    #         xAliasingIndex = self._spectrumValues[0].aliasingIndex
-    #         xFoldingMode = self._spectrumValues[0].foldingMode
-    #
-    #         # check tolerances
-    #         if not self._widthsChangedEnough((fxMax, 0.0), (fxMin, 0.0), tol=1e-10):
-    #             fxMax, fxMin = 1.0, -1.0
-    #
-    #         dxAF = fxMax - fxMin
-    #         xScale = dx * dxAF / self._spectrumValues[0].pointCount
-    #
-    #         if spectrumView.spectrum.dimensionCount > 1:
-    #             # Nd spectra
-    #             dy = -1.0 if self.INVERTYAXIS else -1.0  # self.sign(self.axisT - self.axisB)
-    #             fyMax, fyMin = self._spectrumValues[1].maxSpectrumFrequency, self._spectrumValues[1].minSpectrumFrequency
-    #             yAliasingIndex = self._spectrumValues[1].aliasingIndex
-    #             yFoldingMode = self._spectrumValues[1].foldingMode
-    #
-    #             # check tolerances
-    #             if not self._widthsChangedEnough((fyMax, 0.0), (fyMin, 0.0), tol=1e-10):
-    #                 fyMax, fyMin = 1.0, -1.0
-    #
-    #             dyAF = fyMax - fyMin
-    #             yScale = dy * dyAF / self._spectrumValues[1].pointCount
-    #
-    #             # set to nD limits to twice the width of the spectrum and a few data points
-    #             self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fxMax - fxMin) / self._spectrumValues[0].pointCount)
-    #             self._maxXRange = max(self._maxXRange, (fxMax - fxMin))
-    #             self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fyMax - fyMin) / self._spectrumValues[1].pointCount)
-    #             self._maxYRange = max(self._maxYRange, (fyMax - fyMin))
-    #
-    #         else:
-    #             dy = -1.0 if self.INVERTYAXIS else -1.0  # dy = self.sign(self.axisT - self.axisB)
-    #
-    #             if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:
-    #                 fyMax = float(np.max(spectrumView.spectrum.intensities))
-    #                 fyMin = float(np.min(spectrumView.spectrum.intensities))
-    #             else:
-    #                 fyMax, fyMin = 0.0, 0.0
-    #             yAliasingIndex = (0, 0)
-    #             yFoldingMode = None
-    #
-    #             # check tolerances
-    #             if not self._widthsChangedEnough((fyMax, 0.0), (fyMin, 0.0), tol=1e-10):
-    #                 fyMax, fyMin = 1.0, -1.0
-    #
-    #             dyAF = fyMax - fyMin
-    #             yScale = dy * dyAF / 1.0
-    #
-    #             # set to 1D limits to twice the width of the spectrum and the intensity limit
-    #             self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fxMax - fxMin) / max(self._spectrumValues[0].pointCount, self.SPECTRUMXZOOM))
-    #             self._maxXRange = max(self._maxXRange, (fxMax - fxMin))
-    #             # self._minYRange = min(self._minYRange, 3.0 * (fyMax - fyMin) / self.SPECTRUMYZOOM)
-    #             self._minYRange = min(self._minYRange, self._intensityLimit)
-    #             self._maxYRange = max(self._maxYRange, (fyMax - fyMin))
-    #
-    #             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
-    #
-    #             # if self._stackingMode:
-    #             stX = stackCount * self._stackingValue[0]
-    #             stY = stackCount * self._stackingValue[1]
-    #             # stackCount += 1
-    #             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
-    #                                                                                          0.0, 1.0, 0.0, 0.0,
-    #                                                                                          0.0, 0.0, 1.0, 0.0,
-    #                                                                                          stX, stY, 0.0, 1.0]
-    #             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET] = np.array((stX, stY), dtype=np.float32)
-    #
-    #     self._rangeXDefined = True
-    #     self._rangeYDefined = True
-    #
-    #     # create modelview matrix for the spectrum to be drawn
-    #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
-    #
-    #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
-    #                                                                           0.0, yScale, 0.0, 0.0,
-    #                                                                           0.0, 0.0, 1.0, 0.0,
-    #                                                                           fxMax, fyMax, 0.0, 1.0]
-    #     # setup information for the horizontal/vertical traces
-    #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XLIMITS] = (fxMin, fxMax)
-    #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YLIMITS] = (fyMin, fyMax)
-    #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_AF] = (dxAF, dyAF)
-    #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_SCALE] = (xScale, yScale)
-    #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_SPINNINGRATE] = spectrumView.spectrum.spinningRate
-    #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_ALIASINGINDEX] = (xAliasingIndex, yAliasingIndex)
-    #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_FOLDINGMODE] = (xFoldingMode, yFoldingMode)
-    #
-    #     indices = getAxisCodeMatchIndices(self.strip.axisCodes, spectrumView.spectrum.axisCodes)
-    #     # only need the axes for this spectrum
-    #     indices = indices[:spectrumView.spectrum.dimensionCount]
-    #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
-    #
-    #     if len(self._spectrumValues) > 2:
-    #         # store a list for the extra dimensions - should only be one per spectrumDisplay really
-    #         # needed so that the planeDepth is calculated correctly for visible spectra
-    #         vPP = ()
-    #         for dim in range(2, len(self._spectrumValues)):
-    #             specVal = self._spectrumValues[dim]
-    #             vPP = vPP + (specVal.valuePerPoint,)
-    #
-    #         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = vPP
-    #
-    #     else:
-    #         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = None
-    #
-    #     self._maxX = max(self._maxX, fxMax)
-    #     self._minX = min(self._minX, fxMin)
-    #     self._maxY = max(self._maxY, fyMax)
-    #     self._minY = min(self._minY, fyMin)
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # def _buildSpectrumSetting(self, spectrumView, stackCount=0):
+        #     # if spectrumView.spectrum.headerSize == 0:
+        #     #     return
+        #
+        #     self._spectrumSettings[spectrumView] = {}
+        #
+        #     self._spectrumValues = spectrumView.getVisibleState()
+        #
+        #     # set defaults for undefined spectra
+        #     if not self._spectrumValues[0].pointCount:
+        #         dx = -1.0 if self.INVERTXAXIS else -1.0
+        #         fxMax, fxMin = 1.0, -1.0
+        #         dxAF = fxMax - fxMin
+        #         xScale = dx * dxAF
+        #
+        #         dy = -1.0 if self.INVERTYAXIS else -1.0
+        #         fyMax, fyMin = 1.0, -1.0
+        #         dyAF = fyMax - fyMin
+        #         yScale = dy * dyAF
+        #         xAliasingIndex = (0, 0)
+        #         yAliasingIndex = (0, 0)
+        #         xFoldingMode = yFoldingMode = None
+        #
+        #         self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fxMax - fxMin))
+        #         self._maxXRange = max(self._maxXRange, (fxMax - fxMin))
+        #         self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fyMax - fyMin))
+        #         self._maxYRange = max(self._maxYRange, (fyMax - fyMin))
+        #
+        #     else:
+        #
+        #         # get the bounding box of the spectra
+        #         dx = -1.0 if self.INVERTXAXIS else -1.0  # self.sign(self.axisR - self.axisL)
+        #         fxMax, fxMin = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
+        #         xAliasingIndex = self._spectrumValues[0].aliasingIndex
+        #         xFoldingMode = self._spectrumValues[0].foldingMode
+        #
+        #         # check tolerances
+        #         if not self._widthsChangedEnough((fxMax, 0.0), (fxMin, 0.0), tol=1e-10):
+        #             fxMax, fxMin = 1.0, -1.0
+        #
+        #         dxAF = fxMax - fxMin
+        #         xScale = dx * dxAF / self._spectrumValues[0].pointCount
+        #
+        #         if spectrumView.spectrum.dimensionCount > 1:
+        #             # Nd spectra
+        #             dy = -1.0 if self.INVERTYAXIS else -1.0  # self.sign(self.axisT - self.axisB)
+        #             fyMax, fyMin = self._spectrumValues[1].maxSpectrumFrequency, self._spectrumValues[1].minSpectrumFrequency
+        #             yAliasingIndex = self._spectrumValues[1].aliasingIndex
+        #             yFoldingMode = self._spectrumValues[1].foldingMode
+        #
+        #             # check tolerances
+        #             if not self._widthsChangedEnough((fyMax, 0.0), (fyMin, 0.0), tol=1e-10):
+        #                 fyMax, fyMin = 1.0, -1.0
+        #
+        #             dyAF = fyMax - fyMin
+        #             yScale = dy * dyAF / self._spectrumValues[1].pointCount
+        #
+        #             # set to nD limits to twice the width of the spectrum and a few data points
+        #             self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fxMax - fxMin) / self._spectrumValues[0].pointCount)
+        #             self._maxXRange = max(self._maxXRange, (fxMax - fxMin))
+        #             self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fyMax - fyMin) / self._spectrumValues[1].pointCount)
+        #             self._maxYRange = max(self._maxYRange, (fyMax - fyMin))
+        #
+        #         else:
+        #             dy = -1.0 if self.INVERTYAXIS else -1.0  # dy = self.sign(self.axisT - self.axisB)
+        #
+        #             if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:
+        #                 fyMax = float(np.max(spectrumView.spectrum.intensities))
+        #                 fyMin = float(np.min(spectrumView.spectrum.intensities))
+        #             else:
+        #                 fyMax, fyMin = 0.0, 0.0
+        #             yAliasingIndex = (0, 0)
+        #             yFoldingMode = None
+        #
+        #             # check tolerances
+        #             if not self._widthsChangedEnough((fyMax, 0.0), (fyMin, 0.0), tol=1e-10):
+        #                 fyMax, fyMin = 1.0, -1.0
+        #
+        #             dyAF = fyMax - fyMin
+        #             yScale = dy * dyAF / 1.0
+        #
+        #             # set to 1D limits to twice the width of the spectrum and the intensity limit
+        #             self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fxMax - fxMin) / max(self._spectrumValues[0].pointCount, self.SPECTRUMXZOOM))
+        #             self._maxXRange = max(self._maxXRange, (fxMax - fxMin))
+        #             # self._minYRange = min(self._minYRange, 3.0 * (fyMax - fyMin) / self.SPECTRUMYZOOM)
+        #             self._minYRange = min(self._minYRange, self._intensityLimit)
+        #             self._maxYRange = max(self._maxYRange, (fyMax - fyMin))
+        #
+        #             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
+        #
+        #             # if self._stackingMode:
+        #             stX = stackCount * self._stackingValue[0]
+        #             stY = stackCount * self._stackingValue[1]
+        #             # stackCount += 1
+        #             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
+        #                                                                                          0.0, 1.0, 0.0, 0.0,
+        #                                                                                          0.0, 0.0, 1.0, 0.0,
+        #                                                                                          stX, stY, 0.0, 1.0]
+        #             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIXOFFSET] = np.array((stX, stY), dtype=np.float32)
+        #
+        #     self._rangeXDefined = True
+        #     self._rangeYDefined = True
+        #
+        #     # create modelview matrix for the spectrum to be drawn
+        #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
+        #
+        #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
+        #                                                                           0.0, yScale, 0.0, 0.0,
+        #                                                                           0.0, 0.0, 1.0, 0.0,
+        #                                                                           fxMax, fyMax, 0.0, 1.0]
+        #     # setup information for the horizontal/vertical traces
+        #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XLIMITS] = (fxMin, fxMax)
+        #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YLIMITS] = (fyMin, fyMax)
+        #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_AF] = (dxAF, dyAF)
+        #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_SCALE] = (xScale, yScale)
+        #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_SPINNINGRATE] = spectrumView.spectrum.spinningRate
+        #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_ALIASINGINDEX] = (xAliasingIndex, yAliasingIndex)
+        #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_FOLDINGMODE] = (xFoldingMode, yFoldingMode)
+        #
+        #     indices = getAxisCodeMatchIndices(self.strip.axisCodes, spectrumView.spectrum.axisCodes)
+        #     # only need the axes for this spectrum
+        #     indices = indices[:spectrumView.spectrum.dimensionCount]
+        #     self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
+        #
+        #     if len(self._spectrumValues) > 2:
+        #         # store a list for the extra dimensions - should only be one per spectrumDisplay really
+        #         # needed so that the planeDepth is calculated correctly for visible spectra
+        #         vPP = ()
+        #         for dim in range(2, len(self._spectrumValues)):
+        #             specVal = self._spectrumValues[dim]
+        #             vPP = vPP + (specVal.valuePerPoint,)
+        #
+        #         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = vPP
+        #
+        #     else:
+        #         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_VALUEPERPOINT] = None
+        #
+        #     self._maxX = max(self._maxX, fxMax)
+        #     self._minX = min(self._minX, fxMin)
+        #     self._maxY = max(self._maxY, fyMax)
+        #     self._minY = min(self._minY, fyMin)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         self._buildAxisCodesWithWildCards()
 
@@ -2453,7 +2453,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     self._drawDeltaOffset = True
 
         if self.mousePressInLabel(mx, my, top):
-            self._draggingLabel = False # True to enable dragging of label
+            self._draggingLabel = False  # True to enable dragging of label
 
         else:
             # check if the corner buttons have been pressed
@@ -6201,7 +6201,7 @@ class CcpnGLWidget(QOpenGLWidget):
         for orderedAxis in self._orderedAxes[2:]:
             ppmPositions.append(orderedAxis.position)
 
-        self.strip.peakPickPosition(ppmPositions)
+        self.strip.createPeak(ppmPositions)
 
     def _clearIntegralRegions(self):
         """Clear the integral regions
@@ -6668,7 +6668,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 # selectedRegion is tuple((xL, xR), (yB, yT), ...) - from display
                 # ... is other Nd axes
 
-                peaks = self.strip.peakPickRegion(selectedRegion)
+                peaks = self.strip.pickPeaks(selectedRegion)
                 self.current.peaks = peaks
 
         elif controlLeftMouse(event):

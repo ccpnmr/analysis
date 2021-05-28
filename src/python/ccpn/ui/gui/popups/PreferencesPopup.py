@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 18:19:50 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-28 16:26:14 +0100 (Fri, May 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -574,7 +574,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.glFontSizeData.setMinimumWidth(PulldownListsMinimumWidth)
         self.glFontSizeData.currentIndexChanged.connect(self._queueChangeGLFontSize)
 
-
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
 
@@ -623,7 +622,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
     #     if result:
     #         self.preferences.general.seenTipsOfTheDay.clear()
 
-
     def _populateAppearanceTab(self):
         """Populate the widgets in the appearanceTab
         """
@@ -647,7 +645,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.showAllTips.setEnabled(False)
         self.showAllTips.setChecked(False)
         self._shownTips = copy(self.preferences.general.seenTipsOfTheDay)
-
 
     def _populate(self):
         """Populate the widgets in the tabs
@@ -724,6 +721,15 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.peakFactor1D.setValue(float(self.preferences.general.peakFactor1D))
         volumeIntegralLimit = self.preferences.general.volumeIntegralLimit
         self.volumeIntegralLimitData.setValue(int(volumeIntegralLimit))
+
+        from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC
+
+        _peakPickers = PeakPickerABC._peakPickers
+        self.peakPicker1dData.setData(texts=[''] + sorted([pp for pp in _peakPickers.keys()]))
+        self.peakPickerNdData.setData(texts=[''] + sorted([pp for pp in _peakPickers.keys()]))
+        self.peakPicker1dData.set(self.preferences.general.peakPicker1d)
+        self.peakPickerNdData.set(self.preferences.general.peakPickerNd)
+
         self.peakFittingMethod.setIndex(PEAKFITTINGDEFAULTS.index(self.preferences.general.peakFittingMethod))
         self.showToolbarBox.setChecked(self.preferences.general.showToolbar)
         self.spectrumBorderBox.setChecked(self.preferences.general.showSpectrumBorder)
@@ -883,6 +889,18 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                      min=1.0, max=5.0, grid=(row, 1), hAlign='l')
         self.volumeIntegralLimitData.setMinimumWidth(LineEditsMinimumWidth)
         self.volumeIntegralLimitData.valueChanged.connect(self._queueSetVolumeIntegralLimit)
+
+        row += 1
+        self.peakPicker1dLabel = Label(parent, text="Default 1d Peak Picker", grid=(row, 0))
+        self.peakPicker1dData = PulldownList(parent, grid=(row, 1))
+        self.peakPicker1dData.setMinimumWidth(LineEditsMinimumWidth)
+        self.peakPicker1dData.currentIndexChanged.connect(self._queueChangePeakPicker1dIndex)
+
+        row += 1
+        self.peakPickerNdLabel = Label(parent, text="Default Nd Peak Picker", grid=(row, 0))
+        self.peakPickerNdData = PulldownList(parent, grid=(row, 1))
+        self.peakPickerNdData.setMinimumWidth(LineEditsMinimumWidth)
+        self.peakPickerNdData.currentIndexChanged.connect(self._queueChangePeakPickerNdIndex)
 
         row += 1
         self.peakFittingMethodLabel = Label(parent, text="Peak Region Fitting Method", grid=(row, 0))
@@ -1836,6 +1854,32 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Set the option for the axis ordering of strips when opening a new display
         """
         self.preferences.general.axisOrderingOptions = value
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueChangePeakPicker1dIndex(self):
+        value = self.peakPicker1dData.get() or None
+        if value != self.preferences.general.peakPicker1d:
+            return partial(self._setPeakPicker1d, value)
+
+    def _setPeakPicker1d(self, value):
+        """Set the default peak picker for 1d spectra
+        """
+        self.preferences.general.peakPicker1d = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueChangePeakPickerNdIndex(self):
+        value = self.peakPickerNdData.get() or None
+        if value != self.preferences.general.peakPickerNd:
+            return partial(self._setPeakPickerNd, value)
+
+    def _setPeakPickerNd(self, value):
+        """Set the default peak picker for Nd spectra
+        """
+        self.preferences.general.peakPickerNd = value
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetPeakFittingMethod(self):

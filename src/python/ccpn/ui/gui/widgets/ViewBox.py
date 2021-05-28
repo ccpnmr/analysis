@@ -46,7 +46,8 @@ By Mouse button:
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -55,8 +56,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-12 19:39:18 +0100 (Mon, April 12, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-05-28 16:26:14 +0100 (Fri, May 28, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -250,7 +251,7 @@ class ViewBox(pg.ViewBox):
         for orderedAxis in orderedAxes[2:]:
             position.append(orderedAxis.position)
 
-        newPeaks = self.current.strip.peakPickPosition(position)
+        newPeaks = self.current.strip.createPeak(position)
         self.current.peaks = newPeaks
 
     def _mouseClickEvent(self, event: QtGui.QMouseEvent, axis=None):
@@ -473,7 +474,7 @@ class ViewBox(pg.ViewBox):
                 project.blankNotification()
 
                 try:
-                    peaks = self.current.strip.peakPickRegion(selectedRegion)
+                    peaks = self.current.strip.pickPeaks(selectedRegion)
                 finally:
                     project.unblankNotification()
 

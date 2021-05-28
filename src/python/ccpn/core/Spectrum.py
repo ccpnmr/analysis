@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-27 17:07:38 +0100 (Thu, May 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-05-28 16:26:13 +0100 (Fri, May 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -320,6 +320,23 @@ class Spectrum(AbstractWrapperObject):
         None indicates no valid spectrum data file has been defined
         """
         return self._dataSource
+
+    @property
+    def peakPicker(self):
+        """A peakPicker instance for region picking in this spectrum.
+        None indicates no peakPicker is attached to this spectrum
+        """
+        from ccpn.core.lib.SpectrumLib import _createDefaultPeakPicker
+
+        if not self._peakPicker:
+            _peakPicker = _createDefaultPeakPicker(self)
+            # automatically store in the spectrum internal store
+            if _peakPicker:
+                with undoBlockWithoutSideBar():
+                    self._peakPicker = _peakPicker
+                    self._peakPicker._storeAttributes()
+
+        return self._peakPicker
 
     #-----------------------------------------------------------------------------------------
     # Spectrum properties
@@ -2551,13 +2568,13 @@ class Spectrum(AbstractWrapperObject):
         raise NotImplementedError('replace by getRegion')
 
     @logCommand(get='self')
-    def pickPeak(self, peakList=None, **ppmPositions) -> Optional['Peak']:
-        """Pick peak at position specified by the ppmPositions dict.
+    def createPeak(self, peakList=None, **ppmPositions) -> Optional['Peak']:
+        """Create peak at position specified by the ppmPositions dict.
 
         Return the peak created at this ppm position or None.
 
-        Axis limits are passed in as a dict of (axisCode, ppmValue) key, value pairs
-        with the ppmValue supplied as the ppm value for the closest matched axis.
+        Ppm positions are passed in as a dict of (axisCode, ppmValue) key, value pairs
+        with the ppmValue supplied mapping to the closest matching axis.
 
         Illegal or non-matching axisCodes will return None.
 
@@ -2567,100 +2584,57 @@ class Spectrum(AbstractWrapperObject):
 
             {'Hn': 7.0, 'Nh': 110}
 
-
         Example calling function:
-            peak = spectrum.pickPeak(**limitsDict)
 
-            peak = spectrum.pickPeak(peakList, **limitsDict)
+        ::
 
-            peak = spectrum.pickPeak(peakList=peakList, Hn=7.0, Nh=110)
+        >>> peak = spectrum.createPeak(**limitsDict)
+        >>> peak = spectrum.createPeak(peakList, **limitsDict)
+        >>> peak = spectrum.createPeak(peakList=peakList, Hn=7.0, Nh=110)
 
         :param peakList: peakList to create new peak in, or None for the last peakList belonging to spectrum
         :param ppmPositions: dict of (axisCode, ppmValue) key,value pairs
         :return: new peak or None
         """
-        from ccpn.util.Common import getAxisCodeMatchIndices
+        from ccpn.core.lib.SpectrumLib import _createPeak
 
-        with undoBlockWithoutSideBar():
+        return _createPeak(self, peakList, **ppmPositions)
 
-            peakList = self.project.getByPid(peakList) if isinstance(peakList, str) else peakList
-            if not peakList:
-                if self.peakLists:
-                    peakList = self.peakLists[-1]
-                else:
-                    peakList = self.newPeakList()
-
-            axisCodes = []
-            _ppmPositions = []
-            for axis, pos in ppmPositions.items():
-                axisCodes.append(axis)
-                _ppmPositions.append(float(pos))
-
-            indices = getAxisCodeMatchIndices(self.axisCodes, axisCodes, allMatches=False, checkBoundAtoms=True, exactMatch=False)
-
-            if None in indices:
-                return
-
-            # should get all ppm's from the reference - shouldn't really be any Nones now though
-            _ppmPositions = [_ppmPositions[ii] for ii in indices]
-            height = self.getHeight(_ppmPositions)
-            specLimits = self.spectrumLimits
-            aliasingValues = self.aliasingValues
-
-            for dim, pos in enumerate(_ppmPositions):
-                # check that the picked peak lies in the bounded region of the spectrum
-                minSpectrumFrequency, maxSpectrumFrequency = sorted(specLimits[dim])
-                visibleAlias = aliasingValues[dim]
-                regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
-                                round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
-
-                if not (regionBounds[0] <= pos <= regionBounds[1]):
-                    break
-
-            else:
-                # get the list of existing peak pointPositions in this peakList
-                pointCounts = self.pointCounts
-                intPositions = [int(((self.ppm2point(pos, dimension=indx + 1)) - 1) % np) + 1
-                                for indx, (pos, np) in enumerate(zip(_ppmPositions, pointCounts))]
-
-                # get the existing peak point-positions for this list
-                existingPositions = [[int(pp) for pp in pk.pointPositions] for pk in peakList.peaks]
-
-                if intPositions not in existingPositions:
-                    # add the new peak only if one doesn't exist at these pointPositions
-                    pk = peakList.newPeak(ppmPositions=_ppmPositions, height=height)
-                    return pk
-
-    @logCommand(get='self')
-    def setPeakPicker(self, peakPicker):
+    @peakPicker.setter
+    def peakPicker(self, peakPicker):
         """Set the current peakPicker class instance
         """
-        from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC
+        from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, PEAKPICKERSTORE, PEAKPICKER
 
         if not isinstance(peakPicker, (PeakPickerABC, type(None))):
-            raise TypeError('Not a valid peakPickerABC class')
-        else:
+            raise ValueError('Not a valid peakPickerABC class')
+        elif peakPicker and peakPicker.spectrum != self:
+            raise ValueError(f'peakPicker is already linked to spectrum {peakPicker.spectrum}')
+        elif peakPicker:
+            # set the current peakPicker
             self._peakPicker = peakPicker
 
-    @logCommand(get='self')
-    def setPeakPickerParameters(self, **params):
-        """Set the parameters for the current peakPicker class
-        """
-        if not self._peakPicker:
-            raise RuntimeError('No peakPicker specified')
+            # automatically store in the spectrum CCPN internal store
+            self._peakPicker._storeAttributes()
+            getLogger().debug('Setting new peak picker')
+        else:
+            with undoBlockWithoutSideBar():
+                if self._peakPicker:
+                    self._peakPicker._clearAttributes()
+                    self._peakPicker = None
+                    getLogger().debug('Clearing old peak picker')
 
-        self._peakPicker.setParameters(**params)
-
     @logCommand(get='self')
-    def pickPeaks(self, peakList, **ppmRegions) -> Optional[Tuple['Peak', ...]]:
+    def pickPeaks(self, peakList=None, positiveThreshold=None, negativeThreshold=None, **ppmRegions) -> Optional[Tuple['Peak', ...]]:
         """Pick peaks in the region defined by the ppmRegions dict.
 
-        Axis limits are passed in as a dict containing the axis codes and the required limits.
-        Each limit is defined as a key, value pair: (str, tuple), with the tuple supplied as (min,max) axis limits in ppm.
+        Ppm regions are passed in as a dict containing the axis codes and the required limits.
+        Each limit is defined as a key, value pair: (str, tuple), with the tuple supplied as (min, max) axis limits in ppm.
+        Axis codes supplied are mapped to the closest matching axis.
 
         Illegal or non-matching axisCodes will return None.
 
-        Example dict:
+        Example ppmRegions dict:
 
         ::
 
@@ -2669,61 +2643,24 @@ class Spectrum(AbstractWrapperObject):
              }
 
         Example calling function:
-            peaks = spectrum.pickPeaks(**regionsDict)
 
-            peaks = spectrum.pickPeaks(peakList, **regionsDict)
+        ::
 
-            peaks = spectrum.pickPeaks(peakList=peakList, Hn=(7.0, 9.0), Nh=(110, 130))
+        >>> peaks = spectrum.pickPeaks(**regionsDict)
+        >>> peaks = spectrum.pickPeaks(peakList, **regionsDict)
+        >>> peaks = spectrum.pickPeaks(peakList=peakList, Hn=(7.0, 9.0), Nh=(110, 130))
 
         :param peakList: peakList to create new peak in, or None for the last peakList belonging to spectrum
+        :param positiveThreshold: float or None specifying the positive threshold above which to find peaks.
+                                  if None, positive peak picking is disabled.
+        :param negativeThreshold: float or None specifying the negative threshold below which to find peaks.
+                                  if None, negative peak picking is disabled.
         :param ppmRegions: dict of (axisCode, tupleValue) key, value pairs
         :return: tuple of new peaks or None
         """
-        from ccpn.util.Common import getAxisCodeMatchIndices
+        from ccpn.core.lib.SpectrumLib import _pickPeaks
 
-        with undoBlockWithoutSideBar():
-
-            peakList = self.project.getByPid(peakList) if isinstance(peakList, str) else peakList
-            if not peakList:
-                if self.peakLists:
-                    peakList = self.peakLists[-1]
-                else:
-                    peakList = self.newPeakList()
-
-            axisCodes = []
-            _ppmRegions = []
-            for axis, region in ppmRegions.items():
-                axisCodes.append(axis)
-                _ppmRegions.append(sorted(float(pos) for pos in region))
-
-            indices = getAxisCodeMatchIndices(self.axisCodes, axisCodes, allMatches=False, checkBoundAtoms=True, exactMatch=False)
-
-            if None in indices:
-                return
-
-            _ppmRegions = [_ppmRegions[ii] for ii in indices]
-            specLimits = self.spectrumLimits
-            aliasingValues = self.aliasingValues
-
-            # check that the picked peak lies in the bounded region of the spectrum
-            for dim, pos in enumerate(_ppmRegions):
-                minSpectrumFrequency, maxSpectrumFrequency = sorted(specLimits[dim])
-                visibleAlias = aliasingValues[dim]
-                regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
-                                round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
-
-                # clip to the current region bounds
-                for ii in range(2):
-                    if pos[ii] < regionBounds[0]:
-                        pos[ii] = regionBounds[0]
-                    elif pos[ii] > regionBounds[1]:
-                        pos[ii] = regionBounds[1]
-
-            # get the peaks from the peakPicker
-            axisDict = {axisCodes[ind]:_ppmRegions[ii] for ii, ind in enumerate(indices)}
-            if self._peakPicker:
-                pks = self._peakPicker.pickPeaks(peakList=peakList, axisDict=axisDict)
-                return tuple(pks)
+        return _pickPeaks(self, peakList, positiveThreshold, negativeThreshold, **ppmRegions)
 
     def _extractToFile(self, axisCodes, position, path, dataFormat, tag):
         """Local routine to prevent code duplication across extractSliceToFile, extractPlaneToFile,
@@ -2850,11 +2787,30 @@ class Spectrum(AbstractWrapperObject):
     def _restoreObject(cls, project, apiObj):
         """Subclassed to allow for initialisations on restore, not on creation via newSpectrum
         """
+        from ccpn.core.lib.PeakPickers import PeakPickerABC
+        from ccpn.core.lib.PeakPickers.PeakPickerABC import PEAKPICKERSTORE, PEAKPICKER, PEAKPICKERPARAMETERS
+
         spectrum = super()._restoreObject(project, apiObj)
 
         try:
             spectrum._dataStore = DataStore()._importFromSpectrum(spectrum)
             spectrum._dataSource = spectrum._getDataSource(spectrum._dataStore, reportWarnings=True)
+
+            # move to PeakPickerABC _importFromSpectrum?
+            # spectrum._peakPicker = PeakPickerABC._importFromSpectrum(_pickerType, spectrum)?
+
+            # get peakPickerType from ccpnInternal
+            _pickerType = spectrum.getParameter(PEAKPICKERSTORE, PEAKPICKER)
+
+            if _pickerType:
+                _picker = PeakPickerABC.PeakPickerABC.createPeakPicker(_pickerType, spectrum)
+                if _picker:
+                    getLogger().debug(f'peakPicker {_picker} instantiated')
+                    # restore peakPicker with parameters
+                    spectrum._peakPicker = _picker
+                    _pickerParams = spectrum.getParameter(PEAKPICKERSTORE, PEAKPICKERPARAMETERS)
+                    if isinstance(_pickerParams, dict):
+                        _picker.setParameters(**_pickerParams)
 
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid data source for %s (%s)' % (spectrum, es))
@@ -3113,7 +3069,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self')
     def newMultipletList(self, title: str = None,
                          symbolColour: str = None, textColour: str = None, lineColour: str = None,
-                         multipletAveraging = None,
+                         multipletAveraging=None,
                          comment: str = None, multiplets: Sequence[Union['Multiplet', str]] = None, **kwds):
         """Create new MultipletList within Spectrum.
 

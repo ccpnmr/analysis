@@ -201,9 +201,9 @@ class PeakList(PMIListABC):
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
                 spectrum = self.spectrum
-                x,y = spectrum.positions, self.spectrum.intensities
+                x, y = spectrum.positions, self.spectrum.intensities
                 maxIrange, minIrange = max(intensityRange), min(intensityRange)
-                xR,yR = _1DregionsFromLimits(spectrum.positions, self.spectrum.intensities, dataRange)
+                xR, yR = _1DregionsFromLimits(spectrum.positions, self.spectrum.intensities, dataRange)
                 noiseLevel = spectrum.noiseLevel
                 negativeNoiseLevel = spectrum.negativeNoiseLevel
 
@@ -217,14 +217,13 @@ class PeakList(PMIListABC):
                 currentPositions = [p.position[0] for p in self.peaks]  # don't add peaks if already there
                 pdd = percentage(peakFactor1D, noiseLevel)
                 ndd = percentage(peakFactor1D, negativeNoiseLevel)
-                maxValues, minValues = simple1DPeakPicker(yR,xR, noiseLevel+pdd, negDelta=negativeNoiseLevel+ndd, negative=True)
-                for position, height in maxValues+minValues:
+                maxValues, minValues = simple1DPeakPicker(yR, xR, noiseLevel + pdd, negDelta=negativeNoiseLevel + ndd, negative=True)
+                for position, height in maxValues + minValues:
                     if minIrange < height < maxIrange:
                         if position not in currentPositions:
                             peak = self.newPeak(ppmPositions=[position], height=height)
                             peaks.append(peak)
         return peaks
-
 
     def pickPeaks1d_(self, dataRange, intensityRange=None, size: int = 3, mode: str = 'wrap') -> List['Peak']:
         """
@@ -232,6 +231,7 @@ class PeakList(PMIListABC):
         """
         from ccpn.ui.gui.widgets.MessageDialog import _stoppableProgressBar
         from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning
+
         # maxValues, minValues = simple1DPeakPicker(y=filteredY, x=filteredX, delta=maxNoiseLevel + deltaAdjustment,
         #                                           negative=False)
         with undoBlockWithoutSideBar():
@@ -248,7 +248,7 @@ class PeakList(PMIListABC):
 
                 if selectedData.size == 0:
                     return peaks
-                x,y = selectedData
+                x, y = selectedData
 
                 maxFilter = maximum_filter(selectedData[1], size=size, mode=mode)
                 boolsMax = selectedData[1] == maxFilter
@@ -268,7 +268,7 @@ class PeakList(PMIListABC):
                         values.append((float(height), peakPosition), )
                 found = len(values)
                 if found > 10:
-                    title = 'Found %s peaks on %s'% (found, self.spectrum.name)
+                    title = 'Found %s peaks on %s' % (found, self.spectrum.name)
                     msg = 'Do you want continue? \n\n\n\nTo filter out more peaks: Increase the peak factor from preferences:' \
                           '\nProject > Preferences... > Spectrum > 1D Peak Picking Factor.\nAlso, try to select above the noise region'
 
@@ -282,7 +282,7 @@ class PeakList(PMIListABC):
 
     @logCommand(get='self')
     def pickPeaks1dFiltered(self, size: int = 9, mode: str = 'wrap', factor=10, excludeRegions=None,
-                            positiveNoiseThreshold=None, negativeNoiseThreshold=None, negativePeaks=True,stdFactor=0.5):
+                            positiveNoiseThreshold=None, negativeNoiseThreshold=None, negativePeaks=True, stdFactor=0.5):
         """
         Pick 1D peaks from data in self.spectrum.
         """
@@ -298,8 +298,8 @@ class PeakList(PMIListABC):
             estimateNoiseLevel1D(spectrum.intensities, f=factor, stdFactor=0.5)
 
             if positiveNoiseThreshold == 0.0 or positiveNoiseThreshold is None:
-                positiveNoiseThreshold,negativeNoiseThreshold = estimateNoiseLevel1D(spectrum.intensities,
-                                                                                     f=factor, stdFactor=stdFactor)
+                positiveNoiseThreshold, negativeNoiseThreshold = estimateNoiseLevel1D(spectrum.intensities,
+                                                                                      f=factor, stdFactor=stdFactor)
             spectrum.noiseLevel = positiveNoiseThreshold
             spectrum.negativeNoiseLevel = negativeNoiseThreshold
             #     positiveNoiseThreshold = _oldEstimateNoiseLevel1D(spectrum.intensities, factor=factor)
@@ -399,7 +399,7 @@ class PeakList(PMIListABC):
         spectrum.noiseLevel = float(maxNoiseLevel)
         spectrum.negativeNoiseLevel = float(minNoiseLevel)
         if maxValue:
-            peak = self.newPeak(ppmPositions=[float(x[maxValue]),], height=float(y[maxValue]))
+            peak = self.newPeak(ppmPositions=[float(x[maxValue]), ], height=float(y[maxValue]))
             snr = peak.signalToNoiseRatio
             peaks.append(peak)
         return peaks
@@ -407,11 +407,12 @@ class PeakList(PMIListABC):
     def peakFinder1D(self, maxNoiseLevel=None, minNoiseLevel=None,
                      ignoredRegions=[[20, 19]], negativePeaks=False,
                      eNoiseThresholdFactor=1.5,
-                     recalculateSNR = True,
+                     recalculateSNR=True,
                      deltaPercent=10,
                      useXRange=1):
         from ccpn.core.lib.peakUtils import simple1DPeakPicker
         from ccpn.core.lib.SpectrumLib import _estimate1DSpectrumSNR
+
         peaks = []
         # with undoBlockWithoutSideBar():
         #     with notificationEchoBlocking():
@@ -438,7 +439,6 @@ class PeakList(PMIListABC):
                 peak = self.newPeak(ppmPositions=[position], height=height)
                 peaks.append(peak)
         return peaks
-
 
     @logCommand(get='self')
     def copyTo(self, targetSpectrum: Spectrum, **kwargs) -> 'PeakList':
@@ -599,6 +599,7 @@ class PeakList(PMIListABC):
                         excludedDiagonalDims=None, excludedDiagonalTransform=None,
                         estimateLineWidths=True):
 
+        getLogger().warning('Deprecated, please use spectrum.pickPeaks()')
         print('>>>   pickPeaksRegion')
 
         # NOTE:ED - put the call in spectrum?
@@ -924,7 +925,7 @@ class PeakList(PMIListABC):
         """Refit the current selected peaks.
         Must be called with peaks that belong to this peakList
         """
-
+        getLogger().warning('Deprecated, please use spectrum.fitExistingPeaks()')
         print('>>>   peakList.fitExistingPeaks')
 
         from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
@@ -988,7 +989,7 @@ class PeakList(PMIListABC):
         if not all(isinstance(ii, int) for ii in newAxisOrder):
             raise ValueError('newAxisOrder must be ints')
         if not all(0 <= ii < dims for ii in newAxisOrder):
-            raise ValueError('newAxisOrder elements must be in range 0-%i', dims-1)
+            raise ValueError('newAxisOrder elements must be in range 0-%i', dims - 1)
 
         with undoBlockWithoutSideBar():
             # reorder all peaks in the peakList

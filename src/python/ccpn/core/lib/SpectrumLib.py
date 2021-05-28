@@ -29,11 +29,12 @@ import collections
 import math
 import random
 import numpy as np
-from typing import Tuple
+from typing import Tuple, Optional
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.util.Common import percentage, getAxisCodeMatchIndices
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeTransfers
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
@@ -80,8 +81,6 @@ def _calibrateY1D(spectrum, currentPosition, newPosition):
 
 
 def _calibrateXND(spectrum, strip, currentPosition, newPosition):
-    from ccpn.util.Common import getAxisCodeMatchIndices
-
     # map the X change to the correct spectrum axis
     spectrumReferencing = list(spectrum.referenceValues)
     indices = getAxisCodeMatchIndices(strip.axisCodes, spectrum.axisCodes)
@@ -92,8 +91,6 @@ def _calibrateXND(spectrum, strip, currentPosition, newPosition):
 
 
 def _calibrateNDAxis(spectrum, axisIndex, currentPosition, newPosition):
-    from ccpn.util.Common import getAxisCodeMatchIndices
-
     # map the X change to the correct spectrum axis
     spectrumReferencing = list(spectrum.referenceValues)
 
@@ -103,8 +100,6 @@ def _calibrateNDAxis(spectrum, axisIndex, currentPosition, newPosition):
 
 
 def _calibrateYND(spectrum, strip, currentPosition, newPosition):
-    from ccpn.util.Common import getAxisCodeMatchIndices
-
     # map the Y change to the correct spectrum axis
     spectrumReferencing = list(spectrum.referenceValues)
     indices = getAxisCodeMatchIndices(strip.axisCodes, spectrum.axisCodes)
@@ -271,6 +266,7 @@ def _getProjection(spectrum: 'Spectrum', axisCodes: tuple,
 from scipy.sparse import csc_matrix, eye, diags
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
+
 
 def als(y, lam=10 ** 2, p=0.001, nIter=10):
     """Implements an Asymmetric Least Squares (Asl) Smoothing
@@ -638,6 +634,7 @@ def _recurseData(ii, dataList, startCondition, endCondition):
                 newData = [val for sublist in newData for val in sublist]
 
             _recurseData(ii + 1, newData, startCondition, endCondition)
+
 
 # keep for a minute - example of how to call _recurseData
 # # iterate over the array to calculate noise at each level
@@ -1561,7 +1558,7 @@ def _setApiRefExperiment(experiment, refExperiment):
             continue
 
         if not _getRefExpDim4ExpDim(expDim):
-            if len(refExpDims)>0:
+            if len(refExpDims) > 0:
                 refExpDim = refExpDims.pop(0)
                 _tempLinkRefExpDim2ExpDim(expDim, refExpDim)
 
@@ -1599,3 +1596,195 @@ def _setApiRefExperiment(experiment, refExperiment):
                             del refData[jj]
                             break
 
+
+def _createPeak(spectrum, peakList=None, **ppmPositions) -> Optional['Peak']:
+    """Create peak at position specified by the ppmPositions dict.
+
+    Return the peak created at this ppm position or None.
+
+    Ppm positions are passed in as a dict of (axisCode, ppmValue) key, value pairs
+    with the ppmValue supplied mapping to the closest matching axis.
+
+    Illegal or non-matching axisCodes will return None.
+
+    Example ppmPosition dict:
+
+    ::
+
+        {'Hn': 7.0, 'Nh': 110}
+
+
+    Example calling function:
+
+    >>> peak = spectrum.createPeak(**limitsDict)
+    >>> peak = spectrum.createPeak(peakList, **limitsDict)
+    >>> peak = spectrum.createPeak(peakList=peakList, Hn=7.0, Nh=110)
+
+    :param peakList: peakList to create new peak in, or None for the last peakList belonging to spectrum
+    :param ppmPositions: dict of (axisCode, ppmValue) key,value pairs
+    :return: new peak or None
+    """
+    with undoBlockWithoutSideBar():
+
+        axisCodes = []
+        _ppmPositions = []
+        for axis, pos in ppmPositions.items():
+            axisCodes.append(axis)
+            _ppmPositions.append(float(pos))
+
+        try:
+            # try and match the axis codes before creating new peakList (if required)
+            indices = spectrum.getByAxisCodes('axes', axisCodes)
+        except Exception as es:
+            getLogger().warning(f'Non-matching axis codes found {axisCodes}')
+            return
+
+        peakList = spectrum.project.getByPid(peakList) if isinstance(peakList, str) else peakList
+        if not peakList:
+            if spectrum.peakLists:
+                peakList = spectrum.peakLists[-1]
+            else:
+                # log warning that no peakList exists - this SHOULD never happen
+                getLogger().warning(f'Spectrum {spectrum} has no peakLists - creating new')
+                peakList = spectrum.newPeakList()
+
+        # should get all ppm's from the reference - shouldn't really be any Nones now though
+        _ppmPositions = [_ppmPositions[ii] for ii in indices]
+        height = spectrum.getHeight(_ppmPositions)
+        specLimits = spectrum.spectrumLimits
+        aliasingValues = spectrum.aliasingValues
+
+        for dim, pos in enumerate(_ppmPositions):
+            # check that the picked peak lies in the bounded region of the spectrum
+            minSpectrumFrequency, maxSpectrumFrequency = sorted(specLimits[dim])
+            visibleAlias = aliasingValues[dim]
+            regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
+                            round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
+
+            if not (regionBounds[0] <= pos <= regionBounds[1]):
+                break
+
+        else:
+            # get the list of existing peak pointPositions in this peakList
+            pointCounts = spectrum.pointCounts
+            intPositions = [int(((spectrum.ppm2point(pos, dimension=indx + 1)) - 1) % np) + 1
+                            for indx, (pos, np) in enumerate(zip(_ppmPositions, pointCounts))]
+
+            # get the existing peak point-positions for this list
+            existingPositions = [[int(pp) for pp in pk.pointPositions] for pk in peakList.peaks]
+
+            if intPositions not in existingPositions:
+                # add the new peak only if one doesn't exist at these pointPositions
+                pk = peakList.newPeak(ppmPositions=_ppmPositions, height=height)
+                return pk
+
+
+def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshold=None, **ppmRegions) -> Optional[Tuple['Peak', ...]]:
+    """Pick peaks in the region defined by the ppmRegions dict.
+
+    Ppm regions are passed in as a dict containing the axis codes and the required limits.
+    Each limit is defined as a key, value pair: (str, tuple), with the tuple supplied as (min, max) axis limits in ppm.
+    Axis codes supplied are mapped to the closest matching axis.
+
+    Illegal or non-matching axisCodes will return None.
+
+    Example ppmRegions dict:
+
+    ::
+
+        {'Hn': (7.0, 9.0),
+         'Nh': (110, 130)
+         }
+
+    Example calling function:
+
+    >>> peaks = spectrum.pickPeaks(**regionsDict)
+    >>> peaks = spectrum.pickPeaks(peakList, **regionsDict)
+    >>> peaks = spectrum.pickPeaks(peakList=peakList, Hn=(7.0, 9.0), Nh=(110, 130))
+
+    :param peakList: peakList to create new peak in, or None for the last peakList belonging to spectrum
+    :param positiveThreshold: float or None specifying the positive threshold above which to find peaks.
+                              if None, positive peak picking is disabled.
+    :param negativeThreshold: float or None specifying the negative threshold below which to find peaks.
+                              if None, negative peak picking is disabled.
+    :param ppmRegions: dict of (axisCode, tupleValue) key, value pairs
+    :return: tuple of new peaks or None
+    """
+
+    with undoBlockWithoutSideBar():
+
+        axisCodes = []
+        _ppmRegions = []
+        for axis, region in ppmRegions.items():
+            axisCodes.append(axis)
+            _ppmRegions.append(sorted(float(pos) for pos in region))
+
+        try:
+            # try and match the axis codes before creating new peakList (if required)
+            indices = spectrum.getByAxisCodes('axes', axisCodes)
+        except Exception as es:
+            getLogger().warning(f'Non-matching axis codes found {axisCodes}')
+            return
+
+        peakList = spectrum.project.getByPid(peakList) if isinstance(peakList, str) else peakList
+        if not peakList:
+            if spectrum.peakLists:
+                peakList = spectrum.peakLists[-1]
+            else:
+                # log warning that no peakList exists - this SHOULD never happen
+                getLogger().warning(f'Spectrum {spectrum} has no peakLists - creating new')
+                peakList = spectrum.newPeakList()
+
+        _ppmRegions = [_ppmRegions[ii] for ii in indices]
+        specLimits = spectrum.spectrumLimits
+        aliasingValues = spectrum.aliasingValues
+
+        # check that the picked peak lies in the bounded region of the spectrum
+        for dim, pos in enumerate(_ppmRegions):
+            minSpectrumFrequency, maxSpectrumFrequency = sorted(specLimits[dim])
+            visibleAlias = aliasingValues[dim]
+            regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
+                            round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
+
+            # clip to the current region bounds
+            for ii in range(2):
+                if pos[ii] < regionBounds[0]:
+                    pos[ii] = regionBounds[0]
+                elif pos[ii] > regionBounds[1]:
+                    pos[ii] = regionBounds[1]
+
+        # get the peaks from the peakPicker
+        axisDict = {axisCodes[ind]: _ppmRegions[ii] for ii, ind in enumerate(indices)}
+        # Should be in points :|
+        if spectrum._peakPicker:
+            pks = spectrum._peakPicker.pickPeaks(peakList=peakList,
+                                                 positiveThreshold=positiveThreshold,
+                                                 negativeThreshold=negativeThreshold,
+                                                 axisDict=axisDict)
+            return tuple(pks)
+
+
+def _createDefaultPeakPicker(spectrum):
+    """Create a default PeakPicker from preferences
+
+    :param spectrum: instance of type Spectrum
+    :return: new peakPicker of type defined in 1d or Nd section of preferences or None
+    """
+    from ccpn.framework.Application import getApplication
+    from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC
+
+    app = getApplication()
+
+    if app and spectrum:
+        prefsGeneral = app.preferences.general
+
+        if spectrum.dimensionCount == 1:
+            _pickerType = prefsGeneral.peakPicker1d
+        else:
+            _pickerType = prefsGeneral.peakPickerNd
+
+        if _pickerType:
+            _picker = PeakPickerABC.createPeakPicker(_pickerType, spectrum)
+
+            getLogger().debug(f'Creating default peakPicker {_picker}')
+            return _picker

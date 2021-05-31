@@ -255,9 +255,7 @@ class SpeechBalloon(QWidget):
 
         pixmap = QPixmap(int(path.boundingRect().width() + 2), int(path.boundingRect().height() + 2))
 
-        painter = QPainter()
-
-        painter.begin(pixmap)
+        painter = QPainter(pixmap)
 
         brush = QBrush(QColor('white'))
         painter.fillRect(pixmap.rect(), brush)

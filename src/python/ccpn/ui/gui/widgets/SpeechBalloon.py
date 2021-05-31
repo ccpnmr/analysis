@@ -146,10 +146,9 @@ class SpeechBalloon(QWidget):
     def _calc_local_usable_rect(self):
         return self._rect_to_local(self._calc_usable_rect())
 
-    def resizeEvent(self, event):
-        self.setMask(self.window_mask())
-
     def paintEvent(self, a0: QtGui.QPaintEvent) -> None:
+
+        self.setMask(self.window_mask())
 
         painterPath = self.window_path()
 

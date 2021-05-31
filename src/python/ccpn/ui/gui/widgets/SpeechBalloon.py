@@ -299,6 +299,12 @@ class SpeechBalloon(QWidget):
 
         self.layout().addWidget(central_widget, 0, 0)
 
+        # otherwise geometry isn't known when the window is shown on osx
+        # and you get the message 'qt.qpa.cocoa.window: Window position outside any known screen, using primary screen'
+        # https://stackoverflow.com/questions/541 7201/qt-place-new-window-correctly-on-screen-center-over-mouse-move-into-screen
+        self.layout().activate()
+
+
     def centralWidget(self):
         children = [child for child in self.children() if isinstance(child, QWidget)]
         result = children[0] if len(children) else None

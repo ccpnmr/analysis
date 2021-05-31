@@ -165,6 +165,8 @@ class SpeechBalloon(QWidget):
         painter.fillPath(painterPath, brush)
         painter.strokePath(painterPath, pen)
 
+        painter.end()
+
         return super(SpeechBalloon, self).paintEvent(a0)
 
     def _get_pointer_position(self):

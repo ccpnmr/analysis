@@ -184,7 +184,6 @@ class DoubleRangeView(QGraphicsView):
         scene_rect = self.sceneRect()
         if global_system:
             global_pos = self.mapToGlobal(scene_rect.topLeft().toPoint())
-            # ic(global_pos)
             scene_rect = QRect(global_pos, scene_rect.size().toSize())
 
         min_x = scene_rect.left() + self._slider._handle_left.width() / 2
@@ -213,7 +212,6 @@ class DoubleRangeView(QGraphicsView):
         self._slider.removeFromGroup(self._slider._handle_right)
 
         centre_min_width_2 = self._slider._centre.min_width() / 2
-        # ic(centre_min_width_2)
 
         # TODO WHY A FACTOR OF 0.5..
         left_slider_position = positions[LEFT] - centre_min_width_2 - (self._slider._handle_left.width() / 2) + 0.5
@@ -1369,11 +1367,10 @@ class SetOneOf(QObject):
         else:
             raise Exception('unexpected')
 
-        # ic(results)
         results = list(results)
         results[self._index] = value
         results = [int(result) for result in results]
-        # ic(results)
+
         self.output.emit(tuple(results))
 
 

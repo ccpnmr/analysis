@@ -68,7 +68,7 @@ class SpeechBalloon(QWidget):
         self._pointer_height = 10
         self._pointer_width = 20
         self._pointer_side = side
-        self._display_rect = self._calc_display_rect()
+
         self._percentage = percentage / 100.0
 
         self._corner_radius = 3

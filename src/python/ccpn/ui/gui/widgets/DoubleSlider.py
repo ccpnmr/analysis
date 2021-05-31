@@ -1,6 +1,5 @@
 import sys
 
-
 from PyQt5 import QtGui
 from PyQt5.QtCore import QPointF, QRectF, Qt, QTimer, QObject, QRect, QPoint, pyqtProperty
 from PyQt5.QtCore import pyqtSignal
@@ -1378,12 +1377,110 @@ class SetOneOf(QObject):
         self.output.emit(tuple(results))
 
 
+class PopoverButton(QToolButton):
+
+    def __init__(self, balloon_side=Side.BOTTOM, *args, **kwargs):
+
+        super(PopoverButton, self).__init__(*args, **kwargs)
+
+        self.setFocusPolicy(Qt.NoFocus)
+
+        self._balloon_side = balloon_side
+        self._speech_balloon = SpeechBalloon(side=OPPOSITE_SIDES[balloon_side])
+        self._speech_balloon.setWindowFlags(self._speech_balloon.windowFlags()| Qt.Popup)
+
+        self.pressed.connect(self._press_handler)
+        # self.setArrowType(Qt.DownArrow)
+        self.setStyleSheet('''
+                        border-style: solid;
+                        border-color: grey;
+                        border-width: 1px;
+                        border-radius: 3px;
+                        ''')
+
+        # self.setAttribute(Qt.WA_MacShowFocusRect, 0)
+        path='/Users/garythompson/Dropbox/git/ccpnmr/ccpnmr_3.0.3.edge_gwv6/src/python/ccpn/ui/gui/widgets/icons/exclamation.png'
+        self.setIcon(QIcon(path))
+
+        self._event_filter = None
+
+
+    @pyqtProperty(Side)
+    def balloonSide(self):
+        return self._balloon_side
+
+    @balloonSide.setter
+    def balloonSide(self, balloonSide):
+        self.setBalloonSide(side)
+
+    def setBalloonSide(self, side):
+        self._balloon_side = side
+        self._speech_balloon.pointerSide = OPPOSITE_SIDES[self._balloon_side]
+
+
+    def _press_handler(self):
+        window_side = OPPOSITE_SIDES[self._speech_balloon._pointer_side]
+        middle_side = self._get_middle_side(window_side)
+
+        self._speech_balloon.showAt(middle_side)
+
+    def _get_max_screen(self, global_rect):
+        screen_by_overlap = {}
+        for screen in QGuiApplication.screens():
+            screen_rect = screen.availableGeometry()
+            intersection  = screen_rect.intersected(global_rect)
+            intersection_area =  intersection.width() * intersection.height()
+            screen_by_overlap[intersection_area] = screen
+
+        best_screen_key = max(screen_by_overlap)
+
+        return screen_by_overlap[best_screen_key]
+
+
+    def _get_middle_side(self, side):
+
+        global_top_left = self.mapToGlobal(QPoint(0,0))
+        global_rect = QRect(global_top_left, self.geometry().size())
+
+        width = self.width()
+        height = self.height()
+        width_2 = int(width / 2)
+        height_2 = int(height / 2)
+
+
+        if side == Side.BOTTOM:
+            result = QPoint(QPoint(global_rect.x() + width_2, global_rect.y() + height))
+        elif side == Side.TOP:
+            result = QPoint(QPoint(global_rect.x() + width_2, global_rect.y()))
+        elif side == Side.LEFT:
+            result = QPoint(QPoint(global_rect.x(), global_rect.y() + height_2))
+        else:  # side == Side.RIGHT:
+            result = QPoint(QPoint(global_rect.x()+width, global_rect.y() + height_2))
+
+
+        return result
+
+    def popover(self):
+        return self._speech_balloon
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
     window = QMainWindow()
 
     widget = QWidget()
+
+    test_button = PopoverButton(balloon_side=Side.RIGHT)
+    label = QTextEdit('test2')
+
+    test_button.popover().setCentralWidget(label)
+
+    side_list = QComboBox()
+    for side in Side:
+        side_list.addItem(str(side.name), side)
+    side_list.setCurrentIndex(OPPOSITE_SIDES[Side.LEFT])
+    side_list.currentIndexChanged.connect(lambda: test_button.setBalloonSide(side_list.itemData(side_list.currentIndex(), Qt.UserRole)))
 
     left_value_display = QLabel()
     left_value_display.setText('unknown')
@@ -1405,6 +1502,8 @@ if __name__ == '__main__':
     right_value_edit = QLineEdit()
 
     v_layout = QFormLayout()
+    v_layout.addRow('Test button', test_button)
+    v_layout.addRow('Side selector', side_list)
     v_layout.addRow('Left Value [signal]', left_value_display)
     v_layout.addRow('Right Value [signal]', right_value_display)
     v_layout.addRow('Min Value [signal]', min_value_display)

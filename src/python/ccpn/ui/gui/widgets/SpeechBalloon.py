@@ -7,7 +7,7 @@ from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import QRectF, Qt, QRect, QPoint, pyqtProperty, QTimer
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QBrush, QPolygon, QPolygonF, QPixmap, QPalette, QCursor, \
      QFontMetrics
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QLayout, QFrame, \
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QLayout, QFrame
 
 
 

@@ -1588,6 +1588,7 @@ if __name__ == '__main__':
     view.setEnabled(True)
     bar.addWidget(view)
 
+    window.setGeometry(QStyle.alignedRect(Qt.LeftToRight, Qt.AlignCenter, window.size(), QGuiApplication.screens()[0].availableGeometry()))
     window.show()
 
     app.exec_()

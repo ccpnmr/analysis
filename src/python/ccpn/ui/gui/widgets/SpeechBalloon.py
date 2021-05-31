@@ -309,6 +309,38 @@ class SpeechBalloon(QWidget):
         children = [child for child in self.children() if isinstance(child, QWidget)]
         result = children[0] if len(children) else None
         return result
+    
+    def showAt(self, pointer_pos):
+        margins = self._get_margins(1)
+        size_hint = self.centralWidget().sizeHint()
+
+        geometry = QRect()
+        geometry.setSize(size_hint)
+
+
+        geometry.adjust(*margins)
+        pointer_pos_on_geometry = self._get_pointer_position(geometry, on_border=True)
+
+        offset = pointer_pos - pointer_pos_on_geometry
+
+        geometry.translate(offset.x(), offset.y())
+
+        #  there's an error in the layout...
+        # these are approximately correct till we correct it
+        CORRECTIONS ={
+            Side.BOTTOM: (-1,-1),
+            Side.RIGHT: (-1,-1),
+            Side.TOP: (-1,0),
+            Side.LEFT: (0,-1)
+        }
+
+        correction = CORRECTIONS[self._pointer_side]
+        scale = self._get_corner_margins()[0] + 1
+        geometry.translate(scale * correction[0], scale * correction[1])
+
+        self.setGeometry(geometry)
+
+        super(SpeechBalloon, self).show()
 
     def setMargins(self):
         self.layout().setContentsMargins(0, 0, 0, 0)

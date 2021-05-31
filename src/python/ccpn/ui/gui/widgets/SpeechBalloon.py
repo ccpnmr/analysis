@@ -338,7 +338,9 @@ class SpeechBalloon(QWidget):
 
         self.setGeometry(geometry)
 
-        super(SpeechBalloon, self).show()
+        self.show()
+
+
 
     def setMargins(self):
         self.layout().setContentsMargins(0, 0, 0, 0)

@@ -5,11 +5,12 @@ from PyQt5 import QtGui
 from PyQt5.QtCore import QPointF, QRectF, Qt, QTimer, QObject, QRect, QPoint, pyqtProperty
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QLinearGradient, QBrush, QFont, QFontMetrics, QCursor, \
-    QGuiApplication
+    QGuiApplication, QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsItem, QGraphicsItemGroup, QGraphicsRectItem, QLabel, \
-    QWidget, QGraphicsObject, QCheckBox, QLineEdit, QFormLayout
+    QWidget, QGraphicsObject, QCheckBox, QLineEdit, QFormLayout, QTextEdit, QToolButton, QDialog, \
+    QComboBox, QStyle
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
-from SpeechBalloon import SpeechBalloon, DoubleLabel
+from SpeechBalloon import SpeechBalloon, DoubleLabel, Side
 
 # class MyGraphicsScene(QGraphicsScene):
 #     def drawBackground(self, painter, rect):

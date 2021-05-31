@@ -272,8 +272,8 @@ class SpeechBalloon(QWidget):
         return result
 
     def _local_display_rect(self):
-        self._display_rect = self._calc_display_rect()
-        local_display_rect = self._rect_to_local(self._display_rect)
+        display_rect = self._calc_display_rect()
+        local_display_rect = self._rect_to_local(display_rect)
         return local_display_rect
 
     def _rect_to_local(self, rect):

@@ -297,11 +297,20 @@ class SpeechBalloon(QWidget):
 
     def setMargins(self):
         self.layout().setContentsMargins(0, 0, 0, 0)
+        new_margins = self._get_margins()
+        self.layout().setContentsMargins(*new_margins)
+
+    def _get_corner_margins(self, multiplier=1):
         corner_margin = self._corner_radius / sqrt(2)
         corner_margin = int(ceil(corner_margin))
-        new_margins = [corner_margin, ] * 4
-        new_margins[self._pointer_side] += self._pointer_height
-        self.layout().setContentsMargins(*new_margins)
+        new_margins = [corner_margin * multiplier, ] * 4
+
+        return new_margins
+
+    def _get_margins(self, multiplier=1):
+        new_margins= self._get_corner_margins(multiplier)
+        new_margins[self._pointer_side] += (self._pointer_height * multiplier)
+        return new_margins
 
     def leaveEvent(self, a0: QtCore.QEvent) -> None:
         if self._owner:

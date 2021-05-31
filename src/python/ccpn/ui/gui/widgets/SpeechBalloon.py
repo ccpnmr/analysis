@@ -6,9 +6,9 @@ from math import sqrt, ceil, floor
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import QRectF, Qt, QRect, QPoint, pyqtProperty, QTimer
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QBrush, QPolygon, QPolygonF, QPixmap, QPalette, QCursor, \
-    QGuiApplication, QFontMetrics
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QLayout, QTableWidget, QTableWidgetItem, QFrame
-# from icecream import ic
+     QFontMetrics
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QLayout, QFrame, \
+
 
 
 class Side(IntEnum):
@@ -307,7 +307,7 @@ class SpeechBalloon(QWidget):
         children = [child for child in self.children() if isinstance(child, QWidget)]
         result = children[0] if len(children) else None
         return result
-    
+
     def showAt(self, pointer_pos):
         margins = self._get_margins(1)
         size_hint = self.centralWidget().sizeHint()

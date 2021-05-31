@@ -48,6 +48,12 @@ LEFT = 0
 RIGHT = 1
 BOTH = 2
 
+OPPOSITE_SIDES = {
+    Side.TOP: Side.BOTTOM,
+    Side.BOTTOM: Side.TOP,
+    Side.LEFT: Side.RIGHT,
+    Side.RIGHT: Side.LEFT
+}
 
 class DoubleRangeView(QGraphicsView):
     # signals

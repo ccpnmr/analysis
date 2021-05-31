@@ -112,6 +112,8 @@ class SpeechBalloon(QWidget):
     @pointerSide.setter
     def pointerSide(self, side):
         self._pointer_side = side
+        self.layout().setContentsMargins(*self._get_margins())
+        self.layout().activate()
         self.update()
 
     @pyqtProperty(float)

@@ -169,15 +169,21 @@ class SpeechBalloon(QWidget):
 
         return super(SpeechBalloon, self).paintEvent(a0)
 
-    def _get_pointer_position(self):
-        width = self._local_display_rect().width()
-        top = self._local_display_rect().top()
-        bottom = self._local_display_rect().bottom()
-        left = self._local_display_rect().left()
-        right = self._local_display_rect().right()
-        height = self._local_display_rect().height()
+    def _get_pointer_position(self, rect=None, on_border=False):
 
-        pointer_height = self._pointer_height
+        if rect == None:
+            local_display_rect = self._local_display_rect()
+        else:
+            local_display_rect = rect
+
+        width = local_display_rect.width()
+        top = local_display_rect.top()
+        bottom = local_display_rect.bottom()
+        left = local_display_rect.left()
+        right = local_display_rect.right()
+        height = local_display_rect.height()
+
+        pointer_height = 0 if on_border else self._pointer_height
 
         pointer_width_2 = int(self._pointer_width / 2)
 

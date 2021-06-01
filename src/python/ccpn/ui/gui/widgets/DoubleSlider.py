@@ -1419,10 +1419,17 @@ class PopoverButton(QToolButton):
 
         self._get_max_screen()
 
-        window_side = OPPOSITE_SIDES[self._speech_balloon._pointer_side]
-        middle_side = self._get_middle_side(window_side)
+        pointer_side = self._speech_balloon._pointer_side
+        window_side = OPPOSITE_SIDES[pointer_side]
 
-        self._speech_balloon.showAt(middle_side)
+        sides = [window_side, pointer_side]
+        for side in Side:
+            if not side in sides:
+                sides.append(side)
+
+        middle_sides = [(side,self._get_middle_side(side)) for side in sides]
+
+        self._speech_balloon.showAt(middle_sides[0], middle_sides[1:])
 
     def _get_max_screen(self):
 

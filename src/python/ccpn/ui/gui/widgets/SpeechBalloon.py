@@ -6,9 +6,9 @@ from math import sqrt, ceil, floor
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import QRectF, Qt, QRect, QPoint, pyqtProperty, QTimer
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QBrush, QPolygon, QPolygonF, QPixmap, QPalette, QCursor, \
-     QFontMetrics
+    QFontMetrics, QScreen
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QLayout, QFrame
-
+from icecream import ic
 
 
 class Side(IntEnum):
@@ -308,9 +308,13 @@ class SpeechBalloon(QWidget):
         result = children[0] if len(children) else None
         return result
 
-    def showAt(self, side_pointer_pos, alternatives):
+    def showAt(self, screen, side_pos_alternatives):
 
-        side, pointer_pos = side_pointer_pos
+        for side, pos in side_pos_alternatives:
+            ic(side_pos_alternatives)
+            ic(self._get_side_preferences(screen, side, pos))
+
+        side, pointer_pos = side_pos_alternatives[0]
         margins = self._get_margins(1)
         size_hint = self.centralWidget().sizeHint()
 
@@ -341,6 +345,33 @@ class SpeechBalloon(QWidget):
         self.setGeometry(geometry)
 
         self.show()
+
+
+    def _get_screen_side(self, screen, side):
+        screen_rect = screen.availableGeometry()
+
+        #TODO: sides are in a strange order should be top left bottom right
+        #TODO: add side selection by x and y into Side also opposites
+        screen_cooords = [screen_rect.top(), screen_rect.left(),
+                          screen_rect.right(), screen_rect.bottom()]
+
+        return screen_cooords[side]
+
+    def _get_side_preferences(self, screen, side, pos):
+
+        dists = {}
+        for side in Side:
+
+            screen_side_coord = self._get_screen_side(screen, side)
+
+            if side in (Side.TOP, Side.BOTTOM):
+                dist = screen_side_coord - pos.y()
+            else:
+                dist = screen_side_coord - pos.x()
+            dists[side] = abs(dist)
+
+        return dists
+
 
 
 

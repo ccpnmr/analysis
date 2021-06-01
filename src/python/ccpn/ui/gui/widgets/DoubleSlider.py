@@ -1417,7 +1417,7 @@ class PopoverButton(QToolButton):
 
     def _press_handler(self):
 
-        self._get_max_screen()
+        chosen_screen = self._get_max_screen()
 
         pointer_side = self._speech_balloon._pointer_side
         window_side = OPPOSITE_SIDES[pointer_side]
@@ -1429,7 +1429,7 @@ class PopoverButton(QToolButton):
 
         middle_sides = [(side,self._get_middle_side(side)) for side in sides]
 
-        self._speech_balloon.showAt(middle_sides[0], middle_sides[1:])
+        self._speech_balloon.showAt(chosen_screen, middle_sides)
 
     def _get_max_screen(self):
 

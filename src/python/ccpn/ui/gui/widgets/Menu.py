@@ -38,6 +38,7 @@ MACROSMENU = 'User Macros'
 CCPNMACROSMENU = 'Run CCPN Macros'
 USERMACROSMENU = 'Run User Macros'
 TUTORIALSMENU = 'Tutorials'
+HOWTOSMENU = 'How-Tos'
 PLUGINSMENU = 'User Plugins'
 CCPNPLUGINSMENU = 'CCPN Plugins'
 

@@ -165,6 +165,19 @@ class Path(_Path_):
 
         return self
 
+    def listDirFiles(self, extension:str=None):
+        """
+        If self is a directory path, return a list of its sub-files as Path instance.
+        If the extensions is given (e.g.: pdf, jpeg...), returns only files of that pattern.
+        Non recursive.
+
+        """
+        if not extension:
+            return list(self.glob('*'))
+        else:
+            return list(self.glob(f'*.{extension}'))
+
+
     def split3(self):
         """Return a tuple of (.parent, .stem, .suffix) strings
         """

@@ -56,7 +56,7 @@ from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, \
-    USERMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU
+    USERMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU, HOWTOSMENU
 from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
@@ -856,51 +856,43 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     def _fillTutorialsMenu(self):
         modulesMenu = self.searchMenuAction(TUTORIALSMENU)
         modulesMenu.clear()
+        import ccpn.framework.PathsAndUrls as pa
+        from ccpn.util.Path import aPath
 
-        from ccpn.framework.PathsAndUrls import tutorialsPath, beginnersTutorialPath, \
-            backboneAssignmentTutorialPath, cspTutorialPath, solidStateTutorialPath, analysisScreenTutorialPath
-
-        from os import walk
-
-        importantList = (('Beginners Tutorial', beginnersTutorialPath),
-                         ('Backbone Tutorial', backboneAssignmentTutorialPath),
-                         ('Chemical Shift Perturbation Tutorial', cspTutorialPath),
-                         ('Screen Tutorial', analysisScreenTutorialPath),
-                         ('Solid State Tutorial', solidStateTutorialPath))
+        importantList = (('Beginners Tutorial', pa.beginnersTutorialPath),
+                         ('Backbone Tutorial', pa.backboneAssignmentTutorialPath),
+                         ('Chemical Shift Perturbation Tutorial', pa.cspTutorialPath),
+                         ('Screen Tutorial', pa.analysisScreenTutorialPath),
+                         ('Solid State Tutorial', pa.solidStateTutorialPath))
 
         # add link to website videos
-        modulesMenu.addAction(Action(modulesMenu, text='Video Tutorials && Manual',
-                                     callback=self._showCCPNTutorials))
+        modulesMenu.addAction(Action(modulesMenu, text='Video Tutorials && Manual', callback=self._showCCPNTutorials))
         modulesMenu.addSeparator()
-
-        # add priority list for the important ones
-        # and solid State
-
-        # read the tutorials file directory - only top level
-        tutorialsFiles = []
-        for (dirpath, dirnames, filenames) in walk(os.path.expanduser(tutorialsPath)):
-            tutorialsFiles.extend([os.path.join(dirpath, filename) for filename in filenames])
-            break
 
         # add the main tutorials
         for text, file in importantList:
-            filename, fileExt = os.path.splitext(file)
-
-            if os.path.exists(file) and fileExt == '.pdf':
-                modulesMenu.addAction(Action(modulesMenu, text=text,
-                                             callback=partial(self._showTutorial, file, self)))
-
+            filePath = aPath(file)
+            if filePath.exists() and filePath.suffix == '.pdf':
+                modulesMenu.addAction(Action(modulesMenu, text=text, callback=partial(self._showTutorial, file, self)))
         modulesMenu.addSeparator()
 
-        # add the remaining tutorials
-        for file in sorted(tutorialsFiles, key=lambda ff: os.path.basename(ff)):
-            filename, fileExt = os.path.splitext(file)
-
-            if file not in [ff[1] for ff in importantList] and fileExt == '.pdf':
-                _label = camelCaseToString(os.path.basename(filename))
+        # add the remaining tutorials from the tutorials top directory
+        tutorialsFiles = aPath(pa.tutorialsPath).listDirFiles('pdf')
+        for filePath in sorted(tutorialsFiles, key=lambda ff: ff.basename):
+            if filePath not in [ff[1] for ff in importantList]:
+                _label = camelCaseToString(filePath.basename)
                 _label = _label.replace('Chem Build', 'ChemBuild')
                 modulesMenu.addAction(Action(modulesMenu, text=_label,
-                                             callback=partial(self._showTutorial, file, self)))
+                                             callback=partial(self._showTutorial, filePath, self)))
+        modulesMenu.addSeparator()
+
+        # add the How-Tos submenu
+        howtosMenu = self._addMenu(HOWTOSMENU, modulesMenu)
+        howtosFiles = aPath(pa.howTosPath).listDirFiles('pdf')
+        for filePath in sorted(howtosFiles, key=lambda ff: ff.basename):
+            _label = camelCaseToString(filePath.basename)
+            howtosMenu.addAction(Action(howtosMenu, text=_label, callback=partial(self._showTutorial, filePath, self)))
+
 
     def _showCCPNTutorials(self):
         from ccpn.framework.PathsAndUrls import ccpnVideos

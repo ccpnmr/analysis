@@ -65,6 +65,7 @@ screenTutorialPath              = ccpnCodePath / 'tutorials' / 'CcpNmr_AnalysisS
 cspTutorialPath                 = ccpnCodePath / 'tutorials' / 'CSPTutorial.pdf'
 solidStateTutorialPath          = ccpnCodePath / 'tutorials' / 'SolidStateAssignmentTutorial.pdf'
 analysisScreenTutorialPath      = ccpnCodePath / 'tutorials' / 'ScreenTutorial.pdf'
+howTosPath                      = tutorialsPath / 'How-Tos'
 
 documentationPath               = ccpnCodePath / 'doc' / 'build' / 'html' / 'index.html'
 licensePath                     = ccpnCodePath / 'LICENSE.txt'

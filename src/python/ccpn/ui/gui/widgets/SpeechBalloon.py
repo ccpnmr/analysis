@@ -24,6 +24,17 @@ MIDDLE_LABEL = 1
 RIGHT_LABEL = 2
 
 
+class PaintContext:
+    def __init__(self, painter):
+        self._painter = painter
+
+    def __enter__(self):
+        return self._painter
+
+    def __exit__(self, *args):
+        self._painter.end()
+        return True
+
 class MyApplication(QApplication):
     def __init__(self, arg):
         super(MyApplication, self).__init__(arg)
@@ -152,20 +163,20 @@ class SpeechBalloon(QWidget):
 
         painterPath = self.window_path()
 
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing, True)
+        with PaintContext(QPainter(self)) as painter:
 
-        pal = self.palette()
-        fgColor = pal.color(QPalette.Active, QPalette.Text)
-        bgColor = pal.color(QPalette.Active, QPalette.Window)
+            painter.setRenderHint(QPainter.Antialiasing, True)
 
-        brush = QBrush(bgColor)
-        pen = QPen(fgColor)
-        pen.setWidth(self._pen_width)
-        painter.fillPath(painterPath, brush)
-        painter.strokePath(painterPath, pen)
+            pal = self.palette()
+            fgColor = pal.color(QPalette.Active, QPalette.Text)
+            bgColor = pal.color(QPalette.Active, QPalette.Window)
 
-        painter.end()
+            brush = QBrush(bgColor)
+            pen = QPen(fgColor)
+            pen.setWidth(self._pen_width)
+            painter.fillPath(painterPath, brush)
+            painter.strokePath(painterPath, pen)
+
 
         return super(SpeechBalloon, self).paintEvent(a0)
 

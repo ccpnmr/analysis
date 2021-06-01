@@ -308,7 +308,9 @@ class SpeechBalloon(QWidget):
         result = children[0] if len(children) else None
         return result
 
-    def showAt(self, pointer_pos):
+    def showAt(self, side_pointer_pos, alternatives):
+
+        side, pointer_pos = side_pointer_pos
         margins = self._get_margins(1)
         size_hint = self.centralWidget().sizeHint()
 

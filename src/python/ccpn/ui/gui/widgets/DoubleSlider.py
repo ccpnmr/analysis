@@ -4,7 +4,7 @@ from PyQt5 import QtGui
 from PyQt5.QtCore import QPointF, QRectF, Qt, QTimer, QObject, QRect, QPoint, pyqtProperty
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QLinearGradient, QBrush, QFont, QFontMetrics, QCursor, \
-    QGuiApplication, QIcon
+    QGuiApplication, QIcon, QScreen
 from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsItem, QGraphicsItemGroup, QGraphicsRectItem, QLabel, \
     QWidget, QGraphicsObject, QCheckBox, QLineEdit, QFormLayout, QTextEdit, QToolButton, QDialog, \
     QComboBox, QStyle
@@ -1416,12 +1416,18 @@ class PopoverButton(QToolButton):
 
 
     def _press_handler(self):
+
+        self._get_max_screen()
+
         window_side = OPPOSITE_SIDES[self._speech_balloon._pointer_side]
         middle_side = self._get_middle_side(window_side)
 
         self._speech_balloon.showAt(middle_side)
 
-    def _get_max_screen(self, global_rect):
+    def _get_max_screen(self):
+
+        global_rect = QRect(self.mapToGlobal(QPoint(0,0)),self.geometry().size())
+
         screen_by_overlap = {}
         for screen in QGuiApplication.screens():
             screen_rect = screen.availableGeometry()
@@ -1431,7 +1437,11 @@ class PopoverButton(QToolButton):
 
         best_screen_key = max(screen_by_overlap)
 
-        return screen_by_overlap[best_screen_key]
+        result = screen_by_overlap[best_screen_key]
+
+        return result
+
+
 
 
     def _get_middle_side(self, side):

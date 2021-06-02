@@ -86,8 +86,14 @@ from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
 from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSimple, \
     undoStackBlocking, renameObject, undoBlock, notificationBlanking, \
     ccpNmrV3CoreSetter, inactivity
-from ccpn.core.lib.DataStore import DataStore
+
+from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
+
 from ccpn.core.lib.Cache import cached
+
+
+from ccpn.util.traits.CcpNmrJson import CcpNmrJson, jsonHandler
+from ccpn.util.traits.CcpNmrTraits import Instance, Any
 
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY
 
@@ -165,7 +171,7 @@ def _includeInDimensionalCopy(func):
 # Spectrum class
 #=========================================================================================
 
-class Spectrum(AbstractWrapperObject):
+class Spectrum(AbstractWrapperObject, CcpNmrJson):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
     path to the stored NMR data file
     """
@@ -295,20 +301,27 @@ class Spectrum(AbstractWrapperObject):
 
     def __init__(self, project: Project, wrappedData: Nmr.DataSource):
 
-        super().__init__(project, wrappedData)
+        # super().__init__(project, wrappedData)
+        CcpNmrJson.__init__(self)
+        AbstractWrapperObject.__init__(self, project, wrappedData)
 
         # 1D data references
         self._intensities = None
         self._positions = None
 
         # References to DataStore / DataSource instances for filePath manipulation and data reading;
-        self._dataStore = None
+        # self._dataStore = None
         self._dataSource = None
 
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
         self._scaleChanged = False
+    #-----------------------------------------------------------------------------------------
+    # end __init__
+    #-----------------------------------------------------------------------------------------
 
+    _dataStore = DataStoreTrait(default_value = None, allow_none = True, read_only=True, ).tag(
+                                saveToJson = True)
     @property
     def dataStore(self):
         """A DataStore instance encoding the path and dataFormat of the (binary) spectrum data.
@@ -316,6 +329,8 @@ class Spectrum(AbstractWrapperObject):
         """
         return self._dataStore
 
+    # _dataSource = Any(default_value = None, allow_none = True).tag(
+    #                   savetoJson = False)
     @property
     def dataSource(self):
         """A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
@@ -714,7 +729,8 @@ class Spectrum(AbstractWrapperObject):
                                      (idx, newDataSource.pointCounts[idx], value))
         # we found a valid new file
         self._dataSource = newDataSource
-        self._dataStore = newDataStore
+        self.setTraitValue('_dataStore', newDataStore, force=True)
+        # self._dataStore = newDataStore
         self._dataStore._saveInternal()
         self._clearCache()
         self._saveSpectrumMetaData()
@@ -2679,7 +2695,9 @@ class Spectrum(AbstractWrapperObject):
 
         try:
             # Restore the dataStore info
-            spectrum._dataStore = DataStore()._importFromSpectrum(spectrum)
+            dataStore = DataStore()._importFromSpectrum(spectrum)
+            spectrum.setTraitValue('_dataStore', dataStore, force=True)
+            # spectrum._dataStore =
             # Restore the dataSource info
             spectrum._dataSource = spectrum._getDataSource(spectrum._dataStore, reportWarnings=True)
 
@@ -3184,7 +3202,8 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name) -> Spectrum
     dataStore.dataFormat = dataSource.dataFormat
     dataStore.spectrum = spectrum
     dataStore._saveInternal()
-    spectrum._dataStore = dataStore
+    # spectrum._dataStore = dataStore
+    spectrum.setTraitValue('_dataStore', dataStore, force=True)
 
     # update dataSource with proper expanded path
     dataSource.setPath(dataStore.aPath())

@@ -36,6 +36,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeTransfers
 
 
+
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
 

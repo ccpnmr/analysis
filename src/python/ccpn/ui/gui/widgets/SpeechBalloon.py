@@ -266,17 +266,17 @@ class SpeechBalloon(QWidget):
 
         pixmap = QPixmap(int(path.boundingRect().width() + 2), int(path.boundingRect().height() + 2))
 
-        painter = QPainter(pixmap)
+        with PaintContext(QPainter(pixmap)) as painter:
 
-        brush = QBrush(QColor('white'))
-        painter.fillRect(pixmap.rect(), brush)
 
-        brush = QBrush(QColor('black'))
-        painter.setBrush(brush)
+            brush = QBrush(QColor('white'))
+            painter.fillRect(pixmap.rect(), brush)
 
-        painter.drawPath(path)
+            brush = QBrush(QColor('black'))
+            painter.setBrush(brush)
 
-        painter.end()
+            painter.drawPath(path)
+
 
         result = pixmap.createHeuristicMask(False)
 

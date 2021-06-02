@@ -194,7 +194,7 @@ class PathRedirections(list):
 
 class DataStore(CcpNmrJson):
     """
-    This class wraps the inplementation of $DATA, $ALONGSIDE, $INSIDE redirections
+    This class wraps the implementation of $DATA, $ALONGSIDE, $INSIDE redirections
     """
 
     # For old Spectrum instances, its parses the api insideData, remoteData, alongSideData etc.
@@ -457,10 +457,8 @@ class DataStoreTrait(Instance):
     """Specific trait for a Datastore instance encoding the path and dataFormat of the (binary) spectrum data.
     None indicates no spectrum data file path has been defined
     """
-    klass = DataStore
-
     def __init__(self, **kwds):
-        Instance.__init__(self, klass=self.klass, **kwds)
+        Instance.__init__(self, klass=DataStore, **kwds)
 
     class jsonHandler(CcpNmrJsonClassHandlerABC):
         klass = DataStore

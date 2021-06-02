@@ -1814,3 +1814,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                                )
 #end class
 
+from ccpn.util.traits.CcpNmrTraits import Instance
+from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
+
+class DataSourceTrait(Instance):
+    """Specific trait for a Datasource instance encoding access to the (binary) spectrum data.
+    None indicates no spectrumDataSource has been defined
+    """
+    def __init__(self, **kwds):
+        Instance.__init__(self, klass=SpectrumDataSourceABC, **kwds)
+
+    class jsonHandler(CcpNmrJsonClassHandlerABC):
+        klass = SpectrumDataSourceABC

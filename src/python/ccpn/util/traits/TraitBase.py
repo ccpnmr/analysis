@@ -34,7 +34,7 @@ class TraitBase(HasTraits):
     """Class to give HasTraits dict-like methods keys, values, update, items and iteration 
     """
 
-    keysInOrder = False  # If True, return key in order defined by _traitOrder attribute
+    keysInOrder = True   # If True, return key in order defined by _traitOrder attribute
                          # of the keys
 
     def getTraitValue(self, trait):

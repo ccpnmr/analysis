@@ -226,7 +226,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         }
 
     #-----------------------------------------------------------------------------------------
-    # Internal NameSpace definitions
+    # Internal NameSpace  and other definitions
     #-----------------------------------------------------------------------------------------
 
     # Key for storing the dataStore info in the Ccpn internal parameter store
@@ -235,6 +235,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     _AdditionalAttribute = 'AdditionalAttribute'
     _ReferenceSubstancesPids = '_ReferenceSubstancesPids'
+
+    version = 1.0  # for json saving
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure

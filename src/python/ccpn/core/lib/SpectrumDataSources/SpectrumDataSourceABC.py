@@ -252,8 +252,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     _bigEndian = (sys.byteorder == 'big')
 
-
     saveAllTraitsToJson = True
+    version = 1.0  # for json saving
 
     date = CString(allow_none=True, default_value=None).tag(
                                                                 isDimensional=False,

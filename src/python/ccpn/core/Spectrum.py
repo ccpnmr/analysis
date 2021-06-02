@@ -69,28 +69,29 @@ from functools import partial
 from itertools import permutations
 import numpy
 
-from ccpn.util.Path import aPath
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.api.ccp.general import DataLocation
-# Dimensions
-# GWV next three imports are unresolved!
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FidDataDim as ApiFidDataDim
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FreqDataDim as ApiFreqDataDim
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SampledDataDim as ApiSampledDataDim
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.lib import Pid
+
+import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection, \
     getDefaultSpectrumColours
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSimple, \
+
+from ccpn.core.lib.ContextManagers import \
+    newObject, deleteObject, ccpNmrV3CoreSimple, \
     undoStackBlocking, renameObject, undoBlock, notificationBlanking, \
     ccpNmrV3CoreSetter, inactivity
 
 from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
 
-from ccpn.core.lib.Cache import cached
+from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import \
+    getDataFormats, getSpectrumDataSource, checkPathForSpectrumFormats
+from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 
+from ccpn.core.lib.Cache import cached
 
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, jsonHandler
 from ccpn.util.traits.CcpNmrTraits import Instance, Any
@@ -101,8 +102,9 @@ from ccpn.util.Constants import SCALETOLERANCE
 from ccpn.util.Common import isIterable, _getObjectsByPids
 from ccpn.util.Common import getAxisCodeMatch as axisCodeMapping
 from ccpn.util.Logging import getLogger
-
 from ccpn.util.decorators import logCommand, singleton
+from ccpn.util.Path import aPath
+
 
 
 INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
@@ -116,13 +118,6 @@ MAXALIASINGRANGE = 3
 DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
 SPECTRUMSERIES = 'spectrumSeries'
 SPECTRUMSERIESITEMS = 'spectrumSeriesItems'
-
-DIMENSIONFID = 'Fid'
-DIMENSIONFREQUENCY = 'Frequency'
-DIMENSIONFREQ = 'Freq'
-DIMENSIONSAMPLED = 'Sampled'
-DIMENSIONTYPES = [DIMENSIONFID, DIMENSIONFREQUENCY, DIMENSIONSAMPLED]
-_DIMENSIONCLASSES = {DIMENSIONFID: ApiFidDataDim, DIMENSIONFREQUENCY: ApiFreqDataDim, DIMENSIONSAMPLED: ApiSampledDataDim}
 
 
 #=========================================================================================
@@ -197,30 +192,29 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     _snr = None
     #-----------------------------------------------------------------------------------------
 
-    MAXDIM = 8  # Maximum dimensionality
+    # 'local' definitions of constants; defining defs in SpectrumLib to prevent circular imports
+    # elsewhere
+    MAXDIM = specLib.MAXDIM  # 8  # Maximum dimensionality
 
-    X_AXIS = 0
-    Y_AXIS = 1
-    Z_AXIS = 2
-    A_AXIS = 3
-    B_AXIS = 4
-    C_AXIS = 5
-    D_AXIS = 6
-    E_AXIS = 7
-    UNDEFINED_AXIS = 8
-    axisNames = {X_AXIS        : "x-axis", Y_AXIS: "y-axis", Z_AXIS: "z-axis", A_AXIS: "a-axis",
-                 B_AXIS        : "b-axis", C_AXIS: "c-axis", D_AXIS: "d-axis", E_AXIS: "e-axis",
-                 UNDEFINED_AXIS: "undefined"
-                 }
+    X_AXIS = specLib.X_AXIS  # 0
+    Y_AXIS = specLib.Y_AXIS  # 1
+    Z_AXIS = specLib.Z_AXIS  # 2
+    A_AXIS = specLib.A_AXIS  # 3
+    B_AXIS = specLib.B_AXIS  # 4
+    C_AXIS = specLib.C_AXIS  # 5
+    D_AXIS = specLib.D_AXIS  # 6
+    E_AXIS = specLib.E_AXIS  # 7
+    UNDEFINED_AXIS = specLib.Y_AXIS  # 8
+    axisNames = specLib.axisNames
 
-    X_DIM = 1
-    Y_DIM = 2
-    Z_DIM = 3
-    A_DIM = 4
-    B_DIM = 5
-    C_DIM = 6
-    D_DIM = 7
-    E_DIM = 8
+    X_DIM = specLib.X_DIM  # 1
+    Y_DIM = specLib.Y_DIM  # 2
+    Z_DIM = specLib.Z_DIM  # 3
+    A_DIM = specLib.A_DIM  # 4
+    B_DIM = specLib.B_DIM  # 5
+    C_DIM = specLib.C_DIM  # 6
+    D_DIM = specLib.D_DIM  # 7
+    E_DIM = specLib.E_DIM  # 8
 
     # Isotope-dependent assignment tolerances (in ppm)
     defaultAssignmentTolerance = 0.4
@@ -744,16 +738,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self.dataStore.aPath()
 
     def hasValidPath(self) -> bool:
-        """Return true if the spectrum's dataStore currently defines an valid dataSource object.
+        """Return true if the spectrum's dataSource currently defines an valid dataSource object
+        with a valid path defined
         """
-        return (self.dataSource is not None)
+        return self.dataSource is not None and self.dataSource.hasValidPath()
 
     def isEmptySpectrum(self):
         """Return True if instance refers to an empty spectrum; i.e. as in without actual spectral data"
         """
-        # local import to avoid cycles
-        from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
-
         if self.dataStore is None:
             raise RuntimeError('dataStore not defined')
         return self.dataStore.dataFormat == EmptySpectrumDataSource.dataFormat
@@ -975,7 +967,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """dimension types ('Fid' / 'Frequency' / 'Sampled'),  per dimension
         """
         ll = [x.className[:-7] for x in self._wrappedData.sortedDataDims()]
-        return tuple(DIMENSIONFREQUENCY if x == DIMENSIONFREQ else x for x in ll)
+        return tuple(specLib.DIMENSIONFREQUENCY if x == specLib.DIMENSIONFREQ else x for x in ll)
 
     # @dimensionTypes.setter
     # def dimensionTypes(self, value: Sequence):
@@ -2556,7 +2548,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         :param axisDict: dict of (axisCode, (startPpm,stopPpm)) key,value pairs
         :return: numpy array
         """
-        self.checkValidPath()
+        if not self.hasValidPath():
+            raise RuntimeError('Not valid path for %s ' % self)
         sliceTuples = self._axisDictToSliceTuples(axisDict)
         return self.dataSource.getRegionData(sliceTuples)
 
@@ -2571,9 +2564,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         extractProjectionToFile.
         Return new spectrum instance
         """
-        # local import to prevent cycles
-        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-
         dimensions = self.getByAxisCodes('dimensions', axisCodes)
 
         dataFormats = getDataFormats()
@@ -2624,7 +2614,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if axisDims[0] == axisDims[1]:
             raise ValueError('Invalid axisCodes %s; identical' % axisCodes)
 
-        self.checkValidPath()
+        if not self.hasValidPath():
+            raise RuntimeError('Not valid path for %s ' % self)
         return self.dataSource.allPlanes(xDim=axisDims[0], yDim=axisDims[1])
 
     def allSlices(self, axisCode, exactMatch=True):
@@ -2632,7 +2623,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         positions are 1-based
         """
         sliceDim = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)[0]
-        self.checkValidPath()
+        if not self.hasValidPath():
+            raise RuntimeError('Not valid path for %s ' % self)
         return self.dataSource.allSlices(sliceDim=sliceDim)
 
     #-----------------------------------------------------------------------------------------
@@ -2645,8 +2637,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         dataStore instance are incorrect
         Optionally report warnings
         """
-        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getSpectrumDataSource
-        from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 
         if dataStore is None:
             raise ValueError('dataStore not defined')
@@ -3228,9 +3218,6 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str =
     :return: Spectrum instance or None on error
     """
 
-    # Local  to prevent circular import
-    from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
-
     if not isIterable(isotopeCodes) or len(isotopeCodes) == 0:
         raise ValueError('invalid isotopeCodes "%s"' % isotopeCodes)
 
@@ -3256,9 +3243,6 @@ def _newSpectrum(project: Project, path: str, name: str) -> (Spectrum, None):
     """Creation of new Spectrum;
     :return: Spectrum instance or None on error
     """
-
-    # Local  to prevent circular import
-    from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
 
     logger = getLogger()
 
@@ -3294,8 +3278,6 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
     :param dimensions:  [dim_a, dim_b, ...];  defining dimensions to be extracted (1-based)
     :param position, spectrum position-vector of length spectrum.dimensionCount (list, tuple; 1-based)
     """
-    # local import to prevent cycles
-    from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
 
     getLogger().debug('Extracting from %s, dimensions=%r, position=%r, dataStore=%s, dataFormat %r' %
                       (spectrum, dimensions, position, dataStore, dataFormat))

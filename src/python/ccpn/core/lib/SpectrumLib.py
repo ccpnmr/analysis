@@ -35,6 +35,41 @@ from ccpn.util.Common import percentage, getAxisCodeMatchIndices
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeTransfers
 
+#=========================================================================================
+# Dimension definitions
+# Defined here to prevent cyclic import problems in other modules that need access to these definitions
+#=========================================================================================
+DIMENSIONFID = 'Fid'
+DIMENSIONFREQUENCY = 'Frequency'
+DIMENSIONFREQ = 'Freq'
+DIMENSIONSAMPLED = 'Sampled'
+DIMENSIONTYPES = [DIMENSIONFID, DIMENSIONFREQUENCY, DIMENSIONSAMPLED]
+
+MAXDIM = 8  # Maximum dimensionality
+
+X_AXIS = 0
+Y_AXIS = 1
+Z_AXIS = 2
+A_AXIS = 3
+B_AXIS = 4
+C_AXIS = 5
+D_AXIS = 6
+E_AXIS = 7
+UNDEFINED_AXIS = 8
+axisNames = {X_AXIS        : "x-axis", Y_AXIS: "y-axis", Z_AXIS: "z-axis", A_AXIS: "a-axis",
+             B_AXIS        : "b-axis", C_AXIS: "c-axis", D_AXIS: "d-axis", E_AXIS: "e-axis",
+             UNDEFINED_AXIS: "undefined"
+             }
+
+X_DIM = 1
+Y_DIM = 2
+Z_DIM = 3
+A_DIM = 4
+B_DIM = 5
+C_DIM = 6
+D_DIM = 7
+E_DIM = 8
+#=========================================================================================
 
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')

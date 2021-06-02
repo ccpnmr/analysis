@@ -85,6 +85,11 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         """
         return None
 
+    def hasValidPath(self):
+        """Always True
+        """
+        return True
+
     def readParameters(self):
         """Read the parameters from the Spectrum instance
         Returns self

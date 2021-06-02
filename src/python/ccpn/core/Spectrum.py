@@ -690,9 +690,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             raise RuntimeError('dataStore not defined')
 
         if value is None:
-            self.dataStore.path = None
-            self._dataSource = None
             self._clearCache()
+            self._dataStore.path = None
+            self._dataSource = None
             return
 
         newDataStore = DataStore.newFromPath(path=value, dataFormat=self.dataFormat)
@@ -703,7 +703,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         newDataSource = self._getDataSource(newDataStore, reportWarnings=True)
         if newDataSource is None:
-            raise ValueError('Spectrum.filePath: incompatible "%s"' % value)
+            raise ValueError('Spectrum.filePath: incompatible file "%s"' % value)
 
         else:
             # check some fundamental parameters
@@ -812,12 +812,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def axisCodes(self) -> Tuple[Optional[str], ...]:
         """axisCode, per dimension - None if no main ExpDimRef
         """
-        # # See if axis codes are set
-        # for expDim in self._wrappedData.experiment.expDims:
-        #     if expDim.findFirstExpDimRef(axisCode=None) is not None:
-        #         self._wrappedData.experiment.resetAxisCodes()
-        #         break
-
         result = []
         for dataDim in self._wrappedData.sortedDataDims():
             expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
@@ -945,19 +939,19 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         else:
             raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
-    @property
-    @_includeInDimensionalCopy
-    def blockSizes(self) -> Tuple[int, ...]:
-        """BlockSizes -  per dimension"""
-        return tuple(self._apiDataStore.blockSizes)
-
-    @blockSizes.setter
-    def blockSizes(self, value: Sequence):
-        apiDataSource = self._wrappedData
-        if len(value) == apiDataSource.numDim:
-            self._apiDataStore.blockSizes = value
-        else:
-            raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
+    # @property
+    # @_includeInDimensionalCopy
+    # def blockSizes(self) -> Tuple[int, ...]:
+    #     """BlockSizes -  per dimension"""
+    #     return tuple(self._apiDataStore.blockSizes)
+    #
+    # @blockSizes.setter
+    # def blockSizes(self, value: Sequence):
+    #     apiDataSource = self._wrappedData
+    #     if len(value) == apiDataSource.numDim:
+    #         self._apiDataStore.blockSizes = value
+    #     else:
+    #         raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
     #TODO: add setter for dimensionTypes
     @property
@@ -2332,6 +2326,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         NB: use getPlane() method for axisCode based access
         """
+        if self.dimensionCount < 2:
+            raise RuntimeError("Spectrum.getPlaneData: dimensionality < 2")
+
         if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
             data = numpy.zeros((self.pointCounts[yDim - 1], self.pointCounts[xDim - 1]), dtype=numpy.float32)

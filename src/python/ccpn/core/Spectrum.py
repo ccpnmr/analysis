@@ -8,29 +8,29 @@ CCPN data the preferred convention is to have the acquisition dimension as dimen
 Axes identifiers run from 0 to the dimensionCount-1 (e.g. 0,1,2 for a 3D)
 Per-axis values are given in the order data are stored in the spectrum file
 
-The axisCodes are used as an alternative axis identifier. These are unique strings (so they can
-be recognised even if the axes are reordered in display). The axisCodes reflect the isotope
-on the relevant axis, and can match the dimension identifiers in the reference experiment templates,
-linking a dimension to the correct reference experiment dimension. They are also used to
-automatically map spectrum display-axes between different spectra.
-
-By default the axisCodes are derived from the isotopeCodes that define the experimental data
-for each dimension. Axes that are linked by a one-bond magnetisation transfer could be given a
-lower-case suffix to show the nucleus bound to. Duplicate axis names should be distinguished
-by a numerical suffix.
+The axisCodes are used as an alternative axis identifier. These are unique strings that typically
+reflect the isotope on the relevant axis.
+By default upon loading a new spectrum, the axisCodes are derived from the isotopeCodes that define
+the experimental data for each dimension.
+They can match the dimension identifiers in the reference experiment templates, linking a dimension
+to the correct reference experiment dimension.
+They are also used to automatically map spectrum display-axes between different spectra on a first
+character basis.
+Axes that are linked by a one-bond magnetisation transfer could be given a lower-case suffix to
+show the nucleus bound to. Duplicate axis names should be distinguished by a numerical suffix.
 The rules are best illustrated by example:
 
-Experiment                 axisCodes
+Experiment                          axisCodes
 
-1D Bromine NMR             Br
-3D proton NOESY-TOCSY      H, H1, H2
-19F-13C-HSQC               Fc, Cf
-15N-NOESY-HSQC OR
-15N-HSQC-NOESY:            Hn, Nh, H
-4D HCCH-TOCSY              Hc, Ch, Hc1, Ch1
-HNCA/CB                    H N C
-HNCO                       H, N, CO
-HCACO                      H, CA, CO
+15N-NOESY-HSQC OR 15N-HSQC-NOESY:   Hn, Nh, H
+4D HCCH-TOCSY                       Hc, Ch, Hc1, Ch1
+HNCA/CB                             H, N, C
+HNCO                                H, N, CO
+HCACO                               H, CA, CO
+3D proton NOESY-TOCSY               H, H1, H2
+
+1D Bromine NMR                      Br
+19F-13C-HSQC                        Fc, Cf
 
 Useful reordering methods exist to get dimensional/axis parameters in a particular order, i.e.:
 getByDimension(), setByDimension(), getByAxisCode(), setByAxisCode()

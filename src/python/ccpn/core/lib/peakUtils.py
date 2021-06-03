@@ -1059,6 +1059,10 @@ def _getBins(y, binCount=None):
 def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaksAsLimits=False,
                                     doNeg=True, figOfMeritLimit=1, spectrum=None):
 
+    if not peaks:
+        getLogger().warning('Cannot snap peaks. No peaks found')
+        return []
+
     if not spectrum:
         spectrum = peaks[0].peakList.spectrum
     peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position

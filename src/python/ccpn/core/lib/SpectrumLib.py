@@ -1259,8 +1259,18 @@ def estimateNoiseLevel1D(y, f=10, stdFactor=0.5):
 
 def _filterROI1Darray(x, y, roi):
     """ Return region included in the ROI ppm position"""
-    mask = (x > max(roi)) | (x > min(roi))
+    mask = _getMaskedRegionInsideLimits(x, roi)
     return x[mask], y[mask]
+
+def _getMaskedRegionInsideLimits(x, limits):
+    """
+    Return an array of Booleans for the condition.
+    True if the point in the array is within the limits, False otherwise.
+    Limits and Array can be positives and/or negatives
+    """
+    import numpy.ma as ma
+    mask = ma.masked_inside(x, *limits)
+    return mask.mask
 
 
 def _filtered1DArray(data, ignoredRegions):

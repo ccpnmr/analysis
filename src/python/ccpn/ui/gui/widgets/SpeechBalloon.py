@@ -49,6 +49,67 @@ class MyApplication(QApplication):
         if window:
             window.move_pointer_to(pos)
 
+class BalloonMetrics:
+    NUM_SIDES = 4
+    SIGNS = [-1, -1, 1, 1]
+
+    def __init__(self, corner_radius=3, pointer_side=Side.RIGHT, pointer_height=10, pointer_width=20):
+        self.corner_radius = corner_radius
+        self.pointer_side = pointer_side
+        self.pointer_height = pointer_height
+        self.pointer_width = pointer_width
+        self.antialias_margin = 1
+
+    def _get_corner_margin(self):
+        result = self.corner_radius / sqrt(2)
+        result = int(ceil(result))
+
+        return result
+
+    def _add_margins(self, rect: QRect, margin, multiplier=1):
+        margins = [margin * multiplier] * 4
+        margins = [margins[i] * self.SIGNS[i] for i in range(self.NUM_SIDES)]
+
+        return rect.adjusted(*margins)
+
+    def _add_central_widget_margins(self, rect: QRect, multiplier=1):
+        return self._add_margins(rect, self._get_corner_margin(), multiplier)
+
+    def _add_pointer_margin(self, rect: QRect, multiplier=1):
+
+        signs = [self.SIGNS[i] * multiplier for i in range(self.NUM_SIDES)]
+        margin = [self.pointer_height] * self.NUM_SIDES
+
+        margin = [margin[i] * signs[i] for i in range(self.NUM_SIDES)]
+
+        mask = [0] * self.NUM_SIDES
+        mask[self.pointer_side] = 1
+
+        pointer_margins = [margin[i] * mask[i] for i in range(self.NUM_SIDES)]
+
+        return rect.adjusted(*pointer_margins)
+
+    def _add_antialias_margin(self, rect: QRect, multiplier=1):
+
+        return self._add_margins(rect, self.antialias_margin, multiplier)
+
+
+    def expand_to_perimeter(self, rect: QRect):
+
+        result = self._add_central_widget_margins(rect)
+        result = self._add_pointer_margin(result)
+        result = self._add_antialias_margin(result)
+
+        return result
+
+    def reduce_to_inside(self, rect: QRect):
+
+        result = self._add_antialias_margin(rect, multiplier=-1)
+        result = self._add_pointer_margin(result, multiplier=-1)
+        result = self._add_central_widget_margins(result, multiplier=-1)
+
+        return result
+
 
 class SpeechBalloon(QWidget):
     """
@@ -521,17 +582,62 @@ class MousePositionLabel(DoubleLabel):
         self.setLabels([x,y])
 
 
+def run_tests():
+    import pytest
+    pytest.main([__file__])
+
+
+def test_expand():
+    metrics = BalloonMetrics()
+
+    test_rect = QRect(QPoint(0, 0), QSize(10, 100))
+    assert QRect(QPoint(-3, -3), QSize(16, 106)) == metrics._add_central_widget_margins(test_rect)
+    assert QRect(QPoint(0,0), QSize(20, 100)) == metrics._add_pointer_margin(test_rect)
+    assert QRect(QPoint(-1, -1), QSize(12, 102)) == metrics._add_antialias_margin(test_rect)
+    assert QRect(QPoint(-4, -4), QSize(28, 108)) == metrics.expand_to_perimeter(test_rect)
+
+
+def test_reduce():
+    metrics = BalloonMetrics()
+
+    test_rect = QRect(QPoint(0, 0), QSize(10,100))
+
+    assert QRect(QPoint(1, 1), QSize(8, 98)) == metrics._add_antialias_margin(test_rect, multiplier=-1)
+    assert QRect(QPoint(3, 3), QSize(4, 94)) == metrics._add_central_widget_margins(test_rect, multiplier=-1)
+    assert QRect(QPoint(0, 0), QSize(0, 100)) == metrics._add_pointer_margin(test_rect, multiplier=-1)
+    assert test_rect == metrics.reduce_to_inside(QRect(QPoint(-4, -4), QSize(28, 108)))
+
+
+def test_expand_sides():
+    metrics = BalloonMetrics()
+
+    test_rect = QRect(QPoint(0, 0), QSize(100, 100))
+
+    metrics.pointer_side = Side.BOTTOM
+    assert QRect(QPoint(0,0), QSize(100, 110)) == metrics._add_pointer_margin(test_rect)
+    metrics.pointer_side = Side.TOP
+    assert QRect(QPoint(0, -10), QSize(100, 110)) == metrics._add_pointer_margin(test_rect)
+    metrics.pointer_side = Side.LEFT
+    assert QRect(QPoint(-10, 0), QSize(110, 100)) == metrics._add_pointer_margin(test_rect)
+    metrics.pointer_side = Side.RIGHT
+    assert QRect(QPoint(0, 0), QSize(110, 100)) == metrics._add_pointer_margin(test_rect)
+
+
 if __name__ == '__main__':
-    app = MyApplication(sys.argv)
 
-    window2 = SpeechBalloon()
-    window2.cornerRadius = 3
+    if '-t' in sys.argv:
+        run_tests()
+    else:
+        app = MyApplication(sys.argv)
 
-    app.setActiveWindow(window2)
+        window2 = SpeechBalloon()
+        window2.cornerRadius = 3
 
-    label = MousePositionLabel(parent=window2)
+        app.setActiveWindow(window2)
 
-    window2.setCentralWidget(label)
-    window2.show()
+        label = MousePositionLabel(parent=window2)
 
-    app.exec_()
+        window2.setCentralWidget(label)
+        window2.show()
+
+        app.exec_()

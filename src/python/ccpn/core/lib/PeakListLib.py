@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-01 12:39:28 +0100 (Tue, June 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 20:14:14 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -433,6 +433,7 @@ def _pickPeaks1d(peakList, dataRange, intensityRange, peakFactor1D=1) -> List['P
     """
     from ccpn.core.lib.peakUtils import simple1DPeakPicker, _1DregionsFromLimits
 
+    peaks = []
     with undoBlockWithoutSideBar():
         with notificationEchoBlocking():
             spectrum = peakList.spectrum
@@ -457,6 +458,8 @@ def _pickPeaks1d(peakList, dataRange, intensityRange, peakFactor1D=1) -> List['P
                 if minIrange < height < maxIrange:
                     if position not in currentPositions:
                         peak = peakList.newPeak(ppmPositions=[position], height=height)
+                        peaks.append(peak)
+    return peaks
 
 def _pickPeaks1d_(peakList, dataRange, intensityRange=None, size: int = 3, mode: str = 'wrap') -> List['Peak']:
     """

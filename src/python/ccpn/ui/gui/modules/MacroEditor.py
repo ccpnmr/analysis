@@ -2,7 +2,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-11 12:55:11 +0000 (Thu, March 11, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-04 14:58:02 +0100 (Fri, June 04, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -541,13 +542,18 @@ class MacroEditor(CcpnModule):
                 getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
 
     def _closeModule(self):
-        """Re-implementation of closeModule  """
+        """Re-implementation of closeModule"""
         if self._isDirty():
             ok = MessageDialog.showYesNoWarning('Close Macro', 'Do you want save?')
             if ok:
                 self.saveMacro()
         self._deleteTempFile()
         self._removeMacroFromCurrent()
+        try:
+            self.textEditor.backend.stop()
+        except Exception as err:
+            getLogger().warning(f'error closing macro editor {err}')
+
         super()._closeModule()
 
 

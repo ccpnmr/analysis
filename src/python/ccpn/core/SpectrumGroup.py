@@ -4,7 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-24 00:05:20 +0000 (Wed, March 24, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-04 17:58:15 +0100 (Fri, June 04, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -246,8 +247,8 @@ class SpectrumGroup(AbstractWrapperObject):
     def seriesUnits(self, value):
         """Set the seriesUnits for the spectrumGroup
         """
-        if not isinstance(value, str):
-            raise ValueError("seriesUnits must be a string.")
+        if not isinstance(value, (str, type(None))):
+            raise ValueError("seriesUnits must be a string or None.")
 
         self.setParameter(SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESUNITS, value)
 
@@ -262,8 +263,8 @@ class SpectrumGroup(AbstractWrapperObject):
     def seriesType(self, value):
         """Set the seriesType for the spectrumGroup
         """
-        if not isinstance(value, int):
-            raise ValueError("seriesType must be an int.")
+        if not isinstance(value, (int, type(None))):
+            raise ValueError("seriesType must be an int or None.")
 
         self.setParameter(SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESTYPE, value)
 
@@ -328,7 +329,7 @@ class SpectrumGroup(AbstractWrapperObject):
             try:
                 setattr(newSpectrumGroup, name, val)
             except Exception as e:
-                getLogger().warning('Error cloning: %s. Invalid attr: %s' %(self.pid, name))
+                getLogger().warning('Error cloning: %s. Invalid attr: %s - %s' %(self.pid, name, str(e)))
 
         return newSpectrumGroup
 

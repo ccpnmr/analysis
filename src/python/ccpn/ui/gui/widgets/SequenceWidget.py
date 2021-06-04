@@ -9,8 +9,9 @@ GWV: 22/4/2018: New handling of colours
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -19,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-27 09:43:02 +0000 (Tue, October 27, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-06-04 16:43:28 +0100 (Fri, June 04, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -57,7 +58,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 
 
-class SequenceModule():
+class SequenceWidget():
     """
     The module displays all chains in the project as one-letter amino acids. The one letter residue
     sequence codes are all instances of the GuiChainResidue class and the style applied to a residue
@@ -65,15 +66,16 @@ class SequenceModule():
     stretch of residues matches a given stretch of connected NmrResidues. The QGraphicsScene and
     QGraphicsView instances provide the canvas on to which the amino acids representations are drawn.
     """
-    includeSettingsWidget = False
-    maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
-    settingsPosition = 'left'
 
-    _alreadyOpened = False
-    _onlySingleInstance = True
-    _currentModule = None
-
-    className = 'SequenceModule'
+    # includeSettingsWidget = False
+    # maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
+    # settingsPosition = 'left'
+    #
+    # _alreadyOpened = False
+    # _onlySingleInstance = True
+    # _currentModule = None
+    #
+    # className = 'SequenceModule'
 
     def __init__(self, moduleParent=None, parent=None, mainWindow=None, name='Sequence', chains=None):
         #CcpnModule.__init__(self, size=(10, 30), name='Sequence', closable=False)
@@ -440,10 +442,10 @@ class SequenceModule():
                                              'Chain',
                                              self._refreshChainLabels)
         self._nmrResidueNotifier = Notifier(self.project,
-                                         [Notifier.CHANGE],
-                                         'NmrResidue',
-                                         self._refreshChainLabels,
-                                         onceOnly=True)
+                                            [Notifier.CHANGE],
+                                            'NmrResidue',
+                                            self._refreshChainLabels,
+                                            onceOnly=True)
 
     def _unRegisterNotifiers(self):
         """unregister notifiers
@@ -521,10 +523,10 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
     along with a dictionary mapping Residue objects and GuiChainResidues, which is required for assignment.
     """
 
-    def __init__(self, sequenceModule, mainWindow, scene, position, chain, placeholder=None, tryToUseSequenceCodes=False):
+    def __init__(self, sequenceWidget, mainWindow, scene, position, chain, placeholder=None, tryToUseSequenceCodes=False):
         QtWidgets.QGraphicsTextItem.__init__(self)
 
-        self.sequenceModule = sequenceModule
+        self.sequenceWidget = sequenceWidget
         self.mainWindow = mainWindow
         self.scene = scene
         self.chain = chain

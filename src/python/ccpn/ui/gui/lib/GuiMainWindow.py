@@ -860,10 +860,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         from ccpn.util.Path import aPath
 
         importantList = (('Beginners Tutorial', pa.beginnersTutorialPath),
-                         ('Backbone Tutorial', pa.backboneAssignmentTutorialPath),
+                         ('Backbone Assignment Tutorial', pa.backboneAssignmentTutorialPath),
                          ('Chemical Shift Perturbation Tutorial', pa.cspTutorialPath),
-                         ('Screen Tutorial', pa.analysisScreenTutorialPath),
-                         ('Solid State Tutorial', pa.solidStateTutorialPath))
+                         ('Solid State Peptide Tutorial', pa.solidStatePeptideTutorialPath),
+                         ('Solid State SH3 Tutorial', pa.solidStateSH3TutorialPath),
+                         ('Screen Tutorial', pa.analysisScreenTutorialPath))
 
         # add link to website videos
         modulesMenu.addAction(Action(modulesMenu, text='Video Tutorials && Manual', callback=self._showCCPNTutorials))

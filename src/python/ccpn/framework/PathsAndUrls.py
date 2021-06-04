@@ -63,7 +63,8 @@ beginnersTutorialPath           = ccpnCodePath / 'tutorials' / 'BeginnersTutoria
 backboneAssignmentTutorialPath  = ccpnCodePath / 'tutorials' / 'BackboneAssignmentTutorial.pdf'
 screenTutorialPath              = ccpnCodePath / 'tutorials' / 'CcpNmr_AnalysisScreen_Tutorial_Beta2Release.pdf'
 cspTutorialPath                 = ccpnCodePath / 'tutorials' / 'CSPTutorial.pdf'
-solidStateTutorialPath          = ccpnCodePath / 'tutorials' / 'SolidStateAssignmentTutorial.pdf'
+solidStatePeptideTutorialPath          = ccpnCodePath / 'tutorials' / 'SolidStatePeptideAssignmentTutorial.pdf'
+solidStateSH3TutorialPath          = ccpnCodePath / 'tutorials' / 'SolidStateAssignmentTutorial.pdf'
 analysisScreenTutorialPath      = ccpnCodePath / 'tutorials' / 'ScreenTutorial.pdf'
 howTosPath                      = tutorialsPath / 'How-Tos'
 

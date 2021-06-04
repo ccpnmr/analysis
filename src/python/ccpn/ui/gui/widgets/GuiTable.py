@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 13:07:13 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 15:23:21 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2226,8 +2226,8 @@ GuiTable::item::selected {
             for cell in self._cellNotifiers:
                 if cell is not None:
                     cell.unRegister()
+            self._cellNotifiers = []
 
-        self._cellNotifiers = None
         if self._selectCurrentNotifier is not None:
             self._selectCurrentNotifier.unRegister()
             self._selectCurrentNotifier = None

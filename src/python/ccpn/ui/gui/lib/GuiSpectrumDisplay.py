@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-23 14:36:21 +0100 (Fri, April 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 15:23:20 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1507,12 +1507,6 @@ class GuiSpectrumDisplay(CcpnModule):
                 self.showSpectrumToolbar()
             else:
                 self.hideSpectrumToolbar()
-
-    def close(self):
-        """
-        Close the module from the commandline
-        """
-        self._closeModule()
 
     def _closeModule(self):
         """

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 11:00:56 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -159,6 +159,11 @@ class PandasTableModuleExample(CcpnModule):
     @dataFrame.setter
     def dataFrame(self, dataFrame):
         self.pandasTable.dataFrame = dataFrame
+
+    def _closeModule(self):
+        """Re-implementation of closeModule function from CcpnModule to unregister notification """
+        self.pandasTable._close()
+        super()._closeModule()
 
 
 if __name__ == '__main__':

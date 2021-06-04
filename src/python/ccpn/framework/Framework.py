@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 16:19:50 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:29 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1580,6 +1580,7 @@ class Framework(NotifierBase):
             okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
                                                                  phrase='create a new')
             if okToContinue:
+                self.ui.mainWindow.moduleArea._closeAll()
                 project = self.newProject()
                 if project is None:
                     raise RuntimeError('Unable to create new project')
@@ -2683,40 +2684,40 @@ class Framework(NotifierBase):
         popup = CreateChainPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
         popup.exec_()
 
-    @logCommand('application.')
-    def toggleSequenceModule(self):
-        """
-        Toggles whether Sequence Module is displayed or not
-        """
-        self.showSequenceModule()
+    # @logCommand('application.')
+    # def toggleSequenceModule(self):
+    #     """
+    #     Toggles whether Sequence Module is displayed or not
+    #     """
+    #     self.showSequenceModule()
 
-    @logCommand('application.')
-    def showSequenceModule(self, position='top', relativeTo=None):
-        """
-        Displays Sequence Module at the top of the screen.
-        """
-        from ccpn.ui.gui.modules.SequenceModule import SequenceModule
+    # @logCommand('application.')
+    # def showSequenceModule(self, position='top', relativeTo=None):
+    #     """
+    #     Displays Sequence Module at the top of the screen.
+    #     """
+    #     from ccpn.ui.gui.modules.SequenceModule import SequenceModule
+    #
+    #     if SequenceModule._alreadyOpened is False:
+    #         mainWindow = self.ui.mainWindow
+    #         self.sequenceModule = SequenceModule(mainWindow=mainWindow)
+    #         mainWindow.moduleArea.addModule(self.sequenceModule,
+    #                                         position=position, relativeTo=relativeTo)
+    #         action = self._findMenuAction('View', 'Show Sequence')
+    #         if action:
+    #             action.setChecked(True)
+    #
+    #         # set the colours of the currently highlighted chain in open sequenceGraph
+    #         # should really be in the class, but doesn't fire correctly during __init__
+    #         self.sequenceModule.populateFromSequenceGraphs()
 
-        if SequenceModule._alreadyOpened is False:
-            mainWindow = self.ui.mainWindow
-            self.sequenceModule = SequenceModule(mainWindow=mainWindow)
-            mainWindow.moduleArea.addModule(self.sequenceModule,
-                                            position=position, relativeTo=relativeTo)
-            action = self._findMenuAction('View', 'Show Sequence')
-            if action:
-                action.setChecked(True)
-
-            # set the colours of the currently highlighted chain in open sequenceGraph
-            # should really be in the class, but doesn't fire correctly during __init__
-            self.sequenceModule.populateFromSequenceGraphs()
-
-    @logCommand('application.')
-    def hideSequenceModule(self):
-        """Hides sequence module"""
-
-        if hasattr(self, 'sequenceModule'):
-            self.sequenceModule.close()
-            delattr(self, 'sequenceModule')
+    # @logCommand('application.')
+    # def hideSequenceModule(self):
+    #     """Hides sequence module"""
+    #
+    #     if hasattr(self, 'sequenceModule'):
+    #         self.sequenceModule.close()
+    #         delattr(self, 'sequenceModule')
 
     def inspectMolecule(self):
         pass

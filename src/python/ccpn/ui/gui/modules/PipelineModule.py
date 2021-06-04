@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 11:00:56 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -515,16 +515,10 @@ class GuiPipeline(CcpnModule, Pipeline):
         self._unregisterNotifier()
         super()._closeModule()
 
-    def close(self):
-        """
-        Close the table from the commandline
-        """
-        self._closeModule()
-
     ####################################_________ others____________###########################################
 
     def _unregisterNotifier(self):
-        "Cleanup of Notifierers"
+        """Cleanup of Notifierers"""
         if self._inputDataDeletedNotifier:
             self._inputDataDeletedNotifier.unRegister()
 

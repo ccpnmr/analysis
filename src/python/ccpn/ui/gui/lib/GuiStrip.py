@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2216,7 +2216,7 @@ class GuiStrip(Frame):
     def visibleSpectra(self):
         """List of spectra currently visible in the strip. Ordered as in the spectrumDisplay
         """
-        return [sv.spectrum for sv in self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews) if sv.isVisible()]
+        return self.spectrumDisplay.visibleSpectra
 
     def _invertSelectedSpectra(self):
 

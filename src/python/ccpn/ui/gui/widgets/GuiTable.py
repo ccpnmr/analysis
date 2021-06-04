@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 14:27:27 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,7 @@ from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT, \
     DATAFRAME_INDEX, DATAFRAME_PID
 
+from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
@@ -1040,13 +1041,13 @@ GuiTable::item::selected {
             return visCol
 
     def _setContextMenu(self, enableExport=True, enableDelete=True):
-        self.tableMenu = QtWidgets.QMenu()
+        self.tableMenu = Menu('', self, isFloatWidget=True)
         setWidgetFont(self.tableMenu, )
         self.tableMenu.addAction("Copy clicked cell value", self._copySelectedCell)
         if enableExport:
             self.tableMenu.addAction("Export Visible Table", partial(self.exportTableDialog, exportAll=False))
         if enableExport:
-            self.tableMenu.addAction("Export All", partial(self.exportTableDialog, exportAll=True))
+            self.tableMenu.addAction("Export All Columns", partial(self.exportTableDialog, exportAll=True))
         if enableDelete:
             self.tableMenu.addAction("Delete", self.deleteObjFromTable)
 
@@ -2225,8 +2226,8 @@ GuiTable::item::selected {
             for cell in self._cellNotifiers:
                 if cell is not None:
                     cell.unRegister()
+            self._cellNotifiers = []
 
-        self._cellNotifiers = None
         if self._selectCurrentNotifier is not None:
             self._selectCurrentNotifier.unRegister()
             self._selectCurrentNotifier = None

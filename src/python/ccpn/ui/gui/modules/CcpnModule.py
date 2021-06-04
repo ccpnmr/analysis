@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 11:00:56 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -437,7 +437,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         else:
             current = target
 
-        while current.parent() != None:
+        while current.parent() is not None:
             if isinstance(current, DockArea):
                 break
             current = current.parent()
@@ -554,7 +554,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
     @property
     def titleName(self):
-        'module name without serial'
+        """module name without serial"""
         moduleName = self.name()
         splits = moduleName.split(self._nameSplitter)
         if len(splits) > 1:
@@ -814,22 +814,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         # delete any notifiers initiated with this Module
         self.deleteAllNotifiers()
 
-        # GWV 20181201: diabled; bad idea (I put it here!)
-        # # Try de-registering any notifiers or object with unRegister() method for notifiers
-        # try:
-        #     notifiers = [n for n in self.__dict__.values()
-        #                    if (isinstance(n, Notifier) or
-        #                        isinstance(n, GuiNotifier) or
-        #                        isinstance(n, _PulldownABC)
-        #                        )]
-        #     logger = getLogger()
-        #     logger.debug3('>>> notifiers of %s: %s' % (self, notifiers))
-        #     for notifier in notifiers:
-        #         logger.debug3('>>> unregistering: %s' % notifier)
-        #         notifier.unRegister()
-        # except:
-        #     pass
-
         getLogger().debug('Closing %s' % str(self.container()))
 
         if self.maximised:
@@ -844,6 +828,11 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                             self._container = i
 
         super().close()
+
+    def close(self):
+        """Close the module from the commandline
+        """
+        self._closeModule()
 
     def enterEvent(self, event):
         if self.mainWindow:
@@ -1002,7 +991,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
     def findWindow(self):
         current = self
-        while current.parent() != None:
+        while current.parent() is not None:
             current = current.parent()
         return current
 
@@ -1070,7 +1059,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         targetWidget = QtWidgets.QApplication.instance().widgetAt(endPosition)
         if (self.drag.target() is None) and (not globalDockRect.contains(endPosition)):
-            if targetWidget == None:
+            if targetWidget is None:
                 self.float()
                 window = self.findWindow()
                 window.move(endPosition)

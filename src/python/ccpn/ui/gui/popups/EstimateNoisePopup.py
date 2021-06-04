@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 16:32:06 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -57,7 +58,7 @@ ESTIMATEAUTO = 'estimateAuto'
 
 class EstimateNoisePopup(CcpnDialogMainWidget):
     """
-    Class to implement a ppopup for estimating noise in a set of spectra
+    Class to implement a popup for estimating noise in a set of spectra
     """
 
     def __init__(self, parent=None, mainWindow=None, title='Estimate Noise',
@@ -311,7 +312,7 @@ class NoiseTab(Widget):
         self.noiseLevelSpinBox.setMaximum(1e12)
         self.noiseLevelSpinBox.setMinimum(0.1)
         self.noiseLevelSpinBox.setMinimumCharacters(15)
-        self.recalculateLevelsButton = Button(self, grid=(row, 2), callback=self._estimateNoise, text='Estimate Noise')
+        self.recalculateLevelsButton = Button(self, grid=(row, 2), callback=self._estimateNoise, text='Re-estimate Noise')
 
         row += 1
         Label(self, text='Current Noise Level', grid=(row, 0), vAlign='c', hAlign='l')
@@ -319,7 +320,10 @@ class NoiseTab(Widget):
 
         row += 1
         self.noiseLevelButtons = ButtonList(self, grid=(row, 2), callbacks=[self._setNoiseLevel],
-                                            texts=['Set noiseLevel'])
+                                            texts=['Set Noise Level'])
+        row += 1
+        self.noiseLevelToAllButtons = ButtonList(self, grid=(row, 2), callbacks=[self._setNoiseLevelToAll],
+                                            texts=['Set Noise Level To All'])
 
         # remember the row for subclassed Nd below
         self.row = row
@@ -383,6 +387,21 @@ class NoiseTab(Widget):
         self.spectrum.noiseLevel = value
         self.spectrum.negativeNoiseLevel = -value if value > 0 else value * 2
         self._populate()
+
+    def _setNoiseLevelToAll(self):
+        """
+        Set the noise level from the current tab to all spectra.
+        """
+        from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+
+        spectra = self._parent.orderedSpectra
+        value = float(self.noiseLevelSpinBox.value())
+        with undoBlockWithoutSideBar():
+            for spectrum in spectra:
+                spectrum.noiseLevel = value
+                spectrum.negativeNoiseLevel = -value if value > 0 else value * 2
+        for tab in self._parent._noiseTab:
+            tab._populate()
 
     def _storeWidgetState(self):
         """Store the state of the checkBoxes between popups

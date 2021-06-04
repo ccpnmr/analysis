@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:48 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:29 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -911,7 +911,12 @@ def _getBins(y, binCount=None):
 
 
 def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaksAsLimits=False,
-                                      doNeg=True, figOfMeritLimit=1, spectrum=None):
+                                    doNeg=True, figOfMeritLimit=1, spectrum=None):
+
+    if not peaks:
+        getLogger().warning('Cannot snap peaks. No peaks found')
+        return []
+
     if not spectrum:
         spectrum = peaks[0].peakList.spectrum
     peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position

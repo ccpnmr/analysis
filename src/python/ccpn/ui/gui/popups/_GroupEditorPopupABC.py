@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -486,6 +486,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
 
         self.obj = obj
         self.editMode = editMode
+        self._modelsConnected = False
 
         # open popup with these items already added to left ListWidget. Ready to create the group.
         # assumes that defaultItems is a list of core objects (with pid)
@@ -495,7 +496,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             # define the destination for the widgets - Dialog has mainWidget, will change for tabbed widgets
             self._dialogWidget = self.mainWidget
         else:
-            # hPolicy='expanding' gives wierd results
+            # hPolicy='expanding' gives weird results
             self._tabWidget = Tabs(self.mainWidget, grid=(0, 0))
 
             # define the new tab widget
@@ -636,20 +637,24 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         # self.leftListWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
 
     def _connectModels(self):
-        self.nameEdit.textChanged.connect(self._updateNameOnEdit)
-        self.commentEdit.textChanged.connect(self._updateCommentOnEdit)
-        self.leftListWidget.model().dataChanged.connect(self._updateModelsOnEdit)
-        self.leftListWidget.model().rowsRemoved.connect(self._updateModelsOnEdit)
-        self.leftListWidget.model().rowsInserted.connect(self._updateModelsOnEdit)
-        self.leftListWidget.model().rowsMoved.connect(self._updateModelsOnEdit)
+        if not self._modelsConnected:
+            self.nameEdit.textChanged.connect(self._updateNameOnEdit)
+            self.commentEdit.textChanged.connect(self._updateCommentOnEdit)
+            self.leftListWidget.model().dataChanged.connect(self._updateModelsOnEdit)
+            self.leftListWidget.model().rowsRemoved.connect(self._updateModelsOnEdit)
+            self.leftListWidget.model().rowsInserted.connect(self._updateModelsOnEdit)
+            self.leftListWidget.model().rowsMoved.connect(self._updateModelsOnEdit)
+            self._modelsConnected = True
 
     def _disconnectModels(self):
-        self.nameEdit.textChanged.disconnect(self._updateNameOnEdit)
-        self.commentEdit.textChanged.disconnect(self._updateCommentOnEdit)
-        self.leftListWidget.model().dataChanged.disconnect(self._updateModelsOnEdit)
-        self.leftListWidget.model().rowsRemoved.disconnect(self._updateModelsOnEdit)
-        self.leftListWidget.model().rowsInserted.disconnect(self._updateModelsOnEdit)
-        self.leftListWidget.model().rowsMoved.disconnect(self._updateModelsOnEdit)
+        if self._modelsConnected:
+            self.nameEdit.textChanged.disconnect(self._updateNameOnEdit)
+            self.commentEdit.textChanged.disconnect(self._updateCommentOnEdit)
+            self.leftListWidget.model().dataChanged.disconnect(self._updateModelsOnEdit)
+            self.leftListWidget.model().rowsRemoved.disconnect(self._updateModelsOnEdit)
+            self.leftListWidget.model().rowsInserted.disconnect(self._updateModelsOnEdit)
+            self.leftListWidget.model().rowsMoved.disconnect(self._updateModelsOnEdit)
+            self._modelsConnected = False
 
     def _setRightWidgets(self):
 

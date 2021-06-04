@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -224,12 +224,6 @@ class ViolationTableModule(CcpnModule):
         """Re-implementation of closeModule function from CcpnModule to unregister notification """
         self.violationTable._close()
         super()._closeModule()
-
-    def close(self):
-        """
-        Close the table from the commandline
-        """
-        self._closeModule()
 
     @property
     def dataFrame(self):

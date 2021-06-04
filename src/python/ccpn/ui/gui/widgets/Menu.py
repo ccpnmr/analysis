@@ -4,7 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:38 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -38,6 +39,7 @@ MACROSMENU = 'User Macros'
 CCPNMACROSMENU = 'Run CCPN Macros'
 USERMACROSMENU = 'Run User Macros'
 TUTORIALSMENU = 'Tutorials'
+HOWTOSMENU = 'How-Tos'
 PLUGINSMENU = 'User Plugins'
 CCPNPLUGINSMENU = 'CCPN Plugins'
 
@@ -73,6 +75,32 @@ class Menu(QtWidgets.QMenu, Base):
         """ this adds a normal QMenu """
         QtWidgets.QMenu.addMenu(self, menu)
         return menu
+
+    def getItems(self):
+        dd = {i.text(): i for i in self.actions()}
+        return dd
+
+    def getActionByName(self, name):
+        """
+        Given a name return the menu action
+        """
+        return self.getItems().get(name, None)
+
+    def moveActionBelowName(self, action, targetActionName):
+        """
+        Move a action below a pre-existing name
+        """
+        targetAction = self.getActionByName(targetActionName)
+        if targetAction:
+            self.insertAction(action, targetAction)
+
+    def moveActionAboveName(self, action, targetActionName):
+        """
+        Move a action above a pre-existing name
+        """
+        targetAction = self.getActionByName(targetActionName)
+        if targetAction:
+            self.insertAction(targetAction, action)
 
 
 class MenuBar(QtWidgets.QMenuBar):

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 14:27:27 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:29 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1210,8 +1210,18 @@ def estimateNoiseLevel1D(y, f=10, stdFactor=0.5):
 
 def _filterROI1Darray(x, y, roi):
     """ Return region included in the ROI ppm position"""
-    mask = (x > max(roi)) | (x > min(roi))
+    mask = _getMaskedRegionInsideLimits(x, roi)
     return x[mask], y[mask]
+
+def _getMaskedRegionInsideLimits(x, limits):
+    """
+    Return an array of Booleans for the condition.
+    True if the point in the array is within the limits, False otherwise.
+    Limits and Array can be positives and/or negatives
+    """
+    import numpy.ma as ma
+    mask = ma.masked_inside(x, *limits)
+    return mask.mask
 
 
 def _filtered1DArray(data, ignoredRegions):

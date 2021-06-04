@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-07 09:53:45 +0100 (Fri, May 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:29 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -67,8 +67,10 @@ beginnersTutorialPath           = ccpnCodePath / 'tutorials' / 'BeginnersTutoria
 backboneAssignmentTutorialPath  = ccpnCodePath / 'tutorials' / 'BackboneAssignmentTutorial.pdf'
 screenTutorialPath              = ccpnCodePath / 'tutorials' / 'CcpNmr_AnalysisScreen_Tutorial_Beta2Release.pdf'
 cspTutorialPath                 = ccpnCodePath / 'tutorials' / 'CSPTutorial.pdf'
-solidStateTutorialPath          = ccpnCodePath / 'tutorials' / 'SolidStateAssignmentTutorial.pdf'
+solidStatePeptideTutorialPath          = ccpnCodePath / 'tutorials' / 'SolidStatePeptideAssignmentTutorial.pdf'
+solidStateSH3TutorialPath          = ccpnCodePath / 'tutorials' / 'SolidStateAssignmentTutorial.pdf'
 analysisScreenTutorialPath      = ccpnCodePath / 'tutorials' / 'ScreenTutorial.pdf'
+howTosPath                      = tutorialsPath / 'How-Tos'
 
 documentationPath               = ccpnCodePath / 'doc' / 'build' / 'html' / 'index.html'
 licensePath                     = ccpnCodePath / 'LICENSE.txt'

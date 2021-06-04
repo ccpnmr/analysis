@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-26 19:50:50 +0100 (Wed, May 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -105,7 +105,7 @@ gY = 0.715158
 bY = 0.072187
 COLOUR_LIGHT_THRESHOLD = 80
 COLOUR_DARK_THRESHOLD = 190  #(256 - COLOUR_LIGHT_THRESHOLD)
-COLOUR_THRESHOLD = 60
+COLOUR_THRESHOLD = 40
 
 
 # Inverse of sRGB "gamma" function. (approx 2.2)

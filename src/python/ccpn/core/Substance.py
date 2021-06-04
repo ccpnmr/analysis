@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:48 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:29 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -544,11 +544,11 @@ class Substance(AbstractWrapperObject):
     @property
     def referenceSpectra(self) -> typing.Tuple[Spectrum, ...]:
         """Reference Spectra acquired for Substance"""
-        _referenceSpectra = []
-        for spectum in self.project.spectra:
-            if self in spectum.referenceSubstances:
-                _referenceSpectra.append(spectum)
-        return tuple(_referenceSpectra)
+        _referenceSpectra = tuple([sp for sp in self.project.spectra if self in sp.referenceSubstances])
+        # _referenceSpectra = tuple(filter(lambda sp: self in sp.referenceSubstances, self.project.spectra)) # just an alternative way to a loop
+
+        return _referenceSpectra
+
 
     @referenceSpectra.setter
     def referenceSpectra(self, spectra):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -797,6 +797,12 @@ class GuiSpectrumDisplay(CcpnModule):
         GLSignals.emitPaintEvent()
 
     @property
+    def visibleSpectra(self):
+        """List of spectra currently visible in the spectrumDisplay
+        """
+        return [sv.spectrum for sv in self.orderedSpectrumViews(self.spectrumViews) if sv.isVisible()]
+
+    @property
     def isGrouped(self):
         """Return whether the spectrumDisplay contains grouped spectra
         """
@@ -1242,31 +1248,47 @@ class GuiSpectrumDisplay(CcpnModule):
     def _handleSubstances(self, substances):
         # get the widget that is under the cursor, SHOULD be guiWidget
         # if selected peaks, will add the substance Name as peak.annotation
-        point = QtGui.QCursor.pos()
-        destStrip = QtWidgets.QApplication.widgetAt(point)
 
-        if destStrip and isinstance(destStrip, CcpnGLWidget):
-            objectsClicked = destStrip.getObjectsUnderMouse()
-
-            if objectsClicked is None:
-                return
-
-            if PEAKSELECT in objectsClicked or MULTIPLETSELECT in objectsClicked:
-                # dropped onto a peak or multiplet
-                # dropping onto a multiplet will apply to all attached peaks
-                # Set substance name to peak.annotation
-                peaks = set(self.current.peaks)
-                for mult in self.current.multiplets:
-                    peaks = peaks | set(mult.peaks)
+        peaks = set(self.current.peaks)
+        replaceAnnotation = True
+        for mult in self.current.multiplets:
+            peaks = peaks | set(mult.peaks)
+        if peaks:
+            with undoBlockWithoutSideBar():
                 for substance in substances:
+                    annotation = substance.name
                     for peak in peaks:
-                        # make sure is not duplicating any existing annotation, and is appending not replacing.
-                        annotation = ', '.join(filter(None, set([peak.annotation, substance.name])))
-                        peak.annotation = annotation
+                        if peak.peakList.spectrum in self.visibleSpectra:
+                            if not replaceAnnotation: # if want appending instead of replacing
+                                annotation = ', '.join(filter(None, set([peak.annotation, substance.name]))) # Filter to make sure is not duplicating any existing annotation
+                            peak.annotation = annotation
 
-            elif not objectsClicked:
-                # function not defined yet
-                showWarning('Dropped Substance(s).','Action not implemented yet' )
+        # # FIXME below still doesn't work if in stack mode
+        # point = QtGui.QCursor.pos()
+        # destStrip = QtWidgets.QApplication.widgetAt(point)
+        #
+        # if destStrip and isinstance(destStrip, CcpnGLWidget):
+        #     objectsClicked = destStrip.getObjectsUnderMouse()
+        #
+        #     if objectsClicked is None:
+        #         return
+        #
+        #     if PEAKSELECT in objectsClicked or MULTIPLETSELECT in objectsClicked:
+        #         # dropped onto a peak or multiplet
+        #         # dropping onto a multiplet will apply to all attached peaks
+        #         # Set substance name to peak.annotation
+        #         peaks = set(self.current.peaks)
+        #         for mult in self.current.multiplets:
+        #             peaks = peaks | set(mult.peaks)
+        #         for substance in substances:
+        #             for peak in peaks:
+        #                 # make sure is not duplicating any existing annotation, and is appending not replacing.
+        #                 annotation = ', '.join(filter(None, set([peak.annotation, substance.name])))
+        #                 peak.annotation = annotation
+        #
+        #     elif not objectsClicked:
+        #         # function not defined yet
+        #         showWarning('Dropped Substance(s).','Action not implemented yet' )
 
 
     def _handleNmrAtoms(self, nmrAtoms):
@@ -1485,12 +1507,6 @@ class GuiSpectrumDisplay(CcpnModule):
                 self.showSpectrumToolbar()
             else:
                 self.hideSpectrumToolbar()
-
-    def close(self):
-        """
-        Close the module from the commandline
-        """
-        self._closeModule()
 
     def _closeModule(self):
         """

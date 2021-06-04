@@ -2,7 +2,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-09 10:45:13 +0100 (Fri, April 09, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,7 +40,7 @@ from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.PulldownListsForObjects import ChainPulldown
 from ccpn.ui.gui.widgets.VLine import VLine
-from ccpn.ui.gui.modules.SequenceModule import SequenceModule
+from ccpn.ui.gui.widgets.SequenceWidget import SequenceWidget
 from ccpn.core.Chain import Chain
 from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.guiSettings import LABEL_SELECTEDBACKGROUND, LABEL_SELECTEDFOREGROUND, LABEL_HIGHLIGHT
@@ -104,13 +105,13 @@ class ResidueInformation(CcpnModule):
 
         # add a splitter to contain the residue table and the sequence module
         self.splitter = Splitter(self.mainWidget, horizontal=False)
-        self._sequenceModuleFrame = Frame(None, setLayout=True)
+        self._sequenceWidgetFrame = Frame(None, setLayout=True)
         # self._SequenceGraphFrame = Frame(self.splitter, setLayout=True)
         self.mainWidget.getLayout().addWidget(self.splitter, 1, 0)
 
         # initialise the sequence module
-        self.thisSequenceModule = SequenceModule(moduleParent=self,
-                                                 parent=self._sequenceModuleFrame,
+        self.thisSequenceWidget = SequenceWidget(moduleParent=self,
+                                                 parent=self._sequenceWidgetFrame,
                                                  mainWindow=mainWindow,
                                                  chains=self.project.chains)
 
@@ -123,7 +124,7 @@ class ResidueInformation(CcpnModule):
 
         # insert into the mainWidget
         self.splitter.addWidget(self._widgetScrollArea)
-        self.splitter.addWidget(self._sequenceModuleFrame)
+        self.splitter.addWidget(self._sequenceWidgetFrame)
         self.splitter.setStretchFactor(0, 5)
         self.splitter.setChildrenCollapsible(False)
 

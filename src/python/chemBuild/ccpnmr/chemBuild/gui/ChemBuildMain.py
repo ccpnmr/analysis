@@ -83,10 +83,10 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     
     menuBar = self.menuBar() # QtWidgets.QMenuBar()
     fileMenu = Menu(menuBar, '&File')
-    importMenu = Menu(menuBar, '&Import')
-    exportMenu = Menu(menuBar, 'E&xport')
     editMenu = Menu(menuBar, '&Edit')
     viewMenu = Menu(menuBar, '&View')
+    importMenu = Menu(menuBar, '&Import')
+    exportMenu = Menu(menuBar, 'E&xport')
     helpMenu = Menu(menuBar, '&Help')
     
     # Menu items
@@ -564,8 +564,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     #   compound = self.readSaveFile(self.compoundFileName)
     #
     # if not compound:
-    #   self.compoundFileName = None
-    #   self.setCompound( Compound('Unnamed') )
+    self.compoundFileName = None
+    self.setCompound( Compound('Unnamed') )
 
   def _getCompound(self):
     return self.compound

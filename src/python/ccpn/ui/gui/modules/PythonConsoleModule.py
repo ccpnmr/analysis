@@ -4,8 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,6 +30,7 @@ __date__ = "$Date: 2017-05-10 16:04:41 +0000 (Wed, May 10, 2017) $"
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
+from ccpn.util.Logging import getLogger
 
 
 class PythonConsoleModule(CcpnModule):
@@ -61,7 +63,7 @@ class PythonConsoleModule(CcpnModule):
         row = 0
         self.settingsEditorCheckBox = CheckBox(self.settingsWidget, checked=True, text='Show logging window', callback=self._toggleTextEditor,
                                                grid=(row, 0))
-        self._toggleTextEditor(False)
+        # self._toggleTextEditor(False)
 
         row += 1
         self.settingsLoggingCheckBox = CheckBox(self.settingsWidget, checked=True, text='Enable logging', callback=self._toggleLogging,
@@ -69,15 +71,18 @@ class PythonConsoleModule(CcpnModule):
 
         # make the widget visible, it is hidden when first instantiated
         self.pythonConsoleWidget.show()
-        self.pythonConsoleWidget.textEditor.show()
+        self._toggleTextEditor(True)
 
-    def _toggleTextEditor(self, value):
+    def _toggleTextEditor(self, isVisible):
         """Show/hide the logging window in the python console
         """
-        if value:
-            self.pythonConsoleWidget.textEditor.show()
-        else:
-            self.pythonConsoleWidget.textEditor.hide()
+        try:
+            if isVisible:
+                self.pythonConsoleWidget.textEditor.show()
+            else:
+                self.pythonConsoleWidget.textEditor.hide()
+        except RuntimeError as runError:
+            getLogger().warning('PythonConsole module Error: %s'%runError)
 
     def _toggleLogging(self, value):
         """Enable/disable logging to the logging window of the python console

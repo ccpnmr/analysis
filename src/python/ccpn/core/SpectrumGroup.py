@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:29 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-04 19:49:32 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -392,6 +392,8 @@ def _newSpectrumGroup(self: Project, name: str, spectra=(), comment: str = None,
 
     if name and Pid.altCharacter in name:
         raise ValueError("Character %s not allowed in ccpn.SpectrumGroup.name" % Pid.altCharacter)
+
+    name = SpectrumGroup._uniqueName(project=self, name=name)
 
     if spectra:
         getByPid = self._project.getByPid

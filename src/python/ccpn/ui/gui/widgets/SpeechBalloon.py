@@ -112,7 +112,7 @@ class BalloonMetrics:
 
 
 class SpeechBalloon(QWidget):
-    """
+    r""" Popover window class
         inspired by but not sharing any code with FUKIDASHI
         aka https://github.com/sharkpp/qtpopover (MIT licensed!)
 

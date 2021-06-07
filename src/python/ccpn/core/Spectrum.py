@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-28 16:26:13 +0100 (Fri, May 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-07 12:53:53 +0100 (Mon, June 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -324,7 +324,7 @@ class Spectrum(AbstractWrapperObject):
     @property
     def peakPicker(self):
         """A peakPicker instance for region picking in this spectrum.
-        None indicates no peakPicker is attached to this spectrum
+        None indicates no valid peakPicker has been defined
         """
         from ccpn.core.lib.SpectrumLib import _createDefaultPeakPicker
 
@@ -2588,8 +2588,8 @@ class Spectrum(AbstractWrapperObject):
 
         ::
 
-        >>> peak = spectrum.createPeak(**limitsDict)
-        >>> peak = spectrum.createPeak(peakList, **limitsDict)
+        >>> peak = spectrum.createPeak(**ppmPositions)
+        >>> peak = spectrum.createPeak(peakList, **ppmPositions)
         >>> peak = spectrum.createPeak(peakList=peakList, Hn=7.0, Nh=110)
 
         :param peakList: peakList to create new peak in, or None for the last peakList belonging to spectrum
@@ -2646,8 +2646,8 @@ class Spectrum(AbstractWrapperObject):
 
         ::
 
-        >>> peaks = spectrum.pickPeaks(**regionsDict)
-        >>> peaks = spectrum.pickPeaks(peakList, **regionsDict)
+        >>> peaks = spectrum.pickPeaks(**ppmRegions)
+        >>> peaks = spectrum.pickPeaks(peakList, **ppmRegions)
         >>> peaks = spectrum.pickPeaks(peakList=peakList, Hn=(7.0, 9.0), Nh=(110, 130))
 
         :param peakList: peakList to create new peak in, or None for the last peakList belonging to spectrum
@@ -2766,6 +2766,14 @@ class Spectrum(AbstractWrapperObject):
 
         return dataSource
 
+    def _getPeakPicker(self):
+        """Check whether a peakPicker class has been saved with this spectrum.
+        Returns new peakPicker instance or None if one has not been defined
+        """
+        from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC
+
+        return PeakPickerABC._restorePeakPicker(self)
+
     def _updateParameterValues(self):
         """This method check, and if needed updates specific parameter values
         """
@@ -2787,30 +2795,12 @@ class Spectrum(AbstractWrapperObject):
     def _restoreObject(cls, project, apiObj):
         """Subclassed to allow for initialisations on restore, not on creation via newSpectrum
         """
-        from ccpn.core.lib.PeakPickers import PeakPickerABC
-        from ccpn.core.lib.PeakPickers.PeakPickerABC import PEAKPICKERSTORE, PEAKPICKER, PEAKPICKERPARAMETERS
-
         spectrum = super()._restoreObject(project, apiObj)
 
         try:
             spectrum._dataStore = DataStore()._importFromSpectrum(spectrum)
             spectrum._dataSource = spectrum._getDataSource(spectrum._dataStore, reportWarnings=True)
-
-            # move to PeakPickerABC _importFromSpectrum?
-            # spectrum._peakPicker = PeakPickerABC._importFromSpectrum(_pickerType, spectrum)?
-
-            # get peakPickerType from ccpnInternal
-            _pickerType = spectrum.getParameter(PEAKPICKERSTORE, PEAKPICKER)
-
-            if _pickerType:
-                _picker = PeakPickerABC.PeakPickerABC.createPeakPicker(_pickerType, spectrum)
-                if _picker:
-                    getLogger().debug(f'peakPicker {_picker} instantiated')
-                    # restore peakPicker with parameters
-                    spectrum._peakPicker = _picker
-                    _pickerParams = spectrum.getParameter(PEAKPICKERSTORE, PEAKPICKERPARAMETERS)
-                    if isinstance(_pickerParams, dict):
-                        _picker.setParameters(**_pickerParams)
+            spectrum._peakPicker = spectrum._getPeakPicker()
 
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid data source for %s (%s)' % (spectrum, es))

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-27 17:07:38 +0100 (Thu, May 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-07 12:53:53 +0100 (Mon, June 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -307,9 +307,9 @@ class AbstractWrapperObject(NotifierBase):
 
     @classmethod
     def _validateStringValue(cls, attribName: str, value: str,
-                                  allowWhitespace: bool = False,
-                                  allowEmpty: bool = False,
-                                  allowNone: bool = False):
+                             allowWhitespace: bool = False,
+                             allowEmpty: bool = False,
+                             allowNone: bool = False):
         """Validate the value of any string
 
         :param attribName: used for reporting
@@ -334,7 +334,7 @@ class AbstractWrapperObject(NotifierBase):
                              (cls.__name__, Pid.altCharacter, attribName))
 
         if not allowWhitespace and commonUtil.contains_whitespace(value):
-           raise ValueError('%s: Whitespace not allowed in %r' %
+            raise ValueError('%s: Whitespace not allowed in %r' %
                              (cls.__name__, attribName))
 
     # @staticmethod
@@ -1067,13 +1067,11 @@ class AbstractWrapperObject(NotifierBase):
                     #     obj = childClass(project, apiObj)
                     # else:
                     #     obj = factoryFunction(project, apiObj)
-                try:
+                if obj is not None:
                     obj._initializeAll()
-
-                except Exception as er:
-                    getLogger().warning('Error initialising object %s. %s1' % (obj, er))
-                    # raise er
-                # getLogger().info(str(obj))   # ejb - temp
+                else:
+                    getLogger().warning('Error restoring object %s.' % apiObj)
+                    raise RuntimeError('Error restoring object %s.' % apiObj)
 
     def _unwrapAll(self):
         """remove wrapper from object and child objects
@@ -1133,13 +1131,6 @@ class AbstractWrapperObject(NotifierBase):
                 wrappedData.root.override = False
             if undo is not None:
                 undo.decreaseBlocking()
-
-    def _getDirectChildren(self):
-        """Get list of all objects that have self as a parent
-        """
-        getDataObj = self._project._data2Obj.get
-        result = list(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
-        return result
 
     # Notifiers and related functions:
 
@@ -1279,7 +1270,7 @@ class AbstractWrapperObject(NotifierBase):
         Raises ValueError for objects that do not have a serial
         (or, more precisely, where the _wrappedData does not have a serial)."""
 
-        ccpn.core._implementation.resetSerial.resetSerial (self._wrappedData, newSerial)
+        ccpn.core._implementation.resetSerial.resetSerial(self._wrappedData, newSerial)
         self._resetIds()
 
     def getAsDict(self, _includePrivate=False) -> OrderedDict:

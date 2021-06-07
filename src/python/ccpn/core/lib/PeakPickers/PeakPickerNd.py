@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-28 16:26:13 +0100 (Fri, May 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-07 12:53:53 +0100 (Mon, June 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -48,9 +48,11 @@ class PeakPickerNd(PeakPickerABC):
     peakPickerType = "PeakPickerNd"
     onlyFor1D = False
 
-    # list of user peakPicker attributes that need to be stored/restored
+    # list of peakPicker attributes that need to be stored/restored
+    # these pertain to a particular peakPicker subclass
     # this cannot contain items that are not JSON serialisable
     # call self._storeAttributes at the end of methods that change any values
+    # these are defined in a similar manner to the core attributes above
     attributes = ['noise',
                   'minimumLineWidth',
                   'checkAllAdjacent',
@@ -100,7 +102,7 @@ class PeakPickerNd(PeakPickerABC):
         :return list of SimplePeak instances
         """
 
-        print(f'>>>  {self.peakPickerType}   findPeaks')
+        # print(f'>>>  {self.peakPickerType}   findPeaks')
 
         # find the list of peaks in the region
         allPeaksArray, allRegionArrays, regionArray, _ = self._findPeaks(data, self.positiveThreshold, self.negativeThreshold)
@@ -224,7 +226,7 @@ class PeakPickerNd(PeakPickerABC):
         """Set the default functionality for picking simplePeaks from the region defined by axisDict
         """
         # NOTE:ED - verify parameters
-        print(f'>>>  {self.peakPickerType}   pickPeaks')
+        # print(f'>>>  {self.peakPickerType}   pickPeaks')
 
         # set the correct parameters for the standard findPeaks
         self._hbsWidth = self.halfBoxFindPeaksWidth
@@ -246,7 +248,7 @@ class PeakPickerNd(PeakPickerABC):
         :param peakList: peakList instance to add newly pickedPeaks
         :return: list of core.Peak instances
         """
-        print(f'>>>  {self.peakPickerType}   snapToExtremum')
+        # print(f'>>>  {self.peakPickerType}   snapToExtremum')
 
         if self.spectrum is None:
             raise RuntimeError('%s.spectrum is None' % self.__class__.__name__)
@@ -385,7 +387,7 @@ class PeakPickerNd(PeakPickerABC):
         Must be called with peaks that belong to this peakList
         """
 
-        print(f'>>>  {self.peakPickerType}   fitExistingPeaks')
+        # print(f'>>>  {self.peakPickerType}   fitExistingPeaks')
 
         if not peaks:
             return

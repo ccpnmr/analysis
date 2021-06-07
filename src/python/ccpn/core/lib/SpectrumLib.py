@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:29 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-07 12:53:54 +0100 (Mon, June 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1210,6 +1210,7 @@ def _filterROI1Darray(x, y, roi):
     mask = _getMaskedRegionInsideLimits(x, roi)
     return x[mask], y[mask]
 
+
 def _getMaskedRegionInsideLimits(x, limits):
     """
     Return an array of Booleans for the condition.
@@ -1217,6 +1218,7 @@ def _getMaskedRegionInsideLimits(x, limits):
     Limits and Array can be positives and/or negatives
     """
     import numpy.ma as ma
+
     mask = ma.masked_inside(x, *limits)
     return mask.mask
 
@@ -1755,13 +1757,17 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
 
         # get the peaks from the peakPicker
         axisDict = {axisCodes[ind]: _ppmRegions[ii] for ii, ind in enumerate(indices)}
-        # Should be in points :|
+
         if spectrum._peakPicker:
-            pks = spectrum._peakPicker.pickPeaks(peakList=peakList,
-                                                 positiveThreshold=positiveThreshold,
-                                                 negativeThreshold=negativeThreshold,
-                                                 axisDict=axisDict)
-            return tuple(pks)
+            try:
+                pks = spectrum._peakPicker.pickPeaks(peakList=peakList,
+                                                     positiveThreshold=positiveThreshold,
+                                                     negativeThreshold=negativeThreshold,
+                                                     axisDict=axisDict)
+                return tuple(pks)
+            except Exception as err:
+                # need to trap error that Nd spectra may not be defined in all dimensions of axisDict
+                getLogger().warning(f'could not pick peaks for {spectrum} in region {axisDict}')
 
 
 def _createDefaultPeakPicker(spectrum):
@@ -1786,5 +1792,7 @@ def _createDefaultPeakPicker(spectrum):
         if _pickerType:
             _picker = PeakPickerABC.createPeakPicker(_pickerType, spectrum)
 
-            getLogger().debug(f'Creating default peakPicker {_picker}')
+            getLogger().debug(f'{spectrum}: creating default peakPicker {_picker}')
             return _picker
+        else:
+            getLogger().debug(f'{spectrum}: default peakPicker not defined')

@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:57 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-07 12:53:54 +0100 (Mon, June 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -127,9 +127,10 @@ from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 
 from ccpn.framework.constants import CCPNMR_PREFIX
 
+
 _BLOCK_CACHE = CCPNMR_PREFIX + 'block_cache'
 # _BLOCK_CACHE_MAXITEMS = 128
-MB = 1024*1024
+MB = 1024 * 1024
 
 
 def getDataFormats() -> OrderedDict:
@@ -148,6 +149,7 @@ def getDataFormats() -> OrderedDict:
     from ccpn.core.lib.SpectrumDataSources.NmrViewSpectrumDataSource import NmrViewSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.NmrPipeSpectrumDataSource import NmrPipeSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+
     return SpectrumDataSourceABC._dataFormats
 
 
@@ -159,7 +161,7 @@ def getSpectrumDataSource(path, dataFormat):
     if cls is None:
         raise ValueError('getSpectrumDataSource: invalid format "%s"; must be one of %s' %
                          (dataFormat, [k for k in dataFormats.keys()])
-                        )
+                         )
     instance = cls.checkForValidFormat(path)
     return instance
 
@@ -204,7 +206,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     D_DIM = Spectrum.D_DIM
     E_DIM = Spectrum.E_DIM
 
-    dataType = numpy.float32   # numpy data format of the resulting slice, plane, region data
+    dataType = numpy.float32  # numpy data format of the resulting slice, plane, region data
 
     #=========================================================================================
     # to be subclassed
@@ -213,7 +215,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     isBlocked = None  # flag defining if data are blocked
     hasBlockCached = True  # Flag indicating if block data are cached
-    maxCacheSize = 64*MB  # Max cache size in Bytes
+    maxCacheSize = 64 * MB  # Max cache size in Bytes
 
     wordSize = 4
     headerSize = 0
@@ -235,7 +237,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     @classmethod
     def _registerFormat(cls):
-        "register cls.dataFormat"
+        """register cls.dataFormat"""
         if cls.dataFormat in SpectrumDataSourceABC._dataFormats:
             raise RuntimeError('dataFormat "%s" was already registered' % cls.dataFormat)
         SpectrumDataSourceABC._dataFormats[cls.dataFormat] = cls
@@ -247,204 +249,199 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     _bigEndian = (sys.byteorder == 'big')
 
-
     saveAllTraitsToJson = True
 
-    date = CString(allow_none=True, default_value=None).tag(
-                                                                isDimensional=False,
-                                                                doCopy=True,
-                                                                spectrumAttribute=None,
-                                                                hasSetterInSpectrumClass=False
-                                                                )
-    comment = CString(allow_none=True, default_value=None).tag(
-                                                                isDimensional=False,
-                                                                doCopy=True,
-                                                                spectrumAttribute='comment',
-                                                                hasSetterInSpectrumClass=True
-                                                                )
-    pulseProgram = CString(allow_none=True, default_value=None).tag(
-                                                                isDimensional=False,
-                                                                doCopy=True,
-                                                                spectrumAttribute=None,
-                                                                hasSetterInSpectrumClass=False
-                                                                )
-    temperature = CFloat(allow_none=True, default_value=None).tag(
-                                                                isDimensional=False,
-                                                                doCopy=True,
-                                                                spectrumAttribute='temperature',
-                                                                hasSetterInSpectrumClass=True
-                                                                )
-    isBigEndian = Bool(default_value=_bigEndian).tag(           isDimensional=False,
-                                                                doCopy=True,
-                                                                spectrumAttribute=None,
-                                                                hasSetterInSpectrumClass=False
-                                                                )
-    dataScale = CFloat(default_value=1.0).tag(                  isDimensional=False,
-                                                                doCopy=True,
-                                                                spectrumAttribute='scale',
-                                                                hasSetterInSpectrumClass=True
-                                                                )
-    sampledValues = List(default_value=[]).tag(                 isDimensional=False,
-                                                                doCopy=True,
-                                                                spectrumAttribute=None,
-                                                                hasSetterInSpectrumClass=False
-                                                                )
-    sampledSigmas = List(default_value=[]).tag(                 isDimensional=False,
-                                                                doCopy=True,
-                                                                spectrumAttribute=None,
-                                                                hasSetterInSpectrumClass=False
-                                                                )
-    dimensionCount = CInt(default_value=0).tag(                 isDimensional=False,
-                                                                doCopy=True,
-                                                                spectrumAttribute='dimensionCount',
-                                                                hasSetterInSpectrumClass=False
-                                                                )
+    date = CString(allow_none=True, default_value=None).tag(isDimensional=False,
+                                                            doCopy=True,
+                                                            spectrumAttribute=None,
+                                                            hasSetterInSpectrumClass=False
+                                                            )
+    comment = CString(allow_none=True, default_value=None).tag(isDimensional=False,
+                                                               doCopy=True,
+                                                               spectrumAttribute='comment',
+                                                               hasSetterInSpectrumClass=True
+                                                               )
+    pulseProgram = CString(allow_none=True, default_value=None).tag(isDimensional=False,
+                                                                    doCopy=True,
+                                                                    spectrumAttribute=None,
+                                                                    hasSetterInSpectrumClass=False
+                                                                    )
+    temperature = CFloat(allow_none=True, default_value=None).tag(isDimensional=False,
+                                                                  doCopy=True,
+                                                                  spectrumAttribute='temperature',
+                                                                  hasSetterInSpectrumClass=True
+                                                                  )
+    isBigEndian = Bool(default_value=_bigEndian).tag(isDimensional=False,
+                                                     doCopy=True,
+                                                     spectrumAttribute=None,
+                                                     hasSetterInSpectrumClass=False
+                                                     )
+    dataScale = CFloat(default_value=1.0).tag(isDimensional=False,
+                                              doCopy=True,
+                                              spectrumAttribute='scale',
+                                              hasSetterInSpectrumClass=True
+                                              )
+    sampledValues = List(default_value=[]).tag(isDimensional=False,
+                                               doCopy=True,
+                                               spectrumAttribute=None,
+                                               hasSetterInSpectrumClass=False
+                                               )
+    sampledSigmas = List(default_value=[]).tag(isDimensional=False,
+                                               doCopy=True,
+                                               spectrumAttribute=None,
+                                               hasSetterInSpectrumClass=False
+                                               )
+    dimensionCount = CInt(default_value=0).tag(isDimensional=False,
+                                               doCopy=True,
+                                               spectrumAttribute='dimensionCount',
+                                               hasSetterInSpectrumClass=False
+                                               )
 
     # dimension order mappings e.g. used by NmrPipe, Xeasy
-    dimensionOrder = CList(trait=CInt(), default_value=[dim for dim in range(0,MAXDIM)], maxlen=MAXDIM).tag(
-                                                                info='A (optional) mapping index into the dimensional data',
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute=None,
-                                                                hasSetterInSpectrumClass=False
-                                                                )
+    dimensionOrder = CList(trait=CInt(), default_value=[dim for dim in range(0, MAXDIM)], maxlen=MAXDIM).tag(
+            info='A (optional) mapping index into the dimensional data',
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute=None,
+            hasSetterInSpectrumClass=False
+            )
 
-    pointCounts = CList(trait=CInt(allow_none=False), default_value=[0]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='pointCounts',
-                                                                hasSetterInSpectrumClass=True
-                                                                )
-    blockSizes = CList(trait=CInt(allow_none=True), default_value=[None]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=False,
-                                                                spectrumAttribute=None,
-                                                                hasSetterInSpectrumClass=False
-                                                                )
+    pointCounts = CList(trait=CInt(allow_none=False), default_value=[0] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='pointCounts',
+            hasSetterInSpectrumClass=True
+            )
+    blockSizes = CList(trait=CInt(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=False,
+            spectrumAttribute=None,
+            hasSetterInSpectrumClass=False
+            )
     #TODO dimensionTypes needs setting in Spectrum class
-    dimensionTypes = CList(trait=CString(allow_none=False), default_value=[DIMENSIONFREQUENCY]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='dimensionTypes',
-                                                                hasSetterInSpectrumClass=False
-                                                                )
-    isComplex = CList(trait=CBool(), default_value=[False]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='isComplex',
-                                                                hasSetterInSpectrumClass=True
-                                                                )
-    isotopeCodes = CList(trait=CString(allow_none=True), default_value=[None]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='isotopeCodes',
-                                                                hasSetterInSpectrumClass=True
-                                                                )
-    axisCodes = CList(trait=CString(allow_none=True), default_value=[None]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='axisCodes',
-                                                                hasSetterInSpectrumClass=True
-                                                                )
+    dimensionTypes = CList(trait=CString(allow_none=False), default_value=[DIMENSIONFREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='dimensionTypes',
+            hasSetterInSpectrumClass=False
+            )
+    isComplex = CList(trait=CBool(), default_value=[False] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='isComplex',
+            hasSetterInSpectrumClass=True
+            )
+    isotopeCodes = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='isotopeCodes',
+            hasSetterInSpectrumClass=True
+            )
+    axisCodes = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='axisCodes',
+            hasSetterInSpectrumClass=True
+            )
     acquisitionAxisCode = CString(allow_none=True, default_value=None).tag(
-                                                                isDimensional=False,
-                                                                doCopy=True,
-                                                                spectrumAttribute='acquisitionAxisCode',
-                                                                hasSetterInSpectrumClass=True
-                                                                )
-    axisLabels = CList(trait=CString(allow_none=True), default_value=[None]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute=None,
-                                                                hasSetterInSpectrumClass=False,
-                                                                info='per dimension: labels, as e.g. present in Felix or NmrPipe',
-                                                                )
-    measurementTypes = CList(trait=CString(allow_none=True), default_value=['shift']*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='measurementTypes',
-                                                                hasSetterInSpectrumClass=True,
-                                                                )
-    spectrometerFrequencies = CList(trait=CFloat(allow_none=False), default_value=[1.0]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='spectrometerFrequencies',
-                                                                hasSetterInSpectrumClass=True,
-                                                                )
-    spectralWidthsHz = CList(trait=CFloat(allow_none=False), default_value=[1.0]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='spectralWidthsHz',
-                                                                hasSetterInSpectrumClass=True,
-                                                                )
-    referencePoints = CList(trait=CFloat(allow_none=False), default_value=[1.0]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='referencePoints',
-                                                                hasSetterInSpectrumClass=True,
-                                                                )
-    referenceValues = CList(trait=CFloat(allow_none=False), default_value=[1.0]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='referenceValues',
-                                                                hasSetterInSpectrumClass=True,
-                                                                )
-    phases0 = CList(trait=CFloat(allow_none=True), default_value=[None]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='phases0',
-                                                                hasSetterInSpectrumClass=True,
-                                                                )
-    phases1 = CList(trait=CFloat(allow_none=True), default_value=[None]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='phases1',
-                                                                hasSetterInSpectrumClass=True,
-                                                                )
-    windowFunctions = CList(trait=CString(allow_none=True), default_value=[None]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='windowFunctions',
-                                                                hasSetterInSpectrumClass=True,
-                                                                info='per dimension: Window function name (or None) - e.g. "EM", "GM", "SINE", "QSINE"'
-                                                                )
-    lorentzianBroadenings = CList(trait=CFloat(allow_none=True), default_value=[None]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='lorentzianBroadenings',
-                                                                hasSetterInSpectrumClass=True,
-                                                                info='per dimension: Lorenzian broadening in Hz'
-                                                                )
-    gaussianBroadenings = CList(trait=CFloat(allow_none=True), default_value=[None]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='gaussianBroadenings',
-                                                                hasSetterInSpectrumClass=True,
-                                                                info='per dimension: Gaussian broadening in Hz'
-                                                                )
-    assignmentTolerances = CList(trait=CFloat(allow_none=True), default_value=[None]*MAXDIM, maxlen=MAXDIM).tag(
-                                                                isDimensional=True,
-                                                                doCopy=True,
-                                                                spectrumAttribute='assignmentTolerances',
-                                                                hasSetterInSpectrumClass=True,
-                                                                info='per dimension: Assignment tolerance in ppm'
-                                                                )
+            isDimensional=False,
+            doCopy=True,
+            spectrumAttribute='acquisitionAxisCode',
+            hasSetterInSpectrumClass=True
+            )
+    axisLabels = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute=None,
+            hasSetterInSpectrumClass=False,
+            info='per dimension: labels, as e.g. present in Felix or NmrPipe',
+            )
+    measurementTypes = CList(trait=CString(allow_none=True), default_value=['shift'] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='measurementTypes',
+            hasSetterInSpectrumClass=True,
+            )
+    spectrometerFrequencies = CList(trait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='spectrometerFrequencies',
+            hasSetterInSpectrumClass=True,
+            )
+    spectralWidthsHz = CList(trait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='spectralWidthsHz',
+            hasSetterInSpectrumClass=True,
+            )
+    referencePoints = CList(trait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='referencePoints',
+            hasSetterInSpectrumClass=True,
+            )
+    referenceValues = CList(trait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='referenceValues',
+            hasSetterInSpectrumClass=True,
+            )
+    phases0 = CList(trait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='phases0',
+            hasSetterInSpectrumClass=True,
+            )
+    phases1 = CList(trait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='phases1',
+            hasSetterInSpectrumClass=True,
+            )
+    windowFunctions = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='windowFunctions',
+            hasSetterInSpectrumClass=True,
+            info='per dimension: Window function name (or None) - e.g. "EM", "GM", "SINE", "QSINE"'
+            )
+    lorentzianBroadenings = CList(trait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='lorentzianBroadenings',
+            hasSetterInSpectrumClass=True,
+            info='per dimension: Lorenzian broadening in Hz'
+            )
+    gaussianBroadenings = CList(trait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='gaussianBroadenings',
+            hasSetterInSpectrumClass=True,
+            info='per dimension: Gaussian broadening in Hz'
+            )
+    assignmentTolerances = CList(trait=CFloat(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='assignmentTolerances',
+            hasSetterInSpectrumClass=True,
+            info='per dimension: Assignment tolerance in ppm'
+            )
 
     #=========================================================================================
     # Convenience properties and methods
     #=========================================================================================
 
     def isDimensionalParameter(self, parameterName) -> bool:
-        ":return True if parameterName is dimensional"
+        """:return True if parameterName is dimensional"""
         return self.getMetadata(parameterName, 'isDimensional')
 
     def getDimensionalParameters(self) -> OrderedDict:
-        "Return a OrderedDict of (parameterName, values) for dimensional parameters"
-        items = [i for i in self.items(isDimensional=lambda i:i)]
+        """Return a OrderedDict of (parameterName, values) for dimensional parameters"""
+        items = [i for i in self.items(isDimensional=lambda i: i)]
         return OrderedDict(items)
 
     def getNonDimensionalParameters(self) -> OrderedDict:
-        "Return a OrderedDict of (parameterName, values) for non-dimensional parameters"
+        """Return a OrderedDict of (parameterName, values) for non-dimensional parameters"""
         items = [i for i in self.items(isDimensional=lambda i: not i)]
         return OrderedDict(items)
 
@@ -452,7 +449,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def dimensions(self):
         """A one-based list of dimensions [1,dimensionCount]
         """
-        return range(1, self.dimensionCount+1)
+        return range(1, self.dimensionCount + 1)
 
     @property
     def axes(self):
@@ -462,7 +459,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     @property
     def totalNumberOfPoints(self):
-        "Total number of points of the data"
+        """Total number of points of the data"""
         result = self.pointCounts[0]
         for axis in self.axes[1:]:
             result *= self.pointCounts[axis]
@@ -470,7 +467,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     @property
     def expectedFileSizeInBytes(self):
-        "The expected file size in Bytes"
+        """The expected file size in Bytes"""
         if self.dimensionCount == 0:
             raise RuntimeError('%s: Undefined parameters' % self)
 
@@ -539,11 +536,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
             if len(values) < self.dimensionCount:
                 values += self.getTraitDefaultValue(par)
             values = values[0:self.dimensionCount]
-            self.setTraitValue(par,values)
+            self.setTraitValue(par, values)
 
     @property
     def path(self) -> aPath:
-        "Return an absolute path of datapath as a Path instance"
+        """Return an absolute path of datapath as a Path instance"""
         return (None if self.dataFile is None else aPath(self.dataFile))
 
     def setPath(self, path, substituteSuffix=False):
@@ -595,7 +592,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             if dim < 1 or dim > self.dimensionCount:
                 raise ValueError('invalid dimension "%s" in %r' % (dim, dimensions))
         values = self.getTraitValue(parameterName)
-        return [values[dim-1] for dim in dimensions]
+        return [values[dim - 1] for dim in dimensions]
 
     def setByDimensions(self, parameterName: str, values: Sequence, dimensions: Sequence[int]):
         """Set values defined by parameterName in order defined by dimensions (1..dimensionCount).
@@ -609,7 +606,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 raise ValueError('invalid dimension "%s" in %r' % (dim, dimensions))
         newValues = values[:]
         for idx, dim in enumerate(dimensions):
-            newValues[dim-1] = values[idx]
+            newValues[dim - 1] = values[idx]
         self.setTraitValue(parameterName, newValues)
 
     def _copyParametersFromSpectrum(self, spectrum):
@@ -747,16 +744,16 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """map dimensional parameters according to dimensionsMap dict comprised of
         (sourceDim, desinationDim) key, value pairs (1-based)
         """
-        if  dimensionsMap is None or \
-            not isinstance(dimensionsMap, dict) or \
-            len(dimensionsMap) != self.dimensionCount or \
-            len(set(dimensionsMap.keys())) != self.dimensionCount or \
-            len(set(dimensionsMap.items())) != self.dimensionCount:
+        if dimensionsMap is None or \
+                not isinstance(dimensionsMap, dict) or \
+                len(dimensionsMap) != self.dimensionCount or \
+                len(set(dimensionsMap.keys())) != self.dimensionCount or \
+                len(set(dimensionsMap.items())) != self.dimensionCount:
             raise ValueError('invalid dimensionsMap %r' % dimensionsMap)
 
         sourceDims = []
         targetDims = []
-        for k,v in dimensionsMap.items():
+        for k, v in dimensionsMap.items():
             if k < 1 or k > self.dimensionCount or v < 1 or v > self.dimensionCount:
                 raise ValueError('invalid (%s,%s) pair in dimensionsMap %r' % (k, v, dimensionsMap))
             sourceDims.append(k)
@@ -769,7 +766,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def transposeParameters(self, dimension1, dimension2):
         """Transpose parameters of dimension1 and dimenson2 (1-based)
         """
-        dimTuples = [(dim,dim) for dim in self.dimensions]  # identity map
+        dimTuples = [(dim, dim) for dim in self.dimensions]  # identity map
         dimTuples[dimension1 - 1] = (dimension2, dimension1)
         dimTuples[dimension2 - 1] = (dimension1, dimension2)
         self._mapDimensionalParameters(dict(dimTuples))
@@ -815,13 +812,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
             # Make axisCode unique by optionally adding dimension suffix
             acode = self.axisCodes[idx]
             if acode in self.axisCodes[0:idx]:
-                acode = '%s_%d' % (acode, idx+1)
+                acode = '%s_%d' % (acode, idx + 1)
                 self.axisCodes[idx] = acode
 
-        self.acquisitionAxisCode =self.axisCodes[self.X_AXIS]
+        self.acquisitionAxisCode = self.axisCodes[self.X_AXIS]
 
     def setDimensionCount(self, dimensionCount):
-        "Change the dimensionality, assuring proper values of the dimensional parameters"
+        """Change the dimensionality, assuring proper values of the dimensional parameters"""
         if dimensionCount < 1 or dimensionCount > self.MAXDIM:
             raise ValueError('dimensionCount must be in the range 1, %s' % self.MAXDIM)
 
@@ -833,24 +830,24 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
 
     def _initBlockCache(self):
-        "Intialise the cache"
+        """Intialise the cache"""
         cache = Cache(maxItems=0, name=_BLOCK_CACHE)
         setattr(self, _BLOCK_CACHE, cache)
 
     @property
     def cache(self):
-        "Returns the Block cache instance"
+        """Returns the Block cache instance"""
         if not hasattr(self, _BLOCK_CACHE):
             self._initBlockCache()
         cache = getattr(self, _BLOCK_CACHE)
         return cache
 
     def disableCache(self):
-        "Disable the caching of blockdata"
+        """Disable the caching of blockdata"""
         self.cache.resize(0)
 
     def clearCache(self):
-        "Clear the cache"
+        """Clear the cache"""
         self.cache.clear()
 
     def _setMaxCacheSize(self, sizeInBytes):
@@ -865,7 +862,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
     @property
     def _totalBlockSize(self):
-        "Return total number of words in one block"
+        """Return total number of words in one block"""
         result = self.blockSizes[0]
         for points in self.blockSizes[1:]:
             result *= points
@@ -874,7 +871,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     @property
     def _totalBlocks(self):
-        "Return total number of blocks in the file"
+        """Return total number of blocks in the file"""
         numBlocks = self._numBlocksPerDimension
         tBlocks = numBlocks[0]
         for bn in numBlocks[1:]:
@@ -883,15 +880,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     @property
     def _numBlocksPerDimension(self):
-        "number of blocks per dimension"
+        """number of blocks per dimension"""
         nBlocks = [1 + (self.pointCounts[dim] - 1) // self.blockSizes[dim] for dim in range(self.dimensionCount)]
         return nBlocks
 
     def _pointsToBlocksPerDimension(self, zPoints):
-        "returns list of (block-index, block-offset) tuples (zero-based) corresponding to zPoints (zero-based)"
+        """returns list of (block-index, block-offset) tuples (zero-based) corresponding to zPoints (zero-based)"""
         return [(p // self.blockSizes[i],
-                 p %  self.blockSizes[i]
-                ) for i, p in enumerate(zPoints)]
+                 p % self.blockSizes[i]
+                 ) for i, p in enumerate(zPoints)]
 
     def _pointsToAbsoluteBlockIndex(self, points):
         """Returns absolute block index corresponding to points (zero-based)
@@ -910,7 +907,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         absIndex = blockIndex[dim]
         dim -= 1
         while dim >= 0:
-            absIndex = absIndex*numBlocks[dim] + blockIndex[dim]
+            absIndex = absIndex * numBlocks[dim] + blockIndex[dim]
             dim -= 1
         return absIndex
 
@@ -923,7 +920,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     @property
     def dtype(self):
-        "return the numpy dtype string based on settings"
+        """return the numpy dtype string based on settings"""
         return '%s%s%s' % (self.isBigEndian and '>' or '<', self.isFloatData and 'f' or 'i', self.wordSize)
 
     @cached(_BLOCK_CACHE, debug=False, doSignatureExpansion=False)
@@ -952,8 +949,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         try:
             _data = self._readBlockFromFile(absBlockIndex)
             if _data.size < self._totalBlockSize:
-                _data = numpy.pad(_data, pad_width= (0, self._totalBlockSize - _data.size), mode='constant')
-            data = _data.reshape(self.blockSizes[::-1]) # nD numpy arrays are array[z][y][x] (i.e. reversed indexing)
+                _data = numpy.pad(_data, pad_width=(0, self._totalBlockSize - _data.size), mode='constant')
+            data = _data.reshape(self.blockSizes[::-1])  # nD numpy arrays are array[z][y][x] (i.e. reversed indexing)
 
         except Exception as es:
             getLogger().error('Reading %s (zero-based; absBlockIndex %s) from %s' % (points, absBlockIndex, self))
@@ -971,14 +968,14 @@ class SpectrumDataSourceABC(CcpNmrJson):
         position = self.checkForValidPosition(position)
 
         # converts to zero-based
-        points = [p-1 for p in position]
+        points = [p - 1 for p in position]
 
         # we are reading nD blocks; need to slice across these with depth of 1)
         blockOffsets = [offset for _tmp, offset in self._pointsToBlocksPerDimension(points)]
-        slices = [slice(offset, offset+1) for offset in blockOffsets]
+        slices = [slice(offset, offset + 1) for offset in blockOffsets]
 
         blockdata = self._readBlock(points)
-        _tmp = blockdata[ tuple(slices[::-1]) ].flatten() # invert the slices as multi-d numpy arrays are array[z][y][x] (i.e. reversed indexing)
+        _tmp = blockdata[tuple(slices[::-1])].flatten()  # invert the slices as multi-d numpy arrays are array[z][y][x] (i.e. reversed indexing)
         return float(_tmp[0])
 
     def _readBlockedSlice(self, sliceDim=1, position=None):
@@ -992,7 +989,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # converts to zero-based
         sliceDim -= 1
-        points = [p-1 for p in position]
+        points = [p - 1 for p in position]
 
         # create the array with zeros
         data = numpy.zeros(self.pointCounts[sliceDim], dtype=self.dataType)
@@ -1000,7 +997,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         # we are reading nD blocks; need to slice across these with depth of 1 in non-slice dims and a
         # size of blockSizes[sliceDim] along the sliceDim (set dynamically during the looping)
         blockOffsets = [offset for _tmp, offset in self._pointsToBlocksPerDimension(points)]
-        slices = [slice(offset, offset+1) for offset in blockOffsets]
+        slices = [slice(offset, offset + 1) for offset in blockOffsets]
 
         if not self.hasOpenFile():
             self.openFile(mode=self.defaultOpenReadMode)
@@ -1010,9 +1007,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
             points[sliceDim] = p
             blockdata = self._readBlock(points)
             # The actual size along sliceDim may not be an integer times the blockSize of sliceDim
-            pStop = min(p+self.blockSizes[sliceDim], self.pointCounts[sliceDim])
-            slices[sliceDim] = slice(0, pStop-p) # truncate if necessary
-            _tmp = blockdata[ tuple(slices[::-1]) ].flatten() # invert the slices as multi-d numpy arrays are array[z][y][x] (i.e. reversed indexing)
+            pStop = min(p + self.blockSizes[sliceDim], self.pointCounts[sliceDim])
+            slices[sliceDim] = slice(0, pStop - p)  # truncate if necessary
+            _tmp = blockdata[tuple(slices[::-1])].flatten()  # invert the slices as multi-d numpy arrays are array[z][y][x] (i.e. reversed indexing)
             data[p:pStop] = _tmp
         return data
 
@@ -1028,7 +1025,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         # convert to zero-based
         xDim -= 1
         yDim -= 1
-        points = [p-1 for p in position]
+        points = [p - 1 for p in position]
 
         # create the array with zeros
         pointCounts = (self.pointCounts[yDim], self.pointCounts[xDim])  # y,x ordering
@@ -1037,7 +1034,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         # we are reading nD blocks; need to slice across these with depth of 1 in non-plane dims and a
         # size of blockSizes[xDim], blockSizes[yDim] along the xDim,yDim (set dynamically during the looping)
         blockOffsets = [offset for _tmp, offset in self._pointsToBlocksPerDimension(points)]
-        slices = [slice(offset, offset+1) for offset in blockOffsets]
+        slices = [slice(offset, offset + 1) for offset in blockOffsets]
 
         if not self.hasOpenFile():
             self.openFile(mode=self.defaultOpenReadMode)
@@ -1047,26 +1044,26 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
             points[yDim] = y
             # The actual size along yDim may not be an integer times the blockSize of yDim
-            yStop = min(y+self.blockSizes[yDim], self.pointCounts[yDim])
-            slices[yDim] = slice(0, yStop-y) # truncate if necessary
+            yStop = min(y + self.blockSizes[yDim], self.pointCounts[yDim])
+            slices[yDim] = slice(0, yStop - y)  # truncate if necessary
 
             # loop through the x points of xDim in steps blockSize[xDim]
             for x in range(0, self.pointCounts[xDim], self.blockSizes[xDim]):
 
                 points[xDim] = x
                 # The actual size along xDim may not be an integer times the blockSize of xDim
-                xStop = min(x+self.blockSizes[xDim], self.pointCounts[xDim])
-                slices[xDim] = slice(0, xStop-x) # truncate if necessary  --> slices are x,y,z,... ordered
+                xStop = min(x + self.blockSizes[xDim], self.pointCounts[xDim])
+                slices[xDim] = slice(0, xStop - x)  # truncate if necessary  --> slices are x,y,z,... ordered
 
                 blockData = self._readBlock(points)  #  --> z,y,x ordered
-                blockPlane = blockData[ tuple(slices[::-1]) ] # invert the slices --> blockPlane inverse ordered
+                blockPlane = blockData[tuple(slices[::-1])]  # invert the slices --> blockPlane inverse ordered
                 # The blockdata are z,y,x;
                 if xDim > yDim:
                     # Example: assume xDim=3='z', yDim=1='x'; i.e. an (3,1)=(z,x) plane is asked for
                     # The resulting plane data will be (inverse) x,z ordered
                     # blockPlane is (inverse) z,x ordered --> need to transpose to get an (inverse-ordered) x,z plane
                     blockPlane = blockPlane.transpose()
-                blockPlane = blockPlane.reshape((yStop-y, xStop-x))
+                blockPlane = blockPlane.reshape((yStop - y, xStop - x))
 
                 data[y:yStop, x:xStop] = blockPlane
 
@@ -1169,7 +1166,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if mode is None:
             mode = self.defaultOpenReadMode
 
-        self.closeFile() # Wil close if open, do nothing otherwise
+        self.closeFile()  # Wil close if open, do nothing otherwise
         self.openFile(mode=mode)  # also reads parameters
         # self.readParameters()
         try:
@@ -1198,7 +1195,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             mode = self.defaultOpenWriteMode
 
         try:
-            self.closeFile() # Will close if open disgarding everything, do nothing otherwise
+            self.closeFile()  # Will close if open disgarding everything, do nothing otherwise
             getLogger().debug('%s.openNewFile: calling openFile' % self.__class__.__name__)
             self.openFile(mode=mode)
             yield self
@@ -1210,7 +1207,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         finally:
             getLogger().debug('%s.openNewFile: writing parameters and calling closeFile' %
-                               self.__class__.__name__)
+                              self.__class__.__name__)
             self.writeParameters()
             self.closeFile()
 
@@ -1244,7 +1241,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return self
 
     def writeParameters(self):
-        "to be subclassed"
+        """to be subclassed"""
         raise NotImplementedError('Not implemented')
 
     def checkForValidPosition(self, position):
@@ -1255,19 +1252,19 @@ class SpectrumDataSourceABC(CcpNmrJson):
             raise RuntimeError('%s: Undefined parameters' % self)
 
         if position is None:
-            position = [1]*self.dimensionCount
+            position = [1] * self.dimensionCount
 
         if not isIterable(position):
             raise ValueError('position must be an tuple or list')
 
         if len(position) < self.dimensionCount:
-            position += [1]*self.dimensionCount - len(position)
+            position += [1] * self.dimensionCount - len(position)
         position = position[0:self.dimensionCount]
 
         for idx, p in enumerate(position):
             if not (1 <= p <= self.pointCounts[idx]):
                 raise ValueError('dimension %d: value must be in [1,%d]: got "%d"' % \
-                                 (idx+1, self.pointCounts[idx], p))
+                                 (idx + 1, self.pointCounts[idx], p))
         return position
 
     def checkForValidPlane(self, position, xDim, yDim):
@@ -1329,7 +1326,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         return position
 
-    def getSliceData(self, position:Sequence=None, sliceDim:int=1):
+    def getSliceData(self, position: Sequence = None, sliceDim: int = 1):
         """Get slice defined by sliceDim and position (all 1-based)
         Check for hdf5buffer first, then blocked format
         Optionally to be subclassed
@@ -1346,7 +1343,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         else:
             raise NotImplementedError('Not implemented')
 
-    def setSliceData(self, data, position:Sequence=None, sliceDim:int=1):
+    def setSliceData(self, data, position: Sequence = None, sliceDim: int = 1):
         """Set data as slice defined by sliceDim and position (all 1-based)
 
         to be subclassed
@@ -1366,8 +1363,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         sliceIdx = position[yDim - 1] - 1 if sliceDim == xDim else position[xDim - 1] - 1  # position amd dimensions are 1-based
 
         # Improve caching,
-        position[xDim-1] = 1
-        position[yDim-1] = 1
+        position[xDim - 1] = 1
+        position[yDim - 1] = 1
         planeData = self.getPlaneData(position, xDim, yDim)
 
         if sliceDim == xDim:
@@ -1378,7 +1375,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         return data
 
-    def getPointData(self, position:Sequence=None) -> float:
+    def getPointData(self, position: Sequence = None) -> float:
         """Get value defined by position (1-based, integer values)
         Use getPointValue() for an interpolated value
         """
@@ -1392,7 +1389,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         else:
             # piggyback on getSliceData
             data = self.getSliceData(position=position, sliceDim=1)
-            return float(data[position[0]-1])
+            return float(data[position[0] - 1])
 
     def getPointValue(self, position, aliasingFlags=None):
         """Get interpolated value defined by position (1-based, float values), optionally aliased
@@ -1415,7 +1412,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                             along (-1) dimension: newValue = value[0] + factor * (value[1]-value[0])
             :returns: (N-1)-dimensional Numpy array with sizes 2 along each dimension
             """
-            diffs = factor*numpy.diff(data, axis=-1)
+            diffs = factor * numpy.diff(data, axis=-1)
             slices = [slice(0, n) for n in diffs.shape]
             result = numpy.add(data[tuple(slices)], diffs)
             result = numpy.squeeze(result, axis=-1)
@@ -1424,10 +1421,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # get the fractions of position; i.e. if position=(324.4, 120.9, 33.7),
         # get ( 0.4, 0.9, 0.7 )
-        fractions = [p-float(int(p)) for p in position]
+        fractions = [p - float(int(p)) for p in position]
         # get the nD slice data around position; i.e. if position=(324.4, 120.9, 33.7),
         # get ( (324,325), (120,121), (33,34) )
-        sliceTuples = [(int(p), int(p)+1) for p in position]
+        sliceTuples = [(int(p), int(p) + 1) for p in position]
         pointData = self.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
 
         for f in fractions:
@@ -1459,27 +1456,27 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
             if aliasingFlags[idx] == 0:
                 if start < 1:
-                    raise ValueError('invalid sliceTuple for dimension %s; start < 1 (%s)' % (idx+1, start))
+                    raise ValueError('invalid sliceTuple for dimension %s; start < 1 (%s)' % (idx + 1, start))
 
                 if stop > self.pointCounts[idx]:
                     raise ValueError('invalid sliceTuple for dimension %s; stop > %s (%s)'
-                                     % (idx+1, self.pointCounts[idx], stop))
+                                     % (idx + 1, self.pointCounts[idx], stop))
 
             if start > stop:
-                raise ValueError('invalid sliceTuple for dimension %s; start (%s) > stop (%s)' % (idx+1, start,stop))
+                raise ValueError('invalid sliceTuple for dimension %s; start (%s) > stop (%s)' % (idx + 1, start, stop))
 
     def _getRegionData(self, sliceTuples, aliasingFlags=None):
         """Return an numpy array containing the region data; see getRegionData description
         implementation based upon getSliceData method
         """
-        sizes = [(stop-start+1) for start,stop in sliceTuples]
-        starts = [start-1 for start,stop in sliceTuples] # 0-based
-        stops = [stop for start,stop in sliceTuples] # 0-based, non-inclusive
+        sizes = [(stop - start + 1) for start, stop in sliceTuples]
+        starts = [start - 1 for start, stop in sliceTuples]  # 0-based
+        stops = [stop for start, stop in sliceTuples]  # 0-based, non-inclusive
         sliceDim = 1
         sliceAxis = sliceDim - 1  # 0-based axis of sliceDim
 
         # The result being assembled
-        regionData = numpy.zeros(sizes[::-1], dtype=self.dataType) # ...,z,y,x numpy ordering
+        regionData = numpy.zeros(sizes[::-1], dtype=self.dataType)  # ...,z,y,x numpy ordering
 
         # temp buffer for unpacking aliased data along sliceDim
         sliceData2 = numpy.zeros(sizes[sliceAxis], dtype=self.dataType)
@@ -1514,11 +1511,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
             #       if data is (100, 50) and region is (125, 5) then this will need 2 tiles ((0, 0), (1, 0))
             _its = [range(((size - 1) // np) + 1) for size, np in zip(sizes, nPointCounts)]
             allDataSlices = [
-                [slice(al * np + ((p-1)-start) % np, al * np + (((p-1)-start) % np) + 1) for start, p, np, al in zip(starts, position, nPointCounts, alias)]
+                [slice(al * np + ((p - 1) - start) % np, al * np + (((p - 1) - start) % np) + 1) for start, p, np, al in zip(starts, position, nPointCounts, alias)]
                 for alias in [it for it in product(*_its)]
                 ]
             for _slice in allDataSlices:
-                _slice[sliceAxis] = slice(0,sizes[sliceAxis])
+                _slice[sliceAxis] = slice(0, sizes[sliceAxis])
 
             # get aliasing factor determined by dimensions other than sliceDim
             factor = 1.0
@@ -1530,19 +1527,19 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 # There are no aliased points along sliceDim
                 for dataSlices in allDataSlices:
                     # copy the relevant section of the sliceData into the (nD) data array
-                    regionData[tuple(dataSlices[::-1])] = factor * sliceData[starts[sliceAxis]:stops[sliceAxis]] # dimensions run in ..,z,y,x order
+                    regionData[tuple(dataSlices[::-1])] = factor * sliceData[starts[sliceAxis]:stops[sliceAxis]]  # dimensions run in ..,z,y,x order
             else:
                 # copy the relevant points from sliceData to sliceData2 array; aliasing where needed
-                for idx, p in zip( range(0,sizes[sliceAxis]), range(starts[sliceAxis],stops[sliceAxis]) ):
+                for idx, p in zip(range(0, sizes[sliceAxis]), range(starts[sliceAxis], stops[sliceAxis])):
                     pointFactor = aliasingFlags[sliceAxis] if (p < 0 or p >= nPoints) else 1.0
-                    while p<0:
+                    while p < 0:
                         p += nPoints
                     while p >= nPoints:
                         p -= nPoints
                     sliceData2[idx] = factor * pointFactor * sliceData[p]
                 for dataSlices in allDataSlices:
                     # copy the sliceData2 into the (nD) data array
-                    regionData[tuple(dataSlices[::-1])] = sliceData2[:] # dimensions run in ..,z,y,x order
+                    regionData[tuple(dataSlices[::-1])] = sliceData2[:]  # dimensions run in ..,z,y,x order
 
         return regionData
 
@@ -1562,7 +1559,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             aliasingFlags = [0] * self.dimensionCount
 
         if self.hdf5buffer is not None:
-            regionData =  self.hdf5buffer.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
+            regionData = self.hdf5buffer.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
 
         else:
             self.checkForValidRegion(sliceTuples, aliasingFlags)
@@ -1584,7 +1581,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         absData = numpy.array([v for v in map(abs, data)])
         median = numpy.median(absData)
         std = numpy.std(absData)
-        noiseLevel = median + 1.0*std
+        noiseLevel = median + 1.0 * std
         return noiseLevel
 
     #=========================================================================================
@@ -1614,8 +1611,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         iterDims = list(set(self.dimensions) - set(excludeDimensions))
 
         # get relevant iteration parameters
-        slices = [sliceTuples[dim-1] for dim in iterDims]
-        indices = [dim-1 for dim in iterDims]
+        slices = [sliceTuples[dim - 1] for dim in iterDims]
+        indices = [dim - 1 for dim in iterDims]
         iterData = list(zip(iterDims, slices, indices))
 
         def _nextPosition(currentPosition):
@@ -1631,7 +1628,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             return (True, None)  # reached the end
 
         # loop over selected slices
-        loopPosition = [start for start,stop in sliceTuples]
+        loopPosition = [start for start, stop in sliceTuples]
         done = False
         while not done:
             # get position list within the [1,pointCounts] range and an aliased True/False list
@@ -1661,8 +1658,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         sliceTuples = [(1, p) for p in self.pointCounts]
         with notificationEchoBlocking():
             for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[xDim, yDim]):
-                position[xDim-1] = 1
-                position[yDim-1] = 1
+                position[xDim - 1] = 1
+                position[yDim - 1] = 1
                 planeData = self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
                 yield (position, planeData)
 
@@ -1675,7 +1672,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         sliceTuples = [(1, p) for p in self.pointCounts]
         with notificationEchoBlocking():
             for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim]):
-                position[sliceDim-1] = 1
+                position[sliceDim - 1] = 1
                 sliceData = self.getSliceData(position=position, sliceDim=sliceDim)
                 yield (position, sliceData)
 
@@ -1719,7 +1716,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # create a hdf5 buffer file instance
         hdf5buffer = Hdf5SpectrumDataSource().copyParametersFrom(self)
-        hdf5buffer._dataSource = self # link back to self
+        hdf5buffer._dataSource = self  # link back to self
         hdf5buffer.setPath(path=path, substituteSuffix=True)
         # do not use openNewFile as it has to remain open after filling the buffer
         hdf5buffer.openFile(mode=Hdf5SpectrumDataSource.defaultOpenWriteMode)
@@ -1753,7 +1750,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
 
     def printParameters(self, path=sys.stdout):
-        "Print all to path"
+        """Print all to path"""
         path.write(str(self) + '\n')
         for param, value in self.getNonDimensionalParameters().items():
             path.write('%-24s: %s\n' % (param, value))
@@ -1773,7 +1770,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             if self.hdf5buffer is not None:
                 fpStatus = '%r' % 'buffered'
                 path = self.hdf5buffer.path
-            elif self.fp is not None:
+            elif self.hasOpenFile():
                 fpStatus = '%r' % self.mode
                 path = self.path
             else:
@@ -1781,10 +1778,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 path = self.path
 
             return '<%s: %dD (%s), %s: path=%s>' % (self.__class__.__name__,
-                                                self.dimensionCount,
-                                                'x'.join([str(p) for p in self.pointCounts]),
-                                                fpStatus,
-                                                path
-                                               )
+                                                    self.dimensionCount,
+                                                    'x'.join([str(p) for p in self.pointCounts]),
+                                                    fpStatus,
+                                                    path
+                                                    )
 #end class
-

@@ -510,24 +510,30 @@ class ScatterPlot(Widget):
 
     def setPlotLimits(self, **kwargs):
         from ccpn.util.Common import percentage
-        addPercent = 200
-        xValues, yValues = self.scatterPlot.getData()
-        xMin, xMax = np.min(xValues), np.max(xValues)
-        yMin, yMax = np.min(yValues), np.max(yValues)
-        deltaX = xMax - xMin
-        deltaY = yMax - yMin
-        deltaX += percentage(addPercent, deltaX)
-        deltaY += percentage(addPercent, deltaY)
+        try:
+            addPercent = 200
+            xValues, yValues = self.scatterPlot.getData()
+            xMin, xMax = np.min(xValues), np.max(xValues)
+            yMin, yMax = np.min(yValues), np.max(yValues)
+            deltaX = xMax - xMin
+            deltaY = yMax - yMin
+            deltaX += percentage(addPercent, deltaX)
+            deltaY += percentage(addPercent, deltaY)
+        except Exception as e:
+            getLogger().warning("Error in setting scatter plot limits: %s" % e)
+            return
+
         self._scatterViewbox.setLimits(
-                                    xMin = xMin - deltaX,
-                                    xMax = xMax + deltaX,
-                                    yMin = yMin - deltaY,
-                                    yMax = yMax + deltaY,
-                                    minXRange = 0.01,
-                                    maxXRange = max(xValues)*10,
-                                    minYRange = 0.01,
-                                    maxYRange = max(yValues)*10,
-                                    )
+                                        xMin = xMin - deltaX,
+                                        xMax = xMax + deltaX,
+                                        yMin = yMin - deltaY,
+                                        yMax = yMax + deltaY,
+                                        minXRange = 0.01,
+                                        maxXRange = max(xValues)*10,
+                                        minYRange = 0.01,
+                                        maxYRange = max(yValues)*10,
+                                        )
+
 
     def getPointBrushes(self, itemDef=None, overrideItemDef=False):
         """

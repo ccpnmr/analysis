@@ -5,7 +5,8 @@ Module containing functions for defining GLSL shaders.
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 14:37:54 +0000 (Tue, March 02, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-07 12:11:51 +0100 (Mon, June 07, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -168,12 +169,12 @@ class ShaderProgramABC(object):
     def setProjectionAxes(self, attMatrix, left, right, bottom, top, near, far):
         """Set the contents of the projection matrix
         """
-        oa = 2.0 / (right - left)  #if abs(right-left) > 1.0e-7 else 1.0
-        ob = 2.0 / (top - bottom)  #if abs(top-bottom) > 1.0e-7 else 1.0
-        oc = -2.0 / (far - near)  #if abs(far-near) > 1.0e-7 else 1.0
-        od = -(far + near) / (far - near)  #if abs(far-near) > 1.0e-7 else 0.0
-        oe = -(top + bottom) / (top - bottom)  #if abs(top-bottom) > 1.0e-7 else 0.0
-        og = -(right + left) / (right - left)  #if abs(right-left) > 1.0e-7 else 0.0
+        oa = 2.0 / (right - left) if abs(right-left) > 1.0e-7 else 1.0
+        ob = 2.0 / (top - bottom) if abs(top-bottom) > 1.0e-7 else 1.0
+        oc = -2.0 / (far - near) if abs(far-near) > 1.0e-7 else 1.0
+        od = -(far + near) / (far - near) if abs(far-near) > 1.0e-7 else 0.0
+        oe = -(top + bottom) / (top - bottom) if abs(top-bottom) > 1.0e-7 else 0.0
+        og = -(right + left) / (right - left) if abs(right-left) > 1.0e-7 else 0.0
 
         attMatrix[0:16] = [oa, 0.0, 0.0, 0.0,
                            0.0, ob, 0.0, 0.0,

@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-20 10:15:15 +0100 (Thu, May 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-07 12:11:50 +0100 (Mon, June 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -212,6 +212,9 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self._successiveClicks = None  # GWV: Store successive click events for zooming; None means first click not set
         self._dottedCursorCoordinate = None
         self._dottedCursorVisible = None
+
+        self.axesChanged = False
+        self.axisLabelling = {'0': [], '1': []}
 
         self.gridList = []
         self._gridVisible = True

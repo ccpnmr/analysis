@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-28 16:26:14 +0100 (Fri, May 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-07 12:11:50 +0100 (Mon, June 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -316,6 +316,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.diagonalSideBandsGLList = None
         self.boundingBoxes = None
         self._updateAxes = True
+        self.axesChanged = False
+        self.axisLabelling = {'0': [], '1': []}
 
         self._axesVisible = True
         self._aspectRatios = {}
@@ -3015,6 +3017,8 @@ class CcpnGLWidget(QOpenGLWidget):
     def _buildGL(self):
         """Separate the building of the display from the paint event; not sure that this is required
         """
+        # if abs(self.axisL - self.axisR) < 1e-9 or abs(self.axisT - self.axisB) < 1e-9:
+        #     return
 
         self.buildCursors()
 
@@ -4058,8 +4062,8 @@ class CcpnGLWidget(QOpenGLWidget):
             mark.drawTextArrayVBO()
 
     def _scaleAxisToRatio(self, values):
-        return [((values[0] - self.axisL) / (self.axisR - self.axisL)) if values[0] is not None else None,
-                ((values[1] - self.axisB) / (self.axisT - self.axisB)) if values[1] is not None else None]
+        return [((values[0] - self.axisL) / (self.axisR - self.axisL)) if values[0] is not None and abs(self.axisR - self.axisL) > 1e-9 else 0.0,
+                ((values[1] - self.axisB) / (self.axisT - self.axisB)) if values[1] is not None and abs(self.axisT - self.axisB) > 1e-9 else 0.0]
 
     def buildCursors(self):
         """Build and draw the cursors/doubleCursors
@@ -4478,7 +4482,10 @@ class CcpnGLWidget(QOpenGLWidget):
     def buildMouseCoords(self, refresh=False):
 
         def valueToRatio(val, x0, x1):
-            return (val - x0) / (x1 - x0)
+            if abs(x1-x0) > 1e-9:
+                return (val - x0) / (x1 - x0)
+            else:
+                return 0.0
 
         cursorCoordinate = self.getCurrentCursorCoordinate()
         if refresh or self._widthsChangedEnough(cursorCoordinate[:2], self._mouseCoords[:2], tol=1e-8):
@@ -5456,6 +5463,11 @@ class CcpnGLWidget(QOpenGLWidget):
                 index = 0
                 for scaleOrder, i in enumerate(scaleGrid):  #  [2,1,0]:   ## Draw three different scales of grid
                     dist = br - ul
+
+                    if 0 in dist:
+                        # skip if one of the axes is zero
+                        continue
+
                     nlTarget = 10. ** i
                     _pow = np.log10(abs(dist / nlTarget)) + 0.5
                     d = 10. ** np.floor(_pow)

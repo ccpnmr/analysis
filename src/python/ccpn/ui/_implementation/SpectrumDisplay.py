@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:57 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-07 12:11:50 +0100 (Mon, June 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -638,6 +638,9 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                     _max, _min = max(_intensities), min(_intensities)
                     apiAxis.position = float(_min + _max) / 2
                     apiAxis.width = float(_max - _min)
+                else:
+                    apiAxis.position = 0.0
+                    apiAxis.width = 1.0
 
         if dataSource.numDim != 1:  # it gets crazy on 1D displays
             display._useFirstDefault = False

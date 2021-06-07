@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 20:49:35 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-07 12:11:51 +0100 (Mon, June 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -787,6 +787,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # only call if the axes have changed
         # self._updateAxes = True
 
+        # if abs(self.axisL - self.axisR) < 1e-9 or abs(self.axisT - self.axisB) < 1e-9:
+        #     return
+
         if self._updateAxes:
             self.buildGrid()
             self._updateAxes = False
@@ -925,6 +928,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.diagonalSideBandsGLList = None
         self.boundingBoxes = None
         self._updateAxes = True
+        self.axesChanged = False
+        self.axisLabelling = {'0': [], '1': []}
 
         self._axesVisible = True
         self._aspectRatioMode = 0

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-20 10:15:15 +0100 (Thu, May 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-07 12:11:51 +0100 (Mon, June 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1405,7 +1405,8 @@ class Gui1dWidget(CcpnGLWidget):
                         # circular -    offset = fx0 + dxAF*alias, alias = min->max
                         currentShader.setMVMatrix(_matrix)
 
-                        self._contourList[spectrumView].drawVertexColorVBO()
+                        if spectrumView in self._contourList:
+                            self._contourList[spectrumView].drawVertexColorVBO()
 
                 else:
                     if spectrumView in self._contourList.keys() and \
@@ -1416,7 +1417,8 @@ class Gui1dWidget(CcpnGLWidget):
                             currentShader.setMVMatrix(self._spectrumSettings[spectrumView][
                                                           GLDefs.SPECTRUM_STACKEDMATRIX])
                         # draw contours
-                        self._contourList[spectrumView].drawVertexColorVBO()
+                        if spectrumView in self._contourList:
+                            self._contourList[spectrumView].drawVertexColorVBO()
 
         # reset lineWidth
         GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)

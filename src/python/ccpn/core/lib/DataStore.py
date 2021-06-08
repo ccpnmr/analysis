@@ -458,7 +458,7 @@ class DataStoreTrait(Instance):
     None indicates no spectrum data file path has been defined
     """
     def __init__(self, **kwds):
-        Instance.__init__(self, klass=DataStore, **kwds)
+        Instance.__init__(self, klass=DataStore, allow_none=True, **kwds)
 
     class jsonHandler(CcpNmrJsonClassHandlerABC):
         klass = DataStore

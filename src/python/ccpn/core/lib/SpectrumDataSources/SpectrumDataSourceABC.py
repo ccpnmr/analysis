@@ -1822,7 +1822,7 @@ class DataSourceTrait(Instance):
     None indicates no spectrumDataSource has been defined
     """
     def __init__(self, **kwds):
-        Instance.__init__(self, klass=SpectrumDataSourceABC, **kwds)
+        Instance.__init__(self, klass=SpectrumDataSourceABC, allow_none=True, **kwds)
 
     class jsonHandler(CcpNmrJsonClassHandlerABC):
         klass = SpectrumDataSourceABC

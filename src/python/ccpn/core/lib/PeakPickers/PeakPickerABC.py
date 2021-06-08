@@ -163,7 +163,7 @@ class PeakPickerABC(object):
                                 for sLeft, sRight in self.sliceTuples]
 
         # TODO: use Spectrum aliasing definitions once defined
-        data = self.spectrum.dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
+        data = self.spectrum._dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
 
         peaks = self.findPeaks(data)
         getLogger().debug('%s.pickPeaks: found %d peaks in spectrum %s; %r' %
@@ -195,7 +195,7 @@ class PeakPickerABC(object):
 
                 if pk.height is None:
                     # height was not defined; get the interpolated value from the data
-                    pk.height = self.spectrum.dataSource.getPointValue(pointPositions)
+                    pk.height = self.spectrum._dataSource.getPointValue(pointPositions)
                 cPeak = peakList.newPeak(pointPositions=pointPositions, height=pk.height, volume=pk.volume, pointLineWidths=pk.lineWidths)
                 if self.autoFit:
                     peakParabolicInterpolation(cPeak, update=True)

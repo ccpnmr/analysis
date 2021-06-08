@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 23:48:44 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-08 09:29:58 +0100 (Tue, June 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -145,7 +145,7 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
     auth = base64.encodebytes(ss.encode('utf-8'))[:-1]
     authheader = 'Basic %s' % auth
 
-    headers = {'Content-type' : 'application/x-www-form-urlencoded;charset=UTF-8',
+    headers = {'Content-Type' : 'application/x-www-form-urlencoded;charset=UTF-8',
                'Authorization': authheader}
     values = {'fileData': fileData, 'fileName': fileStoredAs, 'serverDbRoot': serverDbRoot}
 
@@ -156,9 +156,9 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
         if result.startswith(BAD_DOWNLOAD) or not result.startswith('Ok'):
             ll = len(result)
             bd = len(BAD_DOWNLOAD)
-            getLogger().warning(Exception(result[min(ll, bd):min(ll, bd + 50)]))
+            getLogger().warning(Exception(result[min(ll, bd):min(ll, bd + 1024)]))
         else:
-            print(result[0:min(50, len(result))])
+            print(result[:1024])
             return result
 
     except Exception as es:

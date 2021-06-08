@@ -4,7 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-12 11:01:03 +0000 (Fri, February 12, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-08 09:29:58 +0100 (Tue, June 08, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,8 +45,9 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     context.verify_mode = ssl.CERT_NONE
 
     if not headers:
-        headers = {'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8'}
+        headers = {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'}
     body = urlencode(data, quote_via=quote).encode('utf-8') if data else None
+    headers['Content-Length'] = f'{len(body)}'
 
     urllib3.contrib.pyopenssl.inject_into_urllib3()
 
@@ -54,7 +56,7 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
                'cert_reqs': 'CERT_REQUIRED',
                'ca_certs' : certifi.where(),
                # 'timeout'  : urllib3.Timeout(connect=3.0, read=3.0),
-               'retries'  : urllib3.Retry(1, redirect=False)
+               # 'retries'  : urllib3.Retry(1, redirect=False)
                }
 
 
@@ -115,7 +117,8 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     response = http.request(method, url,
                             headers=headers,
                             body=body,
-                            preload_content=False)
+                            preload_content=True,
+                            decode_content=False)
 
     # return the http response
     return response

@@ -5,7 +5,8 @@ Module Documentation Here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:38 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-08 09:34:17 +0100 (Tue, June 08, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -510,24 +511,30 @@ class ScatterPlot(Widget):
 
     def setPlotLimits(self, **kwargs):
         from ccpn.util.Common import percentage
-        addPercent = 200
-        xValues, yValues = self.scatterPlot.getData()
-        xMin, xMax = np.min(xValues), np.max(xValues)
-        yMin, yMax = np.min(yValues), np.max(yValues)
-        deltaX = xMax - xMin
-        deltaY = yMax - yMin
-        deltaX += percentage(addPercent, deltaX)
-        deltaY += percentage(addPercent, deltaY)
+        try:
+            addPercent = 200
+            xValues, yValues = self.scatterPlot.getData()
+            xMin, xMax = np.min(xValues), np.max(xValues)
+            yMin, yMax = np.min(yValues), np.max(yValues)
+            deltaX = xMax - xMin
+            deltaY = yMax - yMin
+            deltaX += percentage(addPercent, deltaX)
+            deltaY += percentage(addPercent, deltaY)
+        except Exception as e:
+            getLogger().warning("Error in setting scatter plot limits: %s" % e)
+            return
+
         self._scatterViewbox.setLimits(
-                                    xMin = xMin - deltaX,
-                                    xMax = xMax + deltaX,
-                                    yMin = yMin - deltaY,
-                                    yMax = yMax + deltaY,
-                                    minXRange = 0.01,
-                                    maxXRange = max(xValues)*10,
-                                    minYRange = 0.01,
-                                    maxYRange = max(yValues)*10,
-                                    )
+                                        xMin = xMin - deltaX,
+                                        xMax = xMax + deltaX,
+                                        yMin = yMin - deltaY,
+                                        yMax = yMax + deltaY,
+                                        minXRange = 0.01,
+                                        maxXRange = max(xValues)*10,
+                                        minYRange = 0.01,
+                                        maxYRange = max(yValues)*10,
+                                        )
+
 
     def getPointBrushes(self, itemDef=None, overrideItemDef=False):
         """

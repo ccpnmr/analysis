@@ -94,7 +94,6 @@ class _SettingsChanged(object):
         else:
             getLogger().warn('Changes blocking already at 0')
 
-DefaultFoo = 0
 SettingsChanged = 'settingsChanged'
 
 class _DataModuleBase(object):

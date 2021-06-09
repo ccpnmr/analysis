@@ -1,24 +1,19 @@
-import string
 import sys
-from enum import IntEnum
-from math import sqrt, ceil, floor
+from math import sqrt, ceil
 
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import QRectF, Qt, QRect, QPoint, pyqtProperty, QTimer
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QBrush, QPolygon, QPolygonF, QPixmap, QPalette, QCursor, \
-    QFontMetrics, QScreen
+    QFontMetrics
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QLayout, QFrame
-from icecream import ic
 
+from BalloonMetrics import Side
 
-class Side(IntEnum):
-    TOP = 1
-    LEFT = 0
-    RIGHT = 2
-    BOTTOM = 3
+# from typing import NamedTuple
 
 
 DEFAULT_SEPARATOR = '|'
+
 LEFT_LABEL = 0
 MIDDLE_LABEL = 1
 RIGHT_LABEL = 2
@@ -35,6 +30,7 @@ class PaintContext:
         self._painter.end()
         return True
 
+
 class MyApplication(QApplication):
     def __init__(self, arg):
         super(MyApplication, self).__init__(arg)
@@ -49,66 +45,13 @@ class MyApplication(QApplication):
         if window:
             window.move_pointer_to(pos)
 
-class BalloonMetrics:
-    NUM_SIDES = 4
-    SIGNS = [-1, -1, 1, 1]
 
-    def __init__(self, corner_radius=3, pointer_side=Side.RIGHT, pointer_height=10, pointer_width=20):
-        self.corner_radius = corner_radius
-        self.pointer_side = pointer_side
-        self.pointer_height = pointer_height
-        self.pointer_width = pointer_width
-        self.antialias_margin = 1
-
-    def _get_corner_margin(self):
-        result = self.corner_radius / sqrt(2)
-        result = int(ceil(result))
-
-        return result
-
-    def _add_margins(self, rect: QRect, margin, multiplier=1):
-        margins = [margin * multiplier] * 4
-        margins = [margins[i] * self.SIGNS[i] for i in range(self.NUM_SIDES)]
-
-        return rect.adjusted(*margins)
-
-    def _add_central_widget_margins(self, rect: QRect, multiplier=1):
-        return self._add_margins(rect, self._get_corner_margin(), multiplier)
-
-    def _add_pointer_margin(self, rect: QRect, multiplier=1):
-
-        signs = [self.SIGNS[i] * multiplier for i in range(self.NUM_SIDES)]
-        margin = [self.pointer_height] * self.NUM_SIDES
-
-        margin = [margin[i] * signs[i] for i in range(self.NUM_SIDES)]
-
-        mask = [0] * self.NUM_SIDES
-        mask[self.pointer_side] = 1
-
-        pointer_margins = [margin[i] * mask[i] for i in range(self.NUM_SIDES)]
-
-        return rect.adjusted(*pointer_margins)
-
-    def _add_antialias_margin(self, rect: QRect, multiplier=1):
-
-        return self._add_margins(rect, self.antialias_margin, multiplier)
+# class Pointer(IntEnum):
+#     LEFT = 0
+#     MIDDLE = 1
+#     RIGHT = 2
 
 
-    def expand_to_perimeter(self, rect: QRect):
-
-        result = self._add_central_widget_margins(rect)
-        result = self._add_pointer_margin(result)
-        result = self._add_antialias_margin(result)
-
-        return result
-
-    def reduce_to_inside(self, rect: QRect):
-
-        result = self._add_antialias_margin(rect, multiplier=-1)
-        result = self._add_pointer_margin(result, multiplier=-1)
-        result = self._add_central_widget_margins(result, multiplier=-1)
-
-        return result
 
 
 class SpeechBalloon(QWidget):
@@ -243,7 +186,7 @@ class SpeechBalloon(QWidget):
 
     def _get_pointer_position(self, rect=None, on_border=False):
 
-        if rect == None:
+        if rect is None:
             local_display_rect = self._local_display_rect()
         else:
             local_display_rect = rect
@@ -371,7 +314,8 @@ class SpeechBalloon(QWidget):
 
         # otherwise geometry isn't known when the window is shown on osx
         # and you get the message 'qt.qpa.cocoa.window: Window position outside any known screen, using primary screen'
-        # https://stackoverflow.com/questions/541 7201/qt-place-new-window-correctly-on-screen-center-over-mouse-move-into-screen
+        # https://stackoverflow.com/questions/541 7201/qt-place-new-window-correctly-on-screen-center-\
+        # over-mouse-move-into-screen
         self.layout().activate()
 
 
@@ -382,12 +326,12 @@ class SpeechBalloon(QWidget):
 
     def showAt(self, screen, side_pos_alternatives):
 
-        for side, pos in side_pos_alternatives:
-            ic(side_pos_alternatives)
-            ic(self._get_side_preferences(screen, side, pos))
+        # for side, pos in side_pos_alternatives:
+        #     ic(side_pos_alternatives)
+        #     ic(self._get_side_preferences(screen, side, pos))
 
         side, pointer_pos = side_pos_alternatives[0]
-        margins = self._get_margins(1)
+        margins = self._get_margins()
         size_hint = self.centralWidget().sizeHint()
 
         geometry = QRect()
@@ -403,11 +347,11 @@ class SpeechBalloon(QWidget):
 
         #  there's an error in the layout...
         # these are approximately correct till we correct it
-        CORRECTIONS ={
-            Side.BOTTOM: (-1,-1),
-            Side.RIGHT: (-1,-1),
-            Side.TOP: (-1,0),
-            Side.LEFT: (0,-1)
+        CORRECTIONS = {
+            Side.BOTTOM: (-1, -1),
+            Side.RIGHT: (-1, -1),
+            Side.TOP: (-1, 0),
+            Side.LEFT: (0, -1)
         }
 
         correction = CORRECTIONS[self._pointer_side]
@@ -419,15 +363,16 @@ class SpeechBalloon(QWidget):
         self.show()
 
 
-    def _get_screen_side(self, screen, side):
+    @staticmethod
+    def _get_screen_side(screen, side):
         screen_rect = screen.availableGeometry()
 
-        #TODO: sides are in a strange order should be top left bottom right
-        #TODO: add side selection by x and y into Side also opposites
-        screen_cooords = [screen_rect.top(), screen_rect.left(),
-                          screen_rect.right(), screen_rect.bottom()]
+        # TODO: sides are in a strange order should be top left bottom right
+        # TODO: add side selection by x and y into Side also opposites
+        screen_coords = [screen_rect.top(), screen_rect.left(),
+                         screen_rect.right(), screen_rect.bottom()]
 
-        return screen_cooords[side]
+        return screen_coords[side]
 
     def _get_side_preferences(self, screen, side, pos):
 
@@ -460,7 +405,7 @@ class SpeechBalloon(QWidget):
         return new_margins
 
     def _get_margins(self, multiplier=1):
-        new_margins= self._get_corner_margins(multiplier)
+        new_margins = self._get_corner_margins(multiplier)
         new_margins[self._pointer_side] += (self._pointer_height * multiplier)
         return new_margins
 
@@ -471,7 +416,7 @@ class SpeechBalloon(QWidget):
 
 class DoubleLabel(QFrame):
 
-    def __init__(self, text=[''], parent=None):
+    def __init__(self, text=('',), parent=None):
         super(DoubleLabel, self).__init__(parent=parent)
 
         layout = QGridLayout()
@@ -579,65 +524,22 @@ class MousePositionLabel(DoubleLabel):
         x = '%i' % ev.x()
         y = '%i' % ev.y()
 
-        self.setLabels([x,y])
-
-
-def run_tests():
-    import pytest
-    pytest.main([__file__])
-
-
-def test_expand():
-    metrics = BalloonMetrics()
-
-    test_rect = QRect(QPoint(0, 0), QSize(10, 100))
-    assert QRect(QPoint(-3, -3), QSize(16, 106)) == metrics._add_central_widget_margins(test_rect)
-    assert QRect(QPoint(0,0), QSize(20, 100)) == metrics._add_pointer_margin(test_rect)
-    assert QRect(QPoint(-1, -1), QSize(12, 102)) == metrics._add_antialias_margin(test_rect)
-    assert QRect(QPoint(-4, -4), QSize(28, 108)) == metrics.expand_to_perimeter(test_rect)
-
-
-def test_reduce():
-    metrics = BalloonMetrics()
-
-    test_rect = QRect(QPoint(0, 0), QSize(10,100))
-
-    assert QRect(QPoint(1, 1), QSize(8, 98)) == metrics._add_antialias_margin(test_rect, multiplier=-1)
-    assert QRect(QPoint(3, 3), QSize(4, 94)) == metrics._add_central_widget_margins(test_rect, multiplier=-1)
-    assert QRect(QPoint(0, 0), QSize(0, 100)) == metrics._add_pointer_margin(test_rect, multiplier=-1)
-    assert test_rect == metrics.reduce_to_inside(QRect(QPoint(-4, -4), QSize(28, 108)))
-
-
-def test_expand_sides():
-    metrics = BalloonMetrics()
-
-    test_rect = QRect(QPoint(0, 0), QSize(100, 100))
-
-    metrics.pointer_side = Side.BOTTOM
-    assert QRect(QPoint(0,0), QSize(100, 110)) == metrics._add_pointer_margin(test_rect)
-    metrics.pointer_side = Side.TOP
-    assert QRect(QPoint(0, -10), QSize(100, 110)) == metrics._add_pointer_margin(test_rect)
-    metrics.pointer_side = Side.LEFT
-    assert QRect(QPoint(-10, 0), QSize(110, 100)) == metrics._add_pointer_margin(test_rect)
-    metrics.pointer_side = Side.RIGHT
-    assert QRect(QPoint(0, 0), QSize(110, 100)) == metrics._add_pointer_margin(test_rect)
+        self.setLabels([x, y])
 
 
 if __name__ == '__main__':
 
-    if '-t' in sys.argv:
-        run_tests()
-    else:
-        app = MyApplication(sys.argv)
 
-        window2 = SpeechBalloon()
-        window2.cornerRadius = 3
+    app = MyApplication(sys.argv)
 
-        app.setActiveWindow(window2)
+    window2 = SpeechBalloon()
+    window2.cornerRadius = 3
 
-        label = MousePositionLabel(parent=window2)
+    app.setActiveWindow(window2)
 
-        window2.setCentralWidget(label)
-        window2.show()
+    label = MousePositionLabel(parent=window2)
 
-        app.exec_()
+    window2.setCentralWidget(label)
+    window2.show()
+
+    app.exec_()

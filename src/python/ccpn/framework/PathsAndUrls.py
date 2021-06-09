@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:29 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-09 13:55:53 +0100 (Wed, June 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -59,6 +59,7 @@ pipeTemplates                   = ccpnPythonPath / 'framework' / 'lib' / 'pipeli
 fontsPath                       = ccpnPythonPath / 'ui' / 'gui' / 'widgets' / 'fonts'
 openGLFontsPath                 = fontsPath / 'Fonts'
 nefValidationPath               = ccpnPythonPath / 'util' / 'nef' / 'NEF' / 'specification' / 'mmcif_nef_v1_1.dic'
+peakPickerPath                  = ccpnPythonPath / 'core' / 'lib' / 'PeakPickers'
 
 # Program tutorials and documentation
 shortcutsPath                   = ccpnCodePath / 'doc' / 'static' / 'AnalysisShortcuts.pdf'
@@ -67,8 +68,8 @@ beginnersTutorialPath           = ccpnCodePath / 'tutorials' / 'BeginnersTutoria
 backboneAssignmentTutorialPath  = ccpnCodePath / 'tutorials' / 'BackboneAssignmentTutorial.pdf'
 screenTutorialPath              = ccpnCodePath / 'tutorials' / 'CcpNmr_AnalysisScreen_Tutorial_Beta2Release.pdf'
 cspTutorialPath                 = ccpnCodePath / 'tutorials' / 'CSPTutorial.pdf'
-solidStatePeptideTutorialPath          = ccpnCodePath / 'tutorials' / 'SolidStatePeptideAssignmentTutorial.pdf'
-solidStateSH3TutorialPath          = ccpnCodePath / 'tutorials' / 'SolidStateAssignmentTutorial.pdf'
+solidStatePeptideTutorialPath   = ccpnCodePath / 'tutorials' / 'SolidStatePeptideAssignmentTutorial.pdf'
+solidStateSH3TutorialPath       = ccpnCodePath / 'tutorials' / 'SolidStateAssignmentTutorial.pdf'
 analysisScreenTutorialPath      = ccpnCodePath / 'tutorials' / 'ScreenTutorial.pdf'
 howTosPath                      = tutorialsPath / 'How-Tos'
 

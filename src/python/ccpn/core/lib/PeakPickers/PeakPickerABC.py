@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-07 12:53:53 +0100 (Mon, June 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-09 13:55:53 +0100 (Wed, June 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -34,11 +34,51 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core.lib.peakUtils import peakParabolicInterpolation
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 from ccpn.util.Logging import getLogger
+from ccpn.util.Common import loadModules
+from ccpn.framework.PathsAndUrls import peakPickerPath
 
 
 PEAKPICKERSTORE = 'peakPickerStore'
 PEAKPICKER = 'peakPicker'
 PEAKPICKERPARAMETERS = 'peakPickerParameters'
+
+
+def getPeakPickerTypes() -> OrderedDict:
+    """Get peakPicker types
+
+    :return: a dictionary of (type-identifier-strings, PeakPicker classes) as (key, value) pairs
+    """
+    # from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
+    # from ccpn.core.lib.PeakPickers.Simple1DPeakPicker import Simple1DPeakPicker
+    # from ccpn.core.lib.PeakPickers.NmrgluePeakPicker import NmrgluePeakPicker
+    loadModules([peakPickerPath,])
+
+    return PeakPickerABC._peakPickers
+
+
+def getPeakPicker(peakPickerType, spectrum, *args, **kwds):
+    """Return instance of class if PeakPicker defined by peakPickerType has been registered
+
+    :param peakPickerType: type str; reference to peakPickerType of peakPicker class
+    :return: new instance of class if registered else None
+    """
+    peakPickerTypes = getPeakPickerTypes()
+    cls = peakPickerTypes.get(peakPickerType)
+    if cls is None:
+        raise ValueError('getPeakPicker: invalid format "%s"; must be one of %s' %
+                         (peakPickerType, [k for k in peakPickerTypes.keys()])
+                         )
+
+    return cls(spectrum, *args, **kwds)
+
+
+def isRegistered(peakPickerType):
+    """Return True if a PeakPicker class of type peakPickerType is registered
+
+    :param peakPickerType: type str; reference to peakPickerType of peakPicker class
+    :return: True if class referenced by peakPickerType has been registered else False
+    """
+    return getPeakPickerTypes().get(peakPickerType) is not None
 
 
 class SimplePeak(object):
@@ -106,43 +146,10 @@ class PeakPickerABC(object):
     @classmethod
     def register(cls):
         """register cls.peakPickerType"""
-        if cls.peakPickerType in PeakPickerABC._peakPickers:
-            getLogger().debug(f'{cls.peakPickerType} already registered')
-            return
-            # raise RuntimeError('PeakPicker "%s" was already registered' % cls.peakPickerType)
+        if cls.peakPickerType in cls._peakPickers:
+            raise RuntimeError(f'PeakPicker "{cls.peakPickerType}" was already registered')
         PeakPickerABC._peakPickers[cls.peakPickerType] = cls
         getLogger().info(f'Registering peakPicker class {cls.peakPickerType}')
-
-    @classmethod
-    def getPeakPickerClass(cls, peakPickerType):
-        """Return classtype if PeakPicker defined by peakPickerType has been registered
-
-        :param peakPickerType: type str; reference to peakPickerType of peakPicker class
-        :return: class referenced by peakPickerType if it has been registered otherwise None
-        """
-        if not isinstance(peakPickerType, str):
-            raise ValueError(f'{peakPickerType} must be of type str')
-        return PeakPickerABC._peakPickers.get(peakPickerType)
-
-    @classmethod
-    def isRegistered(cls, peakPickerType):
-        """Return True if a PeakPicker class if type peakPickerType is registered
-
-        :param peakPickerType: type str; reference to peakPickerType of peakPicker class
-        :return: True if class referenced by peakPickerType if it has been registered
-        """
-        return cls.getPeakPickerClass(peakPickerType) is not None
-
-    @classmethod
-    def createPeakPicker(cls, peakPickerType, spectrum, *args, **kwds):
-        """Return instance of class if PeakPicker defined by peakPickerType has been registered
-
-        :param peakPickerType: type str; reference to peakPickerType of peakPicker class
-        :return: new instance of class if registered else None
-        """
-        klass = cls.getPeakPickerClass(peakPickerType)
-        if klass:
-            return klass(spectrum, *args, **kwds)
 
     @classmethod
     def _restorePeakPicker(cls, spectrum):
@@ -158,7 +165,7 @@ class PeakPickerABC(object):
         _pickerType = spectrum.getParameter(PEAKPICKERSTORE, PEAKPICKER)
 
         if _pickerType:
-            _picker = cls.createPeakPicker(_pickerType, spectrum)
+            _picker = getPeakPicker(_pickerType, spectrum)
             if _picker:
                 getLogger().debug(f'peakPicker {_picker} instantiated')
                 # restore peakPicker with parameters from CcpnInternal

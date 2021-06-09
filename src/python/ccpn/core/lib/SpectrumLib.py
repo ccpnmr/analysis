@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-07 12:53:54 +0100 (Mon, June 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-09 13:55:53 +0100 (Wed, June 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1813,7 +1813,7 @@ def _createDefaultPeakPicker(spectrum):
     :return: new peakPicker of type defined in 1d or Nd section of preferences or None
     """
     from ccpn.framework.Application import getApplication
-    from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC
+    from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPicker
 
     app = getApplication()
 
@@ -1826,7 +1826,7 @@ def _createDefaultPeakPicker(spectrum):
             _pickerType = prefsGeneral.peakPickerNd
 
         if _pickerType:
-            _picker = PeakPickerABC.createPeakPicker(_pickerType, spectrum)
+            _picker = getPeakPicker(_pickerType, spectrum)
 
             getLogger().debug(f'{spectrum}: creating default peakPicker {_picker}')
             return _picker

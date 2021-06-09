@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-24 19:40:02 +0100 (Mon, May 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-09 13:55:53 +0100 (Wed, June 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1338,6 +1338,35 @@ def _getObjectsByPids(project, pids):
 
 def _getPidsFromObjects(objs):
     return list(filter(None, map(lambda x: x.pid, objs)))
+
+
+def loadModules(paths):
+    """
+    dynamic module importer.
+    """
+    import sys
+    import pkgutil as _pkgutil
+    import traceback
+    from ccpn.util.Logging import getLogger
+
+    modules = []
+    # change to strings - pathlib objects don't work
+    paths = [str(path) for path in paths]
+
+    for loader, name, isPpkg in _pkgutil.walk_packages(paths):
+        if name:
+            try:
+                found = loader.find_module(name)
+                if found:
+                    if sys.modules.get(name):  # already loaded.
+                        continue
+                    else:
+                        module = found.load_module(name)
+                        modules.append(module)
+            except Exception as err:
+                traceback.print_tb(err.__traceback__)
+                getLogger().warning('Error Loading Module %s. %s' % (name, str(err)))
+    return modules
 
 
 if __name__ == '__main__':

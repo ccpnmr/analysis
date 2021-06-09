@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-28 16:26:13 +0100 (Fri, May 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-09 13:55:53 +0100 (Wed, June 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,36 +27,9 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 """
-User peakPickers are to go in this directory
+User peakPickers are automatically picked up by getPeakPickerTypes
 """
 
+from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPickerTypes
 
-def loadPeakPickerModules(paths):
-    """
-    dynamic peakPicker importer. Called upon initialisation of the program for loading the registered ccpn peakPickers.
-    Path = path of the top dir containing the peakPicker files.
-    """
-    import pkgutil as _pkgutil
-    import traceback
-    from ccpn.util.Logging import getLogger
-    import sys
-
-    modules = []
-
-    for loader, name, isPpkg in _pkgutil.walk_packages(paths):
-        if name:
-            try:
-                found = loader.find_module(name)
-                if found:
-                    if sys.modules.get(name):  # already loaded.
-                        continue
-                    else:
-                        module = found.load_module(name)
-                        modules.append(module)
-            except Exception as err:
-                traceback.print_tb(err.__traceback__)
-                getLogger().warning('Error Loading PeakPicker %s. %s' % (name, str(err)))
-    return modules
-
-
-loadPeakPickerModules(__path__)
+getPeakPickerTypes()

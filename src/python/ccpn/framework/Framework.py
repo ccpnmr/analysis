@@ -1431,7 +1431,7 @@ class Framework(NotifierBase):
             ("Multiplet Table", partial(self.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')]),
             ("Restraint Table", partial(self.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
             ("Structure Table", partial(self.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
-            ("Violation Table", partial(self.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
+            ("Restraint Analysis Table", partial(self.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
             (),
             ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
             ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
@@ -2989,21 +2989,21 @@ class Framework(NotifierBase):
         return notesEditorModule
 
     @logCommand('application.')
-    def showViolationTable(self,
+    def showRestraintAnalysisTable(self,
                            position: str = 'bottom',
                            relativeTo: CcpnModule = None,
                            peakList=None, selectFirstItem=False):
-        """Displays violation table.
+        """Displays restraint analysis table.
         """
-        from ccpn.ui.gui.modules.ViolationTable import ViolationTableModule
+        from ccpn.ui.gui.modules.RestraintAnalysisTable import RestraintAnalysisTableModule
 
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        violationTableModule = ViolationTableModule(mainWindow=mainWindow, peakList=peakList, selectFirstItem=selectFirstItem)
+        restraintAnalysisTableModule = RestraintAnalysisTableModule(mainWindow=mainWindow, peakList=peakList, selectFirstItem=selectFirstItem)
 
-        mainWindow.moduleArea.addModule(violationTableModule, position=position, relativeTo=relativeTo)
-        return violationTableModule
+        mainWindow.moduleArea.addModule(restraintAnalysisTableModule, position=position, relativeTo=relativeTo)
+        return restraintAnalysisTableModule
 
     def showPrintSpectrumDisplayPopup(self):
         """Show the print spectrumDisplay dialog

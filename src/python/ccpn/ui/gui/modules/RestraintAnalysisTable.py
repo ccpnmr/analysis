@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-09 18:50:23 +0100 (Wed, June 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -47,6 +47,7 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.widgets.GuiTable import GuiTable, _getValueByHeader
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.CompoundWidgets import DoubleSpinBoxCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.TableSorting import MultiColumnTableWidgetItem
@@ -62,7 +63,7 @@ UNITS = ['ppm', 'Hz', 'point']
 
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 HeaderIndex = '#'
-HeaderPeak = 'Peak'
+HeaderPeak = 'Peak Serial'
 HeaderObject = '_object'
 HeaderExpand = 'Expand'
 HeaderRestraint = 'RestraintPid'
@@ -75,9 +76,9 @@ HeaderCount1 = 'Count>0.3'
 HeaderCount2 = 'Count>0.5'
 
 
-class ViolationTableModule(CcpnModule):
+class RestraintAnalysisTableModule(CcpnModule):
     """
-    This class implements the module by wrapping a ViolationTable instance
+    This class implements the module by wrapping a RestraintAnalysisTable instance
     """
 
     includeSettingsWidget = True
@@ -90,11 +91,11 @@ class ViolationTableModule(CcpnModule):
     includeNmrChains = False
     includeSpectrumTable = False
 
-    className = 'ViolationTableModule'
+    className = 'RestraintAnalysisTableModule'
 
     activePulldownClass = None  # e.g., can make the table respond to current peakList
 
-    def __init__(self, mainWindow=None, name='Violation Table',
+    def __init__(self, mainWindow=None, name='Restraint Analysis Table',
                  peakList=None, selectFirstItem=False):
         super().__init__(mainWindow=mainWindow, name=name)
 
@@ -143,8 +144,20 @@ class ViolationTableModule(CcpnModule):
                                     #                                               'texts'    : ['Collapse', 'Expand', 'Ignore'], }
                                     #                              }
                                     #                 }),
+                                    ('meanLowerLimit', {'label'   : 'Mean Value Lower Limit',
+                                                        'callBack': self._updateMeanLowerLimit,
+                                                        'enabled' : True,
+                                                        '_init'   : None,
+                                                        'type'    : DoubleSpinBoxCompoundWidget,
+                                                        'kwds'    : {'labelText': 'Mean Value Lower Limit',
+                                                                     'tipText'  : 'Lower threshold for mean value of restraints',
+                                                                     'range'    : (0.0, 1.0),
+                                                                     'decimals' : 2,
+                                                                     'step'     : 0.05,
+                                                                     'value'    : 0.3},
+                                                        }),
                                     ('autoExpand', {'label'   : 'Auto-expand Groups',
-                                                    'tipText' : 'Autotomatically expand/collapse groups on\nadding new restraintList, or sorting.',
+                                                    'tipText' : 'Automatically expand/collapse groups on\nadding new restraintList, or sorting.',
                                                     'callBack': self._updateAutoExpand,
                                                     'enabled' : True,
                                                     'checked' : False,
@@ -182,56 +195,67 @@ class ViolationTableModule(CcpnModule):
                                                                     }),
                                              )))
 
-        self._VTwidget = ModuleSettingsWidget(parent=self.settingsWidget, mainWindow=self.mainWindow,
-                                              settingsDict=settingsDict,
-                                              grid=(0, 0))
-        self._restraintList = self._VTwidget.checkBoxes['RestraintLists']['pulldownList']
+        self._RATwidget = ModuleSettingsWidget(parent=self.settingsWidget, mainWindow=self.mainWindow,
+                                               settingsDict=settingsDict,
+                                               grid=(0, 0))
+        self._restraintList = self._RATwidget.checkBoxes['RestraintLists']['widget']
         self._restraintList.listWidget.changed.connect(self._updateRestraintLists)
-        # self._expandSelector = self._VTwidget.checkBoxes['autoExpand']['pulldownList']
+        # self._expandSelector = self._RATwidget.checkBoxes['autoExpand']['widget']
+
+        self._meanLowerLimitSpinBox = self._RATwidget.checkBoxes['meanLowerLimit']['widget']
+        self._autoExpandCheckBox = self._RATwidget.checkBoxes['autoExpand']['widget']
 
         # mainWidget
-        self.violationTable = ViolationTableWidget(parent=self.mainWidget,
-                                                   mainWindow=self.mainWindow,
-                                                   moduleParent=self,
-                                                   setLayout=True,
-                                                   grid=(0, 0))
+        self.restraintAnalysisTable = RestraintAnalysisTableWidget(parent=self.mainWidget,
+                                                                   mainWindow=self.mainWindow,
+                                                                   moduleParent=self,
+                                                                   setLayout=True,
+                                                                   grid=(0, 0))
 
         if peakList is not None:
             self.selectPeakList(peakList)
         elif selectFirstItem:
-            self.violationTable.pLwidget.selectFirstItem()
+            self.restraintAnalysisTable.pLwidget.selectFirstItem()
 
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
     @property
     def _dataFrame(self):
-        if self.violationTable._dataFrameObject:
-            return self.violationTable._dataFrameObject.dataFrame
+        if self.restraintAnalysisTable._dataFrameObject:
+            return self.restraintAnalysisTable._dataFrameObject.dataFrame
 
     def _maximise(self):
         """
         Maximise the attached table
         """
-        self.violationTable._maximise()
+        self.restraintAnalysisTable._maximise()
 
     def selectPeakList(self, peakList=None):
         """
         Manually select a peakList from the pullDown
         """
-        self.violationTable._selectPeakList(peakList)
+        self.restraintAnalysisTable._selectPeakList(peakList)
 
     def _closeModule(self):
         """Re-implementation of closeModule function from CcpnModule to unregister notification """
-        self.violationTable._close()
+        self.restraintAnalysisTable._close()
         super()._closeModule()
+
+    def restoreWidgetsState(self, **widgetsState):
+        super().restoreWidgetsState(**widgetsState)
+        getLogger().debug(f'RestraintTableModule {self} - restoreWidgetsState')
+
+        # need to set the values from the restored state
+        self.restraintAnalysisTable._updateSettings(self._meanLowerLimitSpinBox.getValue(),
+                                                    self._autoExpandCheckBox.get())
 
     @property
     def dataFrame(self):
-        return self.violationTable.dataFrame
+        return self.restraintAnalysisTable.dataFrame
 
     @dataFrame.setter
     def dataFrame(self, dataFrame):
-        self.violationTable.dataFrame = dataFrame
+        self.restraintAnalysisTable.dataFrame = dataFrame
 
     def _updateRestraintLists(self, *args):
         """Update the selected restraintLists
@@ -243,18 +267,21 @@ class ViolationTableModule(CcpnModule):
             restraintLists = [self.project.getByPid(rList) for rList in restraintLists]
             restraintLists = [rList for rList in restraintLists if rList is not None and isinstance(rList, RestraintList)]
 
-        self.violationTable.updateRestraintLists(restraintLists)
+        self.restraintAnalysisTable.updateRestraintLists(restraintLists)
 
     def _updateAutoExpand(self, expand):
         # index = self._expandSelector.getIndex()
-        self.violationTable.updateAutoExpand(expand)
+        self.restraintAnalysisTable.updateAutoExpand(expand)
+
+    def _updateMeanLowerLimit(self, value):
+        self.restraintAnalysisTable.updateMeanLowerLimit(value)
 
 
-class ViolationTableWidget(GuiTable):
+class RestraintAnalysisTableWidget(GuiTable):
     """
-    Class to present a violation Table
+    Class to present a Restraint Analysis Table
     """
-    className = 'ViolationTable'
+    className = 'RestraintAnalysisTable'
     attributeName = 'peakLists'
 
     positionsUnit = UNITS[0]  #default
@@ -271,7 +298,7 @@ class ViolationTableWidget(GuiTable):
     # groups are always max->min
     applySortToGroups = False
 
-    PRIMARYCOLUMN = 'Peak'
+    PRIMARYCOLUMN = 'Peak'  # column holding active objects
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, multiSelect=True,
                  actionCallback=None, selectionCallback=None, **kwds):
@@ -289,13 +316,14 @@ class ViolationTableWidget(GuiTable):
             self.project = None
             self.current = None
 
-        ViolationTableWidget.project = self.project
+        RestraintAnalysisTableWidget.project = self.project
 
         self.settingWidgets = None
         self._selectedPeakList = None
         kwds['setLayout'] = True  # Assure we have a layout with the widget
         self._restraintLists = []
         self._autoExpand = False
+        self._meanLowerLimit = 0.0
 
         # Initialise the scroll widget and common settings
         self._initTableCommonWidgets(parent, **kwds)
@@ -393,6 +421,7 @@ class ViolationTableWidget(GuiTable):
         """
         self._selectedPeakList = self.project.getByPid(self.pLwidget.getText())
         self._groups = None
+        self.hide()
 
         if useSelectedPeakList:
             if self._selectedPeakList:
@@ -412,6 +441,7 @@ class ViolationTableWidget(GuiTable):
                 self.clear()
 
         self.updateTableExpanders()
+        self.show()
 
     def _selectPeakList(self, peakList=None):
         """Manually select a PeakList from the pullDown
@@ -499,6 +529,16 @@ class ViolationTableWidget(GuiTable):
         """
         self._autoExpand = expand
 
+    def updateMeanLowerLimit(self, value):
+        """Set the lower limit for visible restraints
+        """
+        self._meanLowerLimit = value
+        self._updateTable()
+
+    def _updateSettings(self, meanLowerLimit, expand):
+        self._meanLowerLimit = meanLowerLimit
+        self._autoExpand = expand
+
     def _selectOnTableCurrentPeaksNotifierCallback(self, data):
         """
         Callback from a notifier to highlight the peaks on the peak table
@@ -583,8 +623,8 @@ class ViolationTableWidget(GuiTable):
             # highlight them back again
             self._highLightObjs(objs)
 
-        # outside of the with to spawn a repaint
-        self.show()
+        # # outside of the with to spawn a repaint
+        # self.show()
 
     def _highLightObjs(self, selection, scrollToSelection=True):
 
@@ -763,22 +803,24 @@ class ViolationTableWidget(GuiTable):
             for resList in resLists:
                 for res in resList.restraints:
                     for pk in res.peaks:
-                        pkRestraints.setdefault(pk, set()).add(res)
+                        pkRestraints.setdefault(pk.serial, set()).add(res)
                         # pkRes.setdefault(pk, {})
                         # pkRes[pk].setdefault(resList, set()).add(res)
 
             # get the maximum number of restraintItems from each restraint list
             counts = [np.array([sum([
-                len(contribs[res]) for res in (pkRestraints.get(pk) or ()) if res and res.restraintList == rList
+                len(contribs[res]) for res in (pkRestraints.get(pk.serial) or ()) if res and res.restraintList == rList
                 ])
                 for pk in pks])
                 for rList in resLists]
             maxCount = np.max(counts, axis=0)
+            # print(f' max counts {list(maxCount)}')
+            # maxCount += 1
 
-            # allPks = pd.DataFrame([(pk.pid, pk, None)  for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['Peak', '_object', 'Expand'])
-            allPkPids = pd.DataFrame([pk.pid for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakPid', ])
-            index = pd.DataFrame([ii for ii in range(1, len(allPkPids) + 1)], columns=['index'])
-            allPks = pd.DataFrame([(pk.pid, pk, self._downIcon) for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakPid', '_object', 'Expand'])
+            # allPks = pd.DataFrame([(pk.serial, pk, None)  for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['Peak', '_object', 'Expand'])
+            allPkSerials = pd.DataFrame([pk.serial for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakSerial', ])
+            index = pd.DataFrame([ii for ii in range(1, len(allPkSerials) + 1)], columns=['index', ])
+            allPks = pd.DataFrame([(pk.serial, pk, self._downIcon) for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakSerial', '_object', 'Expand'])
 
             # make matching length tables for each of the restraintLists for each peak so the rows match up in the table
             dfs = {}
@@ -786,15 +828,15 @@ class ViolationTableWidget(GuiTable):
             for lCount, rl in enumerate(resLists):
                 head = 0
                 for pk, cc, maxcc in zip(pks, counts[lCount], maxCount):
-                    _res = [(res.pid, _atom) for res in (pkRestraints.get(pk) or ()) if res.restraintList == rl
+                    _res = [(res.pid, _atom) for res in (pkRestraints.get(pk.serial) or ()) if res.restraintList == rl
                             for _atom in contribs[res]]
                     if _res:
                         ll[head:head + len(_res)] = _res
 
                     head += maxcc
 
-                # put the pid and atoms into another table to be concatenated to the right, lCount = index in resLists
-                dfs[rl] = pd.concat([allPkPids,
+                # put the serial and atoms into another table to be concatenated to the right, lCount = index in resLists
+                dfs[rl] = pd.concat([allPkSerials,
                                      pd.DataFrame(ll, columns=[f'RestraintPid_{lCount + 1}',
                                                                f'Atoms_{lCount + 1}'])], axis=1)
 
@@ -811,6 +853,7 @@ class ViolationTableWidget(GuiTable):
 
             # merge all the tables for each restraintList
             _out = {}
+            zeroCols = []
             for ii, resList in enumerate(resLists):
                 if resList in violationResults:
 
@@ -818,18 +861,23 @@ class ViolationTableWidget(GuiTable):
                     _right = violationResults[resList]
                     if (f'RestraintPid_{ii + 1}' in _left.columns and f'Atoms_{ii + 1}' in _left.columns) and \
                             (f'RestraintPid_{ii + 1}' in _right.columns and f'Atoms_{ii + 1}' in _right.columns):
-                        _out[resList] = pd.merge(_left, _right, on=[f'RestraintPid_{ii + 1}', f'Atoms_{ii + 1}'], how='left').drop(columns=['PeakPid']).fillna(0.0)
+                        _out[resList] = pd.merge(_left, _right, on=[f'RestraintPid_{ii + 1}', f'Atoms_{ii + 1}'], how='left').drop(columns=['PeakSerial']).fillna(0.0)
+                        zeroCols.append(f'{HeaderMean}_{ii + 1}')
 
                     for _colID in (HeaderRestraint, HeaderAtoms, HeaderMin, HeaderMax, HeaderMean, HeaderStd, HeaderCount1, HeaderCount2):
                         _cols.append((f'{_colID}_{ii + 1}', lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
 
             # concatenate the final dataFrame
             _table = pd.concat([index, allPks, *_out.values()], axis=1)
+            # # purge all rows that contain all means == 0, fastest method
+            # _table = _table[np.count_nonzero(_table[zeroCols].values, axis=1) > 0]
+            # process all row that have means > 0.3, keep only rows that contain at least one valid mean
+            _table = _table[(_table[zeroCols] >= self._meanLowerLimit).sum(axis=1) > 0]
 
         else:
             # make a table that only has peaks
             index = pd.DataFrame([ii for ii in range(1, len(pks) + 1)], columns=['index'])
-            allPks = pd.DataFrame([(pk.pid, pk, self._downIcon) for pk in pks], columns=['PeakPid', '_object', 'Expand'])
+            allPks = pd.DataFrame([(pk.serial, pk, self._downIcon) for pk in pks], columns=['PeakSerial', '_object', 'Expand'])
 
             _table = pd.concat([index, allPks], axis=1)
 
@@ -887,7 +935,7 @@ class ViolationTableWidget(GuiTable):
         self._groups = {}
         # collate max/min information
         for row in df.itertuples(index=False):
-            name = row[self.PIDCOLUMN]
+            name = str(row[self.PIDCOLUMN])
             if name not in self._groups:
                 _row = tuple(universalSortKey(x) for x in row)
                 self._groups[name] = {'min': _row, 'max': _row}
@@ -971,7 +1019,7 @@ if __name__ == '__main__':
     mainWindow = application.ui.mainWindow
 
     # add the module to mainWindow
-    _module = ViolationTableModule(mainWindow=mainWindow)
+    _module = RestraintAnalysisTableModule(mainWindow=mainWindow)
     mainWindow.moduleArea.addModule(_module)
 
     # show the mainWindow

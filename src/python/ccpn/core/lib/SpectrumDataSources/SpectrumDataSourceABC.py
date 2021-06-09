@@ -114,10 +114,11 @@ import tempfile
 
 import numpy
 
+import ccpn.core.lib.SpectrumLib as specLib
+
 from ccpn.util.Common import isIterable
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
-from ccpn.core.Spectrum import Spectrum, DIMENSIONFREQUENCY, DIMENSIONFID
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.util.isotopes import findNucleiFromSpectrometerFrequencies, Nucleus
 from ccpn.core.lib.Cache import cached, Cache
@@ -149,8 +150,7 @@ def getDataFormats() -> OrderedDict:
     from ccpn.core.lib.SpectrumDataSources.NmrViewSpectrumDataSource import NmrViewSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.NmrPipeSpectrumDataSource import NmrPipeSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
-
-    return SpectrumDataSourceABC._dataFormats
+    return SpectrumDataSourceABC._spectrumDataFormats
 
 
 def getSpectrumDataSource(path, dataFormat):
@@ -184,29 +184,31 @@ class SpectrumDataSourceABC(CcpNmrJson):
     ABC for NMR spectral data sources reading/writing
     """
 
-    MAXDIM = Spectrum.MAXDIM  # currently set to 8
+    classVersion = 1.0  # For json saving
 
-    X_AXIS = Spectrum.X_AXIS
-    Y_AXIS = Spectrum.Y_AXIS
-    Z_AXIS = Spectrum.Z_AXIS
-    A_AXIS = Spectrum.A_AXIS
-    B_AXIS = Spectrum.B_AXIS
-    C_AXIS = Spectrum.C_AXIS
-    D_AXIS = Spectrum.D_AXIS
-    E_AXIS = Spectrum.E_AXIS
-    UNDEFINED_AXIS = Spectrum.UNDEFINED_AXIS
-    axisNames = Spectrum.axisNames
+    # 'local' definitions of constants; defining defs in SpectrumLib to prevent circular imports
+    # elsewhere
+    MAXDIM = specLib.MAXDIM  # 8  # Maximum dimensionality
 
-    X_DIM = Spectrum.X_DIM
-    Y_DIM = Spectrum.Y_DIM
-    Z_DIM = Spectrum.Z_DIM
-    A_DIM = Spectrum.A_DIM
-    B_DIM = Spectrum.B_DIM
-    C_DIM = Spectrum.C_DIM
-    D_DIM = Spectrum.D_DIM
-    E_DIM = Spectrum.E_DIM
+    X_AXIS = specLib.X_AXIS  # 0
+    Y_AXIS = specLib.Y_AXIS  # 1
+    Z_AXIS = specLib.Z_AXIS  # 2
+    A_AXIS = specLib.A_AXIS  # 3
+    B_AXIS = specLib.B_AXIS  # 4
+    C_AXIS = specLib.C_AXIS  # 5
+    D_AXIS = specLib.D_AXIS  # 6
+    E_AXIS = specLib.E_AXIS  # 7
+    UNDEFINED_AXIS = specLib.Y_AXIS  # 8
+    axisNames = specLib.axisNames
 
-    dataType = numpy.float32  # numpy data format of the resulting slice, plane, region data
+    X_DIM = specLib.X_DIM  # 1
+    Y_DIM = specLib.Y_DIM  # 2
+    Z_DIM = specLib.Z_DIM  # 3
+    A_DIM = specLib.A_DIM  # 4
+    B_DIM = specLib.B_DIM  # 5
+    C_DIM = specLib.C_DIM  # 6
+    D_DIM = specLib.D_DIM  # 7
+    E_DIM = specLib.E_DIM  # 8
 
     #=========================================================================================
     # to be subclassed
@@ -231,16 +233,20 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
     # data formats
     #=========================================================================================
-    # A dict of registered dataFormat: filled by _registerFormat classmethod, called once after
-    # each definition of a new derived class (e.g. Hdf5SpectrumDataSource)
-    _dataFormats = OrderedDict()
+    dataType = numpy.float32   # numpy data format of the resulting slice, plane, region data
+
+    # A dict of registered spectrum data formats: filled by _registerFormat classmethod, called
+    # once after each definition of a new derived class (e.g. Hdf5SpectrumDataSource)
+    _spectrumDataFormats = OrderedDict()
 
     @classmethod
     def _registerFormat(cls):
         """register cls.dataFormat"""
-        if cls.dataFormat in SpectrumDataSourceABC._dataFormats:
+        if cls.dataFormat in cls._spectrumDataFormats:
             raise RuntimeError('dataFormat "%s" was already registered' % cls.dataFormat)
-        SpectrumDataSourceABC._dataFormats[cls.dataFormat] = cls
+        cls._spectrumDataFormats[cls.dataFormat] = cls
+        # Also register the class for json restoring
+        cls.register()
 
     #=========================================================================================
     # parameter definitions and mappings onto the Spectrum class
@@ -250,6 +256,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     _bigEndian = (sys.byteorder == 'big')
 
     saveAllTraitsToJson = True
+    version = 1.0  # for json saving
 
     date = CString(allow_none=True, default_value=None).tag(isDimensional=False,
                                                             doCopy=True,
@@ -276,10 +283,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                                      spectrumAttribute=None,
                                                      hasSetterInSpectrumClass=False
                                                      )
+    # internal data scale (e.g. as used by Bruker)
     dataScale = CFloat(default_value=1.0).tag(isDimensional=False,
                                               doCopy=True,
-                                              spectrumAttribute='scale',
-                                              hasSetterInSpectrumClass=True
+                                              spectrumAttribute=None,
+                                              hasSetterInSpectrumClass=False
                                               )
     sampledValues = List(default_value=[]).tag(isDimensional=False,
                                                doCopy=True,
@@ -319,7 +327,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             hasSetterInSpectrumClass=False
             )
     #TODO dimensionTypes needs setting in Spectrum class
-    dimensionTypes = CList(trait=CString(allow_none=False), default_value=[DIMENSIONFREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
+    dimensionTypes = CList(trait=CString(allow_none=False), default_value=[specLib.DIMENSIONFREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='dimensionTypes',
@@ -540,7 +548,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     @property
     def path(self) -> aPath:
-        """Return an absolute path of datapath as a Path instance"""
+        """Return an absolute path of datapath as a Path instance or None when not defined
+        """
         return (None if self.dataFile is None else aPath(self.dataFile))
 
     def setPath(self, path, substituteSuffix=False):
@@ -561,6 +570,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
                     _p = _p + self.suffixes[0]
             self.dataFile = str(_p)
         return self
+
+    def hasValidPath(self):
+        """Return true if the path is valid
+        """
+        path = self.path
+        return path is not None and path.exists()
 
     def checkPath(self, path, mode='r') -> bool:
         """Check if path exists (mode='r') or parent of path exists (not mode='r');
@@ -633,6 +648,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def importFromSpectrum(self, spectrum, includePath=True):
         """copy parameters & path (optionally) from spectrum, set spectrum attribute and return self
         """
+        # local import to avoid cycles
+        from ccpn.core.Spectrum import Spectrum
+
         if spectrum is None:
             raise ValueError('Undefined spectrum; cannot import parameters')
 
@@ -650,6 +668,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def exportToSpectrum(self, spectrum, includePath=True):
         """copy parameters & path (optionally) to spectrum, set spectrum attribute, and return self
         """
+        # local import to avoid cycles
+        from ccpn.core.Spectrum import Spectrum
+
         if spectrum is None:
             raise ValueError('Undefined spectrum; cannot export parameters')
 
@@ -791,7 +812,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         for idx, isotopeCode in enumerate(self.isotopeCodes):
 
-            if self.dimensionTypes[idx] == DIMENSIONFID:
+            if self.dimensionTypes[idx] == specLib.DIMENSIONFID:
                 self.axisCodes[idx] = 'Time'
 
             elif isotopeCode is None:
@@ -1300,7 +1321,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         elif self.isBlocked:
             position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
-            return self._readBlockedPlane(xDim=xDim, yDim=yDim, position=position)
+            data = self._readBlockedPlane(xDim=xDim, yDim=yDim, position=position)
+            data *= self.dataScale
+            return data
 
         else:
             raise NotImplementedError('Not implemented')
@@ -1338,7 +1361,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         elif self.isBlocked:
             position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
-            return self._readBlockedSlice(sliceDim=sliceDim, position=position)
+            data = self._readBlockedSlice(sliceDim=sliceDim, position=position)
+            data *= self.dataScale
+            return data
 
         else:
             raise NotImplementedError('Not implemented')
@@ -1384,7 +1409,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         elif self.isBlocked:
             position = self.checkForValidPosition(position)
-            return self._readBlockedPoint(position)
+            data = self._readBlockedPoint(position)
+            data *= self.dataScale
+            return data
 
         else:
             # piggyback on getSliceData
@@ -1563,6 +1590,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         else:
             self.checkForValidRegion(sliceTuples, aliasingFlags)
+            # No need to scale, as _getRegionData relies on getSliceData, which is already scaled
             regionData = self._getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
 
         return regionData
@@ -1784,3 +1812,18 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                                     path
                                                     )
 #end class
+
+from ccpn.util.traits.CcpNmrTraits import Instance
+from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
+
+class DataSourceTrait(Instance):
+    """Specific trait for a Datasource instance encoding access to the (binary) spectrum data.
+    None indicates no spectrumDataSource has been defined
+    """
+    klass = SpectrumDataSourceABC
+    def __init__(self, **kwds):
+        Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
+
+    class jsonHandler(CcpNmrJsonClassHandlerABC):
+        # klass = SpectrumDataSourceABC
+        pass

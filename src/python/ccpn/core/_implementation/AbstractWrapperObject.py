@@ -144,6 +144,8 @@ class AbstractWrapperObject(NotifierBase):
         # NB wrappedData must be globally unique. CCPN objects all are,
         # but for non-CCPN objects this must be ensured.
 
+        NotifierBase.__init__(self)
+
         # Check if object is already wrapped
         data2Obj = project._data2Obj
         if wrappedData in data2Obj:

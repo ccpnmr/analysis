@@ -143,8 +143,10 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
                     dataSetKwds.setdefault('compression', self.defaultCompressionMode)
                     dataSetKwds.setdefault('fletcher32', False)
 
-                self.fp.create_dataset(SPECTRUM_DATASET_NAME, self.pointCounts[::-1], dtype=self.dataType,
-                                       chunks=True, **dataSetKwds)
+                self.fp.create_dataset(SPECTRUM_DATASET_NAME, self.pointCounts[::-1],
+                                       dtype=self.dataType, chunks=True,
+                                       track_times=False,  # to assure same hash after opening/storing
+                                       **dataSetKwds)
                 self.blockSizes = tuple(self.spectrumData.chunks[::-1])
                 self.writeParameters()
 
@@ -317,6 +319,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         data = data.reshape((self.pointCounts[secondAxis], self.pointCounts[firstAxis]))
         if xDim > yDim:
             data = data.transpose()
+        data *= self.dataScale
 
         return data
 
@@ -369,7 +372,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         dataset = self.spectrumData
         slices = self._getSlices(position=position, dims=(sliceDim,))
         data = dataset[slices[::-1]]  # data are z,y,x ordered
-        data = data.reshape((self.pointCounts[sliceDim - 1],))
+        data = data.reshape((self.pointCounts[sliceDim-1],))
+        data *= self.dataScale
 
         return data
 
@@ -395,9 +399,10 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         dataset = self.spectrumData
         slices = self._getSlices(position=position, dims=[])
-        data = dataset[slices[::-1]].flatten()  # data are z,y,x ordered
+        data = dataset[slices[::-1]].flatten() # data are z,y,x ordered
+        pointValue = float(data[0]) * self.dataScale
 
-        return float(data[0])
+        return pointValue
 
     def getRegionData(self, sliceTuples, aliasingFlags=None):
         """Return an numpy array containing the points defined by
@@ -426,6 +431,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             dataset = self.spectrumData
             slices = tuple(slice(start - 1, stop) for start, stop in sliceTuples)
             data = dataset[slices[::-1]]  # data are ..,z,y,x ordered
+            data *= self.dataScale
 
         return data
 

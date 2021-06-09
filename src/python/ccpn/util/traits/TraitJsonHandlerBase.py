@@ -159,3 +159,45 @@ class RecursiveListHandlerABC(TraitJsonHandlerBase):
         result = self.klass(result)
         setattr(obj, trait, result)
 # end class
+
+
+class CcpNmrJsonClassHandlerABC(TraitJsonHandlerBase):
+    """Abstract base class to handle class-like traits of the CcpNmrJson (sub-)type
+    """
+    # #--------------------------------------------------------------------------------------------
+    # # to be subclassed
+    # #--------------------------------------------------------------------------------------------
+    # klass = None
+    # #--------------------------------------------------------------------------------------------
+    # # end to be subclassed
+    # #--------------------------------------------------------------------------------------------
+
+    def encode(self, obj, trait):
+        # convert klass, of (sub-)type CcpNmrJson
+
+        # local imports to avoid circular dependencies
+        from ccpn.util.traits.CcpNmrJson import CcpNmrJson
+
+        value = getattr(obj, trait)
+        # if not isinstance(value, self.klass):
+        #     raise RuntimeError('trait: "%s", expected instance class "%s", got "%s"' %
+        #                        (trait, type(self.klass), type(value))
+        #                        )
+        if isinstance(value, CcpNmrJson):
+            value = value._encode()
+
+        return value
+
+    def decode(self, obj, trait, value):
+        # converting value to the relevant klass instance
+
+        # local imports to avoid circular dependencies
+        from ccpn.util.traits.CcpNmrJson import CcpNmrJson
+
+        result = value
+        # check if this encoded a CcpNmrJson type object
+        if CcpNmrJson.isEncodedObject(value):
+            theDict = dict(value)
+            result = CcpNmrJson._newObjectFromDict(theDict)
+
+        obj.setTraitValue(trait, result, force=True)

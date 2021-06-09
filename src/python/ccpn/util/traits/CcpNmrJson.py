@@ -508,11 +508,12 @@ class CcpNmrJson(TraitBase):
         handler = self.trait_metadata(trait, constants.JSONHANDLER)
         if handler is not None:
             return handler
+
         # check for traitlet class specific handler
-        # if hasattr(self.traits()[trait], constants.JSONHANDLER):
         traitObj = self.getTraitObject(trait)
         if hasattr(traitObj, constants.JSONHANDLER):
             return getattr(traitObj, constants.JSONHANDLER)
+
         # check for TraitBase class specific handler
         if hasattr(self, constants.JSONHANDLER):
             return getattr(self, constants.JSONHANDLER)

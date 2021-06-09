@@ -57,7 +57,8 @@ CCPN_PYTHON = 'miniconda/bin/python'
 #     CCPN_BACKUP_SUFFIX, CCPN_ARCHIVES_DIRECTORY, CCPN_LOGS_DIRECTORY,  CCPN_SUMMARIES_DIRECTORY
 
 
-from pathlib import Path as _Path_, _windows_flavour, _posix_flavour
+from pathlib import Path as _Path_
+from pathlib import _windows_flavour, _posix_flavour
 
 
 class Path(_Path_):
@@ -153,15 +154,18 @@ class Path(_Path_):
             raise ValueError('%s is not a directory' % self)
         _rmdirs(str(self))
 
-    def fetchDir(self, dirName):
-        """Return and (if needed) create dirName relative to self
-        :return: Path instance of self / dirName
+    def fetchDir(self, *dirNames):
+        """Return and (if needed) create all dirNames relative to self
+        :return: Path instance of self / dirName[0] / dirName[1] ...
         """
         if not self.is_dir():
             raise ValueError('%s is not a directory' % self)
-        result = self / dirName
-        if not result.exists():
-            result.mkdir()
+
+        result = self
+        for dirName in dirNames:
+            result = result / dirName
+            if not result.exists():
+                result.mkdir()
         return result
 
     def removeFile(self):
@@ -266,7 +270,6 @@ def _rmdirs(path):
 def aPath(path):
     """Return a ~-expanded, left/right spaces-stripped, normalised Path instance"""
     return Path(str(path).strip()).expanduser().normalise()
-
 
 
 def normalisePath(path, makeAbsolute=None):

@@ -356,7 +356,8 @@ class MainWindow(coreClass, _GuiMainWindow):
     """GUI main window, corresponds to OS window"""
 
     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
-        AbstractWrapperObject.__init__(self, project, wrappedData)
+        # AbstractWrapperObject.__init__(self, project, wrappedData)
+        super().__init__(project, wrappedData)
 
         logger = Logging.getLogger()
 

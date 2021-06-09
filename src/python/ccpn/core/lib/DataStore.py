@@ -194,7 +194,7 @@ class PathRedirections(list):
 
 class DataStore(CcpNmrJson):
     """
-    This class wraps the inplementation of $DATA, $ALONGSIDE, $INSIDE redirections
+    This class wraps the implementation of $DATA, $ALONGSIDE, $INSIDE redirections
     """
 
     # For old Spectrum instances, its parses the api insideData, remoteData, alongSideData etc.
@@ -259,7 +259,7 @@ class DataStore(CcpNmrJson):
 
     @classmethod
     def newFromPath(cls, path, autoRedirect=False, autoVersioning=False,
-                         appendToName=None, withSuffix=None):
+                         appendToName=None, withSuffix=None, dataFormat=None):
         """Create and return a new instance from path; optionally append to name and set suffix
         """
         _p = Path(path)
@@ -274,6 +274,9 @@ class DataStore(CcpNmrJson):
 
         instance = cls(autoRedirect=autoRedirect, autoVersioning=autoVersioning)
         instance.path = _p
+
+        instance.dataFormat= dataFormat
+
         return instance
 
     def hasPathDefined(self):
@@ -446,3 +449,20 @@ class DataStore(CcpNmrJson):
 
     __repr__ = __str__
 
+DataStore.register()
+
+
+from ccpn.util.traits.CcpNmrTraits import Instance
+from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
+
+class DataStoreTrait(Instance):
+    """Specific trait for a Datastore instance encoding the path and dataFormat of the (binary) spectrum data.
+    None indicates no spectrum data file path has been defined
+    """
+    klass = DataStore
+    def __init__(self, **kwds):
+        Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
+
+    class jsonHandler(CcpNmrJsonClassHandlerABC):
+        # klass = klass
+        pass

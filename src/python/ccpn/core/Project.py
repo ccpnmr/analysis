@@ -33,6 +33,7 @@ from typing import Sequence, Union, Optional
 from collections import OrderedDict
 from time import time
 from datetime import datetime
+
 # from ccpn.util.Common import isValidPath, isValidFileNameLength
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
@@ -40,6 +41,8 @@ from ccpn.core.lib import Undo
 from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.nef.GenericStarParser import DataBlock
+from ccpn.util.Path import aPath, Path
+
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
@@ -371,7 +374,8 @@ class Project(AbstractWrapperObject):
 
     @property
     def path(self) -> str:
-        """path to directory containing Project"""
+        """return absolute path to directory containing Project
+        """
         return apiIo.getRepositoryPath(self._wrappedData.root, 'userData')
 
     @property
@@ -1348,7 +1352,6 @@ class Project(AbstractWrapperObject):
 
             dataType, subType, usePath = ioFormats.analyseUrl(path)
 
-            #TODO:RASMUS: Replace prints by logger calls
             #TODO:RASMUS: Fix all return types; define properly first
             if dataType is None:
                 # print("Skipping: file data type not recognised for %s" % usePath)

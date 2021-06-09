@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:51 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-09 18:49:25 +0100 (Wed, June 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -541,7 +541,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.aliasLabelsEnabledData.setEnabled(_enabled)
             self.aliasShadeData.setEnabled(_enabled)
 
-            self.mainWindow.statusBar().showMessage("Cycle Symbol Labelling: %s " %self.annotationsData.get())
+            self.mainWindow.statusBar().showMessage("Cycle Symbol Labelling: %s " % self.annotationsData.get())
 
             self.blockSignals(False)
 
@@ -1276,18 +1276,18 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
                     widgetType = data['type']
                     if 'kwds' in data:
                         newItem = widgetType(self, self.mainWindow, grid=(row, 0),
-                                                            callback=data['callBack'] if 'callBack' in data else None,
-                                                            **data['kwds'],
-                                                            )
+                                             callback=data['callBack'] if 'callBack' in data else None,
+                                             **data['kwds'],
+                                             )
                     else:
                         newItem = widgetType(self, self.mainWindow, grid=(row, 0),
-                                                            callback=data['callBack'] if 'callBack' in data else None,
-                                                            **{})
-
-                    self.checkBoxes[item] = {'pulldownList': newItem,
-                                             'item'        : item,
-                                             'signalFunc'  : None
-                                             }
+                                             callback=data['callBack'] if 'callBack' in data else None,
+                                             **{})
+                    # newItem.setCallback(data['callBack'] if 'callBack' in data else None)
+                    # self.checkBoxes[item] = {'widget'      : newItem,
+                    #                          'item'        : item,
+                    #                          'signalFunc'  : None
+                    #                          }
 
                 else:
                     newItem = CheckBoxCompoundWidget(
@@ -1302,13 +1302,14 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
                             callback=data['callBack'] if 'callBack' in data else None,
                             # enabled=data['enabled']
                             )
+                    # newItem.setCallback(data['callBack'] if 'callBack' in data else None)
                     if 'enabled' in data:
                         newItem.setEnabled(data['enabled'])
 
-                    self.checkBoxes[item] = {'checkBox'  : newItem,
-                                             'item'      : item,
-                                             'signalFunc': None
-                                             }
+                self.checkBoxes[item] = {'widget'    : newItem,
+                                         'item'      : item,
+                                         'signalFunc': None
+                                         }
 
                 # if data['_init']:
                 #     # attach a one-off signal to the checkBox

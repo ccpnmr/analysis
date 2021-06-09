@@ -449,6 +449,8 @@ class DataStore(CcpNmrJson):
 
     __repr__ = __str__
 
+DataStore.register()
+
 
 from ccpn.util.traits.CcpNmrTraits import Instance
 from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
@@ -457,8 +459,10 @@ class DataStoreTrait(Instance):
     """Specific trait for a Datastore instance encoding the path and dataFormat of the (binary) spectrum data.
     None indicates no spectrum data file path has been defined
     """
+    klass = DataStore
     def __init__(self, **kwds):
-        Instance.__init__(self, klass=DataStore, allow_none=True, **kwds)
+        Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
 
     class jsonHandler(CcpNmrJsonClassHandlerABC):
-        klass = DataStore
+        # klass = klass
+        pass

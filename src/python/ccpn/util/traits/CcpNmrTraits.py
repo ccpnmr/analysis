@@ -342,7 +342,7 @@ class CPath(TraitType, _Ordered):
             self.default_value = default_value
 
     def validate(self, obj, value):
-        """Assure a AttributeDict instance
+        """Assure a Path instance
         """
         if isinstance(value, Path):
             pass
@@ -360,12 +360,17 @@ class CPath(TraitType, _Ordered):
         """Serialise Path to be json compatible.
         """
         def encode(self, obj, trait):
-            # stores as a str for json
-            return str(getattr(obj, trait))
+            # stores as a str for json if not None
+            value = getattr(obj, trait)
+            if value is not None:
+                value = str(value)
+            return value
 
         def decode(self, obj, trait, value):
-            # needs conversion from str into Path
-            setattr(obj, trait, Path(value))
+            # needs conversion from str into Path if not None
+            if value is not None:
+                value = Path(value)
+            setattr(obj, trait, value)
     # end class
 # end class
 

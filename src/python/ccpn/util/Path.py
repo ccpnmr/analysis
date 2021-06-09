@@ -259,7 +259,6 @@ def aPath(path):
     return Path(str(path).strip()).expanduser().normalise()
 
 
-
 def normalisePath(path, makeAbsolute=None):
     """
     Normalises the path, e.g. removes redundant .. and slashes and

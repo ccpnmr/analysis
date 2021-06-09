@@ -1352,7 +1352,6 @@ class Project(AbstractWrapperObject):
 
             dataType, subType, usePath = ioFormats.analyseUrl(path)
 
-            #TODO:RASMUS: Replace prints by logger calls
             #TODO:RASMUS: Fix all return types; define properly first
             if dataType is None:
                 # print("Skipping: file data type not recognised for %s" % usePath)

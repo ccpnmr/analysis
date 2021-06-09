@@ -164,13 +164,13 @@ class RecursiveListHandlerABC(TraitJsonHandlerBase):
 class CcpNmrJsonClassHandlerABC(TraitJsonHandlerBase):
     """Abstract base class to handle class-like traits of the CcpNmrJson (sub-)type
     """
-    #--------------------------------------------------------------------------------------------
-    # to be subclassed
-    #--------------------------------------------------------------------------------------------
-    klass = None
-    #--------------------------------------------------------------------------------------------
-    # end to be subclassed
-    #--------------------------------------------------------------------------------------------
+    # #--------------------------------------------------------------------------------------------
+    # # to be subclassed
+    # #--------------------------------------------------------------------------------------------
+    # klass = None
+    # #--------------------------------------------------------------------------------------------
+    # # end to be subclassed
+    # #--------------------------------------------------------------------------------------------
 
     def encode(self, obj, trait):
         # convert klass, of (sub-)type CcpNmrJson
@@ -179,10 +179,10 @@ class CcpNmrJsonClassHandlerABC(TraitJsonHandlerBase):
         from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 
         value = getattr(obj, trait)
-        if not isinstance(value, self.klass):
-            raise RuntimeError('trait: "%s", expected instance class "%s", got "%s"' %
-                               (trait, type(self.klass), type(value))
-                               )
+        # if not isinstance(value, self.klass):
+        #     raise RuntimeError('trait: "%s", expected instance class "%s", got "%s"' %
+        #                        (trait, type(self.klass), type(value))
+        #                        )
         if isinstance(value, CcpNmrJson):
             value = value._encode()
 
@@ -200,4 +200,4 @@ class CcpNmrJsonClassHandlerABC(TraitJsonHandlerBase):
             theDict = dict(value)
             result = CcpNmrJson._newObjectFromDict(theDict)
 
-        setattr(obj, trait, result)
+        obj.setTraitValue(trait, result, force=True)

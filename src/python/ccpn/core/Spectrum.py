@@ -698,7 +698,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         newDataStore.spectrum = self
 
         try:
-            newDataSource = self._getDataSource(newDataStore, reportWarnings=True)
+            newDataSource = self._getDataSource(newDataStore)
         except:
             raise ValueError('Spectrum.filePath: incompatible file "%s"' % value)
 
@@ -2615,7 +2615,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     # Implementation functions
     #-----------------------------------------------------------------------------------------
 
-    def _getDataSource(self, dataStore, reportWarnings=False):
+    def _getDataSource(self, dataStore):
         """Check the validity of the file defined by dataStore;
         returns SpectrumDataSource instance or None when filePath and/or dataFormat of the
         dataStore instance are incorrect
@@ -2630,28 +2630,24 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if dataStore.dataFormat == EmptySpectrumDataSource.dataFormat:
             # Special case, empty spectrum
             dataSource = EmptySpectrumDataSource(spectrum=self)
-            return dataSource
 
-        if not dataStore.exists():
-            if reportWarnings:
-                dataStore.warningMessage()
-            raise RuntimeError('Spectrum._getDataSource: invalid dataStore')
+        else:
+            dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
+            if dataSource is None:
+                RuntimeError('Spectrum._getDataSource: dataStore path "%s" is incompatible with dataFormat "%s"' %
+                                    (dataStore.aPath(), dataStore.dataFormat))
 
-        dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
-        if dataSource is None and reportWarnings:
-            RuntimeError('Spectrum._getDataSource: dataStore path "%s" is incompatible with dataFormat "%s"' %
-                                (dataStore.aPath(), dataStore.dataFormat))
+            # check some fundamental parameters
+            if dataSource.dimensionCount != self.dimensionCount:
+                RuntimeError('Spectrum._getDataSource: incompatible dimensionCount (%s) of "%s"' %
+                                 (dataSource.dimensionCount, dataStore.aPath()))
 
-        # check some fundamental parameters
-        if dataSource.dimensionCount != self.dimensionCount:
-            RuntimeError('Spectrum._getDataSource: incompatible dimensionCount (%s) of "%s"' %
-                             (dataSource.dimensionCount, dataStore.aPath()))
+            for idx, np in enumerate(self.pointCounts):
+                if dataSource.pointCounts[idx] != np:
+                    raise RuntimeError('Spectrum._getDataSource: incompatible pointsCount[%s] = %s of "%s"' %
+                                     (idx, dataSource.pointCounts[idx], dataStore.aPath()))
 
-        for idx, np in enumerate(self.pointCounts):
-            if dataSource.pointCounts[idx] != np:
-                raise RuntimeError('Spectrum._getDataSource: incompatible pointsCount[%s] = %s of "%s"' %
-                                 (idx, dataSource.pointCounts[idx], dataStore.aPath()))
-
+        dataSource.spectrum = self
         return dataSource
 
     def _updateParameterValues(self):
@@ -2678,21 +2674,24 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         spectrum = super()._restoreObject(project, apiObj)
 
         try:
-            # Restore the dataStore info and get a dataSource object
+            # Restore the dataStore info
             dataStore = DataStore()._importFromSpectrum(spectrum)
-            dataSource = spectrum._getDataSource(dataStore, reportWarnings=True)
-
             spectrum.setTraitValue('_dataStore', dataStore, force=True)
+        except (ValueError, RuntimeError) as es:
+            getLogger().warning('Error restoring valid data store for %s (%s)' % (spectrum, es))
+
+        try:
+            # Get a dataSource object
+            dataSource = spectrum._getDataSource(dataStore)
             spectrum.setTraitValue('_dataSource', dataSource, force=True)
-
-            # save the spectrum metadata
-            spectrum._saveSpectrumMetaData()
-
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid data source for %s (%s)' % (spectrum, es))
 
         # Assure a setting of crucial attributes
         spectrum._updateParameterValues()
+        # save the spectrum metadata
+        spectrum._saveSpectrumMetaData()
+
         return spectrum
 
     @renameObject()
@@ -2706,14 +2705,19 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return result
 
     def _saveSpectrumMetaData(self):
-        """Save the spectrum metadata in the project/state/spectra for optional future reference
+        """Save the spectrum metadata in the project/state/spectra in json file for optional future reference
         """
         _tmpPath = aPath(self.project.path).fetchDir(CCPN_STATE_DIRECTORY, self._pluralLinkName)
         self.save(_tmpPath / self.name + '.json')
-        # if self._dataStore is not None:
-        #     self._dataStore.save(_tmpPath / self.name + '_dataStore.json')
-        # if self._dataSource is not None:
-        #     self._dataSource.save(_tmpPath / self.name + '_dataSource.json')
+
+    def _restoreFromSpectrumMetaData(self):
+        """Retore the spectrum metadata from the project/state/spectra json file
+        """
+        _tmpPath = aPath(self.project.path).fetchDir(CCPN_STATE_DIRECTORY, self._pluralLinkName)
+        self.restore(_tmpPath / self.name + '.json')
+        self._dataStore.spectrum = self
+        self._dataStore._saveInternal()
+        self._dataSource.spectrum = self
 
     def _deleteSpectrumMetaData(self):
         """Delete the spectrum metadata in the project/state/spectra
@@ -2722,14 +2726,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         _path = _tmpPath / self.name + '.json'
         if _path.exists():
             _path.removeFile()
-        # if self._dataStore is not None:
-        #     _path = _tmpPath / self.name + '_dataStore.json'
-        #     if _path.exists():
-        #         _path.removeFile()
-        # if self._dataSource is not None:
-        #     _path = _tmpPath / self.name + '_dataSource.json'
-        #     if _path.exists():
-        #         _path.removeFile()
 
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated spectrumViews instances
@@ -3131,6 +3127,8 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name) -> Spectrum
     if dataSource.dimensionCount == 0:
         raise ValueError('dataSource.dimensionCount = 0')
 
+    if name is None:
+        name = dataStore.path.basename
     # assure unique name
     name = Spectrum._uniqueName(project=project, name=name)
 
@@ -3253,9 +3251,6 @@ def _newSpectrum(project: Project, path: str, name: str) -> (Spectrum, None):
     if dataSource is None:
         logger.warning('Invalid spectrum path "%s"' % path)  # report the argument given
         return None
-
-    if name is None:
-        name = _path.basename
 
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
     # Hack to trigger initialisation of contours

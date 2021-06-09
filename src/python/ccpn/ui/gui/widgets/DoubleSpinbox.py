@@ -4,8 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-03 10:01:42 +0000 (Thu, December 03, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-06-09 18:47:58 +0100 (Wed, June 09, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -109,51 +110,39 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
         self._qLocale = locale or QtCore.QLocale()
         self.setLocale(self._qLocale)
 
-        # if value is not None:
-        #   value = value
-        #   # self.setValue(value)
-
         if min is not None:
             self.setMinimum(min)
         else:
             self.setMinimum(-1.0 * sys.float_info.max)
-
         if max is not None:
             self.setMaximum(max)
         else:
             self.setMaximum(sys.float_info.max)
 
         self.isSelected = False
+        self._internalWheelEvent = True
 
         if step is not None:
             self.setSingleStep(step)
-
         if decimals is not None:
             self.setDecimals(decimals)
-
         if showButtons is False:
             self.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
-
         if prefix:
             self.setPrefix(prefix + ' ')
-
         if suffix:
             self.setSuffix(' ' + suffix)
-
-        self._callback = None
-        self.setCallback(callback)
-
-        # self.setMinimumWidth(self.defaultMinimumSizes[0])
-        # self.setMinimumHeight(self.defaultMinimumSizes[1])
 
         if value is not None:
             value = value
             self.setValue(value)
 
-        self._internalWheelEvent = True
-
         lineEdit = self.lineEdit()
         lineEdit.returnPressed.connect(self._returnPressed)
+
+        # must be set after setting value/limits
+        self._callback = None
+        self.setCallback(callback)
 
         # change focusPolicy so that spinboxes don't grab focus unless selected
         self.setFocusPolicy(QtCore.Qt.StrongFocus)

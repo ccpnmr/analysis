@@ -5,8 +5,9 @@ Base class for compound widgets
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:52 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-06-09 18:47:01 +0100 (Wed, June 09, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -81,7 +82,7 @@ class CompoundBaseWidget(Frame, SignalBlocking):
             raise RuntimeError('Invalid notifiers attribute (%s)' % nf)
 
     def _addWidget(self, widget):
-        "Add widget, using the layout as defined previously by layoutDict and orientation"
+        """Add widget, using the layout as defined previously by layoutDict and orientation"""
         if len(self._gridding) < len(self._widgets) + 1:
             raise RuntimeError('Cannot add widget; invalid gridding')
         gx, gy = self._gridding[len(self._widgets)]
@@ -89,7 +90,7 @@ class CompoundBaseWidget(Frame, SignalBlocking):
         self.layout().addWidget(widget, gx, gy)
 
     def setMinimumWidths(self, minimumWidths):
-        "Set minimumwidths of widgets"
+        """Set minimumwidths of widgets"""
         if len(minimumWidths) < len(self._widgets):
             raise RuntimeError('Not enough values to set minimum widths of all widgets')
         for i, width in enumerate(minimumWidths[0:len(self._widgets)]):
@@ -97,7 +98,7 @@ class CompoundBaseWidget(Frame, SignalBlocking):
                 self._widgets[i].setMinimumWidth(width)
 
     def setMaximumWidths(self, maximumWidths):
-        "Set maximumWidths of widgets"
+        """Set maximumWidths of widgets"""
         if len(maximumWidths) < len(self._widgets):
             raise RuntimeError('Not enough values to set maximum widths of all widgets')
         for i, width in enumerate(maximumWidths[0:len(self._widgets)]):
@@ -105,7 +106,7 @@ class CompoundBaseWidget(Frame, SignalBlocking):
                 self._widgets[i].setMaximumWidth(width)
 
     def setFixedWidths(self, fixedWidths):
-        "Set maximumWidths of widgets"
+        """Set maximumWidths of widgets"""
         if len(fixedWidths) < len(self._widgets):
             raise RuntimeError('Not enough values to set fixed widths of all widgets')
         for i, width in enumerate(fixedWidths[0:len(self._widgets)]):
@@ -113,7 +114,7 @@ class CompoundBaseWidget(Frame, SignalBlocking):
                 self._widgets[i].setFixedWidth(width)
 
     def setFixedHeights(self, fixedHeights):
-        "Set fixed heights of widgets"
+        """Set fixed heights of widgets"""
         if len(fixedHeights) < len(self._widgets):
             raise RuntimeError('Not enough values to set fixed heights of all widgets')
         for i, height in enumerate(fixedHeights[0:len(self._widgets)]):
@@ -137,7 +138,7 @@ class CompoundBaseWidget(Frame, SignalBlocking):
         return notifier
 
     def addNotifier(self, notifier):
-        "add a notifer to the widget"
+        """add a notifer to the widget"""
         if not hasattr(self, NOTIFIERS):
             raise RuntimeError('Widget has no notifiers attribute')
         nf = getattr(self, NOTIFIERS)
@@ -145,7 +146,7 @@ class CompoundBaseWidget(Frame, SignalBlocking):
         getLogger().debug('Added notifier %s to widget %s' % (notifier, self))
 
     def deleteNotifiers(self):
-        "Delete all notifiers associated with the widget"
+        """Delete all notifiers associated with the widget"""
         while len(self._notifiers) > 0:
             notifier = self._notifiers.pop()
             #print('>deleteNotifier>', notifier)

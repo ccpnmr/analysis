@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-09 18:47:01 +0100 (Wed, June 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -210,11 +210,11 @@ class ListCompoundWidget(CompoundBaseWidget):
                 self.listWidget.addItem(i)
 
     def getTexts(self):
-        "Convenience: Return list of texts in listWidget"
+        """Convenience: Return list of texts in listWidget"""
         return [self.listWidget.item(i).text() for i in range(self.listWidget.count())]
 
     def addText(self, text):
-        "Convenience: Add text to listWidget"
+        """Convenience: Add text to listWidget"""
         if text is None:
             return
         if self._uniqueList and text in self.getTexts():
@@ -222,7 +222,7 @@ class ListCompoundWidget(CompoundBaseWidget):
         self.listWidget.addItem(text)
 
     def addPulldownItem(self, item):
-        "convenience: add pulldown item (text or index) to list"
+        """convenience: add pulldown item (text or index) to list"""
         texts = self.pulldownList.texts
         if item in texts:
             self.addText(item)
@@ -234,7 +234,7 @@ class ListCompoundWidget(CompoundBaseWidget):
             pass
 
     def _addToListWidget(self, item):
-        "Callback for Pulldown, adding the selcted item to the listWidget"
+        """Callback for Pulldown, adding the selcted item to the listWidget"""
         if item is not None and self.pulldownList.getSelectedIndex() != 0:
             self.addText(item)
         # reset to first > select-to-add < entry
@@ -313,11 +313,11 @@ class EntryCompoundWidget(CompoundBaseWidget):
         #     self.Entry.setSizeAdjustPolicy(sizeAdjustPolicy)
 
     def getText(self):
-        "Convenience: Return text of Entry"
+        """Convenience: Return text of Entry"""
         return self.entry.getText()
 
     def setText(self, text):
-        "Convenience: set text of Entry"
+        """Convenience: set text of Entry"""
         self.entry.setText(text)
 
 
@@ -639,7 +639,7 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
             self.setFixedWidths(fixedWidths)
 
     def isChecked(self):
-        "Convenience: Return whether checkBox is checked"
+        """Convenience: Return whether checkBox is checked"""
         return self.checkBox.isChecked()
 
     def get(self):
@@ -728,11 +728,11 @@ class SpinBoxCompoundWidget(CompoundBaseWidget):
             self.setFixedWidths(fixedWidths)
 
     def getValue(self) -> float:
-        "get the value from the SpinBox"
+        """get the value from the SpinBox"""
         return self.spinBox.value()
 
     def setValue(self, value: float):
-        "set the value in the SpinBox"
+        """set the value in the SpinBox"""
         return self.spinBox.setValue(value if value is not None else 0)
 
     def setCallback(self, callback):
@@ -822,11 +822,11 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
             self.setFixedWidths(fixedWidths)
 
     def getValue(self) -> float:
-        "get the value from the DoubleSpinBox"
+        """get the value from the DoubleSpinBox"""
         return self.doubleSpinBox.value()
 
     def setValue(self, value: float):
-        "set the value in the DoubleSpinBox"
+        """set the value in the DoubleSpinBox"""
         return self.doubleSpinBox.setValue(value if value is not None else 0)
 
     def setCallback(self, callback):
@@ -914,11 +914,11 @@ class ScientificSpinBoxCompoundWidget(CompoundBaseWidget):
             self.setFixedWidths(fixedWidths)
 
     def getValue(self) -> float:
-        "get the value from the scientificSpinBox"
+        """get the value from the scientificSpinBox"""
         return self.scientificSpinBox.value()
 
     def setValue(self, value: float):
-        "set the value in the scientificSpinBox"
+        """set the value in the scientificSpinBox"""
         return self.scientificSpinBox.setValue(value if value is not None else 0.0)
 
     def setCallback(self, callback):
@@ -939,11 +939,11 @@ class SelectorWidget(Widget):
         self.pulldownList.setObjectName(label)
 
     def getText(self):
-        "Convenience: Return selected text in Pulldown"
+        """Convenience: Return selected text in Pulldown"""
         return self.pulldownList.currentText()
 
     def select(self, item):
-        "Convenience: Set item in Pulldown; works with text or item"
+        """Convenience: Set item in Pulldown; works with text or item"""
         return self.pulldownList.select(item)
 
 

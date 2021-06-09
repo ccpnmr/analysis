@@ -1223,6 +1223,24 @@ def getSpectralPeakHeightForNmrResidue(spectra, peakListIndexes:list=None) -> pd
     newDf = newDf.reset_index(drop=True).groupby(NR_ID).max()
     return newDf
 
+def getSpectralPeakVolumeForNmrResidue(spectra, peakListIndexes:list=None) -> pd.DataFrame:
+    """
+    return: Pandas DataFrame with the following structure:
+            Index:  ID for the nmrResidue(s) assigned to the peak ;
+            Columns => Spectrum series values sorted by ascending values, if series values are not set, then the
+                       spectrum name is used instead.
+
+                   |   SP1     |    SP2    |   SP3
+        NR_ID      |           |           |
+       ------------+-----------+-----------+----------
+        A.1.ARG    |    10     |  100      | 1000
+
+        """
+    df = getSpectralPeakVolumes(spectra, peakListIndexes)
+    newDf = df[df[NR_ID] != ''] # remove rows if NR_ID is not defined
+    newDf = newDf.reset_index(drop=True).groupby(NR_ID).max()
+    return newDf
+
 def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID=NR_ID, peakListIndexes:list=None):
     """
     :param spectra: list of spectra

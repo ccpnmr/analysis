@@ -2616,10 +2616,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     #-----------------------------------------------------------------------------------------
 
     def _getDataSource(self, dataStore):
-        """Check the validity of the file defined by dataStore;
-        returns SpectrumDataSource instance or None when filePath and/or dataFormat of the
+        """Check the validity and access the file defined by dataStore;
+        returns: SpectrumDataSource instance or None when filePath and/or dataFormat of the
         dataStore instance are incorrect
-        Optionally report warnings
         """
 
         if dataStore is None:

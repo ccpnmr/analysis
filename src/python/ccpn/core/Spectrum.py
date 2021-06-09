@@ -2747,12 +2747,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         else:
             dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
             if dataSource is None:
-                RuntimeError('Spectrum._getDataSource: dataStore path "%s" is incompatible with dataFormat "%s"' %
+                raise RuntimeError('Spectrum._getDataSource: dataStore path "%s" is incompatible with dataFormat "%s"' %
                                     (dataStore.aPath(), dataStore.dataFormat))
 
             # check some fundamental parameters
             if dataSource.dimensionCount != self.dimensionCount:
-                RuntimeError('Spectrum._getDataSource: incompatible dimensionCount (%s) of "%s"' %
+                raise RuntimeError('Spectrum._getDataSource: incompatible dimensionCount (%s) of "%s"' %
                                  (dataSource.dimensionCount, dataStore.aPath()))
 
             for idx, np in enumerate(self.pointCounts):
@@ -2793,6 +2793,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """Subclassed to allow for initialisations on restore, not on creation via newSpectrum
         """
         spectrum = super()._restoreObject(project, apiObj)
+        dataStore = None
 
         try:
             # Restore the dataStore info

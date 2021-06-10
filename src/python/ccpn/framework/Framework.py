@@ -1623,20 +1623,9 @@ class Framework(NotifierBase):
         return project
 
     def _openProject(self):
-        """Just a stub to pass on to mainWindow, to be moved later
+        """Just a stub for the menu setup to pass on to mainWindow, to be moved later
         """
         return self.ui.mainWindow._openProject()
-        # if project:
-        #     try:
-        #         project._mainWindow.show()
-        #         QtWidgets.QApplication.setActiveWindow(project._mainWindow)
-        #
-        #     except Exception as es:
-        #         getLogger().warning('Error opening project:', str(es))
-        #     finally:
-        #         return project
-        # else:
-        #     return None
 
     def _loadV3Project(self, path):
         """Actual V3 project loader
@@ -1664,6 +1653,7 @@ class Framework(NotifierBase):
         """Just a stub for now; calling MainWindow methods
         """
         self.ui.mainWindow._openProject(path)
+
         # """Load project from path
         #    If not path then opens a file dialog box and loads project from selected file.
         #

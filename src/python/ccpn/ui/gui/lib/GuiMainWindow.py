@@ -510,16 +510,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #     return self.project.isTemporary
 
 
-    def _buildProjectGui(self, newProject):
-        """Build the project related Gui elements
+    def _badSpectraPopup(self, project):
+        """Report bad spectra in a popup
         """
-        # Note that the new project has its own MainWindow; i.e. it is not self
-        newProject._mainWindow.sideBar.buildTree(newProject)
-        newProject._mainWindow.show()
-        QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
-
-        # if the new project contains invalid spectra then open the popup to see them
-        badSpectra = [str(spectrum) for spectrum in newProject.spectra if not spectrum.hasValidPath()]
+        badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
         if badSpectra:
             text = 'Detected invalid Spectrum file path(s) for:\n\n'
             for sp in badSpectra:
@@ -1111,29 +1105,77 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """
         assert 0 == 1
 
+    def _processUrl(self, url) -> list:
+        """Handle the dropped url
+        return a tuple ([objs], errorText)
+        """
+        # CCPNINTERNAL. Called also from module area and GuiStrip. They should have same behaviour
+
+        url = str(url)
+        getLogger().debug('>>> dropped: ' + url)
+
+        objs = []
+
+        dataLoader = checkPathForDataLoader(url)
+
+        if dataLoader is None:
+            txt = 'Loading "%s" failed; unrecognised type' % url
+            getLogger().warning(txt)
+            # MessageDialog.showError('Load Data', txt, parent=self)
+            return ([], txt)
+
+        if dataLoader.createsNewProject:
+            if not self._queryCloseProject(title='Load %s project' % dataLoader.dataFormat,
+                                           phrase='create a new'):
+                return ([], None)
+
+            newProject = self._loadProject(dataLoader=dataLoader)
+            if newProject is not None:
+                objs.append(newProject)
+
+        else:
+            with undoBlockWithoutSideBar():
+                result = dataLoader.load()
+                objs.extend(result)
+
+        return (objs, None)
+
     def _processDroppedItems(self, data):
         """Handle the dropped urls
         """
         # CCPNINTERNAL. Called also from module area and GuiStrip. They should have same behaviour
         # use an undoBlockWithoutSideBar, and ignore logging if MAXITEMLOGGING or more items
         # to stop overloading of the log
-        objs = []
-        urls = data.get('urls', [])
 
+        urls = data.get('urls', [])
         if urls is None:
-            return objs
+            return []
 
         getLogger().info('Handling urls...')
+        objs = []
+        errorList  = []
         if len(urls) > 0 and len(urls) <= MAXITEMLOGGING:
             for url in urls:
-                result = self._processUrl(url)
-            objs.extend(result)
+                result, errorText = self._processUrl(url)
+                objs.extend(result)
+                if errorText is not None:
+                    errorList.append( url )
 
         elif len(urls) > MAXITEMLOGGING:
             with notificationEchoBlocking():
                 for url in urls:
-                    result = self._processUrl(url)
-                objs.extend(result)
+                    result, errorText = self._processUrl(url)
+                    objs.extend(result)
+                    if errorText is not None:
+                        errorList.append( url )
+
+        _numErrors = len(errorList)
+        if _numErrors == 1:
+            url = errorList[0]
+            MessageDialog.showError('Load Data', 'Loading "%s" failed; unrecognised type' % url, parent=self)
+        elif _numErrors > 1:
+            MessageDialog.showError('Load Data', '%d dropped items were not recognised (see log for details)' % _numErrors,
+                                     parent=self)
 
         return objs
 
@@ -1178,7 +1220,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         message = 'Do you really want to %s project (current project will be closed %s)?' % \
                   (phrase, (' and any changes will be lost' if self.project.isModified else ''))
-        result = MessageDialog.showYesNo(title, message)
+        result = MessageDialog.showYesNo(title, message, parent=self)
         return bool(result)
 
     def _openProject(self, projectDir=None):
@@ -1241,54 +1283,43 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """
         if dataLoader is None and path is not None:
             dataLoader = checkPathForDataLoader(path)
-        if dataLoader is None:
-            raise RuntimeError('No suitable dataLoader found')
-        if not dataLoader.createsNewProject:
-            raise RuntimeError('dataLoader %s does not yield a new project' % dataLoader)
 
-        with progressManager(self, 'Loading project %s ... ' % dataLoader.path):
-            newProject = dataLoader.load()[0]
-            if newProject is not None:
-                self._buildProjectGui(newProject)
+        if dataLoader is None:
+            MessageDialog.showError('Load Project', 'No suitable dataLoader found', parent=self)
+            return None
+
+        if not dataLoader.createsNewProject:
+            MessageDialog.showError('Load Project', '"%s" does not yield a new project' % dataLoader.path,
+                                    parent=self
+                                    )
+            return None
+
+        # Some error recovery; store info to re-open the current project (or a new default)
+        oldProjectPath = self.project.path
+        oldProjectIsTemporary = self.project.isTemporary
+
+        try:
+            with progressManager(self, 'Loading project %s ... ' % dataLoader.path):
+                newProject = dataLoader.load()[0]
+                # Note that the newProject has its own MainWindow; i.e. it is not self
+                newProject._mainWindow.sideBar.buildTree(newProject)
+                newProject._mainWindow.show()
+                QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
+                # if the new project contains invalid spectra then open the popup to see them
+                self._badSpectraPopup(newProject)
+
+        except RuntimeError as es:
+            MessageDialog.showError('Load Project', '"%s" did not yield a valid new project (%s)' % \
+                                    (dataLoader.path, str(es)), parent=self
+                                   )
+
+            # First get to a defined state
+            self.application.newProject()
+            if not oldProjectIsTemporary:
+                self.application.loadProject(oldProjectPath)
+            return None
 
         return newProject
-
-    def _processUrl(self, url) -> list:
-        """Handle the dropped url
-        return a list of objs (in order to handle directory)
-        """
-        # CCPNINTERNAL. Called also from module area and GuiStrip. They should have same behaviour
-
-        url = str(url)
-        getLogger().debug('>>> dropped: ' + url)
-
-        objs = []
-
-        dataLoader = checkPathForDataLoader(url)
-
-        if dataLoader is None:
-            txt = 'Loading "%s" failed; unrecognised type' % url
-            getLogger().warning(txt)
-            MessageDialog.showError('Load Data', txt, parent=self)
-            return []
-
-        if dataLoader.createsNewProject:
-            if not self._queryCloseProject(title='Load %s project' % dataLoader.dataFormat,
-                                           phrase='create a new'):
-                return []
-
-            newProject = self._loadProject(dataLoader=dataLoader)
-            if newProject is not None:
-                objs.append(newProject)
-
-        else:
-            with undoBlockWithoutSideBar():
-                result = dataLoader.load()
-                if not isIterable(result):
-                    result = [result]
-                objs.extend(result)
-
-        return objs
 
     # def _processUrls(self, urls):
     #     """Handle the dropped urls

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-08 09:34:17 +0100 (Tue, June 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-10 14:59:40 +0100 (Thu, June 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -46,8 +46,10 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
 
     if not headers:
         headers = {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'}
-    body = urlencode(data, quote_via=quote).encode('utf-8') if data else None
-    headers['Content-Length'] = f'{len(body)}'
+    try:
+        body = urlencode(data or {}, quote_via=quote).encode('utf-8')
+    except Exception as err:
+        body = urlencode({}, quote_via=quote).encode('utf-8')
 
     urllib3.contrib.pyopenssl.inject_into_urllib3()
 
@@ -58,7 +60,6 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
                # 'timeout'  : urllib3.Timeout(connect=3.0, read=3.0),
                # 'retries'  : urllib3.Retry(1, redirect=False)
                }
-
 
     # check whether a proxy is required
     from ccpn.util.UserPreferences import UserPreferences, USEPROXY, USEPROXYPASSWORD, PROXYADDRESS, \

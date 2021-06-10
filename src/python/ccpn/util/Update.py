@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-18 00:01:19 +0100 (Tue, May 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-10 14:59:40 +0100 (Thu, June 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -59,6 +59,7 @@ WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 ###VERSION_RE = re.compile('^[.\d]+$')
 
 BAD_DOWNLOAD = 'Exception: '
+ERROR_DOWNLOAD = 'Error: '
 DELETEHASHCODE = '<DELETE>'
 TERMSANDCONDITIONS = 'termsConditions'
 
@@ -370,16 +371,20 @@ class UpdateAgent(object):
             return
 
         if data.startswith(BAD_DOWNLOAD):
-            raise Exception('Could not download database file from server')
+            self.showError('fetching updates', f'Error: Could not download database file from server - {data}')
+            return
+
+        if data.startswith(ERROR_DOWNLOAD):
+            self.showError('fetching updates', data)
+            return
 
         lines = data.split('\n')
         if lines:
             version = lines[0].strip()
-            # if not VERSION_RE.match(version):
-            #  raise Exception('First line of server database file = %s, does not match a version number' % version)
 
             if version != self.version:
-                raise Exception('Server database version = %s != %s = program version' % (version, self.version))
+                self.showError('fetching updates', 'Error: Server database version => %s != %s' % (version, self.version))
+                return
 
             for line in lines[1:]:
                 line = line.rstrip()

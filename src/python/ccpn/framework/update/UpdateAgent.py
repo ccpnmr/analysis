@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-08 09:34:17 +0100 (Tue, June 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-10 14:59:40 +0100 (Thu, June 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -60,6 +60,7 @@ PATH_SEP = '__sep_'
 ###VERSION_RE = re.compile('^[.\d]+$')
 
 BAD_DOWNLOAD = 'Exception: '
+ERROR_DOWNLOAD = 'Error: '
 
 
 def lastModifiedTime(filePath):
@@ -350,49 +351,30 @@ class UpdateAgent(object):
         serverUploadScript = '%s%s' % (self.server, self.serverUploadScript)
         data = downloadFile(serverDownloadScript, self.serverDbRoot, self.serverDbFile)
 
-        # if data.startswith(BAD_DOWNLOAD):
-        #     raise Exception('Could not download database file from server')
         if not data:
+            return
+
+        if data.startswith(BAD_DOWNLOAD):
+            self.showError('fetching updates', f'Error: Could not download database file from server - {data}')
+            return
+
+        if data.startswith(ERROR_DOWNLOAD):
+            self.showError('fetching updates', data)
             return
 
         lines = data.split('\n')
         if lines:
             version = lines[0].strip()
-            #if not VERSION_RE.match(version):
-            #  raise Exception('First line of server database file = %s, does not match a version number' % version)
 
             if version != self.version:
-                raise Exception('Server database version = %s != %s = program version' % (version, self.version))
+                self.showError('fetching updates', 'Error: Server database version => %s != %s' % (version, self.version))
+                return
 
             for line in lines[1:]:
                 line = line.rstrip()
                 if line:
                     (filePath, fileTime, fileStoredAs, fileHashCode) = line.split(FIELD_SEP)
 
-                    # specifically fro updateAdmin, so show ALL files in the list
-
-                    # if fileHashCode == DELETEHASHCODE:
-                    #     # delete file
-                    #     if os.path.exists(os.path.join(self.installLocation, filePath)) or fileTime in [0, '0', '0.0']:
-                    #
-                    #         # if still exists then need to add to update list
-                    #         updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime,
-                    #                                 fileStoredAs, fileHashCode, serverDownloadScript=serverDownloadScript,
-                    #                                 serverUploadScript=serverUploadScript)
-                    #         updateFiles.append(updateFile)
-                    #         updateFileDict[filePath] = updateFile
-                    #
-                    # elif self.serverUser or self.isUpdateDifferent(filePath, fileHashCode):
-                    #
-                    #     # file exists, is modified and needs updating
-                    #     updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime, fileStoredAs, fileHashCode,
-                    #                             serverDownloadScript=serverDownloadScript, serverUploadScript=serverUploadScript)
-                    #     updateFiles.append(updateFile)
-                    #     updateFileDict[filePath] = updateFile
-                    #
-                    # elif fileTime in [0, '0', '0.0']:
-                    #   file exists, is modified and needs updating
-                    #
                     updateFile = UpdateFile(self.installLocation, self.serverDbRoot, filePath, fileTime, fileStoredAs, fileHashCode,
                                             serverDownloadScript=serverDownloadScript, serverUploadScript=serverUploadScript)
                     updateFiles.append(updateFile)

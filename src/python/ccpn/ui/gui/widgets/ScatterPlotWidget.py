@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-08 09:34:17 +0100 (Tue, June 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-10 14:59:40 +0100 (Thu, June 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -278,6 +278,7 @@ class ScatterPlot(Widget):
         self.autoBtn.clicked.connect(self._setZoomFull)
         self.getLayout().addWidget(self._scatterView)
         self.axisSelectionFrame = Frame(self, setLayout=True, grid=(1, 0))
+        self.axisSelectionFrame.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
         self._xSelCW = PulldownListCompoundWidget(self.axisSelectionFrame, labelText='Select X-axis',
                                         callback=self._axisSelectionCallback, grid=(0, 0))#,  hAlign='l',)
         self._ySelCW = PulldownListCompoundWidget(self.axisSelectionFrame, labelText='Select Y-axis',

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:29 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-10 14:59:40 +0100 (Thu, June 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1088,8 +1088,25 @@ def getSpectralPeakHeightForNmrResidue(spectra, peakListIndexes: list = None) ->
     newDf = newDf.reset_index(drop=True).groupby(NR_ID).max()
     return newDf
 
+def getSpectralPeakVolumeForNmrResidue(spectra, peakListIndexes:list=None) -> pd.DataFrame:
+    """
+    return: Pandas DataFrame with the following structure:
+            Index:  ID for the nmrResidue(s) assigned to the peak ;
+            Columns => Spectrum series values sorted by ascending values, if series values are not set, then the
+                       spectrum name is used instead.
 
-def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID=NR_ID, peakListIndexes: list = None):
+                   |   SP1     |    SP2    |   SP3
+        NR_ID      |           |           |
+       ------------+-----------+-----------+----------
+        A.1.ARG    |    10     |  100      | 1000
+
+        """
+    df = getSpectralPeakVolumes(spectra, peakListIndexes)
+    newDf = df[df[NR_ID] != ''] # remove rows if NR_ID is not defined
+    newDf = newDf.reset_index(drop=True).groupby(NR_ID).max()
+    return newDf
+
+def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID=NR_ID, peakListIndexes:list=None):
     """
     :param spectra: list of spectra
     :param peakProperty: 'height'or'volume'

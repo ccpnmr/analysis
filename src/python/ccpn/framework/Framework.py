@@ -80,7 +80,7 @@ from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
-from ccpn.util.Common import uniquify, isWindowsOS, isMacOS
+from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.Logging import getLogger
 from ccpn.util import Layout
 from ccpn.ui.gui.Gui import Gui
@@ -1349,7 +1349,7 @@ class Framework(NotifierBase):
         ms.append(('Project', [
             ("New", self.createNewProject, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
-            ("Open...", self.openProject, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Open...", self._openProject, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Open Recent", ()),
 
             #      ("Load Spectrum...", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
@@ -1622,19 +1622,21 @@ class Framework(NotifierBase):
 
         return project
 
-    def openProject(self, path=None):
-        project = self.ui.mainWindow.loadProject(projectDir=path)
-        if project:
-            try:
-                project._mainWindow.show()
-                QtWidgets.QApplication.setActiveWindow(project._mainWindow)
-
-            except Exception as es:
-                getLogger().warning('Error opening project:', str(es))
-            finally:
-                return project
-        else:
-            return None
+    def _openProject(self):
+        """Just a stub to pass on to mainWindow, to be moved later
+        """
+        return self.ui.mainWindow._openProject()
+        # if project:
+        #     try:
+        #         project._mainWindow.show()
+        #         QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+        #
+        #     except Exception as es:
+        #         getLogger().warning('Error opening project:', str(es))
+        #     finally:
+        #         return project
+        # else:
+        #     return None
 
     def _loadV3Project(self, path):
         """Actual V3 project loader
@@ -1675,7 +1677,7 @@ class Framework(NotifierBase):
         if dataLoader is None or not dataLoader.createsNewProject:
             raise ValueError('File "%s" does not encode a valid project' % path)
 
-        return dataLoader.load()
+        return dataLoader.load()[0]
 
         # dataType, subType, usePath = ioFormats.analyseUrl(path)
         # project = None
@@ -1925,7 +1927,21 @@ class Framework(NotifierBase):
         """
         objs = []
         for path in paths:
-            objs.extend( self.project.loadData(path) )
+            dataLoader = checkPathForDataLoader(path)
+
+            if dataLoader is None:
+                getLogger().warning('Unable to load "%s"' % path)
+
+            elif dataLoader.createsNewProject:
+                newProject = dataLoader.load()[0]
+                objs.append(newProject)
+
+            else:
+                result = dataLoader.load()
+                if not isIterable(result):
+                    result = [result]
+                objs.extend( result )
+
         return objs
 
     def _cloneSpectraToProjectDir(self):

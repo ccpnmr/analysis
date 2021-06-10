@@ -80,17 +80,23 @@ class SpectrumDataLoader(DataLoaderABC):
         return (dataStore, dataSoure)
 
     def load(self):
-        """The project loading method
-        :return: object representing the data or None on error
+        """The actual spectrum loading method;
+        raises RunTimeError on error
+        :return: a list of [spectrum]
         """
         if self.dataSource is None:
             self.dataStore, self.dataSource = self._check(self.path)
 
         if self.dataSource is None:
-            return None
+            raise RuntimeError('Error loading "%s"' % self.path)
 
-        spectrum = _newSpectrumFromDataSource(project=self.project, dataStore=self.dataStore,
-                                              dataSource=self.dataSource)
-        return spectrum
+        try:
+            spectrum = _newSpectrumFromDataSource(project=self.project, dataStore=self.dataStore,
+                                                  dataSource=self.dataSource)
+        except Exception as es:
+            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
+
+        return [spectrum]
+
 
 SpectrumDataLoader._registerFormat()

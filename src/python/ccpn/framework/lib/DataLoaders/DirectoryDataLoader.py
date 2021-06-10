@@ -55,11 +55,16 @@ class DirectoryDataLoader(DataLoaderABC):
             return instance
 
     def load(self):
-        """The project loading method
-        :return: object representing the data or None on error
+        """The actual loading method;
+        raises RunTimeError on error
+        :return: a list of [object(s)] representing the directory
         """
         filesToLoad = [str(f) for f in self.files]
-        return self.application.loadData(*filesToLoad)
+        try:
+            result = self.application.loadData(*filesToLoad)
+        except Exception as es:
+            raise RuntimeError('Error loading files from "%s"' % self.path)
+        return result
 
     def __init__(self, path):
         super().__init__(path=path)

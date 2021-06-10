@@ -61,10 +61,15 @@ class CcpNmrV3ProjectDataLoader(DataLoaderABC):
         return None
 
     def load(self):
-        """The project loading method
-        :return: object representing the data or None on error
+        """The actual project loading method;
+        raises RunTimeError on error
+        :return: a list of [project]
         """
-        project = self.application._loadV3Project(self.path)
-        return project
+        try:
+            project = self.application._loadV3Project(self.path)
+        except Exception as es:
+            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
+
+        return [project]
 
 CcpNmrV3ProjectDataLoader._registerFormat()

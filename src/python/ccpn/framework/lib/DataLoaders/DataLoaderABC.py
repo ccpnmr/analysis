@@ -118,9 +118,10 @@ class DataLoaderABC(TraitBase):
         """
         raise NotImplementedError()
 
-    def load(self):
+    def load(self) -> list:
         """The actual loading method; to be subclassed
-        :return: object representing the data or None on error
+        raises RunTimeError on error
+        :return: a list of [object(s)] representing the data
         """
         raise NotImplementedError()
 

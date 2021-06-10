@@ -509,16 +509,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #     """
     #     return self.project.isTemporary
 
-    def _queryCloseProject(self, title, phrase):
-
-        if self.project.isModified:
-            ss = ' and any changes will be lost'
-        else:
-            ss = ''
-        result = MessageDialog.showYesNo(title,
-                                         'Do you really want to %s project (current project will be closed%s)?' % (phrase, ss))
-
-        return result
 
     def _buildProjectGui(self, newProject):
         """Build the project related Gui elements
@@ -607,58 +597,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         self.application._importNef(path)
 
-    def loadProject(self, projectDir=None):
-        """
-        Opens a loadProject dialog box if project directory is not specified.
-        Loads the selected project.
-        """
-        result = self._queryCloseProject(title='Open Project', phrase='open another')
-        lastValidProject = self.project.path
-
-        project = None
-        if result:
-            if projectDir is None:
-                dialog = ProjectFileDialog(parent=self, acceptMode='open')
-                dialog._show()
-                projectDir = dialog.selectedFile()
-
-            if projectDir:
-                # try and load the new project
-                # try:
-                project = self._loadProjectLastValid(projectDir)
-
-                if self.application.preferences.general.useProjectPath:
-                    Logging.getLogger().debug2('mainWindow - setting current path %s' % Path.Path(projectDir).parent)
-                    # this dialog doesn't need to be seen, required to set initialPath
-                    _dialog = ProjectFileDialog(parent=self, acceptMode='open')
-                    _dialog.initialPath = Path.Path(projectDir).parent
-
-            # except (ValueError, RuntimeError) as es:
-            #     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s' % str(projectDir))
-            #     Logging.getLogger().warning('Fatal error loading project: %s' % str(projectDir))
-            #     raise es
-
-            # try:
-            #     project = self._loadProject(projectDir)
-            #
-            # except Exception as es:
-            #     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s\nReloading last saved position.' % str(projectDir))
-            #     Logging.getLogger().warning('Fatal error loading project: %s - Reloading last saved position.' % str(projectDir))
-            #
-            #     # try and load the previous project (only one try)
-            #     try:
-            #         project = self._loadProject(lastValidProject)
-            #
-            #     except Exception as es:
-            #         MessageDialog.showError('loadProject', 'Fatal error loading previous project:\n%s' % str(lastValidProject))
-            #         Logging.getLogger().warning('Fatal error loading previous project: %s' % str(lastValidProject))
-
-        # undo = self._project._undo
-        # if undo is not None:
-        #     undo.markClean()
-
-        return project
-
     def _fillRecentProjectsMenu(self):
         """
         Populates recent projects menu with 10 most recently loaded projects
@@ -672,7 +610,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             #                callback=partial(self.application.loadProject, path=recentFile))
 
             action = Action(self, text=recentFile, translate=False,
-                            callback=partial(self.loadProject, projectDir=recentFile))
+                            callback=partial(self._openProject, projectDir=recentFile))
             recentFileMenu.addAction(action)
         recentFileMenu.addSeparator()
         recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
@@ -1197,11 +1135,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                     result = self._processUrl(url)
                 objs.extend(result)
 
-        if len(objs) == 0:
-           txt = 'Loading "%s" failed' % urls
-           MessageDialog.showError('Load Data', txt)
-           getLogger().warning(txt)
-
         return objs
 
     def _processPids(self, data, position=None, relativeTo=None):
@@ -1236,6 +1169,90 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #                                                  ioFormats.SPARKY):
     #             return url
 
+    def _queryCloseProject(self, title, phrase):
+        """Query if project can be closed; always True for temporary projects
+        :returns True/False
+        """
+        if self.project.isTemporary:
+            return True
+
+        message = 'Do you really want to %s project (current project will be closed %s)?' % \
+                  (phrase, (' and any changes will be lost' if self.project.isModified else ''))
+        result = MessageDialog.showYesNo(title, message)
+        return bool(result)
+
+    def _openProject(self, projectDir=None):
+        """
+        Opens a OpenProject dialog box if project directory is not specified.
+        Loads the selected project.
+        :returns new project instance or None
+        """
+        if not self._queryCloseProject(title='Open Project', phrase='open another'):
+            return None
+
+        lastValidProject = self.project.path
+        project = None
+
+        if projectDir is None:
+            dialog = ProjectFileDialog(parent=self, acceptMode='open')
+            dialog._show()
+            projectDir = dialog.selectedFile()
+
+        if projectDir:
+            # try and load the new project
+            project = self._loadProject(path=projectDir)
+
+            if self.application.preferences.general.useProjectPath:
+                Logging.getLogger().debug2('mainWindow - setting current path %s' % Path.Path(projectDir).parent)
+                # this dialog doesn't need to be seen, required to set initialPath
+                _dialog = ProjectFileDialog(parent=self, acceptMode='open')
+                _dialog.initialPath = Path.Path(projectDir).parent
+
+            # except (ValueError, RuntimeError) as es:
+            #     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s' % str(projectDir))
+            #     Logging.getLogger().warning('Fatal error loading project: %s' % str(projectDir))
+            #     raise es
+
+            # try:
+            #     project = self._loadProject(projectDir)
+            #
+            # except Exception as es:
+            #     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s\nReloading last saved position.' % str(projectDir))
+            #     Logging.getLogger().warning('Fatal error loading project: %s - Reloading last saved position.' % str(projectDir))
+            #
+            #     # try and load the previous project (only one try)
+            #     try:
+            #         project = self._loadProject(lastValidProject)
+            #
+            #     except Exception as es:
+            #         MessageDialog.showError('loadProject', 'Fatal error loading previous project:\n%s' % str(lastValidProject))
+            #         Logging.getLogger().warning('Fatal error loading previous project: %s' % str(lastValidProject))
+
+        # undo = self._project._undo
+        # if undo is not None:
+        #     undo.markClean()
+
+        return project
+
+    def _loadProject(self, dataLoader=None, path=None):
+        """Load a project either from a dataLoader instance or from path;
+        build the project Gui elements
+        :returns project instance or None
+        """
+        if dataLoader is None and path is not None:
+            dataLoader = checkPathForDataLoader(path)
+        if dataLoader is None:
+            raise RuntimeError('No suitable dataLoader found')
+        if not dataLoader.createsNewProject:
+            raise RuntimeError('dataLoader %s does not yield a new project' % dataLoader)
+
+        with progressManager(self, 'Loading project %s ... ' % dataLoader.path):
+            newProject = dataLoader.load()[0]
+            if newProject is not None:
+                self._buildProjectGui(newProject)
+
+        return newProject
+
     def _processUrl(self, url) -> list:
         """Handle the dropped url
         return a list of objs (in order to handle directory)
@@ -1252,30 +1269,25 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if dataLoader is None:
             txt = 'Loading "%s" failed; unrecognised type' % url
             getLogger().warning(txt)
-            MessageDialog.showError('Load Data', txt)
+            MessageDialog.showError('Load Data', txt, parent=self)
             return []
 
         if dataLoader.createsNewProject:
-            okToContinue = True
-            if not self.project.isTemporary:
-                okToContinue = self._queryCloseProject(title='Load %s project' % dataLoader.dataFormat,
-                                                    phrase='create a new')
-            if not okToContinue:
+            if not self._queryCloseProject(title='Load %s project' % dataLoader.dataFormat,
+                                           phrase='create a new'):
                 return []
 
-            with progressManager(self, 'Loading project... ' + url):
-                newProject = dataLoader.load()
-                if newProject is not None:
-                    self._buildProjectGui(newProject)
-                    objs.append(newProject)
+            newProject = self._loadProject(dataLoader=dataLoader)
+            if newProject is not None:
+                objs.append(newProject)
 
         else:
             with undoBlockWithoutSideBar():
                 result = dataLoader.load()
                 if not isIterable(result):
                     result = [result]
+                objs.extend(result)
 
-            objs.extend(result)
         return objs
 
     # def _processUrls(self, urls):

@@ -1298,24 +1298,22 @@ class Project(AbstractWrapperObject):
 
     @logCommand('project.')
     def loadData(self, path: str) -> typing.Optional[typing.List]:
+        """Just a stub for backward compatibility
         """
-        Load data from path, determining type first.
-        Return None for Un-recognised or un-parsable path; return empty list for no-data loaded (e.g.
-        a directory with no loadable files)
-        """
+        return self.application.loadData(path)
 
-        dataLoader = checkPathForDataLoader(path)
-        if dataLoader is None:
-            getLogger().warning('Unable to load "%s"' % path)
-            return []
-        if dataLoader.createsNewProject:
-            raise RuntimeError('File "%s" creates a new project; use application.loadProject() instead')
-
-        # this assures recursion into directories
-        result = dataLoader.load()
-        if not isIterable(result):
-            result = [result]
-        return result
+        # dataLoader = checkPathForDataLoader(path)
+        # if dataLoader is None:
+        #     getLogger().warning('Unable to load "%s"' % path)
+        #     return []
+        # if dataLoader.createsNewProject:
+        #     raise RuntimeError('File "%s" creates a new project; use application.loadProject() instead')
+        #
+        # # this assures recursion into directories
+        # result = dataLoader.load()
+        # if not isIterable(result):
+        #     result = [result]
+        # return result
 
         # # TODO: RASMUS:
         # # RASMUS EXPLANATION (to my successor)

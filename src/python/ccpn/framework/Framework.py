@@ -67,6 +67,8 @@ from ccpn.framework.Translation import translator
 from ccpn.framework.PathsAndUrls import userPreferencesPath
 from ccpn.framework.PathsAndUrls import userPreferencesDirectory
 from ccpn.framework.PathsAndUrls import macroPath
+from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
+
 from ccpn.ui import interfaces, defaultInterface
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
@@ -1629,12 +1631,33 @@ class Framework(NotifierBase):
         else:
             return None
 
-    def loadProject(self, path=None):
+    def _loadV3Project(self, path):
+        """Actual V3 project loader
+        CCPNINTERNAL: called from CcpNmrV3ProjectDataLoader
         """
-           Load project from path
+        if not isinstance(path, (Path.Path, str)):
+            raise ValueError('invalid path "%s"' % path)
+
+        _path = Path.aPath(path)
+        if not _path.exists():
+            raise ValueError('path "%s" does not exist' % path)
+
+        getLogger().info('==> Loading ccpn project "%s"\n' % path)
+
+        if self.project is not None:  # always close for Ccpn
+            self._closeProject()
+        project = coreIo.loadProject(str(_path), useFileLogger=self.useFileLogger, level=self.level)
+        project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+        self._initialiseProject(project)
+        self.project = project
+        return project
+
+    @logCommand('application.')
+    def loadProject(self, path=None):
+        """Load project from path
            If not path then opens a file dialog box and loads project from selected file.
 
-           ReturnsProject instance or None on error
+           Returns Project instance or None on error
         """
         if not path:
             dialog = ProjectFileDialog(parent=self.ui.mainWindow, acceptMode='load')
@@ -1643,77 +1666,84 @@ class Framework(NotifierBase):
             if not path:
                 return None
 
-        dataType, subType, usePath = ioFormats.analyseUrl(path)
-        project = None
+        dataLoader = checkPathForDataLoader(path)
+        if dataLoader is None or not dataLoader.createsNewProject:
+            raise ValueError('File "%s" does not encode a valid project' % path)
 
-        if dataType == 'Project' and subType in (ioFormats.CCPN,
-                                                 ioFormats.NEF,
-                                                 # ioFormats.NMRSTAR,
-                                                 ioFormats.SPARKY):
+        return dataLoader.load()
 
-            # if subType != ioFormats.NEF:    # ejb - only reset project for CCPN files
-            #   if self.project is not None:
-            #     self._closeProject()
-
-            if subType == ioFormats.CCPN:
-                sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
-
-                if self.project is not None:  # always close for Ccpn
-                    self._closeProject()
-                project = coreIo.loadProject(path, useFileLogger=self.useFileLogger, level=self.level)
-                project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-                self._initialiseProject(project)
-
-            elif subType == ioFormats.NEF:
-                sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
-                project = self._loadNefFile(path, makeNewProject=True)  # RHF - new by default
-                project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-
-            # elif subType == ioFormats.NMRSTAR: This is all Broken!
-            #     sys.stderr.write('==> Loading %s NMRStar project "%s"\n' % (subType, path))
-            #     project = self._loadNMRStarFile(path, makeNewProject=True)  # RHF - new by default
-            #     project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-
-            elif subType == ioFormats.SPARKY:
-                sys.stderr.write('==> Loading %s Sparky project "%s"\n' % (subType, path))
-                project = self._loadSparkyProject(path, makeNewProject=True)  # RHF - new by default
-                project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-
-            # project._validateDataUrlAndFilePaths()
-            project._checkUpgradedFromV2()
-
-            if self.preferences.general.useProjectPath:
-                getLogger().debug2('application - setting current path %s' % Path.Path(path).parent)
-                # temporary dialog to set initialPath
-                _dialog = ProjectFileDialog(self.ui.mainWindow)
-                _dialog.initialPath = Path.Path(path).parent
-
-            # if project and project._undo:
-            #     project._undo.clear()
-
-            self.project = project
-
-            return project
-
-        # elif dataType == 'NefFile' and subType in (ioFormats.NEF):
-        # # ejb - testing - 24/6/17 hopefully this will insert into project
-        # #                 is caught by the test above
-        # #                 need to deciode whether it is a 'project' or 'NefFile' load
+        # dataType, subType, usePath = ioFormats.analyseUrl(path)
+        # project = None
         #
-        #   sys.stderr.write('==> Loading %s NefFile "%s"\n' % (subType, path))
-        #   project = self._loadNefFile(path, makeNewProject=False)
-        #   project._resetUndo(debug=_DEBUG)
+        # if dataType == 'Project' and subType in (ioFormats.CCPN,
+        #                                          ioFormats.NEF,
+        #                                          # ioFormats.NMRSTAR,
+        #                                          ioFormats.SPARKY):
         #
-        #   return project
-
-        else:
-            sys.stderr.write('==> Could not recognise "%s" as a project; loading into default project\n' % path)
-            self.project = self.newProject()
-            self.loadData(paths=[path])
-
-            if project and project._undo:
-                project._undo.clear()
-            return self.project
+        #     # if subType != ioFormats.NEF:    # ejb - only reset project for CCPN files
+        #     #   if self.project is not None:
+        #     #     self._closeProject()
+        #
+        #     if subType == ioFormats.CCPN:
+        #         project = self._loadV3Project(path)
+        #         # sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
+        #         #
+        #         # if self.project is not None:  # always close for Ccpn
+        #         #     self._closeProject()
+        #         # project = coreIo.loadProject(path, useFileLogger=self.useFileLogger, level=self.level)
+        #         # project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+        #         # self._initialiseProject(project)
+        #
+        #     elif subType == ioFormats.NEF:
+        #         sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
+        #         project = self._loadNefFile(path, makeNewProject=True)  # RHF - new by default
+        #         project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+        #
+        #     # elif subType == ioFormats.NMRSTAR: This is all Broken!
+        #     #     sys.stderr.write('==> Loading %s NMRStar project "%s"\n' % (subType, path))
+        #     #     project = self._loadNMRStarFile(path, makeNewProject=True)  # RHF - new by default
+        #     #     project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+        #
+        #     elif subType == ioFormats.SPARKY:
+        #         sys.stderr.write('==> Loading %s Sparky project "%s"\n' % (subType, path))
+        #         project = self._loadSparkyProject(path, makeNewProject=True)  # RHF - new by default
+        #         project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+        #
+        #     # project._validateDataUrlAndFilePaths()
+        #     project._checkUpgradedFromV2()
+        #
+        #     if self.preferences.general.useProjectPath:
+        #         getLogger().debug2('application - setting current path %s' % Path.Path(path).parent)
+        #         # temporary dialog to set initialPath
+        #         _dialog = ProjectFileDialog(self.ui.mainWindow)
+        #         _dialog.initialPath = Path.Path(path).parent
+        #
+        #     # if project and project._undo:
+        #     #     project._undo.clear()
+        #
+        #     self.project = project
+        #
+        #     return project
+        #
+        # # elif dataType == 'NefFile' and subType in (ioFormats.NEF):
+        # # # ejb - testing - 24/6/17 hopefully this will insert into project
+        # # #                 is caught by the test above
+        # # #                 need to deciode whether it is a 'project' or 'NefFile' load
+        # #
+        # #   sys.stderr.write('==> Loading %s NefFile "%s"\n' % (subType, path))
+        # #   project = self._loadNefFile(path, makeNewProject=False)
+        # #   project._resetUndo(debug=_DEBUG)
+        # #
+        # #   return project
+        #
+        # else:
+        #     sys.stderr.write('==> Could not recognise "%s" as a project; loading into default project\n' % path)
+        #     self.project = self.newProject()
+        #     self.loadData(paths=[path])
+        #
+        #     if project and project._undo:
+        #         project._undo.clear()
+        #     return self.project
 
     def _loadNefFile(self, path: str, makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup"""

@@ -39,30 +39,11 @@ from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.CcpNmrTraits import Unicode, Any, List, Bool, CPath, Odict
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import singleton
-from ccpn.framework.Framework import getApplication
-
-
-# from sandbox.Geerten.Refactored.dataLoaders.loadCcpNmr import loadCcpNmrV3, isCcpNmrV2Project, \
-#     loadCcpNmrV2, loadCcpNmrTgzCompressed, loadCcpNmrZipCompressed
-# from sandbox.Geerten.Refactored.dataLoaders.loadNef import loadNef
-# from sandbox.Geerten.Refactored.dataLoaders.loadSparky import loadSparky
-# from sandbox.Geerten.Refactored.dataLoaders.loadPdb import loadPdb, isPdbFile
-# from sandbox.Geerten.Refactored.dataLoaders.loadSpectrum import loadSpectrum, isSpectrum
-#
-# from sandbox.Geerten.Refactored.dataLoaders.loadExcel import loadExcel
-# from sandbox.Geerten.Refactored.decorators import debug2Enter, debug2Leave
 
 
 #--------------------------------------------------------------------------------------------
-# matching functions; Need to review lib/io/Formats.py and ioFormats.analyseUrl(path)
+# Need to review lib/io/Formats.py and ioFormats.analyseUrl(path)
 #--------------------------------------------------------------------------------------------
-
-def caseInsensitiveSuffix(pattern, path):
-    """match pattern to path as case-insentive suffix"""
-    return path.lower().endswith(pattern.lower())
-
-
-
 
 CCPNMRV2PROJECT = 'ccpNmrV2Project'
 CCPNMRTGZCOMPRESSED = 'ccpNmrTgzCompressed'
@@ -96,6 +77,7 @@ def getDataLoaders():
     #--------------------------------------------------------------------------------------------
     from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
     from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
+    from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
     return DataLoaderABC._dataLoaders
 
@@ -118,7 +100,8 @@ def checkPathForDataLoader(path):
 class DataLoaderABC(TraitBase):
     """A DataLoaderABC: has definition for patterns
 
-    Maintains a load(project) methods to do the actual loading
+    Maintains a load() method to call the actual loading function (presumably from self.application
+    or self.project
     """
 
     #=========================================================================================
@@ -148,7 +131,6 @@ class DataLoaderABC(TraitBase):
     # traits
     path = CPath().tag(info='a path to a file to be loaded')
     application = Any(default_value=None, allow_none=True)
-    project = Any(default_value=None, allow_none=True)
 
     # A dict of registered DataLoaders: filled by _registerFormat classmethod, called
     # once after each definition of a new derived class (e.g. PdbDataLoader)
@@ -170,9 +152,15 @@ class DataLoaderABC(TraitBase):
         if not self.path.exists():
             raise ValueError('Invalid path "%s"' % path)
 
+        # local import to avoid cycles
+        from ccpn.framework.Framework import getApplication
+
         self.application = getApplication()
-        self.project = self.application.project
 
-
+    @property
+    def project(self):
+        """Current poject instance
+        """
+        return self.application.project
 
 

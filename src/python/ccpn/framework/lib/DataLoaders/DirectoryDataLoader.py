@@ -1,6 +1,5 @@
 """
-This module defines the data loading mechanism for spectra; it uses the SpectrumDataSources
-rotuines and info
+This module defines the data loading mechanism for a V3 project
 """
 
 #=========================================================================================
@@ -30,67 +29,46 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
-from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats, checkPathForSpectrumFormats, \
-      DataSourceTrait
-from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
-from ccpn.core.Spectrum import _newSpectrumFromDataSource
+from ccpn.util.Path import aPath
 
 
-class SpectrumDataLoader(DataLoaderABC):
-    """Spectrum data loader
+class DirectoryDataLoader(DataLoaderABC):
+    """A directory data loader
     """
 
-    dataFormat = 'Spectrum'
-    suffixes = list(set([suf for spec in getDataFormats().values()
-                         for suf in spec.suffixes if suf is not None]))  # a list of possible spectrum suffixes
+    dataFormat = 'directoryData'
+    suffixes = []  # a list of suffixes that get matched to path
     createsNewProject = False
-
-
-    dataSource = DataSourceTrait(default_value=None)
-    dataStore = DataStoreTrait(default_value=None)
 
     @classmethod
     def checkForValidFormat(cls, path):
         """check if valid format corresponding to dataFormat
         :return: None or instance of the class
         """
-        dataStore, dataSoure = cls._check(path)
-        if dataSoure is not None:
+        _path = aPath(path)
+        if not _path.exists():
+            return None
+        if not _path.is_dir():
+            return None
+        else:
             instance = cls(path)
-            instance.dataSource = dataSoure
-            instance.dataStore = dataStore
             return instance
-
-        return None
-
-    @staticmethod
-    def _check(path):
-        """Check if path yields a valid dataSource
-        return: (dataStore, dataSource) tuple, or None's if some failed
-        """
-        dataStore = DataStore.newFromPath(path)
-        if not dataStore.exists():
-            return (None, None)
-
-        dataSoure = checkPathForSpectrumFormats(dataStore.path)
-        if dataSoure is None:
-            return (dataStore, None)
-        dataStore.dataFormat = dataSoure.dataFormat
-
-        return (dataStore, dataSoure)
 
     def load(self):
         """The project loading method
         :return: object representing the data or None on error
         """
-        if self.dataSource is None:
-            self.dataStore, self.dataSource = self._check(self.path)
+        raise NotImplementedError('directory loading not yet implemented')
+        return None
 
-        if self.dataSource is None:
-            return None
+    def __init__(self, path):
+        super().__init__(path=path)
 
-        spectrum = _newSpectrumFromDataSource(project=self.project, dataStore=self.dataStore,
-                                              dataSource=self.dataSource)
-        return spectrum
+        # get all the files in the directory
+        self.files = []
+        for f in self.path.glob('*'):
+            f = aPath(f)
+            if not f.is_dir():
+                self.files.append(f)
 
-SpectrumDataLoader._registerFormat()
+DirectoryDataLoader._registerFormat()

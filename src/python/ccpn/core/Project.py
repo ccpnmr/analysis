@@ -42,6 +42,9 @@ from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.nef.GenericStarParser import DataBlock
 from ccpn.util.Path import aPath, Path
+from ccpn.util.Common import isIterable
+
+from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
@@ -1297,131 +1300,145 @@ class Project(AbstractWrapperObject):
     def loadData(self, path: str) -> typing.Optional[typing.List]:
         """
         Load data from path, determining type first.
-        Return None for Un-recognised or un-parsable files; return empty list for ???
+        Return None for Un-recognised or un-parsable path; return empty list for no-data loaded (e.g.
+        a directory with no loadable files)
         """
 
-        # TODO: RASMUS:
-        # RASMUS EXPLANATION (to my successor)
-        # loadData does too many things: it is used for handling dropped files,
-        # which includes a system for deciding what actions are taken where for what file types,
-        # and it is called directly for loading e.g. a spectrum.
+        dataLoader = checkPathForDataLoader(path)
+        if dataLoader is None:
+            getLogger().warning('Unable to load "%s"' % path)
+            return None
+        if dataLoader.createsNewProject:
+            raise RuntimeError('File "%s" creates a new project; use application.loadProject() instead')
+
+        # this assures recursion into directories
+        result = dataLoader.load()
+        if not isIterable(result):
+            result = [result]
+        return result
+
+        # # TODO: RASMUS:
+        # # RASMUS EXPLANATION (to my successor)
+        # # loadData does too many things: it is used for handling dropped files,
+        # # which includes a system for deciding what actions are taken where for what file types,
+        # # and it is called directly for loading e.g. a spectrum.
+        # #
+        # # Part of the idea was that a file of type 'Xyz' being dropped would trigger
+        # # a call to '_loadXyz' if, and only if, _loadXyz was defined for the object
+        # # in question. That allowed you to control which drops were allowed where, and what
+        # # specific actions should be triggered.
+        # #
+        # # The entire system has been (partially??) refactored by GV, so it is necessary to rethink this.
+        # # My proposal (hopefully consistent with GV's (?)) would be to use this function
+        # # ONLY to handle drops and other files of unknown type (and likely rename it _loadData')
+        # # and to call specific functions (like loadSpectrum) when you know that you are loading e.g. a
+        # # spectrum or a project (currently loadData is (too) widely used.
+        # # Some of these functions may or may not need to be written first.
+        # # That still leaves the question of how to handle a case where e.g. a text
+        # # file should trigger a specific action when loaded e.g. on a Note editor popup and oNLY there,
+        # # but that must be thought out and decided.
+        # # Anyway, this function should have a proper and consistent return type (as GV says)
+        # # Maybe we should consider returning a dictionary rather than a list of tuples??
         #
-        # Part of the idea was that a file of type 'Xyz' being dropped would trigger
-        # a call to '_loadXyz' if, and only if, _loadXyz was defined for the object
-        # in question. That allowed you to control which drops were allowed where, and what
-        # specific actions should be triggered.
+        # # urlInfo is list of triplets of (type, subType, modifiedUrl),
+        # # e.g. ('Spectrum', 'Bruker', newUrl)
         #
-        # The entire system has been (partially??) refactored by GV, so it is necessary to rethink this.
-        # My proposal (hopefully consistent with GV's (?)) would be to use this function
-        # ONLY to handle drops and other files of unknown type (and likely rename it _loadData')
-        # and to call specific functions (like loadSpectrum) when you know that you are loading e.g. a
-        # spectrum or a project (currently loadData is (too) widely used.
-        # Some of these functions may or may not need to be written first.
-        # That still leaves the question of how to handle a case where e.g. a text
-        # file should trigger a specific action when loaded e.g. on a Note editor popup and oNLY there,
-        # but that must be thought out and decided.
-        # Anyway, this function should have a proper and consistent return type (as GV says)
-        # Maybe we should consider returning a dictionary rather than a list of tuples??
-
-        # urlInfo is list of triplets of (type, subType, modifiedUrl),
-        # e.g. ('Spectrum', 'Bruker', newUrl)
-
-        # scan the folder for valid data
-        # validList = self.recurseAnalyseUrl(path)
-
-        # GWV 30/11/2020
-        # First usage of new SpectrumdataSource routines
-
-        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
-        from ccpn.core.lib.DataStore import DataStore
-
-        getLogger().debug('Project.loadData: loading "%s"' % path)
-
-        # Expand and check any redirections
-        dataStore = DataStore.newFromPath(path)
-        if not dataStore.exists():
-            raise FileNotFoundError('Path "%s" not found' % path)
-
-        # check for a spectrum
-        if checkPathForSpectrumFormats( dataStore.aPath().asString() ) is not None:
-
-            newSpectrum  = self.newSpectrum(path=path)
-            return [newSpectrum]
-
-        else:
-
-            dataType, subType, usePath = ioFormats.analyseUrl(path)
-
-            #TODO:RASMUS: Fix all return types; define properly first
-            if dataType is None:
-                # print("Skipping: file data type not recognised for %s" % usePath)
-                getLogger().warning("Skipping: file data type not recognised for %s" % usePath)
-                # raise ValueError("Skipping: file data type not recognised for %s" % usePath)
-                return None
-
-            elif dataType == 'Dirs':
-                # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
-                paths = usePath
-                #TODO:RASMUS: Undefined return type
-                _loadedData = []
-                for path in paths:
-                    _loadedData += self.loadData(path)
-                return _loadedData
-
-            elif not os.path.exists(usePath):
-                # print("Skipping: no file found at %s" % usePath)
-                getLogger().warning("Skipping: no file found at %s" % usePath)
-                # raise ValueError("Skipping: no file found at %s" % usePath)
-                return []
-
-            elif dataType == 'Text':
-                # Special case - you return the text instead of a list of Pids
-                # GWV: Can't do this!! -> have to return a list of tuples: [(dataType, pid or data)]
-                # need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!
-                #TODO:RASMUS: return type is not a list
-
-                return open(usePath).read()
-
-            elif dataType == 'Macro' and subType == ioFormats.PYTHON:
-                # GWV: Can't do this: have to call the routine with a flag: autoExecute=True
-                # with suspendSideBarNotifications(self, 'runMacro', usePath, quiet=False):
-                self._appBase.runMacro(usePath)
-
-            elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
-                # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-                projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
-                project = self.loadProject(projectPath, ioFormats.CCPN)
-                #TODO:RASMUS: use python tmpdir or V3 class
-                # NBNB _unpackCcpnTarfile *does* use the Python tempfile module
-                project._wrappedData.root._temporaryDirectory = temporaryDirectory
-                return [project]
-
-            else:
-                # No idea what is going on here
-                #TODO: use a dictionary to define
-                funcname = '_load' + dataType
-                if funcname == '_loadProject':
-                    # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-                    thisProj = [self.loadProject(usePath, subType)]
-                    return thisProj
-
-                # elif funcname == '_loadSpectrum':
-                #     # NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore
-                #     # (NB referred to elsewhere
-                #     # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-                #     with undoBlock():
-                #         thisSpec = self.loadSpectrum(usePath, subType)
-                #     return thisSpec
-
-                elif hasattr(self, funcname):
-                    with undoBlock():
-                        pids = getattr(self, funcname)(usePath, subType)
-                    return pids
-                else:
-                    # print("Skipping: project has no function %s" % funcname)
-                    getLogger().warning("Skipping: project has no function %s" % funcname)
-
-        return []
+        # # scan the folder for valid data
+        # # validList = self.recurseAnalyseUrl(path)
+        #
+        # # GWV 30/11/2020
+        # # First usage of new SpectrumdataSource routines
+        #
+        # from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
+        # from ccpn.core.lib.DataStore import DataStore
+        #
+        # getLogger().debug('Project.loadData: loading "%s"' % path)
+        #
+        # # Expand and check any redirections
+        # dataStore = DataStore.newFromPath(path)
+        # if not dataStore.exists():
+        #     raise FileNotFoundError('Path "%s" not found' % path)
+        #
+        # # check for a spectrum
+        # if checkPathForSpectrumFormats( dataStore.aPath().asString() ) is not None:
+        #
+        #     newSpectrum  = self.newSpectrum(path=path)
+        #     return [newSpectrum]
+        #
+        # else:
+        #
+        #     dataType, subType, usePath = ioFormats.analyseUrl(path)
+        #
+        #     #TODO:RASMUS: Fix all return types; define properly first
+        #     if dataType is None:
+        #         # print("Skipping: file data type not recognised for %s" % usePath)
+        #         getLogger().warning("Skipping: file data type not recognised for %s" % usePath)
+        #         # raise ValueError("Skipping: file data type not recognised for %s" % usePath)
+        #         return None
+        #
+        #     elif dataType == 'Dirs':
+        #         # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
+        #         paths = usePath
+        #         #TODO:RASMUS: Undefined return type
+        #         _loadedData = []
+        #         for path in paths:
+        #             _loadedData += self.loadData(path)
+        #         return _loadedData
+        #
+        #     elif not os.path.exists(usePath):
+        #         # print("Skipping: no file found at %s" % usePath)
+        #         getLogger().warning("Skipping: no file found at %s" % usePath)
+        #         # raise ValueError("Skipping: no file found at %s" % usePath)
+        #         return []
+        #
+        #     elif dataType == 'Text':
+        #         # Special case - you return the text instead of a list of Pids
+        #         # GWV: Can't do this!! -> have to return a list of tuples: [(dataType, pid or data)]
+        #         # need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!
+        #         #TODO:RASMUS: return type is not a list
+        #
+        #         return open(usePath).read()
+        #
+        #     elif dataType == 'Macro' and subType == ioFormats.PYTHON:
+        #         # GWV: Can't do this: have to call the routine with a flag: autoExecute=True
+        #         # with suspendSideBarNotifications(self, 'runMacro', usePath, quiet=False):
+        #         self._appBase.runMacro(usePath)
+        #
+        #     elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
+        #         # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
+        #         projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
+        #         project = self.loadProject(projectPath, ioFormats.CCPN)
+        #         #TODO:RASMUS: use python tmpdir or V3 class
+        #         # NBNB _unpackCcpnTarfile *does* use the Python tempfile module
+        #         project._wrappedData.root._temporaryDirectory = temporaryDirectory
+        #         return [project]
+        #
+        #     else:
+        #         # No idea what is going on here
+        #         #TODO: use a dictionary to define
+        #         funcname = '_load' + dataType
+        #         if funcname == '_loadProject':
+        #             # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
+        #             thisProj = [self.loadProject(usePath, subType)]
+        #             return thisProj
+        #
+        #         # elif funcname == '_loadSpectrum':
+        #         #     # NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore
+        #         #     # (NB referred to elsewhere
+        #         #     # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
+        #         #     with undoBlock():
+        #         #         thisSpec = self.loadSpectrum(usePath, subType)
+        #         #     return thisSpec
+        #
+        #         elif hasattr(self, funcname):
+        #             with undoBlock():
+        #                 pids = getattr(self, funcname)(usePath, subType)
+        #             return pids
+        #         else:
+        #             # print("Skipping: project has no function %s" % funcname)
+        #             getLogger().warning("Skipping: project has no function %s" % funcname)
+        #
+        # return []
 
     # Data loaders and dispatchers
     def _loadSequence(self, path: str, subType: str) -> list:

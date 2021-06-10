@@ -1,5 +1,5 @@
 """
-This module defines the data loading mechanism for V3 projects
+This module defines the data loading mechanism for a V3 project
 """
 
 #=========================================================================================
@@ -54,8 +54,9 @@ class CcpNmrV3ProjectDataLoader(DataLoaderABC):
         if not _path.is_dir():
             return None
         # assume that all is good if we find the CCPN_API_DIRECTORY
-        if _path / CCPN_API_DIRECTORY .exists():
-            instance = cls(_path)
+        _apiPath = _path / CCPN_API_DIRECTORY
+        if _apiPath.exists():
+            instance = cls(path)
             return instance
         return None
 
@@ -63,7 +64,7 @@ class CcpNmrV3ProjectDataLoader(DataLoaderABC):
         """The project loading method
         :return: object representing the data or None on error
         """
-        project = self.application.openProject(self.path)
+        project = self.application._loadV3Project(self.path)
         return project
 
 CcpNmrV3ProjectDataLoader._registerFormat()

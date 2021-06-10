@@ -102,7 +102,7 @@ from ccpn.util.Common import isIterable, _getObjectsByPids
 from ccpn.util.Common import getAxisCodeMatch
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand, singleton
-from ccpn.util.Path import aPath
+from ccpn.util.Path import Path, aPath
 
 
 
@@ -309,7 +309,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
         self._scaleChanged = False
-
     #-----------------------------------------------------------------------------------------
     # end __init__
     #-----------------------------------------------------------------------------------------
@@ -2809,7 +2808,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             getLogger().warning('Error restoring valid data source for %s (%s)' % (spectrum, es))
 
         try:
-            spectrum._peakPicker = spectrum._getPeakPicker()
+                spectrum._peakPicker = spectrum._getPeakPicker()
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid peak picker for %s (%s)' % (spectrum, es))
 
@@ -3267,7 +3266,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
 
 @newObject(Spectrum)
-def _newSpectrumFromDataSource(project, dataStore, dataSource, name) -> Spectrum:
+def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spectrum:
     """Create a new Spectrum instance with name using the data in dataStore and dataSource
     Returns Spectrum instance or None on error
     """
@@ -3355,10 +3354,17 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name) -> Spectrum
         if len(spectrum.peakLists) == 0:
             spectrum.newPeakList()
 
+        # Hack to trigger initialisation of contours
+        spectrum.positiveContourCount = 0
+        spectrum.negativeContourCount = 0
+        spectrum._updateParameterValues()
+
+        spectrum._saveSpectrumMetaData()
+
     return spectrum
 
 
-def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str = 'empty') -> Spectrum:
+def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str = 'emptySpectrum') -> Spectrum:
     """Creation of new Empty Spectrum;
     :return: Spectrum instance or None on error
     """
@@ -3379,12 +3385,11 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str =
     dataSource._assureProperDimensionality()
 
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
-    spectrum._updateParameterValues()
 
     return spectrum
 
 
-def _newSpectrum(project: Project, path: str, name: str) -> (Spectrum, None):
+def _newSpectrum(project: Project, path: (str, Path), name: str=None) -> (Spectrum, None):
     """Creation of new Spectrum;
     :return: Spectrum instance or None on error
     """
@@ -3405,10 +3410,6 @@ def _newSpectrum(project: Project, path: str, name: str) -> (Spectrum, None):
         return None
 
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
-    # Hack to trigger initialisation of contours
-    spectrum.positiveContourCount = 0
-    spectrum.negativeContourCount = 0
-    spectrum._updateParameterValues()
 
     return spectrum
 

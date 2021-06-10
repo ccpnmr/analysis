@@ -1660,24 +1660,27 @@ class Framework(NotifierBase):
         return project
 
     @logCommand('application.')
-    def loadProject(self, path=None):
-        """Load project from path
-           If not path then opens a file dialog box and loads project from selected file.
-
-           Returns Project instance or None on error
+    def loadProject(self, path):
+        """Just a stub for now; calling MainWindow methods
         """
-        if not path:
-            dialog = ProjectFileDialog(parent=self.ui.mainWindow, acceptMode='load')
-            dialog._show()
-            path = dialog.selectedFile()
-            if not path:
-                return None
-
-        dataLoader = checkPathForDataLoader(path)
-        if dataLoader is None or not dataLoader.createsNewProject:
-            raise ValueError('File "%s" does not encode a valid project' % path)
-
-        return dataLoader.load()[0]
+        self.ui.mainWindow._openProject(path)
+        # """Load project from path
+        #    If not path then opens a file dialog box and loads project from selected file.
+        #
+        #    Returns Project instance or None on error
+        # """
+        # if not path:
+        #     dialog = ProjectFileDialog(parent=self.ui.mainWindow, acceptMode='load')
+        #     dialog._show()
+        #     path = dialog.selectedFile()
+        #     if not path:
+        #         return None
+        #
+        # dataLoader = checkPathForDataLoader(path)
+        # if dataLoader is None or not dataLoader.createsNewProject:
+        #     raise ValueError('File "%s" does not encode a valid project' % path)
+        #
+        # return dataLoader.load()[0]
 
         # dataType, subType, usePath = ioFormats.analyseUrl(path)
         # project = None

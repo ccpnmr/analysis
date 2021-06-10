@@ -58,8 +58,8 @@ class DirectoryDataLoader(DataLoaderABC):
         """The project loading method
         :return: object representing the data or None on error
         """
-        raise NotImplementedError('directory loading not yet implemented')
-        return None
+        filesToLoad = [str(f) for f in self.files]
+        return self.application.loadData(*filesToLoad)
 
     def __init__(self, path):
         super().__init__(path=path)
@@ -68,7 +68,7 @@ class DirectoryDataLoader(DataLoaderABC):
         self.files = []
         for f in self.path.glob('*'):
             f = aPath(f)
-            if not f.is_dir():
+            if not f.is_dir() and not f.name.startswith("."):  # Exclude directories and dotted-files
                 self.files.append(f)
 
 DirectoryDataLoader._registerFormat()

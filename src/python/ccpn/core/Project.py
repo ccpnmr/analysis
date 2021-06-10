@@ -1307,7 +1307,7 @@ class Project(AbstractWrapperObject):
         dataLoader = checkPathForDataLoader(path)
         if dataLoader is None:
             getLogger().warning('Unable to load "%s"' % path)
-            return None
+            return []
         if dataLoader.createsNewProject:
             raise RuntimeError('File "%s" creates a new project; use application.loadProject() instead')
 

@@ -62,6 +62,8 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+
 from ccpn.util.Common import uniquify, camelCaseToString
 from ccpn.util import Logging
 from ccpn.util import Path
@@ -518,45 +520,62 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         return result
 
-    def _loadProjectSingleTry(self, projectDir):
-        """Load/Reload project after load dialog.
+    def _buildProjectGui(self, newProject):
+        """Build the project related Gui elements
         """
-        from ccpn.ui.gui.widgets.MessageDialog import showWarning
+        # Note that the new project has its own MainWindow; i.e. it is not self
+        newProject._mainWindow.sideBar.buildTree(newProject)
+        newProject._mainWindow.show()
+        QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
 
-        project = self.application.loadProject(projectDir)
-        if project is None:
-            showWarning('Load Project', 'Error loading project "%s"' % projectDir)
+        # if the new project contains invalid spectra then open the popup to see them
+        badSpectra = [str(spectrum) for spectrum in newProject.spectra if not spectrum.hasValidPath()]
+        if badSpectra:
+            text = 'Detected invalid Spectrum file path(s) for:\n\n'
+            for sp in badSpectra:
+                text += '%s\n' % str(sp)
+            text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
+            showWarning('Spectrum file paths', text)
 
-        else:
-            project._mainWindow.sideBar.buildTree(project)
-            project._mainWindow.show()
-            QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+    # def _loadProjectSingleTry(self, projectDir):
+    #     """Load/Reload project after load dialog.
+    #     """
+    #     from ccpn.ui.gui.widgets.MessageDialog import showWarning
+    #
+    #     project = self.application.loadProject(projectDir)
+    #     if project is None:
+    #         showWarning('Load Project', 'Error loading project "%s"' % projectDir)
+    #
+    #     else:
+    #         project._mainWindow.sideBar.buildTree(project)
+    #         project._mainWindow.show()
+    #         QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+    #
+    #         # if the new project contains invalid spectra then open the popup to see them
+    #         badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
+    #         if badSpectra:
+    #             text = 'Detected invalid Spectrum file path(s) for:\n\n'
+    #             for sp in badSpectra:
+    #                 text += '%s\n' % str(sp)
+    #             text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
+    #             showWarning('Spectrum file paths', text)
+    #
+    #     return project
 
-            # if the new project contains invalid spectra then open the popup to see them
-            badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
-            if badSpectra:
-                text = 'Detected invalid Spectrum file path(s) for:\n\n'
-                for sp in badSpectra:
-                    text += '%s\n' % str(sp)
-                text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
-                showWarning('Spectrum file paths', text)
-
-        return project
-
-    def _loadProjectLastValid(self, projectDir):
-        """Try and load a new project, if error try and load the last valid project.
-        """
-        lastValidProject = self.project.path
-        lastProjectisTemporary = self.project.isTemporary
-
-        # try and load the new project
-        # try:
-        project = self._loadProjectSingleTry(projectDir)
-        if project:
-            undo = self._project._undo
-            if undo is not None:
-                undo.markClean()
-            return project
+    # def _loadProjectLastValid(self, projectDir):
+    #     """Try and load a new project, if error try and load the last valid project.
+    #     """
+    #     lastValidProject = self.project.path
+    #     lastProjectisTemporary = self.project.isTemporary
+    #
+    #     # try and load the new project
+    #     # try:
+    #     project = self._loadProjectSingleTry(projectDir)
+    #     if project:
+    #         undo = self._project._undo
+    #         if undo is not None:
+    #             undo.markClean()
+    #         return project
 
         # except Exception as es:
         #     MessageDialog.showError('loadProject', 'Error loading project:\n%s\n\n%s\n\nReloading last saved position.' % (str(projectDir), str(es)))
@@ -1178,6 +1197,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                     result = self._processUrl(url)
                 objs.extend(result)
 
+        if len(objs) == 0:
+           txt = 'Loading "%s" failed' % urls
+           MessageDialog.showError('Load Data', txt)
+           getLogger().warning(txt)
+
         return objs
 
     def _processPids(self, data, position=None, relativeTo=None):
@@ -1227,23 +1251,23 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         if dataLoader is None:
             txt = 'Loading "%s" failed; unrecognised type' % url
-            MessageDialog.showError('Load Data', txt)
             getLogger().warning(txt)
+            MessageDialog.showError('Load Data', txt)
             return []
 
-        # Local import here to prevent too early registering
-        from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
-        if dataLoader.dataFormat == DirectoryDataLoader.dataFormat:
-            pass
-
-        if dataLoader.createsNewProject and not self.project.isTemporary:
-            okToContinue = self._queryCloseProject(title='Load %s project' % dataLoader.dataFormat,
+        if dataLoader.createsNewProject:
+            okToContinue = True
+            if not self.project.isTemporary:
+                okToContinue = self._queryCloseProject(title='Load %s project' % dataLoader.dataFormat,
                                                     phrase='create a new')
-            if okToContinue:
-                with progressManager(self, 'Loading project... ' + url):
-                    obj = self._loadProjectLastValid(url)
-            if obj is not None:
-                objs.append(obj)
+            if not okToContinue:
+                return []
+
+            with progressManager(self, 'Loading project... ' + url):
+                newProject = dataLoader.load()
+                if newProject is not None:
+                    self._buildProjectGui(newProject)
+                    objs.append(newProject)
 
         else:
             with undoBlockWithoutSideBar():

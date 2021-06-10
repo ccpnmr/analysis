@@ -1919,15 +1919,14 @@ class Framework(NotifierBase):
                         self.project.loadData(str(spectrumPath))
 
     @logCommand('application.')
-    def loadData(self, paths):
+    def loadData(self, *paths) -> list:
+        """Loads data from paths.
+        :returns list of loaded objects
         """
-        Loads data from paths.
-        """
-        if isinstance(paths, str):
-            paths = [paths]
-
+        objs = []
         for path in paths:
-            self.project.loadData(path)
+            objs.extend( self.project.loadData(path) )
+        return objs
 
     def _cloneSpectraToProjectDir(self):
         """ Keep a copy of spectra inside the project directory "myproject.ccpn/data/spectra".

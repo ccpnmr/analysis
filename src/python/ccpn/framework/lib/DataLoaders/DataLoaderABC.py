@@ -57,15 +57,6 @@ EXCELFILE = 'excelFile'
 
 SPECTRUM = 'Spectrum'
 
-AZARASPECTRUM = 'azaraSpectrum'
-BRUKERSPECTRUM = 'brukerSpectrum'
-FELIXSPECTRUM = 'felixSpectrum'
-HDF5SPECTRUM = 'hdf5Spectrum'
-NMRPIPESPECTRUM = 'nmrpipeSpectrum'
-NMRVIEWSPECTRUM = 'nmrviewSpectrum'
-VARIANSPECTRUM = 'varianSpectrum'
-XEASYSPECTRUM = 'xeasySpectrum'
-
 def getDataLoaders():
     """Get data loader classes
     :return: a dictionary of (format-identifier-strings, DataLoader classes) as (key, value) pairs
@@ -76,6 +67,7 @@ def getDataLoaders():
     # It is local to prevent circular imports
     #--------------------------------------------------------------------------------------------
     from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
+    from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
     from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 

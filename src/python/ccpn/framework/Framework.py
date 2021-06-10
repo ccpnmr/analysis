@@ -1627,6 +1627,21 @@ class Framework(NotifierBase):
         """
         return self.ui.mainWindow._openProject()
 
+    def _loadV2Project(self, path):
+        """Actual V2 project loader
+        CCPNINTERNAL: called from CcpNmrV2ProjectDataLoader
+        """
+        logger = getLogger()
+        project = self._loadV3Project(path)
+        logger.info('Upgraded %s to version-3' % project)
+        try:
+            project.save()
+            logger.info('Saved %s as "%s"' % (project, project.path))
+        except Exception as es:
+            logger.warning('Failed saving %s (%s)' % (project, str(es)))
+
+        return project
+
     def _loadV3Project(self, path):
         """Actual V3 project loader
         CCPNINTERNAL: called from CcpNmrV3ProjectDataLoader

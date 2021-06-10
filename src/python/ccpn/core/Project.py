@@ -259,6 +259,12 @@ class Project(AbstractWrapperObject):
         """
         return self._wrappedData.root.isProjectModified()
 
+    @property
+    def isUpgradedFromV2(self):
+        """Return True if project was upgraded from V2
+        """
+        return self._apiNmrProject.root._upgradedFromV2
+
     def _initialiseProject(self):
         """Complete initialisation of project,
 
@@ -369,11 +375,6 @@ class Project(AbstractWrapperObject):
     def name(self) -> str:
         """name of Project"""
         return self._wrappedData.root.name
-        # apiNmrProject = self._wrappedData
-        # if len(apiNmrProject.root.nmrProjects) == 1:
-        #   return apiNmrProject.root.name
-        # else:
-        #   return apiNmrProject.name
 
     @property
     def path(self) -> str:
@@ -1007,12 +1008,12 @@ class Project(AbstractWrapperObject):
     # Library functions
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def _checkUpgradedFromV2(self):
-        """Check whether the project has been upgraded from V2
-        """
-        if self._apiNmrProject.root._upgradedFromV2:
-            # reset the noise levels
-            self._setNoiseLevels(alwaysSetNoise=True)
+    # def _checkUpgradedFromV2(self):
+    #     """Check whether the project has been upgraded from V2
+    #     """
+    #     if self._apiNmrProject.root._upgradedFromV2:
+    #         # reset the noise levels
+    #         self._setNoiseLevels(alwaysSetNoise=True)
 
     # def _validateDataUrlAndFilePaths(self, newDataUrlPath=None):
     #     """Perform validate operation for setting dataUrl from preferences - to be called after loading

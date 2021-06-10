@@ -1323,3 +1323,4 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             #         MessageDialog.showError('Load Data', 'Loading "%s" encountered error: %s' % (url,str(es)))
             #         getLogger().warning('loadData Error: %s' % str(es))
         # return objs
+

@@ -1353,7 +1353,7 @@ class Framework(NotifierBase):
             ("Open Recent", ()),
 
             #      ("Load Spectrum...", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
-            ("Load Data...", self.loadData, [('shortcut', 'ld')]),
+            ("Load Data...", lambda: self._loadDataFromMenu(text='Load Data'), [('shortcut', 'ld')]),
             (),
             ("Save", self.saveProject, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
@@ -1564,13 +1564,18 @@ class Framework(NotifierBase):
     ## MENU callbacks:  Project
     ###################################################################################################################
 
-    def _loadDataFromMenu(self, text=None):
+    def _loadDataFromMenu(self, text='Load Data', filter=None):
         """Call loadData from the menu and trap errors.
         """
+        dialog = DataFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter)
+        dialog._show()
+        path = dialog.selectedFile()
+        if not path:
+            return
+        paths = [path]
+
         try:
-
-            self.loadData(text=text)
-
+            result = self.loadData(paths)
         except Exception as es:
             MessageDialog.showWarning(str(self.ui.mainWindow.windowTitle()), str(es))
             if self._isInDebugMode:
@@ -1913,22 +1918,12 @@ class Framework(NotifierBase):
                     for spectrumPath in tqdm(spectraPaths):
                         self.project.loadData(str(spectrumPath))
 
-    def loadData(self, paths=None, text=None, filter=None):
+    @logCommand('application.')
+    def loadData(self, paths):
         """
-        Opens a file dialog box and loads data from selected file.
+        Loads data from paths.
         """
-        if text is None:
-            text = 'Load Data'
-
-        if paths is None:
-            dialog = DataFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter)
-            dialog._show()
-            path = dialog.selectedFile()
-            if not path:
-                return
-            paths = [path]
-
-        elif isinstance(paths, str):
+        if isinstance(paths, str):
             paths = [paths]
 
         for path in paths:

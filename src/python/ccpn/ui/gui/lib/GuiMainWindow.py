@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__modifiedBy__ = "$modifiedBy: gvuister $"
 __dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
@@ -62,10 +62,11 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, showMulti
 
 from ccpn.util.Common import uniquify, camelCaseToString
 from ccpn.util import Logging
+#from ccpn.util.Logging import getLogger
 from ccpn.util import Path
 from ccpn.util.Path import aPath
 from ccpn.util.Common import isIterable
@@ -73,13 +74,12 @@ from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationE
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
-
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.Peak import Peak
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QApplication
 
-#from ccpn.util.Logging import getLogger
+
 #from collections import OrderedDict
 
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -510,7 +510,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #     return self.project.isTemporary
 
 
-    def _badSpectraPopup(self, project):
+    def _checkForBadSpectra(self, project):
         """Report bad spectra in a popup
         """
         badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
@@ -1155,12 +1155,21 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         createsNewProject = dataLoader.createsNewProject
 
-        # # stub for future expansion
-        # # local import here, as checkPathForDataLoaders needs to be called first to assure proper import oder
-        # from ccpn.framework.lib.DataLoaders.SomeDataLoader impoer SomeDataLoader
-        # if dataLoader.dataFormat == SomeDataLoader.dataFormat:
-        #     do stuff
-        #     pass
+        # local import here, as checkPathForDataLoaders needs to be called first to assure proper import orer
+        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+        if dataLoader.dataFormat == NefDataLoader.dataFormat:
+            choices = ['Import', 'New project', 'Cancel']
+            choice = showMulti('Load NEF file', 'How do you want to handle the file:',
+                               choices, parent=self)
+            if choice == choices[0]:
+                dataLoader.makeNewProject = False
+                createsNewProject = False
+            elif choice == choices[1]:
+                dataLoader.makeNewProject = True
+                createsNewProject = True
+            else:
+                dataLoader = None
+                createsNewProject = False
 
         return (dataLoader, createsNewProject)
 
@@ -1171,7 +1180,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # use an undoBlockWithoutSideBar, and ignore logging if MAXITEMLOGGING or more items
         # to stop overloading of the log
 
-        urls = [str(url) for url in data.get('urls', []) if len(url)>0]
+        urls = [str(url) for url in data.get(DropBase.URLS, []) if len(url)>0]
         if urls is None:
             return []
 
@@ -1212,14 +1221,18 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         objs = []
         for url, dataLoader, createNewProject in urlsToLoad:
-            if doEchoBlocking:
-                with notificationEchoBlocking():
+            try:
+                if doEchoBlocking:
+                    with notificationEchoBlocking():
+                        result = _getResult(dataLoader, createNewProject)
+                else:
                     result = _getResult(dataLoader, createNewProject)
-            else:
-                result = _getResult(dataLoader, createNewProject)
 
-            if result is not None:
-                objs.extend(result)
+                if result is not None:
+                    objs.extend(result)
+
+            except RuntimeError as es:
+                showWarning("Load data", 'Error loading "%s" \n(%s)' % (url, str(es)), parent=self)
 
         return objs
 
@@ -1351,7 +1364,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
 
             # if the new project contains invalid spectra then open the popup to see them
-            self._badSpectraPopup(newProject)
+            self._checkForBadSpectra(newProject)
 
         except RuntimeError as es:
             MessageDialog.showError('Load Project', '"%s" did not yield a valid new project (%s)' % \

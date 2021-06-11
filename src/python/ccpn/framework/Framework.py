@@ -49,6 +49,9 @@ from PyQt5.QtWidgets import QApplication
 from distutils.dir_util import copy_tree
 from functools import partial
 
+from tqdm import tqdm
+
+
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
@@ -83,21 +86,22 @@ from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.Logging import getLogger
 from ccpn.util import Layout
+
 from ccpn.ui.gui.Gui import Gui
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, undoBlock, notificationEchoBlocking
+
 from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
 from ccpn.framework.Version import authors
 from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_OVERVIEW
+
 from PyQt5.QtCore import QTimer
 
 import faulthandler
-
-
 faulthandler.enable()
 
 # from functools import partial
@@ -1349,7 +1353,7 @@ class Framework(NotifierBase):
         ms.append(('Project', [
             ("New", self.createNewProject, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
-            ("Open...", self._openProject, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Open Recent", ()),
 
             #      ("Load Spectrum...", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
@@ -1388,7 +1392,7 @@ class Framework(NotifierBase):
                    ))
 
         ms.append(('Spectrum', [
-            ("Load Spectra...", self.loadSpectra, [('shortcut', 'ls')]),
+            ("Load Spectra...", self._loadSpectraCallback, [('shortcut', 'ls')]),
             (),
             # ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]), # multiple edit temporarly disabled
             ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
@@ -1622,7 +1626,7 @@ class Framework(NotifierBase):
 
         return project
 
-    def _openProject(self):
+    def _openProjectCallback(self):
         """Just a stub for the menu setup to pass on to mainWindow, to be moved later
         """
         return self.ui.mainWindow._openProject()
@@ -1665,7 +1669,7 @@ class Framework(NotifierBase):
 
     @logCommand('application.')
     def loadProject(self, path):
-        """Just a stub for now; calling MainWindow methods
+        """Just a stub for now; calling MainWindow methods as it initialises the Gui
         """
         self.ui.mainWindow._openProject(path)
 
@@ -1882,15 +1886,17 @@ class Framework(NotifierBase):
         self.preferences.recentMacros = []
         self.ui.mainWindow._fillRecentMacrosMenu()
 
-    def loadSpectra(self, paths=None, filter=None, askBeforeOpen_lenght=20):
+    def _loadSpectraCallback(self, paths=None, filter=None, askBeforeOpen_lenght=20):
         """
+        Load all the spectra found in paths
+
         :param paths: list of str of paths
         :param filter:
         :param askBeforeOpen_lenght: how many spectra can open without asking first
-
         """
-        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
-        from tqdm import tqdm
+        from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader, getDataLoaders
+        _loaders = getDataLoaders() # just a dummy to import
+        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
 
         if paths is None:
             # if self.preferences.general.useNative:
@@ -1905,28 +1911,26 @@ class Framework(NotifierBase):
         if not paths:
             return
 
-        spectraPaths = []
+        spectrumLoaders = []
+        # Recursively search all paths
         for path in paths:
-            path = str(path)
-            subPaths = ioFormats._searchSpectraPathsInSubDir(path)  # Filter only spectra files
-            if len(subPaths) > 0:
-                spectraPaths += subPaths
+            _path = Path.aPath(path)
+            for p in _path.glob('*'):
+                if p.name.startswith('.'):
+                    pass
+                elif (sLoader:= SpectrumDataLoader.checkForValidFormat(p)) is not None:
+                    spectrumLoaders.append(sLoader)
 
-        if len(spectraPaths) < len(paths):
-            notRecognised = [i for i in paths if i not in spectraPaths if not os.path.isdir(i)]
-            getLogger().warning('Not valid spectrum Path(s): ' + str(notRecognised))
-
-        if len(spectraPaths) > askBeforeOpen_lenght:
-            okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (~%s).'
-                                                               ' Do you want to open all?' % str(len(spectraPaths)))
+        if len(spectrumLoaders) > askBeforeOpen_lenght:
+            okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (%d).'
+                                                               ' Do you want to open all?' % len(spectrumLoaders))
             if not okToOpenAll:
                 return
 
-        if spectraPaths:
-            with undoBlockWithoutSideBar():
-                with notificationEchoBlocking():
-                    for spectrumPath in tqdm(spectraPaths):
-                        self.project.loadData(str(spectrumPath))
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                for sLoader in tqdm(spectrumLoaders):
+                    sLoader.load()
 
     @logCommand('application.')
     def loadData(self, *paths) -> list:
@@ -2046,7 +2050,7 @@ class Framework(NotifierBase):
                 self._importNefFile(path=path, makeNewProject=False)
             self.ui.mainWindow.sideBar.buildTree(self.project)
 
-    def _importNefFile(self, path: Union[str, Path.aPath], makeNewProject=True) -> Project:
+    def _importNefFile(self, path: Union[str, Path.Path], makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup"""
 
         from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking

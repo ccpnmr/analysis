@@ -39,6 +39,7 @@ class CcpNmrV3ProjectDataLoader(DataLoaderABC):
 
     dataFormat = 'ccpNmrV3Project'
     suffixes = [CCPN_DIRECTORY_SUFFIX]  # a list of suffixes that get matched to path
+    allowDirectory = True  # Can/Can't open a directory
     createsNewProject = True
 
     @classmethod
@@ -46,10 +47,7 @@ class CcpNmrV3ProjectDataLoader(DataLoaderABC):
         """check if valid format corresponding to dataFormat
         :return: None or instance of the class
         """
-        _path = aPath(path)
-        if not _path.exists():
-            return None
-        if not _path.suffix in cls.suffixes:
+        if (_path := cls.checkPath(path)) is None:
             return None
         if not _path.is_dir():
             return None

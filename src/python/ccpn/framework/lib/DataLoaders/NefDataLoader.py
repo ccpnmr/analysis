@@ -1,5 +1,5 @@
 """
-This module defines the data loading mechanism for a V2 project
+This module defines the data loading mechanism for loading a NEF file
 """
 
 #=========================================================================================
@@ -29,22 +29,20 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
-from ccpn.util.Path import aPath
-from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_API_DIRECTORY
-
-from ccpnmodel.ccpncore.memops.metamodel import Constants as metaConstants
-MEMOPS = metaConstants.modellingPackageName
-IMPLEMENTATION = metaConstants.implementationPackageName
 
 
-class CcpNmrV2ProjectDataLoader(DataLoaderABC):
-    """V2 project data loader
+class NefDataLoader(DataLoaderABC):
+    """NEF data loader
     """
 
-    dataFormat = 'ccpNmrV2Project'
-    suffixes = []  # a list of suffixes that get matched to path
-    allowDirectory = True  # Can/Can't open a directory
+    dataFormat = 'nefFile'
+    suffixes = ['.nef']  # a list of suffixes that get matched to path
+    allowDirectory = False  # Can/Can't open a directory
     createsNewProject = True
+
+    def __init__(self, path):
+        super(NefDataLoader, self).__init__(path)
+        self.makeNewProject = self.createsNewProject  # A instance 'copy' to allow modification
 
     @classmethod
     def checkForValidFormat(cls, path):
@@ -53,27 +51,20 @@ class CcpNmrV2ProjectDataLoader(DataLoaderABC):
         """
         if (_path := cls.checkPath(path)) is None:
             return None
-        if not _path.is_dir():
-            return None
-        # assume that all is good if we find the CCPN_API_DIRECTORY
-        _apiPath = _path / MEMOPS / IMPLEMENTATION
-        if _apiPath.exists():
-            # it is a directory that has memops/implementation subdirectory,
-            # so we must assume it to be a V2 project directory.
-            instance = cls(path)
-            return instance
-        return None
+        # assume that all is good
+        instance = cls(path)
+        return instance
 
     def load(self):
-        """The actual project loading method;
+        """The actual Nef loading method;
         raises RunTimeError on error
         :return: a list of [project]
         """
         try:
-            project = self.application._loadV2Project(self.path)
+            project = self.application._loadNefFile(self.path, makeNewProject=self.makeNewProject)
         except Exception as es:
             raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
 
         return [project]
 
-CcpNmrV2ProjectDataLoader._registerFormat()
+NefDataLoader._registerFormat()

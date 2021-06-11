@@ -59,6 +59,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
     isFloatData = False
 
     suffixes = [None]
+    allowDirectory = True  # Can supply a Bruker top directory
     openMethod = open
     defaultOpenReadMode = 'rb'
 
@@ -172,13 +173,13 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         """Return True if path (of type Path) is a Bruker directory
         """
         if path is None or not path.exists():
-            getLogger().debug('Bruker top directory "%s": does not exist' % path)
+            getLogger().debug2('Bruker top directory "%s": does not exist' % path)
             return False
         if not path.is_dir():
-            getLogger().debug('Bruker top directory "%s": is not a directory' % path)
+            getLogger().debug2('Bruker top directory "%s": is not a directory' % path)
             return False
         if len(path.globList('acqu*')) == 0:
-            getLogger().debug('Bruker top directory "%s": has no acqu* files' % path)
+            getLogger().debug2('Bruker top directory "%s": has no acqu* files' % path)
             return False
 
         return True
@@ -192,16 +193,16 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         """Return True if path (of type Path) is a Bruker pdata directory
         """
         if path is None or not path.exists():
-            getLogger().debug('Bruker pdata directory "%s": does not exist' % path)
+            getLogger().debug2('Bruker pdata directory "%s": does not exist' % path)
             return False
         if not path.is_dir():
-            getLogger().debug('Bruker pdata directory "%s": is not a directory' % path)
+            getLogger().debug2('Bruker pdata directory "%s": is not a directory' % path)
             return False
         if len(path.globList('proc*')) == 0:
-            getLogger().debug('Bruker pdata directory "%s": has no proc* files' % path)
+            getLogger().debug2('Bruker pdata directory "%s": has no proc* files' % path)
             return False
         if len(path.globList('[1-6][r,i]*')) == 0:
-            getLogger().debug('Bruker pdata directory "%s": has no valid processed data' % path)
+            getLogger().debug2('Bruker pdata directory "%s": has no valid processed data' % path)
             return False
 
         return True

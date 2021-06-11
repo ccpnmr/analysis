@@ -141,14 +141,14 @@ def getDataFormats() -> OrderedDict:
     """
     # The following imports are just to assure that all the classes have been imported
     # It is local to prevent circular imports
+    from ccpn.core.lib.SpectrumDataSources.BrukerSpectrumDataSource import BrukerSpectrumDataSource
+    from ccpn.core.lib.SpectrumDataSources.NmrPipeSpectrumDataSource import NmrPipeSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
+    from ccpn.core.lib.SpectrumDataSources.UcsfSpectrumDataSource import UcsfSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.AzaraSpectrumDataSource import AzaraSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.FelixSpectrumDataSource import FelixSpectrumDataSource
-    from ccpn.core.lib.SpectrumDataSources.BrukerSpectrumDataSource import BrukerSpectrumDataSource
-    from ccpn.core.lib.SpectrumDataSources.UcsfSpectrumDataSource import UcsfSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.XeasySpectrumDataSource import XeasySpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.NmrViewSpectrumDataSource import NmrViewSpectrumDataSource
-    from ccpn.core.lib.SpectrumDataSources.NmrPipeSpectrumDataSource import NmrPipeSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
     return SpectrumDataSourceABC._spectrumDataFormats
 
@@ -226,6 +226,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     hasWritingAbility = False  # flag that defines if dataFormat implements writing methods
 
     suffixes = []  # potential suffixes of data file; first is taken as default; [None] is defined as no suffix
+    allowDirectory = False  # Can/Can't open a directory
     openMethod = None  # method to open the file as openMethod(path, mode)
     defaultOpenReadMode = 'r+'
     defaultOpenWriteMode = 'w'
@@ -1115,6 +1116,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         if not instance.checkPath(instance.path, mode=instance.defaultOpenReadMode):
             logger.debug2('path "%s" is not valid for reading dataFormat "%s"' %
+                         (path, instance.dataFormat))
+            return None
+
+        if not instance.allowDirectory and instance.path.is_dir():
+            logger.debug2('path "%s" is directory and not valid for reading dataFormat "%s"' %
                          (path, instance.dataFormat))
             return None
 

@@ -69,8 +69,8 @@ def getDataLoaders():
     from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
     from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
     from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
+    from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
-
     return DataLoaderABC._dataLoaders
 
 
@@ -158,5 +158,27 @@ class DataLoaderABC(TraitBase):
         """Current poject instance
         """
         return self.application.project
+
+    @classmethod
+    def checkPath(cls, path):
+        """Check if path exists and confirms to settings of class attributes suffixes and allowDirectory
+        do not allow dot-file (e.g. .cshrc)
+        :returns Path instance of path, or None
+        """
+        _path = aPath(path)
+        if not _path.exists():
+            return None
+        if len(cls.suffixes) > 0 and not _path.suffix in cls.suffixes:
+            return None
+        if _path.basename == '':
+            return None
+        if _path.is_dir() and not cls.allowDirectory:
+            return None
+        return _path
+
+    def __str__(self):
+        return '<%s: %s>' % (self.__class__.__name__, self.path)
+
+    __repr__ = __str__
 
 

@@ -1440,18 +1440,17 @@ class Project(AbstractWrapperObject):
         # return []
 
     # Data loaders and dispatchers
-    def _loadSequence(self, path: str, subType: str) -> list:
-        """Load sequence(s) from file into Wrapper project"""
 
-        if subType == ioFormats.FASTA:
-            sequences = fastaIo.parseFastaFile(path)
-        else:
-            raise ValueError("Sequence file type %s is not recognised" % subType)
-
+    def _loadFastaFile(self, path: str) -> list:
+        """Load Fasta sequence(s) from file into Wrapper project
+        CCPNINTERNAL: called from FastDataLoader
+        """
+        sequences = fastaIo.parseFastaFile(path)
         chains = []
         for sequence in sequences:
-            chains.append(self.createChain(sequence=sequence[1], compoundName=sequence[0],
-                                           molType='protein'))
+            newChain = self.createChain(sequence=sequence[1], compoundName=sequence[0],
+                                        molType='protein')
+            chains.append(newChain)
         #
         return chains
 

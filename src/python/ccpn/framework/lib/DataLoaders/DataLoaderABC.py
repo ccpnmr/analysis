@@ -45,12 +45,9 @@ from ccpn.util.decorators import singleton
 # Need to review lib/io/Formats.py and ioFormats.analyseUrl(path)
 #--------------------------------------------------------------------------------------------
 
-CCPNMRV2PROJECT = 'ccpNmrV2Project'
 CCPNMRTGZCOMPRESSED = 'ccpNmrTgzCompressed'
 CCPNMRZIPCOMPRESSED = 'ccpNmrZipCompressed'
 
-NEFFILE = 'nefFile'
-UCSFSPECTRUM = 'ucsfSpectrum'
 SPARKYFILE = 'sparkyFile'
 PDBFILE = 'pdbFile'
 EXCELFILE = 'excelFile'
@@ -70,6 +67,7 @@ def getDataLoaders():
     from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
     from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
     from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+    from ccpn.framework.lib.DataLoaders.FastaDataLoader import FastaDataLoader
     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
     return DataLoaderABC._dataLoaders
 

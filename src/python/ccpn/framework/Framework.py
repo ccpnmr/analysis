@@ -1351,9 +1351,9 @@ class Framework(NotifierBase):
         self._menuSpec = ms = []
 
         ms.append(('Project', [
-            ("New", self.createNewProject, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("New", self._newProjectMenuCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
-            ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Open...", self._openProjectMenuCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Open Recent", ()),
 
             #      ("Load Spectrum...", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
@@ -1585,7 +1585,7 @@ class Framework(NotifierBase):
             if self._isInDebugMode:
                 raise es
 
-    def createNewProject(self):
+    def _newProjectMenuCallback(self):
         "Callback for creating new project"
         with catchExceptions(application=self, errorStringTemplate='Error creating new project:', printTraceBack=True):
             okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
@@ -1626,7 +1626,7 @@ class Framework(NotifierBase):
 
         return project
 
-    def _openProjectCallback(self):
+    def _openProjectMenuCallback(self):
         """Just a stub for the menu setup to pass on to mainWindow, to be moved later
         """
         return self.ui.mainWindow._openProject()

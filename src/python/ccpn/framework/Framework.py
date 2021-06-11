@@ -1594,12 +1594,12 @@ class Framework(NotifierBase):
                 project._mainWindow.show()
                 QtWidgets.QApplication.setActiveWindow(project._mainWindow)
 
+    #@logCommand('application.') #cannot do, as project is not there yet
     def newProject(self, name='default'):
         """Create new, empty project; return Project instance
         """
 
         # NB _closeProject includes a gui cleanup call
-
         if self.project is not None:
             self._closeProject()
 
@@ -1653,7 +1653,7 @@ class Framework(NotifierBase):
         if not _path.exists():
             raise ValueError('path "%s" does not exist' % path)
 
-        getLogger().info('==> Loading ccpn project "%s"\n' % path)
+        getLogger().info('==> Loading ccpn project "%s"' % path)
 
         if self.project is not None:  # always close for Ccpn
             self._closeProject()

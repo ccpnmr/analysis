@@ -407,6 +407,9 @@ def logCommand(prefix='', get=None, isProperty=False):
         self = args[0]
 
         application = self.project.application
+        # GWV: tried this for application.newProject decoration, but unsuccessful (for now)
+        # from ccpn.framework.Framework import getApplication
+        # application = getApplication()
         blocking = application._echoBlocking
 
         if blocking == 0 and application.ui is not None:
@@ -481,7 +484,7 @@ def debugEnter(verbosityLevel=Logging.DEBUG1):
         logs = _makeLogString('ENTERING: ', True, func, *args, **kwds)
 
         # get a logger and call the correct routine depending on verbosityLevel
-        logger = getLogger()
+        logger = Logging.getLogger()
         if verbosityLevel == Logging.DEBUG1:
             logger.debug(logs)
         elif verbosityLevel == Logging.DEBUG2:
@@ -537,7 +540,7 @@ def debugLeave(verbosityLevel=Logging.DEBUG1):
             logs = 'LEAVING: %s(); result=%r' % (func.__name__, result)
 
         # get a logger and call the correct routine depending on verbosityLevel
-        logger = getLogger()
+        logger = Logging.getLogger()
         if verbosityLevel == Logging.DEBUG1:
             logger.debug(logs)
         elif verbosityLevel == Logging.DEBUG2:

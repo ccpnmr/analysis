@@ -1105,40 +1105,64 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """
         assert 0 == 1
 
-    def _processUrl(self, url) -> list:
-        """Handle the dropped url
-        return a tuple ([objs], errorText)
+    # def _processUrl(self, url) -> list:
+    #     """Handle the dropped url
+    #     return a tuple ([objs], errorText)
+    #     """
+    #     # CCPNINTERNAL. Called also from module area and GuiStrip. They should have same behaviour
+    #
+    #     url = str(url)
+    #     getLogger().debug('>>> dropped: ' + url)
+    #
+    #     objs = []
+    #
+    #     dataLoader = checkPathForDataLoader(url)
+    #
+    #     if dataLoader is None:
+    #         txt = 'Loading "%s" failed; unrecognised type' % url
+    #         getLogger().warning(txt)
+    #         # MessageDialog.showError('Load Data', txt, parent=self)
+    #         return ([], txt)
+    #
+    #     if dataLoader.createsNewProject:
+    #         if not self._queryCloseProject(title='Load %s project' % dataLoader.dataFormat,
+    #                                        phrase='create a new'):
+    #             return ([], None)
+    #
+    #         newProject = self._loadProject(dataLoader=dataLoader)
+    #         if newProject is not None:
+    #             objs.append(newProject)
+    #
+    #     else:
+    #         with undoBlockWithoutSideBar():
+    #             result = dataLoader.load()
+    #             objs.extend(result)
+    #
+    #     return (objs, None)
+
+    def _getDataLoader(self, url):
+        """Get dataLoader for the url (or None if not present)
+        Allows for reporting or checking through popups
+        does not do the actual loading
+        return a tuple (dataLoader, createsNewProject)
         """
-        # CCPNINTERNAL. Called also from module area and GuiStrip. They should have same behaviour
-
-        url = str(url)
-        getLogger().debug('>>> dropped: ' + url)
-
-        objs = []
-
         dataLoader = checkPathForDataLoader(url)
 
         if dataLoader is None:
             txt = 'Loading "%s" failed; unrecognised type' % url
             getLogger().warning(txt)
-            # MessageDialog.showError('Load Data', txt, parent=self)
-            return ([], txt)
+            return (None, False)
 
-        if dataLoader.createsNewProject:
-            if not self._queryCloseProject(title='Load %s project' % dataLoader.dataFormat,
-                                           phrase='create a new'):
-                return ([], None)
+        createsNewProject = dataLoader.createsNewProject
 
-            newProject = self._loadProject(dataLoader=dataLoader)
-            if newProject is not None:
-                objs.append(newProject)
+        # # stub fro future expansion
+        # # local import here, as checkPathForDataLoaders needs to be called first to assure proper import oder
+        # from ccpn.framework.lib.DataLoaders.SomeDataLoader impoer SomeDataLoader
+        # if dataLoader.dataFormat == SomeDataLoader.dataFormat:
+        #     do stuff
+        #     pass
 
-        else:
-            with undoBlockWithoutSideBar():
-                result = dataLoader.load()
-                objs.extend(result)
-
-        return (objs, None)
+        return (dataLoader, createsNewProject)
 
     def _processDroppedItems(self, data):
         """Handle the dropped urls
@@ -1151,31 +1175,50 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if urls is None:
             return []
 
+        # A list of (url, dataLoader, createsNewProject) tuples. (createsNew to modify behavior, eg. for NEF)
+        dataLoaders = []
+        # analyse the Urls
+        for url in urls:
+            dataLoader, createsNewProject = self._getDataLoader(url)
+            dataLoaders.append( (url, dataLoader, createsNewProject) )
+
+        # analyse for potential errors
+        errorUrls = [url for url, dl, createNew in dataLoaders if dl is None]
+        if len(errorUrls) == 1:
+            MessageDialog.showError('Load Data', 'Dropped item "%s" was not unrecognised' % errorUrls[0], parent=self)
+        elif len(errorUrls) > 1:
+            MessageDialog.showError('Load Data', '%d dropped items were not recognised (see log for details)' % \
+                                    len(errorUrls), parent=self)
+
+        # Analyse if any Url would create a new project
+        createNewProject = any([createNew for url, dl, createNew in dataLoaders])
+        if createNewProject and not self._queryCloseProject(title='Load project', phrase='create a new'):
+                return []
+
+        # load the url's with valid handlers
+        urlsToLoad = [(url, dl, createNew) for url, dl, createNew in dataLoaders if dl is not None]
+        doEchoBlocking = len(urlsToLoad) > MAXITEMLOGGING
+
+        # just a helper function to avoid code duplication
+        def _getResult(dLoader, createNew):
+            if createNew:
+                result = [self._loadProject(dataLoader=dLoader)]
+            else:
+                with undoBlockWithoutSideBar():
+                    result = dLoader.load()
+            return result
+
         getLogger().info('Handling urls...')
         objs = []
-        errorList  = []
-        if len(urls) > 0 and len(urls) <= MAXITEMLOGGING:
-            for url in urls:
-                result, errorText = self._processUrl(url)
+        for url, dataLoader, createNewProject in urlsToLoad:
+            if doEchoBlocking:
+                with notificationEchoBlocking():
+                    result = _getResult(dataLoader, createNewProject)
+            else:
+                result = _getResult(dataLoader, createNewProject)
+
+            if result is not None:
                 objs.extend(result)
-                if errorText is not None:
-                    errorList.append( url )
-
-        elif len(urls) > MAXITEMLOGGING:
-            with notificationEchoBlocking():
-                for url in urls:
-                    result, errorText = self._processUrl(url)
-                    objs.extend(result)
-                    if errorText is not None:
-                        errorList.append( url )
-
-        _numErrors = len(errorList)
-        if _numErrors == 1:
-            url = errorList[0]
-            MessageDialog.showError('Load Data', 'Loading "%s" failed; unrecognised type' % url, parent=self)
-        elif _numErrors > 1:
-            MessageDialog.showError('Load Data', '%d dropped items were not recognised (see log for details)' % _numErrors,
-                                     parent=self)
 
         return objs
 
@@ -1305,8 +1348,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 newProject._mainWindow.sideBar.buildTree(newProject)
                 newProject._mainWindow.show()
                 QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
-                # if the new project contains invalid spectra then open the popup to see them
-                self._badSpectraPopup(newProject)
+
+            # if the new project contains invalid spectra then open the popup to see them
+            self._badSpectraPopup(newProject)
 
         except RuntimeError as es:
             MessageDialog.showError('Load Project', '"%s" did not yield a valid new project (%s)' % \

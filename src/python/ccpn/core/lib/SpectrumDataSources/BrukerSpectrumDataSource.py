@@ -254,15 +254,15 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self._brukerRoot = _path.parent.parent
 
             else:
-                logger.debug('"%s" does not define a valid path with Bruker data' % path)
+                logger.debug2('"%s" does not define a valid path with Bruker data' % path)
                 return None
 
             # check the directories
             if not self._checkBrukerTopDir(self._brukerRoot):
-                logger.debug('"%s" does not define a valid path with Bruker data' % path)
+                logger.debug2('"%s" does not define a valid path with Bruker data' % path)
                 return None
             if not self._checkBrukerPdataDir(self._pdata):
-                logger.debug('"%s" does not define a valid path with Bruker data' % path)
+                logger.debug2('"%s" does not define a valid path with Bruker data' % path)
                 return None
 
             dimensionality = self._getDimensionality(self._brukerRoot)

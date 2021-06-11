@@ -81,7 +81,10 @@ def checkPathForDataLoader(path):
     """
     for fmt, cls in getDataLoaders().items():
         instance = cls.checkForValidFormat(path)
-        if instance is not None:
+        if instance is None:
+            getLogger().debug('path "%s" is not valid for dataFormat "%s"' % (path, cls.dataFormat))
+        else:
+            getLogger().debug('path "%s" is valid for dataFormat "%s"' % (path, cls.dataFormat))
             return instance  # we found a valid format for path
     return None
 

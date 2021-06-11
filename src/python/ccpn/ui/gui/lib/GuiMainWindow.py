@@ -1155,7 +1155,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         createsNewProject = dataLoader.createsNewProject
 
-        # # stub fro future expansion
+        # # stub for future expansion
         # # local import here, as checkPathForDataLoaders needs to be called first to assure proper import oder
         # from ccpn.framework.lib.DataLoaders.SomeDataLoader impoer SomeDataLoader
         # if dataLoader.dataFormat == SomeDataLoader.dataFormat:
@@ -1171,9 +1171,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # use an undoBlockWithoutSideBar, and ignore logging if MAXITEMLOGGING or more items
         # to stop overloading of the log
 
-        urls = data.get('urls', [])
+        urls = [str(url) for url in data.get('urls', []) if len(url)>0]
         if urls is None:
             return []
+
+        getLogger().info('Handling urls...')
 
         # A list of (url, dataLoader, createsNewProject) tuples. (createsNew to modify behavior, eg. for NEF)
         dataLoaders = []
@@ -1208,7 +1210,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                     result = dLoader.load()
             return result
 
-        getLogger().info('Handling urls...')
         objs = []
         for url, dataLoader, createNewProject in urlsToLoad:
             if doEchoBlocking:

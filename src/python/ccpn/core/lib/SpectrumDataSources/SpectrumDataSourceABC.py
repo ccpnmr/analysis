@@ -1109,12 +1109,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # checking path
         if instance.setPath(path, substituteSuffix=False) is None:
-            logger.debug('path "%s" is not valid for dataFormat "%s"' %
+            logger.debug2('path "%s" is not valid for dataFormat "%s"' %
                          (path, instance.dataFormat))
             return None
 
         if not instance.checkPath(instance.path, mode=instance.defaultOpenReadMode):
-            logger.debug('path "%s" is not valid for reading dataFormat "%s"' %
+            logger.debug2('path "%s" is not valid for reading dataFormat "%s"' %
                          (path, instance.dataFormat))
             return None
 
@@ -1124,18 +1124,18 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 pass
                 # instance.readParameters()
         except RuntimeError as es:
-            logger.debug('path "%s", dataFormat "%s": bailing on reading with error: "%s"' %
+            logger.debug2('path "%s", dataFormat "%s": bailing on reading with error: "%s"' %
                          (path, instance.dataFormat, es))
             return None
 
         # Check dimensionality; should be > 0
         if instance.dimensionCount == 0:
-            logger.debug('path "%s": reading parameters in dataFormat "%s" yielded dimensionCount 0' %
+            logger.debug2('path "%s": reading parameters in dataFormat "%s" yielded dimensionCount 0' %
                          (path, instance.dataFormat))
             return None
 
         elif instance.dimensionCount > 0:
-            logger.debug('path "%s" is valid for dataFormat "%s"' %
+            logger.debug2('path "%s" is valid for dataFormat "%s"' %
                          (path, instance.dataFormat))
             return instance  # found the file with right attributes
 

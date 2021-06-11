@@ -1257,47 +1257,46 @@ class Project(AbstractWrapperObject):
                 t2 = time()
                 getLogger().info('Exporting dataBlock to file, time = %.2fs' % (t2 - t0))
 
-    def recurseAnalyseUrl(self, filePath, includeUndefined=False):
-        """Recurse through the given path to find valid data that can be loaded
-        This list will contain loadable files and loadable folders which may load the same data
-        if includeUndefined is True, will include ('Text', None, ...) results
-        which may not be useful
-        """
-        from ccpn.util.OrderedSet import OrderedSet
+    # def recurseAnalyseUrl(self, filePath, includeUndefined=False):
+    #     """Recurse through the given path to find valid data that can be loaded
+    #     This list will contain loadable files and loadable folders which may load the same data
+    #     if includeUndefined is True, will include ('Text', None, ...) results
+    #     which may not be useful
+    #     """
+    #     from ccpn.util.OrderedSet import OrderedSet
+    #
+    #     validList = OrderedSet()
+    #
+    #     if os.path.isdir(filePath):
+    #         # list the folders
+    #         dirs = [os.path.join(filePath, dirpath) for dirpath, dirs, files in os.walk(filePath, topdown=False)]
+    #
+    #         # list the files
+    #         dirs += [os.path.join(filePath, dirpath, file)
+    #                  for dirpath, dirs, files in os.walk(filePath, topdown=False)
+    #                  for file in files]
+    #
+    #         # search the folders and files the valid data
+    #         for dI in dirs:
+    #             dataType, subType, usePath = ioFormats.analyseUrl(dI)
+    #
+    #             # only add the valid types to the set
+    #             if usePath:
+    #
+    #                 # include if both defined or either is None IF includeUndefined is True
+    #                 if (dataType and subType) or (includeUndefined and ((dataType and not subType) or (subType and not dataType))):
+    #
+    #                     # only add if not a subset of an existing path
+    #                     for inList in validList:
+    #                         if inList[2].startswith(usePath):
+    #                             break
+    #                     else:
+    #
+    #                         # flag whether the usePath is a folder
+    #                         validList.add((dataType, subType, usePath, os.path.isdir(usePath)))
+    #
+    #     return validList
 
-        validList = OrderedSet()
-
-        if os.path.isdir(filePath):
-            # list the folders
-            dirs = [os.path.join(filePath, dirpath) for dirpath, dirs, files in os.walk(filePath, topdown=False)]
-
-            # list the files
-            dirs += [os.path.join(filePath, dirpath, file)
-                     for dirpath, dirs, files in os.walk(filePath, topdown=False)
-                     for file in files]
-
-            # search the folders and files the valid data
-            for dI in dirs:
-                dataType, subType, usePath = ioFormats.analyseUrl(dI)
-
-                # only add the valid types to the set
-                if usePath:
-
-                    # include if both defined or either is None IF includeUndefined is True
-                    if (dataType and subType) or (includeUndefined and ((dataType and not subType) or (subType and not dataType))):
-
-                        # only add if not a subset of an existing path
-                        for inList in validList:
-                            if inList[2].startswith(usePath):
-                                break
-                        else:
-
-                            # flag whether the usePath is a folder
-                            validList.add((dataType, subType, usePath, os.path.isdir(usePath)))
-
-        return validList
-
-    @logCommand('project.')
     def loadData(self, path: str) -> typing.Optional[typing.List]:
         """Just a stub for backward compatibility
         """
@@ -1494,43 +1493,43 @@ class Project(AbstractWrapperObject):
         ensemble = EnsembleData.from_pdb(path)
         return label, ensemble
 
-    def _loadNefFile(self, path: str, subType: str):
-        """
-        Load a Nef file into an existing project
-        """
-        # ejb - 24/6/17
+    # def _loadNefFile(self, path: str, subType: str):
+    #     """
+    #     Load a Nef file into an existing project
+    #     """
+    #     # ejb - 24/6/17
+    #
+    #     if subType in (ioFormats.NEF):
+    #
+    #         return self._appBase.loadProject(path)
+    #
+    #         # # load Nef File here
+    #         # nefReader = CcpnNefIo.CcpnNefReader(self)
+    #         #
+    #         # dataBlock = nefReader.getNefData(path)
+    #         # # project = self.newProject(dataBlock.name)
+    #         # # self._echoBlocking += 1
+    #         # self._undo.increaseBlocking()
+    #         # self._wrappedData.shiftAveraging = False
+    #         #
+    #         # nefReader.importNewProject(self, dataBlock)
+    #         #
+    #         # self._wrappedData.shiftAveraging = True
+    #         # # self._echoBlocking -= 1
+    #         # self._undo.decreaseBlocking()
+    #         #
+    #         # return True
+    #     else:
+    #         raise ValueError("Project file type %s is not recognised" % subType)
 
-        if subType in (ioFormats.NEF):
-
-            return self._appBase.loadProject(path)
-
-            # # load Nef File here
-            # nefReader = CcpnNefIo.CcpnNefReader(self)
-            #
-            # dataBlock = nefReader.getNefData(path)
-            # # project = self.newProject(dataBlock.name)
-            # # self._echoBlocking += 1
-            # self._undo.increaseBlocking()
-            # self._wrappedData.shiftAveraging = False
-            #
-            # nefReader.importNewProject(self, dataBlock)
-            #
-            # self._wrappedData.shiftAveraging = True
-            # # self._echoBlocking -= 1
-            # self._undo.decreaseBlocking()
-            #
-            # return True
-        else:
-            raise ValueError("Project file type %s is not recognised" % subType)
-
-    def loadProject(self, path: str, subType: str) -> "Project":
-        """Load project from file into application and return the new project"""
-
-        # if subType == ioFormats.CCPN:
-        if subType in (ioFormats.CCPN, ioFormats.NEF, ioFormats.NMRSTAR, ioFormats.SPARKY):
-            return self._appBase.loadProject(path)
-        else:
-            raise ValueError("Project file type %s is not recognised" % subType)
+    # def loadProject(self, path: str, subType: str) -> "Project":
+    #     """Load project from file into application and return the new project"""
+    #
+    #     # if subType == ioFormats.CCPN:
+    #     if subType in (ioFormats.CCPN, ioFormats.NEF, ioFormats.NMRSTAR, ioFormats.SPARKY):
+    #         return self._appBase.loadProject(path)
+    #     else:
+    #         raise ValueError("Project file type %s is not recognised" % subType)
 
     # @logCommand('project')
     # def loadSpectrum(self, path: str, subType: str, name=None) -> list:
@@ -1538,7 +1537,6 @@ class Project(AbstractWrapperObject):
     #     """
     #     from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
     #
-    #     # #TODO:RASMUS FIXME check for rename
     #
     #     try:
     #         apiDataSource = self._wrappedData.loadDataSource(

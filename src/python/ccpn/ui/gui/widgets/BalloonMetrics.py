@@ -3,6 +3,8 @@ from math import ceil, sqrt, floor
 from typing import NamedTuple
 
 from PyQt5.QtCore import QPoint, QRect, QSize
+from PyQt5.QtWidgets import QWidget
+
 
 
 class Pointer(NamedTuple):
@@ -131,6 +133,15 @@ class BalloonMetrics:
         self.inner = None
         self.outer = None
         self._pointer_rect = None
+        self.pointer = None
+
+    # TODO replace reset with property change?
+    # TODO recalc on last rect set?
+    def reset(self):
+        self.inner = None
+        self.outer = None
+        self._pointer_rect = None
+        self.pointer = None
 
     def _get_corner_margin(self):
         result = self.corner_radius / sqrt(2)
@@ -198,6 +209,8 @@ class BalloonMetrics:
 
         self.outer = result
 
+        self._calc_pointer_position()
+
         return self
 
     def from_outer(self, rect: QRect):
@@ -230,9 +243,11 @@ class BalloonMetrics:
 
         self.inner = result
 
+        self._calc_pointer_position()
+
         return self
 
-    def _get_pointer_at_position(self):
+    def _calc_pointer_position(self):
 
         if self._pointer_rect is None:
             raise InvalidStateError('Error: call from_inner or from_outer first!')
@@ -283,11 +298,8 @@ class BalloonMetrics:
         pointer_right[pointer_axis] = bottom
         pointer_right[range_axis] = int(right)
 
-        raw_result = QPoint(*pointer_left), QPoint(*pointer_centre), QPoint(*pointer_right)
+        self.pointer = QPoint(*pointer_left), QPoint(*pointer_centre), QPoint(*pointer_right)
 
-        result = Pointer(*raw_result)
-
-        return result
 
 
 def test_expand():
@@ -344,7 +356,7 @@ def test_rects_from_outer():
         metrics = BalloonMetrics(pointer_side=side)
         metrics.from_inner(test_rect)
 
-        display_rect(metrics._pointer_rect)
+        # display_rect(metrics._pointer_rect)
         assert metrics._pointer_rect == expected_for_side[side]
 
 
@@ -400,25 +412,21 @@ def test_reset():
     assert metrics.outer is None
     assert metrics._pointer_rect is None
 
-    with pytest.raises(InvalidStateError):
-        metrics._get_pointer_at_position()
+    assert metrics.pointer == None
 
     metrics.from_outer(QRect(0, 0, 100, 200))
 
     assert metrics.inner is not None
     assert metrics.outer is not None
     assert metrics._pointer_rect is not None
-
-    metrics._get_pointer_at_position()
+    assert metrics.pointer is not None
 
     metrics.reset()
 
     assert metrics.inner is None
     assert metrics.outer is None
     assert metrics._pointer_rect is None
-
-    with pytest.raises(InvalidStateError):
-        metrics._get_pointer_at_position()
+    assert metrics.pointer is None
 
 
 def test_pointer_positions():
@@ -449,9 +457,7 @@ def test_pointer_positions():
 
         # display_rect(metrics._pointer_rect, f'pointer rect {side.name}')
 
-        pointer = metrics._get_pointer_at_position()
-
-        assert expected == pointer
+        assert expected == metrics.pointer
 
 
 def _run_tests():

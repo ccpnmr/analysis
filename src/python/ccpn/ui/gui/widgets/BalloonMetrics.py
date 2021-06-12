@@ -247,69 +247,76 @@ class BalloonMetrics:
 
     def from_inner(self, rect: QRect):
 
-        self._inner = QRect(rect)
+        if rect != self._inner:
 
-        pointer_box = {
-            Axis.X: [],
-            Axis.Y: []
-        }
+            self._inner = QRect(rect)
 
-        result = self._add_central_widget_margins(rect)
+            pointer_box = {
+                Axis.X: [],
+                Axis.Y: []
+            }
 
-        pointer_bottom = _qrect_get_side(result, self.pointer_side)
-        pointer_box[POINTER_AXIS[self.pointer_side]].append(pointer_bottom)
+            result = self._add_central_widget_margins(rect)
 
-        result = self._add_pointer_margin(result)
+            self._body_rect = QRect(result)
 
-        pointer_top = _qrect_get_side(result, self.pointer_side)
-        pointer_box[POINTER_AXIS[self.pointer_side]].append(pointer_top)
+            pointer_bottom = _qrect_get_side(result, self.pointer_side)
+            pointer_box[POINTER_AXIS[self.pointer_side]].append(pointer_bottom)
 
-        for orthogonal_side in NON_POINTER_SIDES[self.pointer_side]:
-            orthogonal_axis = OPPOSITE_AXIS[POINTER_AXIS[self.pointer_side]]
-            pointer_box[orthogonal_axis].append(_qrect_get_side(result, orthogonal_side))
+            result = self._add_pointer_margin(result)
 
-        self._pointer_rect = new_rect_xleftytop_xrightybottom(min(pointer_box[Axis.X]), min(pointer_box[Axis.Y]),
-                                                              max(pointer_box[Axis.X]), max(pointer_box[Axis.Y]))
+            pointer_top = _qrect_get_side(result, self.pointer_side)
+            pointer_box[POINTER_AXIS[self.pointer_side]].append(pointer_top)
 
-        result = self._add_antialias_margin(result)
+            for orthogonal_side in NON_POINTER_SIDES[self.pointer_side]:
+                orthogonal_axis = OPPOSITE_AXIS[POINTER_AXIS[self.pointer_side]]
+                pointer_box[orthogonal_axis].append(_qrect_get_side(result, orthogonal_side))
 
-        self._outer = result
+            self._pointer_rect = new_rect_xleftytop_xrightybottom(min(pointer_box[Axis.X]), min(pointer_box[Axis.Y]),
+                                                                  max(pointer_box[Axis.X]), max(pointer_box[Axis.Y]))
 
-        self._calc_pointer_position()
+            result = self._add_antialias_margin(result)
+
+            self._outer = result
+
+            self._calc_pointer_position()
 
         return self
 
     def from_outer(self, rect: QRect):
 
-        self._outer = QRect(rect)
+        if rect != self._outer:
+            self._outer = QRect(rect)
 
-        pointer_box = {
-            Axis.X: [],
-            Axis.Y: []
-        }
+            pointer_box = {
+                Axis.X: [],
+                Axis.Y: []
+            }
 
-        result = self._add_antialias_margin(rect, multiplier=-1)
+            result = self._add_antialias_margin(rect, multiplier=-1)
 
-        pointer_top = _qrect_get_side(result, self.pointer_side)
-        pointer_box[POINTER_AXIS[self.pointer_side]].append(pointer_top)
+            pointer_top = _qrect_get_side(result, self.pointer_side)
+            pointer_box[POINTER_AXIS[self.pointer_side]].append(pointer_top)
 
-        for orthogonal_side in NON_POINTER_SIDES[self.pointer_side]:
-            orthogonal_axis = OPPOSITE_AXIS[POINTER_AXIS[self.pointer_side]]
-            pointer_box[orthogonal_axis].append(_qrect_get_side(result, orthogonal_side))
+            for orthogonal_side in NON_POINTER_SIDES[self.pointer_side]:
+                orthogonal_axis = OPPOSITE_AXIS[POINTER_AXIS[self.pointer_side]]
+                pointer_box[orthogonal_axis].append(_qrect_get_side(result, orthogonal_side))
 
-        result = self._add_pointer_margin(result, multiplier=-1)
+            result = self._add_pointer_margin(result, multiplier=-1)
 
-        pointer_bottom = _qrect_get_side(result, self.pointer_side)
-        pointer_box[POINTER_AXIS[self.pointer_side]].append(pointer_bottom)
+            pointer_bottom = _qrect_get_side(result, self.pointer_side)
+            pointer_box[POINTER_AXIS[self.pointer_side]].append(pointer_bottom)
 
-        self._pointer_rect = new_rect_xleftytop_xrightybottom(min(pointer_box[Axis.X]), min(pointer_box[Axis.Y]),
-                                                              max(pointer_box[Axis.X]), max(pointer_box[Axis.Y]))
+            self._pointer_rect = new_rect_xleftytop_xrightybottom(min(pointer_box[Axis.X]), min(pointer_box[Axis.Y]),
+                                                                  max(pointer_box[Axis.X]), max(pointer_box[Axis.Y]))
 
-        result = self._add_central_widget_margins(result, multiplier=-1)
+            self._body_rect = QRect(result)
 
-        self._inner = result
+            result = self._add_central_widget_margins(result, multiplier=-1)
 
-        self._calc_pointer_position()
+            self._inner = result
+
+            self._calc_pointer_position()
 
         return self
 

@@ -130,43 +130,68 @@ class BalloonMetrics:
         self.antialias_margin = 1
         self.pointer_position = 0.5
 
-        self.inner = None
-        self.outer = None
+        self._inner = None
+        self._outer = None
         self._pointer_rect = None
-        self.pointer = None
+        self._pointer = None
 
     # TODO replace reset with property change?
     # TODO recalc on last rect set?
     def reset(self):
-        self.inner = None
-        self.outer = None
+        self._inner = None
+        self._outer = None
         self._pointer_rect = None
-        self.pointer = None
+        self._pointer = None
 
     @property
     def outer_viewport(self):
         self._raise_invalid_if_required()
 
-        translation = self.outer.topLeft()  * -1
+        translation = self._outer.topLeft() * -1
 
-        return self.outer.translated(translation)
+        return self._outer.translated(translation)
 
     @property
     def inner_viewport(self):
         self._raise_invalid_if_required()
 
-        translation = self.outer.topLeft() * -1
+        translation = self._outer.topLeft() * -1
 
-        return self.inner.translated(translation)
+        return self._inner.translated(translation)
 
     @property
     def pointer_viewport(self):
         self._raise_invalid_if_required()
 
-        translation = self.outer.topLeft() * -1
-        result = [point + translation for point in self.pointer]
+        translation = self._outer.topLeft() * -1
+        result = [point + translation for point in self._pointer]
 
         return result
+
+    @property
+    def outer(self):
+        self._raise_invalid_if_required()
+
+        return self._outer
+
+    @property
+    def inner(self):
+        self._raise_invalid_if_required()
+
+        return self._inner
+
+    @property
+    def pointer(self):
+        self._raise_invalid_if_required()
+
+        return self._pointer
+
+    @property
+    def pointer_rect(self):
+        self._raise_invalid_if_required()
+
+        return self._pointer_rect
+
 
     def _get_corner_margin(self):
         result = self.corner_radius / sqrt(2)
@@ -206,7 +231,7 @@ class BalloonMetrics:
 
     def from_inner(self, rect: QRect):
 
-        self.inner = QRect(rect)
+        self._inner = QRect(rect)
 
         pointer_box = {
             Axis.X: [],
@@ -232,7 +257,7 @@ class BalloonMetrics:
 
         result = self._add_antialias_margin(result)
 
-        self.outer = result
+        self._outer = result
 
         self._calc_pointer_position()
 
@@ -240,7 +265,7 @@ class BalloonMetrics:
 
     def from_outer(self, rect: QRect):
 
-        self.outer = QRect(rect)
+        self._outer = QRect(rect)
 
         pointer_box = {
             Axis.X: [],
@@ -266,7 +291,7 @@ class BalloonMetrics:
 
         result = self._add_central_widget_margins(result, multiplier=-1)
 
-        self.inner = result
+        self._inner = result
 
         self._calc_pointer_position()
 
@@ -322,7 +347,7 @@ class BalloonMetrics:
         pointer_right[pointer_axis] = bottom
         pointer_right[range_axis] = int(right)
 
-        self.pointer = QPoint(*pointer_left), QPoint(*pointer_centre), QPoint(*pointer_right)
+        self._pointer = QPoint(*pointer_left), QPoint(*pointer_centre), QPoint(*pointer_right)
 
     def _raise_invalid_if_required(self):
         if self._pointer_rect is None:
@@ -336,7 +361,7 @@ def test_expand():
     assert QRect(QPoint(-3, -3), QSize(16, 106)) == metrics._add_central_widget_margins(test_rect)
     assert QRect(QPoint(0, 0), QSize(20, 100)) == metrics._add_pointer_margin(test_rect)
     assert QRect(QPoint(-1, -1), QSize(12, 102)) == metrics._add_antialias_margin(test_rect)
-    assert QRect(QPoint(-4, -4), QSize(28, 108)) == metrics.from_inner(test_rect).outer
+    assert QRect(QPoint(-4, -4), QSize(28, 108)) == metrics.from_inner(test_rect)._outer
 
 
 def test_reduce():
@@ -347,7 +372,7 @@ def test_reduce():
     assert QRect(QPoint(1, 1), QSize(8, 98)) == metrics._add_antialias_margin(test_rect, multiplier=-1)
     assert QRect(QPoint(3, 3), QSize(4, 94)) == metrics._add_central_widget_margins(test_rect, multiplier=-1)
     assert QRect(QPoint(0, 0), QSize(0, 100)) == metrics._add_pointer_margin(test_rect, multiplier=-1)
-    assert test_rect == metrics.from_outer(QRect(QPoint(-4, -4), QSize(28, 108))).inner
+    assert test_rect == metrics.from_outer(QRect(QPoint(-4, -4), QSize(28, 108)))._inner
 
 
 def test_expand_sides():
@@ -428,7 +453,7 @@ def test_pointer_rects_from_outer():
         metrics = BalloonMetrics(pointer_side=side)
         metrics.from_outer(outer)
 
-        assert metrics._pointer_rect == expected
+        assert metrics.pointer_rect == expected
 
 def test_local():
     test_rect = QRect(QPoint(0, 0), QSize(200, 100))
@@ -447,26 +472,38 @@ def test_reset():
     import pytest
     metrics = BalloonMetrics()
 
-    assert metrics.inner is None
-    assert metrics.outer is None
-    assert metrics._pointer_rect is None
+    with pytest.raises(InvalidStateError):
+        metrics.inner
 
-    assert metrics.pointer == None
+    with pytest.raises(InvalidStateError):
+        metrics.outer
+
+    with pytest.raises(InvalidStateError):
+        metrics.pointer_rect
+
+    with pytest.raises(InvalidStateError):
+        metrics.pointer
 
     metrics.from_outer(QRect(0, 0, 100, 200))
 
     assert metrics.inner is not None
     assert metrics.outer is not None
-    assert metrics._pointer_rect is not None
+    assert metrics.pointer_rect is not None
     assert metrics.pointer is not None
 
     metrics.reset()
 
-    assert metrics.inner is None
-    assert metrics.outer is None
-    assert metrics._pointer_rect is None
-    assert metrics.pointer is None
+    with pytest.raises(InvalidStateError):
+        metrics.inner
 
+    with pytest.raises(InvalidStateError):
+        metrics.outer
+
+    with pytest.raises(InvalidStateError):
+        metrics.pointer_rect
+
+    with pytest.raises(InvalidStateError):
+        metrics.pointer
 
 def test_pointer_positions():
     test_rect = QRect(QPoint(0, 0), QSize(200, 100))

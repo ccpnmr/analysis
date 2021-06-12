@@ -135,6 +135,7 @@ class BalloonMetrics:
         self._pointer_rect = None
         self._pointer = None
 
+
     # TODO replace reset with property change?
     # TODO recalc on last rect set?
     def reset(self):

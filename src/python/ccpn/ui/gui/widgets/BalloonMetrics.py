@@ -126,6 +126,7 @@ class BalloonMetrics:
         self.pointer_height = pointer_height
         self.pointer_width = pointer_width
         self.antialias_margin = 1
+        self.pointer_position = 0.5
 
         self.inner = None
         self.outer = None
@@ -231,7 +232,7 @@ class BalloonMetrics:
 
         return self
 
-    def get_pointer_at_position(self, position=0.50):
+    def _get_pointer_at_position(self):
 
         if self._pointer_rect is None:
             raise InvalidStateError('Error: call from_inner or from_outer first!')
@@ -256,7 +257,7 @@ class BalloonMetrics:
             range_right = max_right - pointer_width_2
 
             centre_range = range_right - range_left
-            centre = range_left + int(floor(centre_range * position))
+            centre = range_left + int(floor(centre_range * self.pointer_position))
 
             left = centre - pointer_width_2
             right = centre + pointer_width_2
@@ -282,7 +283,11 @@ class BalloonMetrics:
         pointer_right[pointer_axis] = bottom
         pointer_right[range_axis] = int(right)
 
-        return Pointer(QPoint(*pointer_left), QPoint(*pointer_centre), QPoint(*pointer_right))
+        raw_result = QPoint(*pointer_left), QPoint(*pointer_centre), QPoint(*pointer_right)
+
+        result = Pointer(*raw_result)
+
+        return result
 
 
 def test_expand():
@@ -387,6 +392,35 @@ def test_pointer_rects_from_outer():
         assert metrics._pointer_rect == expected
 
 
+def test_reset():
+    import pytest
+    metrics = BalloonMetrics()
+
+    assert metrics.inner is None
+    assert metrics.outer is None
+    assert metrics._pointer_rect is None
+
+    with pytest.raises(InvalidStateError):
+        metrics._get_pointer_at_position()
+
+    metrics.from_outer(QRect(0, 0, 100, 200))
+
+    assert metrics.inner is not None
+    assert metrics.outer is not None
+    assert metrics._pointer_rect is not None
+
+    metrics._get_pointer_at_position()
+
+    metrics.reset()
+
+    assert metrics.inner is None
+    assert metrics.outer is None
+    assert metrics._pointer_rect is None
+
+    with pytest.raises(InvalidStateError):
+        metrics._get_pointer_at_position()
+
+
 def test_pointer_positions():
     test_rect = QRect(QPoint(0, 0), QSize(200, 100))
 
@@ -410,11 +444,12 @@ def test_pointer_positions():
     for (percentage, side), expected in expected.items():
 
         metrics = BalloonMetrics(pointer_side=side)
+        metrics.pointer_position = percentage
         metrics.from_inner(test_rect)
 
-        display_rect(metrics._pointer_rect, f'pointer rect {side.name}')
+        # display_rect(metrics._pointer_rect, f'pointer rect {side.name}')
 
-        pointer = metrics.get_pointer_at_position(percentage)
+        pointer = metrics._get_pointer_at_position()
 
         assert expected == pointer
 

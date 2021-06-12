@@ -326,8 +326,6 @@ class BalloonMetrics:
             left = centre - pointer_width_2
             right = centre + pointer_width_2
 
-
-        display_rect(self._pointer_rect, 'pointer rect')
         pointer_sides = [_qrect_get_side(self._pointer_rect, side) for side in POINTER_SIDES[self.pointer_side]]
         bottom, top = pointer_sides
 
@@ -408,8 +406,7 @@ def test_rects_from_outer():
         metrics = BalloonMetrics(pointer_side=side)
         metrics.from_inner(test_rect)
 
-        # display_rect(metrics._pointer_rect)
-        assert metrics._pointer_rect == expected_for_side[side]
+        assert metrics.pointer_rect == expected_for_side[side]
 
 
 def test_inners_from_outer():
@@ -455,7 +452,8 @@ def test_pointer_rects_from_outer():
 
         assert metrics.pointer_rect == expected
 
-def test_local():
+
+def test_viewport_views():
     test_rect = QRect(QPoint(0, 0), QSize(200, 100))
     expected_outer = QRect(QPoint(0, 0), QSize(218, 108))
     expected_inner = QRect(QPoint(4, 4), QSize(200, 100))
@@ -467,6 +465,7 @@ def test_local():
     assert metrics.outer_viewport == expected_outer
     assert metrics.inner_viewport == expected_inner
     assert metrics.pointer_viewport == expected_pointer
+
 
 def test_reset():
     import pytest
@@ -530,8 +529,6 @@ def test_pointer_positions():
         metrics = BalloonMetrics(pointer_side=side)
         metrics.pointer_position = percentage
         metrics.from_inner(test_rect)
-
-        # display_rect(metrics._pointer_rect, f'pointer rect {side.name}')
 
         assert expected == metrics.pointer
 

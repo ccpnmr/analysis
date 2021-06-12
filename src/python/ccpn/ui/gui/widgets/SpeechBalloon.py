@@ -143,26 +143,6 @@ class SpeechBalloon(QWidget):
         self._percentage = percentage
         self.update()
 
-    def _calc_display_rect(self):
-        result = self._calc_usable_rect()
-
-        offsets = [0, 0, 0, 0]
-        offset_direction = (1, 1, -1, -1)
-
-        side = int(self._pointer_side)
-        offsets[side] = self._pointer_height * offset_direction[side]
-
-        result.adjust(*offsets)
-
-        return result
-
-    def _calc_usable_rect(self):
-
-        # this allows for anti-aliasing
-        return self.frameGeometry().adjusted(1, 1, -1, -1)
-
-    def _calc_local_usable_rect(self):
-        return self._rect_to_local(self._calc_usable_rect())
 
     def paintEvent(self, a0: QtGui.QPaintEvent) -> None:
 
@@ -173,6 +153,7 @@ class SpeechBalloon(QWidget):
         with PaintContext(QPainter(self)) as painter:
 
             painter.setRenderHint(QPainter.Antialiasing, True)
+            painter.setRenderHint(QPainter.HighQualityAntialiasing, True)
 
             pal = self.palette()
             fgColor = pal.color(QPalette.Active, QPalette.Text)
@@ -210,6 +191,8 @@ class SpeechBalloon(QWidget):
 
         with PaintContext(QPainter(pixmap)) as painter:
 
+            painter.setRenderHint(QPainter.Antialiasing)
+            painter.setRenderHint(QPainter.HighQualityAntialiasing)
 
             brush = QBrush(QColor('white'))
             painter.fillRect(pixmap.rect(), brush)

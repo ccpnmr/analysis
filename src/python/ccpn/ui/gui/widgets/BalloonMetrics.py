@@ -181,7 +181,7 @@ class BalloonMetrics:
     def outer(self):
         self._raise_invalid_if_required()
 
-        return self._outer
+        return QRect(self._outer)
 
     @property
     def inner(self):
@@ -205,7 +205,7 @@ class BalloonMetrics:
     def pointer_rect(self):
         self._raise_invalid_if_required()
 
-        return self._pointer_rect
+        return QRect(self._pointer_rect)
 
 
     def _get_corner_margin(self):

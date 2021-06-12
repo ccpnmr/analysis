@@ -83,6 +83,7 @@ class SpeechBalloon(QWidget):
         self._pointer_height = 10
         self._pointer_width = 20
         self._pointer_side = side
+        self._metrics = BalloonMetrics()
 
         self._percentage = percentage / 100.0
 
@@ -127,6 +128,8 @@ class SpeechBalloon(QWidget):
     @pointerSide.setter
     def pointerSide(self, side):
         self._pointer_side = side
+        self._metrics.pointer_side = side
+        self._metrics.reset()
         self.layout().setContentsMargins(*self._get_margins())
         self.layout().activate()
         self.update()
@@ -184,85 +187,20 @@ class SpeechBalloon(QWidget):
 
         return super(SpeechBalloon, self).paintEvent(a0)
 
-    def _get_pointer_position(self, rect=None, on_border=False):
-
-        if rect is None:
-            local_display_rect = self._local_display_rect()
-        else:
-            local_display_rect = rect
-
-        width = local_display_rect.width()
-        top = local_display_rect.top()
-        bottom = local_display_rect.bottom()
-        left = local_display_rect.left()
-        right = local_display_rect.right()
-        height = local_display_rect.height()
-
-        pointer_height = 0 if on_border else self._pointer_height
-
-        pointer_width_2 = int(self._pointer_width / 2)
-
-        pointer_pos = None
-        if self._pointer_side in (Side.TOP, Side.BOTTOM):
-            min_pos_x = pointer_width_2 + self._corner_radius
-            max_pos_x = width - pointer_width_2 - self._corner_radius
-            pointer_pos_x = int(min_pos_x + ((max_pos_x - min_pos_x) * self._percentage))
-
-            if self._pointer_side == Side.TOP:
-                pointer_pos = QPoint(pointer_pos_x, top - pointer_height)
-            elif self._pointer_side == Side.BOTTOM:
-                pointer_pos = QPoint(pointer_pos_x, bottom + pointer_height)
-        else:
-            min_pos_y = self._corner_radius + pointer_width_2
-            max_pos_y = height - pointer_width_2 - self._corner_radius
-            pointer_pos_y = int(min_pos_y + ((max_pos_y - min_pos_y) * self._percentage))
-
-            if self._pointer_side == Side.LEFT:
-                pointer_pos = QPoint(left - pointer_height, pointer_pos_y)
-            elif self._pointer_side == Side.RIGHT:
-                pointer_pos = QPoint(right + pointer_height, pointer_pos_y)
-
-        return pointer_pos
-
     def window_path(self):
-        display_rect = QRectF(self._local_display_rect())
+
+        self._metrics.pointer_side = self._pointer_side
+
+        self._metrics.from_outer(self.frameGeometry())
 
         path = QPainterPath()
-        path.addRoundedRect(display_rect, self._corner_radius, self._corner_radius)
+        path.addRoundedRect(QRectF(self._metrics.body_rect_viewport), self._corner_radius, self._corner_radius)
 
-        width = self._local_display_rect().width()
-        width_2 = int(width / 2)
-        top = self._local_display_rect().top()
-        bottom = self._local_display_rect().bottom()
-        left = self._local_display_rect().left()
-        right = self._local_display_rect().right()
-        # height = self._local_display_rect().height()
-
-        pointer_width_2 = int(self._pointer_width / 2)
-
-        pointer_pos = self._get_pointer_position()
-        pointer_points = None
-        if self._pointer_side == Side.TOP:
-            pointer_points = [QPoint(pointer_pos.x() - pointer_width_2, top),
-                              pointer_pos,
-                              QPoint(pointer_pos.x() + pointer_width_2, top)]
-        elif self._pointer_side == Side.BOTTOM:
-            pointer_points = [QPoint(width_2 - pointer_width_2, bottom + 1),
-                              pointer_pos,
-                              QPoint(width_2 + pointer_width_2, bottom + 1)]
-        elif self._pointer_side == Side.LEFT:
-            pointer_points = [QPoint(left, pointer_pos.y() - pointer_width_2),
-                              pointer_pos,
-                              QPoint(left, pointer_pos.y() + pointer_width_2)]
-        elif self._pointer_side == Side.RIGHT:
-            pointer_points = [QPoint(right + 1, pointer_pos.y() - pointer_width_2),
-                              pointer_pos,
-                              QPoint(right + 1, pointer_pos.y() + pointer_width_2)]
-
-        pointer_polygon = QPolygonF(QPolygon(pointer_points))
+        pointer_polygon = QPolygonF(QPolygon(self._metrics.pointer_viewport))
         path.addPolygon(pointer_polygon)
 
         path = path.simplified()
+
         return path
 
     def window_mask(self):
@@ -286,20 +224,9 @@ class SpeechBalloon(QWidget):
 
         return result
 
-    def _local_display_rect(self):
-        display_rect = self._calc_display_rect()
-        local_display_rect = self._rect_to_local(display_rect)
-        return local_display_rect
-
-    def _rect_to_local(self, rect):
-        result = QRect()
-        result.setTopLeft(self.mapFromGlobal(rect.topLeft()))
-        result.setSize(rect.size())
-        return result
-
     def _pointer_offset(self):
 
-        pointer_pos = self.mapToGlobal(self._get_pointer_position())
+        pointer_pos = self.mapToGlobal(self._metrics.pointer_viewport.top)
 
         return pointer_pos - self.pos()
 

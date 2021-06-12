@@ -249,8 +249,7 @@ class BalloonMetrics:
 
     def _calc_pointer_position(self):
 
-        if self._pointer_rect is None:
-            raise InvalidStateError('Error: call from_inner or from_outer first!')
+        self._raise_invalid_if_required()
 
         movement_sides = NON_POINTER_SIDES[self.pointer_side]
         values = [_qrect_get_side(self._pointer_rect, side) for side in movement_sides]
@@ -300,6 +299,9 @@ class BalloonMetrics:
 
         self.pointer = QPoint(*pointer_left), QPoint(*pointer_centre), QPoint(*pointer_right)
 
+    def _raise_invalid_if_required(self):
+        if self._pointer_rect is None:
+            raise InvalidStateError('Error: call from_inner or from_outer first!')
 
 
 def test_expand():

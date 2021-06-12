@@ -3,7 +3,6 @@ from math import ceil, sqrt, floor
 from typing import NamedTuple
 
 from PyQt5.QtCore import QPoint, QRect, QSize
-from PyQt5.QtWidgets import QWidget
 
 
 

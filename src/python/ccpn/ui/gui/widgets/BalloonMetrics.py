@@ -131,6 +131,7 @@ class BalloonMetrics:
 
         self._inner = None
         self._outer = None
+        self._body_rect = None
         self._pointer_rect = None
         self._pointer = None
 
@@ -139,6 +140,7 @@ class BalloonMetrics:
     def reset(self):
         self._inner = None
         self._outer = None
+        self._body_rect = None
         self._pointer_rect = None
         self._pointer = None
 
@@ -159,13 +161,21 @@ class BalloonMetrics:
         return self._inner.translated(translation)
 
     @property
+    def body_rect_viewport(self):
+        self._raise_invalid_if_required()
+
+        translation = self._outer.topLeft() * -1
+
+        return self._body_rect.translated(translation)
+
+    @property
     def pointer_viewport(self):
         self._raise_invalid_if_required()
 
         translation = self._outer.topLeft() * -1
         result = [point + translation for point in self._pointer]
 
-        return result
+        return Pointer(*result)
 
     @property
     def outer(self):
@@ -177,7 +187,13 @@ class BalloonMetrics:
     def inner(self):
         self._raise_invalid_if_required()
 
-        return self._inner
+        return QRect(self._inner)
+
+    @property
+    def body_rect(self):
+        self._raise_invalid_if_required()
+
+        return QRect(self._body_rect)
 
     @property
     def pointer(self):
@@ -482,6 +498,9 @@ def test_reset():
     with pytest.raises(InvalidStateError):
         metrics.pointer
 
+    with pytest.raises(InvalidStateError):
+        metrics.body_rect
+
     metrics.from_outer(QRect(0, 0, 100, 200))
 
     assert metrics.inner is not None
@@ -502,6 +521,28 @@ def test_reset():
 
     with pytest.raises(InvalidStateError):
         metrics.pointer
+
+    with pytest.raises(InvalidStateError):
+        metrics.body_rect
+
+def test_body_rect():
+    test_rect = QRect(QPoint(0, 0), QSize(200, 100))
+    expected = QRect(QPoint(-3, -3), QSize(206, 106))
+
+    expected_local = {
+        Side.TOP: QRect(QPoint(1, 11), QSize(206, 106)),
+        Side.LEFT: QRect(QPoint(11, 1), QSize(206, 106)),
+        Side.BOTTOM: QRect(QPoint(1, 1), QSize(206, 106)),
+        Side.RIGHT: QRect(QPoint(1, 1), QSize(206, 106))
+    }
+
+    for side in Side:
+        metrics = BalloonMetrics(pointer_side=side)
+        metrics.from_inner(test_rect)
+
+        assert expected == metrics.body_rect
+        assert expected_local[side] == metrics.body_rect_viewport
+
 
 def test_pointer_positions():
     test_rect = QRect(QPoint(0, 0), QSize(200, 100))

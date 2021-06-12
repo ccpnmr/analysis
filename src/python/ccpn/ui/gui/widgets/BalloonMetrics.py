@@ -143,6 +143,31 @@ class BalloonMetrics:
         self._pointer_rect = None
         self.pointer = None
 
+    @property
+    def outer_viewport(self):
+        self._raise_invalid_if_required()
+
+        translation = self.outer.topLeft()  * -1
+
+        return self.outer.translated(translation)
+
+    @property
+    def inner_viewport(self):
+        self._raise_invalid_if_required()
+
+        translation = self.outer.topLeft() * -1
+
+        return self.inner.translated(translation)
+
+    @property
+    def pointer_viewport(self):
+        self._raise_invalid_if_required()
+
+        translation = self.outer.topLeft() * -1
+        result = [point + translation for point in self.pointer]
+
+        return result
+
     def _get_corner_margin(self):
         result = self.corner_radius / sqrt(2)
         result = int(ceil(result))
@@ -405,6 +430,18 @@ def test_pointer_rects_from_outer():
 
         assert metrics._pointer_rect == expected
 
+def test_local():
+    test_rect = QRect(QPoint(0, 0), QSize(200, 100))
+    expected_outer = QRect(QPoint(0, 0), QSize(218, 108))
+    expected_inner = QRect(QPoint(4, 4), QSize(200, 100))
+    expected_pointer = [QPoint(207, 44), QPoint(217, 54), QPoint(207, 64)]
+
+    metrics = BalloonMetrics()
+    metrics.from_inner(test_rect)
+
+    assert metrics.outer_viewport == expected_outer
+    assert metrics.inner_viewport == expected_inner
+    assert metrics.pointer_viewport == expected_pointer
 
 def test_reset():
     import pytest

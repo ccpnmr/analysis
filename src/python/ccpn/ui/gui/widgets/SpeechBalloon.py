@@ -84,7 +84,7 @@ class SpeechBalloon(QWidget):
 
     @pyqtProperty(int)
     def cornerRadius(self):
-        return self._metrics._corner_radius
+        return self._metrics.corner_radius
 
     @cornerRadius.setter
     def cornerRadius(self, radius):
@@ -94,7 +94,7 @@ class SpeechBalloon(QWidget):
 
     @pyqtProperty(int)
     def pointerHeight(self):
-        return self._metrics._pointer_height
+        return self._metrics.pointer_height
 
     @pointerHeight.setter
     def pointerHeight(self, height):
@@ -104,7 +104,7 @@ class SpeechBalloon(QWidget):
 
     @pyqtProperty(int)
     def pointerWidth(self):
-        return self._metrics._pointer_width
+        return self._metrics.pointer_width
 
     @pointerWidth.setter
     def pointerWidth(self, width):

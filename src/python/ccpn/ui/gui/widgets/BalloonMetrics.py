@@ -619,7 +619,7 @@ def test_pointer_position():
 def _run_tests():
     import pytest
     # pytest.main(['%s::test_reset' % __file__])
-    pytest.main([__file__])
+    pytest.main([__file__, '-vv'])
 
 if __name__ == '__main__':
     _run_tests()

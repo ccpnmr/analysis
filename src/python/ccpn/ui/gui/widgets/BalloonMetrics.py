@@ -520,20 +520,23 @@ def test_reset():
     import pytest
     metrics = BalloonMetrics()
 
-    with pytest.raises(InvalidStateError):
-        metrics.inner
+    def check_raises():
+        with pytest.raises(InvalidStateError):
+            metrics.inner
 
-    with pytest.raises(InvalidStateError):
-        metrics.outer
+        with pytest.raises(InvalidStateError):
+            metrics.outer
 
-    with pytest.raises(InvalidStateError):
-        metrics.pointer_rect
+        with pytest.raises(InvalidStateError):
+            metrics.pointer_rect
 
-    with pytest.raises(InvalidStateError):
-        metrics.pointer
+        with pytest.raises(InvalidStateError):
+            metrics.pointer
 
-    with pytest.raises(InvalidStateError):
-        metrics.body_rect
+        with pytest.raises(InvalidStateError):
+            metrics.body_rect
+
+    check_raises()
 
     metrics.from_outer(QRect(0, 0, 100, 200))
 
@@ -544,20 +547,7 @@ def test_reset():
 
     metrics.reset()
 
-    with pytest.raises(InvalidStateError):
-        metrics.inner
-
-    with pytest.raises(InvalidStateError):
-        metrics.outer
-
-    with pytest.raises(InvalidStateError):
-        metrics.pointer_rect
-
-    with pytest.raises(InvalidStateError):
-        metrics.pointer
-
-    with pytest.raises(InvalidStateError):
-        metrics.body_rect
+    check_raises()
 
 def test_body_rect():
     test_rect = QRect(QPoint(0, 0), QSize(200, 100))

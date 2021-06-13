@@ -506,7 +506,7 @@ def test_viewport_views():
     test_rect = QRect(QPoint(0, 0), QSize(200, 100))
     expected_outer = QRect(QPoint(0, 0), QSize(218, 108))
     expected_inner = QRect(QPoint(4, 4), QSize(200, 100))
-    expected_pointer = [QPoint(207, 44), QPoint(217, 54), QPoint(207, 64)]
+    expected_pointer = Pointer(QPoint(207, 44), QPoint(217, 54), QPoint(207, 64))
 
     metrics = BalloonMetrics()
     metrics.from_inner(test_rect)

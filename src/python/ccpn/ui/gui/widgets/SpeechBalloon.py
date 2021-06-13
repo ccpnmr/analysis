@@ -87,13 +87,12 @@ class SpeechBalloon(QWidget):
         return result
 
 
-    def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
-
-
-        # self.set_central_widget_geometry()
-        ic('resize before', self.geometry(), self._central_widget.geometry())
-        super(SpeechBalloon, self).resizeEvent(a0)
-        ic('resize after', self.geometry(), self._central_widget.geometry())
+    def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
+        super(SpeechBalloon, self).resizeEvent(event)
+        new_outer = QRect(self.geometry())
+        new_outer.setSize(event.size())
+        self._metrics.from_outer(new_outer)
+        self._central_widget.setGeometry(self._metrics.inner_viewport)
 
     @pyqtProperty(int)
     def cornerRadius(self):
@@ -327,26 +326,6 @@ class SpeechBalloon(QWidget):
 
         return dists
 
-
-
-
-    def setMargins(self):
-        self.layout().setContentsMargins(0, 0, 0, 0)
-        new_margins = self._get_margins()
-        self.layout().setContentsMargins(*new_margins)
-
-    def _get_corner_margins(self, multiplier=1):
-        corner_margin = self._corner_radius / sqrt(2)
-        corner_margin = int(ceil(corner_margin))
-        new_margins = [corner_margin * multiplier, ] * 4
-
-        return new_margins
-
-    def _get_margins(self, multiplier=1):
-        new_margins = self._get_corner_margins(multiplier)
-        new_margins[self._pointer_side] += (self._pointer_height * multiplier)
-        return new_margins
-
     def leaveEvent(self, a0: QtCore.QEvent) -> None:
         if self._owner:
             self._owner.leaveEvent(a0)
@@ -412,6 +391,7 @@ class DoubleLabel(QFrame):
 
         self._labels[LEFT_LABEL].setFixedWidth(width)
         self._labels[RIGHT_LABEL].setFixedWidth(width)
+        self.updateGeometry()
 
     def setLabels(self, text):
         if len(text) not in (1, 2):
@@ -432,6 +412,7 @@ class DoubleLabel(QFrame):
             self.setLabelText(MIDDLE_LABEL, self._separator)
             self.setLabelText(RIGHT_LABEL, text[1])
 
+        self.updateGeometry()
 
     @staticmethod
     def _check_widget_index(widget_id):

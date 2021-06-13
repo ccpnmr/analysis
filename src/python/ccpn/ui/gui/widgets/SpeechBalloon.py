@@ -8,25 +8,13 @@ from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QBrush, QPolygon, 
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QFrame
 
 from BalloonMetrics import Side, BalloonMetrics, OPPOSITE_SIDES
+from ccpn.core.lib.ContextManagers import AntiAliasedPaintContext
 
 DEFAULT_SEPARATOR = '|'
 
 LEFT_LABEL = 0
 MIDDLE_LABEL = 1
 RIGHT_LABEL = 2
-
-
-class PaintContext:
-    def __init__(self, painter):
-        self._painter = painter
-
-    def __enter__(self):
-        return self._painter
-
-    def __exit__(self, *args):
-        self._painter.end()
-        return True
-
 
 class MyApplication(QApplication):
     def __init__(self, arg):
@@ -151,10 +139,7 @@ class SpeechBalloon(QWidget):
 
         painterPath = self.window_path()
 
-        with PaintContext(QPainter(self)) as painter:
-
-            painter.setRenderHint(QPainter.Antialiasing, True)
-            painter.setRenderHint(QPainter.HighQualityAntialiasing, True)
+        with AntiAliasedPaintContext(QPainter(self)) as painter:
 
             pal = self.palette()
             fgColor = pal.color(QPalette.Active, QPalette.Text)
@@ -192,10 +177,7 @@ class SpeechBalloon(QWidget):
 
         pixmap = QPixmap(int(path.boundingRect().width() + 2), int(path.boundingRect().height() + 2))
 
-        with PaintContext(QPainter(pixmap)) as painter:
-
-            painter.setRenderHint(QPainter.Antialiasing)
-            painter.setRenderHint(QPainter.HighQualityAntialiasing)
+        with AntiAliasedPaintContext(QPainter(pixmap)) as painter:
 
             brush = QBrush(QColor('white'))
             painter.fillRect(pixmap.rect(), brush)

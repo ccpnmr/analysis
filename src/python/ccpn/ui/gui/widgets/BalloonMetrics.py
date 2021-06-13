@@ -184,25 +184,49 @@ class BalloonMetrics:
     def outer(self):
         self._raise_invalid_if_required()
 
-        return QRect(self._outer)
+        result = QRect(self._outer)
+
+        return self._translate_to_pointer(result)
+
+
+    def _global_pointer_offset(self):
+        result = QPoint()
+        if self.pointer_position:
+            result = self.pointer_position - self._pointer.top
+        return result
+
+    def _translate_to_pointer(self, rect: QRect):
+        pointer_offset = self._global_pointer_offset()
+
+        rect.translate(pointer_offset)
+
+        return rect
 
     @property
     def inner(self):
         self._raise_invalid_if_required()
 
-        return QRect(self._inner)
+        result = QRect(self._inner)
+
+        return self._translate_to_pointer(result)
 
     @property
     def body_rect(self):
         self._raise_invalid_if_required()
 
-        return QRect(self._body_rect)
+        result = QRect(self._body_rect)
+
+        return self._translate_to_pointer(result)
 
     @property
     def pointer(self):
         self._raise_invalid_if_required()
 
-        return self._pointer
+        offset = self._global_pointer_offset()
+        ic(offset)
+        points = [QPoint(point) + offset for point in self._pointer]
+
+        return Pointer(*points)
 
     @property
     def pointer_rect(self):
@@ -370,7 +394,7 @@ class BalloonMetrics:
         pointer_right[pointer_axis] = bottom
         pointer_right[range_axis] = int(right)
 
-        self._pointer = QPoint(*pointer_left), QPoint(*pointer_centre), QPoint(*pointer_right)
+        self._pointer = Pointer(QPoint(*pointer_left), QPoint(*pointer_centre), QPoint(*pointer_right))
 
     def _raise_invalid_if_required(self):
         if self._pointer_rect is None:
@@ -582,6 +606,25 @@ def test_pointer_positions():
 
         assert expected == metrics.pointer
 
+
+def test_pointer_position():
+
+    test_rect = QRect(QPoint(0, 0), QSize(200, 100))
+
+    expected_pointer = Pointer(QPoint(90, 90), QPoint(100, 100), QPoint(90, 110))
+    expected_outer = QRect(QPoint(-117, 46), QSize(218, 108))
+    expected_inner = QRect(QPoint(-113, 50), QSize(200, 100))
+    expected_body = QRect(QPoint(-116, 47), QSize(206, 106))
+
+    metrics = BalloonMetrics()
+    metrics.from_inner(test_rect)
+    metrics.pointer_position = QPoint(100,100)
+    ic(metrics.pointer)
+    ic(metrics.body_rect)
+    assert expected_pointer == metrics.pointer
+    assert expected_outer == metrics.outer
+    assert expected_inner == metrics.inner
+    assert expected_body == metrics.body_rect
 
 def _run_tests():
     import pytest

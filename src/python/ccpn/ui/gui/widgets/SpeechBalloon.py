@@ -2,12 +2,12 @@ import sys
 from math import sqrt, ceil
 
 from PyQt5 import QtGui, QtCore
-from PyQt5.QtCore import QRectF, Qt, QRect, QPoint, pyqtProperty, QTimer
+from PyQt5.QtCore import QRectF, Qt, QRect, QPoint, pyqtProperty, QTimer, QEvent, QSize
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QBrush, QPolygon, QPolygonF, QPixmap, QPalette, QCursor, \
     QFontMetrics
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QLayout, QFrame
 
-from BalloonMetrics import Side
+from BalloonMetrics import Side, BalloonMetrics
 
 # from typing import NamedTuple
 
@@ -18,6 +18,13 @@ LEFT_LABEL = 0
 MIDDLE_LABEL = 1
 RIGHT_LABEL = 2
 
+
+OPPOSITE_SIDES = {
+    Side.TOP: Side.BOTTOM,
+    Side.RIGHT: Side.LEFT,
+    Side.BOTTOM: Side.TOP,
+    Side.LEFT: Side.RIGHT
+}
 
 class PaintContext:
     def __init__(self, painter):
@@ -74,11 +81,11 @@ class SpeechBalloon(QWidget):
         self.setWindowFlags(flags)
         self.setAttribute(Qt.WA_NoSystemBackground)
 
-        layout = QGridLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.setSizeConstraint(QLayout.SetFixedSize)
-        self.setLayout(layout)
+        # layout = QGridLayout()
+        # layout.setContentsMargins(0, 0, 0, 0)
+        # layout.setSpacing(0)
+        # layout.setSizeConstraint(QLayout.SetFixedSize)
+        # self.setLayout(layout)
 
         self._pointer_height = 10
         self._pointer_width = 20
@@ -92,7 +99,38 @@ class SpeechBalloon(QWidget):
 
         self._owner = owner
 
-        self.setMargins()
+        self._central_widget:QWidget = None
+
+        # self.setMargins()
+
+    def event(self, e: QtCore.QEvent) -> bool:
+        if e.type() == QEvent.LayoutRequest:
+            ic('got layout')
+            ic(self.geometry(),self._central_widget.geometry())
+            self._layout()
+            result = True
+        else:
+            result = super(SpeechBalloon, self).event(e)
+
+        if e.type() == QEvent.LayoutRequest:
+            ic('after layout')
+            ic(self.geometry(),self._central_widget.geometry())
+
+        return result
+
+    # def get_central_widget_geometry(self):
+    #     result = QSize(self._central_widget.sizeHint())
+    #     if self._central_widget
+    #
+
+
+    def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
+
+
+        # self.set_central_widget_geometry()
+        ic('resize before', self.geometry(), self._central_widget.geometry())
+        super(SpeechBalloon, self).resizeEvent(a0)
+        ic('resize after', self.geometry(), self._central_widget.geometry())
 
     @pyqtProperty(int)
     def cornerRadius(self):
@@ -130,8 +168,6 @@ class SpeechBalloon(QWidget):
         self._pointer_side = side
         self._metrics.pointer_side = side
         self._metrics.reset()
-        self.layout().setContentsMargins(*self._get_margins())
-        self.layout().activate()
         self.update()
 
     @pyqtProperty(float)
@@ -214,25 +250,47 @@ class SpeechBalloon(QWidget):
         return pointer_pos - self.pos()
 
     def move_pointer_to(self, pos):
-        offset = self._pointer_offset()
 
-        self.setGeometry(QRect(pos - offset, self.geometry().size()))
+        self._metrics.pointer_position = pos
+
+        self.setGeometry(self._metrics.outer)
 
     def setCentralWidget(self, central_widget):
 
-        self.layout().addWidget(central_widget, 0, 0)
+        self._central_widget = central_widget
 
-        # otherwise geometry isn't known when the window is shown on osx
-        # and you get the message 'qt.qpa.cocoa.window: Window position outside any known screen, using primary screen'
-        # https://stackoverflow.com/questions/541 7201/qt-place-new-window-correctly-on-screen-center-\
-        # over-mouse-move-into-screen
-        self.layout().activate()
+        self._central_widget.setParent(self)
+        self._central_widget.show()
+
 
 
     def centralWidget(self):
-        children = [child for child in self.children() if isinstance(child, QWidget)]
-        result = children[0] if len(children) else None
+        return self._central_widget
+
+    def _central_widget_size(self):
+        result = self._central_widget.sizeHint()
+        if self._central_widget.minimumWidth() == self._central_widget.maximumWidth():
+            result.setWidth(self._central_widget.minimumWidth())
+        if self._central_widget.minimumHeight() == self._central_widget.maximumHeight():
+            result.setHeight(self._central_widget.minimumHeight())
         return result
+
+    def _layout(self):
+
+
+        self._metrics.from_inner(QRect(QPoint(0, 0), self._central_widget_size()))
+
+        self.setGeometry(self._metrics.outer)
+
+        self._central_widget.setGeometry(self._metrics.inner_viewport)
+
+        ic(self.geometry())
+
+    def show(self):
+        self._central_widget.show()
+        super(SpeechBalloon, self).show()
+        self._layout()
+
 
     def showAt(self, screen, side_pos_alternatives):
 
@@ -241,34 +299,40 @@ class SpeechBalloon(QWidget):
         #     ic(self._get_side_preferences(screen, side, pos))
 
         side, pointer_pos = side_pos_alternatives[0]
-        margins = self._get_margins()
-        size_hint = self.centralWidget().sizeHint()
 
-        geometry = QRect()
-        geometry.setSize(size_hint)
+        self._metrics.pointer_side = OPPOSITE_SIDES[side]
+        self._layout()
+        self._metrics.pointer_position = pointer_pos
 
 
-        geometry.adjust(*margins)
-        pointer_pos_on_geometry = self._get_pointer_position(geometry, on_border=True)
-
-        offset = pointer_pos - pointer_pos_on_geometry
-
-        geometry.translate(offset.x(), offset.y())
-
-        #  there's an error in the layout...
-        # these are approximately correct till we correct it
-        CORRECTIONS = {
-            Side.BOTTOM: (-1, -1),
-            Side.RIGHT: (-1, -1),
-            Side.TOP: (-1, 0),
-            Side.LEFT: (0, -1)
-        }
-
-        correction = CORRECTIONS[self._pointer_side]
-        scale = self._get_corner_margins()[0] + 1
-        geometry.translate(scale * correction[0], scale * correction[1])
-
-        self.setGeometry(geometry)
+        # margins = self._get_margins()
+        # size_hint = self.centralWidget().sizeHint()
+        #
+        # geometry = QRect()
+        # geometry.setSize(size_hint)
+        #
+        #
+        # geometry.adjust(*margins)
+        # pointer_pos_on_geometry = self._get_pointer_position(geometry, on_border=True)
+        #
+        # offset = pointer_pos - pointer_pos_on_geometry
+        #
+        # geometry.translate(offset.x(), offset.y())
+        #
+        # #  there's an error in the layout...
+        # # these are approximately correct till we correct it
+        # CORRECTIONS = {
+        #     Side.BOTTOM: (-1, -1),
+        #     Side.RIGHT: (-1, -1),
+        #     Side.TOP: (-1, 0),
+        #     Side.LEFT: (0, -1)
+        # }
+        #
+        # correction = CORRECTIONS[self._pointer_side]
+        # scale = self._get_corner_margins()[0] + 1
+        # geometry.translate(scale * correction[0], scale * correction[1])
+        #
+        # self.setGeometry(geometry)
 
         self.show()
 

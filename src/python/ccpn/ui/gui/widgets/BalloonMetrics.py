@@ -223,7 +223,7 @@ class BalloonMetrics:
         self._raise_invalid_if_required()
 
         offset = self._global_pointer_offset()
-        ic(offset)
+
         points = [QPoint(point) + offset for point in self._pointer]
 
         return Pointer(*points)
@@ -609,8 +609,7 @@ def test_pointer_position():
     metrics = BalloonMetrics()
     metrics.from_inner(test_rect)
     metrics.pointer_position = QPoint(100,100)
-    ic(metrics.pointer)
-    ic(metrics.body_rect)
+
     assert expected_pointer == metrics.pointer
     assert expected_outer == metrics.outer
     assert expected_inner == metrics.inner

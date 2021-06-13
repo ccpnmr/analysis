@@ -346,7 +346,7 @@ class BalloonMetrics:
             range_right = max_right - pointer_width_2
 
             centre_range = range_right - range_left
-            centre = range_left + int(floor(centre_range * self.pointer_position))
+            centre = range_left + int(floor(centre_range * self.pointer_alignment))
 
             left = centre - pointer_width_2
             right = centre + pointer_width_2
@@ -577,7 +577,7 @@ def test_pointer_positions():
     for (percentage, side), expected in expected.items():
 
         metrics = BalloonMetrics(pointer_side=side)
-        metrics.pointer_position = percentage
+        metrics.pointer_alignment = percentage
         metrics.from_inner(test_rect)
 
         assert expected == metrics.pointer

@@ -18,13 +18,6 @@ MIDDLE_LABEL = 1
 RIGHT_LABEL = 2
 
 
-OPPOSITE_SIDES = {
-    Side.TOP: Side.BOTTOM,
-    Side.RIGHT: Side.LEFT,
-    Side.BOTTOM: Side.TOP,
-    Side.LEFT: Side.RIGHT
-}
-
 class PaintContext:
     def __init__(self, painter):
         self._painter = painter

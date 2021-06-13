@@ -9,8 +9,7 @@ from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QLayout,
 
 from BalloonMetrics import Side, BalloonMetrics
 
-# from typing import NamedTuple
-
+from BalloonMetrics import Side, BalloonMetrics, OPPOSITE_SIDES
 
 DEFAULT_SEPARATOR = '|'
 

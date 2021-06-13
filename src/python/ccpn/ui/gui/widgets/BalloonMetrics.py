@@ -70,6 +70,14 @@ class Side(IntEnum):
     BOTTOM = 3
 
 
+OPPOSITE_SIDES = {
+    Side.TOP: Side.BOTTOM,
+    Side.RIGHT: Side.LEFT,
+    Side.BOTTOM: Side.TOP,
+    Side.LEFT: Side.RIGHT
+}
+
+
 def _qrect_get_side(rect: QRect, side: Side) -> int:
     if side == Side.TOP:
         result = rect.top()

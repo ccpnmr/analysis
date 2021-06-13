@@ -5,9 +5,7 @@ from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import QRectF, Qt, QRect, QPoint, pyqtProperty, QTimer, QEvent, QSize
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QBrush, QPolygon, QPolygonF, QPixmap, QPalette, QCursor, \
     QFontMetrics
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QLayout, QFrame
-
-from BalloonMetrics import Side, BalloonMetrics
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QFrame
 
 from BalloonMetrics import Side, BalloonMetrics, OPPOSITE_SIDES
 
@@ -44,15 +42,6 @@ class MyApplication(QApplication):
         if window:
             window.move_pointer_to(pos)
 
-
-# class Pointer(IntEnum):
-#     LEFT = 0
-#     MIDDLE = 1
-#     RIGHT = 2
-
-
-
-
 class SpeechBalloon(QWidget):
     r""" Popover window class
         inspired by but not sharing any code with FUKIDASHI
@@ -87,27 +76,15 @@ class SpeechBalloon(QWidget):
 
         self._central_widget:QWidget = None
 
-        # self.setMargins()
 
-    def event(self, e: QtCore.QEvent) -> bool:
-        if e.type() == QEvent.LayoutRequest:
-            ic('got layout')
-            ic(self.geometry(),self._central_widget.geometry())
+    def event(self, event: QtCore.QEvent) -> bool:
+        if event.type() == QEvent.LayoutRequest:
             self._layout()
             result = True
         else:
-            result = super(SpeechBalloon, self).event(e)
-
-        if e.type() == QEvent.LayoutRequest:
-            ic('after layout')
-            ic(self.geometry(),self._central_widget.geometry())
+            result = super(SpeechBalloon, self).event(event)
 
         return result
-
-    # def get_central_widget_geometry(self):
-    #     result = QSize(self._central_widget.sizeHint())
-    #     if self._central_widget
-    #
 
 
     def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
@@ -275,8 +252,6 @@ class SpeechBalloon(QWidget):
 
         self._central_widget.setGeometry(self._metrics.inner_viewport)
 
-        ic(self.geometry())
-
     def show(self):
         self._central_widget.show()
         super(SpeechBalloon, self).show()
@@ -332,8 +307,6 @@ class SpeechBalloon(QWidget):
     def _get_screen_side(screen, side):
         screen_rect = screen.availableGeometry()
 
-        # TODO: sides are in a strange order should be top left bottom right
-        # TODO: add side selection by x and y into Side also opposites
         screen_coords = [screen_rect.top(), screen_rect.left(),
                          screen_rect.right(), screen_rect.bottom()]
 

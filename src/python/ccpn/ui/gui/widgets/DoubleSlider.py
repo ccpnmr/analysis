@@ -1419,7 +1419,7 @@ class PopoverButton(QToolButton):
 
         chosen_screen = self._get_max_screen()
 
-        pointer_side = self._speech_balloon._pointer_side
+        pointer_side = self._speech_balloon.pointerSide
         window_side = OPPOSITE_SIDES[pointer_side]
 
         sides = [window_side, pointer_side]

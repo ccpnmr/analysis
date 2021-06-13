@@ -73,20 +73,14 @@ class SpeechBalloon(QWidget):
         self.setWindowFlags(flags)
         self.setAttribute(Qt.WA_NoSystemBackground)
 
-        # layout = QGridLayout()
-        # layout.setContentsMargins(0, 0, 0, 0)
-        # layout.setSpacing(0)
-        # layout.setSizeConstraint(QLayout.SetFixedSize)
-        # self.setLayout(layout)
-
-        self._pointer_height = 10
-        self._pointer_width = 20
-        self._pointer_side = side
         self._metrics = BalloonMetrics()
 
-        self._percentage = percentage / 100.0
+        self._metrics.pointer_height = 10
+        self._metrics.pointer_width = 20
+        self._metrics.pointer_side = side
+        self._metrics.alignment = percentage / 100.0
+        self._metrics.corner_radius = 3
 
-        self._corner_radius = 3
         self._pen_width = 0
 
         self._owner = owner
@@ -126,49 +120,52 @@ class SpeechBalloon(QWidget):
 
     @pyqtProperty(int)
     def cornerRadius(self):
-        return self._corner_radius
+        return self._metrics._corner_radius
 
     @cornerRadius.setter
     def cornerRadius(self, radius):
-        self._corner_radius = radius
+        self._metrics.corner_radius = radius
+        self._metrics.reset()
         self.update()
 
     @pyqtProperty(int)
     def pointerHeight(self):
-        return self._pointer_height
+        return self._metrics._pointer_height
 
     @pointerHeight.setter
     def pointerHeight(self, height):
-        self._pointer_height = height
+        self._metrics.pointer_height = height
+        self._metrics.reset()
         self.update()
 
     @pyqtProperty(int)
     def pointerWidth(self):
-        return self._pointer_width
+        return self._metrics._pointer_width
 
     @pointerWidth.setter
     def pointerWidth(self, width):
-        self._pointer_width = width
+        self._metrics.pointer_width = width
+        self._metrics.reset()
         self.update()
 
     @pyqtProperty(Side)
     def pointerSide(self):
-        return self._pointer_side
+        return self._metrics.pointer_side
 
     @pointerSide.setter
     def pointerSide(self, side):
-        self._pointer_side = side
         self._metrics.pointer_side = side
         self._metrics.reset()
         self.update()
 
     @pyqtProperty(float)
-    def pointerSideOffset(self):
-        return self._percentage
+    def pointerAlignment(self):
+        return self._metrics.pointer_alignment
 
-    @pointerSideOffset.setter
-    def pointerSideOffset(self, percentage):
-        self._percentage = percentage
+    @pointerAlignment.setter
+    def pointerAlignment(self, alignment):
+        self.metrics.pointer_alignment = alignment
+        self._metrics.reset()
         self.update()
 
 
@@ -198,12 +195,14 @@ class SpeechBalloon(QWidget):
 
     def window_path(self):
 
-        self._metrics.pointer_side = self._pointer_side
+        self._metrics.pointer_side = self.pointerSide
 
         self._metrics.from_outer(self.frameGeometry())
 
         path = QPainterPath()
-        path.addRoundedRect(QRectF(self._metrics.body_rect_viewport), self._corner_radius, self._corner_radius)
+
+        corner_radius = self._metrics.corner_radius
+        path.addRoundedRect(QRectF(self._metrics.body_rect_viewport), corner_radius, corner_radius)
 
         pointer_polygon = QPolygonF(QPolygon(self._metrics.pointer_viewport))
         path.addPolygon(pointer_polygon)

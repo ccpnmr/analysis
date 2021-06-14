@@ -31,7 +31,7 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC, checkPathForDataLoader
 from ccpn.util.Path import aPath
 
-from ccpn.util.traits.CcpNmrTraits import Bool, List
+from ccpn.util.traits.CcpNmrTraits import Bool, List, Int
 
 
 class DirectoryDataLoader(DataLoaderABC):
@@ -45,6 +45,7 @@ class DirectoryDataLoader(DataLoaderABC):
 
     recursive = Bool(default_value=False).tag(info='Flag to define recursive behavior')
     dataLoaders = List(default_value=[]).tag(info='List with dataLoader instances for the files of the directory "path"')
+    count = Int(default_value=0).tag('Count of number of dataLoaders including the recursive ones')
 
     @classmethod
     def checkForValidFormat(cls, path):
@@ -55,7 +56,7 @@ class DirectoryDataLoader(DataLoaderABC):
             return None
         if not _path.is_dir():
             return None
-        # assume that all is good now
+        # assume that all is good for now
         instance = cls(path)
         return instance
 
@@ -67,7 +68,7 @@ class DirectoryDataLoader(DataLoaderABC):
         result = []
         try:
             for dataLoader in self.dataLoaders:
-                objs = dataLoader.load()
+                objs = dataLoader.load()  # This will automatically recurse
                 result.extend(objs)
         except Exception as es:
             raise RuntimeError('Error loading files from "%s"' % self.path)
@@ -82,6 +83,7 @@ class DirectoryDataLoader(DataLoaderABC):
         """
         super().__init__(path=path)
         self.recursive = recursive
+        self.count = 0
 
         # scan all the files in the directory, skipping dotted files and only processing directories
         # if recursion is True
@@ -89,19 +91,28 @@ class DirectoryDataLoader(DataLoaderABC):
             dataLoader = None
             if f.name.startswith("."):  # Exclude dotted-files
                 pass
+
             elif f.is_dir() and self.recursive: # get directories if recursive is True
                 dataLoader = DirectoryDataLoader(path=f, recursive=recursive, filterForDataFormats=filterForDataFormats)
-                if dataLoader is not None and len(dataLoader.dataLoaders) == 0:
-                    # No loadable files found; may as well not add to the list to reduce overhead on load()
-                    dataLoader = None
-            else:
-                dataLoader = checkPathForDataLoader(f)
-
-            if dataLoader is not None:
-                if filterForDataFormats is not None and dataLoader.dataFormat not in filterForDataFormats:
-                    # we are filtering and this dataLoader is not for a desired format
-                    pass
-                else:
+                if dataLoader is not None and len(dataLoader) > 0:
+                    # Loadable files were found
+                    self.count += len(dataLoader)
                     self.dataLoaders.append(dataLoader)
+
+            elif not f.is_dir():
+                # "f" is a file: check if it is of a recognisable dataFormat
+                dataLoader = checkPathForDataLoader(f)
+                if dataLoader is not None:
+                    if filterForDataFormats is not None and \
+                       len(filterForDataFormats) > 0 and \
+                       dataLoader.dataFormat not in filterForDataFormats:
+                        # we are filtering and this dataLoader is not for a desired format
+                        pass
+                    else:
+                        self.dataLoaders.append(dataLoader)
+                        self.count += 1
+
+    def __len__(self):
+        return self.count
 
 DirectoryDataLoader._registerFormat()

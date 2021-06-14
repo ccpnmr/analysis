@@ -1894,9 +1894,8 @@ class Framework(NotifierBase):
         :param filter:
         :param askBeforeOpen_lenght: how many spectra can open without asking first
         """
-        from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader, getDataLoaders
-        _loaders = getDataLoaders() # just a dummy to import
         from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
+        from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
         if paths is None:
             # if self.preferences.general.useNative:
@@ -1912,16 +1911,21 @@ class Framework(NotifierBase):
             return
 
         spectrumLoaders = []
+        count = 0
         # Recursively search all paths
         for path in paths:
             _path = Path.aPath(path)
-            for p in _path.glob('*'):
-                if p.name.startswith('.'):
-                    pass
-                elif (sLoader:= SpectrumDataLoader.checkForValidFormat(p)) is not None:
-                    spectrumLoaders.append(sLoader)
+            if _path.is_dir():
+                dirLoader = DirectoryDataLoader(path, recursive=True,
+                                                filterForDataFormats=(SpectrumDataLoader.dataFormat,))
+                spectrumLoaders.append(dirLoader)
+                count += len(dirLoader)
 
-        if len(spectrumLoaders) > askBeforeOpen_lenght:
+            elif (sLoader:= SpectrumDataLoader.checkForValidFormat(path)) is not None:
+                spectrumLoaders.append(sLoader)
+                count += 1
+
+        if count > askBeforeOpen_lenght:
             okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (%d).'
                                                                ' Do you want to open all?' % len(spectrumLoaders))
             if not okToOpenAll:
@@ -1945,7 +1949,7 @@ class Framework(NotifierBase):
                 getLogger().warning('Unable to load "%s"' % path)
 
             elif dataLoader.createsNewProject:
-                newProject = dataLoader.load()[0]
+                newProject = self.loadProject(path)
                 objs.append(newProject)
 
             else:

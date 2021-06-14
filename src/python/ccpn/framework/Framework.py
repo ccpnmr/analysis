@@ -145,6 +145,9 @@ sys.excepthook = _ccpnExceptionhook
 
 
 def _strList(inlist: list, maxlen: int = 80) -> list:
+    #TODO: do not put a private method in the top of the file of the most important class of the whole programme
+    # GWV: What does this do; should be a library function!! Only used in printCreditsText --> Make a credits.py file
+    # (like in the 'sandbox' code)
     outstr = ''
     # skip = False  # print commas and ampersand
     lencount = maxlen
@@ -315,6 +318,7 @@ class AutoBackup(Thread):
     def run(self):
         self.startTime = time()
         while True:
+            waitTime = None
             if not self.q.empty():
                 waitTime = self.q.get()
             if waitTime is None:
@@ -428,7 +432,7 @@ class Framework(NotifierBase):
 
     @property
     def hasGui(self) -> bool:
-        "Return True if application has a gui"
+        """Return True if application has a gui"""
         return isinstance(self.ui, Gui)
 
     def _testShortcuts0(self):
@@ -862,6 +866,7 @@ class Framework(NotifierBase):
                     # move to the correct place in the widget - check stripDirection to display as row or column
                     if spectrumDisplay.stripArrangement == 'Y':
 
+                        #TODO: remove unreachable code
                         if True:  # tilePosition is None:
                             spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
                             strip.tilePosition = (0, si)
@@ -1101,7 +1106,6 @@ class Framework(NotifierBase):
     #     getLogger().debug2('command=%s, echoBlocking=%s, undo.blocking=%s'
     #                        % (command, self._echoBlocking, undo.blocking))
 
-    # #TODO:TJ: Why is this a private method; it is and should be used all over the code?
     # def _endCommandBlock(self):
     #     """End block for command echoing,
     #
@@ -1592,11 +1596,11 @@ class Framework(NotifierBase):
                                                                  phrase='create a new')
             if okToContinue:
                 self.ui.mainWindow.moduleArea._closeAll()
-                project = self.newProject()
-                if project is None:
+                newProject = self.newProject()
+                if newProject is None:
                     raise RuntimeError('Unable to create new project')
-                project._mainWindow.show()
-                QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+                newProject._mainWindow.show()
+                QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
 
     #@logCommand('application.') #cannot do, as project is not there yet
     def newProject(self, name='default'):
@@ -3473,8 +3477,8 @@ if __name__ == '__main__':
     # from sandbox.Geerten.Refactored.framework import Framework
     # from sandbox.Geerten.Refactored.programArguments import Arguments
 
-    from ccpn.framework.Framework import Framework
-    from ccpn.framework.Framework import Arguments
+    # from ccpn.framework.Framework import Framework
+    # from ccpn.framework.Framework import Arguments
 
 
     _makeMainWindowVisible = False

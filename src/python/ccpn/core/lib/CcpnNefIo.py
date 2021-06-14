@@ -1897,7 +1897,7 @@ class CcpnNefReader(CcpnNefContent):
     verifiers = {}
     renames = {}
 
-    def __init__(self, application: str, specificationFile: str = None, mode: str = 'standard',
+    def __init__(self, application, specificationFile: str = None, mode: str = 'standard',
                  testing: bool = False):
 
         self.application = application

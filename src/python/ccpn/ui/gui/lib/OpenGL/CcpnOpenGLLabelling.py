@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-20 19:34:35 +0100 (Thu, May 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-14 19:17:57 +0100 (Mon, June 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1983,6 +1983,8 @@ class GL1dLabelling():
             indexing.vertexStart = 0
 
             pls = self.objectList(objListView)
+            if not pls:
+                return
 
             listCol = getAutoColourRgbRatio(objListView.symbolColour or GLDefs.DEFAULTCOLOUR, pls.spectrum,
                                             self.autoColour,

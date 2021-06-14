@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 14:27:27 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-14 19:17:57 +0100 (Mon, June 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1365,7 +1365,9 @@ class Project(AbstractWrapperObject):
                 #TODO:RASMUS: Undefined return type
                 _loadedData = []
                 for path in paths:
-                    _loadedData += self.loadData(path)
+                    _data = self.loadData(path)
+                    if _data:
+                        _loadedData += _data
                 return _loadedData
 
             elif not os.path.exists(usePath):

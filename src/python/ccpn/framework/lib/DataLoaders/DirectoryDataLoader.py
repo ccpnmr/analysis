@@ -28,8 +28,10 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
+from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC, checkPathForDataLoader
 from ccpn.util.Path import aPath
+
+from ccpn.util.traits.CcpNmrTraits import Bool, List
 
 
 class DirectoryDataLoader(DataLoaderABC):
@@ -41,40 +43,65 @@ class DirectoryDataLoader(DataLoaderABC):
     allowDirectory = True  # Can/Can't open a directory
     createsNewProject = False
 
+    recursive = Bool(default_value=False).tag(info='Flag to define recursive behavior')
+    dataLoaders = List(default_value=[]).tag(info='List with dataLoader instances for the files of the directory "path"')
+
     @classmethod
     def checkForValidFormat(cls, path):
         """check if valid format corresponding to dataFormat
         :return: None or instance of the class
         """
-        _path = aPath(path)
-        if not _path.exists():
+        if (_path := cls.checkPath(path)) is None:
             return None
         if not _path.is_dir():
             return None
-        else:
-            instance = cls(path)
-            return instance
+        # assume that all is good now
+        instance = cls(path)
+        return instance
 
     def load(self):
         """The actual loading method;
         raises RunTimeError on error
         :return: a list of [object(s)] representing the directory
         """
-        filesToLoad = [str(f) for f in self.files]
+        result = []
         try:
-            result = self.application.loadData(*filesToLoad)
+            for dataLoader in self.dataLoaders:
+                objs = dataLoader.load()
+                result.extend(objs)
         except Exception as es:
             raise RuntimeError('Error loading files from "%s"' % self.path)
         return result
 
-    def __init__(self, path):
+    def __init__(self, path, recursive: bool = False, filterForDataFormats: (tuple,list) = None):
+        """
+        Initialise the DirectoryLoader instance
+        :param path: directory path
+        :param recursive: Recursively include subdirectories
+        :param filterForDataFormats: Only include defined dataFormats
+        """
         super().__init__(path=path)
+        self.recursive = recursive
 
-        # get all the files in the directory
-        self.files = []
+        # scan all the files in the directory, skipping dotted files and only processing directories
+        # if recursion is True
         for f in self.path.glob('*'):
-            f = aPath(f)
-            if not f.is_dir() and not f.name.startswith("."):  # Exclude directories and dotted-files
-                self.files.append(f)
+            dataLoader = None
+            if f.name.startswith("."):  # Exclude dotted-files
+                pass
+            elif f.is_dir() and self.recursive: # get directories if recursive is True
+                dataLoader = DirectoryDataLoader(path=f, recursive=recursive, filterForDataFormats=filterForDataFormats)
+                if dataLoader is not None and len(dataLoader.dataLoaders) == 0:
+                    # No loadable files found; may as well not add to the list to reduce overhead on load()
+                    dataLoader = None
+            else:
+                dataLoader = checkPathForDataLoader(f)
+
+            if dataLoader is not None:
+                if filterForDataFormats is not None and dataLoader.dataFormat not in filterForDataFormats:
+                    # we are filtering and this dataLoader is not for a desired format
+                    pass
+                else:
+                    self.dataLoaders.append(dataLoader)
 
 DirectoryDataLoader._registerFormat()

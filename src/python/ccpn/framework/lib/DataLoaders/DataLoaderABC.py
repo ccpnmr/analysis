@@ -2,7 +2,7 @@
 This module defines the data loading mechanism.
 
 Loader instances have all the information regarding a particular data type
-(e.g. a ccpn project, a NEF file, a PDB file, etc. and include a hander function to to the actual
+(e.g. a ccpn project, a NEF file, a PDB file, etc. and include a load() function to to the actual
 work of loading the data into the project.
 """
 
@@ -52,7 +52,6 @@ SPARKYFILE = 'sparkyFile'
 PDBFILE = 'pdbFile'
 EXCELFILE = 'excelFile'
 
-SPECTRUM = 'Spectrum'
 
 def getDataLoaders():
     """Get data loader classes

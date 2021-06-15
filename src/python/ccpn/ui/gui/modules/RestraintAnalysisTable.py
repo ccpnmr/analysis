@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-09 18:50:23 +0100 (Wed, June 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-15 16:04:16 +0100 (Tue, June 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -298,7 +298,7 @@ class RestraintAnalysisTableWidget(GuiTable):
     # groups are always max->min
     applySortToGroups = False
 
-    PRIMARYCOLUMN = 'Peak'  # column holding active objects
+    PRIMARYCOLUMN = '_object'  # column holding active objects (pids for this table)
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, multiSelect=True,
                  actionCallback=None, selectionCallback=None, **kwds):
@@ -472,9 +472,6 @@ class RestraintAnalysisTableWidget(GuiTable):
 
         # multiselection table will return a list of objects
         objs = data[CallBack.OBJECT]
-
-        # print(f'>>> _actionCallback  {objs}')
-
         if not objs:
             return
         if isinstance(objs, (tuple, list)):
@@ -502,7 +499,6 @@ class RestraintAnalysisTableWidget(GuiTable):
         set as current the selected peaks on the table
         """
         peaks = data[CallBack.OBJECT]
-
         if peaks is None:
             self.current.clearPeaks()
             self.current.clearRestraints()
@@ -648,7 +644,8 @@ class RestraintAnalysisTableWidget(GuiTable):
                 uniqObjs = set(selection)
 
                 _peakObjects = tuple(_getValueByHeader(row, 3) for row in self._dataFrameObject.objects)
-                rows = [self._dataFrameObject.find(self, str(obj.pid), column='Peak', multiRow=True) for obj in uniqObjs if obj in _peakObjects]
+                rows = [self._dataFrameObject.find(self, str(obj.pid), column='_object', multiRow=True) for obj in uniqObjs]
+                        # if obj in _peakObjects and obj.peakList == self._selectedPeakList]
                 rows = [row for row in set(makeIterableList(rows)) if row is not None]
                 if rows:
                     rows.sort(key=lambda c: int(c))
@@ -820,7 +817,7 @@ class RestraintAnalysisTableWidget(GuiTable):
             # allPks = pd.DataFrame([(pk.serial, pk, None)  for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['Peak', '_object', 'Expand'])
             allPkSerials = pd.DataFrame([pk.serial for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakSerial', ])
             index = pd.DataFrame([ii for ii in range(1, len(allPkSerials) + 1)], columns=['index', ])
-            allPks = pd.DataFrame([(pk.serial, pk, self._downIcon) for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakSerial', '_object', 'Expand'])
+            allPks = pd.DataFrame([(pk.serial, pk.pid, self._downIcon) for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakSerial', '_object', 'Expand'])
 
             # make matching length tables for each of the restraintLists for each peak so the rows match up in the table
             dfs = {}
@@ -877,7 +874,7 @@ class RestraintAnalysisTableWidget(GuiTable):
         else:
             # make a table that only has peaks
             index = pd.DataFrame([ii for ii in range(1, len(pks) + 1)], columns=['index'])
-            allPks = pd.DataFrame([(pk.serial, pk, self._downIcon) for pk in pks], columns=['PeakSerial', '_object', 'Expand'])
+            allPks = pd.DataFrame([(pk.serial, pk.pid, self._downIcon) for pk in pks], columns=['PeakSerial', '_object', 'Expand'])
 
             _table = pd.concat([index, allPks], axis=1)
 

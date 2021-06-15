@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 16:43:28 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-15 19:36:11 +0100 (Tue, June 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1896,9 +1896,13 @@ class Framework(NotifierBase):
 
         # the loader can be subclassed if required, and the type passed as nefImporterClass
         # _loader = CcpnNefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
-        _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
-        _loader.loadFile(path)
-        _loader.loadValidateDictionary(nefValidationPath)
+
+        # _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
+        # _loader.loadFile(path)
+        # _loader.loadValidateDictionary(nefValidationPath)
+
+        # create/read the nef file
+        _loader = self.readNefFile(path, nefValidationPath=nefValidationPath, errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
 
         # verify popup here
         selection = None
@@ -1915,7 +1919,9 @@ class Framework(NotifierBase):
                                              NEFFRAMEKEY_PATHNAME         : str(path),
                                              })
                                 )
-        dialog.fillPopup()
+        with notificationEchoBlocking():
+            dialog.fillPopup()
+
         dialog.setActiveNefWindow(1)
         if dialog.exec_():
 
@@ -1927,20 +1933,99 @@ class Framework(NotifierBase):
                     self._closeProject()
                 self.project = self.newProject(_loader._nefDict.name)
 
-            self.project.shiftAveraging = False
-            # with suspendSideBarNotifications(project=self.project):
+            # import from the loader into the current project
+            self.importFromLoader(_loader, reader=_nefReader)
 
-            with undoBlockWithoutSideBar():
-                with notificationEchoBlocking():
-                    with catchExceptions(application=self, errorStringTemplate='Error importing Nef file: %s', printTraceBack=True):
-                        # need datablock selector here, with subset selection dependent on datablock type
-
-                        _nefReader.importNewProject(self.project, _loader._nefDict, selection)
-
-            self.project.shiftAveraging = True
+            # self.project.shiftAveraging = False
+            # # with suspendSideBarNotifications(project=self.project):
+            #
+            # with undoBlockWithoutSideBar():
+            #     with notificationEchoBlocking():
+            #         with catchExceptions(application=self, errorStringTemplate='Error importing Nef file: %s', printTraceBack=True):
+            #             # need datablock selector here, with subset selection dependent on datablock type
+            #
+            #             _nefReader.importNewProject(self.project, _loader._nefDict, selection)
+            #
+            # self.project.shiftAveraging = True
 
             getLogger().info('==> Loaded NEF file: "%s"' % (path,))
             return self.project
+
+    @logCommand('application.')
+    def readNefFile(self, path: Union[str, Path.aPath], nefValidationPath: Union[str, Path.aPath, None]=None, errorLogging=None, hidePrefix=True):
+        """Create a Nef loader object and load a nef file into it together with a Nef validation file.
+        If no validation file is specified, the default is taken from PathsAndUrls
+
+        :param path: path to the nef file
+        :param nefValidationPath: path to the nef validation file - an mmcif.dic file
+        :param errorLogging: level of logging - 'standard', 'silent', 'strict'
+        :param hidePrefix: True/False, hide the 'nef_' prefixes in the saveframes
+        :return: instance of NefImporter
+        """
+
+        from ccpn.util.nef import NefImporter as Nef
+        from ccpn.framework.PathsAndUrls import nefValidationPath as defaultNefValidationPath
+
+        # set the default values if not specified
+        _errorLogging = errorLogging or Nef.el.NEF_STRICT
+        _validation = nefValidationPath or defaultNefValidationPath
+
+        # check the parameters
+        if not isinstance(path, (str, Path.Path)):
+            raise ValueError(f'path {path} not defined correctly')
+        if not isinstance(_validation, (str, Path.Path, type(None))):
+            raise ValueError(f'nefValidationPath {_validation} not defined correctly')
+        if _errorLogging not in [Nef.el.NEF_STANDARD, Nef.el.NEF_STRICT, Nef.el.NEF_SILENT]:
+            raise ValueError(f'errorLogging must be one of: [{repr(Nef.el.NEF_STANDARD)}, {repr(Nef.el.NEF_STRICT)}, {repr(Nef.el.NEF_SILENT)}]')
+        if not isinstance(hidePrefix, bool):
+            raise ValueError(f'hidePrefix must be a bool')
+
+        # convert to aPath objects
+        path = Path.aPath(path) if isinstance(path, str) else path
+        _validation = Path.aPath(_validation) if isinstance(_validation, str) else _validation
+
+        # create the nef importer instance
+        _loader = Nef.NefImporter(errorLogging=_errorLogging, hidePrefix=hidePrefix)
+
+        # load the nef file and the validation file
+        _loader.loadFile(path)
+        _loader.loadValidateDictionary(_validation)
+
+        return _loader
+
+    @logCommand('application.')
+    def importFromLoader(self, loader, reader=None):
+        """Read the selection from the nefImporter object into the current.project
+
+        To use without the nef import dialog, requires the creation of a reader object
+        If no reader is specified, then a default is created
+        Selection of objects is specified through the loader before import
+
+        :param loader: nef loader object created from a nef file
+        """
+
+        from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+        from ccpn.util.nef import NefImporter as Nef
+
+        # set a default if not specified
+        reader = reader or CcpnNefIo.CcpnNefReader(self)
+
+        # check the parameters
+        if not isinstance(loader, Nef.NefImporter):
+            raise ValueError(f'loader {loader} not defined correctly')
+        if not isinstance(reader, CcpnNefIo.CcpnNefReader):
+            raise ValueError(f'reader {reader} not defined correctly')
+
+        self.project.shiftAveraging = False
+
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                with catchExceptions(application=self, errorStringTemplate='Error importing Nef file: %s', printTraceBack=True):
+                    # need datablock selector here, with subset selection dependent on datablock type
+
+                    reader.importNewProject(self.project, loader._nefDict)
+
+        self.project.shiftAveraging = True
 
     def _exportNEF(self):
         """

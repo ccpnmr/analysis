@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-07 15:55:18 +0100 (Fri, May 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-15 19:36:11 +0100 (Tue, June 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1897,7 +1897,7 @@ class CcpnNefReader(CcpnNefContent):
     verifiers = {}
     renames = {}
 
-    def __init__(self, application: str, specificationFile: str = None, mode: str = 'standard',
+    def __init__(self, application, specificationFile: str = None, mode: str = 'standard',
                  testing: bool = False):
 
         self.application = application
@@ -2527,11 +2527,12 @@ class CcpnNefReader(CcpnNefContent):
         if not hasattr(self, '_nmrResidueMap') or projectIsEmpty:
             self._nmrResidueMap = {}
 
-        self.importNewProject(project, dataBlock=dataBlock, projectIsEmpty=projectIsEmpty, selection=selection)
+        self.importNewProject(project, dataBlock=dataBlock, projectIsEmpty=projectIsEmpty, ) #selection=selection)
 
     def importNewProject(self, project: Project, dataBlock: StarIo.NmrDataBlock,
                          projectIsEmpty: bool = True,
-                         selection: typing.Optional[dict] = None):
+                         # selection: typing.Optional[dict] = None
+                         ):
         """Import entire project from dataBlock into empty Project"""
 
         t0 = time.time()
@@ -2597,9 +2598,9 @@ class CcpnNefReader(CcpnNefContent):
                     name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
                     self._frameCodeToSpectra[saveFrameName] = dataSetSerial
 
-                if selection and saveFrameName not in selection:
-                    getLogger().debug2('>>>  -- skip saveframe {}'.format(saveFrameName))
-                    continue
+                # if selection and str(saveFrameName) not in selection:
+                #     getLogger().debug2('>>>  -- skip saveframe {}'.format(saveFrameName))
+                #     continue
                 # getLogger().debug2('>>> loading saveframe {}'.format(saveFrameName))
 
                 importer = self.importers.get(sf_category)

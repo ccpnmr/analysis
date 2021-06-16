@@ -4722,7 +4722,8 @@ class CcpnNefReader(CcpnNefContent):
             if filePath:
                 storageParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping, ccpnPrefix='_apiDataStore')
                 storageParameters['numPoints'] = spectrum.pointCounts
-                spectrum._addDataStore(filePath, **storageParameters)
+                # spectrum._addDataStore(filePath, **storageParameters)
+                spectrum.filePath = filePath
 
             # Load CCPN dimensions before peaks
             loopName = 'ccpn_spectrum_dimension'
@@ -5809,7 +5810,6 @@ class CcpnNefReader(CcpnNefContent):
                         % (peaks, str(es)),
                         loop
                         )
-            # restraint.peaks = peaks
         #
         return None
 

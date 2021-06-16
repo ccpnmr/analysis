@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-07 12:53:53 +0100 (Mon, June 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-16 12:59:28 +0100 (Wed, June 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2991,9 +2991,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     def _resetPeakLists(self):
         """Delete autocreated peaklists and reset
+        CCPN Internal - not for general use
+        required by nef importer
         """
         for peakList in list(self.peakLists):
-            peakList.delete()
+            # overrides spectrum contains at least one peakList
+            self._deleteChild(peakList)
         self._wrappedData.__dict__['_serialDict']['peakLists'] = 0
 
     @property

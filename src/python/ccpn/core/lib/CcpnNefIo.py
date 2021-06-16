@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-15 19:36:11 +0100 (Tue, June 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-16 11:16:13 +0100 (Wed, June 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -4723,7 +4723,10 @@ class CcpnNefReader(CcpnNefContent):
 
             # Set experiment transfers at the API level
             if transferData and not spectrum.magnetisationTransfers:
-                spectrum._setMagnetisationTransfers(transferData)
+                try:
+                    spectrum._setMagnetisationTransfers(transferData)
+                except Exception as es:
+                    self.warning("nef_spectrum_dimension_transfer is ill-defined: %s" % transferData, loop)
 
             # Make data storage object
             filePath = saveFrame.get('ccpn_spectrum_file_path')
@@ -5554,8 +5557,14 @@ class CcpnNefReader(CcpnNefContent):
 
                 # finalise last peak
                 if result and assignedNmrAtoms:
-                    # There is a peak in result, and the peak has assignments to set
-                    result[-1].assignedNmrAtoms = assignedNmrAtoms
+                    try:
+                        # There is a peak in result, and the peak has assignments to set
+                        result[-1].assignedNmrAtoms = assignedNmrAtoms
+                    except Exception as es:
+                        # error settings assignments - maybe badly defined
+                        self.warning("Error setting Peak assignment for peak %s: %s."
+                                     % (peakLabel, assignedNmrAtoms),
+                                     loop)
                     assignedNmrAtoms.clear()
 
                 # make new peak  multipleAttributes
@@ -6631,7 +6640,7 @@ class CcpnNefReader(CcpnNefContent):
         """Get NmrChain, correcting for possible errors"""
 
         if chainCode is None:
-            chainCode = self.defaultNmrChainCode
+            chainCode = coreConstants.defaultNmrChainCode
         newChainCode = chainCode
         while True:
             try:

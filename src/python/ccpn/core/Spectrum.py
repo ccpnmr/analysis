@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-27 16:46:39 +0100 (Thu, May 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-16 12:55:20 +0100 (Wed, June 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2964,9 +2964,12 @@ assignmentTolerances
 
     def _resetPeakLists(self):
         """Delete autocreated peaklists and reset
+        CCPN Internal - not for general use
+        required by nef importer
         """
         for peakList in list(self.peakLists):
-            peakList.delete()
+            # overrides spectrum contains at least one peakList
+            self._deleteChild(peakList)
         self._wrappedData.__dict__['_serialDict']['peakLists'] = 0
 
     #===========================================================================================

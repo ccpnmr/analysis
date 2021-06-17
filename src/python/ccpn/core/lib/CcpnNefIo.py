@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-16 11:38:53 +0100 (Wed, June 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-17 18:25:42 +0100 (Thu, June 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -5794,14 +5794,22 @@ class CcpnNefReader(CcpnNefContent):
                         )
                 continue
 
-            # Is all worked, now accumulate the lin
-            ll = links.get(restraint, [])
-            ll.append(peak)
+            # Is all worked, now accumulate the links
+            ll = links.get(restraint, set())
+            ll.add(peak)
             links[restraint] = ll
 
         # Set the actual links
         for restraint, peaks in links.items():
-            restraint.peaks = peaks
+            try:
+                restraint.peaks = list(peaks)
+            except Exception as es:
+                self.warning(
+                        "Error setting restraint.peaks: %s - %s"
+                        % (peaks, str(es)),
+                        loop
+                        )
+            # restraint.peaks = peaks
         #
         return None
 
@@ -6807,7 +6815,8 @@ class CcpnNefReader(CcpnNefContent):
             # take or create dataSet matching serial
             dataSet = self.getDataSet(serial)
             if dataSet is None:
-                dataSet = self.project.newDataSet(serial=serial)
+                _name = self._defaultName(DataSet, serial)
+                dataSet = self.project.newDataSet(name=_name, serial=serial)
         #
         self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
         return dataSet

@@ -132,7 +132,7 @@ class SpeechBalloon(QWidget):
     def pointerSide(self, side):
         self._metrics.pointer_side = side
         self._metrics.reset()
-        self.update()
+        self.updateGeometry()
 
     @pyqtProperty(float)
     def pointerAlignment(self):

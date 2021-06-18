@@ -480,10 +480,7 @@ class BalloonMetrics:
 
         self._raise_invalid_if_required()
 
-        movement_sides = NON_POINTER_SIDES[self.pointer_side]
-        values = [rect_get_side(self._pointer_rect, side) for side in movement_sides]
-
-        min_left, max_right = values
+        min_left, max_right  = self._calc_minleft_maxright_pointer_base(self._pointer_rect)
 
         pointer_width_2 = self.pointer_width/2
 

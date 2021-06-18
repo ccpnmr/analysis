@@ -307,6 +307,18 @@ class SpeechBalloon(QWidget):
 
         self.show()
 
+    def _distances_to_offset(self, distances, extra = 5):
+
+        offsets = [0, 0]
+        for side, distance in distances.items():
+            axis = SIDE_AXIS[side]
+            offsets[axis] -= distance
+
+        pointer_axis = SIDE_AXIS[self._metrics.pointer_side]
+        offsets[pointer_axis] = 0
+
+
+        return QPoint(*offsets)
 
     @staticmethod
     def _calc_screen_by_overlap(body_rect):
@@ -318,22 +330,18 @@ class SpeechBalloon(QWidget):
             result[intersection_area] = screen
         return result
 
-        return screen_coords[side]
+    @staticmethod
+    def find_side_outside_rect_offset(test_rect: QRect, target_rect: QRect):
+        intersection = test_rect.intersected(target_rect)
 
-    def _get_side_preferences(self, screen, side, pos):
-
-        dists = {}
+        result = {}
         for side in Side:
+            inter_side = rect_get_side(intersection, side)
+            test_side = rect_get_side(test_rect, side)
+            if inter_side != test_side:
+                result[side] = inter_side - test_side
 
-            screen_side_coord = self._get_screen_side(screen, side)
-
-            if side in (Side.TOP, Side.BOTTOM):
-                dist = screen_side_coord - pos.y()
-            else:
-                dist = screen_side_coord - pos.x()
-            dists[side] = abs(dist)
-
-        return dists
+        return result
 
     def leaveEvent(self, a0: QtCore.QEvent) -> None:
         if self._owner:

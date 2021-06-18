@@ -205,6 +205,7 @@ class BalloonMetrics:
         self._body_rect = None
         self._pointer_rect = None
         self._pointer = None
+        self.override_offset = None
 
     @property
     def outer_viewport(self):

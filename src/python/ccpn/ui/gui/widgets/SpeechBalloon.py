@@ -309,11 +309,14 @@ class SpeechBalloon(QWidget):
 
 
     @staticmethod
-    def _get_screen_side(screen, side):
-        screen_rect = screen.availableGeometry()
-
-        screen_coords = [screen_rect.top(), screen_rect.left(),
-                         screen_rect.right(), screen_rect.bottom()]
+    def _calc_screen_by_overlap(body_rect):
+        result = {}
+        for screen in QGuiApplication.screens():
+            screen_rect = screen.availableGeometry()
+            intersection = screen_rect.intersected(body_rect)
+            intersection_area = intersection.width() * intersection.height()
+            result[intersection_area] = screen
+        return result
 
         return screen_coords[side]
 

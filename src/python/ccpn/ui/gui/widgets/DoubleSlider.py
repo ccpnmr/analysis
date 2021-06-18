@@ -1417,62 +1417,8 @@ class PopoverButton(QToolButton):
 
     def _press_handler(self):
 
-        chosen_screen = self._get_max_screen()
-
-        pointer_side = self._speech_balloon.pointerSide
-        window_side = OPPOSITE_SIDES[pointer_side]
-
-        sides = [window_side, pointer_side]
-        for side in Side:
-            if not side in sides:
-                sides.append(side)
-
-        middle_sides = [(side,self._get_middle_side(side)) for side in sides]
-
-        self._speech_balloon.showAt(chosen_screen, middle_sides)
-
-    def _get_max_screen(self):
-
-        global_rect = QRect(self.mapToGlobal(QPoint(0,0)),self.geometry().size())
-
-        screen_by_overlap = {}
-        for screen in QGuiApplication.screens():
-            screen_rect = screen.availableGeometry()
-            intersection  = screen_rect.intersected(global_rect)
-            intersection_area =  intersection.width() * intersection.height()
-            screen_by_overlap[intersection_area] = screen
-
-        best_screen_key = max(screen_by_overlap)
-
-        result = screen_by_overlap[best_screen_key]
-
-        return result
-
-
-
-
-    def _get_middle_side(self, side):
-
-        global_top_left = self.mapToGlobal(QPoint(0,0))
-        global_rect = QRect(global_top_left, self.geometry().size())
-
-        width = self.width()
-        height = self.height()
-        width_2 = int(width / 2)
-        height_2 = int(height / 2)
-
-
-        if side == Side.BOTTOM:
-            result = QPoint(QPoint(global_rect.x() + width_2, global_rect.y() + height))
-        elif side == Side.TOP:
-            result = QPoint(QPoint(global_rect.x() + width_2, global_rect.y()))
-        elif side == Side.LEFT:
-            result = QPoint(QPoint(global_rect.x(), global_rect.y() + height_2))
-        else:  # side == Side.RIGHT:
-            result = QPoint(QPoint(global_rect.x()+width, global_rect.y() + height_2))
-
-
-        return result
+        global_rect = QRect(self.mapToGlobal(QPoint(0, 0)), self.geometry().size())
+        self._speech_balloon.showAt(global_rect, self._balloon_side)
 
     def popover(self):
         return self._speech_balloon

@@ -78,7 +78,7 @@ OPPOSITE_SIDES = {
 }
 
 
-def _qrect_get_side(rect: QRect, side: Side) -> int:
+def rect_get_side(rect: QRect, side: Side) -> int:
     if side == Side.TOP:
         result = rect.top()
     elif side == Side.BOTTOM:

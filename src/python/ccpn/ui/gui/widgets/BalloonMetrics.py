@@ -1,3 +1,5 @@
+
+# TODO move out rect code
 from enum import IntEnum
 from math import ceil, sqrt, floor
 from typing import NamedTuple, Optional, Sequence

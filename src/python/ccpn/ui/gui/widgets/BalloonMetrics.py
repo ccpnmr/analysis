@@ -108,7 +108,7 @@ class Axis(IntEnum):
     Y = 1
 
 
-POINTER_AXIS = {
+SIDE_AXIS = {
     Side.TOP: Axis.Y,
     Side.RIGHT: Axis.X,
     Side.BOTTOM: Axis.Y,

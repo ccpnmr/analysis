@@ -347,14 +347,23 @@ class BalloonMetrics:
 
         return self._add_override_offset_rect(result)
 
+    @property
+    def pointer(self):
+        self._raise_invalid_if_required()
 
+        offset = self._global_pointer_offset()
+
+        points = [QPoint(point) + offset for point in self._pointer]
+
+        result = Pointer(*points)
+
+        return  self._add_override_offset_pointer(result)
 
     @property
     def pointer_rect(self):
         self._raise_invalid_if_required()
 
         return QRect(self._pointer_rect)
-
 
     def _get_corner_margin(self):
         result = self.corner_radius / sqrt(2)

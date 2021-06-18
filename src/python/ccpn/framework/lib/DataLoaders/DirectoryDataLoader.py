@@ -45,7 +45,7 @@ class DirectoryDataLoader(DataLoaderABC):
 
     recursive = Bool(default_value=False).tag(info='Flag to define recursive behavior')
     dataLoaders = List(default_value=[]).tag(info='List with dataLoader instances for the files of the directory "path"')
-    count = Int(default_value=0).tag('Count of number of dataLoaders including the recursive ones')
+    count = Int(default_value=0).tag(info='Count of number of dataLoaders including the recursive ones')
 
     @classmethod
     def checkForValidFormat(cls, path):

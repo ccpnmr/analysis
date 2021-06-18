@@ -1,5 +1,5 @@
 """
-This module defines the data loading mechanism for loading a Fasta file
+This module defines the data loading mechanism for loading a Exel file
 """
 
 #=========================================================================================
@@ -31,12 +31,12 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
 
 
-class FastaDataLoader(DataLoaderABC):
-    """Fasta data loader
+class ExcelDataLoader(DataLoaderABC):
+    """Excel data loader
     """
 
-    dataFormat = 'fastaFile'
-    suffixes = ['.fasta']  # a list of suffixes that get matched to path
+    dataFormat = 'excelFile'
+    suffixes = ['.xlsx', '.xls']  # a list of suffixes that get matched to path
     allowDirectory = False  # Can/Can't open a directory
     createsNewProject = False
 
@@ -56,13 +56,11 @@ class FastaDataLoader(DataLoaderABC):
         raises RunTimeError on error
         :return: a list of [project]
         """
-        # with logCommand('application.loadData(%r)' % self.path):
-
         try:
-            chains = self.project._loadFastaFile(self.path)
+            chains = self.project._loadExcelFile(self.path)
         except Exception as es:
             raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
 
         return chains
 
-FastaDataLoader._registerFormat()
+ExcelDataLoader._registerFormat()

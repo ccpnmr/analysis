@@ -1315,7 +1315,6 @@ class Project(AbstractWrapperObject):
         #     result = [result]
         # return result
 
-        # # TODO: RASMUS:
         # # RASMUS EXPLANATION (to my successor)
         # # loadData does too many things: it is used for handling dropped files,
         # # which includes a system for deciding what actions are taken where for what file types,
@@ -1367,7 +1366,6 @@ class Project(AbstractWrapperObject):
         #
         #     dataType, subType, usePath = ioFormats.analyseUrl(path)
         #
-        #     #TODO:RASMUS: Fix all return types; define properly first
         #     if dataType is None:
         #         # print("Skipping: file data type not recognised for %s" % usePath)
         #         getLogger().warning("Skipping: file data type not recognised for %s" % usePath)
@@ -1377,7 +1375,6 @@ class Project(AbstractWrapperObject):
         #     elif dataType == 'Dirs':
         #         # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
         #         paths = usePath
-        #         #TODO:RASMUS: Undefined return type
         #         _loadedData = []
         #         for path in paths:
         #             _loadedData += self.loadData(path)
@@ -1393,7 +1390,6 @@ class Project(AbstractWrapperObject):
         #         # Special case - you return the text instead of a list of Pids
         #         # GWV: Can't do this!! -> have to return a list of tuples: [(dataType, pid or data)]
         #         # need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!
-        #         #TODO:RASMUS: return type is not a list
         #
         #         return open(usePath).read()
         #
@@ -1406,14 +1402,12 @@ class Project(AbstractWrapperObject):
         #         # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
         #         projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
         #         project = self.loadProject(projectPath, ioFormats.CCPN)
-        #         #TODO:RASMUS: use python tmpdir or V3 class
-        #         # NBNB _unpackCcpnTarfile *does* use the Python tempfile module
+
         #         project._wrappedData.root._temporaryDirectory = temporaryDirectory
         #         return [project]
         #
         #     else:
         #         # No idea what is going on here
-        #         #TODO: use a dictionary to define
         #         funcname = '_load' + dataType
         #         if funcname == '_loadProject':
         #             # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
@@ -1421,7 +1415,6 @@ class Project(AbstractWrapperObject):
         #             return thisProj
         #
         #         # elif funcname == '_loadSpectrum':
-        #         #     # NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore
         #         #     # (NB referred to elsewhere
         #         #     # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
         #         #     with undoBlock():
@@ -1453,22 +1446,23 @@ class Project(AbstractWrapperObject):
         #
         return chains
 
-    def _loadStructure(self, path: str, subType: str):
-        """
-        Load Structure ensemble(s) from file into Wrapper project
+    def _loadPdbFile(self, path: str):
+        """Load data from pdb file path into new StructureEnsemble object(s)
         """
 
-        from ccpn.util.StructureData import averageStructure
+        from ccpn.util.StructureData import averageStructure, EnsembleData
         from ccpn.core.Model import Model
 
-        if subType == 'PDB':
-            name, ensemble = self._loadPdbStructure(path)
-        else:
-            raise NotImplementedError('{} type structures cannot be loaded'.format(subType))
-        se = self.newStructureEnsemble()
-        se.data = ensemble
-        se.rename(name)
+        _path = aPath(path)
+        if not _path.exists():
+            raise ValueError('Path "%s" does not exist' % path)
 
+        name = _path.basename
+
+        ensemble = EnsembleData.from_pdb(path)
+        se = self.newStructureEnsemble(name=name, data=ensemble)
+
+        # TODO: this should be in newStructureEnsemble if data is not None
         ensemble._containingObject = se
         for modelNumber in sorted(ensemble['modelNumber'].unique()):
             # _validateName
@@ -1476,22 +1470,46 @@ class Project(AbstractWrapperObject):
 
             se.newModel(serial=modelNumber, label=_label)
 
-        ds = self.newDataSet(title=name)
-        d = ds.newData(name='Derived')
-        d.setParameter('average', averageStructure(ensemble))
-
         return [se]
 
-    def _loadPdbStructure(self, path):
-        import os
-        from ccpn.util.StructureData import EnsembleData
+    # def _loadStructure(self, path: str, subType: str):
+    #     """
+    #     Load Structure ensemble(s) from file into Wrapper project
+    #     """
+    #
+    #     from ccpn.util.StructureData import averageStructure
+    #     from ccpn.core.Model import Model
+    #
+    #     if subType == 'PDB':
+    #         name, ensemble = self._loadPdbStructure(path)
+    #     else:
+    #         raise NotImplementedError('{} type structures cannot be loaded'.format(subType))
+    #     se = self.newStructureEnsemble()
+    #     se.data = ensemble
+    #     se.rename(name)
+    #
+    #     ensemble._containingObject = se
+    #     for modelNumber in sorted(ensemble['modelNumber'].unique()):
+    #         # _validateName
+    #         _label = 'my%s_%s' % (Model.className, modelNumber)
+    #
+    #         se.newModel(serial=modelNumber, label=_label)
+    #
+    #     ds = self.newDataSet(title=name)
+    #     d = ds.newData(name='Derived')
+    #     d.setParameter('average', averageStructure(ensemble))
+    #
+    #     return [se]
 
-        label = os.path.split(path)[1]
-        label = label.split('.')[:-1]
-        label = '_'.join(label)
-
-        ensemble = EnsembleData.from_pdb(path)
-        return label, ensemble
+    # def _loadPdbStructure(self, path):
+    #     from ccpn.util.StructureData import EnsembleData
+    #
+    #     label = os.path.split(path)[1]
+    #     label = label.split('.')[:-1]
+    #     label = '_'.join(label)
+    #
+    #     ensemble = EnsembleData.from_pdb(path)
+    #     return label, ensemble
 
     # def _loadNefFile(self, path: str, subType: str):
     #     """
@@ -1580,18 +1598,26 @@ class Project(AbstractWrapperObject):
         # this is a GUI only function call. Please move to the appropriate location on 3.1
         self.application.restoreLayoutFromFile(path)
 
-    def _loadLookupFile(self, path: str, subType: str, ):
-        """Load data from a look-up file, csv or xls ."""
+    def _loadExcelFile(self, path: str):
+        """Load data from a Excel file.
+        """
+        #CCPNINTERNAL: used in Excel data loader
+        with undoBlock():
+            ExcelReader(project=self, excelPath=path)
 
-        if subType == ioFormats.CSV:
-            self._logger.warning("This function has not been implemented yet")
-            # readCsv(self, path=path)
+    # def _loadLookupFile(self, path: str, subType: str, ):
+    #     """Load data from a look-up file, csv or xls ."""
+    #
+    #     if subType == ioFormats.CSV:
+    #         self._logger.warning("This function has not been implemented yet")
+    #         # readCsv(self, path=path)
+    #
+    #     elif subType == ioFormats.EXCEL:
+    #         # with suspendSideBarNotifications(self, 'ExcelReader', quiet=False):
+    #         with undoBlock():
+    #             ExcelReader(project=self, excelPath=path)
 
-        elif subType == ioFormats.EXCEL:
-            # with suspendSideBarNotifications(self, 'ExcelReader', quiet=False):
-            with undoBlock():
-                ExcelReader(project=self, excelPath=path)
-
+    #TODO: use Substance._uniqueName
     def _uniqueSubstanceName(self, name: str = None, defaultName: str = 'Molecule') -> str:
         """add integer suffixed to name till it is unique"""
 

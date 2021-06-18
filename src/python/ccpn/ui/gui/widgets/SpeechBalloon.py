@@ -271,41 +271,87 @@ class SpeechBalloon(QWidget):
 
         return result
 
-        self._metrics.pointer_side = OPPOSITE_SIDES[side]
+    @singledispatchmethod
+    def showAt(self, point: QPoint, preferred_side=Side.RIGHT,
+               side_priority=(Side.RIGHT, Side.LEFT, Side.BOTTOM, Side.TOP)):
+
+
+        self._showAtList(QRect(point,QSize(1,1)), preferred_side=preferred_side, side_priority=side_priority)
+
+    @showAt.register
+    def _showAtRect(self, rect: QRect, preferred_side=Side.RIGHT,
+                    side_priority=(Side.RIGHT, Side.LEFT, Side.BOTTOM, Side.TOP)):
+        """choose a side to show based on: maximal screen-window overlap, maximal screen button overlap
+                                                   side priority or a gneral priority order"""
+
+        result = None
+
+        side_by_overlap = {}
+        side_position = self._get_middle_side(rect)
+        for side, middle_pos in side_position.items():
+            opposite_side = OPPOSITE_SIDES[side]
+
+            metrics = BalloonMetrics(pointer_side=opposite_side)
+            metrics.from_inner(self._central_widget.geometry())
+            metrics.pointer_position = middle_pos
+
+            body_rect = metrics.body_rect
+            screen_by_overlap = self._calc_screen_by_overlap(body_rect)
+
+
+            for intersection_area, screen in screen_by_overlap.items():
+                side_by_overlap.setdefault(intersection_area, []).append((side, screen))
+
+        best_screen_window_key = max(side_by_overlap.keys())
+        # see if the preferred sid is in th best possible overlaps
+        # if so choose it
+        best_possible = body_rect.width() * body_rect.height()
+        if best_possible == best_screen_window_key:
+            best_positions = side_by_overlap[best_screen_window_key]
+            for side, screen in best_positions:
+                if side == preferred_side:
+                    result = preferred_side
+                    best_screen = screen
+                    break
+        # there is only one possible result...
+        if result == None and len(side_by_overlap[best_screen_window_key]) == 1:
+            result, best_screen = side_by_overlap[best_screen_window_key][0]
+
+        # lets choose on overlap of the button with the screen
+        if result == None:
+            screen_button_overlap = self._calc_screen_by_overlap(rect)
+            best_screen_for_button = screen_button_overlap[max(screen_button_overlap.keys())]
+
+            for side, screen in side_by_overlap[best_screen_window_key]:
+                if screen == best_screen_for_button:
+                    result = side
+                    best_screen = screen
+                    break
+
+        # choose by priority
+        if result == None:
+            priority_side = {}
+            for side, screen in side_by_overlap[best_screen_window_key]:
+                if screen == best_screen_for_button:
+                    priority_side[side_priority.index(side)] = (side,screen)
+
+            priority_key = min(priority_side.keys())
+            result, best_screen = priority_side[priority_key]
+
+        self._metrics.override_offset = 0
+        self._metrics.pointer_side = OPPOSITE_SIDES[result]
+        self._metrics.from_inner(self._central_widget.geometry())
+        self._metrics.pointer_position = side_position[result]
+
+        screen_rect = best_screen.availableGeometry()
+        distances = calc_side_distance_outside_rect(self._metrics.body_rect, screen_rect)
+        offset = self._distances_to_offset(distances)
+        self._metrics.override_offset = offset
         self._layout()
-        self._metrics.pointer_position = pointer_pos
-
-
-        # margins = self._get_margins()
-        # size_hint = self.centralWidget().sizeHint()
-        #
-        # geometry = QRect()
-        # geometry.setSize(size_hint)
-        #
-        #
-        # geometry.adjust(*margins)
-        # pointer_pos_on_geometry = self._get_pointer_position(geometry, on_border=True)
-        #
-        # offset = pointer_pos - pointer_pos_on_geometry
-        #
-        # geometry.translate(offset.x(), offset.y())
-        #
-        # #  there's an error in the layout...
-        # # these are approximately correct till we correct it
-        # CORRECTIONS = {
-        #     Side.BOTTOM: (-1, -1),
-        #     Side.RIGHT: (-1, -1),
-        #     Side.TOP: (-1, 0),
-        #     Side.LEFT: (0, -1)
-        # }
-        #
-        # correction = CORRECTIONS[self._pointer_side]
-        # scale = self._get_corner_margins()[0] + 1
-        # geometry.translate(scale * correction[0], scale * correction[1])
-        #
-        # self.setGeometry(geometry)
 
         self.show()
+        return result
+
 
     def _distances_to_offset(self, distances, extra = 5):
 

@@ -250,14 +250,26 @@ class SpeechBalloon(QWidget):
         super(SpeechBalloon, self).show()
         self._layout()
 
+    def _get_middle_side(self, global_rect: QRect):
 
-    def showAt(self, screen, side_pos_alternatives):
+        width = global_rect.width()
+        height = global_rect.height()
+        width_2 = int(width / 2)
+        height_2 = int(height / 2)
 
-        # for side, pos in side_pos_alternatives:
-        #     ic(side_pos_alternatives)
-        #     ic(self._get_side_preferences(screen, side, pos))
+        result = {}
 
-        side, pointer_pos = side_pos_alternatives[0]
+        for side in Side:
+            if side == Side.BOTTOM:
+                result[side] = QPoint(global_rect.x() + width_2, global_rect.y() + height)
+            elif side == Side.TOP:
+                result[side] = QPoint(global_rect.x() + width_2, global_rect.y())
+            elif side == Side.LEFT:
+                result[side] = QPoint(global_rect.x(), global_rect.y() + height_2)
+            else:  # side == Side.RIGHT:
+                result[side] = QPoint(global_rect.x() + width, global_rect.y() + height_2)
+
+        return result
 
         self._metrics.pointer_side = OPPOSITE_SIDES[side]
         self._layout()

@@ -252,7 +252,42 @@ class BalloonMetrics:
 
         result = self._add_override_offset_pointer(result)
 
-        return Pointer(*result)
+        axis = OPPOSITE_AXIS[SIDE_AXIS[self.pointer_side]]
+
+        left = SubscriptableQPoint(result[Pointer.POINTS.LEFT])
+        right = SubscriptableQPoint(result[Pointer.POINTS.RIGHT])
+
+        if left[axis] < min_left_pointer:
+
+            left[axis] = min_left_pointer
+            right[axis] = left[axis] + self.pointer_width
+
+            if right[axis] > max_right_pointer:
+                right[axis] = max_right_pointer
+
+        elif right[axis] > max_right_pointer:
+
+            right[axis] = max_right_pointer
+            left[axis] = right[axis] - self.pointer_width
+            if left[axis] < min_left_pointer:
+                left[axis] = min_left_pointer
+
+        result = Pointer(*result)
+
+        return result
+
+    def _calc_minleft_maxright_pointer_base(self, pointer_rect_viewport):
+
+        movement_sides = NON_POINTER_SIDES[self.pointer_side]
+
+        values = [rect_get_side(pointer_rect_viewport, side) for side in movement_sides]
+
+        min_left_pointer, max_right_pointer = values
+
+        min_left_pointer += self.corner_radius
+        max_right_pointer -= self.corner_radius
+
+        return min_left_pointer, max_right_pointer
 
     @property
     def outer(self):

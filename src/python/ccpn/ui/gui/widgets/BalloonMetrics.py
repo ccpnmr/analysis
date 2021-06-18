@@ -90,6 +90,19 @@ def rect_get_side(rect: QRect, side: Side) -> int:
     return result
 
 
+def calc_side_distance_outside_rect(test_rect: QRect, target_rect: QRect):
+    intersection = test_rect.intersected(target_rect)
+
+    result = {}
+    for side in Side:
+        inter_side = rect_get_side(intersection, side)
+        test_side = rect_get_side(test_rect, side)
+        if inter_side != test_side:
+            result[side] = test_side - inter_side
+
+    return result
+
+
 class Axis(IntEnum):
     X = 0,
     Y = 1

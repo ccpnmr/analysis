@@ -20,7 +20,7 @@ from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QBrush, QPolygon, 
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QFrame
 
 from BalloonMetrics import Side, BalloonMetrics, OPPOSITE_SIDES, rect_get_side, calc_side_distance_outside_rect, \
-    SIDE_AXIS
+    SIDE_AXIS, OPPOSITE_AXIS
 from ccpn.core.lib.ContextManagers import AntiAliasedPaintContext
 
 DEFAULT_SEPARATOR = '|'
@@ -70,6 +70,8 @@ class SpeechBalloon(QWidget):
         self._metrics.pointer_side = side
         self._metrics.alignment = percentage / 100.0
         self._metrics.corner_radius = 3
+
+        self._screen_margin = 10
 
         self._pen_width = 0
 
@@ -145,6 +147,14 @@ class SpeechBalloon(QWidget):
         self._metrics.reset()
         self.updateGeometry()
 
+    @pyqtProperty(int)
+    def screenMargin(self):
+        return self._screen_margin
+
+    @screenMargin.setter
+    def cornerRadius(self, screen_margin):
+        self._screen_margin = screen_margin
+        self.updateGeometry()
 
     def paintEvent(self, a0: QtGui.QPaintEvent) -> None:
 
@@ -363,6 +373,11 @@ class SpeechBalloon(QWidget):
 
         pointer_axis = SIDE_AXIS[self._metrics.pointer_side]
         offsets[pointer_axis] = 0
+
+        if offsets[OPPOSITE_AXIS[pointer_axis]] > 0:
+            offsets[OPPOSITE_AXIS[pointer_axis]] += 10
+        elif offsets[OPPOSITE_AXIS[pointer_axis]] < 0:
+            offsets[OPPOSITE_AXIS[pointer_axis]] -= 10
 
 
         return QPoint(*offsets)

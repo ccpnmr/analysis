@@ -11,15 +11,16 @@
 # TODO profile
 
 import sys
-from math import sqrt, ceil
+from functools import  singledispatchmethod
 
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import QRectF, Qt, QRect, QPoint, pyqtProperty, QTimer, QEvent, QSize
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QBrush, QPolygon, QPolygonF, QPixmap, QPalette, QCursor, \
-    QFontMetrics
+    QFontMetrics, QGuiApplication
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QFrame
 
-from BalloonMetrics import Side, BalloonMetrics, OPPOSITE_SIDES
+from BalloonMetrics import Side, BalloonMetrics, OPPOSITE_SIDES, rect_get_side, calc_side_distance_outside_rect, \
+    SIDE_AXIS
 from ccpn.core.lib.ContextManagers import AntiAliasedPaintContext
 
 DEFAULT_SEPARATOR = '|'

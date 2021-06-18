@@ -264,9 +264,7 @@ class BalloonMetrics:
 
         return self._add_override_offset_rect(result)
 
-        points = [QPoint(point) + offset for point in self._pointer]
 
-        return Pointer(*points)
 
     @property
     def pointer_rect(self):

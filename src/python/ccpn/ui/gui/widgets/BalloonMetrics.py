@@ -1,6 +1,6 @@
 from enum import IntEnum
 from math import ceil, sqrt, floor
-from typing import NamedTuple, Optional
+from typing import NamedTuple, Optional, Sequence
 
 from PyQt5.QtCore import QPoint, QRect, QSize
 
@@ -152,11 +152,11 @@ class BalloonMetrics:
         self.pointer_position: Optional[QPoint] = None
 
 
-        self._inner: QRect = None
-        self._outer: QRect = None
-        self._body_rect: QRect = None
-        self._pointer_rect: QRect = None
-        self._pointer: Pointer = None
+        self._inner: Optional[QRect] = None
+        self._outer: Optional[QRect] = None
+        self._body_rect: Optional[QRect] = None
+        self._pointer_rect: Optional[QRect] = None
+        self._pointer: Optional[Pointer] = None
 
 
     # TODO replace reset with property change?

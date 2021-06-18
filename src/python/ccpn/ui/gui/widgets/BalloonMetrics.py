@@ -150,6 +150,7 @@ class BalloonMetrics:
         self.antialias_margin: int = 1
         self.pointer_alignment: float = 0.5
         self.pointer_position: Optional[QPoint] = None
+        self.override_offset: Optional[QPoint] = None
 
 
         self._inner: Optional[QRect] = None
@@ -199,6 +200,8 @@ class BalloonMetrics:
         translation = self._outer.topLeft() * -1
         result = [point + translation for point in self._pointer]
 
+        result = self._add_override_offset_pointer(result)
+
         return Pointer(*result)
 
     @property
@@ -207,7 +210,9 @@ class BalloonMetrics:
 
         result = QRect(self._outer)
 
-        return self._translate_to_pointer(result)
+        result = self._translate_to_pointer(result)
+
+        return self._add_override_offset_rect(result)
 
 
     def _global_pointer_offset(self):
@@ -223,13 +228,29 @@ class BalloonMetrics:
 
         return rect
 
+    def _add_override_offset_rect(self, rect: QRect):
+
+        if self.override_offset:
+            rect.translate(self.override_offset)
+
+        return rect
+
+    def _add_override_offset_pointer(self, points: Sequence[QPoint]):
+
+        if self.override_offset:
+            points = [QPoint(point) - self.override_offset for point in points]
+
+        return points
+
     @property
     def inner(self):
         self._raise_invalid_if_required()
 
         result = QRect(self._inner)
 
-        return self._translate_to_pointer(result)
+        result = self._translate_to_pointer(result)
+
+        return self._add_override_offset_rect(result)
 
     @property
     def body_rect(self):
@@ -237,13 +258,9 @@ class BalloonMetrics:
 
         result = QRect(self._body_rect)
 
-        return self._translate_to_pointer(result)
+        result = self._translate_to_pointer(result)
 
-    @property
-    def pointer(self):
-        self._raise_invalid_if_required()
-
-        offset = self._global_pointer_offset()
+        return self._add_override_offset_rect(result)
 
         points = [QPoint(point) + offset for point in self._pointer]
 
@@ -635,6 +652,45 @@ def test_pointer_position():
     assert expected_outer == metrics.outer
     assert expected_inner == metrics.inner
     assert expected_body == metrics.body_rect
+
+
+def test_find_side_outside_rect_offset():
+
+    test_rect = QRect(QPoint(0, 0), QSize(200, 100))
+    inside_rect = QRect(QPoint(1, 1), QSize(198, 98))
+    above_rect = QRect(QPoint(1, -1), QSize(198, 98))
+    below_rect = QRect(QPoint(0, 0), QSize(200, 101))
+    above_below_rect = QRect(QPoint(0, -1), QSize(200, 102))
+    outside_rect = QRect(QPoint(-1, -1), QSize(202, 102))
+
+    assert calc_side_distance_outside_rect(inside_rect, test_rect) == {}
+    assert calc_side_distance_outside_rect(above_rect, test_rect) == {Side.TOP: -1}
+    assert calc_side_distance_outside_rect(below_rect, test_rect) == {Side.BOTTOM: 1}
+    assert calc_side_distance_outside_rect(above_below_rect, test_rect) == {Side.TOP: -1, Side.BOTTOM: 1}
+    assert calc_side_distance_outside_rect(outside_rect, test_rect) == {Side.TOP: -1, Side.BOTTOM: 1,
+                                                                        Side.LEFT: -1, Side.RIGHT: 1}
+
+
+def test_override_offset():
+
+    test_rect = QRect(QPoint(0, 0), QSize(200, 100))
+
+    offset = (10, -5)
+
+    expected_inner = QRect(QPoint(10, -5), QSize(200, 100))
+    expected_outer = QRect(QPoint(6, -19), QSize(208, 118))
+    expected_body_rect = QRect(QPoint(7, -8), QSize(206, 106))
+
+    point_offset = QPoint(*offset)
+
+    metrics = BalloonMetrics(pointer_side=Side.TOP)
+    metrics.from_inner(test_rect)
+    metrics.override_offset = point_offset
+
+    assert metrics.inner == expected_inner
+    assert metrics.outer == expected_outer
+    assert metrics.body_rect == expected_body_rect
+
 
 def _run_tests():
     import pytest

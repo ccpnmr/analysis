@@ -11,6 +11,11 @@ class Pointer(NamedTuple):
     top: QPoint
     bottom: QPoint
 
+    class POINTS(IntEnum):
+        LEFT = 0
+        TOP = 1
+        RIGHT = 2
+
 
 class InvalidStateError(ValueError):
     pass
@@ -140,6 +145,36 @@ SIGNS = [-1, -1, 1, 1]
 RECT_NUM_SIDES = 4
 
 
+class SubscriptableQPoint:
+    def __init__(self, target):
+        self._target = target
+
+    def __getitem__(self, item):
+
+        if item == Axis.X:
+            result = self._target.x()
+        elif item == Axis.Y:
+            result = self._target.y()
+        else:
+            raise IndexError(f'Error bad index for QPoint {item}')
+
+        return result
+
+    def __setitem__(self, item, value):
+
+        if item == Axis.X:
+            self._target.setX(value)
+        elif item == Axis.Y:
+             self._target.setY(value)
+        else:
+            raise IndexError(f'Error bad index for QPoint {item}')
+
+    def __int__(self):
+        return f'[{self.x()},{self.y()}]'
+
+
+
+
 class BalloonMetrics:
 
     def __init__(self, corner_radius=3, pointer_side=Side.RIGHT, pointer_height=10, pointer_width=20):
@@ -195,9 +230,21 @@ class BalloonMetrics:
 
         return self._body_rect.translated(translation)
 
+    def _pointer_rect_viewport(self):
+
+        translation = self._outer.topLeft() * -1
+
+        return self._pointer_rect.translated(translation)
+
     @property
     def pointer_viewport(self):
         self._raise_invalid_if_required()
+
+        pointer_rect_viewport = self._pointer_rect_viewport()
+
+        min_left_pointer, max_right_pointer  = self._calc_minleft_maxright_pointer_base(pointer_rect_viewport)
+
+        display_rect(pointer_rect_viewport)
 
         translation = self._outer.topLeft() * -1
         result = [point + translation for point in self._pointer]

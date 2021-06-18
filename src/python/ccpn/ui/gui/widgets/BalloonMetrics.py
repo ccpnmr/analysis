@@ -247,8 +247,6 @@ class BalloonMetrics:
 
         min_left_pointer, max_right_pointer  = self._calc_minleft_maxright_pointer_base(pointer_rect_viewport)
 
-        display_rect(pointer_rect_viewport)
-
         translation = self._outer.topLeft() * -1
         result = [point + translation for point in self._pointer]
 

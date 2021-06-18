@@ -162,6 +162,8 @@ class BalloonMetrics:
 
     # TODO replace reset with property change?
     # TODO recalc on last rect set?
+
+
     def reset(self):
         self._inner = None
         self._outer = None
@@ -558,6 +560,7 @@ def test_reset():
     import pytest
     metrics = BalloonMetrics()
 
+    # noinspection PyStatementEffect
     def check_raises():
         with pytest.raises(InvalidStateError):
             metrics.inner
@@ -586,6 +589,7 @@ def test_reset():
     metrics.reset()
 
     check_raises()
+
 
 def test_body_rect():
     test_rect = QRect(QPoint(0, 0), QSize(200, 100))
@@ -646,7 +650,7 @@ def test_pointer_position():
 
     metrics = BalloonMetrics()
     metrics.from_inner(test_rect)
-    metrics.pointer_position = QPoint(100,100)
+    metrics.pointer_position = QPoint(100, 100)
 
     assert expected_pointer == metrics.pointer
     assert expected_outer == metrics.outer
@@ -696,6 +700,7 @@ def _run_tests():
     import pytest
     # pytest.main(['%s::test_reset' % __file__])
     pytest.main([__file__, '-vv'])
+
 
 if __name__ == '__main__':
     _run_tests()

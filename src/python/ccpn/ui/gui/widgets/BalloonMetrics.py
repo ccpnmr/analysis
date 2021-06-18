@@ -326,17 +326,17 @@ class BalloonMetrics:
 
             self._body_rect = QRect(result)
 
-            pointer_bottom = _qrect_get_side(result, self.pointer_side)
-            pointer_box[POINTER_AXIS[self.pointer_side]].append(pointer_bottom)
+            pointer_bottom = rect_get_side(result, self.pointer_side)
+            pointer_box[SIDE_AXIS[self.pointer_side]].append(pointer_bottom)
 
             result = self._add_pointer_margin(result)
 
-            pointer_top = _qrect_get_side(result, self.pointer_side)
-            pointer_box[POINTER_AXIS[self.pointer_side]].append(pointer_top)
+            pointer_top = rect_get_side(result, self.pointer_side)
+            pointer_box[SIDE_AXIS[self.pointer_side]].append(pointer_top)
 
             for orthogonal_side in NON_POINTER_SIDES[self.pointer_side]:
-                orthogonal_axis = OPPOSITE_AXIS[POINTER_AXIS[self.pointer_side]]
-                pointer_box[orthogonal_axis].append(_qrect_get_side(result, orthogonal_side))
+                orthogonal_axis = OPPOSITE_AXIS[SIDE_AXIS[self.pointer_side]]
+                pointer_box[orthogonal_axis].append(rect_get_side(result, orthogonal_side))
 
             self._pointer_rect = new_rect_xleftytop_xrightybottom(min(pointer_box[Axis.X]), min(pointer_box[Axis.Y]),
                                                                   max(pointer_box[Axis.X]), max(pointer_box[Axis.Y]))
@@ -361,17 +361,17 @@ class BalloonMetrics:
 
             result = self._add_antialias_margin(rect, multiplier=-1)
 
-            pointer_top = _qrect_get_side(result, self.pointer_side)
-            pointer_box[POINTER_AXIS[self.pointer_side]].append(pointer_top)
+            pointer_top = rect_get_side(result, self.pointer_side)
+            pointer_box[SIDE_AXIS[self.pointer_side]].append(pointer_top)
 
             for orthogonal_side in NON_POINTER_SIDES[self.pointer_side]:
-                orthogonal_axis = OPPOSITE_AXIS[POINTER_AXIS[self.pointer_side]]
-                pointer_box[orthogonal_axis].append(_qrect_get_side(result, orthogonal_side))
+                orthogonal_axis = OPPOSITE_AXIS[SIDE_AXIS[self.pointer_side]]
+                pointer_box[orthogonal_axis].append(rect_get_side(result, orthogonal_side))
 
             result = self._add_pointer_margin(result, multiplier=-1)
 
-            pointer_bottom = _qrect_get_side(result, self.pointer_side)
-            pointer_box[POINTER_AXIS[self.pointer_side]].append(pointer_bottom)
+            pointer_bottom = rect_get_side(result, self.pointer_side)
+            pointer_box[SIDE_AXIS[self.pointer_side]].append(pointer_bottom)
 
             self._pointer_rect = new_rect_xleftytop_xrightybottom(min(pointer_box[Axis.X]), min(pointer_box[Axis.Y]),
                                                                   max(pointer_box[Axis.X]), max(pointer_box[Axis.Y]))
@@ -391,7 +391,7 @@ class BalloonMetrics:
         self._raise_invalid_if_required()
 
         movement_sides = NON_POINTER_SIDES[self.pointer_side]
-        values = [_qrect_get_side(self._pointer_rect, side) for side in movement_sides]
+        values = [rect_get_side(self._pointer_rect, side) for side in movement_sides]
 
         min_left, max_right = values
 
@@ -415,10 +415,10 @@ class BalloonMetrics:
             left = centre - pointer_width_2
             right = centre + pointer_width_2
 
-        pointer_sides = [_qrect_get_side(self._pointer_rect, side) for side in POINTER_SIDES[self.pointer_side]]
+        pointer_sides = [rect_get_side(self._pointer_rect, side) for side in POINTER_SIDES[self.pointer_side]]
         bottom, top = pointer_sides
 
-        pointer_axis = POINTER_AXIS[self.pointer_side]
+        pointer_axis = SIDE_AXIS[self.pointer_side]
         range_axis = OPPOSITE_AXIS[pointer_axis]
 
         pointer_centre = [0] * 2

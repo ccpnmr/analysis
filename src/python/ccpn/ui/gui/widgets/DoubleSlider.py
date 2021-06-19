@@ -1414,11 +1414,23 @@ class PopoverButton(QToolButton):
         self._balloon_side = side
         self._speech_balloon.pointerSide = OPPOSITE_SIDES[self._balloon_side]
 
+    def _get_mouse_screen(self):
+
+        position = QCursor.pos()
+
+        result = None
+        for screen in QGuiApplication.screens():
+            if screen.geometry().contains(position):
+                result = screen
+                break
+
+        return result
 
     def _press_handler(self):
 
         global_rect = QRect(self.mapToGlobal(QPoint(0, 0)), self.geometry().size())
-        self._speech_balloon.showAt(global_rect, self._balloon_side)
+        mouse_screen = self._get_mouse_screen()
+        self._speech_balloon.showAt(global_rect, preferred_side=self._balloon_side, target_screen=mouse_screen)
 
     def popover(self):
         return self._speech_balloon

@@ -261,7 +261,7 @@ class SpeechBalloon(QWidget):
         super(SpeechBalloon, self).show()
         self._layout()
 
-    def _get_middle_side(self, global_rect: QRect):
+    def _rect_middle_sides(self, global_rect: QRect):
 
         width = global_rect.width()
         height = global_rect.height()
@@ -284,85 +284,60 @@ class SpeechBalloon(QWidget):
 
     @singledispatchmethod
     def showAt(self, point: QPoint, preferred_side=Side.RIGHT,
-               side_priority=(Side.RIGHT, Side.LEFT, Side.BOTTOM, Side.TOP)):
+               side_priority=(Side.RIGHT, Side.LEFT, Side.BOTTOM, Side.TOP), target_screen=None):
 
 
-        self._showAtList(QRect(point,QSize(1,1)), preferred_side=preferred_side, side_priority=side_priority)
+        self._showAtList(QRect(point,QSize(1,1)), preferred_side=preferred_side, side_priority=side_priority,
+                         target_screen = target_screen)
 
     @showAt.register
     def _showAtRect(self, rect: QRect, preferred_side=Side.RIGHT,
-                    side_priority=(Side.RIGHT, Side.LEFT, Side.BOTTOM, Side.TOP)):
+                    side_priority=(Side.RIGHT, Side.LEFT, Side.BOTTOM, Side.TOP), target_screen = None):
         """choose a side to show based on: maximal screen-window overlap, maximal screen button overlap
-                                                   side priority or a gneral priority order"""
+                                                   side priority or a general priority order"""
 
-        result = None
+        best_side = None
 
-        side_by_overlap = {}
-        side_position = self._get_middle_side(rect)
-        for side, middle_pos in side_position.items():
-            opposite_side = OPPOSITE_SIDES[side]
+        best_screen = target_screen
+        if not target_screen:
+            best_screen = self._best_screen_overlap(rect)
 
-            metrics = BalloonMetrics(pointer_side=opposite_side)
-            metrics.from_inner(self._central_widget.geometry())
-            metrics.pointer_position = middle_pos
+        side_by_overlap = self._calc_screen_overlap_all_sides(rect, best_screen)
 
-            body_rect = metrics.body_rect
-            screen_by_overlap = self._calc_screen_by_overlap(body_rect)
+        best_sides_key = max(side_by_overlap.keys())
 
+        best_sides = side_by_overlap[best_sides_key]
 
-            for intersection_area, screen in screen_by_overlap.items():
-                side_by_overlap.setdefault(intersection_area, []).append((side, screen))
-
-        best_screen_window_key = max(side_by_overlap.keys())
-        # see if the preferred sid is in th best possible overlaps
-        # if so choose it
-        best_possible = body_rect.width() * body_rect.height()
-        if best_possible == best_screen_window_key:
-            best_positions = side_by_overlap[best_screen_window_key]
-            for side, screen in best_positions:
-                if side == preferred_side:
-                    result = preferred_side
-                    best_screen = screen
-                    break
-        # there is only one possible result...
-        if result == None and len(side_by_overlap[best_screen_window_key]) == 1:
-            result, best_screen = side_by_overlap[best_screen_window_key][0]
-
-        # lets choose on overlap of the button with the screen
-        if result == None:
-            screen_button_overlap = self._calc_screen_by_overlap(rect)
-            best_screen_for_button = screen_button_overlap[max(screen_button_overlap.keys())]
-
-            for side, screen in side_by_overlap[best_screen_window_key]:
-                if screen == best_screen_for_button:
-                    result = side
-                    best_screen = screen
+        if preferred_side in best_sides:
+            best_side = preferred_side
+        else:
+            for side in side_priority:
+                if side in best_sides:
+                    best_side = side
                     break
 
-        # choose by priority
-        if result == None:
-            priority_side = {}
-            for side, screen in side_by_overlap[best_screen_window_key]:
-                if screen == best_screen_for_button:
-                    priority_side[side_priority.index(side)] = (side,screen)
+        side_positions = self._rect_middle_sides(rect)
+        position = side_positions[best_side]
 
-            priority_key = min(priority_side.keys())
-            result, best_screen = priority_side[priority_key]
-
-        self._metrics.override_offset = 0
-        self._metrics.pointer_side = OPPOSITE_SIDES[result]
-        self._metrics.from_inner(self._central_widget.geometry())
-        self._metrics.pointer_position = side_position[result]
-
-        screen_rect = best_screen.availableGeometry()
-        distances = calc_side_distance_outside_rect(self._metrics.body_rect, screen_rect)
-        offset = self._distances_to_offset(distances)
-        self._metrics.override_offset = offset
+        self._setup_metrics(position, best_side, best_screen)
         self._layout()
 
         self.show()
-        return result
 
+    def _setup_metrics(self, position, side, screen):
+        self._metrics.override_offset = 0
+        self._metrics.pointer_position = position
+        self._metrics.pointer_side = OPPOSITE_SIDES[side]
+        self._metrics.from_inner(self._central_widget.geometry())
+        screen_rect = screen.availableGeometry()
+        distances = calc_side_distance_outside_rect(self._metrics.body_rect, screen_rect)
+        offset = self._distances_to_offset(distances)
+        self._metrics.override_offset = offset
+
+    def _best_screen_overlap(self, rect):
+        screen_button_overlap = self._calc_screen_by_overlap(rect)
+        best_screen_for_button = screen_button_overlap[max(screen_button_overlap.keys())]
+        return best_screen_for_button
 
     def _distances_to_offset(self, distances, extra = 5):
 
@@ -389,7 +364,29 @@ class SpeechBalloon(QWidget):
             screen_rect = screen.availableGeometry()
             intersection = screen_rect.intersected(body_rect)
             intersection_area = intersection.width() * intersection.height()
+
+            # note ties by intersection are are removed by default
             result[intersection_area] = screen
+        return result
+
+    def _calc_screen_overlap_all_sides(self, rect, target_screen):
+
+        result = {}
+        side_position = self._rect_middle_sides(rect)
+        for side, middle_pos in side_position.items():
+            opposite_side = OPPOSITE_SIDES[side]
+
+            metrics = BalloonMetrics(pointer_side=opposite_side)
+            metrics.from_inner(self._central_widget.geometry())
+            metrics.pointer_position = middle_pos
+
+            outer_rect = metrics.outer
+            screen_by_overlap = self._calc_screen_by_overlap(outer_rect)
+
+            max_area = outer_rect.width() * outer_rect.height()
+            for intersection_area, screen in screen_by_overlap.items():
+                if not screen or screen == target_screen:
+                    result.setdefault(intersection_area / max_area, []).append(side)
         return result
 
     @staticmethod

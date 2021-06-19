@@ -1,14 +1,13 @@
 
 
-# TODO needs to prioritise screen of button on show at
-# TODO needs to pin base of pointer if showat will move pointer below
+# TODO needs to pin base of pointer if show at will move pointer below
 # TODO needs a license
 # TODO display of body rect gives double thickness lines, anti aliasing bug?
 # TODO it would be good to clip the interior widget for edge to edge views
 # TODO it would be good to check the recommendations in https://www.vikingsoftware.com/creating-custom-widgets
-# TODO add extra margin on override offset
 # TODO override offset could have a better name
 # TODO profile
+# TODO balloon pointer is clipped when outside original bounding rect
 
 import sys
 from functools import  singledispatchmethod

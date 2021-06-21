@@ -23,7 +23,7 @@ rem add chemBuild to the PYTHONPATH
 set PYTHONPATH=%CCPNMR_TOP_DIR%\%CHEMPATH%;%PYTHONPATH%
 
 set ENTRY_MODULE=%CCPNMR_TOP_DIR%\%MODULE%
-"%CONDA%"\python -i -O -W ignore "%ENTRY_MODULE%" %*
+"%CONDA%\python" -i -O -W ignore "%ENTRY_MODULE%" %*
 endlocal
 
 PAUSE

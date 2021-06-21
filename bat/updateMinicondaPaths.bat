@@ -23,7 +23,7 @@ set ROOT=%HOME%\%RELEASE%\%CCPNMR_PATH%\miniconda
 set PATHFROM=%CONDA%
 set PATHTO=%HOME%\%RELEASE%\%CCPNMR_PATH%\miniconda
 
-"%CONDA%"\python -i -O -W ignore "%ENTRY_MODULE%" "%ROOT%" "%PATHFROM%" "%PATHTO%"
+"%CONDA%\python" -i -O -W ignore "%ENTRY_MODULE%" "%ROOT%" "%PATHFROM%" "%PATHTO%"
 endlocal
 
 PAUSE

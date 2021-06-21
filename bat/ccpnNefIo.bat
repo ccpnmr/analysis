@@ -19,7 +19,7 @@ set /a "_count=0"
 call "%CCPNMR_TOP_DIR%\bat\paths"
 
 set ENTRY_MODULE=%CCPNMR_TOP_DIR%\%MODULE%
-"%CONDA%"\python -i -O -W ignore "%ENTRY_MODULE%" %*
+"%CONDA%\python" -i -O -W ignore "%ENTRY_MODULE%" %*
 endlocal
 
 PAUSE

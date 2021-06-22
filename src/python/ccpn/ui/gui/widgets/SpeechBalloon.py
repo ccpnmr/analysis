@@ -180,7 +180,7 @@ class SpeechBalloon(QWidget):
 
     def window_path(self):
 
-        self._metrics.pointer_side = self.pointerSide
+        self._metrics.pointer_side = self._metrics.pointer_side
 
         self._metrics.from_outer(self.frameGeometry())
 

@@ -262,7 +262,8 @@ class SpeechBalloon(QWidget):
         super(SpeechBalloon, self).show()
         self._layout()
 
-    def _rect_middle_sides(self, global_rect: QRect):
+    @staticmethod
+    def _rect_middle_sides(global_rect: QRect):
 
         width = global_rect.width()
         height = global_rect.height()

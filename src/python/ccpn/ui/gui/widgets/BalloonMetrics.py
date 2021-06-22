@@ -171,10 +171,8 @@ class SubscriptableQPoint:
         else:
             raise IndexError(f'Error bad index for QPoint {item}')
 
-    def __int__(self):
-        return f'[{self.x()},{self.y()}]'
-
-
+    def __str__(self):
+        return f'[{self._target.x()},{self._target.y()}]'
 
 
 class BalloonMetrics:

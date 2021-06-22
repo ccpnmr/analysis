@@ -28,6 +28,7 @@ LEFT_LABEL = 0
 MIDDLE_LABEL = 1
 RIGHT_LABEL = 2
 
+
 class MyApplication(QApplication):
     def __init__(self, arg):
         super(MyApplication, self).__init__(arg)
@@ -41,6 +42,7 @@ class MyApplication(QApplication):
 
         if window:
             window.move_pointer_to(pos)
+
 
 class SpeechBalloon(QWidget):
     r""" Popover window class

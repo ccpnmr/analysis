@@ -420,9 +420,9 @@ class DoubleLabel(QFrame):
 
         # if you ever allow this to be set you will need to
         # call setLabelText to reset the text widths
-        self._margin = 2
+        self._margin: int = 2
 
-        self._labels = [None] * 3
+        self._labels: List[Optional[QLabel]] = [None] * 3
         left_label = QLabel()
         left_label.setAlignment(Qt.AlignRight)
         layout.addWidget(left_label, 0, 0)

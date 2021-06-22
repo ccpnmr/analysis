@@ -341,7 +341,7 @@ class SpeechBalloon(QWidget):
         best_screen_for_button = screen_button_overlap[max(screen_button_overlap.keys())]
         return best_screen_for_button
 
-    def _distances_to_offset(self, distances, extra = 5):
+    def _distances_to_offset(self, distances):
 
         offsets = [0, 0]
         for side, distance in distances.items():

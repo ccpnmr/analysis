@@ -153,7 +153,7 @@ class SpeechBalloon(QWidget):
         return self._screen_margin
 
     @screenMargin.setter
-    def cornerRadius(self, screen_margin):
+    def screenMargin(self, screen_margin):
         self._screen_margin = screen_margin
         self.updateGeometry()
 

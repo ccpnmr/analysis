@@ -10,7 +10,8 @@
 # TODO balloon pointer is clipped when outside original bounding rect
 
 import sys
-from functools import  singledispatchmethod
+from functools import singledispatchmethod
+from typing import Optional, List
 
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import QRectF, Qt, QRect, QPoint, pyqtProperty, QTimer, QEvent, QSize

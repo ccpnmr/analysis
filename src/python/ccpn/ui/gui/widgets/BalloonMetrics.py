@@ -482,9 +482,6 @@ class BalloonMetrics:
 
         pointer_width_2 = self.pointer_width/2
 
-        min_left += self.corner_radius
-        max_right -= self.corner_radius
-
         if max_right < min_left:
             left = min_left
             right = max_right

@@ -292,73 +292,73 @@ class MacroEditor(CcpnModule):
     def _getToolBarDefs(self):
 
         toolBarDefs = (
-            ['Open', od([
-                ['text', 'Open'],
-                ['toolTip', 'Open a Python File'],
-                ['icon', Icon('icons/document_open_recent')],
-                ['callback', self._openMacroFile],
-                ['enabled', True]
-                ])],
-            ['Export', od([
-                ['text', 'Export'],
-                ['toolTip', 'Export code to PDF'],
-                ['icon', Icon('icons/pdf')],
-                ['callback', self.exportToPdf],
-                ['enabled', True]
-                ])],
-            ['Add to shortcut', od([
-                ['text', 'Add to shortcut'],
-                ['toolTip', 'Add macro to a shortcut'],
-                ['icon', Icon('icons/shortcut')],
-                ['callback', self._addToShortcuts],
-                ['enabled', True]
-                ])],
+            ('Open', od((
+                ('text', 'Open'),
+                ('toolTip', 'Open a Python File'),
+                ('icon', Icon('icons/document_open_recent')),
+                ('callback', self._openMacroFile),
+                ('enabled', True)
+                ))),
+            ('Export', od((
+                ('text', 'Export'),
+                ('toolTip', 'Export code to PDF'),
+                ('icon', Icon('icons/pdf')),
+                ('callback', self.exportToPdf),
+                ('enabled', True)
+                ))),
+            ('Add to shortcut', od((
+                ('text', 'Add to shortcut'),
+                ('toolTip', 'Add macro to a shortcut'),
+                ('icon', Icon('icons/shortcut')),
+                ('callback', self._addToShortcuts),
+                ('enabled', True)
+                ))),
             (),
-            ['Find', od([
-                ['text', 'Find'],
-                ['toolTip', ''],
-                ['icon', Icon('icons/find')],
-                ['callback', self._showFindWidgets],
-                ['enabled', True]
-                ])],
-            ['Replace', od([
-                ['text', 'Find and Replace'],
-                ['toolTip', 'Find and Replace'],
-                ['icon', Icon('icons/find-replace')],
-                ['callback', self._showFindReplaceWidgets],
-                ['enabled', True]
-                ])],
+            ('Find', od((
+                ('text', 'Find'),
+                ('toolTip', ''),
+                ('icon', Icon('icons/find')),
+                ('callback', self._showFindWidgets),
+                ('enabled', True)
+                ))),
+            ('Replace', od((
+                ('text', 'Find and Replace'),
+                ('toolTip', 'Find and Replace'),
+                ('icon', Icon('icons/find-replace')),
+                ('callback', self._showFindReplaceWidgets),
+                ('enabled', True)
+                ))),
             (),
-            ['Undo', od([
-                ['text', 'Undo'],
-                ['toolTip', ''],
-                ['icon', Icon('icons/undo')],
-                ['callback', self.textEditor.undo],
-                ['enabled', True]
-                ])],
-            ['Redo', od([
-                ['text', 'Redo'],
-                ['toolTip', ''],
-                ['icon', Icon('icons/redo')],
-                ['callback', self.textEditor.redo],
-                ['enabled', True]
-                ])],
-            ['Revert', od([
-                ['text', 'Revert'],
-                ['toolTip', 'Revert all changes to initial state'],
-                ['icon', Icon('icons/revert4')],
-                ['callback', self.revertChanges],
-                ['enabled', True]
-                ])],
+            ('Undo', od((
+                ('text', 'Undo'),
+                ('toolTip', ''),
+                ('icon', Icon('icons/undo')),
+                ('callback', self.textEditor.undo),
+                ('enabled', True)
+                ))),
+            ('Redo', od((
+                ('text', 'Redo'),
+                ('toolTip', ''),
+                ('icon', Icon('icons/redo')),
+                ('callback', self.textEditor.redo),
+                ('enabled', True)
+                ))),
+            ('Revert', od((
+                ('text', 'Revert'),
+                ('toolTip', 'Revert all changes to initial state'),
+                ('icon', Icon('icons/revert4')),
+                ('callback', self.revertChanges),
+                ('enabled', True)
+                ))),
             (),
-            ['Run', od([
-                ['text', 'Run'],
-                ['toolTip', 'Run the macro in the IpythonConsole.\nShortcut: cmd(ctrl)+r'],
-                ['icon', Icon('icons/play')],
-                ['callback', self.run],
-                ['enabled', True],
-                ['shortcut', '⌃r']
-                ])],
+            ('Run', od((
+                ('text', 'Run'),
+                ('toolTip', 'Run the macro in the IpythonConsole.\nShortcut: cmd(ctrl)+r'),
+                ('icon', Icon('icons/play')),
+                ('callback', self.run),
+                ('enabled', True),
+                ('shortcut', '⌃r')
+                ))),
             )
         return toolBarDefs
 

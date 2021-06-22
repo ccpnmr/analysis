@@ -290,8 +290,8 @@ class SpeechBalloon(QWidget):
                side_priority=(Side.RIGHT, Side.LEFT, Side.BOTTOM, Side.TOP), target_screen=None):
 
 
-        self._showAtList(QRect(point,QSize(1,1)), preferred_side=preferred_side, side_priority=side_priority,
-                         target_screen = target_screen)
+        self._showAtList(QRect(point, QSize(1, 1)), preferred_side=preferred_side, side_priority=side_priority,
+                         target_screen=target_screen)
 
     @showAt.register
     def _showAtRect(self, rect: QRect, preferred_side=Side.RIGHT,

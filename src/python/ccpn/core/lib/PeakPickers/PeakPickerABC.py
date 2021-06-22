@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-09 13:55:53 +0100 (Wed, June 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-22 09:51:59 +0100 (Tue, June 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,20 +28,21 @@ __date__ = "$Date: 2021-01-13 10:28:41 +0000 (Wed, Jan 13, 2021) $"
 # Start of code
 #=========================================================================================
 
+from json import loads
 from collections import OrderedDict
-from copy import deepcopy
-from ccpn.core.Spectrum import Spectrum
-from ccpn.core.lib.peakUtils import peakParabolicInterpolation
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
+from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, CString
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import loadModules
 from ccpn.framework.PathsAndUrls import peakPickerPath
 
 
-PEAKPICKERSTORE = 'peakPickerStore'
-PEAKPICKER = 'peakPicker'
-PEAKPICKERPARAMETERS = 'peakPickerParameters'
+PEAKPICKERPARAMETERS = '_peakPickerParameters'
 
+
+#=========================================================================================
+# Available peakPicker methods
+#=========================================================================================
 
 def getPeakPickerTypes() -> OrderedDict:
     """Get peakPicker types
@@ -51,7 +52,9 @@ def getPeakPickerTypes() -> OrderedDict:
     # from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
     # from ccpn.core.lib.PeakPickers.Simple1DPeakPicker import Simple1DPeakPicker
     # from ccpn.core.lib.PeakPickers.NmrgluePeakPicker import NmrgluePeakPicker
-    loadModules([peakPickerPath,])
+
+    # load all from folder
+    loadModules([peakPickerPath, ])
 
     return PeakPickerABC._peakPickers
 
@@ -107,9 +110,15 @@ class SimplePeak(object):
         return '<SimplePeak %s: %r, height=%.1e>' % (self.indx, self.points, self.height)
 
 
-class PeakPickerABC(object):
+#=========================================================================================
+# Start of class
+#=========================================================================================
+
+class PeakPickerABC(CcpNmrJson):
     """ABC for implementation of a peak picker
     """
+
+    classVersion = 1.0  # For json saving
 
     #=========================================================================================
     # to be subclassed
@@ -118,23 +127,6 @@ class PeakPickerABC(object):
     peakPickerType = None  # A unique string identifying the peak picker
     defaultPointExtension = 1  # points to extend the region to pick on either side
     onlyFor1D = False
-
-    # list of core peakPicker attributes that need to be restored when the spectrum is loaded
-    _attributes = ['dimensionCount',
-                   'pointExtension',
-                   'autoFit',
-                   'dropFactor',
-                   'fitMethod',
-                   'positiveThreshold',
-                   'negativeThreshold',
-                   ]
-
-    # list of peakPicker attributes that need to be stored/restored
-    # these pertain to a particular peakPicker subclass
-    # this cannot contain items that are not JSON serialisable
-    # call self._storeAttributes at the end of methods that change any values
-    # these are defined in a similar manner to the core attributes above
-    attributes = []
 
     #=========================================================================================
     # data formats
@@ -156,32 +148,64 @@ class PeakPickerABC(object):
         """Create a new peakPicker instance defined by parameters stored within
         spectrum Ccpn Internal data
         """
+        from ccpn.core.Spectrum import Spectrum
+
         if spectrum is None:
             raise ValueError('%s: spectrum is None' % cls.__class__.__name__)
         if not isinstance(spectrum, Spectrum):
             raise ValueError('%s: spectrum is not of Spectrum class' % cls.__class__.__name__)
 
-        # get peakPickerType from CcpnInternal
-        _pickerType = spectrum.getParameter(PEAKPICKERSTORE, PEAKPICKER)
-
-        if _pickerType:
-            _picker = getPeakPicker(_pickerType, spectrum)
-            if _picker:
-                getLogger().debug(f'peakPicker {_picker} instantiated')
-                # restore peakPicker with parameters from CcpnInternal
-                _picker._restoreAttributes()
-                return _picker
-
-            else:
-                getLogger().debug(f'peakPicker {_pickerType} not defined')
-        else:
+        try:
+            # read peakPicker from CCPNinternal
+            jsonData = spectrum._getInternalParameter(PEAKPICKERPARAMETERS)
+            _pickerType = dict(loads(jsonData)).get('_metadata').get('className')
+        except Exception as es:
             getLogger().debug(f'peakPicker not restored from {spectrum}')
 
+        else:
+            if _pickerType:
+                _picker = getPeakPicker(_pickerType, spectrum)
+                if _picker:
+                    getLogger().debug(f'peakPicker {_picker} instantiated')
+                    # restore peakPicker with parameters from CcpnInternal
+                    _picker._restoreAttributes()
+                    return _picker
+
+                else:
+                    getLogger().debug(f'peakPicker {_pickerType} not defined')
+            else:
+                getLogger().debug(f'peakPicker not restored from {spectrum}')
+
+    #=========================================================================================
+    # parameter definitions and mappings onto the Spectrum class
+    #=========================================================================================
+
+    keysInOrder = True  # maintain the definition order
+
+    saveAllTraitsToJson = True
+    version = 1.0  # for json saving
+
+    # list of core peakPicker attributes that need to be restored when the spectrum is loaded
+    dimensionCount = CInt(default_value=0)
+    pointExtension = CInt(default_value=0)
+    autoFit = CBool(default_value=False)
+    dropFactor = CFloat(default_value=0.1)
+    fitMethod = CString(allow_none=True, default_value=None)
+    positiveThreshold = CFloat(default_value=0.0)
+    negativeThreshold = CFloat(default_value=0.0)
+
+    #=========================================================================================
+    # start of methods
     #=========================================================================================
 
     def __init__(self, spectrum, autoFit=False):
         """Initialise the instance and associate with spectrum
+
+        :param spectrum: associate instance with spectrum and import spectrum's parameters
+        :param autoFit:
         """
+        from ccpn.core.Spectrum import Spectrum
+
         if self.peakPickerType is None:
             raise RuntimeError('%s: peakPickerType is undefined' % self.__class__.__name__)
 
@@ -193,8 +217,10 @@ class PeakPickerABC(object):
         if spectrum.dimensionCount > 1 and self.onlyFor1D:
             raise ValueError('%s only works for 1D spectra' % self.__class__.__name__)
 
+        super().__init__()
+
         # default parameters for all peak pickers
-        self._initParameters()
+        self.setDefaultParameters()
 
         # initialise from parameters
         self.spectrum = spectrum
@@ -206,18 +232,18 @@ class PeakPickerABC(object):
         self.lastPickedPeaks = None
         self.sliceTuples = None
 
-    def _initParameters(self):
-        """Initialise the parameters from _attributes and user attributes
+    def setDefaultParameters(self):
+        """Set default values for all parameters
         """
-        for key in (self._attributes + self.attributes):
-            setattr(self, key, None)
+        for par in self.keys():
+            self.setTraitDefaultValue(par)
 
     def _setParameters(self, **parameters):
         """Set parameters for peakPicker instance
         """
-        for key, value in parameters.items():
-            if key in (self._attributes + self.attributes):
-                setattr(self, key, value)
+        for par, value in parameters.items():
+            if par in self.keys():
+                self.setTraitValue(par, value)
 
     def setParameters(self, **parameters):
         """Set parameters as attributes of self
@@ -239,8 +265,7 @@ class PeakPickerABC(object):
         self._storeAttributes()
 
     def _checkParameters(self):
-        """
-        Check whether the parameters are the correct types
+        """Check whether the parameters are the correct types
         """
         # This can check the common parameters, subclassing can check local
         # MUST BE SUBCLASSED
@@ -253,35 +278,31 @@ class PeakPickerABC(object):
         if self.spectrum is None:
             raise RuntimeError('%s._storeAttributes: spectrum not defined' % self.__class__.__name__)
 
-        values = {k: v
-                  for k, v in self.__dict__.items()
-                  if k in (self._attributes + self.attributes)}
-        values = deepcopy(values)
-
-        self.spectrum.setParameter(PEAKPICKERSTORE, PEAKPICKERPARAMETERS, values)
-        self.spectrum.setParameter(PEAKPICKERSTORE, PEAKPICKER, self.peakPickerType)
+        jsonData = self.toJson()
+        self.spectrum._setInternalParameter(PEAKPICKERPARAMETERS, jsonData)
 
     def _restoreAttributes(self):
         """Restore important peakPicker attributes when a project is reloaded
         User attributes are listed in self.attributes at the head of the peakPicker class
         """
         if self.spectrum is None:
-            raise RuntimeError('%s._storeAttributes: spectrum not defined' % self.__class__.__name__)
+            raise RuntimeError('%s._restoreAttributes: spectrum not defined' % self.__class__.__name__)
 
-        _pickerParams = self.spectrum.getParameter(PEAKPICKERSTORE, PEAKPICKERPARAMETERS)
-        if _pickerParams and isinstance(_pickerParams, dict):
-            self._setParameters(**_pickerParams)
-        else:
-            getLogger().debug(f'attributes not restored from {self.spectrum}')
+        jsonData = self.spectrum._getInternalParameter(PEAKPICKERPARAMETERS)
+        if jsonData is None or len(jsonData) == 0:
+            raise RuntimeError('%s._restoreAttributes: json data appear to be corrupted' % self.__class__.__name__)
 
-    def _clearAttributes(self):
-        """Remove the peak picker settings from the spectrum
+        self.fromJson(jsonData)
+
+    def _detachFromSpectrum(self):
+        """Remove all peakPicker settings from the spectrum
         """
         if self.spectrum is None:
-            raise RuntimeError('%s._clearAttributes: spectrum not defined' % self.__class__.__name__)
+            raise RuntimeError('%s._detachFromSpectrum: spectrum not defined' % self.__class__.__name__)
 
-        self.spectrum.setParameter(PEAKPICKERSTORE, PEAKPICKERPARAMETERS, None)
-        self.spectrum.setParameter(PEAKPICKERSTORE, PEAKPICKER, None)
+        # remove all links to spectrum
+        self.spectrum._setInternalParameter(PEAKPICKERPARAMETERS, None)
+        self.spectrum = None
 
     #=========================================================================================
 
@@ -353,6 +374,8 @@ class PeakPickerABC(object):
         :param peakList: a core.PeakList instance
         :return: a list with core.Peak instances
         """
+        from ccpn.core.lib.peakUtils import peakParabolicInterpolation
+
         corePeaks = []
         for pk in peaks:
             if len(pk.points) != self.dimensionCount:
@@ -390,3 +413,23 @@ class PeakPickerABC(object):
 
     def __str__(self):
         return '<%s for %r>' % (self.__class__.__name__, self.spectrum.name)
+
+
+#end class
+
+from ccpn.util.traits.CcpNmrTraits import Instance
+from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC
+
+
+class PeakPickerTrait(Instance):
+    """Specific trait for a PeakPicker instance.
+    """
+    klass = PeakPickerABC
+
+    def __init__(self, **kwds):
+        Instance.__init__(self, klass=self.klass, allow_none=True, **kwds)
+
+
+    class jsonHandler(CcpNmrJsonClassHandlerABC):
+        # klass = PeakPickerABC
+        pass

@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-16 12:59:28 +0100 (Wed, June 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-22 09:51:59 +0100 (Tue, June 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -91,6 +91,8 @@ from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import \
     getDataFormats, getSpectrumDataSource, checkPathForSpectrumFormats, DataSourceTrait
 from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 from ccpn.core.lib.Cache import cached
+
+from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerTrait
 
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, jsonHandler
 from ccpn.util.traits.CcpNmrTraits import Instance, Any
@@ -331,6 +333,10 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     # @property
     # def dataSource(self):
     #     return self._dataSource
+
+    _peakPicker = PeakPickerTrait(default_value = None).tag(
+                                  saveToJson = True,
+                                  info = "A PeakPicker instance")
 
     @property
     def peakPicker(self):
@@ -2599,23 +2605,25 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def peakPicker(self, peakPicker):
         """Set the current peakPicker class instance
         """
-        from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, PEAKPICKERSTORE, PEAKPICKER
+        from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC
 
         if not isinstance(peakPicker, (PeakPickerABC, type(None))):
             raise ValueError('Not a valid peakPickerABC class')
         elif peakPicker and peakPicker.spectrum != self:
             raise ValueError(f'peakPicker is already linked to spectrum {peakPicker.spectrum}')
         elif peakPicker:
-            # set the current peakPicker
-            self._peakPicker = peakPicker
+            with undoBlockWithoutSideBar():
+                # set the current peakPicker
+                self._peakPicker = peakPicker
 
-            # automatically store in the spectrum CCPN internal store
-            self._peakPicker._storeAttributes()
-            getLogger().debug('Setting new peak picker')
+                # automatically store in the spectrum CCPN internal store
+                self._peakPicker._storeAttributes()
+                getLogger().debug('Setting new peak picker')
         else:
             with undoBlockWithoutSideBar():
+                # clear the current peakPicker
                 if self._peakPicker:
-                    self._peakPicker._clearAttributes()
+                    self._peakPicker._detachFromSpectrum()
                     self._peakPicker = None
                     getLogger().debug('Clearing old peak picker')
 

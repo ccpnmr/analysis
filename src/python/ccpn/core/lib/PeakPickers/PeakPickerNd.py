@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-07 12:53:53 +0100 (Mon, June 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-22 09:51:59 +0100 (Tue, June 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,8 +31,9 @@ import numpy as np
 from typing import Sequence
 from collections import Counter
 from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, SimplePeak
-from ccpnc.peak import Peak as CPeak
+from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, CList
 from ccpn.util.Logging import getLogger
+from ccpnc.peak import Peak as CPeak
 
 
 GAUSSIANMETHOD = 'gaussian'
@@ -61,27 +62,23 @@ class PeakPickerNd(PeakPickerABC):
                   'halfBoxSearchWidth',
                   'halfBoxFitWidth',
                   'searchBoxDoFit',
-                  '_hbsWidth',
-                  '_hbfWidth',
                   ]
+
+    noise = CFloat(allow_none=True, default_value=None)
+    minimumLineWidth = CList(allow_none=True, default_value=[])
+    checkAllAdjacent = CBool(allow_none=True, default_value=True)
+    singularMode = CBool(allow_none=True, default_value=True)
+    halfBoxFindPeaksWidth = CInt(allow_none=True, default_value=2)
+    halfBoxSearchWidth = CInt(allow_none=True, default_value=3)
+    halfBoxFitWidth = CInt(allow_none=True, default_value=3)
+    searchBoxDoFit = CBool(allow_none=True, default_value=True)
 
     def __init__(self, spectrum):
         super().__init__(spectrum=spectrum)
-        self.noise = None
+
         self.positiveThreshold = spectrum.positiveContourBase if spectrum.includePositiveContours else None
         self.negativeThreshold = spectrum.negativeContourBase if spectrum.includeNegativeContours else None
-
-        # set some defaults
-        self.dropFactor = 0.1
-        self.minimumLineWidth = None
-        self.checkAllAdjacent = True
         self.fitMethod = PARABOLICMETHOD
-        self.singularMode = True
-        self.halfBoxFindPeaksWidth = 2
-        self.halfBoxSearchWidth = 3
-        self.halfBoxFitWidth = 3
-        self.sarchBoxDoFit = True
-
         self._hbsWidth = None
         self._hbfWidth = None
         self.findFunc = None

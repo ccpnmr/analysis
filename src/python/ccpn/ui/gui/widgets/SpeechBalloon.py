@@ -295,7 +295,7 @@ class SpeechBalloon(QWidget):
 
     @showAt.register
     def _showAtRect(self, rect: QRect, preferred_side=Side.RIGHT,
-                    side_priority=(Side.RIGHT, Side.LEFT, Side.BOTTOM, Side.TOP), target_screen = None):
+                    side_priority=(Side.RIGHT, Side.LEFT, Side.BOTTOM, Side.TOP), target_screen=None):
         """choose a side to show based on: maximal screen-window overlap, maximal screen button overlap
                                                    side priority or a general priority order"""
 

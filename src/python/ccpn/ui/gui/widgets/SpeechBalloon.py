@@ -64,7 +64,7 @@ class SpeechBalloon(QWidget):
         self.setWindowFlags(flags)
         self.setAttribute(Qt.WA_NoSystemBackground)
 
-        self._metrics = BalloonMetrics()
+        self._metrics: BalloonMetrics = BalloonMetrics()
 
         self._metrics.pointer_height = 10
         self._metrics.pointer_width = 20
@@ -72,13 +72,13 @@ class SpeechBalloon(QWidget):
         self._metrics.alignment = percentage / 100.0
         self._metrics.corner_radius = 3
 
-        self._screen_margin = 10
+        self._screen_margin: int = 10
 
-        self._pen_width = 0
+        self._pen_width: int = 0
 
-        self._owner = owner
+        self._owner: QWidget = owner
 
-        self._central_widget:QWidget = None
+        self._central_widget: Optional[QWidget] = None
 
 
     def event(self, event: QtCore.QEvent) -> bool:

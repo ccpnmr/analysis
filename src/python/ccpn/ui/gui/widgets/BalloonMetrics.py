@@ -167,7 +167,7 @@ class SubscriptableQPoint:
         if item == Axis.X:
             self._target.setX(value)
         elif item == Axis.Y:
-             self._target.setY(value)
+            self._target.setY(value)
         else:
             raise IndexError(f'Error bad index for QPoint {item}')
 
@@ -243,7 +243,7 @@ class BalloonMetrics:
 
         pointer_rect_viewport = self._pointer_rect_viewport()
 
-        min_left_pointer, max_right_pointer  = self._calc_minleft_maxright_pointer_base(pointer_rect_viewport)
+        min_left_pointer, max_right_pointer = self._calc_minleft_maxright_pointer_base(pointer_rect_viewport)
 
         translation = self._outer.topLeft() * -1
         result = [point + translation for point in self._pointer]
@@ -355,7 +355,7 @@ class BalloonMetrics:
 
         result = Pointer(*points)
 
-        return  self._add_override_offset_pointer(result)
+        return self._add_override_offset_pointer(result)
 
     @property
     def pointer_rect(self):
@@ -478,7 +478,7 @@ class BalloonMetrics:
 
         self._raise_invalid_if_required()
 
-        min_left, max_right  = self._calc_minleft_maxright_pointer_base(self._pointer_rect)
+        min_left, max_right = self._calc_minleft_maxright_pointer_base(self._pointer_rect)
 
         pointer_width_2 = self.pointer_width/2
 

@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-22 09:51:59 +0100 (Tue, June 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-23 20:16:47 +0100 (Wed, June 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -107,19 +107,14 @@ from ccpn.util.decorators import logCommand, singleton
 from ccpn.util.Path import aPath
 
 
-
+# updated ccpnInternal settings
 INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
 INCLUDENEGATIVECONTOURS = 'includeNegativeContours'
-SPECTRUMAXES = 'spectrumAxesOrdering'
-SPECTRUMPREFERREDAXISORDERING = 'spectrumPreferredAxisOrdering'
-
-SPECTRUMALIASING = 'spectrumAliasing'
-MAXALIASINGRANGE = 3
-
+PREFERREDAXISORDERING = 'preferredAxisOrdering'
+SERIESITEMS = '_seriesItems'
 DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
-SPECTRUMSERIES = 'spectrumSeries'
-SPECTRUMSERIESITEMS = 'spectrumSeriesItems'
 
+MAXALIASINGRANGE = 3
 
 #=========================================================================================
 # Decorators to define the Spectrum attributes to be copied
@@ -447,24 +442,20 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def includePositiveContours(self):
         """Include flag for the positive contours
         """
-        result = self._ccpnInternalData.get(INCLUDEPOSITIVECONTOURS)
+        result = self._getInternalParameter(INCLUDEPOSITIVECONTOURS)
         if result is None:
-            tempCcpn = self._ccpnInternalData.copy()
-            result = tempCcpn[INCLUDEPOSITIVECONTOURS] = True
-            self._ccpnInternalData = tempCcpn
+            # default to True
+            return True
         return result
 
     @includePositiveContours.setter
     def includePositiveContours(self, value: bool):
         """Include flag for the positive contours
         """
-        if not isinstance(self._ccpnInternalData, dict):
-            raise ValueError("Spectrum.includePositiveContours: CCPN internal must be a dictionary")
+        if not isinstance(value, bool):
+            raise ValueError("Spectrum.includePositiveContours: must be True/False")
 
-        # copy needed to ensure that the v2 registers the change, and marks instance for save.
-        tempCcpn = self._ccpnInternalData.copy()
-        tempCcpn[INCLUDEPOSITIVECONTOURS] = value
-        self._ccpnInternalData = tempCcpn
+        self._setInternalParameter(INCLUDEPOSITIVECONTOURS, value)
 
     @property
     @_includeInCopy
@@ -511,24 +502,20 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def includeNegativeContours(self):
         """Include flag for the negative contours
         """
-        result = self._ccpnInternalData.get(INCLUDENEGATIVECONTOURS)
+        result = self._getInternalParameter(INCLUDENEGATIVECONTOURS)
         if result is None:
-            tempCcpn = self._ccpnInternalData.copy()
-            result = tempCcpn[INCLUDENEGATIVECONTOURS] = True
-            self._ccpnInternalData = tempCcpn
+            # default to True
+            return True
         return result
 
     @includeNegativeContours.setter
     def includeNegativeContours(self, value: bool):
         """Include flag for the negative contours
         """
-        if not isinstance(self._ccpnInternalData, dict):
-            raise ValueError("Spectrum.includeNegativeContours: CCPN internal must be a dictionary")
+        if not isinstance(value, bool):
+            raise ValueError("Spectrum.includeNegativeContours: must be True/False")
 
-        # copy needed to ensure that the v2 registers the change, and marks instance for save.
-        tempCcpn = self._ccpnInternalData.copy()
-        tempCcpn[INCLUDENEGATIVECONTOURS] = value
-        self._ccpnInternalData = tempCcpn
+        self._setInternalParameter(INCLUDENEGATIVECONTOURS, value)
 
     @property
     @_includeInCopy
@@ -1642,26 +1629,20 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def displayFoldedContours(self):
         """Return whether the folded spectrum contours are to be displayed
         """
-        alias = self.getParameter(SPECTRUMALIASING, DISPLAYFOLDEDCONTOURS)
-        if alias is not None:
-            return alias
-
-        # set default values in the ccpnInternal store
-        alias = True
-
-        # don't need to notify this - it can be set every time if needed
-        with notificationBlanking():
-            self.setParameter(SPECTRUMALIASING, DISPLAYFOLDEDCONTOURS, alias)
-        return alias
+        result = self._getInternalParameter(DISPLAYFOLDEDCONTOURS)
+        if result is None:
+            # default to True
+            return True
+        return result
 
     @displayFoldedContours.setter
     def displayFoldedContours(self, value):
         """Set whether the folded spectrum contours are to be displayed
         """
         if not isinstance(value, bool):
-            raise ValueError("displayFoldedContours must be True/False.")
+            raise ValueError("Spectrum.displayFoldedContours: must be True/False.")
 
-        self.setParameter(SPECTRUMALIASING, DISPLAYFOLDEDCONTOURS, value)
+        self._setInternalParameter(DISPLAYFOLDEDCONTOURS, value)
 
     @property
     def aliasingValues(self) -> Optional[Tuple[Tuple, ...]]:
@@ -1684,7 +1665,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def _seriesItems(self):
         """Return a tuple of the series items for the spectrumGroups
         """
-        items = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+        items = self._getInternalParameter(SERIESITEMS)
         if items is not None:
             series = ()
             for sg in self.spectrumGroups:
@@ -1717,16 +1698,16 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             if len(diffItems) > 2 or (len(diffItems) == 2 and type(None) not in diffItems):
                 raise ValueError('Items must be of the same type (or None)')
 
-            seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+            seriesItems = self._getInternalParameter(SERIESITEMS)
             for sg, item in zip(self.spectrumGroups, items):
                 if seriesItems:
                     seriesItems[sg.pid] = item
                 else:
                     seriesItems = {sg.pid: item}
-            self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, seriesItems)
+            self._setInternalParameter(SERIESITEMS, seriesItems)
 
         else:
-            self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, None)
+            self._setInternalParameter(SERIESITEMS, None)
 
     def _getSeriesItem(self, spectrumGroup):
         """Return the series item for the current spectrum for the selected spectrumGroup
@@ -1739,7 +1720,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if self not in spectrumGroup.spectra:
             raise ValueError('Spectrum %s does not belong to spectrumGroup %s' % (str(self), str(spectrumGroup)))
 
-        seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+        seriesItems = self._getInternalParameter(SERIESITEMS)
         if seriesItems and spectrumGroup.pid in seriesItems:
             return seriesItems[spectrumGroup.pid]
 
@@ -1756,30 +1737,30 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if self not in spectrumGroup.spectra:
             raise ValueError('Spectrum %s does not belong to spectrumGroup %s' % (str(self), str(spectrumGroup)))
 
-        seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+        seriesItems = self._getInternalParameter(SERIESITEMS)
 
         if seriesItems:
             seriesItems[spectrumGroup.pid] = item
         else:
             seriesItems = {spectrumGroup.pid: item}
-        self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, seriesItems)
+        self._setInternalParameter(SERIESITEMS, seriesItems)
 
     def _renameSeriesItems(self, spectrumGroup, oldPid):
         """rename the keys in the seriesItems to reflect the updated spectrumGroup name
         """
-        seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+        seriesItems = self._getInternalParameter(SERIESITEMS)
         if oldPid in (seriesItems if seriesItems else ()):
             # insert new items with the new pid
             oldItems = seriesItems[oldPid]
             del seriesItems[oldPid]
             seriesItems[spectrumGroup.pid] = oldItems
-            self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, seriesItems)
+            self._setInternalParameter(SERIESITEMS, seriesItems)
 
     def _getSeriesItemsById(self, id):
         """Return the series item for the current spectrum by 'id'
         CCPNINTERNAL: used in creating new spectrumGroups - not for external use
         """
-        seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+        seriesItems = self._getInternalParameter(SERIESITEMS)
         if seriesItems and id in seriesItems:
             return seriesItems[id]
 
@@ -1787,43 +1768,22 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """Set the series item for the current spectrum by 'id'
         CCPNINTERNAL: used in creating new spectrumGroups - not for external use
         """
-        seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+        seriesItems = self._getInternalParameter(SERIESITEMS)
         if seriesItems:
             seriesItems[id] = item
         else:
             seriesItems = {id: item}
-        self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, seriesItems)
+        self._setInternalParameter(SERIESITEMS, seriesItems)
 
     def _removeSeriesItemsById(self, spectrumGroup, id):
         """Remove the keys in the seriesItems allocated to 'id'
         CCPNINTERNAL: used in creating new spectrumGroups - not for external use
         """
         # useful for storing an item
-        seriesItems = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+        seriesItems = self._getInternalParameter(SERIESITEMS)
         if id in seriesItems:
             del seriesItems[id]
-            self.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, seriesItems)
-
-    # @property
-    # def folding(self) -> Tuple:
-    #     """return a tuple of folding values for dimensions
-    #     """
-    #     result = ()
-    #     for dataDim in self._wrappedData.sortedDataDims():
-    #         expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
-    #         if expDimRef is None:
-    #             result += (None,)
-    #         else:
-    #             result += (expDimRef.isFolded,)
-    #
-    #     return result
-    #
-    # @folding.setter
-    # def folding(self, values):
-    #     if len(values) != len(self._wrappedData.sortedPeakDims()):
-    #         raise ValueError("Length of %s does not match number of dimensions." % str(values))
-    #     if not all(isinstance(dimVal, bool) for dimVal in values):
-    #         raise ValueError("Folding values must be True/False.")
+            self._setInternalParameter(SERIESITEMS, seriesItems)
 
     @property
     def temperature(self):
@@ -1843,13 +1803,11 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def preferredAxisOrdering(self):
         """Return the preferred ordering for the axis codes when opening a new spectrumDisplay
         """
-        order = self.getParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING)
-        if order is not None:
-            return order
-
-        # set default ordering
-        self.setParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING, None)
-        return None
+        result = self._getInternalParameter(PREFERREDAXISORDERING)
+        if result is None:
+            # default to None
+            return None
+        return result
 
     @preferredAxisOrdering.setter
     def preferredAxisOrdering(self, order):
@@ -1866,7 +1824,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if len(set(order)) != len(order):
             raise ValueError('order must contain unique elements')
 
-        self.setParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING, order)
+        self._setInternalParameter(PREFERREDAXISORDERING, order)
 
     #-----------------------------------------------------------------------------------------
     # Library functions
@@ -2796,12 +2754,67 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             if not self.sliceColour:
                 self.sliceColour = self.positiveContourColour
 
+    def _updateEdgeToAlpha1(self):
+        """Update the _ccpnInternal settings from version3.0.4 -> 3.1.0.alpha
+        """
+        if not isinstance(self._ccpnInternalData, dict):
+            return
+
+        # deprecated ccpnInternal settings
+        SPECTRUMAXES = 'spectrumAxesOrdering'
+        SPECTRUMPREFERREDAXISORDERING = 'spectrumPreferredAxisOrdering'
+        SPECTRUMALIASING = 'spectrumAliasing'
+        SPECTRUMSERIES = 'spectrumSeries'
+        SPECTRUMSERIESITEMS = 'spectrumSeriesItems'
+
+        # include positive/negative contours
+        if INCLUDEPOSITIVECONTOURS in self._ccpnInternalData:
+            value = self._ccpnInternalData.get(INCLUDEPOSITIVECONTOURS)
+            self._setInternalParameter(INCLUDEPOSITIVECONTOURS, value)
+            del self._ccpnInternalData[INCLUDEPOSITIVECONTOURS]
+
+        if INCLUDENEGATIVECONTOURS in self._ccpnInternalData:
+            value = self._ccpnInternalData.get(INCLUDENEGATIVECONTOURS)
+            self._setInternalParameter(INCLUDENEGATIVECONTOURS, value)
+            del self._ccpnInternalData[INCLUDENEGATIVECONTOURS]
+
+        # spectrum preferred axis order
+        if self.hasParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING):
+            value = self.getParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING)
+            if value is not None:
+                self._setInternalParameter(PREFERREDAXISORDERING, value)
+
+        # spectrumgroup series items
+        if self.hasParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS):
+            value = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+            if value is not None:
+                self._setInternalParameter(SERIESITEMS, value)
+
+        # display folded contours
+        if self.hasParameter(SPECTRUMALIASING, DISPLAYFOLDEDCONTOURS):
+            value = self.getParameter(SPECTRUMALIASING, DISPLAYFOLDEDCONTOURS)
+            if value is not None:
+                self._setInternalParameter(DISPLAYFOLDEDCONTOURS, value)
+        # visibleAliasingRange/aliasingRange should already have gone
+
+        # remove unnecessary dict items
+        if SPECTRUMAXES in self._ccpnInternalData:
+            del self._ccpnInternalData[SPECTRUMAXES]
+        if SPECTRUMSERIES in self._ccpnInternalData:
+            del self._ccpnInternalData[SPECTRUMSERIES]
+        if SPECTRUMALIASING in self._ccpnInternalData:
+            del self._ccpnInternalData[SPECTRUMALIASING]
+
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Subclassed to allow for initialisations on restore, not on creation via newSpectrum
         """
         spectrum = super()._restoreObject(project, apiObj)
         dataStore = None
+
+        # NOTE - version 3.0.4 -> 3.1.0.alpha update
+        # move parameters from _ccpnInternal to the correct namespace, delete old parameters
+        spectrum._updateEdgeToAlpha1()
 
         try:
             # Restore the dataStore info

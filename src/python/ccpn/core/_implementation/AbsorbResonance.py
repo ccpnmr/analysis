@@ -5,7 +5,8 @@ Additional methods for Resonance class
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 12:06:48 +0000 (Tue, March 23, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-23 17:33:29 +0100 (Wed, June 23, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -138,7 +139,14 @@ def absorbResonance(self: 'NmrAtom', nmrAtom) -> 'NmrAtom':
     for shiftA in selfApi.shifts:
         for shiftB in resonanceB.shifts:
             if shiftA.parentList is shiftB.parentList:
+                # average the shift, but take the maximum figureOfMerit and error
+                _value = ((shiftA.value + shiftB.value) / 2.0) #if None not in (shiftA.value, shiftB.value) else None
+                _figOfMerit = max(shiftA.figOfMerit, shiftB.figOfMerit) #if None not in (shiftA.figOfMerit, shiftB.figOfMerit) else None
+                _error = max(shiftA.error, shiftB.error) #if None not in (shiftA.error, shiftB.error) else None
                 shiftA = mergeObjects(project, shiftB, shiftA, _useV3Delete=True)
+                shiftA.value = _value
+                shiftA.figOfMerit = _figOfMerit
+                shiftA.error = _error
 
     # Get rid of duplicate appData
     for appData in selfApi.applicationData:

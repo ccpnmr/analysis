@@ -1603,7 +1603,8 @@ class Project(AbstractWrapperObject):
         """
         #CCPNINTERNAL: used in Excel data loader
         with undoBlock():
-            ExcelReader(project=self, excelPath=path)
+            reader = ExcelReader(project=self, excelPath=path)
+            reader.load()
 
     # def _loadLookupFile(self, path: str, subType: str, ):
     #     """Load data from a look-up file, csv or xls ."""

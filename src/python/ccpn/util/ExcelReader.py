@@ -215,6 +215,10 @@ class ExcelReader(object):
         # with undoBlockWithoutSideBar():
         #     getLogger().info('Loading Excel File...')
         #     with notificationEchoBlocking():
+
+    def load(self):
+        """Load the actual data in the the project
+        """
         self._tempSpectrumGroupsSpectra = {}  # needed to improve the loading speed
         self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
         self.samplesDicts = self._createSamplesDataDicts(self.dataframes)

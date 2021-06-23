@@ -54,7 +54,7 @@ class FastaDataLoader(DataLoaderABC):
     def load(self):
         """The actual Nef loading method;
         raises RunTimeError on error
-        :return: a list of [project]
+        :return: a list of [chains]
         """
         # with logCommand('application.loadData(%r)' % self.path):
 

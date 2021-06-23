@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-27 17:07:38 +0100 (Thu, May 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-23 10:29:30 +0100 (Wed, June 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -516,11 +516,11 @@ class Peak(AbstractWrapperObject):
         _post = set(makeIterableList(self.assignedNmrAtoms))
         _cs = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt.chemicalShifts]))
 
-        def _deleteChemShifts(shifts):
-            """Delete chemicalShifts that have no attached peaks"""
-            _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
-            for cs in _delCS:
-                cs.delete()
+        # def _deleteChemShifts(shifts):
+        #     """Delete chemicalShifts that have no attached peaks"""
+        #     _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
+        #     for cs in _delCS:
+        #         cs.delete()
 
         with undoBlockWithoutSideBar(application=_app):
             # add notifiers to stack
@@ -532,7 +532,7 @@ class Peak(AbstractWrapperObject):
             self._dimensionNmrAtoms = value
 
             _csNew = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt.chemicalShifts]))
-            _deleteChemShifts(_cs)
+            # _deleteChemShifts(_cs)
             for cs in _cs:
                 cs._finaliseAction('change')
             for cs in _csNew - _cs:
@@ -646,11 +646,11 @@ class Peak(AbstractWrapperObject):
         _post = set(makeIterableList(self.assignedNmrAtoms))
         _cs = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt.chemicalShifts]))
 
-        def _deleteChemShifts(shifts):
-            """Delete chemicalShifts that have no attached peaks"""
-            _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
-            for cs in _delCS:
-                cs.delete()
+        # def _deleteChemShifts(shifts):
+        #     """Delete chemicalShifts that have no attached peaks"""
+        #     _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
+        #     for cs in _delCS:
+        #         cs.delete()
 
         with undoBlockWithoutSideBar(application=_app):
             # add notifiers to stack
@@ -662,7 +662,7 @@ class Peak(AbstractWrapperObject):
             self._assignedNmrAtoms = value
 
             _csNew = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt.chemicalShifts]))
-            _deleteChemShifts(_cs)
+            # _deleteChemShifts(_cs)
             for cs in _cs:
                 cs._finaliseAction('change')
             for cs in _csNew - _cs:
@@ -738,18 +738,17 @@ class Peak(AbstractWrapperObject):
 
         # store the currently attached nmrAtoms
         _pre = set(makeIterableList(dimensionNmrAtoms))
-
         dimensionNmrAtoms[index] = value
-
         _post = set(makeIterableList(dimensionNmrAtoms))
+
         _cs = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt.chemicalShifts]))
         _app = self.project.application
 
-        def _deleteChemShifts(shifts):
-            """Delete chemicalShifts that have no attached peaks"""
-            _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
-            for cs in _delCS:
-                cs.delete()
+        # def _deleteChemShifts(shifts):
+        #     """Delete chemicalShifts that have no attached peaks"""
+        #     _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
+        #     for cs in _delCS:
+        #         cs.delete()
 
         with undoBlockWithoutSideBar(application=_app):
             # add notifiers to stack
@@ -760,7 +759,7 @@ class Peak(AbstractWrapperObject):
             # set the value
             self._dimensionNmrAtoms = dimensionNmrAtoms
             _csNew = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt.chemicalShifts]))
-            _deleteChemShifts(_cs)
+            # _deleteChemShifts(_cs)
             for cs in _cs - _csNew:
                 cs._finaliseAction('change')
             for cs in _csNew - _cs:
@@ -945,11 +944,11 @@ class Peak(AbstractWrapperObject):
         _cs = set(makeIterableList([shift for nmrAt in _pre for shift in nmrAt.chemicalShifts]))
         _app = self.project.application
 
-        def _deleteChemShifts(shifts):
-            """Delete chemicalShifts that have no attached peaks"""
-            _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
-            for cs in _delCS:
-                cs.delete()
+        # def _deleteChemShifts(shifts):
+        #     """Delete chemicalShifts that have no attached peaks"""
+        #     _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
+        #     for cs in _delCS:
+        #         cs.delete()
 
         with undoBlockWithoutSideBar(application=_app):
             # add notifiers to stack
@@ -960,7 +959,7 @@ class Peak(AbstractWrapperObject):
 
             # delete the peak - notifiers handled by decorator
             self._delete()
-            _deleteChemShifts(_cs)
+            # _deleteChemShifts(_cs)
             for cs in _cs:
                 # NOTE:ED - check whether recalculate is firing any notifiers
                 cs.recalculateShiftValue()

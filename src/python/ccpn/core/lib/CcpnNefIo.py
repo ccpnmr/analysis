@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-17 18:25:42 +0100 (Thu, June 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-23 20:01:47 +0100 (Wed, June 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -6794,7 +6794,7 @@ class CcpnNefReader(CcpnNefContent):
 
     def _defaultName(self, cls, serial):
         # Get the next class name using serial, this may already exist
-        return '%s_%s' % (cls._defaultName, serial)
+        return '%s_%s' % (cls._defaultName(), serial)
 
     def fetchDataSet(self, serial: int = None):
         """Fetch DataSet with given serial.

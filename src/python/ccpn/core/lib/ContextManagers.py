@@ -5,8 +5,7 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:57 +0100 (Tue, April 20, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: varioustoxins $"
+__dateModified__ = "$dateModified: 2021-06-13 17:12:08 +0100 (Sun, June 13, 2021) $"
+__version__ = "$Revision: 3.0.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,6 +31,9 @@ import traceback
 from contextlib import contextmanager
 from collections.abc import Iterable
 from functools import partial
+
+from PyQt5.QtGui import QPainter
+
 from ccpn.core.lib import Util as coreUtil
 from inspect import signature, Parameter
 from ccpn.util.Logging import getLogger
@@ -1009,6 +1011,26 @@ def queueStateChange(verify):
     return theDecorator
 
 
+class PaintContext:
+    """context manager for closing painters correctly"""
+    def __init__(self, painter):
+        self._painter = painter
+
+    def __enter__(self):
+        return self._painter
+
+    def __exit__(self, *args):
+        self._painter.end()
+        return True
+
+
+class AntiAliasedPaintContext(PaintContext):
+
+    def __init__(self, painter):
+        super(AntiAliasedPaintContext, self).__init__(painter)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.HighQualityAntialiasing)
+
 # if __name__ == '__main__':
 #     # check that the undo mechanism is working with the new context managers
 #     from sandbox.Geerten.Refactored.framework import Framework, getApplication, getProject, getColourScheme
@@ -1096,3 +1118,4 @@ if __name__ == '__main__':
     print(f'>>> {application.project._undo}')
     for value in application.project._undo:
         print(f'>>>   {value}')
+

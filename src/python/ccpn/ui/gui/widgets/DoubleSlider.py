@@ -1,15 +1,15 @@
 import sys
 
-
 from PyQt5 import QtGui
 from PyQt5.QtCore import QPointF, QRectF, Qt, QTimer, QObject, QRect, QPoint, pyqtProperty
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QLinearGradient, QBrush, QFont, QFontMetrics, QCursor, \
-    QGuiApplication
+    QGuiApplication, QIcon, QScreen
 from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsItem, QGraphicsItemGroup, QGraphicsRectItem, QLabel, \
-    QWidget, QGraphicsObject, QCheckBox, QLineEdit, QFormLayout
+    QWidget, QGraphicsObject, QCheckBox, QLineEdit, QFormLayout, QTextEdit, QToolButton, QDialog, \
+    QComboBox, QStyle
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
-from SpeechBalloon import SpeechBalloon, DoubleLabel
+from SpeechBalloon import SpeechBalloon, DoubleLabel, Side
 
 # class MyGraphicsScene(QGraphicsScene):
 #     def drawBackground(self, painter, rect):
@@ -47,6 +47,12 @@ LEFT = 0
 RIGHT = 1
 BOTH = 2
 
+OPPOSITE_SIDES = {
+    Side.TOP: Side.BOTTOM,
+    Side.BOTTOM: Side.TOP,
+    Side.LEFT: Side.RIGHT,
+    Side.RIGHT: Side.LEFT
+}
 
 class DoubleRangeView(QGraphicsView):
     # signals
@@ -64,8 +70,6 @@ class DoubleRangeView(QGraphicsView):
         self._slider.setName('slider')
 
         self._balloon = SpeechBalloon(owner=self, on_top=True)
-        self._balloon.setStyleSheet('color: gray;')
-        # self._balloon.setGeometry(200, 200, 70, 30)
 
         label = DoubleLabel(parent=self._balloon)
         self._balloon.setCentralWidget(label)
@@ -180,7 +184,6 @@ class DoubleRangeView(QGraphicsView):
         scene_rect = self.sceneRect()
         if global_system:
             global_pos = self.mapToGlobal(scene_rect.topLeft().toPoint())
-            # ic(global_pos)
             scene_rect = QRect(global_pos, scene_rect.size().toSize())
 
         min_x = scene_rect.left() + self._slider._handle_left.width() / 2
@@ -209,7 +212,6 @@ class DoubleRangeView(QGraphicsView):
         self._slider.removeFromGroup(self._slider._handle_right)
 
         centre_min_width_2 = self._slider._centre.min_width() / 2
-        # ic(centre_min_width_2)
 
         # TODO WHY A FACTOR OF 0.5..
         left_slider_position = positions[LEFT] - centre_min_width_2 - (self._slider._handle_left.width() / 2) + 0.5
@@ -291,7 +293,7 @@ class DoubleRangeView(QGraphicsView):
         super(DoubleRangeView, self).showEvent(event)
         self.rangeChanged.emit(self._min_value, self._max_value)
         self.valuesChanged.emit(*self._values)
-        display_values = [self._calculate_display_value(value) for value in self._values]
+        display_values = self._calculate_display_values(self._values)
         self.displayValues.emit(*display_values)
 
     def _calculate_min_max_pixel_ranges(self):
@@ -339,7 +341,7 @@ class DoubleRangeView(QGraphicsView):
         self._values = values
 
         self.valuesChanged.emit(int(values[LEFT]), int(values[RIGHT]))
-        display_values = [self._calculate_display_value(value) for value in values]
+        display_values = self._calculate_display_values(values)
         self.displayValues.emit(*display_values)
 
     def _calculate_values(self):
@@ -507,17 +509,22 @@ class DoubleRangeView(QGraphicsView):
 
     def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
 
-        pos = event.pos()
-        scene_pos = self.mapToScene(pos)
-        item_pos = self._track.mapFromScene(scene_pos)
-        self._track._line_pos = item_pos.x()
-        self._track.update()
-
         if self._enabled:
+            pos = event.pos()
+            scene_pos = self.mapToScene(pos)
+            item_pos = self._track.mapFromScene(scene_pos)
+            slider_scene_rect = self._slider.sceneRect()
+
+            self._track._line_pos = item_pos.x()
+            self._track.update()
+
+            slider_state = self._slider._long_click_state
+            last_click_widget = self._slider._last_click_widget
+
             control_rect = self.geometry()
             control_rect = QRect(self.mapToGlobal(control_rect.topLeft()), control_rect.size())
 
-            if self._slider._long_click_state == self._slider.INSIDE:
+            if slider_state == self._slider.INSIDE:
                 min_x, max_x = self._calculate_min_max_handle_centre_positions(global_system=True)
             else:
                 # TODO: needs limiting by position of handles...
@@ -531,43 +538,38 @@ class DoubleRangeView(QGraphicsView):
 
             balloon_pos = QPoint(int(event_x), int(control_rect.top() - 4))
 
-            value = self._position_to_value(balloon_pos.x())
-
             self._balloon.show()
             self._balloon.move_pointer_to(balloon_pos)
 
-            display_value = None
-            if self._slider._long_click_state == self._slider.INSIDE:
-                if self._slider._last_click_widget == self._slider._handle_left:
-                    display_value = self._values[LEFT]
-                elif self._slider._last_click_widget == self._slider._handle_right:
-                    display_value = self._values[RIGHT]
-            else:
-                display_value = self._calculate_display_value(value)
-
-            if self._slider.sceneRect().contains(scene_pos)  and self._slider._long_click_state == self._slider.OUTSIDE \
-               or self._slider._long_click_state == self._slider.SINGLE:
+            if slider_state == self._slider.INSIDE:
+                if last_click_widget == self._slider._handle_left:
+                    values = [self._values[LEFT]]
+                elif last_click_widget == self._slider._handle_right:
+                    values = [self._values[RIGHT]]
+            elif slider_scene_rect.contains(scene_pos) and slider_state == self._slider.OUTSIDE:
                 values = list(self._values)
-                if values[0] == values[1]:
-                    values = [values[0]]
+            elif slider_state == self._slider.SINGLE:
+                values = list(self._values)
+            else:
+                values = [self._position_to_value(event_x)]
 
-                display_values = [self._value_formatter(self._value_converter(value)) for value in values]
-                self._balloon.centralWidget().setLabels(display_values)
+            if len(values) == 2 and (values[0] == values[1]):
+                values = [values[0]]
 
-            elif display_value:
-                if self._value_formatter:
-                    value_string = self._value_formatter(display_value)
-                else:
-                    value_string = '%4.1f' % value
-                self._balloon.centralWidget().setLabels([value_string])
+            display_values = self._calculate_display_values(values)
+            display_strings = ['%4.1f' % value for value in display_values]
+
+            self._balloon.centralWidget().setLabels(display_strings)
 
         return super(DoubleRangeView, self).mouseMoveEvent(event)
 
-    def _calculate_display_value(self, value):
-        display_value = value
+    def _calculate_display_values(self, values):
+        result = list(values)
+
         if self._value_converter:
-            display_value = self._value_converter(display_value)
-        return display_value
+            for i, value in enumerate(values):
+                result[i] = self._value_converter(value)
+        return result
 
     def leaveEvent(self, event):
         super(DoubleRangeView, self).leaveEvent(event)
@@ -1365,12 +1367,73 @@ class SetOneOf(QObject):
         else:
             raise Exception('unexpected')
 
-        # ic(results)
         results = list(results)
         results[self._index] = value
         results = [int(result) for result in results]
-        # ic(results)
+
         self.output.emit(tuple(results))
+
+
+class PopoverButton(QToolButton):
+
+    def __init__(self, balloon_side=Side.BOTTOM, *args, **kwargs):
+
+        super(PopoverButton, self).__init__(*args, **kwargs)
+
+        self.setFocusPolicy(Qt.NoFocus)
+
+        self._balloon_side = balloon_side
+        self._speech_balloon = SpeechBalloon(side=OPPOSITE_SIDES[balloon_side])
+        self._speech_balloon.setWindowFlags(self._speech_balloon.windowFlags()| Qt.Popup)
+
+        self.pressed.connect(self._press_handler)
+        # self.setArrowType(Qt.DownArrow)
+        self.setStyleSheet('''
+                        border-style: solid;
+                        border-color: grey;
+                        border-width: 1px;
+                        border-radius: 3px;
+                        ''')
+
+        # self.setAttribute(Qt.WA_MacShowFocusRect, 0)
+        path='/Users/garythompson/Dropbox/git/ccpnmr/ccpnmr_3.0.3.edge_gwv6/src/python/ccpn/ui/gui/widgets/icons/exclamation.png'
+        self.setIcon(QIcon(path))
+
+        self._event_filter = None
+
+
+    @pyqtProperty(Side)
+    def balloonSide(self):
+        return self._balloon_side
+
+    @balloonSide.setter
+    def balloonSide(self, balloonSide):
+        self.setBalloonSide(side)
+
+    def setBalloonSide(self, side):
+        self._balloon_side = side
+        self._speech_balloon.pointerSide = OPPOSITE_SIDES[self._balloon_side]
+
+    def _get_mouse_screen(self):
+
+        position = QCursor.pos()
+
+        result = None
+        for screen in QGuiApplication.screens():
+            if screen.geometry().contains(position):
+                result = screen
+                break
+
+        return result
+
+    def _press_handler(self):
+
+        global_rect = QRect(self.mapToGlobal(QPoint(0, 0)), self.geometry().size())
+        mouse_screen = self._get_mouse_screen()
+        self._speech_balloon.showAt(global_rect, preferred_side=self._balloon_side, target_screen=mouse_screen)
+
+    def popover(self):
+        return self._speech_balloon
 
 
 if __name__ == '__main__':
@@ -1379,6 +1442,17 @@ if __name__ == '__main__':
     window = QMainWindow()
 
     widget = QWidget()
+
+    test_button = PopoverButton(balloon_side=Side.RIGHT)
+    label = QTextEdit('test2')
+
+    test_button.popover().setCentralWidget(label)
+
+    side_list = QComboBox()
+    for side in Side:
+        side_list.addItem(str(side.name), side)
+    side_list.setCurrentIndex(OPPOSITE_SIDES[Side.LEFT])
+    side_list.currentIndexChanged.connect(lambda: test_button.setBalloonSide(side_list.itemData(side_list.currentIndex(), Qt.UserRole)))
 
     left_value_display = QLabel()
     left_value_display.setText('unknown')
@@ -1400,6 +1474,8 @@ if __name__ == '__main__':
     right_value_edit = QLineEdit()
 
     v_layout = QFormLayout()
+    v_layout.addRow('Test button', test_button)
+    v_layout.addRow('Side selector', side_list)
     v_layout.addRow('Left Value [signal]', left_value_display)
     v_layout.addRow('Right Value [signal]', right_value_display)
     v_layout.addRow('Min Value [signal]', min_value_display)
@@ -1484,6 +1560,7 @@ if __name__ == '__main__':
     view.setEnabled(True)
     bar.addWidget(view)
 
+    window.setGeometry(QStyle.alignedRect(Qt.LeftToRight, Qt.AlignCenter, window.size(), QGuiApplication.screens()[0].availableGeometry()))
     window.show()
 
     app.exec_()

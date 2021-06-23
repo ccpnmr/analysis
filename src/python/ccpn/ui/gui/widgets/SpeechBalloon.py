@@ -1,24 +1,30 @@
-import string
+
+
+# TODO needs to pin base of pointer if show at will move pointer below
+# TODO needs a license
+# TODO display of body rect gives double thickness lines, anti aliasing bug?
+# TODO it would be good to clip the interior widget for edge to edge views
+# TODO it would be good to check the recommendations in https://www.vikingsoftware.com/creating-custom-widgets
+# TODO override offset could have a better name
+# TODO profile
+# TODO balloon pointer is clipped when outside original bounding rect
+
 import sys
-from enum import IntEnum
-from math import sqrt, ceil, floor
+from functools import singledispatchmethod
+from typing import Optional, List
 
 from PyQt5 import QtGui, QtCore
-from PyQt5.QtCore import QRectF, Qt, QRect, QPoint, pyqtProperty, QTimer
+from PyQt5.QtCore import QRectF, Qt, QRect, QPoint, pyqtProperty, QTimer, QEvent, QSize
 from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QBrush, QPolygon, QPolygonF, QPixmap, QPalette, QCursor, \
-    QGuiApplication, QFontMetrics
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QLayout, QTableWidget, QTableWidgetItem, QFrame
-# from icecream import ic
+    QFontMetrics, QGuiApplication
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QFrame
 
-
-class Side(IntEnum):
-    TOP = 1
-    LEFT = 0
-    RIGHT = 2
-    BOTTOM = 3
-
+from BalloonMetrics import Side, BalloonMetrics, OPPOSITE_SIDES, rect_get_side, calc_side_distance_outside_rect, \
+    SIDE_AXIS, OPPOSITE_AXIS
+from ccpn.core.lib.ContextManagers import AntiAliasedPaintContext
 
 DEFAULT_SEPARATOR = '|'
+
 LEFT_LABEL = 0
 MIDDLE_LABEL = 1
 RIGHT_LABEL = 2
@@ -40,7 +46,7 @@ class MyApplication(QApplication):
 
 
 class SpeechBalloon(QWidget):
-    """
+    r""" Popover window class
         inspired by but not sharing any code with FUKIDASHI
         aka https://github.com/sharkpp/qtpopover (MIT licensed!)
 
@@ -59,186 +65,136 @@ class SpeechBalloon(QWidget):
         self.setWindowFlags(flags)
         self.setAttribute(Qt.WA_NoSystemBackground)
 
-        layout = QGridLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.setSizeConstraint(QLayout.SetFixedSize)
-        self.setLayout(layout)
+        self._metrics: BalloonMetrics = BalloonMetrics()
 
-        self._pointer_height = 10
-        self._pointer_width = 20
-        self._pointer_side = side
-        self._display_rect = self._calc_display_rect()
-        self._percentage = percentage / 100.0
+        self._metrics.pointer_height = 10
+        self._metrics.pointer_width = 20
+        self._metrics.pointer_side = side
+        self._metrics.alignment = percentage / 100.0
+        self._metrics.corner_radius = 3
 
-        self._corner_radius = 3
-        self._pen_width = 0
+        self._screen_margin: int = 10
 
-        self._owner = owner
+        self._pen_width: int = 0
 
-        self.setMargins()
+        self._owner: QWidget = owner
 
-    @pyqtProperty(int)
-    def cornerRadius(self):
-        return self._corner_radius
+        self._central_widget: Optional[QWidget] = None
 
-    @cornerRadius.setter
-    def cornerRadius(self, radius):
-        self._corner_radius = radius
-        self.update()
 
-    @pyqtProperty(int)
-    def pointerHeight(self):
-        return self._pointer_height
-
-    @pointerHeight.setter
-    def pointerHeight(self, height):
-        self._pointer_height = height
-        self.update()
-
-    @pyqtProperty(int)
-    def pointerWidth(self):
-        return self._pointer_width
-
-    @pointerWidth.setter
-    def pointerWidth(self, width):
-        self._pointer_width = width
-        self.update()
-
-    @pyqtProperty(Side)
-    def pointerSide(self):
-        return self._pointer_side
-
-    @pointerSide.setter
-    def pointerSide(self, side):
-        self._pointer_side = side
-        self.update()
-
-    @pyqtProperty(float)
-    def pointerSideOffset(self):
-        return self._percentage
-
-    @pointerSideOffset.setter
-    def pointerSideOffset(self, percentage):
-        self._percentage = percentage
-        self.update()
-
-    def _calc_display_rect(self):
-        result = self._calc_usable_rect()
-
-        offsets = [0, 0, 0, 0]
-        offset_direction = (1, 1, -1, -1)
-
-        side = int(self._pointer_side)
-        offsets[side] = self._pointer_height * offset_direction[side]
-
-        result.adjust(*offsets)
+    def event(self, event: QtCore.QEvent) -> bool:
+        if event.type() == QEvent.LayoutRequest:
+            self._layout()
+            result = True
+        else:
+            result = super(SpeechBalloon, self).event(event)
 
         return result
 
-    def _calc_usable_rect(self):
 
-        # this allows for anti-aliasing
-        return self.frameGeometry().adjusted(1, 1, -1, -1)
+    def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
+        super(SpeechBalloon, self).resizeEvent(event)
+        new_outer = QRect(self.geometry())
+        new_outer.setSize(event.size())
+        self._metrics.from_outer(new_outer)
+        self._central_widget.setGeometry(self._metrics.inner_viewport)
 
-    def _calc_local_usable_rect(self):
-        return self._rect_to_local(self._calc_usable_rect())
+    @pyqtProperty(int)
+    def cornerRadius(self):
+        return self._metrics.corner_radius
 
-    def resizeEvent(self, event):
-        self.setMask(self.window_mask())
+    @cornerRadius.setter
+    def cornerRadius(self, radius):
+        self._metrics.corner_radius = radius
+        self._metrics.reset()
+        self.updateGeometry()
+
+    @pyqtProperty(int)
+    def pointerHeight(self):
+        return self._metrics.pointer_height
+
+    @pointerHeight.setter
+    def pointerHeight(self, height):
+        self._metrics.pointer_height = height
+        self._metrics.reset()
+        self.updateGeometry()
+
+    @pyqtProperty(int)
+    def pointerWidth(self):
+        return self._metrics.pointer_width
+
+    @pointerWidth.setter
+    def pointerWidth(self, width):
+        self._metrics.pointer_width = width
+        self._metrics.reset()
+        self.updateGeometry()
+
+    @pyqtProperty(Side)
+    def pointerSide(self):
+        return self._metrics.pointer_side
+
+    @pointerSide.setter
+    def pointerSide(self, side):
+        self._metrics.pointer_side = side
+        self._metrics.reset()
+        self.updateGeometry()
+
+    @pyqtProperty(float)
+    def pointerAlignment(self):
+        return self._metrics.pointer_alignment
+
+    @pointerAlignment.setter
+    def pointerAlignment(self, alignment):
+        self.metrics.pointer_alignment = alignment
+        self._metrics.reset()
+        self.updateGeometry()
+
+    @pyqtProperty(int)
+    def screenMargin(self):
+        return self._screen_margin
+
+    @screenMargin.setter
+    def screenMargin(self, screen_margin):
+        self._screen_margin = screen_margin
+        self.updateGeometry()
 
     def paintEvent(self, a0: QtGui.QPaintEvent) -> None:
 
+        self.setMask(self.window_mask())
+
         painterPath = self.window_path()
 
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing, True)
+        with AntiAliasedPaintContext(QPainter(self)) as painter:
 
-        pal = self.palette()
-        fgColor = pal.color(QPalette.Active, QPalette.Text)
-        bgColor = pal.color(QPalette.Active, QPalette.Window)
+            pal = self.palette()
+            fgColor = pal.color(QPalette.Active, QPalette.Text)
+            bgColor = pal.color(QPalette.Active, QPalette.Window)
 
-        brush = QBrush(bgColor)
-        pen = QPen(fgColor)
-        pen.setWidth(self._pen_width)
-        painter.fillPath(painterPath, brush)
-        painter.strokePath(painterPath, pen)
+            brush = QBrush(bgColor)
+            pen = QPen(fgColor)
+            pen.setWidth(self._pen_width)
+            painter.fillPath(painterPath, brush)
+            painter.strokePath(painterPath, pen)
+
 
         return super(SpeechBalloon, self).paintEvent(a0)
 
-    def _get_pointer_position(self):
-        width = self._local_display_rect().width()
-        top = self._local_display_rect().top()
-        bottom = self._local_display_rect().bottom()
-        left = self._local_display_rect().left()
-        right = self._local_display_rect().right()
-        height = self._local_display_rect().height()
-
-        pointer_height = self._pointer_height
-
-        pointer_width_2 = int(self._pointer_width / 2)
-
-        pointer_pos = None
-        if self._pointer_side in (Side.TOP, Side.BOTTOM):
-            min_pos_x = pointer_width_2 + self._corner_radius
-            max_pos_x = width - pointer_width_2 - self._corner_radius
-            pointer_pos_x = int(min_pos_x + ((max_pos_x - min_pos_x) * self._percentage))
-
-            if self._pointer_side == Side.TOP:
-                pointer_pos = QPoint(pointer_pos_x, top - pointer_height)
-            elif self._pointer_side == Side.BOTTOM:
-                pointer_pos = QPoint(pointer_pos_x, bottom + pointer_height)
-        else:
-            min_pos_y = self._corner_radius + pointer_width_2
-            max_pos_y = height - pointer_width_2 - self._corner_radius
-            pointer_pos_y = int(min_pos_y + ((max_pos_y - min_pos_y) * self._percentage))
-
-            if self._pointer_side == Side.LEFT:
-                pointer_pos = QPoint(left - pointer_height, pointer_pos_y)
-            elif self._pointer_side == Side.RIGHT:
-                pointer_pos = QPoint(right + pointer_height, pointer_pos_y)
-
-        return pointer_pos
-
     def window_path(self):
-        display_rect = QRectF(self._local_display_rect())
+
+        self._metrics.pointer_side = self._metrics.pointer_side
+
+        self._metrics.from_outer(self.frameGeometry())
 
         path = QPainterPath()
-        path.addRoundedRect(display_rect, self._corner_radius, self._corner_radius)
 
-        width = self._local_display_rect().width()
-        width_2 = int(width / 2)
-        top = self._local_display_rect().top()
-        bottom = self._local_display_rect().bottom()
-        left = self._local_display_rect().left()
-        right = self._local_display_rect().right()
-        # height = self._local_display_rect().height()
+        corner_radius = self._metrics.corner_radius
+        path.addRoundedRect(QRectF(self._metrics.body_rect_viewport), corner_radius, corner_radius)
 
-        pointer_width_2 = int(self._pointer_width / 2)
-
-        pointer_pos = self._get_pointer_position()
-        pointer_points = None
-        if self._pointer_side == Side.TOP:
-            pointer_points = [QPoint(pointer_pos.x() - pointer_width_2, top),
-                              pointer_pos,
-                              QPoint(pointer_pos.x() + pointer_width_2, top)]
-        elif self._pointer_side == Side.BOTTOM:
-            pointer_points = [QPoint(width_2 - pointer_width_2, bottom + 1),
-                              pointer_pos,
-                              QPoint(width_2 + pointer_width_2, bottom + 1)]
-        elif self._pointer_side == Side.LEFT:
-            pointer_points = [QPoint(left, pointer_pos.y() - pointer_width_2),
-                              pointer_pos,
-                              QPoint(left, pointer_pos.y() + pointer_width_2)]
-        elif self._pointer_side == Side.RIGHT:
-            pointer_points = [QPoint(right + 1, pointer_pos.y() - pointer_width_2),
-                              pointer_pos,
-                              QPoint(right + 1, pointer_pos.y() + pointer_width_2)]
-
-        pointer_polygon = QPolygonF(QPolygon(pointer_points))
+        pointer_polygon = QPolygonF(QPolygon(self._metrics.pointer_viewport))
         path.addPolygon(pointer_polygon)
 
         path = path.simplified()
+
         return path
 
     def window_mask(self):
@@ -246,62 +202,208 @@ class SpeechBalloon(QWidget):
 
         pixmap = QPixmap(int(path.boundingRect().width() + 2), int(path.boundingRect().height() + 2))
 
-        painter = QPainter()
+        with AntiAliasedPaintContext(QPainter(pixmap)) as painter:
 
-        painter.begin(pixmap)
+            brush = QBrush(QColor('white'))
+            painter.fillRect(pixmap.rect(), brush)
 
-        brush = QBrush(QColor('white'))
-        painter.fillRect(pixmap.rect(), brush)
+            brush = QBrush(QColor('black'))
+            painter.setBrush(brush)
 
-        brush = QBrush(QColor('black'))
-        painter.setBrush(brush)
+            painter.drawPath(path)
 
-        painter.drawPath(path)
-
-        painter.end()
 
         result = pixmap.createHeuristicMask(False)
 
         return result
 
-    def _local_display_rect(self):
-        self._display_rect = self._calc_display_rect()
-        local_display_rect = self._rect_to_local(self._display_rect)
-        return local_display_rect
-
-    def _rect_to_local(self, rect):
-        result = QRect()
-        result.setTopLeft(self.mapFromGlobal(rect.topLeft()))
-        result.setSize(rect.size())
-        return result
-
     def _pointer_offset(self):
 
-        pointer_pos = self.mapToGlobal(self._get_pointer_position())
+        pointer_pos = self.mapToGlobal(self._metrics.pointer_viewport.top)
 
         return pointer_pos - self.pos()
 
     def move_pointer_to(self, pos):
-        offset = self._pointer_offset()
 
-        self.setGeometry(QRect(pos - offset, self.geometry().size()))
+        self._metrics.pointer_position = pos
+
+        self.setGeometry(self._metrics.outer)
 
     def setCentralWidget(self, central_widget):
 
-        self.layout().addWidget(central_widget, 0, 0)
+        self._central_widget = central_widget
+
+        self._central_widget.setParent(self)
+        self._central_widget.show()
+
+
 
     def centralWidget(self):
-        children = [child for child in self.children() if isinstance(child, QWidget)]
-        result = children[0] if len(children) else None
+        return self._central_widget
+
+    def _central_widget_size(self):
+        result = self._central_widget.sizeHint()
+        if self._central_widget.minimumWidth() == self._central_widget.maximumWidth():
+            result.setWidth(self._central_widget.minimumWidth())
+        if self._central_widget.minimumHeight() == self._central_widget.maximumHeight():
+            result.setHeight(self._central_widget.minimumHeight())
         return result
 
-    def setMargins(self):
-        self.layout().setContentsMargins(0, 0, 0, 0)
-        corner_margin = self._corner_radius / sqrt(2)
-        corner_margin = int(ceil(corner_margin))
-        new_margins = [corner_margin, ] * 4
-        new_margins[self._pointer_side] += self._pointer_height
-        self.layout().setContentsMargins(*new_margins)
+    def _layout(self):
+
+
+        self._metrics.from_inner(QRect(QPoint(0, 0), self._central_widget_size()))
+
+        self.setGeometry(self._metrics.outer)
+
+        self._central_widget.setGeometry(self._metrics.inner_viewport)
+
+    def show(self):
+        self._central_widget.show()
+        super(SpeechBalloon, self).show()
+        self._layout()
+
+    @staticmethod
+    def _rect_middle_sides(global_rect: QRect):
+
+        width = global_rect.width()
+        height = global_rect.height()
+        width_2 = int(width / 2)
+        height_2 = int(height / 2)
+
+        result = {}
+
+        for side in Side:
+            if side == Side.BOTTOM:
+                result[side] = QPoint(global_rect.x() + width_2, global_rect.y() + height)
+            elif side == Side.TOP:
+                result[side] = QPoint(global_rect.x() + width_2, global_rect.y())
+            elif side == Side.LEFT:
+                result[side] = QPoint(global_rect.x(), global_rect.y() + height_2)
+            else:  # side == Side.RIGHT:
+                result[side] = QPoint(global_rect.x() + width, global_rect.y() + height_2)
+
+        return result
+
+    @singledispatchmethod
+    def showAt(self, point: QPoint, preferred_side=Side.RIGHT,
+               side_priority=(Side.RIGHT, Side.LEFT, Side.BOTTOM, Side.TOP), target_screen=None):
+
+
+        self._showAtList(QRect(point, QSize(1, 1)), preferred_side=preferred_side, side_priority=side_priority,
+                         target_screen=target_screen)
+
+    @showAt.register
+    def _showAtRect(self, rect: QRect, preferred_side=Side.RIGHT,
+                    side_priority=(Side.RIGHT, Side.LEFT, Side.BOTTOM, Side.TOP), target_screen=None):
+        """choose a side to show based on: maximal screen-window overlap, maximal screen button overlap
+                                                   side priority or a general priority order"""
+
+        best_side = None
+
+        best_screen = target_screen
+        if not target_screen:
+            best_screen = self._best_screen_overlap(rect)
+
+        side_by_overlap = self._calc_screen_overlap_all_sides(rect, best_screen)
+
+        best_sides_key = max(side_by_overlap.keys())
+
+        best_sides = side_by_overlap[best_sides_key]
+
+        if preferred_side in best_sides:
+            best_side = preferred_side
+        else:
+            for side in side_priority:
+                if side in best_sides:
+                    best_side = side
+                    break
+
+        side_positions = self._rect_middle_sides(rect)
+        position = side_positions[best_side]
+
+        self._setup_metrics(position, best_side, best_screen)
+        self._layout()
+
+        self.show()
+
+    def _setup_metrics(self, position, side, screen):
+        self._metrics.override_offset = 0
+        self._metrics.pointer_position = position
+        self._metrics.pointer_side = OPPOSITE_SIDES[side]
+        self._metrics.from_inner(self._central_widget.geometry())
+        screen_rect = screen.availableGeometry()
+        distances = calc_side_distance_outside_rect(self._metrics.body_rect, screen_rect)
+        offset = self._distances_to_offset(distances)
+        self._metrics.override_offset = offset
+
+    def _best_screen_overlap(self, rect):
+        screen_button_overlap = self._calc_screen_by_overlap(rect)
+        best_screen_for_button = screen_button_overlap[max(screen_button_overlap.keys())]
+        return best_screen_for_button
+
+    def _distances_to_offset(self, distances):
+
+        offsets = [0, 0]
+        for side, distance in distances.items():
+            axis = SIDE_AXIS[side]
+            offsets[axis] -= distance
+
+        pointer_axis = SIDE_AXIS[self._metrics.pointer_side]
+        offsets[pointer_axis] = 0
+
+        if offsets[OPPOSITE_AXIS[pointer_axis]] > 0:
+            offsets[OPPOSITE_AXIS[pointer_axis]] += 10
+        elif offsets[OPPOSITE_AXIS[pointer_axis]] < 0:
+            offsets[OPPOSITE_AXIS[pointer_axis]] -= 10
+
+
+        return QPoint(*offsets)
+
+    @staticmethod
+    def _calc_screen_by_overlap(body_rect):
+        result = {}
+        for screen in QGuiApplication.screens():
+            screen_rect = screen.availableGeometry()
+            intersection = screen_rect.intersected(body_rect)
+            intersection_area = intersection.width() * intersection.height()
+
+            # note ties by intersection are are removed by default
+            result[intersection_area] = screen
+        return result
+
+    def _calc_screen_overlap_all_sides(self, rect, target_screen):
+
+        result = {}
+        side_position = self._rect_middle_sides(rect)
+        for side, middle_pos in side_position.items():
+            opposite_side = OPPOSITE_SIDES[side]
+
+            metrics = BalloonMetrics(pointer_side=opposite_side)
+            metrics.from_inner(self._central_widget.geometry())
+            metrics.pointer_position = middle_pos
+
+            outer_rect = metrics.outer
+            screen_by_overlap = self._calc_screen_by_overlap(outer_rect)
+
+            max_area = outer_rect.width() * outer_rect.height()
+            for intersection_area, screen in screen_by_overlap.items():
+                if not screen or screen == target_screen:
+                    result.setdefault(intersection_area / max_area, []).append(side)
+        return result
+
+    @staticmethod
+    def find_side_outside_rect_offset(test_rect: QRect, target_rect: QRect):
+        intersection = test_rect.intersected(target_rect)
+
+        result = {}
+        for side in Side:
+            inter_side = rect_get_side(intersection, side)
+            test_side = rect_get_side(test_rect, side)
+            if inter_side != test_side:
+                result[side] = inter_side - test_side
+
+        return result
 
     def leaveEvent(self, a0: QtCore.QEvent) -> None:
         if self._owner:
@@ -310,7 +412,7 @@ class SpeechBalloon(QWidget):
 
 class DoubleLabel(QFrame):
 
-    def __init__(self, text=[''], parent=None):
+    def __init__(self, text=('',), parent=None):
         super(DoubleLabel, self).__init__(parent=parent)
 
         layout = QGridLayout()
@@ -319,9 +421,9 @@ class DoubleLabel(QFrame):
 
         # if you ever allow this to be set you will need to
         # call setLabelText to reset the text widths
-        self._margin = 2
+        self._margin: int = 2
 
-        self._labels = [None] * 3
+        self._labels: List[Optional[QLabel]] = [None] * 3
         left_label = QLabel()
         left_label.setAlignment(Qt.AlignRight)
         layout.addWidget(left_label, 0, 0)
@@ -368,6 +470,7 @@ class DoubleLabel(QFrame):
 
         self._labels[LEFT_LABEL].setFixedWidth(width)
         self._labels[RIGHT_LABEL].setFixedWidth(width)
+        self.updateGeometry()
 
     def setLabels(self, text):
         if len(text) not in (1, 2):
@@ -388,6 +491,7 @@ class DoubleLabel(QFrame):
             self.setLabelText(MIDDLE_LABEL, self._separator)
             self.setLabelText(RIGHT_LABEL, text[1])
 
+        self.updateGeometry()
 
     @staticmethod
     def _check_widget_index(widget_id):
@@ -418,10 +522,12 @@ class MousePositionLabel(DoubleLabel):
         x = '%i' % ev.x()
         y = '%i' % ev.y()
 
-        self.setLabels([x,y])
+        self.setLabels([x, y])
 
 
 if __name__ == '__main__':
+
+
     app = MyApplication(sys.argv)
 
     window2 = SpeechBalloon()

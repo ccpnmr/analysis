@@ -39,7 +39,6 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
 from ccpn.util import Logging
-from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.nef.GenericStarParser import DataBlock
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Common import isIterable
@@ -1598,13 +1597,13 @@ class Project(AbstractWrapperObject):
         # this is a GUI only function call. Please move to the appropriate location on 3.1
         self.application.restoreLayoutFromFile(path)
 
-    def _loadExcelFile(self, path: str):
-        """Load data from a Excel file.
-        """
-        #CCPNINTERNAL: used in Excel data loader
-        with undoBlock():
-            reader = ExcelReader(project=self, excelPath=path)
-            reader.load()
+    # def _loadExcelFile(self, path: str):
+    #     """Load data from a Excel file.
+    #     """
+    #     #CCPNINTERNAL: used in Excel data loader
+    #     with undoBlock():
+    #         reader = ExcelReader(project=self, excelPath=path)
+    #         reader.load()
 
     # def _loadLookupFile(self, path: str, subType: str, ):
     #     """Load data from a look-up file, csv or xls ."""

@@ -29,6 +29,8 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
+from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.util.ExcelReader import ExcelReader
 
 
 class ExcelDataLoader(DataLoaderABC):
@@ -57,10 +59,12 @@ class ExcelDataLoader(DataLoaderABC):
         :return: a list of [project]
         """
         try:
-            chains = self.project._loadExcelFile(self.path)
+            with undoBlock():
+                reader = ExcelReader(project=self.project, excelPath=self.path)
+                reader.load()
         except Exception as es:
             raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
 
-        return chains
+        return [self.project]
 
 ExcelDataLoader._registerFormat()

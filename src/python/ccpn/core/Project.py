@@ -1260,134 +1260,12 @@ class Project(AbstractWrapperObject):
     # Data loaders
     #===========================================================================================
 
-    # def recurseAnalyseUrl(self, filePath, includeUndefined=False):
-    #     """Recurse through the given path to find valid data that can be loaded
-    #     This list will contain loadable files and loadable folders which may load the same data
-    #     if includeUndefined is True, will include ('Text', None, ...) results
-    #     which may not be useful
-    #     """
-    #     from ccpn.util.OrderedSet import OrderedSet
-    #
-    #     validList = OrderedSet()
-    #
-    #     if os.path.isdir(filePath):
-    #         # list the folders
-    #         dirs = [os.path.join(filePath, dirpath) for dirpath, dirs, files in os.walk(filePath, topdown=False)]
-    #
-    #         # list the files
-    #         dirs += [os.path.join(filePath, dirpath, file)
-    #                  for dirpath, dirs, files in os.walk(filePath, topdown=False)
-    #                  for file in files]
-    #
-    #         # search the folders and files the valid data
-    #         for dI in dirs:
-    #             dataType, subType, usePath = ioFormats.analyseUrl(dI)
-    #
-    #             # only add the valid types to the set
-    #             if usePath:
-    #
-    #                 # include if both defined or either is None IF includeUndefined is True
-    #                 if (dataType and subType) or (includeUndefined and ((dataType and not subType) or (subType and not dataType))):
-    #
-    #                     # only add if not a subset of an existing path
-    #                     for inList in validList:
-    #                         if inList[2].startswith(usePath):
-    #                             break
-    #                     else:
-    #
-    #                         # flag whether the usePath is a folder
-    #                         validList.add((dataType, subType, usePath, os.path.isdir(usePath)))
-    #
-    #     return validList
-
     def loadData(self, path: (str, Path)) -> list:
         """Just a stub for backward compatibility
         """
         return self.application.loadData(path)
 
-        # dataLoader = checkPathForDataLoader(path)
-        # if dataLoader is None:
-        #     getLogger().warning('Unable to load "%s"' % path)
-        #     return []
-        # if dataLoader.createsNewProject:
-        #     raise RuntimeError('File "%s" creates a new project; use application.loadProject() instead')
-        #
-        # # this assures recursion into directories
-        # result = dataLoader.load()
-        # if not isIterable(result):
-        #     result = [result]
-        # return result
-
-        # # RASMUS EXPLANATION (to my successor)
-        # # loadData does too many things: it is used for handling dropped files,
-        # # which includes a system for deciding what actions are taken where for what file types,
-        # # and it is called directly for loading e.g. a spectrum.
-        # #
-        # # Part of the idea was that a file of type 'Xyz' being dropped would trigger
-        # # a call to '_loadXyz' if, and only if, _loadXyz was defined for the object
-        # # in question. That allowed you to control which drops were allowed where, and what
-        # # specific actions should be triggered.
-        # #
-        # # The entire system has been (partially??) refactored by GV, so it is necessary to rethink this.
-        # # My proposal (hopefully consistent with GV's (?)) would be to use this function
-        # # ONLY to handle drops and other files of unknown type (and likely rename it _loadData')
-        # # and to call specific functions (like loadSpectrum) when you know that you are loading e.g. a
-        # # spectrum or a project (currently loadData is (too) widely used.
-        # # Some of these functions may or may not need to be written first.
-        # # That still leaves the question of how to handle a case where e.g. a text
-        # # file should trigger a specific action when loaded e.g. on a Note editor popup and oNLY there,
-        # # but that must be thought out and decided.
-        # # Anyway, this function should have a proper and consistent return type (as GV says)
-        # # Maybe we should consider returning a dictionary rather than a list of tuples??
-        #
-        # # urlInfo is list of triplets of (type, subType, modifiedUrl),
-        # # e.g. ('Spectrum', 'Bruker', newUrl)
-        #
-        # # scan the folder for valid data
-        # # validList = self.recurseAnalyseUrl(path)
-        #
-        # # GWV 30/11/2020
-        # # First usage of new SpectrumdataSource routines
-        #
-        # from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
-        # from ccpn.core.lib.DataStore import DataStore
-        #
-        # getLogger().debug('Project.loadData: loading "%s"' % path)
-        #
-        # # Expand and check any redirections
-        # dataStore = DataStore.newFromPath(path)
-        # if not dataStore.exists():
-        #     raise FileNotFoundError('Path "%s" not found' % path)
-        #
-        # # check for a spectrum
-        # if checkPathForSpectrumFormats( dataStore.aPath().asString() ) is not None:
-        #
-        #     newSpectrum  = self.newSpectrum(path=path)
-        #     return [newSpectrum]
-        #
-        # else:
-        #
-        #     dataType, subType, usePath = ioFormats.analyseUrl(path)
-        #
-        #     if dataType is None:
-        #         # print("Skipping: file data type not recognised for %s" % usePath)
-        #         getLogger().warning("Skipping: file data type not recognised for %s" % usePath)
-        #         # raise ValueError("Skipping: file data type not recognised for %s" % usePath)
-        #         return None
-        #
-        #     elif dataType == 'Dirs':
-        #         # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
-        #         paths = usePath
-        #         _loadedData = []
-        #         for path in paths:
-        #             _loadedData += self.loadData(path)
-        #         return _loadedData
-        #
-        #     elif not os.path.exists(usePath):
-        #         # print("Skipping: no file found at %s" % usePath)
-        #         getLogger().warning("Skipping: no file found at %s" % usePath)
-        #         # raise ValueError("Skipping: no file found at %s" % usePath)
-        #         return []
+# To implement
         #
         #     elif dataType == 'Text':
         #         # Special case - you return the text instead of a list of Pids
@@ -1406,33 +1284,6 @@ class Project(AbstractWrapperObject):
         #         projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
         #         project = self.loadProject(projectPath, ioFormats.CCPN)
 
-        #         project._wrappedData.root._temporaryDirectory = temporaryDirectory
-        #         return [project]
-        #
-        #     else:
-        #         # No idea what is going on here
-        #         funcname = '_load' + dataType
-        #         if funcname == '_loadProject':
-        #             # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-        #             thisProj = [self.loadProject(usePath, subType)]
-        #             return thisProj
-        #
-        #         # elif funcname == '_loadSpectrum':
-        #         #     # (NB referred to elsewhere
-        #         #     # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-        #         #     with undoBlock():
-        #         #         thisSpec = self.loadSpectrum(usePath, subType)
-        #         #     return thisSpec
-        #
-        #         elif hasattr(self, funcname):
-        #             with undoBlock():
-        #                 pids = getattr(self, funcname)(usePath, subType)
-        #             return pids
-        #         else:
-        #             # print("Skipping: project has no function %s" % funcname)
-        #             getLogger().warning("Skipping: project has no function %s" % funcname)
-        #
-        # return []
 
 
     def _loadFastaFile(self, path: (str, Path)) -> list:
@@ -1474,128 +1325,6 @@ class Project(AbstractWrapperObject):
 
         return [se]
 
-    # def _loadStructure(self, path: str, subType: str):
-    #     """
-    #     Load Structure ensemble(s) from file into Wrapper project
-    #     """
-    #
-    #     from ccpn.util.StructureData import averageStructure
-    #     from ccpn.core.Model import Model
-    #
-    #     if subType == 'PDB':
-    #         name, ensemble = self._loadPdbStructure(path)
-    #     else:
-    #         raise NotImplementedError('{} type structures cannot be loaded'.format(subType))
-    #     se = self.newStructureEnsemble()
-    #     se.data = ensemble
-    #     se.rename(name)
-    #
-    #     ensemble._containingObject = se
-    #     for modelNumber in sorted(ensemble['modelNumber'].unique()):
-    #         # _validateName
-    #         _label = 'my%s_%s' % (Model.className, modelNumber)
-    #
-    #         se.newModel(serial=modelNumber, label=_label)
-    #
-    #     ds = self.newDataSet(title=name)
-    #     d = ds.newData(name='Derived')
-    #     d.setParameter('average', averageStructure(ensemble))
-    #
-    #     return [se]
-
-    # def _loadPdbStructure(self, path):
-    #     from ccpn.util.StructureData import EnsembleData
-    #
-    #     label = os.path.split(path)[1]
-    #     label = label.split('.')[:-1]
-    #     label = '_'.join(label)
-    #
-    #     ensemble = EnsembleData.from_pdb(path)
-    #     return label, ensemble
-
-    # def _loadNefFile(self, path: str, subType: str):
-    #     """
-    #     Load a Nef file into an existing project
-    #     """
-    #     # ejb - 24/6/17
-    #
-    #     if subType in (ioFormats.NEF):
-    #
-    #         return self._appBase.loadProject(path)
-    #
-    #         # # load Nef File here
-    #         # nefReader = CcpnNefIo.CcpnNefReader(self)
-    #         #
-    #         # dataBlock = nefReader.getNefData(path)
-    #         # # project = self.newProject(dataBlock.name)
-    #         # # self._echoBlocking += 1
-    #         # self._undo.increaseBlocking()
-    #         # self._wrappedData.shiftAveraging = False
-    #         #
-    #         # nefReader.importNewProject(self, dataBlock)
-    #         #
-    #         # self._wrappedData.shiftAveraging = True
-    #         # # self._echoBlocking -= 1
-    #         # self._undo.decreaseBlocking()
-    #         #
-    #         # return True
-    #     else:
-    #         raise ValueError("Project file type %s is not recognised" % subType)
-
-    # def loadProject(self, path: str, subType: str) -> "Project":
-    #     """Load project from file into application and return the new project"""
-    #
-    #     # if subType == ioFormats.CCPN:
-    #     if subType in (ioFormats.CCPN, ioFormats.NEF, ioFormats.NMRSTAR, ioFormats.SPARKY):
-    #         return self._appBase.loadProject(path)
-    #     else:
-    #         raise ValueError("Project file type %s is not recognised" % subType)
-
-    # @logCommand('project')
-    # def loadSpectrum(self, path: str, subType: str, name=None) -> list:
-    #     """Load spectrum defined by path into application
-    #     """
-    #     from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
-    #
-    #
-    #     try:
-    #         apiDataSource = self._wrappedData.loadDataSource(
-    #                         filePath=path, dataFileFormat=subType, name=name
-    #         )
-    #     except Exception as es:
-    #         getLogger().warning(es)
-    #         raise es
-    #
-    #     if apiDataSource is None:
-    #         return []
-    #     else:
-    #         spectrum = self._data2Obj[apiDataSource]
-    #         spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
-    #
-    #         # estimate new base contour levels
-    #         # if self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:
-    #         if not spectrum.noiseLevel:
-    #             getLogger().info("estimating noise level for spectrum %s" % str(spectrum.pid))
-    #
-    #             setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-    #                                       setPositiveContours=True, setNegativeContours=True,
-    #                                       useSameMultiplier=True)
-    #
-    #         # set the positive/negative/slice colours
-    #         from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
-    #
-    #         (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-    #         spectrum.sliceColour = spectrum.positiveContourColour
-    #
-    #         # set the initial axis ordering
-    #         spectrum.getDefaultOrdering(None)
-    #
-    #         # if there are no peakLists then create a new one - taken from Spectrum _spectrumMakeFirstPeakList notifier
-    #         if not spectrum.peakLists:
-    #             spectrum.newPeakList()
-
-    #         return [spectrum]
-
     def _loadLayout(self, path: (str, Path), subType: str):
         # this is a GUI only function call. Please move to the appropriate location on 3.1
         self.application.restoreLayoutFromFile(path)
@@ -1609,6 +1338,10 @@ class Project(AbstractWrapperObject):
             reader = ExcelReader(project=self, excelPath=path)
             result = reader.load()
             return result
+
+    #===========================================================================================
+    # End data loaders
+    #===========================================================================================
 
     #TODO: use Substance._uniqueName
     def _uniqueSubstanceName(self, name: str = None, defaultName: str = 'Molecule') -> str:
@@ -1670,34 +1403,6 @@ class Project(AbstractWrapperObject):
             result = None
         #
         return result
-
-    # GWV: This is now handled in Spectrum_restoreObject
-    #
-    # def _setContourColours(self):
-    #     """Set new contour colours for spectra that have not been defined
-    #     """
-    #     # 20190520:ED new code to set colours and update contour levels
-    #     from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
-    #
-    #     for spectrum in self.spectra:
-    #         if not spectrum.positiveContourColour or not spectrum.negativeContourColour:
-    #             # set contour colours for every spectrum
-    #             (spectrum.positiveContourColour,
-    #              spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-    #         if not spectrum.sliceColour:
-    #             spectrum.sliceColour = spectrum.positiveContourColour
-    #
-    # def _setNoiseLevels(self, alwaysSetNoise=False):
-    #     """Set noise levels for spectra that have not been defined
-    #     """
-    #     # 20190520:ED new code to set colours and update contour levels
-    #     from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
-    #
-    #     for spectrum in self.spectra:
-    #         if not spectrum.noiseLevel or alwaysSetNoise:
-    #             setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-    #                                       setPositiveContours=True, setNegativeContours=True,
-    #                                       useSameMultiplier=True)
 
     def getCcpCodeData(self, ccpCode, molType=None, atomType=None):
         """Get the CcpCode for molType/AtomType

@@ -407,6 +407,16 @@ class AbstractWrapperObject(NotifierBase):
     # CCPN functionalities
     #=========================================================================================
 
+    @classmethod
+    def newPid(cls, *args) -> 'Pid':
+        """Create a new pid instance from cls.shortClassName and args
+        """
+        from ccpn.core.lib.Pid import Pid
+        if len(args) < cls._numberOfIdFields:
+            raise ValueError('%s.newPid: to few id-fields to generate a valid Pid instance')
+        pidFields = [cls.shortClassName] + [str(x) for x in args]
+        return Pid.new(*pidFields)
+
     CCPNMR_NAMESPACE = '_ccpNmrV3internal'
 
     def _setInternalParameter(self, parameterName: str, value):

@@ -365,9 +365,11 @@ class Project(AbstractWrapperObject):
                                     changeDataLocations=changeDataLocations)
         if savedOk:
             self._resetIds()
-            application = self._appBase
-            if application is not None:
-                application._refreshAfterSave()
+            if self.application.hasGui:
+                self.application.mainWindow.sideBar.setProjectName(self)
+            # application = self._appBase
+            # if application is not None:
+            #     application._refreshAfterSave()
 
         return savedOk
 

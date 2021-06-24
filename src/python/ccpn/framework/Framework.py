@@ -435,6 +435,14 @@ class Framework(NotifierBase):
         """Return True if application has a gui"""
         return isinstance(self.ui, Gui)
 
+    @property
+    def mainWindow(self):
+        """:returns: MainWindow instance if application has a Gui or None otherwise
+        """
+        if self.hasGui:
+            return  self.ui.mainWindow
+        return None
+
     def _testShortcuts0(self):
         print('>>> Testing shortcuts0')
 
@@ -574,13 +582,13 @@ class Framework(NotifierBase):
             # The NoUi version has no mainWindow
             self.ui.initialize(None)
 
-    def _refreshAfterSave(self):
-        """Refresh user interface after project save (which may have caused project rename)"""
-
-        mainWindow = self.ui.mainWindow
-        if mainWindow is not None:
-            # mainWindow.sideBar.setProjectName(self.project)
-            mainWindow.sideBar.setProjectName(self.project)
+    # def _refreshAfterSave(self):
+    #     """Refresh user interface after project save (which may have caused project rename)"""
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if mainWindow is not None:
+    #         # mainWindow.sideBar.setProjectName(self.project)
+    #         mainWindow.sideBar.setProjectName(self.project)
 
     def _getUI(self):
         if self.args.interface == 'Gui':

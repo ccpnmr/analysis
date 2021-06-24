@@ -39,6 +39,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
 from ccpn.util import Logging
+from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.nef.GenericStarParser import DataBlock
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Common import isIterable
@@ -569,7 +570,6 @@ class Project(AbstractWrapperObject):
     #===========================================================================================
     #  Notifiers system
     #
-
     # Old, API-level functions:
     #
     #===========================================================================================
@@ -1003,9 +1003,9 @@ class Project(AbstractWrapperObject):
                 for notifier in dd:
                     notifier(self)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #===========================================================================================
     # Library functions
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #===========================================================================================
 
     # def _checkUpgradedFromV2(self):
     #     """Check whether the project has been upgraded from V2
@@ -1256,6 +1256,10 @@ class Project(AbstractWrapperObject):
                 t2 = time()
                 getLogger().info('Exporting dataBlock to file, time = %.2fs' % (t2 - t0))
 
+    #===========================================================================================
+    # Data loaders
+    #===========================================================================================
+
     # def recurseAnalyseUrl(self, filePath, includeUndefined=False):
     #     """Recurse through the given path to find valid data that can be loaded
     #     This list will contain loadable files and loadable folders which may load the same data
@@ -1296,7 +1300,7 @@ class Project(AbstractWrapperObject):
     #
     #     return validList
 
-    def loadData(self, path: str) -> typing.Optional[typing.List]:
+    def loadData(self, path: (str, Path)) -> list:
         """Just a stub for backward compatibility
         """
         return self.application.loadData(path)
@@ -1430,9 +1434,8 @@ class Project(AbstractWrapperObject):
         #
         # return []
 
-    # Data loaders and dispatchers
 
-    def _loadFastaFile(self, path: str) -> list:
+    def _loadFastaFile(self, path: (str, Path)) -> list:
         """Load Fasta sequence(s) from file into Wrapper project
         CCPNINTERNAL: called from FastDataLoader
         """
@@ -1445,7 +1448,7 @@ class Project(AbstractWrapperObject):
         #
         return chains
 
-    def _loadPdbFile(self, path: str):
+    def _loadPdbFile(self, path: (str, Path)) -> list:
         """Load data from pdb file path into new StructureEnsemble object(s)
         """
 
@@ -1593,29 +1596,19 @@ class Project(AbstractWrapperObject):
 
     #         return [spectrum]
 
-    def _loadLayout(self, path: str, subType: str):
+    def _loadLayout(self, path: (str, Path), subType: str):
         # this is a GUI only function call. Please move to the appropriate location on 3.1
         self.application.restoreLayoutFromFile(path)
 
-    # def _loadExcelFile(self, path: str):
-    #     """Load data from a Excel file.
-    #     """
-    #     #CCPNINTERNAL: used in Excel data loader
-    #     with undoBlock():
-    #         reader = ExcelReader(project=self, excelPath=path)
-    #         reader.load()
-
-    # def _loadLookupFile(self, path: str, subType: str, ):
-    #     """Load data from a look-up file, csv or xls ."""
-    #
-    #     if subType == ioFormats.CSV:
-    #         self._logger.warning("This function has not been implemented yet")
-    #         # readCsv(self, path=path)
-    #
-    #     elif subType == ioFormats.EXCEL:
-    #         # with suspendSideBarNotifications(self, 'ExcelReader', quiet=False):
-    #         with undoBlock():
-    #             ExcelReader(project=self, excelPath=path)
+    def _loadExcelFile(self, path: (str, Path)) -> list:
+        """Load data from a Excel file.
+        :returns list of loaded objects (awaiting adjust ment of excelReader)
+        CCPNINTERNAL: used in Excel data loader
+        """
+        with undoBlock():
+            reader = ExcelReader(project=self, excelPath=path)
+            result = reader.load()
+            return result
 
     #TODO: use Substance._uniqueName
     def _uniqueSubstanceName(self, name: str = None, defaultName: str = 'Molecule') -> str:

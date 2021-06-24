@@ -54,14 +54,12 @@ class ExcelDataLoader(DataLoaderABC):
         return instance
 
     def load(self):
-        """The actual Nef loading method;
+        """The actual Excel loading method;
         raises RunTimeError on error
         :return: a list of [project]
         """
         try:
-            with undoBlock():
-                reader = ExcelReader(project=self.project, excelPath=self.path)
-                reader.load()
+            result = self.project._loadExcelFile(path=self.path)
         except Exception as es:
             raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
 

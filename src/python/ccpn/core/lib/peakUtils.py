@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-10 14:59:40 +0100 (Thu, June 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 18:13:47 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -713,67 +713,6 @@ def peakParabolicInterpolation(peak: 'Peak', update=False):
         peak.height = height
         peak.heightError = heightError
     return newPosition, height, heightError
-
-
-# def getSpectrumData(peak: 'Peak', halfBoxWidth: int = 3):
-#     """Get a region of the spectrum data centred on the peak.
-#     Will return the smallest region containing the peak ±halfBoxWidth about the current peak position.
-#
-#     returns a tuple of the form (dataArray, region, position, planePosition)
-#
-#         dataArray is the numpy array surrounding the peak, ordered by spectrum axisCodes
-#         region is a tuple (bottomLeft, topRight)
-#         position is the float32 relative position of the peak in dataArray
-#         planePosition is the int32 position of the nearest planes to the peak
-#
-#     where bottomLeft is the co-ordinates of the bottom-left corner of the region
-#             topRight is the co-ordinates of the top-right corner of the region
-#
-#             Co-ordinates are indexed from (0, 0)
-#
-#             Note: screen point co-ordinates are indexed from (1, 1)
-#
-#     The region will be cropped to the bounds of the spectrum, in which case position will not correspond to the centre
-#     if no region is found, returns None
-#     """
-#
-#     from ccpn.core.Peak import Peak
-#     from ccpn.framework.Application import getApplication
-#
-#     # error checking - that the peak is a valid peak
-#     peak = getApplication().project.getByPid(peak) if isinstance(peak, str) else peak
-#     if not isinstance(peak, Peak):
-#         raise TypeError('%s is not of type Peak' % peak)
-#
-#     apiPeak = peak._wrappedData
-#
-#     dataSource = apiPeak.peakList.dataSource
-#     peakDims = apiPeak.sortedPeakDims()
-#
-#     # generate a np array with the position of the peak in points rounded to integers
-#     position = [peakDim.position - 1 for peakDim in peakDims]  # API position starts at 1
-#
-#     # round up/down the position to give the square containing the peak
-#     pLower = np.floor(position).astype(np.int32)
-#     pUpper = np.ceil(position).astype(np.int32)
-#     position = np.array(position, dtype=np.float32)
-#
-#     # generate a np array with the number of points per dimension
-#     # numPoints = [peakDim.dataDim.numPoints for peakDim in peakDims]
-#     numPoints = np.array([peakDim.dataDim.numPoints for peakDim in peakDims], dtype=np.int32)
-#
-#     # add extra points in each direction
-#     startPoint = np.maximum(pLower - halfBoxWidth, 0)
-#     endPoint = np.minimum(pUpper + halfBoxWidth, numPoints)
-#
-#     # Get the data; note that arguments has to be cast to ints for the C routines
-#     dataArray, intRegion = dataSource.getRegionData(startPoint, endPoint)
-#
-#     if not (dataArray is not None and dataArray.size != 0):
-#         getLogger().warning('no region found')
-#         return
-#
-#     return (dataArray, intRegion, list(position - startPoint), list(np.round(position).astype(np.int32)))
 
 
 def estimateVolumes(peaks: Sequence[Union[str, 'Peak']], volumeIntegralLimit=2.0):

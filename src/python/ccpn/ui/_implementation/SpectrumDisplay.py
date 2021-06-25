@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-07 12:11:50 +0100 (Mon, June 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:47 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -403,7 +403,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 @newObject(SpectrumDisplay)
 def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 'Y',
                         title: str = None, window: Window = None, comment: str = None,
-                        independentStrips=False, nmrResidue=None, serial: int = None,
+                        independentStrips=False, nmrResidue=None,
                         zPlaneNavigationMode: str = None):
     """Create new SpectrumDisplay
 
@@ -416,7 +416,6 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
     :param comment:
     :param independentStrips:
     :param nmrResidue:
-    :param serial: optional serial number.
     :return: a new SpectrumDisplay instance.
     """
 
@@ -494,14 +493,6 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
         apiSpectrumDisplay.newFreeStrip(axisCodes=axisCodes, axisOrder=axisCodes)
     else:
         apiSpectrumDisplay.newBoundStrip()
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            logger = getLogger()
-            logger.warning("Could not reset serial of %s to %s - keeping original value"
-                           % (result, serial))
 
     return result
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:47 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:47 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -361,7 +361,7 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
                       tensorMagnitude: float = 0.0, tensorRhombicity: float = 0.0,
                       tensorIsotropicValue: float = 0.0, tensorChainCode: str = None,
                       tensorSequenceCode: str = None, tensorResidueType: str = None,
-                      serial: int = None, restraintItemLength=None, **kwargs) -> RestraintList:
+                      restraintItemLength=None, **kwargs) -> RestraintList:
     """Create new RestraintList of type restraintType within DataSet.
 
     See the RestraintList class for details.
@@ -379,7 +379,6 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
     :param tensorSequenceCode:
     :param tensorResidueType:
     :param restraintItemLength:
-    :param serial: optional serial number.
     :return: a new RestraintList instance.
     """
 
@@ -405,13 +404,7 @@ def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: st
     if result is None:
         raise RuntimeError('Unable to generate new RestraintList item')
 
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                         % (result, serial))
-
+    kwargs.pop('serial', None)
     for k,v in kwargs.items():
         try:
             setattr(result, k, v)

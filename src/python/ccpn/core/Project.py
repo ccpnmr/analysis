@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-14 19:17:57 +0100 (Mon, June 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1007,9 +1007,11 @@ class Project(AbstractWrapperObject):
     def _checkUpgradedFromV2(self):
         """Check whether the project has been upgraded from V2
         """
-        if self._apiNmrProject.root._upgradedFromV2:
-            # reset the noise levels
-            self._setNoiseLevels(alwaysSetNoise=True)
+        # if self._apiNmrProject.root._upgradedFromV2:
+        #     # reset the noise levels
+        #     self._setNoiseLevels(alwaysSetNoise=True)
+        # NOTE:ED - needs moving to the new v2 loader
+        pass
 
     # def _validateDataUrlAndFilePaths(self, newDataUrlPath=None):
     #     """Perform validate operation for setting dataUrl from preferences - to be called after loading

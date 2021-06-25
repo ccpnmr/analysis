@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-24 19:35:20 +0100 (Mon, May 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -371,6 +371,11 @@ class NmrAtom(AbstractWrapperObject):
         # this means it can still be set at any isotopeCode later, otherwise need to undo or create new nmrAtom
         self._wrappedData.isotopeCode = value if value else '?'
 
+    def _setApiName(self, name):
+        # set a serial format name of the form ?@<n> from the current serial number
+        # functionality provided by the api
+        self._wrappedData.name = None
+
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename the NmrAtom, changing its name, Pid, and internal representation.
@@ -491,7 +496,7 @@ class NmrAtom(AbstractWrapperObject):
 
 @newObject(NmrAtom)
 def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
-                comment: str = None, serial: int = None) -> NmrAtom:
+                comment: str = None) -> NmrAtom:
     """Create new NmrAtom within NmrResidue. If name is None, use default name
         (of form e.g. 'H@211', 'N@45', ...)
 
@@ -500,7 +505,6 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     :param name: string name of the new nmrAtom
     :param isotopeCode: isotope code
     :param comment: optional string comment
-    :param serial: optional serial number.
     :return: a new NmrAtom instance.
     """
 
@@ -511,7 +515,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
         raise TypeError('Name {} must be of type string (or None)'.format(name))
 
     # Deal with reserved names
-    # serial = None
+    serial = None
     if name is None or len(name) == 0:
         # add default as all other CCPN objects.
         name = NmrAtom._uniqueName(self.project)
@@ -546,8 +550,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
                     # We can renumber obj to free the serial for the new NmrAtom
                     newSerial = obj.parent._serialDict['resonances'] + 1
                     try:
-                        previous.resetSerial(newSerial)
-                        # modelUtil.resetSerial(obj, newSerial, 'resonances')
+                        previous._resetSerial(newSerial)
                     except ValueError:
                         self.project._logger.warning(
                                 "Could not reset serial of %s to %s - keeping original value" % (previous, serial)

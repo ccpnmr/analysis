@@ -3,8 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -117,7 +118,8 @@ class DataSet(AbstractWrapperObject):
         """
         # Reading V2 project resulted in name being None; create one on the fly
         if self._wrappedData.name is None:
-            name = DataSet._uniqueName(self.project)
+            # needed to stop recursion of generating unique names
+            name = DataSet._uniqueApiName(self.project)
             self._wrappedData.__dict__['name'] = name  # The only way to access this
 
         return self._wrappedData.name
@@ -337,7 +339,7 @@ class DataSet(AbstractWrapperObject):
 @newObject(DataSet)
 def _newDataSet(self: Project, title: str = None, name: str = None, programName: str = None, programVersion: str = None,
                 dataPath: str = None, creationDate: datetime.datetime = None, uuid: str = None,
-                comment: str = None, serial: int = None) -> DataSet:
+                comment: str = None) -> DataSet:
     """Create new DataSet
 
     See the DataSet class for details.
@@ -349,7 +351,6 @@ def _newDataSet(self: Project, title: str = None, name: str = None, programName:
     :param creationDate:
     :param uuid:
     :param comment:
-    :param serial: optional serial number.
     :return: a new DataSet instance.
     """
 
@@ -379,13 +380,6 @@ def _newDataSet(self: Project, title: str = None, name: str = None, programName:
     result = self._data2Obj.get(apiNmrConstraintStore)
     if result is None:
         raise RuntimeError('Unable to generate new DataSet item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                         % (result, serial))
 
     return result
 

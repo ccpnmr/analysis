@@ -4,7 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:47 +0100 (Fri, June 25, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -331,7 +332,8 @@ def _newRestraintContribution(self: Restraint, targetValue: float = None, error:
                               weight: float = 1.0, upperLimit: float = None, lowerLimit: float = None,
                               additionalUpperLimit: float = None, additionalLowerLimit: float = None,
                               scale: float = 1.0, isDistanceDependent: bool = False, combinationId: int = None,
-                              restraintItems: Sequence = (), serial: int = None) -> RestraintContribution:
+                              restraintItems: Sequence = ()
+                              ) -> RestraintContribution:
     """Create new RestraintContribution within Restraint
 
     See the RestraintContribution class for details.
@@ -347,7 +349,6 @@ def _newRestraintContribution(self: Restraint, targetValue: float = None, error:
     :param isDistanceDependent:
     :param combinationId:
     :param restraintItems:
-    :param serial: optional serial number.
     :return: a new RestraintContribution instance.
     """
     func = self._wrappedData.newGenericContribution
@@ -359,13 +360,6 @@ def _newRestraintContribution(self: Restraint, targetValue: float = None, error:
     result = self._project._data2Obj.get(obj)
     if result is None:
         raise RuntimeError('Unable to generate new RestraintContribution item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                         % (result, serial))
 
     result.restraintItems = restraintItems
 

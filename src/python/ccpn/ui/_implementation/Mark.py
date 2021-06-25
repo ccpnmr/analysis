@@ -7,7 +7,8 @@ After creation, there are no attributes that can be modified; i.e. the Mark obje
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-19 17:40:23 +0000 (Fri, March 19, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:47 +0100 (Fri, June 25, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -229,7 +230,8 @@ def _removeMarkAxes(self: Project, positions: Sequence[float], axisCodes: Sequen
 
 @newObject(Mark)
 def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: Sequence,
-             style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = (), serial: int = None) -> Mark:
+             style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()
+             ) -> Mark:
     """Create new Mark
 
     :param str colour: Mark colour
@@ -238,7 +240,6 @@ def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: 
     :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
     :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
     :param tuple/list labels: Ruler labels for all lines in the mark. Default: None
-    :param serial: optional serial number
     :return: a new Mark instance.
     """
 
@@ -261,13 +262,6 @@ def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: 
     result = self._data2Obj.get(apiMark)
     if result is None:
         raise RuntimeError('Unable to generate new Mark item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
-                                % (result, serial))
 
     return result
 

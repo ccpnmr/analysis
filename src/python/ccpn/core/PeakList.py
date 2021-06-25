@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:29 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1133,7 +1133,7 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
                  textColour: str = None,
                  meritColour: str = None, meritEnabled: bool = False, meritThreshold: float = None,
                  lineColour: str = None,
-                 isSimulated: bool = False, serial: int = None) -> PeakList:
+                 isSimulated: bool = False) -> PeakList:
     """Create new empty PeakList within Spectrum
 
     See the PeakList class for details.
@@ -1144,7 +1144,6 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
     :param symbolStyle:
     :param symbolColour:
     :param textColour:
-    :param serial: optional serial number.
     :return: a new PeakList instance.
     """
 
@@ -1161,13 +1160,6 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
     result = self._project._data2Obj.get(apiPeakList)
     if result is None:
         raise RuntimeError('Unable to generate new PeakList item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                         % (result, serial))
 
     # set non-api attributes
     if meritColour is not None:

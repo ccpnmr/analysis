@@ -4,8 +4,9 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:27 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:45 +0100 (Fri, June 25, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -209,7 +210,7 @@ del getter
 def _newCalculationStep(self: DataSet, programName: str = None, programVersion: str = None,
                         scriptName: str = None, script: str = None,
                         inputDataUuid: str = None, outputDataUuid: str = None,
-                        inputDataSet: DataSet = None, outputDataSet: DataSet = None, serial: int = None) -> CalculationStep:
+                        inputDataSet: DataSet = None, outputDataSet: DataSet = None) -> CalculationStep:
     """Create new CalculationStep within DataSet.
 
     See the CalculationStep class for details.
@@ -222,7 +223,6 @@ def _newCalculationStep(self: DataSet, programName: str = None, programVersion: 
     :param outputDataUuid:
     :param inputDataSet:
     :param outputDataSet:
-    :param serial: optional serial number.
     :return: a new CalculationStep instance.
     """
 
@@ -250,13 +250,6 @@ def _newCalculationStep(self: DataSet, programName: str = None, programVersion: 
     result = project._data2Obj.get(obj)
     if result is None:
         raise RuntimeError('Unable to generate new CalculationStep item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                         % (result, serial))
 
     return result
 

@@ -3,8 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:51 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:45 +0100 (Fri, June 25, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -243,7 +244,7 @@ del setter
 
 @newObject(ChemicalShiftList)
 def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', autoUpdate: bool = True,
-                          isSimulated: bool = False, serial: int = None, comment: str = None,
+                          isSimulated: bool = False, comment: str = None,
                           spectra=()) -> ChemicalShiftList:
     """Create new ChemicalShiftList.
 
@@ -254,7 +255,6 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
     :param autoUpdate:
     :param isSimulated:
     :param comment:
-    :param serial: optional serial number.
     :return: a new ChemicalShiftList instance.
     """
 
@@ -282,13 +282,6 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
     result = self._data2Obj.get(apiChemicalShiftList)
     if result is None:
         raise RuntimeError('Unable to generate new ChemicalShiftList item')
-
-    if serial is not None:
-        try:
-            result.resetSerial (serial)
-        except ValueError:
-            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                         % (result, serial))
 
     return result
 

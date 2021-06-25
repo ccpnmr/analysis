@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:56 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -433,7 +433,7 @@ class NmrChain(AbstractWrapperObject):
 
 @newObject(NmrChain)
 def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False, label: str = '?',
-                 comment: str = None, serial: int = None) -> NmrChain:
+                 comment: str = None) -> NmrChain:
     """Create new NmrChain. Setting isConnected=True produces a connected NmrChain.
 
     See the NmrChain class for details.
@@ -457,15 +457,16 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
             except ValueError:
                 # the rest of the name is not an int. We are OK
                 pass
-            if serial is not None and serial > 0:
-                # this is a reserved name - try to set it with serial
-                if nmrProject.findFirstNmrChain(serial=serial) is None:
-                    # We are setting a shortName that matches the passed-in serial. OK.
-                    # Set isConnected to match - this overrides the isConnected parameter.
-                    isConnected = (shortName[0] == '#')
-                    shortName = None
-                else:
-                    raise ValueError("Cannot create NmrChain with reserved name %s" % shortName)
+            else:
+                if serial is not None and serial > 0:
+                    # this is a reserved name - try to set it with serial
+                    if nmrProject.findFirstNmrChain(serial=serial) is None:
+                        # We are setting a shortName that matches the passed-in serial. OK.
+                        # Set isConnected to match - this overrides the isConnected parameter.
+                        isConnected = (shortName[0] == '#')
+                        shortName = None
+                    else:
+                        raise ValueError("Cannot create NmrChain with reserved name %s" % shortName)
     else:
         shortName = None
 
@@ -475,13 +476,6 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
     result = self._data2Obj.get(newApiNmrChain)
     if result is None:
         raise RuntimeError('Unable to generate new NmrChain item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            self.project._logger.warning("Could not set shortName of %s to %s - keeping default value"
-                                         % (result, shortName))
 
     return result
 

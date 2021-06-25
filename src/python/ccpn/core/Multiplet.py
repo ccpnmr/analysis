@@ -4,7 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-09 19:13:26 +0000 (Tue, March 09, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -557,7 +558,7 @@ def _newMultiplet(self: MultipletList,
                   offset: float = 0.0, constraintWeight: float = 0.0,
                   figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
                   limits: Sequence[Tuple[float, float]] = (), slopes: List[float] = (),
-                  pointLimits: Sequence[Tuple[float, float]] = (), serial: int = None,
+                  pointLimits: Sequence[Tuple[float, float]] = (),
                   peaks: Sequence[Union['Peak', str]] = ()) -> Multiplet:
     """Create a new Multiplet within a multipletList
 
@@ -572,8 +573,6 @@ def _newMultiplet(self: MultipletList,
     :param figureOfMerit:
     :param annotation:
     :param comment:
-    :param position:
-    :param positionError:
     :param limits:
     :param slopes:
     :param pointLimits:
@@ -612,13 +611,6 @@ def _newMultiplet(self: MultipletList,
     result = self._project._data2Obj.get(apiMultiplet)
     if result is None:
         raise RuntimeError('Unable to generate new Multiplet item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
-                                % (result, serial))
 
     return result
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-23 10:29:30 +0100 (Wed, June 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1248,7 +1248,7 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
              ppmPositions: Sequence[float] = (), position: Sequence[float] = None, positionError: Sequence[float] = (),
              pointPositions: Sequence[float] = (), boxWidths: Sequence[float] = (),
              lineWidths: Sequence[float] = (), ppmLineWidths: Sequence[float] = (), pointLineWidths: Sequence[float] = (),
-             serial: int = None) -> Peak:
+             ) -> Peak:
     """Create a new Peak within a peakList
 
     NB you must create the peak before you can assign it. The assignment attributes are:
@@ -1270,7 +1270,6 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     :param pointPositions:
     :param boxWidths:
     :param lineWidths:
-    :param serial: optional serial number.
     :return: a new Peak instance.
     """
 
@@ -1284,13 +1283,6 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     result = self._project._data2Obj.get(apiPeak)
     if result is None:
         raise RuntimeError('Unable to generate new Peak item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
-                                % (result, serial))
 
     apiPeakDims = apiPeak.sortedPeakDims()
     if ppmPositions:
@@ -1334,7 +1326,7 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
 
 @newObject(Peak)
 def _newPickedPeak(self: PeakList, pointPositions: Sequence[float] = None, height: float = None,
-                   lineWidths: Sequence[float] = (), fitMethod: str = 'gaussian', serial: int = None) -> Peak:
+                   lineWidths: Sequence[float] = (), fitMethod: str = 'gaussian') -> Peak:
     """Create a new Peak within a peakList from a picked peak
 
     See the Peak class for details.
@@ -1343,7 +1335,6 @@ def _newPickedPeak(self: PeakList, pointPositions: Sequence[float] = None, heigh
     :param pointPositions: peak position in points for each dimension (related attributes: positionError, pointPositions)
     :param fitMethod: type of curve fitting
     :param lineWidths:
-    :param serial: optional serial number.
     :return: a new Peak instance.
     """
 
@@ -1352,13 +1343,6 @@ def _newPickedPeak(self: PeakList, pointPositions: Sequence[float] = None, heigh
     result = self._project._data2Obj.get(apiPeak)
     if result is None:
         raise RuntimeError('Unable to generate new Peak item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
-                                % (result, serial))
 
     apiDataSource = self.spectrum._apiDataSource
     apiDataDims = apiDataSource.sortedDataDims()

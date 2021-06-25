@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-26 19:50:50 +0100 (Wed, May 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1393,7 +1393,7 @@ class NmrResidue(AbstractWrapperObject):
 
 @newObject(NmrResidue)
 def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, residueType: str = None,
-                   comment: str = None, serial: int = None) -> NmrResidue:
+                   comment: str = None) -> NmrResidue:
     """Create new NmrResidue within NmrChain.
 
     If NmrChain is connected, append the new NmrResidue to the end of the stretch.
@@ -1424,7 +1424,6 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
     elif sequenceCode is not None and not isinstance(sequenceCode, str):
         raise ValueError("Invalid sequenceCode %s must be int, str, or None" % repr(sequenceCode))
 
-    serial = None
     if sequenceCode:
 
         # Check the sequenceCode is not taken already
@@ -1458,16 +1457,6 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
     result = self._project._data2Obj.get(apiResonanceGroup)
     if result is None:
         raise RuntimeError('Unable to generate new NmrResidue item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-            # modelUtil.resetSerial(obj, serial, 'resonanceGroups')
-        except ValueError:
-            self.project._logger.warning(
-                    "Could not set sequenceCode of %s to %s - keeping default value"
-                    % (result, originalSequenceCode)
-                    )
 
     if residueType is not None:
         # get chem comp ID strings from residue type

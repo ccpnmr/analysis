@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:29 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:45 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -189,7 +189,7 @@ class ChemicalShift(AbstractWrapperObject):
 @newObject(ChemicalShift)
 def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
                       valueError: float = 0.0, figureOfMerit: float = 1.0,
-                      comment: str = None, serial: int = None) -> ChemicalShift:
+                      comment: str = None) -> ChemicalShift:
     """Create new ChemicalShift within ChemicalShiftList.
 
     See the ChemicalShift class for details.
@@ -199,7 +199,6 @@ def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
     :param valueError:
     :param figureOfMerit:
     :param comment:
-    :param serial: optional serial number.
     :return: a new ChemicalShift instance.
     """
 
@@ -219,13 +218,6 @@ def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
     result = self._project._data2Obj.get(apiShift)
     if result is None:
         raise RuntimeError('Unable to generate new ChemicalShift item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                         % (result, serial))
 
     return result
 

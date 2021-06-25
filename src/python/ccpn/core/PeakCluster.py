@@ -3,8 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-04 17:37:09 +0100 (Mon, May 04, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -174,13 +175,12 @@ class PeakCluster(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(PeakCluster)
-def _newPeakCluster(self: Project, peaks: Sequence[Union['Peak', str]] = None, annotation: str = None, serial: int = None) -> PeakCluster:
+def _newPeakCluster(self: Project, peaks: Sequence[Union['Peak', str]] = None, annotation: str = None) -> PeakCluster:
     """Create new PeakCluster.
 
     See the PeakCluster class for details.
 
     :param peaks: optional list of peaks as objects or pids.
-    :param serial: optional serial number.
     :return: a new PeakCluster instance.
     """
 
@@ -196,13 +196,6 @@ def _newPeakCluster(self: Project, peaks: Sequence[Union['Peak', str]] = None, a
     result = self._project._data2Obj.get(apiPeakCluster)
     if result is None:
         raise RuntimeError('Unable to generate new PeakCluster item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
-                                % (result, serial))
 
     return result
 

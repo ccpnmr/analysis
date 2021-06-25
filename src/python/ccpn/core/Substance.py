@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:29 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:47 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -698,7 +698,7 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
                   empiricalFormula: str = None, molecularMass: float = None, comment: str = None,
                   synonyms: typing.Sequence[str] = (), atomCount: int = 0, bondCount: int = 0,
                   ringCount: int = 0, hBondDonorCount: int = 0, hBondAcceptorCount: int = 0,
-                  polarSurfaceArea: float = None, logPartitionCoefficient: float = None, serial: int = None
+                  polarSurfaceArea: float = None, logPartitionCoefficient: float = None,
                   ) -> Substance:
     """Create new substance WITHOUT storing the sequence internally
     (and hence not suitable for making chains). SubstanceType defaults to 'Molecule'.
@@ -725,7 +725,6 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
     :param hBondAcceptorCount:
     :param polarSurfaceArea:
     :param logPartitionCoefficient:
-    :param serial: optional serial number.
     :return: a new Substance instance.
     """
 
@@ -786,13 +785,6 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
     if result is None:
         raise RuntimeError('Unable to generate new Substance item')
 
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                         % (result, serial))
-
     return result
 
 
@@ -802,7 +794,7 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
 
 
 @newObject(Substance)
-def _fetchNefSubstance(self: Project, sequence: typing.Sequence[dict], name: str = None, serial: int = None):
+def _fetchNefSubstance(self: Project, sequence: typing.Sequence[dict], name: str = None):
     """Fetch Substance that matches sequence of NEF rows and/or name
 
     :param self:
@@ -826,12 +818,6 @@ def _fetchNefSubstance(self: Project, sequence: typing.Sequence[dict], name: str
     if result is None:
         raise RuntimeError('Unable to generate new Nef Substance item')
 
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
-                                % (result, serial))
     return result
 
 
@@ -866,7 +852,7 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
                             labelling: str = None, userCode: str = None, smiles: str = None,
                             synonyms: typing.Sequence[str] = (), comment: str = None,
                             startNumber: int = 1, molType: str = None, isCyclic: bool = False,
-                            serial: int = None) -> Substance:
+                            ) -> Substance:
     """Make new Substance from sequence of residue codes, using default linking and variants
 
     NB: For more complex substances, you must use advanced, API-level commands.
@@ -919,13 +905,6 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
 
     if result is None:
         raise RuntimeError('Unable to generate new PolymerSubstance item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
-                                % (result, serial))
 
     result.userCode = userCode
 

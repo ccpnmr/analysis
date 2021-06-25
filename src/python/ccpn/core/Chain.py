@@ -4,7 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-09 10:45:11 +0100 (Fri, April 09, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:45 +0100 (Fri, June 25, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -335,7 +336,6 @@ def _getChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: 
 def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: str = None,
                  startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                  shortName: str = None, role: str = None, comment: str = None,
-                 serial: int = None,
                  expandFromAtomSets: bool = True,
                  addPseudoAtoms: bool = True,
                  addNonstereoAtoms: bool = True,
@@ -355,7 +355,6 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
     :param str shortName: shortName for new chain (optional)
     :param str role: role for new chain (optional)
     :param str comment: comment for new chain (optional)
-    :param serial: optional serial number.
     :param bool expandFromAtomSets: Create new Atoms corresponding to the ChemComp AtomSets definitions.
                 Eg. H1, H2, H3 equivalent atoms will add a new H% atom. This will facilitate assignments workflows.
                 See ccpn.core.lib.MoleculeLib.expandChainAtoms for details.
@@ -459,13 +458,6 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
             substance.delete()
         raise RuntimeError('Unable to generate new Chain item')
 
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
-                                % (result, serial))
-
     for residue in result.residues:
         # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
         residue.resetVariantToDefault()
@@ -480,7 +472,7 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
 
 @newObject(Chain)
 def _createChainFromSubstance(self: Substance, shortName: str = None, role: str = None,
-                              comment: str = None, serial: int = None,
+                              comment: str = None,
                               expandFromAtomSets: bool = True,
                               addPseudoAtoms: bool = True,
                               addNonstereoAtoms: bool = True,
@@ -490,7 +482,6 @@ def _createChainFromSubstance(self: Substance, shortName: str = None, role: str 
     :param shortName:
     :param role:
     :param comment: optional comment string
-    :param serial: optional serial number.
     :return: a new Chain instance.
     """
 
@@ -515,13 +506,6 @@ def _createChainFromSubstance(self: Substance, shortName: str = None, role: str 
     result = self._project._data2Obj[newApiChain]
     if result is None:
         raise RuntimeError('Unable to generate new Chain item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
-                                % (result, serial))
 
     for residue in result.residues:
         # Necessary as CCPN V2 default protonation states do not match the NEF / V3 standard

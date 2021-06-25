@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-17 18:25:42 +0100 (Thu, June 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -303,7 +303,7 @@ del setter
 
 @newObject(Restraint)
 def _newRestraint(self: RestraintList, figureOfMerit: float = None, comment: str = None,
-                  peaks: Sequence[Union['Peak', str]] = (), vectorLength: float = None, serial: int = None) -> Restraint:
+                  peaks: Sequence[Union['Peak', str]] = (), vectorLength: float = None) -> Restraint:
     """Create new Restraint within RestraintList.
 
     ADVANCED: Note that you just create at least one RestraintContribution afterwards in order to
@@ -316,7 +316,6 @@ def _newRestraint(self: RestraintList, figureOfMerit: float = None, comment: str
     :param comment: optional comment string
     :param peaks: optional list of peaks as objects or pids
     :param vectorLength:
-    :param serial: optional serial number.
     :return: a new Restraint instance.
     """
     dd = {'figureOfMerit': figureOfMerit, 'vectorLength': vectorLength, 'details': comment,}
@@ -332,13 +331,6 @@ def _newRestraint(self: RestraintList, figureOfMerit: float = None, comment: str
     result = self._project._data2Obj.get(apiRestraint)
     if result is None:
         raise RuntimeError('Unable to generate new Restraint item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                         % (result, serial))
 
     return result
 

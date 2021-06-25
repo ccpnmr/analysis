@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:49:32 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:47 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -379,14 +379,13 @@ class SpectrumGroup(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(SpectrumGroup)
-def _newSpectrumGroup(self: Project, name: str, spectra=(), comment: str = None, serial: int = None) -> SpectrumGroup:
+def _newSpectrumGroup(self: Project, name: str, spectra=(), comment: str = None) -> SpectrumGroup:
     """Create new SpectrumGroup
 
     See the SpectrumGroup class for details.
 
     :param name: name for the new SpectrumGroup
     :param spectra: optional list of spectra as objects or pids
-    :param serial: optional serial number
     :return: a new SpectrumGroup instance.
     """
 
@@ -404,12 +403,6 @@ def _newSpectrumGroup(self: Project, name: str, spectra=(), comment: str = None,
     if result is None:
         raise RuntimeError('Unable to generate new SpectrumGroup item')
 
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
-                                % (result, serial))
     if spectra:
         result.spectra = spectra
     if comment:

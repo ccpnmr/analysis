@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-16 16:35:26 +0100 (Wed, June 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -200,14 +200,13 @@ class Note(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(Note)
-def _newNote(self: Project, name: str = None, text: str = None, comment: str = None, serial: int = None) -> Note:
+def _newNote(self: Project, name: str = None, text: str = None, comment: str = None) -> Note:
     """Create new Note.
 
     See the Note class for details.
 
     :param name: name for the note.
     :param text: contents of the note.
-    :param serial: optional serial number.
     :return: a new Note instance.
     """
 
@@ -221,13 +220,6 @@ def _newNote(self: Project, name: str = None, text: str = None, comment: str = N
     result = self._data2Obj.get(apiNote)
     if result is None:
         raise RuntimeError('Unable to generate new Note item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
-                                % (result, serial))
 
     result.comment = comment
 

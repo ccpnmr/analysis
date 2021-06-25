@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:57 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:35:47 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -225,7 +225,8 @@ def _newSpectrumHit(self: Spectrum, substanceName: str, pointNumber: int = 0,
                     pseudoDimensionNumber: int = 0, pseudoDimension: PseudoDimension = None,
                     figureOfMerit: float = None, meritCode: str = None, normalisedChange: float = None,
                     isConfirmed: bool = None, concentration: float = None, concentrationError: float = None,
-                    concentrationUnit: str = None, comment: str = None, serial: int = None):
+                    concentrationUnit: str = None, comment: str = None
+                    ):
     """Create new SpectrumHit within Spectrum.
 
     See the SpectrumHit class for details.
@@ -242,7 +243,6 @@ def _newSpectrumHit(self: Spectrum, substanceName: str, pointNumber: int = 0,
     :param concentrationError:
     :param concentrationUnit:
     :param comment:
-    :param serial: optional serial number.
     :return: a new SpectrumHit instance.
     """
 
@@ -270,13 +270,6 @@ def _newSpectrumHit(self: Spectrum, substanceName: str, pointNumber: int = 0,
     result = self._project._data2Obj.get(apiSpectrumHit)
     if result is None:
         raise RuntimeError('Unable to generate new SpectrumHit item')
-
-    if serial is not None:
-        try:
-            result.resetSerial(serial)
-        except ValueError:
-            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
-                                % (result, serial))
 
     return result
 

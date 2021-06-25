@@ -16,7 +16,7 @@ set /a "_count=0"
 
 call "%CCPNMR_TOP_DIR%\bat\paths"
 
-"%CONDA%\python" %*
+"%CONDA%\python.exe" %*
 endlocal
 
 PAUSE

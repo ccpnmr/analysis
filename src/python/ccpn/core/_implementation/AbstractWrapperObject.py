@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-07 12:53:53 +0100 (Mon, June 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:36:49 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -302,6 +302,20 @@ class AbstractWrapperObject(NotifierBase):
             name = cls._defaultName()
         name = name.strip()
         names = [sib.name for sib in getattr(project, cls._pluralLinkName)]
+        while name in names:
+            name = commonUtil.incrementName(name)
+        cls._validateStringValue('name', name)
+        return name
+
+    @classmethod
+    def _uniqueApiName(cls, project, name=None) -> str:
+        """Return a unique name based on api name (set to defaultName if None)
+        Needed to stop recursion when generating unique names from '.name'
+        """
+        if name is None:
+            name = cls._defaultName()
+        name = name.strip()
+        names = [sib._wrappedData.name for sib in getattr(project, cls._pluralLinkName)]
         while name in names:
             name = commonUtil.incrementName(name)
         cls._validateStringValue('name', name)
@@ -1265,7 +1279,7 @@ class AbstractWrapperObject(NotifierBase):
 
         return True
 
-    def resetSerial(self, newSerial: int):
+    def _resetSerial(self, newSerial: int):
         """ADVANCED Reset serial of object to newSerial, resetting parent link
         and the nextSerial of the parent.
 

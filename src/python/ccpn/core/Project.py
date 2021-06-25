@@ -43,6 +43,7 @@ from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.nef.GenericStarParser import DataBlock
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Common import isIterable
+from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
@@ -354,12 +355,19 @@ class Project(AbstractWrapperObject):
         # path is empty for save under the same name
         if newPath:
             # check validity of the newPath
-            if not isValidPath(newPath, stripFullPath=True, stripExtension=True):
-                raise ValueError('Filename can only contain alphanumeric characters and underscores')
-            if not isValidFileNameLength(newPath, stripFullPath=True, stripExtension=True):
-                raise ValueError('Filename must be 32 characters or fewer')
+            newPath = aPath(newPath)
+            newPath.assureSuffix(CCPN_EXTENSION)
+            if newPath.exists() and not overwriteExisting:
+                raise ValueError('Cannot overwrite existing file "%s"' % newPath)
+            if len(newPath.basename) > 32:
+                raise ValueError('Unfortunately, we currently have limited (32) length of the filename (%s)' % newPath.basename)
 
-        savedOk = apiIo.saveProject(self._wrappedData.root, newPath=newPath,
+            # if not isValidPath(newPath, stripFullPath=True, stripExtension=True):
+            #     raise ValueError('Filename can only contain alphanumeric characters and underscores')
+            # if not isValidFileNameLength(newPath, stripFullPath=True, stripExtension=True):
+            #     raise ValueError('Filename must be 32 characters or fewer')
+
+        savedOk = apiIo.saveProject(self._wrappedData.root, newPath=str(newPath),
                                     changeBackup=changeBackup, createFallback=createFallback,
                                     overwriteExisting=overwriteExisting, checkValid=checkValid,
                                     changeDataLocations=changeDataLocations)
@@ -1944,46 +1952,46 @@ class Project(AbstractWrapperObject):
 
         return _getChemicalShiftList(self, name=name, **kwds)
 
-
-def isValidPath(projectName, stripFullPath=True, stripExtension=True):
-    """Check whether the project name is valid after stripping fullpath and extension
-    Can only contain alphanumeric characters and underscores
-
-    :param projectName: name of project to check
-    :param stripFullPath: set to true to remove leading directory
-    :param stripExtension: set to true to remove extension
-    :return: True if valid else False
-    """
-    if not projectName:
-        return
-
-    if isinstance(projectName, str):
-
-        name = os.path.basename(projectName) if stripFullPath else projectName
-        name = os.path.splitext(name)[0] if stripExtension else name
-
-        STRIPCHARS = '_'
-        for ss in STRIPCHARS:
-            name = name.replace(ss, '')
-
-        if name.isalnum():
-            return True
-
-
-def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
-    """Check whether the project name is valid after stripping fullpath and extension
-    Can only contain alphanumeric characters and underscores
-
-    :param projectName: name of project to check
-    :param stripFullPath: set to true to remove leading directory
-    :param stripExtension: set to true to remove extension
-    :return: True if length <= 32 else False
-    """
-    if not projectName:
-        return
-
-    if isinstance(projectName, str):
-        name = os.path.basename(projectName) if stripFullPath else projectName
-        name = os.path.splitext(name)[0] if stripExtension else name
-
-        return len(name) <= 32
+#
+# def isValidPath(projectName, stripFullPath=True, stripExtension=True):
+#     """Check whether the project name is valid after stripping fullpath and extension
+#     Can only contain alphanumeric characters and underscores
+#
+#     :param projectName: name of project to check
+#     :param stripFullPath: set to true to remove leading directory
+#     :param stripExtension: set to true to remove extension
+#     :return: True if valid else False
+#     """
+#     if not projectName:
+#         return
+#
+#     if isinstance(projectName, str):
+#
+#         name = os.path.basename(projectName) if stripFullPath else projectName
+#         name = os.path.splitext(name)[0] if stripExtension else name
+#
+#         STRIPCHARS = '_'
+#         for ss in STRIPCHARS:
+#             name = name.replace(ss, '')
+#
+#         if name.isalnum():
+#             return True
+#
+#
+# def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
+#     """Check whether the project name is valid after stripping fullpath and extension
+#     Can only contain alphanumeric characters and underscores
+#
+#     :param projectName: name of project to check
+#     :param stripFullPath: set to true to remove leading directory
+#     :param stripExtension: set to true to remove extension
+#     :return: True if length <= 32 else False
+#     """
+#     if not projectName:
+#         return
+#
+#     if isinstance(projectName, str):
+#         name = os.path.basename(projectName) if stripFullPath else projectName
+#         name = os.path.splitext(name)[0] if stripExtension else name
+#
+#         return len(name) <= 32

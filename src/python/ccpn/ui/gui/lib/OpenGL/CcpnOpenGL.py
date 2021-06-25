@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-07 12:11:50 +0100 (Mon, June 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 15:32:38 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -5945,20 +5945,21 @@ class CcpnGLWidget(QOpenGLWidget):
                 exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
                 indices = getAxisCodeMatchIndices(self._axisCodes[:2], mouseMovedDict[AXIS_ACTIVEAXES], exactMatch=exactMatch)
 
-                for n in range(2):
-                    if indices[n] is not None:
+                if indices and len(indices) > 1:
+                    for n in range(2):
+                        if indices[n] is not None:
 
-                        axis = mouseMovedDict[AXIS_ACTIVEAXES][indices[n]]
-                        self.cursorSource = CURSOR_SOURCE_OTHER
-                        self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
+                            axis = mouseMovedDict[AXIS_ACTIVEAXES][indices[n]]
+                            self.cursorSource = CURSOR_SOURCE_OTHER
+                            self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
 
-                        # coordinates have already been flipped
-                        self.doubleCursorCoordinate[1 - n] = self.cursorCoordinate[n]
+                            # coordinates have already been flipped
+                            self.doubleCursorCoordinate[1 - n] = self.cursorCoordinate[n]
 
-                    else:
-                        self.cursorSource = CURSOR_SOURCE_OTHER
-                        self.cursorCoordinate[n] = None
-                        self.doubleCursorCoordinate[1 - n] = None
+                        else:
+                            self.cursorSource = CURSOR_SOURCE_OTHER
+                            self.cursorCoordinate[n] = None
+                            self.doubleCursorCoordinate[1 - n] = None
 
                 self.update(mode=PaintModes.PAINT_MOUSEONLY)
 

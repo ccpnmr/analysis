@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-07 12:11:51 +0100 (Mon, June 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 15:32:38 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -510,8 +510,11 @@ class GuiNdWidget(CcpnGLWidget):
                     dxAF, dyAF = specSettings[GLDefs.SPECTRUM_AF]
                     alias = specSettings[GLDefs.SPECTRUM_ALIASINGINDEX]
 
-                    _posColour = spectrumView.posColours[0]
-                    col = (*_posColour[0:3], 0.5)
+                    try:
+                        _posColour = spectrumView.posColours[0]
+                        col = (*_posColour[0:3], 0.5)
+                    except Exception as es:
+                        col = (0.9, 0.1, 0.2, 0.5)
 
                     for ii in range(alias[0][0], alias[0][1] + 2, 1):
                         # draw the vertical lines

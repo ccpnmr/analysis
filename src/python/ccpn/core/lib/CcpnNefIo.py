@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-23 20:01:47 +0100 (Wed, June 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:37:26 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -116,6 +116,7 @@ POSITIONCERTAINTYLEN = len(POSITIONCERTAINTY)
 
 DEFAULTRESTRAINTLINKLOAD = False
 REGEXREMOVEENDQUOTES = u'\`\d*`+?'
+REGEXCHECKNMRATOM = u'^\?\@\d+$'
 
 NEFEXTENSION = '.nef'
 
@@ -2625,7 +2626,8 @@ class CcpnNefReader(CcpnNefContent):
                                  if x not in (nef2CcpnMap.get(sf_category) or {})
                                  and x not in ('sf_category', 'sf_framecode')]
                     if extraTags:
-                        getLogger().warning(f'Unused tags in saveframe {saveFrameName}: {extraTags}')
+                        pass
+                        # getLogger().warning(f'Unused tags in saveframe {saveFrameName}: {extraTags}')
                         # TODO put here function that stashes data in object, or something
 
         # Put metadata in main dataset
@@ -2706,7 +2708,8 @@ class CcpnNefReader(CcpnNefContent):
                                  if x not in (nef2CcpnMap.get(sf_category) or {})
                                  and x not in ('sf_category', 'sf_framecode')]
                     if extraTags:
-                        getLogger().warning(f'Unused tags in saveframe {saveFrameName}: {extraTags}')
+                        pass
+                        # getLogger().warning(f'Unused tags in saveframe {saveFrameName}: {extraTags}')
                         # TODO put here function that stashes data in object, or something
 
         # Put metadata in main dataset
@@ -3183,9 +3186,14 @@ class CcpnNefReader(CcpnNefContent):
         self._updateStringParameters(parameters)
 
         parameters['name'] = framecode[len(category) + 1:]
+        serial = parameters.pop('serial', 1)
 
         # Make main object
         result = project.newChemicalShiftList(**parameters)
+        try:
+            result._resetSerial(serial)
+        except Exception as es:
+            self.warning('Could not set serial for {} to {}'.format(result, serial), saveFrame)
 
         if self.defaultChemicalShiftList is None:
             # ChemicalShiftList should default to the unique ChemicalShIftList in the file
@@ -4289,8 +4297,12 @@ class CcpnNefReader(CcpnNefContent):
                     name = '`%s`' % name
 
         parameters['name'] = name
-
+        serial = parameters.pop('serial', 1)
         result = dataSet.newRestraintList(**parameters)
+        try:
+            result._resetSerial(serial)
+        except Exception as es:
+            self.warning('Could not set serial for {} to {}'.format(result, serial), saveFrame)
 
         # Load loops, with object as parent
         for loopName in loopNames:
@@ -4412,7 +4424,7 @@ class CcpnNefReader(CcpnNefContent):
             restraint = restraints.get(serial)
             if restraint is None:
                 valuesToContribution = {}
-                dd = {'serial': serial}
+                dd = {} # {'serial': serial}
                 val = row.get('ccpn_vector_length')
                 if val is not None:
                     dd['vectorLength'] = val
@@ -4423,6 +4435,10 @@ class CcpnNefReader(CcpnNefContent):
                 if val is not None:
                     dd['comment'] = str(val)
                 restraint = restraintList.newRestraint(**dd)
+                try:
+                    restraint._resetSerial(serial)
+                except Exception as es:
+                    self.warning('Could not set serial for {} to {}'.format(restraint, serial), loop)
                 restraints[serial] = restraint
                 result.append(restraint)
 
@@ -4674,7 +4690,8 @@ class CcpnNefReader(CcpnNefContent):
         spectrumName = framecode[len(category) + 1:]
 
         peakListSerial = _stripSpectrumSerial(spectrumName) or peakListParameters.get('serial') or 1
-        peakListParameters['serial'] = peakListSerial
+        # peakListParameters['serial'] = peakListSerial
+        peakListParameters.pop('serial', None)
         spectrumName = _stripSpectrumName(spectrumName)
 
         spectrum = project.getSpectrum(spectrumName)
@@ -4752,6 +4769,7 @@ class CcpnNefReader(CcpnNefContent):
 
             else:
                 peakList = spectrum.newPeakList(**peakListParameters)
+                peakList._resetSerial(peakListSerial)
 
                 # Load 'nef_peak' loop, with spectrum as parent - load the peaks
                 for loopName in loopNames:
@@ -5104,10 +5122,10 @@ class CcpnNefReader(CcpnNefContent):
             if not self._checkImport(saveFrame, listName, checkID='_importIntegrals'):
                 continue
 
+            parameters.pop('serial', None) # remove from parameters
             integralList = creatorFunc(**parameters)
-            # integralList.resetSerial(row['serial'])
-            # NB former call was BROKEN!
-            # modelUtil.resetSerial(integralList, row['serial'], 'integralLists')
+            integralList._resetSerial(row['serial'])
+
             result.append(integralList)
         #
         return result
@@ -5153,10 +5171,10 @@ class CcpnNefReader(CcpnNefContent):
             if not self._checkImport(saveFrame, listName, checkID='_importMultiplets'):
                 continue
 
+            parameters.pop('serial', None) # remove from parameters
             multipletList = creatorFunc(**parameters)
-            # multipletList.resetSerial(row['serial'])
-            # NB former call was BROKEN!
-            # modelUtil.resetSerial(multipletList, row['serial'], 'multipletLists')
+            multipletList._resetSerial(row['serial'])
+
             result.append(multipletList)
 
         return result
@@ -5211,6 +5229,7 @@ class CcpnNefReader(CcpnNefContent):
             if not self._checkImport(saveFrame, listName, checkID='_importIntegrals'):
                 continue
 
+            serial = parameters.pop('serial', 1)
             integral = serial2creatorFunc[row['integral_list_serial']](**parameters)
 
             # integral.slopes = tuple(row.get(x) for x in multipleAttributes['slopes'])
@@ -5227,10 +5246,8 @@ class CcpnNefReader(CcpnNefContent):
                 integral.limits = eval(row['limits'])
             if row['point_limits']:
                 integral.pointLimits = eval(row['point_limits'])
+            integral._resetSerial(serial)
 
-            # integral.resetSerial(row['serial'])
-            # NB former call was BROKEN!
-            # modelUtil.resetSerial(integral, row['serial'], 'integrals')
             mPeak = row['ccpn_linked_peak']
             peak = spectrum.project.getByPid(mPeak)
             if peak:
@@ -5293,6 +5310,7 @@ class CcpnNefReader(CcpnNefContent):
                 del parameters['position']
             if parameters.get('positionError'):
                 del parameters['positionError']
+            parameters.pop('serial', None) # remove from parameters
             multiplet = serial2creatorFunc[row['multiplet_list_serial']](**parameters)
 
             if row['slopes']:
@@ -5302,7 +5320,7 @@ class CcpnNefReader(CcpnNefContent):
             if row['point_limits']:
                 multiplet.pointLimits = eval(row['point_limits'])
 
-            # multiplet.resetSerial(row['multiplet_serial'])
+            multiplet._resetSerial(row['multiplet_serial'])
             result.append(multiplet)
 
         return result
@@ -5407,11 +5425,12 @@ class CcpnNefReader(CcpnNefContent):
             self._updateStringParameters(parameters, attribs=('comment', 'annotation'))
 
             # NOTE:ED - adding flags to restrict importing to the selection
-            serial = parameters.get('serial')
+            serial = parameters.pop('serial', 1)
             if not self._checkImport(saveFrame, str(serial)):
                 continue
 
             obj = creatorFunc(**parameters)
+            obj._resetSerial(serial)
             result.append(obj)
 
         # load ccpn_peak_cluster
@@ -5536,7 +5555,7 @@ class CcpnNefReader(CcpnNefContent):
             self._updateStringParameters(parameters, attribs=('comment', 'annotation'))
 
             # get or make peak
-            serial = parameters['serial']
+            serial = parameters.pop('serial') # parameters['serial']
             peakListSerial = peakListId or row.get('ccpn_peak_list_serial') or 1
             peakLabel = Pid.IDSEP.join(('' if x is None else str(x)) for x in (peakListSerial, serial))
             peak = peaks.get(peakLabel)
@@ -5568,6 +5587,7 @@ class CcpnNefReader(CcpnNefContent):
                     peakList = spectrum.newPeakList(str(peakListSerial))
 
                 peak = peakList.newPeak(**parameters)
+                peak._resetSerial(serial)
                 peaks[peakLabel] = peak
                 result.append(peak)
 
@@ -6208,7 +6228,7 @@ class CcpnNefReader(CcpnNefContent):
             else:
                 nmrChain = creatorFunc(**parameters)
             try:
-                nmrChain.resetSerial(row['serial'])
+                nmrChain._resetSerial(row['serial'])
             except Exception as es:
                 pass
             nmrChains[parameters['shortName']] = nmrChain
@@ -6262,7 +6282,7 @@ class CcpnNefReader(CcpnNefContent):
             nmrChain = project.fetchNmrChain(chainCode)
             nmrResidue = nmrChain.newNmrResidue(**parameters)
             try:
-                nmrResidue.resetSerial(row['serial'])
+                nmrResidue._resetSerial(row['serial'])
             except Exception as es:
                 pass
             # NB former call was BROKEN!
@@ -6284,13 +6304,24 @@ class CcpnNefReader(CcpnNefContent):
 
             sequenceCode = row['sequence_code']
             nmrResidue = nmrResidues[(chainCode, sequenceCode)]
+
+            _name = parameters.get('name') or ''
+            _match = re.match(REGEXCHECKNMRATOM, _name)
+            if _match:
+                # remove name if of the form '?@<n>'
+                parameters.pop('name', None)
+
             nmrAtom = nmrResidue.newNmrAtom(**parameters)
             try:
-                nmrAtom.resetSerial(row['serial'])
+                nmrAtom._resetSerial(row['serial'])
+                if _match:
+                    # reset name based on the serial number of the nmrAtom
+                    # as newNmrAtom creates with name 'nmrAtom_<n>'
+                    nmrAtom._setApiName(_name)
             except Exception as es:
-                pass
-            # NB former call was BROKEN!
-            # modelUtil.resetSerial(nmrAtom, row['serial'], 'nmrAtoms')
+                self.warning("Could not set serial of nmrAtom %s" % nmrAtom,
+                        saveFrame[nmrAtomLoopName]
+                        )
 
     importers['ccpn_assignment'] = load_ccpn_assignment
 
@@ -6450,6 +6481,7 @@ class CcpnNefReader(CcpnNefContent):
                 # skip if not in the import list
                 continue
 
+            parameters.pop('serial', None) # remove from parameters, although shouldn't be there
             obj = creatorFunc(**parameters)
             result.append(obj)
 
@@ -6463,7 +6495,7 @@ class CcpnNefReader(CcpnNefContent):
             serial = row.get('serial')
             if serial is not None:
                 try:
-                    obj.resetSerial(serial)
+                    obj._resetSerial(serial)
                 except:
                     pass
         #
@@ -6816,7 +6848,11 @@ class CcpnNefReader(CcpnNefContent):
             dataSet = self.getDataSet(serial)
             if dataSet is None:
                 _name = self._defaultName(DataSet, serial)
-                dataSet = self.project.newDataSet(name=_name, serial=serial)
+                dataSet = self.project.newDataSet(name=_name, ) #serial=serial)
+                try:
+                    dataSet._resetSerial(serial)
+                except Exception as es:
+                    self.warning(f'Cannot reset serial of dataSet {dataSet}')
         #
         self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
         return dataSet
@@ -6859,16 +6895,16 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
         filePath = spectrumParameters.get('filePath')
         if filePath and os.path.exists(filePath):
             try:
-                dataType, subType, usePath = ioFormats.analyseUrl(path)
+                dataType, subType, usePath = ioFormats.analyseUrl(filePath)
                 if dataType == 'Spectrum':
+                    spectra = project.loadData(filePath)
                     # spectra = project.loadSpectrum(usePath, subType)
-
-                    spectra = project.loadSpectrum(usePath, subType)
                     if spectra:
                         spectrum = spectra[0]
-            except:
+            except Exception as es:
                 # Deliberate - any error should be skipped
-                pass
+                getLogger().warning(str(es))
+
             if spectrum is None:
                 project._logger.warning("Failed to load spectrum from spectrum path %s" % filePath)
             elif 'axisCodes' in dimensionData:
@@ -6909,9 +6945,9 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
             if acquisitionAxisIndex is not None:
                 spectrum.acquisitionAxisCode = axisCodes[acquisitionAxisIndex]
 
-            # Delete autocreated peaklist  and reset - we want any read-in peakList to be the first
-            # If necessary an empty PeakList is added downstream
-            spectrum._resetPeakLists()
+        # Delete autocreated peaklist  and reset - we want any read-in peakList to be the first
+        # If necessary an empty PeakList is added downstream
+        spectrum._resetPeakLists()
 
         # (Re)set all spectrum attributes
 

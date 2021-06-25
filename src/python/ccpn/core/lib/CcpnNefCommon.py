@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:48 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-25 17:37:26 +0100 (Fri, June 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -403,7 +403,7 @@ nef2CcpnMap = {
         ('ccpn_spectrum_scale', 'scale'),
         ('ccpn_spinning_rate', 'spinningRate'),
         ('ccpn_spectrum_comment', 'comment'),
-        ('ccpn_spectrum_file_path', None),
+        ('ccpn_spectrum_file_path', 'filePath'),
         ('ccpn_sample', None),
         ('ccpn_file_header_size', '_apiDataStore.headerSize'),
         ('ccpn_file_number_type', '_apiDataStore.numberType'),

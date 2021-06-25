@@ -397,11 +397,11 @@ class Project(AbstractWrapperObject):
         backupPath = backupUrl.path
         return backupPath
 
-    @property
-    def programName(self) -> str:
-        """Name of running program - defaults to 'CcpNmr'"""
-        appBase = self._appBase if hasattr(self, '_appBase') else None
-        return 'CcpNmr' if appBase is None else appBase.applicationName
+    # @property
+    # def programName(self) -> str:
+    #     """Name of running program - defaults to 'CcpNmr'"""
+    #     appBase = self._appBase if hasattr(self, '_appBase') else None
+    #     return 'CcpNmr' if appBase is None else appBase.applicationName
 
     @logCommand('project.')
     def deleteObjects(self, *objs: typing.Sequence[typing.Union[Pid.Pid, AbstractWrapperObject]]):

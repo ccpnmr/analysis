@@ -227,7 +227,7 @@ def _newCalculationStep(self: DataSet, programName: str = None, programVersion: 
     """
 
     project = self.project
-    programName = programName or project.programName
+    programName = programName or project.application.applicationName
 
     if inputDataSet is not None:
         if inputDataUuid is None:

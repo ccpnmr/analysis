@@ -34,7 +34,7 @@ exit /b
     REM return absolute name of input path
     REM :param %1: Name of output variable
     REM :param %2: input path
-    REM :return: absolute path
+    REM :return: filename
     set %1=%~nx2
     exit /b
 

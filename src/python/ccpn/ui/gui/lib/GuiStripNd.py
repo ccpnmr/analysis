@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 13:40:34 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -511,8 +511,10 @@ class GuiStripNd(GuiStrip):
                 _minSpectrumFrequency, _maxSpectrumFrequency = sorted(spectrumView.spectrum.spectrumLimits[_index])
                 _valuePerPoint = spectrumView.spectrum.valuesPerPoint[_index]
 
-                minAliasedFrequency = min(_minAliasedFrequency, _minSpectrumFrequency) if _minAliasedFrequency is not None else _minSpectrumFrequency
-                maxAliasedFrequency = max(_maxAliasedFrequency, _maxSpectrumFrequency) if _maxAliasedFrequency is not None else _maxSpectrumFrequency
+                _minFreq = _minAliasedFrequency or _minSpectrumFrequency
+                _maxFreq = _maxAliasedFrequency or _maxSpectrumFrequency
+                minAliasedFrequency = min(minAliasedFrequency, _minFreq) if minAliasedFrequency is not None else _minFreq
+                maxAliasedFrequency = max(maxAliasedFrequency, _maxFreq) if maxAliasedFrequency is not None else _maxFreq
 
                 if minZPlaneSize is None or _valuePerPoint < minZPlaneSize:
                     minZPlaneSize = _valuePerPoint

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 15:32:38 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 13:40:34 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -466,6 +466,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         # get the ppm range
         zPointCount = (self.spectrum.pointCounts)[index]
         zRegionValue = (zPosition + 0.5 * width, zPosition - 0.5 * width)  # Note + and - (axis backwards)
+
+        # clip to the aliasingLimits of the spectrum - ignore if both greater/less than limits
+        aliasing = (self.spectrum.aliasingLimits)[index]
+        if all(val <= aliasing[0] for val in zRegionValue) or all(val >= aliasing[1] for val in zRegionValue):
+            return
+        zRegionValue = tuple(float(np.clip(val, *aliasing)) for val in zRegionValue)
 
         # convert ppm- to point-range
         zPointFloat0 = self.spectrum.ppm2point(zRegionValue[0], axisCode=axisCode) - 1

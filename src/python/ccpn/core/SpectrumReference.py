@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:47 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 14:33:30 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -343,14 +343,14 @@ def _newSpectrumReference(self: Spectrum, dimension: int, spectrometerFrequency:
 # del _newSpectrumReference
 
 
-def getter(self: Spectrum) -> typing.List[typing.Optional[SpectrumReference]]:
-    data2Obj = self._project._data2Obj
-    return list(data2Obj.get(x) if x else None for x in self._mainDataDimRefs())
-
-
-Spectrum.mainSpectrumReferences = property(getter, None, None,
-                                           "Main SpectrumReference for each dimension (value is None for non-frequency dimensions"
-                                           )
+# def getter(self: Spectrum) -> typing.List[typing.Optional[SpectrumReference]]:
+#     data2Obj = self._project._data2Obj
+#     return list(data2Obj.get(x) if x else None for x in self._mainDataDimRefs())
+#
+#
+# Spectrum.mainSpectrumReferences = property(getter, None, None,
+#                                            "Main SpectrumReference for each dimension (value is None for non-frequency dimensions"
+#                                            )
 
 
 # Notifiers:

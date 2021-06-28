@@ -2,7 +2,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:31 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-28 19:12:27 +0100 (Mon, June 28, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -22,7 +23,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.util import Common as commonUtil
+from ccpn.core.lib.AxisCodeLib import axisCodeMatch
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 
@@ -77,7 +78,7 @@ class Test_chemicalShift(WrapperTesting):
 
     def test_assignDimension(self):
         peaks = self.peakList.pickPeaksNd([[7.0, 7.2], [111.75, 112.2]])
-        peaks[0].assignDimension(axisCode=commonUtil.axisCodeMatch('N', self.spectrum.axisCodes),
+        peaks[0].assignDimension(axisCode=axisCodeMatch('N', self.spectrum.axisCodes),
                                  value=self.atom)
         # Undo and redo all operations
         self.assertIsNotNone(self.shiftList.getChemicalShift(self.atom.id))

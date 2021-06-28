@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 14:33:31 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 19:12:28 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from OpenGL import GL
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import pyqtSlot, Qt
 
-from ccpn.util.Common import getAxisCodeMatchIndices
+from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_ACTIVEAXES, MOUSEDICTSTRIP, \
     AXIS_MATCHATOMTYPE, DOUBLEAXIS_MATCHATOMTYPE, DOUBLEAXIS_FULLATOMNAME, \
     DOUBLEAXIS_ACTIVEAXES

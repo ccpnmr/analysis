@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-24 19:40:02 +0100 (Mon, May 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 19:12:26 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -128,6 +128,7 @@ from ccpn.core.PeakList import PeakList, GAUSSIANMETHOD
 from ccpn.core.Project import Project
 from collections import defaultdict
 from itertools import combinations
+import ccpn.core.lib.AxisCodeLib as AxisCodeLib
 from ccpn.util.Common import makeIterableList
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms, getCcpCodes, \
     getSpinSystemScore
@@ -281,9 +282,9 @@ def copyPeakListAssignments(referencePeakList: PeakList, matchPeakList: PeakList
     refAxisCodes = referencePeakList.spectrum.axisCodes
     matchAxisCodes = matchPeakList.spectrum.axisCodes
     if len(refAxisCodes) < len(matchAxisCodes):
-        mappingArray = commonUtil._axisCodeMapIndices(refAxisCodes, matchAxisCodes)
+        mappingArray = AxisCodeLib._axisCodeMapIndices(refAxisCodes, matchAxisCodes)
     else:
-        mappingArray = commonUtil._axisCodeMapIndices(matchAxisCodes, refAxisCodes)
+        mappingArray = AxisCodeLib._axisCodeMapIndices(matchAxisCodes, refAxisCodes)
     refPositions = [numpy.array([peak.position[dim] for dim in mappingArray if dim is not None])
                     for peak in referencePeakList.peaks]
     refLabels = [[peak.pid] for peak in referencePeakList.peaks]
@@ -966,7 +967,7 @@ def sameAxisCodes(peaks: typing.List[Peak], dim: int):
         spectrum0 = spectra.pop()
         axisCode = spectrum0.axisCodes[dim]
         for spectrum in spectra:
-            if not commonUtil.doAxisCodesMatch(spectrum.axisCodes[dim], axisCode):
+            if not AxisCodeLib.doAxisCodesMatch(spectrum.axisCodes[dim], axisCode):
                 return False
 
     return True

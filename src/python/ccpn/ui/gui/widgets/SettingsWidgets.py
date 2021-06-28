@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-09 18:49:25 +0100 (Wed, June 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 19:12:28 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -52,7 +52,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
     SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES, AXISASPECTRATIOS, \
     AXISASPECTRATIOMODE, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
-from ccpn.util.Common import getAxisCodeMatchIndices, ZPlaneNavigationModes
+from ccpn.util.Common import ZPlaneNavigationModes
+from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.Base import SignalBlocking
 from ccpn.core.Chain import Chain
 from ccpn.core.RestraintList import RestraintList
@@ -589,7 +590,7 @@ class _commonSettings():
         if not self.application or not displays or len(displays) > 1:
             return 0, None, None, None
 
-        from ccpn.util.Common import getAxisCodeMatch, getAxisCodeMatchIndices
+        from ccpn.core.lib.AxisCodeLib import getAxisCodeMatch, getAxisCodeMatchIndices
 
         validSpectrumViews = {}
 

@@ -14,7 +14,6 @@ import os
 import glob
 import numpy as np
 from collections import OrderedDict as od
-from ccpn.util.Common import getAxisCodeMatchIndices
 from ccpn.framework.PathsAndUrls import macroPath as mp
 from ccpn.core.lib.ContextManagers import undoBlock
 

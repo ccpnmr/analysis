@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 11:41:01 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 19:12:26 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import numpy as np
 from typing import Sequence, List, Optional
 
+from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.util.Common import percentage
 from scipy.ndimage import maximum_filter, minimum_filter
 from ccpn.util import Common as commonUtil
@@ -340,7 +341,7 @@ class PeakList(PMIListABC):
         positions = [positionCodeDict[code] for code in codes]
 
         # match the spectrum to the restricted codes, these are the only ones to update
-        indices = commonUtil.getAxisCodeMatchIndices(self.spectrum.axisCodes, codes)
+        indices = getAxisCodeMatchIndices(self.spectrum.axisCodes, codes)
 
         # divide by 2 to get the double-width tolerance, i.e. the width of the region - CHECK WITH GEERTEN
         tolerances = tuple(tol / 2 for tol in self.spectrum.assignmentTolerances)

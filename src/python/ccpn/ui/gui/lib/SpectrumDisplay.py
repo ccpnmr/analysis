@@ -118,7 +118,7 @@ def makeStripPlotFromSingles(spectrumDisplay: GuiSpectrumDisplay, nmrAtoms: List
 
 def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widths=None):
 
-    from ccpn.util.Common import getAxisCodeMatchIndices
+    from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 
     spCodes = spectrumDisplay.axisCodes
     pos = [None] * len(spCodes)

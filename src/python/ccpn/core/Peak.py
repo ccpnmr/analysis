@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 19:12:26 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ import numpy as np
 from functools import partial
 from typing import Optional, Tuple, Union, Sequence, TypeVar, Any
 
+from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
 from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -999,8 +1000,8 @@ class Peak(AbstractWrapperObject):
                              % (dimensionCount, self.longPid,
                                 targetPeakList.spectrum.dimensionCount, targetPeakList.longPid))
 
-        dimensionMapping = commonUtil._axisCodeMapIndices(peakList.spectrum.axisCodes,
-                                                          targetPeakList.spectrum.axisCodes)
+        dimensionMapping = _axisCodeMapIndices(peakList.spectrum.axisCodes,
+                                                                         targetPeakList.spectrum.axisCodes)
         if dimensionMapping is None:
             raise ValueError("%s axisCodes %s not compatible with target axisCodes %s"
                              % (self, peakList.spectrum.axisCodes, targetPeakList.spectrum.axisCodes))

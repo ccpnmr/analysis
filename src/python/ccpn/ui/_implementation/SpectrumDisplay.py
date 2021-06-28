@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:47 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 19:12:27 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from numpy import ndarray
 from typing import Sequence, Tuple, Optional
+
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
@@ -37,6 +38,7 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.lib.OrderedSpectrumViews import OrderedSpectrumViews
+from ccpn.core.lib.AxisCodeLib import doAxisCodesMatch, _axisCodeMapIndices
 from ccpn.ui._implementation.Window import Window
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
@@ -530,15 +532,15 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
     spectrumAxisCodes = spectrum.axisCodes
 
     if axisOrder:
-        mapIndices = commonUtil._axisCodeMapIndices(spectrumAxisCodes, axisOrder)
+        mapIndices = _axisCodeMapIndices(spectrumAxisCodes, axisOrder)
         if displayAxisCodes:
-            if not commonUtil.doAxisCodesMatch(axisOrder, displayAxisCodes):
+            if not doAxisCodesMatch(axisOrder, displayAxisCodes):
                 raise ValueError("AxisOrder %s do not match display axisCodes %s"
                                  % (axisOrder, displayAxisCodes))
         else:
             displayAxisCodes = axisOrder
     elif displayAxisCodes:
-        mapIndices = commonUtil._axisCodeMapIndices(spectrumAxisCodes, displayAxisCodes)
+        mapIndices = _axisCodeMapIndices(spectrumAxisCodes, displayAxisCodes)
     else:
         displayAxisCodes = list(spectrumAxisCodes)
         mapIndices = list(range(dataSource.numDim))

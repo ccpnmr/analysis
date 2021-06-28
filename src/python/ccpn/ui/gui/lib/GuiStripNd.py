@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 13:40:34 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 19:12:27 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -60,7 +60,7 @@ from ccpn.ui.gui.lib.Strip import copyStripPosition
 from ccpn.util.Common import ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
-from ccpn.util.Common import getAxisCodeMatchIndices
+from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.PlaneToolbar import ZPlaneToolbar
 from ccpn.util.Colour import colorSchemeTable
 

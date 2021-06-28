@@ -28,7 +28,8 @@ import pandas as pd
 import numpy as np
 import random
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.util.Common import getAxisCodeMatchIndices, name2IsotopeCode
+from ccpn.util.Common import name2IsotopeCode
+
 
 def _lorentzian(points, center, linewidth, intensity=1):
     points = np.asarray(points)

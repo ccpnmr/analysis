@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 19:12:27 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -728,7 +728,7 @@ class GuiStrip(Frame):
     def _addItemsToNavigateMenu(self, position, axisCodes, label, menuFunc, includeAxisCodes=True):
         """Adds item to navigate to section of context menu.
         """
-        from ccpn.util.Common import getAxisCodeMatchIndices
+        from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
         from itertools import product
 
         if not menuFunc:
@@ -1040,7 +1040,7 @@ class GuiStrip(Frame):
         """
         # TODO needs clear documentation
         from functools import partial
-        from ccpn.util.Common import getAxisCodeMatchIndices
+        from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 
         # axisList = (self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2)
 

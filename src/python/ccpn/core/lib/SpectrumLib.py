@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 17:56:12 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 19:12:27 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,8 @@ import random
 import numpy as np
 from typing import Tuple, Optional
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
-from ccpn.util.Common import percentage, getAxisCodeMatchIndices
+from ccpn.util.Common import percentage
+from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeTransfers
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar

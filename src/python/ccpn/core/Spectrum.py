@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 17:56:12 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 19:12:26 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -101,7 +101,7 @@ from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY
 
 from ccpn.util.Constants import SCALETOLERANCE
 from ccpn.util.Common import isIterable, _getObjectsByPids
-from ccpn.util.Common import getAxisCodeMatch
+from ccpn.core.lib.AxisCodeLib import getAxisCodeMatch
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand, singleton
 from ccpn.util.Path import aPath

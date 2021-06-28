@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 11:41:02 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 19:12:27 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,11 +27,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import Sequence, Tuple, List
-from ccpn.util import Common as commonUtil
+
 from ccpn.core.Peak import Peak
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.PeakList import PeakList
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpn.util.Logging import getLogger
@@ -321,11 +322,11 @@ class Strip(AbstractWrapperObject):
         # make axis mapping indices
         if axisOrder and axisOrder != displayAxisCodes:
             # Map axes to axisOrder, and remap to original setting
-            ll = commonUtil._axisCodeMapIndices(spectrum.axisCodes, axisOrder)
+            ll = _axisCodeMapIndices(spectrum.axisCodes, axisOrder)
             mapIndices = [ll[axisOrder.index(x)] for x in displayAxisCodes]
         else:
             # Map axes to original display setting
-            mapIndices = commonUtil._axisCodeMapIndices(spectrum.axisCodes, displayAxisCodes)
+            mapIndices = _axisCodeMapIndices(spectrum.axisCodes, displayAxisCodes)
 
         if mapIndices is None:
             getLogger().debug('Strip.displaySpectrum>>> mapIndices is None')
@@ -505,7 +506,7 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
                 newStrip.moveTo(newIndex)
 
         else:
-            mapIndices = commonUtil._axisCodeMapIndices(strip.axisOrder, self.axisOrder)
+            mapIndices = _axisCodeMapIndices(strip.axisOrder, self.axisOrder)
             if mapIndices is None:
                 raise ValueError("Strip %s not compatible with window %s" % (strip.pid, self.pid))
             else:

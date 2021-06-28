@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 16:07:59 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 17:56:12 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1757,12 +1757,8 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
             axisCodes.append(axis)
             _ppmRegions.append(sorted(float(pos) for pos in region))
 
-        try:
-            # try and match the axis codes before creating new peakList (if required)
-            indices = spectrum.getByAxisCodes('axes', axisCodes)
-        except Exception as es:
-            getLogger().warning(f'Non-matching axis codes found {axisCodes}')
-            return
+        # try and match the axis codes before creating new peakList (if required)
+        indices = spectrum.getByAxisCodes('axes', axisCodes)
 
         peakList = spectrum.project.getByPid(peakList) if isinstance(peakList, str) else peakList
         if not peakList:
@@ -1773,7 +1769,7 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
                 getLogger().warning(f'Spectrum {spectrum} has no peakLists - creating new')
                 peakList = spectrum.newPeakList()
 
-        _ppmRegions = [_ppmRegions[ii] for ii in indices]
+        _ppmRegions = [_ppmRegions[indices.index(ii)] for ii in range(len(indices))]
         specLimits = spectrum.spectrumLimits
         aliasingValues = spectrum.aliasingValues
 
@@ -1792,7 +1788,7 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
                     pos[ii] = regionBounds[1]
 
         # get the peaks from the peakPicker
-        axisDict = {axisCodes[ind]: _ppmRegions[ii] for ii, ind in enumerate(indices)}
+        axisDict = {axisCodes[indices.index(ii)]: _ppmRegions[ii] for ii in range(len(indices))}
 
         if spectrum._peakPicker:
             try:

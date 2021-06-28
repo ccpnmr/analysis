@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-23 20:16:47 +0100 (Wed, June 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 17:56:12 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2460,27 +2460,28 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         CCPNINTERNAL: also used by PeakPickerABC
         """
         axisCodes = [ac for ac in axisDict.keys()]
-        if None in self._mapAxisCodes(axisCodes):
-            raise ValueError('Illegal axisCode in axisDict')
 
         # augment axisDict with any missing axisCodes or replace any None values with spectrumLimits
+        inds = self.getByAxisCodes('axes', axisCodes)
         for idx, ac in enumerate(self.axisCodes):
-            if ac not in axisDict or axisDict[ac] is None:
+            if idx not in inds:
                 axisDict[ac] = self.spectrumLimits[idx]
 
+        axisPpms = [ppm for ppm in axisDict.values()]
         sliceTuples = [None] * self.dimensionCount
         for axis, ac, dim in self.axisTriples:
-            stopPpm, startPpm = axisDict.get(ac)  # to be converted to points; ppm scale runs backwards
+            idx = inds.index(axis)
+            stopPpm, startPpm = axisPpms[idx] # to be converted to points; ppm scale runs backwards
 
             if startPpm is None:
                 startPoint = 1
             else:
-                startPoint = int(self.ppm2point(startPpm, axisCode=ac) + 0.5)
+                startPoint = int(self.ppm2point(startPpm, dimension=idx + 1) + 0.5)
 
             if stopPpm is None:
                 stopPoint = self.pointCounts[axis]
             else:
-                stopPoint = int(self.ppm2point(stopPpm, axisCode=ac) + 0.5)
+                stopPoint = int(self.ppm2point(stopPpm, dimension=idx + 1) + 0.5)
 
             sliceTuples[axis] = (startPoint, stopPoint)
 

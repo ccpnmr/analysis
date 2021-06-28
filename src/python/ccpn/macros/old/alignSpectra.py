@@ -28,10 +28,23 @@ refPeakList = refSpectrum.peakLists[0]
 # refPeakList.pickPeaksNd(regionToPick, doNeg=False)
 
 queryAxisCodeDict = dict((code, regionToPick[ii]) for ii, code in enumerate(queryPeakList.spectrum.axisCodes))
-queryPeakList.pickPeaksRegion(queryAxisCodeDict, doNeg=False)
+# # queryPeakList.pickPeaksRegion(queryAxisCodeDict, doNeg=False)
+# NOTE:ED - this should be the new call
+querySpectrum.pickPeaks(queryPeakList,
+                        querySpectrum.positiveContourBase,
+                        None, **queryAxisCodeDict)
+
+# refAxisCodeDict = dict((code,
+#                           reorder(regionToPick, refSpectrum.axisCodes, axisOrder)[ii])
+#                          for ii, code in enumerate(refPeakList.spectrum.axisCodes))
+# # refPeakList.pickPeaksRegion(refAxisCodeDict, doNeg=False)
 
 refAxisCodeDict = dict((code, regionToPick[ii]) for ii, code in enumerate(refPeakList.spectrum.axisCodes))
-refPeakList.pickPeaksRegion(refAxisCodeDict, doNeg=False)
+# # refPeakList.pickPeaksRegion(refAxisCodeDict, doNeg=False)
+# NOTE:ED - this should be the new call
+refSpectrum.pickPeaks(refPeakList,
+                        refSpectrum.positiveContourBase,
+                        None, **refAxisCodeDict)
 
 # Create numpy arrays containing the peak positions of 
 # each peakList

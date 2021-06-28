@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 20:14:14 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 11:41:02 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -102,17 +102,11 @@ def _pickPeaksRegion(peakList, regionToPick: dict = {},
     :return: list of peaks.
     """
 
-    print('>>>   _pickPeaksRegion')
-
     from ccpnc.peak import Peak as CPeak
 
     spectrum = peakList.spectrum
     dataSource = spectrum._apiDataSource
     numDim = dataSource.numDim
-
-    # assert fitMethod in PICKINGMETHODS, 'pickPeaksRegion: fitMethod = %s, must be one of ("gaussian", "lorentzian", "parabolic")' % fitMethod
-    # assert (minDropFactor >= 0.0) and (minDropFactor <= 1.0), 'pickPeaksRegion: minDropFactor %f not in range [0.0, 1.0]' % minDropFactor
-    # method = PICKINGMETHODS.index(fitMethod)
 
     peaks = []
 
@@ -145,7 +139,7 @@ def _pickPeaksRegion(peakList, regionToPick: dict = {},
         return peaks
 
     # find the regions from the spectrum - sometimes returning None which gives an error
-    foundRegions = peakList.spectrum.getRegionData(exclusionBuffer, **regionToPick)
+    foundRegions = peakList.spectrum.getRegion(**regionToPick)
 
     if not foundRegions:
         return peaks
@@ -225,11 +219,7 @@ def _pickPeaksRegion(peakList, regionToPick: dict = {},
             peakPoints = [(position, height) for position, height in peakPoints if
                           ((startPoints - startPointIntActual) <= position).all() and (position < (endPoints - startPointIntActual)).all()]
 
-            # check new found positions against existing ones
-            existingPositions = []
-            for apiPeak in peakList._wrappedData.peaks:
-                position = np.array([peakDim.position for peakDim in apiPeak.sortedPeakDims()])  # ignores aliasing
-                existingPositions.append(position - 1)  # -1 because API position starts at 1
+            existingPositions = [np.array([int(pp)-1 for pp in pk.pointPositions]) for pk in peakList.peaks]
 
             # NB we can not overwrite exclusionBuffer, because it may be used as a parameter in redoing
             # and 'if not exclusionBuffer' does not work on np arrays.
@@ -366,10 +356,8 @@ def _pickPeaksNd(peakList, regionToPick: Sequence[float] = None,
     startPoint = []
     endPoint = []
     spectrum = peakList.spectrum
-    dataDims = spectrum._apiDataSource.sortedDataDims()
     aliasingLimits = spectrum.aliasingLimits
     apiPeaks = []
-    # for ii, dataDim in enumerate(dataDims):
     spectrumReferences = spectrum.spectrumReferences
     if None in spectrumReferences:
         # TODO if we want to pick in Sampeld fo FId dimensions, this must be added
@@ -387,8 +375,6 @@ def _pickPeaksNd(peakList, regionToPick: Sequence[float] = None,
         value0 = max(value0, aliasingLimit0)
         value1 = min(value1, aliasingLimit1)
         # -1 below because points start at 1 in data model
-        # position0 = dataDim.primaryDataDimRef.valueToPoint(value0) - 1
-        # position1 = dataDim.primaryDataDimRef.valueToPoint(value1) - 1
         position0 = spectrumReference.valueToPoint(value0) - 1
         position1 = spectrumReference.valueToPoint(value1) - 1
         position0, position1 = min(position0, position1), max(position0, position1)
@@ -398,8 +384,6 @@ def _pickPeaksNd(peakList, regionToPick: Sequence[float] = None,
         # yes, this negates -1 above but they are for different reasons
         position0 = int(position0 + 1)
         position1 = int(position1 + 1)
-        # startPoint.append((dataDim.dim, position0))
-        # endPoint.append((dataDim.dim, position1))
         startPoint.append((spectrumReference.dimension, position0))
         endPoint.append((spectrumReference.dimension, position1))
     else:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-22 09:51:59 +0100 (Tue, June 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 11:41:02 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -52,17 +52,6 @@ class PeakPickerNd(PeakPickerABC):
     # list of peakPicker attributes that need to be stored/restored
     # these pertain to a particular peakPicker subclass
     # this cannot contain items that are not JSON serialisable
-    # call self._storeAttributes at the end of methods that change any values
-    # these are defined in a similar manner to the core attributes above
-    attributes = ['noise',
-                  'minimumLineWidth',
-                  'checkAllAdjacent',
-                  'singularMode',
-                  'halfBoxFindPeaksWidth',
-                  'halfBoxSearchWidth',
-                  'halfBoxFitWidth',
-                  'searchBoxDoFit',
-                  ]
 
     noise = CFloat(allow_none=True, default_value=None)
     minimumLineWidth = CList(allow_none=True, default_value=[])
@@ -72,6 +61,7 @@ class PeakPickerNd(PeakPickerABC):
     halfBoxSearchWidth = CInt(allow_none=True, default_value=3)
     halfBoxFitWidth = CInt(allow_none=True, default_value=3)
     searchBoxDoFit = CBool(allow_none=True, default_value=True)
+    setLineWidths = CBool(allow_none=True, default_value=True)
 
     def __init__(self, spectrum):
         super().__init__(spectrum=spectrum)
@@ -98,8 +88,6 @@ class PeakPickerNd(PeakPickerABC):
         :param data: nD numpy array
         :return list of SimplePeak instances
         """
-
-        # print(f'>>>  {self.peakPickerType}   findPeaks')
 
         # find the list of peaks in the region
         allPeaksArray, allRegionArrays, regionArray, _ = self._findPeaks(data, self.positiveThreshold, self.negativeThreshold)
@@ -222,9 +210,6 @@ class PeakPickerNd(PeakPickerABC):
     def pickPeaks(self, axisDict, peakList, positiveThreshold=None, negativeThreshold=None) -> list:
         """Set the default functionality for picking simplePeaks from the region defined by axisDict
         """
-        # NOTE:ED - verify parameters
-        # print(f'>>>  {self.peakPickerType}   pickPeaks')
-
         # set the correct parameters for the standard findPeaks
         self._hbsWidth = self.halfBoxFindPeaksWidth
         self.findFunc = self._returnSimplePeaks
@@ -234,7 +219,9 @@ class PeakPickerNd(PeakPickerABC):
     def _returnSimplePeaks(self, foundPeaks):
         """Return a list of simple peaks from the height/point/lineWidth list
         """
-        return [SimplePeak(points=point[::-1], height=height, lineWidths=pointLineWidths)
+        return [SimplePeak(points=point[::-1],
+                           height=height,
+                           lineWidths=pointLineWidths if self.setLineWidths else None)
                 for height, point, pointLineWidths in foundPeaks]
 
     def snapToExtremum(self, peak) -> list:
@@ -245,8 +232,6 @@ class PeakPickerNd(PeakPickerABC):
         :param peakList: peakList instance to add newly pickedPeaks
         :return: list of core.Peak instances
         """
-        # print(f'>>>  {self.peakPickerType}   snapToExtremum')
-
         if self.spectrum is None:
             raise RuntimeError('%s.spectrum is None' % self.__class__.__name__)
 
@@ -383,8 +368,6 @@ class PeakPickerNd(PeakPickerABC):
         """Refit the current selected peaks.
         Must be called with peaks that belong to this peakList
         """
-
-        # print(f'>>>  {self.peakPickerType}   fitExistingPeaks')
 
         if not peaks:
             return

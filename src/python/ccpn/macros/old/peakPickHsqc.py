@@ -18,4 +18,6 @@ regionToPick = [hRange, nRange]
 # peaks = peakList.pickPeaksNd(regionToPick, doPos=True, doNeg=False)
 
 axisCodeDict = dict((code, regionToPick[ii]) for ii, code in enumerate(peakList.spectrum.axisCodes))
-peaks = peakList.pickPeaksRegion(axisCodeDict, doPos=True, doNeg=False)
+
+posThreshold = hsqcSpectrum.positiveContourBase
+peaks = hsqcSpectrum.pickPeaks(peakList, posThreshold, None, **axisCodeDict)

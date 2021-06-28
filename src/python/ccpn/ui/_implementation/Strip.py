@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-28 16:26:13 +0100 (Fri, May 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 11:41:02 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -443,7 +443,8 @@ class Strip(AbstractWrapperObject):
 
                 # set any additional parameters
                 myPeakPicker.setParameters(dropFactor=minDropFactor,
-                                           fitMethod=fitMethod
+                                           fitMethod=fitMethod,
+                                           setLineWidths=True
                                            )
 
                 for thisPeakListView in validPeakListViews:

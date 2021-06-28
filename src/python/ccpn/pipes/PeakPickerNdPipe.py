@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:29 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 11:41:02 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -110,7 +110,15 @@ class PeakPickerNdPipe(SpectraPipe):
             if len(spectrum.peakLists) > 0:
                 # spectrum.peakLists[DefaultPeakListIndex].pickPeaksNd(minDropFactor=dropFactor, doNeg=negativePeaks)
 
-                spectrum.peakLists[DefaultPeakListIndex].pickPeaksRegion(minDropFactor=dropFactor, doNeg=negativePeaks)
+                peakList = spectrum.peakLists[DefaultPeakListIndex]
+                # may create a peakPicker instance if not defined, subject to settings in preferences
+                _peakPicker = spectrum.peakPicker
+                if _peakPicker:
+                    _peakPicker.dropFactor = dropFactor
+                    _peakPicker.setLineWidths = True
+                    spectrum.pickPeaks(peakList,
+                                        spectrum.positiveContourBase,
+                                        spectrum.negativeContourBase if negativePeaks else None)
 
             else:
                 getLogger().warning('Error: PeakList not found for Spectrum: %s. Add a new PeakList first' % spectrum.pid)

@@ -29,8 +29,9 @@ Modify as you need and share your macros on the forum: https://www.ccpn.ac.uk/fo
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -38,9 +39,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: LucaM $"
-__dateModified__ = "$dateModified: 2019-10-31 16:32:32 +0100 (Thu, Oct 31, 2019) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-06-28 11:41:02 +0100 (Mon, June 28, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -48,6 +49,7 @@ __author__ = "$Author: LucaM $"
 __date__ = "$Date: 2019-10-31 16:32:32 +0100 (Thu, Oct 31, 2019) $"
 #=========================================================================================
 __title__ = "Auto pick and assign for triple resonance backbone assignment"
+# Start of code
 #=========================================================================================
 
 
@@ -147,6 +149,23 @@ if setContours:
     if hncacb: hncacb.positiveContourBase, hncacb.negativeContourBase = hncacbContours[0],  hncacbContours[1]
     if cbcaconh: cbcaconh.positiveContourBase, cbcaconh.negativeContourBase = cbcaconhContours[0],  cbcaconhContours[1]
 
+
+def _pickPeaks(peakList, doPos=True, doNeg=True, minDropFactor=0.1, estimateLineWidths=True, **regionToPick):
+    spectrum = peakList.spectrum
+    # may create a peakPicker instance if not defined, subject to settings in preferences
+    _peakPicker = spectrum.peakPicker
+    if _peakPicker:
+        _peakPicker.dropFactor = minDropFactor
+        _peakPicker.setLineWidths = estimateLineWidths
+        peaks = spectrum.pickPeaks(peakList,
+                           spectrum.positiveContourBase if doPos else None,
+                           spectrum.negativeContourBase if doNeg else None,
+                           **regionToPick)
+
+        return peaks
+
+    return []
+
 def pickPeaksHSQC():
     """
     picks on the last peakList of the HSQC. should be always one as default.
@@ -154,9 +173,13 @@ def pickPeaksHSQC():
     """
     with notificationEchoBlocking():
         peakList = hsqc.peakLists[-1]
-        peaks = peakList.pickPeaksRegion(regionToPick=HSQC_limits, doPos=True, doNeg=False,
-                                         minDropFactor=minDropFactor,estimateLineWidths=True)
+        peaks = _pickPeaks(peakList=peakList,
+                           regionToPick=HSQC_limits, doPos=True, doNeg=False,
+                           minDropFactor=minDropFactor, estimateLineWidths=True)
+        # peaks = peakList.pickPeaksRegion(regionToPick=HSQC_limits, doPos=True, doNeg=False,
+        #                                  minDropFactor=minDropFactor,estimateLineWidths=True)
         return peaks
+
 
 def addLabelsHSQC():
     """
@@ -237,8 +260,12 @@ def getRegions(hsqcPosition, limits):
 
 def _pickAndAssign_HNCA(hnca,hsqcPosition, hsqc_nmrAtoms,nmrResidue, expectedPeakCount=2):
     regions = getRegions(hsqcPosition, HNCA_limits)
-    hncaPeaks = hnca.peakLists[-1].pickPeaksRegion(regionToPick=regions, doPos=True, doNeg=False,
-                                         minDropFactor=minDropFactor)
+
+    hncaPeaks = _pickPeaks(peakList=hnca.peakLists[-1], regionToPick=regions, doPos=True, doNeg=False,
+                           minDropFactor=minDropFactor)
+    # hncaPeaks = hnca.peakLists[-1].pickPeaksRegion(regionToPick=regions, doPos=True, doNeg=False,
+    #                                      minDropFactor=minDropFactor)
+
     _assignNmrAtomsToPeaks(hncaPeaks, hsqc_nmrAtoms)
     peaks = _orderPeaksByHeight(hncaPeaks)
     _assignByHeights(nmrResidue, peaks[:expectedPeakCount], label=CA)
@@ -246,8 +273,12 @@ def _pickAndAssign_HNCA(hnca,hsqcPosition, hsqc_nmrAtoms,nmrResidue, expectedPea
 
 def _pickAndAssign_HNCOCA(hncoca,hsqcPosition, hsqc_nmrAtoms, m1nmrResidue, expectedPeakCount=1):
     regions = getRegions(hsqcPosition, HNCOCA_limits)
-    hncocaPeaks = hncoca.peakLists[-1].pickPeaksRegion(regionToPick=regions, doPos=True, doNeg=False,
-                                                       minDropFactor=minDropFactor)
+
+    hncocaPeaks = _pickPeaks(peakList=hncoca.peakLists[-1], regionToPick=regions, doPos=True, doNeg=False,
+                             minDropFactor=minDropFactor)
+    # hncocaPeaks = hncoca.peakLists[-1].pickPeaksRegion(regionToPick=regions, doPos=True, doNeg=False,
+    #                                                    minDropFactor=minDropFactor)
+
     peaks = _orderPeaksByHeight(hncocaPeaks)
     m1nmrAtomCA = m1nmrResidue.fetchNmrAtom(CA)
     _assignNmrAtomsToPeaks(peaks[:expectedPeakCount], hsqc_nmrAtoms + [m1nmrAtomCA])
@@ -255,8 +286,12 @@ def _pickAndAssign_HNCOCA(hncoca,hsqcPosition, hsqc_nmrAtoms, m1nmrResidue, expe
 
 def _pickAndAssign_CBCACONH(cbcaconh, hsqcPosition, hsqc_nmrAtoms, m1nmrResidue, expectedPeakCount=2):
     regions = getRegions(hsqcPosition, CBCACONH_limits)
-    cbcaconhPeaks = cbcaconh.peakLists[-1].pickPeaksRegion(regionToPick=regions, doPos=True, doNeg=False,
-                                                       minDropFactor=minDropFactor)
+
+    cbcaconhPeaks = _pickPeaks(peakList=cbcaconh.peakLists[-1], regionToPick=regions, doPos=True, doNeg=False,
+                               minDropFactor=minDropFactor)
+    # cbcaconhPeaks = cbcaconh.peakLists[-1].pickPeaksRegion(regionToPick=regions, doPos=True, doNeg=False,
+    #                                                    minDropFactor=minDropFactor)
+
     peaks = _orderPeaksByHeight(cbcaconhPeaks)
      # cannot guess yet which one is CA or CB  so give it a C !
     m1nmrAtomC = m1nmrResidue.fetchNmrAtom(C)
@@ -265,7 +300,10 @@ def _pickAndAssign_CBCACONH(cbcaconh, hsqcPosition, hsqc_nmrAtoms, m1nmrResidue,
 
 def _pickAndAssign_HNCACB(hncacb, hsqcPosition, hsqc_nmrAtoms, nmrResidue , expectedPeakCount=4):
     regions = getRegions(hsqcPosition, HNCACB_limits)
-    hncacbPeaks = hncacb.peakLists[-1].pickPeaksRegion(regionToPick=regions, doPos=True, doNeg=True, minDropFactor=minDropFactor)
+
+    hncacbPeaks = _pickPeaks(peakList=hncacb.peakLists[-1], regionToPick=regions, doPos=True, doNeg=True, minDropFactor=minDropFactor)
+    # hncacbPeaks = hncacb.peakLists[-1].pickPeaksRegion(regionToPick=regions, doPos=True, doNeg=True, minDropFactor=minDropFactor)
+
     _assignNmrAtomsToPeaks(hncacbPeaks, hsqc_nmrAtoms)
     posPeaks = [p for p in hncacbPeaks if p.height > 0]
     negPeaks = [p for p in hncacbPeaks if p.height < 0]

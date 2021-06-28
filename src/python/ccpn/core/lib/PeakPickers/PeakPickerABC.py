@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-22 09:51:59 +0100 (Tue, June 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 11:41:02 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -191,8 +191,8 @@ class PeakPickerABC(CcpNmrJson):
     autoFit = CBool(default_value=False)
     dropFactor = CFloat(default_value=0.1)
     fitMethod = CString(allow_none=True, default_value=None)
-    positiveThreshold = CFloat(default_value=0.0)
-    negativeThreshold = CFloat(default_value=0.0)
+    positiveThreshold = CFloat(allow_none=True, default_value=0.0)
+    negativeThreshold = CFloat(allow_none=True, default_value=0.0)
 
     #=========================================================================================
     # start of methods
@@ -202,7 +202,7 @@ class PeakPickerABC(CcpNmrJson):
         """Initialise the instance and associate with spectrum
 
         :param spectrum: associate instance with spectrum and import spectrum's parameters
-        :param autoFit:
+        :param autoFit: True/False, automatically fit peaks - functionality defined by subclassed peak-pickers
         """
         from ccpn.core.Spectrum import Spectrum
 
@@ -401,10 +401,10 @@ class PeakPickerABC(CcpNmrJson):
 
     def _validatePointPeak(self, pointPositions, peakList):
         """
-        Check whether a peak already exists at this position
-        :param pointPositions:
-        :param peakList:
-        :return: true if pointPositions is valid
+        Check whether a peak already exists at these pointPositions in the supplied peakList
+        :param pointPositions: position in points of the position to test
+        :param peakList: core.PeakList instance
+        :return: True if pointPositions is valid, i.e. position is available
         """
         intPositions = [int((pos - 1) % pCount) + 1 for pos, pCount in zip(pointPositions, self.spectrum.pointCounts)]  # API position starts at 1
         existingPositions = [[int(pp) for pp in pk.pointPositions] for pk in peakList.peaks]

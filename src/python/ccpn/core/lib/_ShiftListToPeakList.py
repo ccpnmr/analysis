@@ -2,7 +2,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:50 +0000 (Mon, March 01, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-28 11:41:02 +0100 (Mon, June 28, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -24,18 +25,18 @@ __date__ = "$Date: 2021-02-22 15:44:00 +0000 (Mon, February 22, 2021) $"
 
 
 ###### WARNING: Private routines
-##     Many routines are directly ported from V2 and intput/output API objects.
-
+##     Many routines are directly ported from V2 and input/output API objects.
 
 
 import re, operator
+from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 from ccpn.core.lib._DistanceRestraintsLib import _getDataDimRefFromPeakDim, _areAtomsBound, \
     _getBoundAtoms, _getBoundResonances, _pnt2ppm, _ppm2pnt, _hz2pnt, _pnt2hz, unit_converter, _areResonancesBound, \
-    longRangeTransfers, _newAtomAndResonanceSets
+    longRangeTransfers  #, _newAtomAndResonanceSets
 
 
-DEFAULT_ISOTOPES = {'H':'1H','C':'13C','N':'15N','P':'31P','Si':'29Si',
-                    'F':'19F','O':'16O'}
+DEFAULT_ISOTOPES = {'H': '1H', 'C': '13C', 'N': '15N', 'P': '31P', 'Si': '29Si',
+                    'F': '19F', 'O': '16O'}
 
 STEREO_PREFIX = 'stereo_'
 CARBOHYDRATE_MOLTYPE = 'carbohydrate'
@@ -44,7 +45,6 @@ OTHER_MOLTYPE = 'other'
 DNA_MOLTYPE = 'DNA'
 RNA_MOLTYPE = 'RNA'
 DNARNA_MOLTYPE = 'DNA/RNA'
-
 
 
 def _getIsotopomerSingleAtomFractions(isotopomers, atomName, subType=1):
@@ -68,6 +68,7 @@ def _getIsotopomerSingleAtomFractions(isotopomers, atomName, subType=1):
             fractionDict[isotopeCode] = fractionDict.get(isotopeCode, 0.0) + contrib
 
     return fractionDict
+
 
 def _molLabelFractionsDict(resLabel, atName, subType, elementName):
     """get the isotopeCode:fraction dictionary for a single molLabel
@@ -113,6 +114,7 @@ def _molLabelFractionsDict(resLabel, atName, subType, elementName):
     #
     return result
 
+
 def _singleAtomFractions(labeledMixture, resId, atName):
     """get the isotopeCode:fraction dictionary for a labeledMixture
 
@@ -123,7 +125,7 @@ def _singleAtomFractions(labeledMixture, resId, atName):
 
     # set up
     molResidue = labeledMixture.labeledMolecule.molecule.findFirstMolResidue(
-        serial=resId)
+            serial=resId)
     if molResidue is None:
         return None
 
@@ -159,6 +161,7 @@ def _singleAtomFractions(labeledMixture, resId, atName):
 
     #
     return result
+
 
 def _getExperimentAtomFractions(experiment, atom):
     """Descrn: Get the isotope proportions for an atom
@@ -220,6 +223,7 @@ def _getIsotopomerAtomPairFractions(isotopomers, atomNames, subTypes):
 
     return fractionDict
 
+
 def _atomPairFractions(labeledMixture, resIds, atNames, ):
     """get the isotope pair : fraction dictionary for a labeledMixture
 
@@ -244,7 +248,7 @@ def _atomPairFractions(labeledMixture, resIds, atNames, ):
     subTypes = []
     for ii in (0, 1):
         molResidue = labeledMixture.labeledMolecule.molecule.findFirstMolResidue(
-            serial=resIds[ii])
+                serial=resIds[ii])
         if molResidue is None:
             return None
 
@@ -305,6 +309,7 @@ def _atomPairFractions(labeledMixture, resIds, atNames, ):
     #
     return result
 
+
 def _getExperimentAtomPairFractions(experiment, atom1, atom2):
     """Descrn: Get the combined isotope proportions for a given pair of molecular
                system atoms for a given experiment (label mixture).
@@ -344,15 +349,17 @@ def _getExperimentAtomPairFractions(experiment, atom1, atom2):
 
     return fractionDict
 
-def _warnChempCompLabelFailure(ccpCode, molType, scheme):
-  """Descrn: Display a general warning for not being able to find a chemComplLabel
-     Inputs: Word, Word, ChemCompLabel.LabelingScheme, MolSystem.Atom
-     Output: None
-  """
 
-  data = (ccpCode,molType,scheme.name)
-  msg  = 'Could not find chemp comp labelling information for %s(%s) in scheme %s'
-  print('Failure',msg % data)
+def _warnChempCompLabelFailure(ccpCode, molType, scheme):
+    """Descrn: Display a general warning for not being able to find a chemComplLabel
+       Inputs: Word, Word, ChemCompLabel.LabelingScheme, MolSystem.Atom
+       Output: None
+    """
+
+    data = (ccpCode, molType, scheme.name)
+    msg = 'Could not find chemp comp labelling information for %s(%s) in scheme %s'
+    print('Failure', msg % data)
+
 
 def _getSchemeAtomFractions(scheme, atom):
     """Descrn: Get the isotope proportions for a given molecular
@@ -477,36 +484,36 @@ def _getPrimaryDataDimRef(freqDataDim):
         return None
 
 
-def _getDataDimRefFullRange(dataDimRef):
-    """
-    Get the full range of freq values for a data dimension reference
-    taking into account spectral width and min/max unaliased freqs
-
-    .. describe:: Input
-
-    ccp.nmr.Nmr.DataDimRef
-
-    .. describe:: Output
-
-    2-List of Floats (min, max)
-    """
-
-    expDimRef = dataDimRef.expDimRef
-    converter = unit_converter[('point', expDimRef.unit)]
-
-    valRange = [converter(1, dataDimRef),
-                converter(dataDimRef.dataDim.numPoints, dataDimRef)]
-    valRange.sort()
-
-    valueMin = expDimRef.minAliasedFreq  # Could be 0.0
-    if valueMin is None:
-        valueMin = valRange[0]
-
-    valueMax = expDimRef.maxAliasedFreq
-    if valueMax is None:
-        valueMax = valRange[1]
-
-    return [valueMin, valueMax]
+# def _getDataDimRefFullRange(dataDimRef):
+#     """
+#     Get the full range of freq values for a data dimension reference
+#     taking into account spectral width and min/max unaliased freqs
+#
+#     .. describe:: Input
+#
+#     ccp.nmr.Nmr.DataDimRef
+#
+#     .. describe:: Output
+#
+#     2-List of Floats (min, max)
+#     """
+#
+#     expDimRef = dataDimRef.expDimRef
+#     converter = unit_converter[('point', expDimRef.unit)]
+#
+#     valRange = [converter(1, dataDimRef),
+#                 converter(dataDimRef.dataDim.numPoints, dataDimRef)]
+#     valRange.sort()
+#
+#     valueMin = expDimRef.minAliasedFreq  # Could be 0.0
+#     if valueMin is None:
+#         valueMin = valRange[0]
+#
+#     valueMax = expDimRef.maxAliasedFreq
+#     if valueMax is None:
+#         valueMax = valRange[1]
+#
+#     return [valueMin, valueMax]
 
 
 def _areAtomsTocsyLinked(atom1, atom2):
@@ -552,7 +559,7 @@ def _areAtomsTocsyLinked(atom1, atom2):
             boolean = False
 
         else:
-            atomsA = set([atom1,])
+            atomsA = set([atom1, ])
             boolean = True
             while atom2 not in atomsA:
                 atomsB = atomsA.copy()
@@ -621,6 +628,7 @@ def _getLinkedResidue(residue, linkCode='prev'):
     residue.linkedResidueDict[linkCode] = residue2
     return residue2
 
+
 def _getNumConnectingBonds(atom1, atom2, limit=5):
     """
     Get the minimum number of binds that connect two atoms.
@@ -665,7 +673,6 @@ def _getChemAtomNmrRef(project, atomName, ccpCode, molType=PROTEIN_MOLTYPE, sour
     Float
     """
 
-
     # key = '%s:%s:%s:%s' % (atomName, ccpCode, molType, sourceName)
     # if not hasattr(project, 'chemAtomNmrRefDict'):
     #  project.chemAtomNmrRefDict = {}
@@ -697,13 +704,13 @@ def _getChemAtomNmrRef(project, atomName, ccpCode, molType=PROTEIN_MOLTYPE, sour
         else:
             data = (molType, ccpCode, sourceName)
             print('Warning',
-                        'Could not load reference NMR data for %s:%s source=%s' % data)
+                  'Could not load reference NMR data for %s:%s source=%s' % data)
             return
 
     else:
         data = (molType, ccpCode)
         print('Warning',
-                    'Could not load reference NMR data for %s:%s' % data)
+              'Could not load reference NMR data for %s:%s' % data)
         return
 
     if not chemAtomNmrRef:
@@ -714,6 +721,7 @@ def _getChemAtomNmrRef(project, atomName, ccpCode, molType=PROTEIN_MOLTYPE, sour
                 break
 
     return chemAtomNmrRef
+
 
 def _getChemicalShiftBounds(chemAtom, threshold=0.001, sourceName='BMRB'):
     """
@@ -773,7 +781,6 @@ def _getChemicalShiftBounds(chemAtom, threshold=0.001, sourceName='BMRB'):
         chemAtom.chemicalShiftBounds[key] = region
 
     return region
-
 
 
 def _getRandomCoilShiftCorrectionsDict():
@@ -1327,6 +1334,39 @@ def _getResidueObservableAtoms(residue, refExperiment=None, labelling=None,
 
     return list(observableAtoms)
 
+
+def _getDataDimRefFullRange(dataDimRef):
+    """
+    Get the full range of freq values for a data dimension reference
+    taking into account spectral width and min/max unaliased freqs
+
+    .. describe:: Input
+
+    ccp.nmr.Nmr.DataDimRef
+
+    .. describe:: Output
+
+    2-List of Floats (min, max)
+    """
+
+    expDimRef = dataDimRef.expDimRef
+    converter = unit_converter[('point', expDimRef.unit)]
+
+    valRange = [converter(1, dataDimRef),
+                converter(dataDimRef.dataDim.numPoints, dataDimRef)]
+    valRange.sort()
+
+    valueMin = expDimRef.minAliasedFreq  # Could be 0.0
+    if valueMin is None:
+        valueMin = valRange[0]
+
+    valueMax = expDimRef.maxAliasedFreq
+    if valueMax is None:
+        valueMax = valRange[1]
+
+    return [valueMin, valueMax]
+
+
 def makePeakListFromShifts(spectrum, chemicalShiftList, useUnassigned=True, chain=None, bondLimit=6,
                            residueLimit=1, labelling=None, labellingThreshold=0.1):
     """
@@ -1781,8 +1821,8 @@ def makePeakListFromShifts(spectrum, chemicalShiftList, useUnassigned=True, chai
                 position.append(shift.value)
 
             peak = peakList.newPeak(position)
-            apiPeak = peak._wrappedData
-            peakDims = apiPeak.sortedPeakDims()
+            # apiPeak = peak._wrappedData
+            # peakDims = apiPeak.sortedPeakDims()
 
             for dim, res in enumerate(resonances):
                 atom = peak.project._data2Obj[res]
@@ -1797,9 +1837,9 @@ def makePeakListFromShifts(spectrum, chemicalShiftList, useUnassigned=True, chai
     return peakList
 
 
-# Move this to the spectrum core class or anyother more direct object ....:
+# Move this to the spectrum core class or another more direct object ....:
 def newPeakListFromChemicalShiftList(self, chemicalShiftList, useUnassigned=True, chain=None,
-                                              bondLimit=6, residueLimit=1):
+                                     bondLimit=6, residueLimit=1):
     # from ccpn.core.lib.ChemicalShiftListLib import makePeakListFromShifts
     # As now to get this working we need to set AtomAndResonanceSets: _newAtomAndResonanceSets
     # needs to have a nmrChain assigned to a chain
@@ -1809,5 +1849,3 @@ def newPeakListFromChemicalShiftList(self, chemicalShiftList, useUnassigned=True
                                               useUnassigned=useUnassigned, chain=chain,
                                               bondLimit=bondLimit, residueLimit=residueLimit)
             return peakList
-
-

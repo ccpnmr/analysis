@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 11:41:02 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -144,16 +144,19 @@ class PeakFindPopup(CcpnDialog):
 
         axisCodeDict = dict((code, positions[ii]) for ii, code in enumerate(self.peakList.spectrum.axisCodes))
 
-        # with logCommandBlock(get='peakList') as log:
-        #     log('pickPeaksRegion')
-
-        peaks = peakList.pickPeaksRegion(regionToPick=axisCodeDict, doPos=doPos, doNeg=doNeg,
-                                     minDropFactor = self.application.preferences.general.peakDropFactor,
-                                         estimateLineWidths=doLineWidths
-                                         )
+        _spectrum = peakList.spectrum
+        # may create a peakPicker instance if not defined, subject to settings in preferences
+        _peakPicker = _spectrum.peakPicker
+        if _peakPicker:
+            _peakPicker.dropFactor = self.application.preferences.general.peakDropFactor
+            _peakPicker.setLineWidths = doLineWidths
+            _spectrum.pickPeaks(peakList,
+                                _spectrum.positiveContourBase if doPos else None,
+                                _spectrum.negativeContourBase if doNeg else None,
+                                **axisCodeDict)
 
         # estimate the peak volumes
-        if doVolumes:
+        if doVolumes and doLineWidths:
             peakList.estimateVolumes(volumeIntegralLimit=self.application.preferences.general.volumeIntegralLimit)
 
         self.accept()

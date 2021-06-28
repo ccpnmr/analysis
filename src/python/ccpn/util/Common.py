@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-09 13:55:53 +0100 (Wed, June 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-28 13:39:56 +0100 (Mon, June 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -929,10 +929,12 @@ class PrintFormatter(object):
     """
     Class to produce formatted strings from python objects.
 
-    Includes standard python objects: list, dict, str, int, float, bool, type(None)
+    Includes standard python objects: list, tuple, dict, set, byte, str, int, float, complex, bool, type(None)
     and additional objects: OrderedDict, OrderedSet, frozenset, FrozenOrderedSet, FrozenDict
 
     Objects not added to formatter will return a pickled object if ALLOWPICKLE is True, otherwise None
+
+    * The original basis for this came from stackOverflow somewhere, but I can't seem to find it now
     """
     TAB = '    '
     CRLF = '\n'

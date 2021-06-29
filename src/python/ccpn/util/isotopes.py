@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 14:27:30 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-29 14:30:45 +0100 (Tue, June 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,6 @@ from ccpn.util.traits.CcpNmrTraits import Unicode, Int, Float, Bool
 from ccpn.framework.PathsAndUrls import ccpnConfigPath
 from ccpn.util.Path import aPath
 from ccpn.util.decorators import singleton
-from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 
 #=========================================================================================
 # Definitions for findMostLikelyFieldFromSpectrometerFrequencies
@@ -262,6 +261,8 @@ def name2IsotopeCode(name=None):
     """
     if not name:
         return None
+
+    from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 
     result = DEFAULT_ISOTOPE_DICT.get(name[0])
     if result is None:

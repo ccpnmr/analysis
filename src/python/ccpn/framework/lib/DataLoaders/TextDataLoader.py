@@ -1,5 +1,6 @@
 """
-This module defines the data loading mechanism for loading a Exel file
+This module defines the data loading mechanism for loading text file(s),
+defined as extensions .txt, .com, .csh, .sh
 """
 
 #=========================================================================================
@@ -32,13 +33,13 @@ from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
 from ccpn.core.Project import Project
 
 
-class PdbDataLoader(DataLoaderABC):
-    """Pdb file data loader
+class TextDataLoader(DataLoaderABC):
+    """Text file data loader
     """
-    dataFormat = 'pdbFile'
-    suffixes = ['.pdb']  # a list of suffixes that get matched to path
+    dataFormat = 'textFile'
+    suffixes = '.txt .com .csh .sh'.split()  # a list of suffixes that get matched to path
     allowDirectory = False  # Can/Can't open a directory
     createsNewProject = False
-    loadFunction = (Project._loadPdbFile, 'project')
+    loadFunction = (Project._loadTextFile, 'project')
 
-PdbDataLoader._registerFormat()
+TextDataLoader._registerFormat()

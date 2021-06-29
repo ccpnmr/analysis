@@ -1311,8 +1311,8 @@ class Project(AbstractWrapperObject):
 
     def _loadPdbFile(self, path: (str, Path)) -> list:
         """Load data from pdb file path into new StructureEnsemble object(s)
+        CCPNINTERNAL: called from pdb dataLoader
         """
-        # CCPNINTERNAL: called from pdb dataLoader
 
         from ccpn.util.StructureData import EnsembleData
 
@@ -1323,6 +1323,20 @@ class Project(AbstractWrapperObject):
         se = self.newStructureEnsemble(name=name, data=ensemble)
 
         return [se]
+
+    def _loadTextFile(self, path: (str, Path)) -> list:
+        """Load text from file path into new Note object
+        CCPNINTERNAL: called from text dataLoader
+        """
+        path = aPath(path)
+        name = path.basename
+
+        with path.open('r') as fp:
+            # cannot do read() as we want one string
+            text = ''.join(line for line in fp.readlines())
+        note = self.newNote(name=name, text=text)
+
+        return [note]
 
     def _loadLayout(self, path: (str, Path), subType: str):
         # this is a GUI only function call. Please move to the appropriate location on 3.1

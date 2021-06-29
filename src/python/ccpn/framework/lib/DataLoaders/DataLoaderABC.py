@@ -66,6 +66,7 @@ def getDataLoaders():
     from ccpn.framework.lib.DataLoaders.FastaDataLoader import FastaDataLoader
     from ccpn.framework.lib.DataLoaders.ExelDataLoader import ExcelDataLoader
     from ccpn.framework.lib.DataLoaders.PdbDataLoader import PdbDataLoader
+    from ccpn.framework.lib.DataLoaders.TextDataLoader import TextDataLoader
     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
     return DataLoaderABC._dataLoaders
 
@@ -101,20 +102,9 @@ class DataLoaderABC(TraitBase):
     dataFormat = None
     suffixes = []  # a list of suffixes that gets matched to path
     createsNewProject = False
-
-    @classmethod
-    def checkForValidFormat(cls, path):
-        """check if valid format corresponding to dataFormat
-        :return: None or instance of the class
-        """
-        raise NotImplementedError()
-
-    def load(self) -> list:
-        """The actual loading method; to be subclassed
-        raises RunTimeError on error
-        :return: a list of [object(s)] representing the data
-        """
-        raise NotImplementedError()
+    allowDirectory = False  # Can/Can't open a directory
+    loadFunction = (None, None) # A (function, attributeName) tuple;
+                                # attributeName := 'project' or 'application'
 
     #=========================================================================================
     # end to be subclassed
@@ -146,7 +136,6 @@ class DataLoaderABC(TraitBase):
 
         # local import to avoid cycles
         from ccpn.framework.Framework import getApplication
-
         self.application = getApplication()
 
     @property
@@ -154,6 +143,36 @@ class DataLoaderABC(TraitBase):
         """Current poject instance
         """
         return self.application.project
+
+    @classmethod
+    def checkForValidFormat(cls, path):
+        """check if valid format corresponding to dataFormat
+        :return: None or instance of the class
+
+        Can be subclassed
+        """
+        if (_path := cls.checkPath(path)) is None:
+            return None
+        # assume that all is good
+        instance = cls(path)
+        return instance
+
+    def load(self):
+        """The actual file loading method;
+        raises RunTimeError on error
+        :return: a list of [objects]
+
+        Can be subclassed
+        """
+        try:
+            func, attributeName = self.loadFunction
+            obj = getattr(self, attributeName)
+            result = func(obj, self.path)
+
+        except Exception as es:
+            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
+
+        return result
 
     @classmethod
     def checkPath(cls, path):

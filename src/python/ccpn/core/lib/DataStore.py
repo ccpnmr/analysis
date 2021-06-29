@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:57 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-29 18:20:01 +0100 (Tue, June 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -76,7 +76,7 @@ class RedirectionABC(CcpNmrJson):
             return self._path
 
     def expandPath(self):
-        "expand path to handle None, zero-length and '.'"
+        """expand path to handle None, zero-length and '.'"""
         if self._path is None or len(self._path) == 0:
             self._path = Path.home()
         elif self._path == '.':
@@ -163,12 +163,12 @@ class PathRedirections(list):
         return self[2].path
 
     def getPaths(self):
-        "Return a list of (identifier, path) tuples"
+        """Return a list of (identifier, path) tuples"""
         paths = [(r.identifier, r.path) for r in self]
         return paths
 
     def getApiMappings(self):
-        "Return a list with (apiName, indentifier) tuples"
+        """Return a list with (apiName, indentifier) tuples"""
         pairs = [(r.apiName, r.identifier) for r in self]
         return pairs
 
@@ -218,7 +218,7 @@ class DataStore(CcpNmrJson):
     apiDataStoreDir = Unicode(allow_none=True, default_value=None).tag(saveToJson=True)
     apiDataStorePath = Unicode(allow_none=True, default_value=None).tag(saveToJson=True)
 
-    # Dict with edirection paths; for reference
+    # Dict with redirection paths; for reference
     pathRedirections = Dict(default_value={}).tag(saveToJson=True)
 
     def __init__(self, spectrum=None, autoRedirect=False, autoVersioning=False):

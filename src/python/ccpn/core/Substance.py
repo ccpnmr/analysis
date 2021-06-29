@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:47 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-29 15:29:18 +0100 (Tue, June 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -836,10 +836,11 @@ def _getNefSubstance(self: Project, sequence: typing.Sequence[dict], name: str =
     apiMolecule = apiNmrProject.root.findFirstMolecule(name=name)
     if apiMolecule:
         apiMolComponent = apiNmrProject.sampleStore.refSampleComponentStore.getMolComponent(apiMolecule)
-        if apiMolComponent in self._data2Obj:
-            return self._data2Obj[apiMolComponent]
-        else:
-            raise RuntimeError('Error getting Nef Substance {}'.format(name))
+        if apiMolComponent:
+            if apiMolComponent in self._data2Obj:
+                return self._data2Obj[apiMolComponent]
+            else:
+                raise RuntimeError('Error getting Nef Substance {} - {}'.format(name, apiMolComponent))
 
 
 #EJB 20181206: moved to Project

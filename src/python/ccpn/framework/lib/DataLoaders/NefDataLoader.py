@@ -34,7 +34,6 @@ from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
 class NefDataLoader(DataLoaderABC):
     """NEF data loader
     """
-
     dataFormat = 'nefFile'
     suffixes = ['.nef']  # a list of suffixes that get matched to path
     allowDirectory = False  # Can/Can't open a directory
@@ -42,21 +41,11 @@ class NefDataLoader(DataLoaderABC):
 
     def __init__(self, path):
         super(NefDataLoader, self).__init__(path)
-        self.makeNewProject = self.createsNewProject  # A instance 'copy' to allow modification
-
-    @classmethod
-    def checkForValidFormat(cls, path):
-        """check if valid format corresponding to dataFormat
-        :return: None or instance of the class
-        """
-        if (_path := cls.checkPath(path)) is None:
-            return None
-        # assume that all is good
-        instance = cls(path)
-        return instance
+        self.makeNewProject = self.createsNewProject  # A instance 'copy' to allow modification by the Gui
 
     def load(self):
-        """The actual Nef loading method;
+        """The actual Nef loading method; subclassed to account for special
+        circumstances
         raises RunTimeError on error
         :return: a list of [project]
         """

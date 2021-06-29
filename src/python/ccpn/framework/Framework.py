@@ -1677,7 +1677,7 @@ class Framework(NotifierBase):
         project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
         self._initialiseProject(project)
         self.project = project
-        return project
+        return [project]
 
     @logCommand('application.')
     def loadProject(self, path):
@@ -1820,7 +1820,6 @@ class Framework(NotifierBase):
         popup.show()
         popup.raise_()
 
-    #     # FIXME Below is broken. This does not create a project! Looks like a copy-paste from NEF code.
     # """Load Project from NEF file at path, and do necessary setup"""
     #
     # from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
@@ -2025,7 +2024,6 @@ class Framework(NotifierBase):
             failMessage = '==> Project save failed\n'
             sys.stderr.write(failMessage)
             self.ui.mainWindow.statusBar().showMessage(failMessage)
-            # NBNB TODO Gui should pre-check newPath and/or pop up something in case of failure
 
         else:
             successMessage = '==> Project successfully saved\n'

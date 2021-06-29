@@ -29,8 +29,7 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
-from ccpn.util.Path import aPath
-from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_API_DIRECTORY
+from ccpn.framework.Framework import Framework
 
 from ccpnmodel.ccpncore.memops.metamodel import Constants as metaConstants
 MEMOPS = metaConstants.modellingPackageName
@@ -40,11 +39,11 @@ IMPLEMENTATION = metaConstants.implementationPackageName
 class CcpNmrV2ProjectDataLoader(DataLoaderABC):
     """V2 project data loader
     """
-
     dataFormat = 'ccpNmrV2Project'
     suffixes = []  # a list of suffixes that get matched to path
     allowDirectory = True  # Can/Can't open a directory
     createsNewProject = True
+    loadFunction = (Framework._loadV2Project, 'application')
 
     @classmethod
     def checkForValidFormat(cls, path):
@@ -63,17 +62,5 @@ class CcpNmrV2ProjectDataLoader(DataLoaderABC):
             instance = cls(path)
             return instance
         return None
-
-    def load(self):
-        """The actual project loading method;
-        raises RunTimeError on error
-        :return: a list of [project]
-        """
-        try:
-            project = self.application._loadV2Project(self.path)
-        except Exception as es:
-            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
-
-        return [project]
 
 CcpNmrV2ProjectDataLoader._registerFormat()

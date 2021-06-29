@@ -29,38 +29,15 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
-
+from ccpn.core.Project import Project
 
 class ExcelDataLoader(DataLoaderABC):
     """Excel data loader
     """
-
     dataFormat = 'excelFile'
     suffixes = ['.xlsx', '.xls']  # a list of suffixes that get matched to path
     allowDirectory = False  # Can/Can't open a directory
     createsNewProject = False
-
-    @classmethod
-    def checkForValidFormat(cls, path):
-        """check if valid format corresponding to dataFormat
-        :return: None or instance of the class
-        """
-        if (_path := cls.checkPath(path)) is None:
-            return None
-        # assume that all is good
-        instance = cls(path)
-        return instance
-
-    def load(self):
-        """The actual Excel loading method;
-        raises RunTimeError on error
-        :return: a list of [project]
-        """
-        try:
-            result = self.project._loadExcelFile(path=self.path)
-        except Exception as es:
-            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
-
-        return [self.project]
+    loadFunction = (Project._loadExcelFile, 'project')
 
 ExcelDataLoader._registerFormat()

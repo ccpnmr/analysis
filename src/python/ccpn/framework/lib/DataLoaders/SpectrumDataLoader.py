@@ -39,7 +39,6 @@ from ccpn.core.Spectrum import _newSpectrumFromDataSource
 class SpectrumDataLoader(DataLoaderABC):
     """Spectrum data loader
     """
-
     dataFormat = 'Spectrum'
     suffixes = list(set([suf for spec in getDataFormats().values()
                          for suf in spec.suffixes if suf is not None]))  # a list of possible spectrum suffixes

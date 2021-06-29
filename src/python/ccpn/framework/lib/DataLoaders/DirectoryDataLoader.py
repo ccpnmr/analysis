@@ -1,5 +1,6 @@
 """
-This module defines the data loading mechanism for a V3 project
+This module defines the data loading mechanism for a directory
+It creates a list of dataLoaders for each recognised type, optionally filtered
 """
 
 #=========================================================================================
@@ -29,15 +30,12 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC, checkPathForDataLoader
-from ccpn.util.Path import aPath
-
 from ccpn.util.traits.CcpNmrTraits import Bool, List, Int
 
 
 class DirectoryDataLoader(DataLoaderABC):
     """A directory data loader
     """
-
     dataFormat = 'directoryData'
     suffixes = []  # a list of suffixes that get matched to path
     allowDirectory = True  # Can/Can't open a directory

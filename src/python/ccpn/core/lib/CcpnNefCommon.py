@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:37:26 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-29 16:10:38 +0100 (Tue, June 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -405,15 +405,15 @@ nef2CcpnMap = {
         ('ccpn_spectrum_comment', 'comment'),
         ('ccpn_spectrum_file_path', 'filePath'),
         ('ccpn_sample', None),
-        ('ccpn_file_header_size', '_apiDataStore.headerSize'),
-        ('ccpn_file_number_type', '_apiDataStore.numberType'),
-        ('ccpn_file_complex_stored_by', '_apiDataStore.complexStoredBy'),
-        ('ccpn_file_scale_factor', '_apiDataStore.scaleFactor'),
-        ('ccpn_file_is_big_endian', '_apiDataStore.isBigEndian'),
-        ('ccpn_file_byte_number', '_apiDataStore.nByte'),
-        ('ccpn_file_has_block_padding', '_apiDataStore.hasBlockPadding'),
-        ('ccpn_file_block_header_size', '_apiDataStore.blockHeaderSize'),
-        ('ccpn_file_type', '_apiDataStore.fileType'),
+        ('ccpn_file_header_size', '_dataSource.headerSize'),
+        ('ccpn_file_number_type', '_dataSource.numberType'),
+        ('ccpn_file_complex_stored_by', '_dataSource.complexStoredBy'),
+        ('ccpn_file_scale_factor', '_dataSource.scaleFactor'),
+        ('ccpn_file_is_big_endian', '_dataSource.isBigEndian'),
+        ('ccpn_file_byte_number', '_dataSource.nByte'),
+        ('ccpn_file_has_block_padding', '_dataSource.hasBlockPadding'),
+        ('ccpn_file_block_header_size', '_dataSource.blockHeaderSize'),
+        ('ccpn_file_type', '_dataSource.fileType'),
 
         # NOTE:ED - testing again
         # ('ccpn_peaklist_serial', 'serial'),
@@ -474,8 +474,8 @@ nef2CcpnMap = {
         ('lorentzian_broadening', 'lorentzianBroadenings'),
         ('gaussian_broadening', 'gaussianBroadenings'),
         ('sine_window_shift', 'sineWindowShifts'),
-        ('dimension_is_complex', '_apiDataStore.isComplex'),
-        ('dimension_block_size', '_apiDataStore.blockSizes'),
+        ('dimension_is_complex', '_dataSource.isComplex'),
+        ('dimension_block_size', '_dataSource.blockSizes'),
         )),
 
     'nef_spectrum_dimension_transfer'       : OD((

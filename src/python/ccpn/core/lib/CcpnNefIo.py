@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 15:29:18 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-29 16:10:38 +0100 (Tue, June 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -4738,7 +4738,7 @@ class CcpnNefReader(CcpnNefContent):
             # Make data storage object
             filePath = saveFrame.get('ccpn_spectrum_file_path')
             if filePath:
-                storageParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping, ccpnPrefix='_apiDataStore')
+                storageParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping, ccpnPrefix='_dataSource')
                 storageParameters['numPoints'] = spectrum.pointCounts
                 # spectrum._addDataStore(filePath, **storageParameters)
                 spectrum.filePath = filePath

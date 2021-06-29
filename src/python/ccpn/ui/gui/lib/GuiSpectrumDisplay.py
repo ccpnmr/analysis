@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-29 09:34:32 +0100 (Tue, June 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -60,7 +60,6 @@ from ccpn.ui.gui.widgets.GLAxis import Gui1dWidgetAxis, GuiNdWidgetAxis
 from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
 from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
 from ccpn.util.Logging import getLogger
-from ccpn.util.Common import ZPlaneNavigationModes
 from ccpn.util import Colour
 from ccpn.core.Substance import Substance
 from ccpn.core.NmrAtom import NmrAtom
@@ -79,7 +78,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_BACKGROUND
+from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_BACKGROUND, ZPlaneNavigationModes
 
 
 STRIP_SPACING = 5

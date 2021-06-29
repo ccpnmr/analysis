@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:47 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-29 09:34:32 +0100 (Tue, June 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -261,7 +261,7 @@ class Window(AbstractWrapperObject):
         """
         from ccpn.ui._implementation.SpectrumDisplay import _createSpectrumDisplay
         from ccpn.ui.gui.lib.GuiSpectrumDisplay import STRIPDIRECTIONS
-        from ccpn.util.Common import ZPlaneNavigationModes
+        from ccpn.ui.gui.guiSettings import ZPlaneNavigationModes
 
         spectrum = self.project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
         if any(x != 'Frequency' for x in spectrum.dimensionTypes):

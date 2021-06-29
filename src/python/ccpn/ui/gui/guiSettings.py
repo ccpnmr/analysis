@@ -6,7 +6,8 @@ Settings used in gui modules, widgets and popups
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 15:00:01 +0000 (Tue, March 02, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-29 09:34:32 +0100 (Tue, June 29, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,6 +28,8 @@ __date__ = "$Date: 2016-11-15 21:37:50 +0000 (Tue, 15 Nov 2016) $"
 #=========================================================================================
 
 from itertools import product
+
+from LabelledEnum import LabelledEnum
 from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONT, \
     DEFAULTFONTSIZE, DEFAULTFONTNAME, CONSOLEFONT, SIDEBARFONT, \
     TABLEFONT, SEQUENCEGRAPHFONT, _readFontFromAppearances
@@ -446,3 +449,9 @@ def getColours():
     colourScheme = getColourScheme()
     colourDict = ColourDict(colourScheme)
     return colourDict
+
+
+class ZPlaneNavigationModes(LabelledEnum):
+    PERSPECTRUMDISPLAY = 0, 'Per Spectrum Display', 'spectrumdisplay'
+    PERSTRIP = 1, 'Per Strip', 'strip'
+    INSTRIP = 2, 'In Strip', 'instrip'

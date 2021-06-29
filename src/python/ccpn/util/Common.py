@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 19:12:28 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-29 09:34:33 +0100 (Tue, June 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -40,14 +40,10 @@ import re
 import sys
 import string
 from collections.abc import Iterable
-from collections import OrderedDict
 from string import whitespace
-from PrintFormatter import PrintFormatter
 
 from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
-from ccpn.util.LabelledEnum import LabelledEnum
-from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
-from ccpn.util.FrozenDict import FrozenDict
+from ccpn.util.OrderedSet import OrderedSet
 
 from ccpn.util import Constants
 from ccpn.util.isotopes import isotopeRecords
@@ -678,12 +674,6 @@ def getIsotopeListFromCode(isotopeCode):
         atomNames = list(OrderedSet([atomName for key in keys for atomName in NEF_ATOM_NAMES[key]]))
 
     return atomNames
-
-
-class ZPlaneNavigationModes(LabelledEnum):
-    PERSPECTRUMDISPLAY = 0, 'Per Spectrum Display', 'spectrumdisplay'
-    PERSTRIP = 1, 'Per Strip', 'strip'
-    INSTRIP = 2, 'In Strip', 'instrip'
 
 
 def _compareDict(d1, d2):

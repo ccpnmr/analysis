@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-29 14:27:29 +0100 (Tue, June 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,11 +32,10 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore as ApiNmrConstraintStore
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonance
-from ccpn.util.Common import name2IsotopeCode
 from ccpn.core.lib import Pid
-from ccpn.util import Common as commonUtil
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
+from ccpn.util.decorators import logCommand
+from ccpn.util.isotopes import name2IsotopeCode
 from ccpn.util.Logging import getLogger
 
 
@@ -90,17 +89,6 @@ class DataSet(AbstractWrapperObject):
         """
         getLogger().warning('Deprecated, please use DataSet.name')
         return self.name
-
-        # # Reading V2 project resulted in name being None; create one on the fly
-        # if self._wrappedData.name is None:
-        #     nextNumber = len(self._project.dataSets) + 1
-        #     title = 'my%s_%s' % (self._defaultName(self), nextNumber) # if nextNumber > 0 else self._defaultName(self)
-        #
-        #     while self._project._wrappedData.findFirstNmrConstraintStore(name=title) is not None:
-        #         title = commonUtil.incrementName(title)
-        #     self._wrappedData.__dict__['name'] = title  # The only way to access this
-        #
-        # return self._wrappedData.name
 
     @title.setter
     def title(self, value: str):

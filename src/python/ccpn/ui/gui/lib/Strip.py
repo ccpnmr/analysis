@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 19:12:27 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-29 14:27:30 +0100 (Tue, June 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
-from ccpn.util import Common as commonUtil
+
+from ccpn.util.isotopes import name2IsotopeCode
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip
@@ -91,8 +92,8 @@ def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: t
 
                         elif widths[ii] == 'default' and stripAxisIndex < 2:
                             # if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H
-                            if (commonUtil.name2IsotopeCode(axisCode) == '13C' or
-                                    commonUtil.name2IsotopeCode(axisCode) == '15N'):
+                            if (name2IsotopeCode(axisCode) == '13C' or
+                                    name2IsotopeCode(axisCode) == '15N'):
                                 _setStripAxisWidth(strip, axisIndex=stripAxisIndex, width=5, update=True)
                             else:
                                 _setStripAxisWidth(strip, axisIndex=stripAxisIndex, width=0.5, update=True)
@@ -158,7 +159,7 @@ def matchAxesAndNmrAtoms(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom]):
         if axis:
             shiftDict[axis.code] = []
             for atom in nmrAtoms:
-                if atom.isotopeCode == commonUtil.name2IsotopeCode(axis.code):
+                if atom.isotopeCode == name2IsotopeCode(axis.code):
                     shift = shiftList.getChemicalShift(atom.id)
                     if shift is not None and isPositionWithinfBounds(strip, shift, axis):
                         shiftDict[axis.code].append(shift)

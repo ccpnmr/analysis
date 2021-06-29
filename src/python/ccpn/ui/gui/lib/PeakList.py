@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-18 13:29:08 +0000 (Thu, March 18, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-06-29 14:27:30 +0100 (Tue, June 29, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.util import Common as commonUtil
+from ccpn.util.isotopes import name2IsotopeCode
 
 
 def restrictedPick(peakListView, axisCodes, peak=None, nmrResidue=None):
@@ -56,7 +57,7 @@ def restrictedPick(peakListView, axisCodes, peak=None, nmrResidue=None):
                             for nmrAtom in nmrResidue.nmrAtoms
                             if shiftList.getChemicalShift(nmrAtom.id)]
         shiftDict = dict(zip(nmrResidueIsotopeCodes, nmrResidueShifts))
-        shiftIsotopeCodes = [commonUtil.name2IsotopeCode(code) for code in axisCodes]
+        shiftIsotopeCodes = [name2IsotopeCode(code) for code in axisCodes]
         positionCodeDict = {axisCodes[ii]: shiftDict[shiftIsotopeCode]
                             for ii, shiftIsotopeCode in enumerate(shiftIsotopeCodes) if shiftIsotopeCode in shiftDict}
 

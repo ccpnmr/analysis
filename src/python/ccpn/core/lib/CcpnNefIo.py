@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:37:26 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-29 14:27:29 +0100 (Tue, June 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -48,6 +48,7 @@ from ccpn.util import Constants
 from ccpn.util import jsonIo
 from ccpn.util.nef import Specification
 from ccpn.util.nef import StarIo
+from ccpn.util.isotopes import isotopeCode2Nucleus
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -6775,7 +6776,7 @@ class CcpnNefReader(CcpnNefContent):
         if isotopeCode:
             prefix = isotopeCode.upper()
             if not name.startswith(prefix):
-                prefix = commonUtil.isotopeCode2Nucleus(isotopeCode)
+                prefix = isotopeCode2Nucleus(isotopeCode)
                 if prefix is None:
                     self.warning("Ignoring unsupported isotopeCode: %s for NmrAtom:%s.%s"
                                  % (isotopeCode, nmrResidue._id, name))

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:59 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-29 14:27:30 +0100 (Tue, June 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,12 +28,14 @@ __date__ = "$Date: 2017-04-07 10:28:48 +0000 (Fri, April 07, 2017) $"
 
 import math
 from collections import Counter
+
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, CcpnJsonDirectoryABC
 from ccpn.util.traits.CcpNmrTraits import Unicode, Int, Float, Bool
 
 from ccpn.framework.PathsAndUrls import ccpnConfigPath
 from ccpn.util.Path import aPath
 from ccpn.util.decorators import singleton
+from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 
 #=========================================================================================
 # Definitions for findMostLikelyFieldFromSpectrometerFrequencies
@@ -253,3 +255,35 @@ def findNucleiFromSpectrometerFrequencies(spectrometerFrequencies):
 
     nuclei = [theField.findNucleus(sf) for sf in spectrometerFrequencies]
     return tuple(nuclei)
+
+
+def name2IsotopeCode(name=None):
+    """Get standard isotope code matching atom name or axisCode string
+    """
+    if not name:
+        return None
+
+    result = DEFAULT_ISOTOPE_DICT.get(name[0])
+    if result is None:
+        if name[0].isdigit():
+            ss = name.title()
+            for key in isotopeRecords:
+                if ss.startswith(key):
+                    if name[:len(key)].isupper():
+                        result = key
+                    break
+        else:
+            result = DEFAULT_ISOTOPE_DICT.get(name[:2])
+    #
+    return result
+
+
+def isotopeCode2Nucleus(isotopeCode=None):
+    if not isotopeCode:
+        return None
+
+    record = isotopeRecords.get(isotopeCode)
+    if record is None:
+        return None
+    else:
+        return record.symbol.upper()

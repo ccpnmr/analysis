@@ -1312,26 +1312,15 @@ class Project(AbstractWrapperObject):
     def _loadPdbFile(self, path: (str, Path)) -> list:
         """Load data from pdb file path into new StructureEnsemble object(s)
         """
+        # CCPNINTERNAL: called from pdb dataLoader
 
-        from ccpn.util.StructureData import averageStructure, EnsembleData
-        from ccpn.core.Model import Model
+        from ccpn.util.StructureData import EnsembleData
 
-        _path = aPath(path)
-        if not _path.exists():
-            raise ValueError('Path "%s" does not exist' % path)
-
-        name = _path.basename
+        path = aPath(path)
+        name = path.basename
 
         ensemble = EnsembleData.from_pdb(path)
         se = self.newStructureEnsemble(name=name, data=ensemble)
-
-        # TODO: this should be in newStructureEnsemble if data is not None
-        ensemble._containingObject = se
-        for modelNumber in sorted(ensemble['modelNumber'].unique()):
-            # _validateName
-            _label = 'my%s_%s' % (Model.className, modelNumber)
-
-            se.newModel(serial=modelNumber, label=_label)
 
         return [se]
 

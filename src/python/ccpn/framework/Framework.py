@@ -2039,7 +2039,7 @@ class Framework(NotifierBase):
                 if self.preferences.general.autoSaveLayoutOnQuit:
                     Layout.saveLayoutToJson(self.ui.mainWindow)
             except Exception as e:
-                getLogger().warning('Impossible to save Layout %s' % e)
+                getLogger().warning('Unable to save Layout %s' % e)
 
             # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
             sys.stderr.write(successMessage)

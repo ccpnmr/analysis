@@ -49,8 +49,6 @@ CCPNMRTGZCOMPRESSED = 'ccpNmrTgzCompressed'
 CCPNMRZIPCOMPRESSED = 'ccpNmrZipCompressed'
 
 SPARKYFILE = 'sparkyFile'
-PDBFILE = 'pdbFile'
-
 
 def getDataLoaders():
     """Get data loader classes
@@ -67,6 +65,7 @@ def getDataLoaders():
     from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
     from ccpn.framework.lib.DataLoaders.FastaDataLoader import FastaDataLoader
     from ccpn.framework.lib.DataLoaders.ExelDataLoader import ExcelDataLoader
+    from ccpn.framework.lib.DataLoaders.PdbDataLoader import PdbDataLoader
     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
     return DataLoaderABC._dataLoaders
 

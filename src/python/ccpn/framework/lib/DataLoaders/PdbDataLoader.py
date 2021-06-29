@@ -31,12 +31,12 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
 
 
-class ExcelDataLoader(DataLoaderABC):
+class PdbDataLoader(DataLoaderABC):
     """Excel data loader
     """
 
-    dataFormat = 'excelFile'
-    suffixes = ['.xlsx', '.xls']  # a list of suffixes that get matched to path
+    dataFormat = 'pdbFile'
+    suffixes = ['.pdb']  # a list of suffixes that get matched to path
     allowDirectory = False  # Can/Can't open a directory
     createsNewProject = False
 
@@ -57,10 +57,10 @@ class ExcelDataLoader(DataLoaderABC):
         :return: a list of [project]
         """
         try:
-            result = self.project._loadExcelFile(path=self.path)
+            result = self.project._loadPdbFile(path=self.path)
         except Exception as es:
             raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
 
         return [self.project]
 
-ExcelDataLoader._registerFormat()
+PdbDataLoader._registerFormat()

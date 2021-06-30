@@ -328,7 +328,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             hasSetterInSpectrumClass=False
             )
     #TODO dimensionTypes needs setting in Spectrum class
-    dimensionTypes = CList(trait=CString(allow_none=False), default_value=[specLib.DIMENSIONFREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
+    dimensionTypes = CList(trait=CString(allow_none=False), default_value=[specLib.DIMENSION_FREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='dimensionTypes',
@@ -813,7 +813,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         for idx, isotopeCode in enumerate(self.isotopeCodes):
 
-            if self.dimensionTypes[idx] == specLib.DIMENSIONFID:
+            if self.dimensionTypes[idx] == specLib.DIMENSION_TIME:
                 self.axisCodes[idx] = 'Time'
 
             elif isotopeCode is None:

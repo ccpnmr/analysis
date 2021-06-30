@@ -36,7 +36,7 @@ from typing import Sequence
 from ccpn.util.Path import Path
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flatten
-from ccpn.core.lib.SpectrumLib import DIMENSIONFID
+from ccpn.core.lib.SpectrumLib import DIMENSION_TIME
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 
 from nmrglue.fileio.bruker import read_acqus_file, read_jcamp
@@ -308,7 +308,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 dimDict.update(self.procs[i])
 
                 if int(float(dimDict.get('FT_mod', 1))) == 0:
-                    self.dimensionTypes[i] = DIMENSIONFID
+                    self.dimensionTypes[i] = DIMENSION_TIME
                     self.measurementTypes[i] = 'time'
 
                 self.pointCounts[i] = int(dimDict['SI'])

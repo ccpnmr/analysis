@@ -966,7 +966,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """dimension types ('Fid' / 'Frequency' / 'Sampled'),  per dimension
         """
         ll = [x.className[:-7] for x in self._wrappedData.sortedDataDims()]
-        return tuple(specLib.DIMENSIONFREQUENCY if x == specLib.DIMENSIONFREQ else x for x in ll)
+        return tuple(specLib.DIMENSION_FREQUENCY if x == specLib.DIMENSIONFREQ else x for x in ll)
 
     # @dimensionTypes.setter
     # def dimensionTypes(self, value: Sequence):
@@ -3302,13 +3302,33 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     for n, expDim in enumerate(apiExperiment.sortedExpDims()):
         expDim.isAcquisition = False  #(dataSource.aquisitionAxisCode == dataSource.axisCodes[n]),
         _nPoints = dataSource.pointCounts[n]
-        freqDataDim = apiDataSource.newFreqDataDim(dim=n + 1, expDim=expDim,
-                                                   numPoints=_nPoints,
-                                                   numPointsOrig=_nPoints,
-                                                   pointOffset=0,
-                                                   isComplex=dataSource.isComplex[n],
-                                                   valuePerPoint=dataSource.spectralWidthsHz[n] / float(_nPoints)
-                                                   )
+        _dimType = dataSource.dimensionTypes[n]
+        _isComplex = dataSource.isComplex[n]
+        if  _dimType == specLib.DIMENSION_FREQUENCY:
+            # valuePerPoint is digital resolution in Hz
+            # TODO: accomodate complex points
+            _valuePerPoint = dataSource.spectralWidthsHz[n] / float(_nPoints)
+            freqDataDim = apiDataSource.newFreqDataDim(dim=n + 1, expDim=expDim,
+                                                       numPoints=_nPoints,
+                                                       numPointsOrig=_nPoints,
+                                                       pointOffset=0,
+                                                       isComplex=_isComplex,
+                                                       valuePerPoint=_valuePerPoint
+                                                       )
+
+        elif  _dimType == specLib.DIMENSION_TIME:
+            # _valuePerPoint is dwell time
+            _valuePerPoint = 1.0 / dataSource.spectralWidthsHz[n] if _isComplex \
+                             else 0.5 / dataSource.spectralWidthsHz[n]
+            fidDataDim = apiDataSource.newFidDataDim(dim=n + 1, expDim=expDim,
+                                                       numPoints=_nPoints,
+                                                       numPointsValid=_nPoints,
+                                                       isComplex=_isComplex,
+                                                       valuePerPoint=_valuePerPoint
+                                                     )
+
+        else:
+            raise RuntimeError('Invalid dimensionType[%d]: "%s"' % (n, _dimType))
 
     # Done with api generation; Create the Spectrum object
 

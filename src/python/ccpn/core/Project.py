@@ -1314,7 +1314,7 @@ class Project(AbstractWrapperObject):
         path = aPath(path)
         name = path.basename
 
-        ensemble = EnsembleData.from_pdb(path)
+        ensemble = EnsembleData.from_pdb(str(path))
         se = self.newStructureEnsemble(name=name, data=ensemble)
 
         return [se]
@@ -1343,7 +1343,7 @@ class Project(AbstractWrapperObject):
         CCPNINTERNAL: used in Excel data loader
         """
         with undoBlock():
-            reader = ExcelReader(project=self, excelPath=path)
+            reader = ExcelReader(project=self, excelPath=str(path))
             result = reader.load()
             return result
 

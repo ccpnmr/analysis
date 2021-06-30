@@ -29,7 +29,6 @@ __date__ = "$Date: 2016-11-15 21:37:50 +0000 (Tue, 15 Nov 2016) $"
 
 from itertools import product
 
-from LabelledEnum import LabelledEnum
 from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONT, \
     DEFAULTFONTSIZE, DEFAULTFONTNAME, CONSOLEFONT, SIDEBARFONT, \
     TABLEFONT, SEQUENCEGRAPHFONT, _readFontFromAppearances

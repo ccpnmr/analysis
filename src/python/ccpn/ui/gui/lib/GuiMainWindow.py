@@ -1144,7 +1144,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """Get dataLoader for the url (or None if not present)
         Allows for reporting or checking through popups
         does not do the actual loading
-        return a tuple (dataLoader, createsNewProject)
+        :returns a tuple (dataLoader, createsNewProject)
         """
         dataLoader = checkPathForDataLoader(url)
 
@@ -1157,9 +1157,14 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         # local import here, as checkPathForDataLoaders needs to be called first to assure proper import orer
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
-        if dataLoader.dataFormat == NefDataLoader.dataFormat:
+        from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
+        # check-for and set any specific attributes of the dataLoader instance
+        # depending on the dataFormat
+        if dataLoader.dataFormat == NefDataLoader.dataFormat or \
+           dataLoader.dataFormat == SparkyDataLoader.dataFormat:
             choices = ['Import', 'New project', 'Cancel']
-            choice = showMulti('Load NEF file', 'How do you want to handle the file:',
+            choice = showMulti('Load %s' % dataLoader.dataFormat,
+                               'How do you want to handle the file:',
                                choices, parent=self)
             if choice == choices[0]:
                 dataLoader.makeNewProject = False

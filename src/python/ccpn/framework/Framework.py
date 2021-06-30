@@ -1851,19 +1851,20 @@ class Framework(NotifierBase):
     # return self.project
 
     def _loadSparkyProject(self, path: str, makeNewProject=True) -> Project:
-        """Load Project from Sparky file at path, and do necessary setup"""
+        """Load Project from Sparky file at path, and do necessary setup
+        CCPNINTERNAL: called from SparkyDataLoader
+        """
 
         from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 
         # read data files
         from ccpn.core.lib.CcpnSparkyIo import SPARKY_NAME
 
-        dataBlock = self.sparkyReader.parseSparkyFile(path)
+        dataBlock = self.sparkyReader.parseSparkyFile(str(path))
         sparkyName = dataBlock.getDataValues(SPARKY_NAME, firstOnly=True)
 
         if makeNewProject and (dataBlock.getDataValues('sparky', firstOnly=True) == 'project file'):
-            if self.project is not None:
-                self._closeProject()
+            self._closeProject()
             self.project = self.newProject(sparkyName)
 
         self.project.shiftAveraging = True
@@ -1873,16 +1874,6 @@ class Framework(NotifierBase):
             with notificationEchoBlocking():
                 with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s', printTraceBack=True):
                     self.sparkyReader.importSparkyProject(self.project, dataBlock)
-
-        # with undoBlock():
-        #     try:
-        #         # insert file into project
-        #
-        #         self.sparkyReader.importSparkyProject(self.project, dataBlock)
-        #         sys.stderr.write('==> Loaded Sparky project files: "%s", building project\n' % (path,))
-        #     except Exception as es:
-        #         getLogger().warning('Error loading Sparky file: %s' % str(es))
-        #
 
         self.project.shiftAveraging = True
 

@@ -4,8 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:31 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-06-30 09:45:23 +0100 (Wed, June 30, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,74 +33,75 @@ import os
 # NB this import can cause circular imports, but ccpn.__init__ makes sure it does not happen
 from ccpn.core.Project import Project
 from ccpn.util import Logging
+from ccpn.util.Path import aPath
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib import ApiPath
 
 
-def loadProject(path:str, useFileLogger:bool=True, level=logging.INFO) -> Project:
-  """Open Project stored at path."""
-  project = _loadNmrProject(path, useFileLogger=useFileLogger)
-  logger = Logging.getLogger()
-  Logging.setLevel(logger, level)
-  apiProject = project._wrappedData.root
-
-  if apiProject._upgradedFromV2:
-    # Regrettably this V2 upgrade operation must be done at the wrapper level.
-    # No good place except here
-    for structureEnsemble in project.structureEnsembles:
-      data = structureEnsemble.data
-      if data is None:
-        project._logger.warning("%s has no data. This should never happen")
-      else:
-        data._containingObject = structureEnsemble
-
-  projectPath = project.path
-  oldName = project.name
-  newName = os.path.basename(apiIo.removeCcpnDirectorySuffix(projectPath))
-  if oldName != newName:
-    # Directory name has changed. Change project name and move Project xml file.
-    oldProjectFilePath = ApiPath.getProjectFile(projectPath, oldName)
-    if os.path.exists(oldProjectFilePath):
-      os.remove(oldProjectFilePath)
-    apiProject.__dict__['name'] = newName
-    apiProject.touch()
-    apiProject.save()
-  #
-  return project
-
-
-def _loadNmrProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True, level=logging.INFO) -> Project:
-  """Open project matching the API Project stored at path. ADVANCED - requires post-processing
-
-  If the API project contains several NmrProjects (rare, and only for legacy projects),
-  nmrProjectName lets you select which one to open"""
-  path = os.path.normpath(path)
-  apiProject = apiIo.loadProject(path, useFileLogger=useFileLogger)
-
-  # # Ad hoc fixes for temporary internal versions (etc.).
-  # _fixLoadedProject(apiProject)
-
-  if apiProject is None:
-    raise ValueError("No valid project loaded from %s" % path )
-  else:
-    apiNmrProject = apiProject.fetchNmrProject(name=nmrProjectName)
-    apiNmrProject.initialiseData()
-    apiNmrProject.initialiseGraphicsData()
-    return Project(apiNmrProject)
-
-
-def newProject(name:str= 'default', path:str=None, useFileLogger:bool=True, level=logging.INFO) -> Project:
-  """Make RAW new project, putting underlying data storage (API project) at path"""
-  apiProject = apiIo.newProject(name, path, overwriteExisting=True,
-                                 useFileLogger=useFileLogger)
-  if apiProject is None:
-    raise ValueError("New project could not be created (overlaps exiting project?) name:%s, path:%s"
-                     % (name, path) )
-  else:
-    apiNmrProject = apiProject.fetchNmrProject()
-    apiNmrProject.initialiseData()
-    apiNmrProject.initialiseGraphicsData()
-    project = Project(apiNmrProject)
+def loadProject(path: str, useFileLogger: bool = True, level=logging.INFO) -> Project:
+    """Open Project stored at path."""
+    project = _loadNmrProject(path, useFileLogger=useFileLogger)
     logger = Logging.getLogger()
     Logging.setLevel(logger, level)
+    apiProject = project._wrappedData.root
+
+    if apiProject._upgradedFromV2:
+        # Regrettably this V2 upgrade operation must be done at the wrapper level.
+        # No good place except here
+        for structureEnsemble in project.structureEnsembles:
+            data = structureEnsemble.data
+            if data is None:
+                project._logger.warning("%s has no data. This should never happen")
+            else:
+                data._containingObject = structureEnsemble
+
+    projectPath = project.path
+    oldName = project.name
+    newName = aPath(projectPath).basename
+    if oldName != newName:
+        # Directory name has changed. Change project name and move Project xml file.
+        oldProjectFilePath = aPath(ApiPath.getProjectFile(projectPath, oldName))
+        if oldProjectFilePath.exists():
+            oldProjectFilePath.removeDir()
+        apiProject.__dict__['name'] = newName
+        apiProject.touch()
+        apiProject.save()
+    #
     return project
+
+
+def _loadNmrProject(path: str, nmrProjectName: str = None, useFileLogger: bool = True, level=logging.INFO) -> Project:
+    """Open project matching the API Project stored at path. ADVANCED - requires post-processing
+
+    If the API project contains several NmrProjects (rare, and only for legacy projects),
+    nmrProjectName lets you select which one to open"""
+    path = aPath(path)
+    apiProject = apiIo.loadProject(path.asString(), useFileLogger=useFileLogger)
+
+    # # Ad hoc fixes for temporary internal versions (etc.).
+    # _fixLoadedProject(apiProject)
+
+    if apiProject is None:
+        raise ValueError("No valid project loaded from %s" % path)
+    else:
+        apiNmrProject = apiProject.fetchNmrProject(name=nmrProjectName)
+        apiNmrProject.initialiseData()
+        apiNmrProject.initialiseGraphicsData()
+        return Project(apiNmrProject)
+
+
+def newProject(name: str = 'default', path: str = None, useFileLogger: bool = True, level=logging.INFO) -> Project:
+    """Make RAW new project, putting underlying data storage (API project) at path"""
+    apiProject = apiIo.newProject(name, path, overwriteExisting=True,
+                                  useFileLogger=useFileLogger)
+    if apiProject is None:
+        raise ValueError("New project could not be created (overlaps exiting project?) name:%s, path:%s"
+                         % (name, path))
+    else:
+        apiNmrProject = apiProject.fetchNmrProject()
+        apiNmrProject.initialiseData()
+        apiNmrProject.initialiseGraphicsData()
+        project = Project(apiNmrProject)
+        logger = Logging.getLogger()
+        Logging.setLevel(logger, level)
+        return project

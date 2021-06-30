@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-06-30 09:45:23 +0100 (Wed, June 30, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1265,12 +1265,13 @@ class Project(AbstractWrapperObject):
 
         validList = OrderedSet()
 
-        if os.path.isdir(filePath):
+        _filePath= aPath(filePath)
+        if _filePath.is_dir():
             # list the folders
-            dirs = [os.path.join(filePath, dirpath) for dirpath, dirs, files in os.walk(filePath, topdown=False)]
+            dirs = [_filePath / dirpath for dirpath, dirs, files in os.walk(filePath, topdown=False)]
 
             # list the files
-            dirs += [os.path.join(filePath, dirpath, file)
+            dirs += [_filePath / dirpath / file
                      for dirpath, dirs, files in os.walk(filePath, topdown=False)
                      for file in files]
 
@@ -1291,7 +1292,7 @@ class Project(AbstractWrapperObject):
                         else:
 
                             # flag whether the usePath is a folder
-                            validList.add((dataType, subType, usePath, os.path.isdir(usePath)))
+                            validList.add((dataType, subType, usePath, aPath(usePath).is_dir()))
 
         return validList
 
@@ -1372,7 +1373,7 @@ class Project(AbstractWrapperObject):
                         _loadedData += _data
                 return _loadedData
 
-            elif not os.path.exists(usePath):
+            elif not aPath(usePath).exists():
                 # print("Skipping: no file found at %s" % usePath)
                 getLogger().warning("Skipping: no file found at %s" % usePath)
                 # raise ValueError("Skipping: no file found at %s" % usePath)
@@ -1476,7 +1477,7 @@ class Project(AbstractWrapperObject):
         import os
         from ccpn.util.StructureData import EnsembleData
 
-        label = os.path.split(path)[1]
+        label = aPath(path).name
         label = label.split('.')[:-1]
         label = '_'.join(label)
 
@@ -2224,8 +2225,8 @@ def isValidPath(projectName, stripFullPath=True, stripExtension=True):
 
     if isinstance(projectName, str):
 
-        name = os.path.basename(projectName) if stripFullPath else projectName
-        name = os.path.splitext(name)[0] if stripExtension else name
+        name = aPath(projectName).name if stripFullPath else projectName
+        name = aPath(name).basename if stripExtension else name
 
         STRIPCHARS = '_'
         for ss in STRIPCHARS:
@@ -2248,7 +2249,7 @@ def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
         return
 
     if isinstance(projectName, str):
-        name = os.path.basename(projectName) if stripFullPath else projectName
-        name = os.path.splitext(name)[0] if stripExtension else name
+        name = aPath(projectName).name if stripFullPath else projectName
+        name = aPath(name).basename if stripExtension else name
 
         return len(name) <= 32

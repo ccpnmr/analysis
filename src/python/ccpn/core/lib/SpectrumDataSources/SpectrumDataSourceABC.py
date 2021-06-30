@@ -141,14 +141,14 @@ def getDataFormats() -> OrderedDict:
     """
     # The following imports are just to assure that all the classes have been imported
     # It is local to prevent circular imports
+    from ccpn.core.lib.SpectrumDataSources.BrukerSpectrumDataSource import BrukerSpectrumDataSource
+    from ccpn.core.lib.SpectrumDataSources.NmrPipeSpectrumDataSource import NmrPipeSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
+    from ccpn.core.lib.SpectrumDataSources.UcsfSpectrumDataSource import UcsfSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.AzaraSpectrumDataSource import AzaraSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.FelixSpectrumDataSource import FelixSpectrumDataSource
-    from ccpn.core.lib.SpectrumDataSources.BrukerSpectrumDataSource import BrukerSpectrumDataSource
-    from ccpn.core.lib.SpectrumDataSources.UcsfSpectrumDataSource import UcsfSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.XeasySpectrumDataSource import XeasySpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.NmrViewSpectrumDataSource import NmrViewSpectrumDataSource
-    from ccpn.core.lib.SpectrumDataSources.NmrPipeSpectrumDataSource import NmrPipeSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
     return SpectrumDataSourceABC._spectrumDataFormats
 
@@ -226,6 +226,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     hasWritingAbility = False  # flag that defines if dataFormat implements writing methods
 
     suffixes = []  # potential suffixes of data file; first is taken as default; [None] is defined as no suffix
+    allowDirectory = False  # Can/Can't open a directory
     openMethod = None  # method to open the file as openMethod(path, mode)
     defaultOpenReadMode = 'r+'
     defaultOpenWriteMode = 'w'
@@ -327,7 +328,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             hasSetterInSpectrumClass=False
             )
     #TODO dimensionTypes needs setting in Spectrum class
-    dimensionTypes = CList(trait=CString(allow_none=False), default_value=[specLib.DIMENSIONFREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
+    dimensionTypes = CList(trait=CString(allow_none=False), default_value=[specLib.DIMENSION_FREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='dimensionTypes',
@@ -812,7 +813,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         for idx, isotopeCode in enumerate(self.isotopeCodes):
 
-            if self.dimensionTypes[idx] == specLib.DIMENSIONFID:
+            if self.dimensionTypes[idx] == specLib.DIMENSION_TIME:
                 self.axisCodes[idx] = 'Time'
 
             elif isotopeCode is None:
@@ -1110,12 +1111,17 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # checking path
         if instance.setPath(path, substituteSuffix=False) is None:
-            logger.debug('path "%s" is not valid for dataFormat "%s"' %
+            logger.debug2('path "%s" is not valid for dataFormat "%s"' %
                          (path, instance.dataFormat))
             return None
 
         if not instance.checkPath(instance.path, mode=instance.defaultOpenReadMode):
-            logger.debug('path "%s" is not valid for reading dataFormat "%s"' %
+            logger.debug2('path "%s" is not valid for reading dataFormat "%s"' %
+                         (path, instance.dataFormat))
+            return None
+
+        if not instance.allowDirectory and instance.path.is_dir():
+            logger.debug2('path "%s" is directory and not valid for reading dataFormat "%s"' %
                          (path, instance.dataFormat))
             return None
 
@@ -1125,18 +1131,18 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 pass
                 # instance.readParameters()
         except RuntimeError as es:
-            logger.debug('path "%s", dataFormat "%s": bailing on reading with error: "%s"' %
+            logger.debug2('path "%s", dataFormat "%s": bailing on reading with error: "%s"' %
                          (path, instance.dataFormat, es))
             return None
 
         # Check dimensionality; should be > 0
         if instance.dimensionCount == 0:
-            logger.debug('path "%s": reading parameters in dataFormat "%s" yielded dimensionCount 0' %
+            logger.debug2('path "%s": reading parameters in dataFormat "%s" yielded dimensionCount 0' %
                          (path, instance.dataFormat))
             return None
 
         elif instance.dimensionCount > 0:
-            logger.debug('path "%s" is valid for dataFormat "%s"' %
+            logger.debug2('path "%s" is valid for dataFormat "%s"' %
                          (path, instance.dataFormat))
             return instance  # found the file with right attributes
 

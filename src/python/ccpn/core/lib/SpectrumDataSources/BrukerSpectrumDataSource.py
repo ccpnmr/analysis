@@ -36,7 +36,7 @@ from typing import Sequence
 from ccpn.util.Path import Path
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flatten
-from ccpn.core.lib.SpectrumLib import DIMENSIONFID
+from ccpn.core.lib.SpectrumLib import DIMENSION_TIME
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 
 from nmrglue.fileio.bruker import read_acqus_file, read_jcamp
@@ -59,6 +59,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
     isFloatData = False
 
     suffixes = [None]
+    allowDirectory = True  # Can supply a Bruker top directory
     openMethod = open
     defaultOpenReadMode = 'rb'
 
@@ -172,13 +173,13 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         """Return True if path (of type Path) is a Bruker directory
         """
         if path is None or not path.exists():
-            getLogger().debug('Bruker top directory "%s": does not exist' % path)
+            getLogger().debug2('Bruker top directory "%s": does not exist' % path)
             return False
         if not path.is_dir():
-            getLogger().debug('Bruker top directory "%s": is not a directory' % path)
+            getLogger().debug2('Bruker top directory "%s": is not a directory' % path)
             return False
         if len(path.globList('acqu*')) == 0:
-            getLogger().debug('Bruker top directory "%s": has no acqu* files' % path)
+            getLogger().debug2('Bruker top directory "%s": has no acqu* files' % path)
             return False
 
         return True
@@ -192,16 +193,16 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         """Return True if path (of type Path) is a Bruker pdata directory
         """
         if path is None or not path.exists():
-            getLogger().debug('Bruker pdata directory "%s": does not exist' % path)
+            getLogger().debug2('Bruker pdata directory "%s": does not exist' % path)
             return False
         if not path.is_dir():
-            getLogger().debug('Bruker pdata directory "%s": is not a directory' % path)
+            getLogger().debug2('Bruker pdata directory "%s": is not a directory' % path)
             return False
         if len(path.globList('proc*')) == 0:
-            getLogger().debug('Bruker pdata directory "%s": has no proc* files' % path)
+            getLogger().debug2('Bruker pdata directory "%s": has no proc* files' % path)
             return False
         if len(path.globList('[1-6][r,i]*')) == 0:
-            getLogger().debug('Bruker pdata directory "%s": has no valid processed data' % path)
+            getLogger().debug2('Bruker pdata directory "%s": has no valid processed data' % path)
             return False
 
         return True
@@ -254,15 +255,15 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self._brukerRoot = _path.parent.parent
 
             else:
-                logger.debug('"%s" does not define a valid path with Bruker data' % path)
+                logger.debug2('"%s" does not define a valid path with Bruker data' % path)
                 return None
 
             # check the directories
             if not self._checkBrukerTopDir(self._brukerRoot):
-                logger.debug('"%s" does not define a valid path with Bruker data' % path)
+                logger.debug2('"%s" does not define a valid path with Bruker data' % path)
                 return None
             if not self._checkBrukerPdataDir(self._pdata):
-                logger.debug('"%s" does not define a valid path with Bruker data' % path)
+                logger.debug2('"%s" does not define a valid path with Bruker data' % path)
                 return None
 
             dimensionality = self._getDimensionality(self._brukerRoot)
@@ -307,7 +308,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 dimDict.update(self.procs[i])
 
                 if int(float(dimDict.get('FT_mod', 1))) == 0:
-                    self.dimensionTypes[i] = DIMENSIONFID
+                    self.dimensionTypes[i] = DIMENSION_TIME
                     self.measurementTypes[i] = 'time'
 
                 self.pointCounts[i] = int(dimDict['SI'])

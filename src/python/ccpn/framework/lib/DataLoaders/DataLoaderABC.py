@@ -2,7 +2,7 @@
 This module defines the data loading mechanism.
 
 Loader instances have all the information regarding a particular data type
-(e.g. a ccpn project, a NEF file, a PDB file, etc. and include a hander function to to the actual
+(e.g. a ccpn project, a NEF file, a PDB file, etc. and include a load() function to to the actual
 work of loading the data into the project.
 """
 
@@ -39,51 +39,16 @@ from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.CcpNmrTraits import Unicode, Any, List, Bool, CPath, Odict
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import singleton
-from ccpn.framework.Framework import getApplication
-
-
-# from sandbox.Geerten.Refactored.dataLoaders.loadCcpNmr import loadCcpNmrV3, isCcpNmrV2Project, \
-#     loadCcpNmrV2, loadCcpNmrTgzCompressed, loadCcpNmrZipCompressed
-# from sandbox.Geerten.Refactored.dataLoaders.loadNef import loadNef
-# from sandbox.Geerten.Refactored.dataLoaders.loadSparky import loadSparky
-# from sandbox.Geerten.Refactored.dataLoaders.loadPdb import loadPdb, isPdbFile
-# from sandbox.Geerten.Refactored.dataLoaders.loadSpectrum import loadSpectrum, isSpectrum
-#
-# from sandbox.Geerten.Refactored.dataLoaders.loadExcel import loadExcel
-# from sandbox.Geerten.Refactored.decorators import debug2Enter, debug2Leave
 
 
 #--------------------------------------------------------------------------------------------
-# matching functions; Need to review lib/io/Formats.py and ioFormats.analyseUrl(path)
+# Need to review lib/io/Formats.py and ioFormats.analyseUrl(path)
 #--------------------------------------------------------------------------------------------
 
-def caseInsensitiveSuffix(pattern, path):
-    """match pattern to path as case-insentive suffix"""
-    return path.lower().endswith(pattern.lower())
-
-
-
-
-CCPNMRV2PROJECT = 'ccpNmrV2Project'
 CCPNMRTGZCOMPRESSED = 'ccpNmrTgzCompressed'
 CCPNMRZIPCOMPRESSED = 'ccpNmrZipCompressed'
 
-NEFFILE = 'nefFile'
-UCSFSPECTRUM = 'ucsfSpectrum'
 SPARKYFILE = 'sparkyFile'
-PDBFILE = 'pdbFile'
-EXCELFILE = 'excelFile'
-
-SPECTRUM = 'Spectrum'
-
-AZARASPECTRUM = 'azaraSpectrum'
-BRUKERSPECTRUM = 'brukerSpectrum'
-FELIXSPECTRUM = 'felixSpectrum'
-HDF5SPECTRUM = 'hdf5Spectrum'
-NMRPIPESPECTRUM = 'nmrpipeSpectrum'
-NMRVIEWSPECTRUM = 'nmrviewSpectrum'
-VARIANSPECTRUM = 'varianSpectrum'
-XEASYSPECTRUM = 'xeasySpectrum'
 
 def getDataLoaders():
     """Get data loader classes
@@ -95,8 +60,14 @@ def getDataLoaders():
     # It is local to prevent circular imports
     #--------------------------------------------------------------------------------------------
     from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
+    from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
     from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
-
+    from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+    from ccpn.framework.lib.DataLoaders.FastaDataLoader import FastaDataLoader
+    from ccpn.framework.lib.DataLoaders.ExelDataLoader import ExcelDataLoader
+    from ccpn.framework.lib.DataLoaders.PdbDataLoader import PdbDataLoader
+    from ccpn.framework.lib.DataLoaders.TextDataLoader import TextDataLoader
+    from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
     return DataLoaderABC._dataLoaders
 
 
@@ -107,7 +78,10 @@ def checkPathForDataLoader(path):
     """
     for fmt, cls in getDataLoaders().items():
         instance = cls.checkForValidFormat(path)
-        if instance is not None:
+        if instance is None:
+            getLogger().debug('path "%s" is not valid for dataFormat "%s"' % (path, cls.dataFormat))
+        else:
+            getLogger().debug('path "%s" is valid for dataFormat "%s"' % (path, cls.dataFormat))
             return instance  # we found a valid format for path
     return None
 
@@ -118,7 +92,8 @@ def checkPathForDataLoader(path):
 class DataLoaderABC(TraitBase):
     """A DataLoaderABC: has definition for patterns
 
-    Maintains a load(project) methods to do the actual loading
+    Maintains a load() method to call the actual loading function (presumably from self.application
+    or self.project
     """
 
     #=========================================================================================
@@ -127,19 +102,9 @@ class DataLoaderABC(TraitBase):
     dataFormat = None
     suffixes = []  # a list of suffixes that gets matched to path
     createsNewProject = False
-
-    @classmethod
-    def checkForValidFormat(cls, path):
-        """check if valid format corresponding to dataFormat
-        :return: None or instance of the class
-        """
-        raise NotImplementedError()
-
-    def load(self):
-        """The actual loading method; to be subclassed
-        :return: object representing the data or None on error
-        """
-        raise NotImplementedError()
+    allowDirectory = False  # Can/Can't open a directory
+    loadFunction = (None, None) # A (function, attributeName) tuple;
+                                # attributeName := 'project' or 'application'
 
     #=========================================================================================
     # end to be subclassed
@@ -148,7 +113,6 @@ class DataLoaderABC(TraitBase):
     # traits
     path = CPath().tag(info='a path to a file to be loaded')
     application = Any(default_value=None, allow_none=True)
-    project = Any(default_value=None, allow_none=True)
 
     # A dict of registered DataLoaders: filled by _registerFormat classmethod, called
     # once after each definition of a new derived class (e.g. PdbDataLoader)
@@ -170,9 +134,66 @@ class DataLoaderABC(TraitBase):
         if not self.path.exists():
             raise ValueError('Invalid path "%s"' % path)
 
+        # local import to avoid cycles
+        from ccpn.framework.Framework import getApplication
         self.application = getApplication()
-        self.project = self.application.project
 
+    @property
+    def project(self):
+        """Current poject instance
+        """
+        return self.application.project
 
+    @classmethod
+    def checkForValidFormat(cls, path):
+        """check if valid format corresponding to dataFormat
+        :return: None or instance of the class
+
+        Can be subclassed
+        """
+        if (_path := cls.checkPath(path)) is None:
+            return None
+        # assume that all is good
+        instance = cls(path)
+        return instance
+
+    def load(self):
+        """The actual file loading method;
+        raises RunTimeError on error
+        :return: a list of [objects]
+
+        Can be subclassed
+        """
+        try:
+            func, attributeName = self.loadFunction
+            obj = getattr(self, attributeName)
+            result = func(obj, self.path)
+
+        except Exception as es:
+            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
+
+        return result
+
+    @classmethod
+    def checkPath(cls, path):
+        """Check if path exists and confirms to settings of class attributes suffixes and allowDirectory
+        do not allow dot-file (e.g. .cshrc)
+        :returns Path instance of path, or None
+        """
+        _path = aPath(path)
+        if not _path.exists():
+            return None
+        if len(cls.suffixes) > 0 and not _path.suffix in cls.suffixes:
+            return None
+        if _path.basename == '':
+            return None
+        if _path.is_dir() and not cls.allowDirectory:
+            return None
+        return _path
+
+    def __str__(self):
+        return '<%s: %s>' % (self.__class__.__name__, self.path)
+
+    __repr__ = __str__
 
 

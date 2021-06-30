@@ -211,10 +211,10 @@ class Pid(str):
     -> False    # all pid elements are strings
     """
 
-    # name mapping dictionary
-    nameMap = dict(
-            MO='Molecule'
-    )
+    # # name mapping dictionary
+    # nameMap = dict(
+    #         MO='Molecule'
+    # )
 
     def __init__(self, string: str, **kwds):
         """First argument ('string' must be a valid pid string with at least one, non-initial PREFIXSEP
@@ -268,17 +268,26 @@ class Pid(str):
     @staticmethod
     def new(*args: object) -> 'Pid':
         """
-        Return Pid object from arguments
+        Return Pid object from arguments; args[0] can be a CoreClass object (e.g. Spectrum, Peak, etc)
         Apply str() on all arguments
         Have to use this as intermediate as str baseclass of Pid only accepts one argument
         """
-        # use str operator on all arguments
+        if len(args) == 0:
+            raise ValueError('Pid.new: Undefined arguments')
+
         args = [str(x) for x in args]
+        if len(args) < 2 or len(args[0]) == 0 or len(args[1]) == 0:
+            raise ValueError('Pid.new: need at least a type and id argument (%s)' % args)
+
+        from ccpn.core import _coreClassMap
+        if args[0] not in _coreClassMap:
+            raise ValueError('Pid.new: invalid Pid type (%s)' % args[0])
+
         # could implement mapping here
-        if (len(args) > 0) and (args[0] in Pid.nameMap):
-            #args = list(args) # don't know why I have to use the list operator
-            args[0] = Pid.nameMap[args[0]]
-        #end if
+        # if (len(args) > 0) and (args[0] in Pid.nameMap):
+        #     #args = list(args) # don't know why I have to use the list operator
+        #     args[0] = Pid.nameMap[args[0]]
+        # #end if
         return Pid(Pid._join(*args))
 
     @staticmethod

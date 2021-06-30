@@ -39,7 +39,6 @@ from ccpn.core.Spectrum import _newSpectrumFromDataSource
 class SpectrumDataLoader(DataLoaderABC):
     """Spectrum data loader
     """
-
     dataFormat = 'Spectrum'
     suffixes = list(set([suf for spec in getDataFormats().values()
                          for suf in spec.suffixes if suf is not None]))  # a list of possible spectrum suffixes
@@ -54,22 +53,49 @@ class SpectrumDataLoader(DataLoaderABC):
         """check if valid format corresponding to dataFormat
         :return: None or instance of the class
         """
-        dataStore = DataStore.newFromPath(path)
-        dataSoure = checkPathForSpectrumFormats(dataStore.path)
+        dataStore, dataSoure = cls._check(path)
         if dataSoure is not None:
             instance = cls(path)
             instance.dataSource = dataSoure
             instance.dataStore = dataStore
-            instance.dataStore.dataFormat = dataSoure.dataFormat
             return instance
 
         return None
 
-    def load(self):
-        """The project loading method
-        :return: object representing the data or None on error
+    @staticmethod
+    def _check(path):
+        """Check if path yields a valid dataSource
+        return: (dataStore, dataSource) tuple, or None's if some failed
         """
-        spectrum = _newSpectrumFromDataSource(project=self.project, dataStore=self.dataStore, dataSource=self.dataSource)
-        return spectrum
+        dataStore = DataStore.newFromPath(path)
+        if not dataStore.exists():
+            return (None, None)
+
+        dataSoure = checkPathForSpectrumFormats(dataStore.path)
+        if dataSoure is None:
+            return (dataStore, None)
+        dataStore.dataFormat = dataSoure.dataFormat
+
+        return (dataStore, dataSoure)
+
+    def load(self):
+        """The actual spectrum loading method;
+        raises RunTimeError on error
+        :return: a list of [spectrum]
+        """
+        if self.dataSource is None:
+            self.dataStore, self.dataSource = self._check(self.path)
+
+        if self.dataSource is None:
+            raise RuntimeError('Error loading "%s"' % self.path)
+
+        try:
+            spectrum = _newSpectrumFromDataSource(project=self.project, dataStore=self.dataStore,
+                                                  dataSource=self.dataSource)
+        except Exception as es:
+            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
+
+        return [spectrum]
+
 
 SpectrumDataLoader._registerFormat()

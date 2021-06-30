@@ -49,6 +49,9 @@ from PyQt5.QtWidgets import QApplication
 from distutils.dir_util import copy_tree
 from functools import partial
 
+from tqdm import tqdm
+
+
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
@@ -67,6 +70,8 @@ from ccpn.framework.Translation import translator
 from ccpn.framework.PathsAndUrls import userPreferencesPath
 from ccpn.framework.PathsAndUrls import userPreferencesDirectory
 from ccpn.framework.PathsAndUrls import macroPath
+from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
+
 from ccpn.ui import interfaces, defaultInterface
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
@@ -78,24 +83,25 @@ from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
-from ccpn.util.Common import uniquify, isWindowsOS, isMacOS
+from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.Logging import getLogger
 from ccpn.util import Layout
+
 from ccpn.ui.gui.Gui import Gui
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, undoBlock, notificationEchoBlocking
+
 from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
 from ccpn.framework.Version import authors
 from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_OVERVIEW
+
 from PyQt5.QtCore import QTimer
 
 import faulthandler
-
-
 faulthandler.enable()
 
 # from functools import partial
@@ -139,6 +145,9 @@ sys.excepthook = _ccpnExceptionhook
 
 
 def _strList(inlist: list, maxlen: int = 80) -> list:
+    #TODO: do not put a private method in the top of the file of the most important class of the whole programme
+    # GWV: What does this do; should be a library function!! Only used in printCreditsText --> Make a credits.py file
+    # (like in the 'sandbox' code)
     outstr = ''
     # skip = False  # print commas and ampersand
     lencount = maxlen
@@ -309,6 +318,7 @@ class AutoBackup(Thread):
     def run(self):
         self.startTime = time()
         while True:
+            waitTime = None
             if not self.q.empty():
                 waitTime = self.q.get()
             if waitTime is None:
@@ -422,8 +432,16 @@ class Framework(NotifierBase):
 
     @property
     def hasGui(self) -> bool:
-        "Return True if application has a gui"
+        """Return True if application has a gui"""
         return isinstance(self.ui, Gui)
+
+    @property
+    def mainWindow(self):
+        """:returns: MainWindow instance if application has a Gui or None otherwise
+        """
+        if self.hasGui:
+            return  self.ui.mainWindow
+        return None
 
     def _testShortcuts0(self):
         print('>>> Testing shortcuts0')
@@ -564,13 +582,13 @@ class Framework(NotifierBase):
             # The NoUi version has no mainWindow
             self.ui.initialize(None)
 
-    def _refreshAfterSave(self):
-        """Refresh user interface after project save (which may have caused project rename)"""
-
-        mainWindow = self.ui.mainWindow
-        if mainWindow is not None:
-            # mainWindow.sideBar.setProjectName(self.project)
-            mainWindow.sideBar.setProjectName(self.project)
+    # def _refreshAfterSave(self):
+    #     """Refresh user interface after project save (which may have caused project rename)"""
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if mainWindow is not None:
+    #         # mainWindow.sideBar.setProjectName(self.project)
+    #         mainWindow.sideBar.setProjectName(self.project)
 
     def _getUI(self):
         if self.args.interface == 'Gui':
@@ -856,6 +874,7 @@ class Framework(NotifierBase):
                     # move to the correct place in the widget - check stripDirection to display as row or column
                     if spectrumDisplay.stripArrangement == 'Y':
 
+                        #TODO: remove unreachable code
                         if True:  # tilePosition is None:
                             spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
                             strip.tilePosition = (0, si)
@@ -1095,7 +1114,6 @@ class Framework(NotifierBase):
     #     getLogger().debug2('command=%s, echoBlocking=%s, undo.blocking=%s'
     #                        % (command, self._echoBlocking, undo.blocking))
 
-    # #TODO:TJ: Why is this a private method; it is and should be used all over the code?
     # def _endCommandBlock(self):
     #     """End block for command echoing,
     #
@@ -1345,13 +1363,13 @@ class Framework(NotifierBase):
         self._menuSpec = ms = []
 
         ms.append(('Project', [
-            ("New", self.createNewProject, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("New", self._newProjectMenuCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
-            ("Open...", self.openProject, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Open...", self._openProjectMenuCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Open Recent", ()),
 
             #      ("Load Spectrum...", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
-            ("Load Data...", self.loadData, [('shortcut', 'ld')]),
+            ("Load Data...", lambda: self._loadDataFromMenu(text='Load Data'), [('shortcut', 'ld')]),
             (),
             ("Save", self.saveProject, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
@@ -1386,7 +1404,7 @@ class Framework(NotifierBase):
                    ))
 
         ms.append(('Spectrum', [
-            ("Load Spectra...", self.loadSpectra, [('shortcut', 'ls')]),
+            ("Load Spectra...", self._loadSpectraCallback, [('shortcut', 'ls')]),
             (),
             # ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]), # multiple edit temporarly disabled
             ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
@@ -1562,37 +1580,42 @@ class Framework(NotifierBase):
     ## MENU callbacks:  Project
     ###################################################################################################################
 
-    def _loadDataFromMenu(self, text=None):
+    def _loadDataFromMenu(self, text='Load Data', filter=None):
         """Call loadData from the menu and trap errors.
         """
+        dialog = DataFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter)
+        dialog._show()
+        path = dialog.selectedFile()
+        if not path:
+            return
+        paths = [path]
+
         try:
-
-            self.loadData(text=text)
-
+            result = self.loadData(paths)
         except Exception as es:
             MessageDialog.showWarning(str(self.ui.mainWindow.windowTitle()), str(es))
             if self._isInDebugMode:
                 raise es
 
-    def createNewProject(self):
+    def _newProjectMenuCallback(self):
         "Callback for creating new project"
         with catchExceptions(application=self, errorStringTemplate='Error creating new project:', printTraceBack=True):
             okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
                                                                  phrase='create a new')
             if okToContinue:
                 self.ui.mainWindow.moduleArea._closeAll()
-                project = self.newProject()
-                if project is None:
+                newProject = self.newProject()
+                if newProject is None:
                     raise RuntimeError('Unable to create new project')
-                project._mainWindow.show()
-                QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+                newProject._mainWindow.show()
+                QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
 
+    #@logCommand('application.') #cannot do, as project is not there yet
     def newProject(self, name='default'):
         """Create new, empty project; return Project instance
         """
 
         # NB _closeProject includes a gui cleanup call
-
         if self.project is not None:
             self._closeProject()
 
@@ -1615,105 +1638,143 @@ class Framework(NotifierBase):
 
         return project
 
-    def openProject(self, path=None):
-        project = self.ui.mainWindow.loadProject(projectDir=path)
-        if project:
-            try:
-                project._mainWindow.show()
-                QtWidgets.QApplication.setActiveWindow(project._mainWindow)
-
-            except Exception as es:
-                getLogger().warning('Error opening project:', str(es))
-            finally:
-                return project
-        else:
-            return None
-
-    def loadProject(self, path=None):
+    def _openProjectMenuCallback(self):
+        """Just a stub for the menu setup to pass on to mainWindow, to be moved later
         """
-           Load project from path
-           If not path then opens a file dialog box and loads project from selected file.
+        return self.ui.mainWindow._openProject()
 
-           ReturnsProject instance or None on error
+    def _loadV2Project(self, path):
+        """Actual V2 project loader
+        CCPNINTERNAL: called from CcpNmrV2ProjectDataLoader
         """
-        if not path:
-            dialog = ProjectFileDialog(parent=self.ui.mainWindow, acceptMode='load')
-            dialog._show()
-            path = dialog.selectedFile()
-            if not path:
-                return None
+        logger = getLogger()
+        project = self._loadV3Project(path)
+        logger.info('Upgraded %s to version-3' % project)
+        try:
+            project.save()
+            logger.info('Saved %s as "%s"' % (project, project.path))
+        except Exception as es:
+            logger.warning('Failed saving %s (%s)' % (project, str(es)))
 
-        dataType, subType, usePath = ioFormats.analyseUrl(path)
-        project = None
+        return project
 
-        if dataType == 'Project' and subType in (ioFormats.CCPN,
-                                                 ioFormats.NEF,
-                                                 # ioFormats.NMRSTAR,
-                                                 ioFormats.SPARKY):
+    def _loadV3Project(self, path):
+        """Actual V3 project loader
+        CCPNINTERNAL: called from CcpNmrV3ProjectDataLoader
+        """
+        if not isinstance(path, (Path.Path, str)):
+            raise ValueError('invalid path "%s"' % path)
 
-            # if subType != ioFormats.NEF:    # ejb - only reset project for CCPN files
-            #   if self.project is not None:
-            #     self._closeProject()
+        _path = Path.aPath(path)
+        if not _path.exists():
+            raise ValueError('path "%s" does not exist' % path)
 
-            if subType == ioFormats.CCPN:
-                sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
+        getLogger().info('==> Loading ccpn project "%s"' % path)
 
-                if self.project is not None:  # always close for Ccpn
-                    self._closeProject()
-                project = coreIo.loadProject(path, useFileLogger=self.useFileLogger, level=self.level)
-                project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-                self._initialiseProject(project)
+        if self.project is not None:  # always close for Ccpn
+            self._closeProject()
+        project = coreIo.loadProject(str(_path), useFileLogger=self.useFileLogger, level=self.level)
+        project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+        self._initialiseProject(project)
+        self.project = project
+        return [project]
 
-            elif subType == ioFormats.NEF:
-                sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
-                project = self._loadNefFile(path, makeNewProject=True)  # RHF - new by default
-                project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+    @logCommand('application.')
+    def loadProject(self, path):
+        """Just a stub for now; calling MainWindow methods as it initialises the Gui
+        """
+        self.ui.mainWindow._openProject(path)
 
-            # elif subType == ioFormats.NMRSTAR: This is all Broken!
-            #     sys.stderr.write('==> Loading %s NMRStar project "%s"\n' % (subType, path))
-            #     project = self._loadNMRStarFile(path, makeNewProject=True)  # RHF - new by default
-            #     project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-
-            elif subType == ioFormats.SPARKY:
-                sys.stderr.write('==> Loading %s Sparky project "%s"\n' % (subType, path))
-                project = self._loadSparkyProject(path, makeNewProject=True)  # RHF - new by default
-                project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-
-            # project._validateDataUrlAndFilePaths()
-            project._checkUpgradedFromV2()
-
-            if self.preferences.general.useProjectPath:
-                getLogger().debug2('application - setting current path %s' % Path.Path(path).parent)
-                # temporary dialog to set initialPath
-                _dialog = ProjectFileDialog(self.ui.mainWindow)
-                _dialog.initialPath = Path.Path(path).parent
-
-            # if project and project._undo:
-            #     project._undo.clear()
-
-            self.project = project
-
-            return project
-
-        # elif dataType == 'NefFile' and subType in (ioFormats.NEF):
-        # # ejb - testing - 24/6/17 hopefully this will insert into project
-        # #                 is caught by the test above
-        # #                 need to deciode whether it is a 'project' or 'NefFile' load
+        # """Load project from path
+        #    If not path then opens a file dialog box and loads project from selected file.
         #
-        #   sys.stderr.write('==> Loading %s NefFile "%s"\n' % (subType, path))
-        #   project = self._loadNefFile(path, makeNewProject=False)
-        #   project._resetUndo(debug=_DEBUG)
+        #    Returns Project instance or None on error
+        # """
+        # if not path:
+        #     dialog = ProjectFileDialog(parent=self.ui.mainWindow, acceptMode='load')
+        #     dialog._show()
+        #     path = dialog.selectedFile()
+        #     if not path:
+        #         return None
         #
-        #   return project
+        # dataLoader = checkPathForDataLoader(path)
+        # if dataLoader is None or not dataLoader.createsNewProject:
+        #     raise ValueError('File "%s" does not encode a valid project' % path)
+        #
+        # return dataLoader.load()[0]
 
-        else:
-            sys.stderr.write('==> Could not recognise "%s" as a project; loading into default project\n' % path)
-            self.project = self.newProject()
-            self.loadData(paths=[path])
-
-            if project and project._undo:
-                project._undo.clear()
-            return self.project
+        # dataType, subType, usePath = ioFormats.analyseUrl(path)
+        # project = None
+        #
+        # if dataType == 'Project' and subType in (ioFormats.CCPN,
+        #                                          ioFormats.NEF,
+        #                                          # ioFormats.NMRSTAR,
+        #                                          ioFormats.SPARKY):
+        #
+        #     # if subType != ioFormats.NEF:    # ejb - only reset project for CCPN files
+        #     #   if self.project is not None:
+        #     #     self._closeProject()
+        #
+        #     if subType == ioFormats.CCPN:
+        #         project = self._loadV3Project(path)
+        #         # sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
+        #         #
+        #         # if self.project is not None:  # always close for Ccpn
+        #         #     self._closeProject()
+        #         # project = coreIo.loadProject(path, useFileLogger=self.useFileLogger, level=self.level)
+        #         # project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+        #         # self._initialiseProject(project)
+        #
+        #     elif subType == ioFormats.NEF:
+        #         sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
+        #         project = self._loadNefFile(path, makeNewProject=True)  # RHF - new by default
+        #         project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+        #
+        #     # elif subType == ioFormats.NMRSTAR: This is all Broken!
+        #     #     sys.stderr.write('==> Loading %s NMRStar project "%s"\n' % (subType, path))
+        #     #     project = self._loadNMRStarFile(path, makeNewProject=True)  # RHF - new by default
+        #     #     project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+        #
+        #     elif subType == ioFormats.SPARKY:
+        #         sys.stderr.write('==> Loading %s Sparky project "%s"\n' % (subType, path))
+        #         project = self._loadSparkyProject(path, makeNewProject=True)  # RHF - new by default
+        #         project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+        #
+        #     # project._validateDataUrlAndFilePaths()
+        #     project._checkUpgradedFromV2()
+        #
+        #     if self.preferences.general.useProjectPath:
+        #         getLogger().debug2('application - setting current path %s' % Path.Path(path).parent)
+        #         # temporary dialog to set initialPath
+        #         _dialog = ProjectFileDialog(self.ui.mainWindow)
+        #         _dialog.initialPath = Path.Path(path).parent
+        #
+        #     # if project and project._undo:
+        #     #     project._undo.clear()
+        #
+        #     self.project = project
+        #
+        #     return project
+        #
+        # # elif dataType == 'NefFile' and subType in (ioFormats.NEF):
+        # # # ejb - testing - 24/6/17 hopefully this will insert into project
+        # # #                 is caught by the test above
+        # # #                 need to deciode whether it is a 'project' or 'NefFile' load
+        # #
+        # #   sys.stderr.write('==> Loading %s NefFile "%s"\n' % (subType, path))
+        # #   project = self._loadNefFile(path, makeNewProject=False)
+        # #   project._resetUndo(debug=_DEBUG)
+        # #
+        # #   return project
+        #
+        # else:
+        #     sys.stderr.write('==> Could not recognise "%s" as a project; loading into default project\n' % path)
+        #     self.project = self.newProject()
+        #     self.loadData(paths=[path])
+        #
+        #     if project and project._undo:
+        #         project._undo.clear()
+        #     return self.project
 
     def _loadNefFile(self, path: str, makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup"""
@@ -1759,7 +1820,6 @@ class Framework(NotifierBase):
         popup.show()
         popup.raise_()
 
-    #     # FIXME Below is broken. This does not create a project! Looks like a copy-paste from NEF code.
     # """Load Project from NEF file at path, and do necessary setup"""
     #
     # from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
@@ -1791,19 +1851,20 @@ class Framework(NotifierBase):
     # return self.project
 
     def _loadSparkyProject(self, path: str, makeNewProject=True) -> Project:
-        """Load Project from Sparky file at path, and do necessary setup"""
+        """Load Project from Sparky file at path, and do necessary setup
+        CCPNINTERNAL: called from SparkyDataLoader
+        """
 
         from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 
         # read data files
         from ccpn.core.lib.CcpnSparkyIo import SPARKY_NAME
 
-        dataBlock = self.sparkyReader.parseSparkyFile(path)
+        dataBlock = self.sparkyReader.parseSparkyFile(str(path))
         sparkyName = dataBlock.getDataValues(SPARKY_NAME, firstOnly=True)
 
         if makeNewProject and (dataBlock.getDataValues('sparky', firstOnly=True) == 'project file'):
-            if self.project is not None:
-                self._closeProject()
+            self._closeProject()
             self.project = self.newProject(sparkyName)
 
         self.project.shiftAveraging = True
@@ -1813,16 +1874,6 @@ class Framework(NotifierBase):
             with notificationEchoBlocking():
                 with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s', printTraceBack=True):
                     self.sparkyReader.importSparkyProject(self.project, dataBlock)
-
-        # with undoBlock():
-        #     try:
-        #         # insert file into project
-        #
-        #         self.sparkyReader.importSparkyProject(self.project, dataBlock)
-        #         sys.stderr.write('==> Loaded Sparky project files: "%s", building project\n' % (path,))
-        #     except Exception as es:
-        #         getLogger().warning('Error loading Sparky file: %s' % str(es))
-        #
 
         self.project.shiftAveraging = True
 
@@ -1837,15 +1888,16 @@ class Framework(NotifierBase):
         self.preferences.recentMacros = []
         self.ui.mainWindow._fillRecentMacrosMenu()
 
-    def loadSpectra(self, paths=None, filter=None, askBeforeOpen_lenght=20):
+    def _loadSpectraCallback(self, paths=None, filter=None, askBeforeOpen_lenght=20):
         """
+        Load all the spectra found in paths
+
         :param paths: list of str of paths
         :param filter:
         :param askBeforeOpen_lenght: how many spectra can open without asking first
-
         """
-        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
-        from tqdm import tqdm
+        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
+        from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
         if paths is None:
             # if self.preferences.general.useNative:
@@ -1860,49 +1912,55 @@ class Framework(NotifierBase):
         if not paths:
             return
 
-        spectraPaths = []
+        spectrumLoaders = []
+        count = 0
+        # Recursively search all paths
         for path in paths:
-            path = str(path)
-            subPaths = ioFormats._searchSpectraPathsInSubDir(path)  # Filter only spectra files
-            if len(subPaths) > 0:
-                spectraPaths += subPaths
+            _path = Path.aPath(path)
+            if _path.is_dir():
+                dirLoader = DirectoryDataLoader(path, recursive=True,
+                                                filterForDataFormats=(SpectrumDataLoader.dataFormat,))
+                spectrumLoaders.append(dirLoader)
+                count += len(dirLoader)
 
-        if len(spectraPaths) < len(paths):
-            notRecognised = [i for i in paths if i not in spectraPaths if not os.path.isdir(i)]
-            getLogger().warning('Not valid spectrum Path(s): ' + str(notRecognised))
+            elif (sLoader:= SpectrumDataLoader.checkForValidFormat(path)) is not None:
+                spectrumLoaders.append(sLoader)
+                count += 1
 
-        if len(spectraPaths) > askBeforeOpen_lenght:
-            okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (~%s).'
-                                                               ' Do you want to open all?' % str(len(spectraPaths)))
+        if count > askBeforeOpen_lenght:
+            okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (%d).'
+                                                               ' Do you want to open all?' % len(spectrumLoaders))
             if not okToOpenAll:
                 return
 
-        if spectraPaths:
-            with undoBlockWithoutSideBar():
-                with notificationEchoBlocking():
-                    for spectrumPath in tqdm(spectraPaths):
-                        self.project.loadData(str(spectrumPath))
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                for sLoader in tqdm(spectrumLoaders):
+                    sLoader.load()
 
-    def loadData(self, paths=None, text=None, filter=None):
+    @logCommand('application.')
+    def loadData(self, *paths) -> list:
+        """Loads data from paths.
+        :returns list of loaded objects
         """
-        Opens a file dialog box and loads data from selected file.
-        """
-        if text is None:
-            text = 'Load Data'
-
-        if paths is None:
-            dialog = DataFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter)
-            dialog._show()
-            path = dialog.selectedFile()
-            if not path:
-                return
-            paths = [path]
-
-        elif isinstance(paths, str):
-            paths = [paths]
-
+        objs = []
         for path in paths:
-            self.project.loadData(path)
+            dataLoader = checkPathForDataLoader(path)
+
+            if dataLoader is None:
+                getLogger().warning('Unable to load "%s"' % path)
+
+            elif dataLoader.createsNewProject:
+                newProject = self.loadProject(path)
+                objs.append(newProject)
+
+            else:
+                result = dataLoader.load()
+                if not isIterable(result):
+                    result = [result]
+                objs.extend( result )
+
+        return objs
 
     def _cloneSpectraToProjectDir(self):
         """ Keep a copy of spectra inside the project directory "myproject.ccpn/data/spectra".
@@ -1957,7 +2015,6 @@ class Framework(NotifierBase):
             failMessage = '==> Project save failed\n'
             sys.stderr.write(failMessage)
             self.ui.mainWindow.statusBar().showMessage(failMessage)
-            # NBNB TODO Gui should pre-check newPath and/or pop up something in case of failure
 
         else:
             successMessage = '==> Project successfully saved\n'
@@ -1971,7 +2028,7 @@ class Framework(NotifierBase):
                 if self.preferences.general.autoSaveLayoutOnQuit:
                     Layout.saveLayoutToJson(self.ui.mainWindow)
             except Exception as e:
-                getLogger().warning('Impossible to save Layout %s' % e)
+                getLogger().warning('Unable to save Layout %s' % e)
 
             # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
             sys.stderr.write(successMessage)
@@ -1998,7 +2055,7 @@ class Framework(NotifierBase):
                 self._importNefFile(path=path, makeNewProject=False)
             self.ui.mainWindow.sideBar.buildTree(self.project)
 
-    def _importNefFile(self, path: Union[str, Path.aPath], makeNewProject=True) -> Project:
+    def _importNefFile(self, path: Union[str, Path.Path], makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup"""
 
         from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
@@ -3502,8 +3559,8 @@ if __name__ == '__main__':
     # from sandbox.Geerten.Refactored.framework import Framework
     # from sandbox.Geerten.Refactored.programArguments import Arguments
 
-    from ccpn.framework.Framework import Framework
-    from ccpn.framework.Framework import Arguments
+    # from ccpn.framework.Framework import Framework
+    # from ccpn.framework.Framework import Arguments
 
 
     _makeMainWindowVisible = False

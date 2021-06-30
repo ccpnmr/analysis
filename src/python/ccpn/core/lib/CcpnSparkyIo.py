@@ -266,7 +266,7 @@ class TypeBlock(SparkyDict):
 
 class CcpnSparkyReader:
 
-    def __init__(self, application: str, specificationFile: str = None, mode: str = 'standard',
+    def __init__(self, application, specificationFile: str = None, mode: str = 'standard',
                  testing: bool = False):
 
         # just copied from Rasmus for the minute

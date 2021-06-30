@@ -1,5 +1,5 @@
 """
-This module defines the data loading mechanism for a V3 project
+This module defines the data loading mechanism for loading a Fasta file
 """
 
 #=========================================================================================
@@ -29,33 +29,41 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
-from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_API_DIRECTORY
-from ccpn.framework.Framework import Framework
+from ccpn.core.Project import Project
 
 
-class CcpNmrV3ProjectDataLoader(DataLoaderABC):
-    """V3 project data loader
+class FastaDataLoader(DataLoaderABC):
+    """Fasta data loader
     """
-    dataFormat = 'ccpNmrV3Project'
-    suffixes = [CCPN_DIRECTORY_SUFFIX]  # a list of suffixes that get matched to path
-    allowDirectory = True  # Can/Can't open a directory
-    createsNewProject = True
-    loadFunction = (Framework._loadV3Project, 'application')
+    dataFormat = 'fastaFile'
+    suffixes = ['.fasta']  # a list of suffixes that get matched to path
+    allowDirectory = False  # Can/Can't open a directory
+    createsNewProject = False
+    loadFunction = (Project._loadFastaFile, 'project')
 
-    @classmethod
-    def checkForValidFormat(cls, path):
-        """check if valid format corresponding to dataFormat
-        :return: None or instance of the class
-        """
-        if (_path := cls.checkPath(path)) is None:
-            return None
-        if not _path.is_dir():
-            return None
-        # assume that all is good if we find the CCPN_API_DIRECTORY
-        _apiPath = _path / CCPN_API_DIRECTORY
-        if _apiPath.exists():
-            instance = cls(path)
-            return instance
-        return None
+    # @classmethod
+    # def checkForValidFormat(cls, path):
+    #     """check if valid format corresponding to dataFormat
+    #     :return: None or instance of the class
+    #     """
+    #     if (_path := cls.checkPath(path)) is None:
+    #         return None
+    #     # assume that all is good
+    #     instance = cls(path)
+    #     return instance
+    #
+    # def load(self):
+    #     """The actual Nef loading method;
+    #     raises RunTimeError on error
+    #     :return: a list of [chains]
+    #     """
+    #     # with logCommand('application.loadData(%r)' % self.path):
+    #
+    #     try:
+    #         chains = self.project._loadFastaFile(self.path)
+    #     except Exception as es:
+    #         raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
+    #
+    #     return chains
 
-CcpNmrV3ProjectDataLoader._registerFormat()
+FastaDataLoader._registerFormat()

@@ -63,7 +63,7 @@ class CalculationStepTest(WrapperTesting):
 
     def test_simple_creation(self):
         dataSet = self.project.newDataSet()
-        step1 = dataSet.newCalculationStep()
+        step1 = dataSet.newCalculationStep(programName='CcpNmr')
         self.assertEqual(step1.programName, 'CcpNmr')
 
     def test_complex_creation(self):

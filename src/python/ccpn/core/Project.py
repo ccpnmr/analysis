@@ -42,6 +42,10 @@ from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.nef.GenericStarParser import DataBlock
 from ccpn.util.Path import aPath, Path
+from ccpn.util.Common import isIterable
+from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
+
+from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
@@ -256,6 +260,12 @@ class Project(AbstractWrapperObject):
         """
         return self._wrappedData.root.isProjectModified()
 
+    @property
+    def isUpgradedFromV2(self):
+        """Return True if project was upgraded from V2
+        """
+        return self._apiNmrProject.root._upgradedFromV2
+
     def _initialiseProject(self):
         """Complete initialisation of project,
 
@@ -345,20 +355,24 @@ class Project(AbstractWrapperObject):
         # path is empty for save under the same name
         if newPath:
             # check validity of the newPath
-            if not isValidPath(newPath, stripFullPath=True, stripExtension=True):
-                raise ValueError('Filename can only contain alphanumeric characters and underscores')
-            if not isValidFileNameLength(newPath, stripFullPath=True, stripExtension=True):
-                raise ValueError('Filename must be 32 characters or fewer')
+            newPath = aPath(newPath)
+            newPath.assureSuffix(CCPN_EXTENSION)
+            if newPath.exists() and not overwriteExisting:
+                raise ValueError('Cannot overwrite existing file "%s"' % newPath)
+            if len(newPath.basename) > 32:
+                raise ValueError('Unfortunately, we currently have limited (32) length of the filename (%s)' % newPath.basename)
 
-        savedOk = apiIo.saveProject(self._wrappedData.root, newPath=newPath,
+        savedOk = apiIo.saveProject(self._wrappedData.root, newPath=str(newPath),
                                     changeBackup=changeBackup, createFallback=createFallback,
                                     overwriteExisting=overwriteExisting, checkValid=checkValid,
                                     changeDataLocations=changeDataLocations)
         if savedOk:
             self._resetIds()
-            application = self._appBase
-            if application is not None:
-                application._refreshAfterSave()
+            if self.application.hasGui:
+                self.application.mainWindow.sideBar.setProjectName(self)
+            # application = self._appBase
+            # if application is not None:
+            #     application._refreshAfterSave()
 
         return savedOk
 
@@ -366,11 +380,6 @@ class Project(AbstractWrapperObject):
     def name(self) -> str:
         """name of Project"""
         return self._wrappedData.root.name
-        # apiNmrProject = self._wrappedData
-        # if len(apiNmrProject.root.nmrProjects) == 1:
-        #   return apiNmrProject.root.name
-        # else:
-        #   return apiNmrProject.name
 
     @property
     def path(self) -> str:
@@ -391,11 +400,11 @@ class Project(AbstractWrapperObject):
         backupPath = backupUrl.path
         return backupPath
 
-    @property
-    def programName(self) -> str:
-        """Name of running program - defaults to 'CcpNmr'"""
-        appBase = self._appBase if hasattr(self, '_appBase') else None
-        return 'CcpNmr' if appBase is None else appBase.applicationName
+    # @property
+    # def programName(self) -> str:
+    #     """Name of running program - defaults to 'CcpNmr'"""
+    #     appBase = self._appBase if hasattr(self, '_appBase') else None
+    #     return 'CcpNmr' if appBase is None else appBase.applicationName
 
     @logCommand('project.')
     def deleteObjects(self, *objs: typing.Sequence[typing.Union[Pid.Pid, AbstractWrapperObject]]):
@@ -566,7 +575,6 @@ class Project(AbstractWrapperObject):
     #===========================================================================================
     #  Notifiers system
     #
-
     # Old, API-level functions:
     #
     #===========================================================================================
@@ -1004,14 +1012,12 @@ class Project(AbstractWrapperObject):
     # Library functions
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def _checkUpgradedFromV2(self):
-        """Check whether the project has been upgraded from V2
-        """
-        # if self._apiNmrProject.root._upgradedFromV2:
-        #     # reset the noise levels
-        #     self._setNoiseLevels(alwaysSetNoise=True)
-        # NOTE:ED - needs moving to the new v2 loader
-        pass
+    # def _checkUpgradedFromV2(self):
+    #     """Check whether the project has been upgraded from V2
+    #     """
+    #     if self._apiNmrProject.root._upgradedFromV2:
+    #         # reset the noise levels
+    #         self._setNoiseLevels(alwaysSetNoise=True)
 
     # def _validateDataUrlAndFilePaths(self, newDataUrlPath=None):
     #     """Perform validate operation for setting dataUrl from preferences - to be called after loading
@@ -1255,335 +1261,97 @@ class Project(AbstractWrapperObject):
                 t2 = time()
                 getLogger().info('Exporting dataBlock to file, time = %.2fs' % (t2 - t0))
 
-    def recurseAnalyseUrl(self, filePath, includeUndefined=False):
-        """Recurse through the given path to find valid data that can be loaded
-        This list will contain loadable files and loadable folders which may load the same data
-        if includeUndefined is True, will include ('Text', None, ...) results
-        which may not be useful
+    #===========================================================================================
+    # Data loaders
+    #===========================================================================================
+
+    def loadData(self, path: (str, Path)) -> list:
+        """Just a stub for backward compatibility
         """
-        from ccpn.util.OrderedSet import OrderedSet
+        return self.application.loadData(path)
 
-        validList = OrderedSet()
-
-        _filePath= aPath(filePath)
-        if _filePath.is_dir():
-            # list the folders
-            dirs = [_filePath / dirpath for dirpath, dirs, files in os.walk(filePath, topdown=False)]
-
-            # list the files
-            dirs += [_filePath / dirpath / file
-                     for dirpath, dirs, files in os.walk(filePath, topdown=False)
-                     for file in files]
-
-            # search the folders and files the valid data
-            for dI in dirs:
-                dataType, subType, usePath = ioFormats.analyseUrl(dI)
-
-                # only add the valid types to the set
-                if usePath:
-
-                    # include if both defined or either is None IF includeUndefined is True
-                    if (dataType and subType) or (includeUndefined and ((dataType and not subType) or (subType and not dataType))):
-
-                        # only add if not a subset of an existing path
-                        for inList in validList:
-                            if inList[2].startswith(usePath):
-                                break
-                        else:
-
-                            # flag whether the usePath is a folder
-                            validList.add((dataType, subType, usePath, aPath(usePath).is_dir()))
-
-        return validList
-
-    @logCommand('project.')
-    def loadData(self, path: str) -> typing.Optional[typing.List]:
-        """
-        Load data from path, determining type first.
-        Return None for Un-recognised or un-parsable files; return empty list for ???
-        """
-
-        # TODO: RASMUS:
-        # RASMUS EXPLANATION (to my successor)
-        # loadData does too many things: it is used for handling dropped files,
-        # which includes a system for deciding what actions are taken where for what file types,
-        # and it is called directly for loading e.g. a spectrum.
+# To implement
         #
-        # Part of the idea was that a file of type 'Xyz' being dropped would trigger
-        # a call to '_loadXyz' if, and only if, _loadXyz was defined for the object
-        # in question. That allowed you to control which drops were allowed where, and what
-        # specific actions should be triggered.
+        #     elif dataType == 'Text':
+        #         # Special case - you return the text instead of a list of Pids
+        #         # GWV: Can't do this!! -> have to return a list of tuples: [(dataType, pid or data)]
+        #         # need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!
         #
-        # The entire system has been (partially??) refactored by GV, so it is necessary to rethink this.
-        # My proposal (hopefully consistent with GV's (?)) would be to use this function
-        # ONLY to handle drops and other files of unknown type (and likely rename it _loadData')
-        # and to call specific functions (like loadSpectrum) when you know that you are loading e.g. a
-        # spectrum or a project (currently loadData is (too) widely used.
-        # Some of these functions may or may not need to be written first.
-        # That still leaves the question of how to handle a case where e.g. a text
-        # file should trigger a specific action when loaded e.g. on a Note editor popup and oNLY there,
-        # but that must be thought out and decided.
-        # Anyway, this function should have a proper and consistent return type (as GV says)
-        # Maybe we should consider returning a dictionary rather than a list of tuples??
+        #         return open(usePath).read()
+        #
+        #     elif dataType == 'Macro' and subType == ioFormats.PYTHON:
+        #         # GWV: Can't do this: have to call the routine with a flag: autoExecute=True
+        #         # with suspendSideBarNotifications(self, 'runMacro', usePath, quiet=False):
+        #         self._appBase.runMacro(usePath)
+        #
+        #     elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
+        #         # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
+        #         projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
+        #         project = self.loadProject(projectPath, ioFormats.CCPN)
 
-        # urlInfo is list of triplets of (type, subType, modifiedUrl),
-        # e.g. ('Spectrum', 'Bruker', newUrl)
 
-        # scan the folder for valid data
-        # validList = self.recurseAnalyseUrl(path)
 
-        # GWV 30/11/2020
-        # First usage of new SpectrumdataSource routines
-
-        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import checkPathForSpectrumFormats
-        from ccpn.core.lib.DataStore import DataStore
-
-        getLogger().debug('Project.loadData: loading "%s"' % path)
-
-        # Expand and check any redirections
-        dataStore = DataStore.newFromPath(path)
-        if not dataStore.exists():
-            raise FileNotFoundError('Path "%s" not found' % path)
-
-        # check for a spectrum
-        if checkPathForSpectrumFormats( dataStore.aPath().asString() ) is not None:
-
-            newSpectrum  = self.newSpectrum(path=path)
-            return [newSpectrum]
-
-        else:
-
-            dataType, subType, usePath = ioFormats.analyseUrl(path)
-
-            #TODO:RASMUS: Fix all return types; define properly first
-            if dataType is None:
-                # print("Skipping: file data type not recognised for %s" % usePath)
-                getLogger().warning("Skipping: file data type not recognised for %s" % usePath)
-                # raise ValueError("Skipping: file data type not recognised for %s" % usePath)
-                return None
-
-            elif dataType == 'Dirs':
-                # special case - usePath is a list of paths from a top dir with enumerate subDirs and paths.
-                paths = usePath
-                #TODO:RASMUS: Undefined return type
-                _loadedData = []
-                for path in paths:
-                    _data = self.loadData(path)
-                    if _data:
-                        _loadedData += _data
-                return _loadedData
-
-            elif not aPath(usePath).exists():
-                # print("Skipping: no file found at %s" % usePath)
-                getLogger().warning("Skipping: no file found at %s" % usePath)
-                # raise ValueError("Skipping: no file found at %s" % usePath)
-                return []
-
-            elif dataType == 'Text':
-                # Special case - you return the text instead of a list of Pids
-                # GWV: Can't do this!! -> have to return a list of tuples: [(dataType, pid or data)]
-                # need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!
-                #TODO:RASMUS: return type is not a list
-
-                return open(usePath).read()
-
-            elif dataType == 'Macro' and subType == ioFormats.PYTHON:
-                # GWV: Can't do this: have to call the routine with a flag: autoExecute=True
-                # with suspendSideBarNotifications(self, 'runMacro', usePath, quiet=False):
-                self._appBase.runMacro(usePath)
-
-            elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
-                # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-                projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
-                project = self.loadProject(projectPath, ioFormats.CCPN)
-                #TODO:RASMUS: use python tmpdir or V3 class
-                # NBNB _unpackCcpnTarfile *does* use the Python tempfile module
-                project._wrappedData.root._temporaryDirectory = temporaryDirectory
-                return [project]
-
-            else:
-                # No idea what is going on here
-                #TODO: use a dictionary to define
-                funcname = '_load' + dataType
-                if funcname == '_loadProject':
-                    # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-                    thisProj = [self.loadProject(usePath, subType)]
-                    return thisProj
-
-                # elif funcname == '_loadSpectrum':
-                #     # NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore
-                #     # (NB referred to elsewhere
-                #     # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-                #     with undoBlock():
-                #         thisSpec = self.loadSpectrum(usePath, subType)
-                #     return thisSpec
-
-                elif hasattr(self, funcname):
-                    with undoBlock():
-                        pids = getattr(self, funcname)(usePath, subType)
-                    return pids
-                else:
-                    # print("Skipping: project has no function %s" % funcname)
-                    getLogger().warning("Skipping: project has no function %s" % funcname)
-
-        return []
-
-    # Data loaders and dispatchers
-    def _loadSequence(self, path: str, subType: str) -> list:
-        """Load sequence(s) from file into Wrapper project"""
-
-        if subType == ioFormats.FASTA:
-            sequences = fastaIo.parseFastaFile(path)
-        else:
-            raise ValueError("Sequence file type %s is not recognised" % subType)
-
+    def _loadFastaFile(self, path: (str, Path)) -> list:
+        """Load Fasta sequence(s) from file into Wrapper project
+        CCPNINTERNAL: called from FastDataLoader
+        """
+        sequences = fastaIo.parseFastaFile(path)
         chains = []
         for sequence in sequences:
-            chains.append(self.createChain(sequence=sequence[1], compoundName=sequence[0],
-                                           molType='protein'))
+            newChain = self.createChain(sequence=sequence[1], compoundName=sequence[0],
+                                        molType='protein')
+            chains.append(newChain)
         #
         return chains
 
-    def _loadStructure(self, path: str, subType: str):
+    def _loadPdbFile(self, path: (str, Path)) -> list:
+        """Load data from pdb file path into new StructureEnsemble object(s)
+        CCPNINTERNAL: called from pdb dataLoader
         """
-        Load Structure ensemble(s) from file into Wrapper project
-        """
 
-        from ccpn.util.StructureData import averageStructure
-        from ccpn.core.Model import Model
+        from ccpn.util.StructureData import EnsembleData
 
-        if subType == 'PDB':
-            name, ensemble = self._loadPdbStructure(path)
-        else:
-            raise NotImplementedError('{} type structures cannot be loaded'.format(subType))
-        se = self.newStructureEnsemble()
-        se.data = ensemble
-        se.rename(name)
+        path = aPath(path)
+        name = path.basename
 
-        ensemble._containingObject = se
-        for modelNumber in sorted(ensemble['modelNumber'].unique()):
-            # _validateName
-            _label = 'my%s_%s' % (Model.className, modelNumber)
-
-            se.newModel(serial=modelNumber, label=_label)
-
-        ds = self.newDataSet(title=name)
-        d = ds.newData(name='Derived')
-        d.setParameter('average', averageStructure(ensemble))
+        ensemble = EnsembleData.from_pdb(path)
+        se = self.newStructureEnsemble(name=name, data=ensemble)
 
         return [se]
 
-    def _loadPdbStructure(self, path):
-        import os
-        from ccpn.util.StructureData import EnsembleData
-
-        label = aPath(path).name
-        label = label.split('.')[:-1]
-        label = '_'.join(label)
-
-        ensemble = EnsembleData.from_pdb(path)
-        return label, ensemble
-
-    def _loadNefFile(self, path: str, subType: str):
+    def _loadTextFile(self, path: (str, Path)) -> list:
+        """Load text from file path into new Note object
+        CCPNINTERNAL: called from text dataLoader
         """
-        Load a Nef file into an existing project
-        """
-        # ejb - 24/6/17
+        path = aPath(path)
+        name = path.basename
 
-        if subType in (ioFormats.NEF):
+        with path.open('r') as fp:
+            # cannot do read() as we want one string
+            text = ''.join(line for line in fp.readlines())
+        note = self.newNote(name=name, text=text)
 
-            return self._appBase.loadProject(path)
+        return [note]
 
-            # # load Nef File here
-            # nefReader = CcpnNefIo.CcpnNefReader(self)
-            #
-            # dataBlock = nefReader.getNefData(path)
-            # # project = self.newProject(dataBlock.name)
-            # # self._echoBlocking += 1
-            # self._undo.increaseBlocking()
-            # self._wrappedData.shiftAveraging = False
-            #
-            # nefReader.importNewProject(self, dataBlock)
-            #
-            # self._wrappedData.shiftAveraging = True
-            # # self._echoBlocking -= 1
-            # self._undo.decreaseBlocking()
-            #
-            # return True
-        else:
-            raise ValueError("Project file type %s is not recognised" % subType)
-
-    def loadProject(self, path: str, subType: str) -> "Project":
-        """Load project from file into application and return the new project"""
-
-        # if subType == ioFormats.CCPN:
-        if subType in (ioFormats.CCPN, ioFormats.NEF, ioFormats.NMRSTAR, ioFormats.SPARKY):
-            return self._appBase.loadProject(path)
-        else:
-            raise ValueError("Project file type %s is not recognised" % subType)
-
-    # @logCommand('project')
-    # def loadSpectrum(self, path: str, subType: str, name=None) -> list:
-    #     """Load spectrum defined by path into application
-    #     """
-    #     from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
-    #
-    #     # #TODO:RASMUS FIXME check for rename
-    #
-    #     try:
-    #         apiDataSource = self._wrappedData.loadDataSource(
-    #                         filePath=path, dataFileFormat=subType, name=name
-    #         )
-    #     except Exception as es:
-    #         getLogger().warning(es)
-    #         raise es
-    #
-    #     if apiDataSource is None:
-    #         return []
-    #     else:
-    #         spectrum = self._data2Obj[apiDataSource]
-    #         spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
-    #
-    #         # estimate new base contour levels
-    #         # if self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:
-    #         if not spectrum.noiseLevel:
-    #             getLogger().info("estimating noise level for spectrum %s" % str(spectrum.pid))
-    #
-    #             setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-    #                                       setPositiveContours=True, setNegativeContours=True,
-    #                                       useSameMultiplier=True)
-    #
-    #         # set the positive/negative/slice colours
-    #         from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
-    #
-    #         (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-    #         spectrum.sliceColour = spectrum.positiveContourColour
-    #
-    #         # set the initial axis ordering
-    #         spectrum.getDefaultOrdering(None)
-    #
-    #         # if there are no peakLists then create a new one - taken from Spectrum _spectrumMakeFirstPeakList notifier
-    #         if not spectrum.peakLists:
-    #             spectrum.newPeakList()
-
-    #         return [spectrum]
-
-    def _loadLayout(self, path: str, subType: str):
+    def _loadLayout(self, path: (str, Path), subType: str):
         # this is a GUI only function call. Please move to the appropriate location on 3.1
         self.application.restoreLayoutFromFile(path)
 
-    def _loadLookupFile(self, path: str, subType: str, ):
-        """Load data from a look-up file, csv or xls ."""
+    def _loadExcelFile(self, path: (str, Path)) -> list:
+        """Load data from a Excel file.
+        :returns list of loaded objects (awaiting adjust ment of excelReader)
+        CCPNINTERNAL: used in Excel data loader
+        """
+        with undoBlock():
+            reader = ExcelReader(project=self, excelPath=path)
+            result = reader.load()
+            return result
 
-        if subType == ioFormats.CSV:
-            self._logger.warning("This function has not been implemented yet")
-            # readCsv(self, path=path)
+    #===========================================================================================
+    # End data loaders
+    #===========================================================================================
 
-        elif subType == ioFormats.EXCEL:
-            # with suspendSideBarNotifications(self, 'ExcelReader', quiet=False):
-            with undoBlock():
-                ExcelReader(project=self, excelPath=path)
-
+    #TODO: use Substance._uniqueName
     def _uniqueSubstanceName(self, name: str = None, defaultName: str = 'Molecule') -> str:
         """add integer suffixed to name till it is unique"""
 
@@ -1643,34 +1411,6 @@ class Project(AbstractWrapperObject):
             result = None
         #
         return result
-
-    # GWV: This is now handled in Spectrum_restoreObject
-    #
-    # def _setContourColours(self):
-    #     """Set new contour colours for spectra that have not been defined
-    #     """
-    #     # 20190520:ED new code to set colours and update contour levels
-    #     from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
-    #
-    #     for spectrum in self.spectra:
-    #         if not spectrum.positiveContourColour or not spectrum.negativeContourColour:
-    #             # set contour colours for every spectrum
-    #             (spectrum.positiveContourColour,
-    #              spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
-    #         if not spectrum.sliceColour:
-    #             spectrum.sliceColour = spectrum.positiveContourColour
-    #
-    # def _setNoiseLevels(self, alwaysSetNoise=False):
-    #     """Set noise levels for spectra that have not been defined
-    #     """
-    #     # 20190520:ED new code to set colours and update contour levels
-    #     from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise
-    #
-    #     for spectrum in self.spectra:
-    #         if not spectrum.noiseLevel or alwaysSetNoise:
-    #             setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
-    #                                       setPositiveContours=True, setNegativeContours=True,
-    #                                       useSameMultiplier=True)
 
     def getCcpCodeData(self, ccpCode, molType=None, atomType=None):
         """Get the CcpCode for molType/AtomType
@@ -2210,46 +1950,46 @@ class Project(AbstractWrapperObject):
 
         return _getChemicalShiftList(self, name=name, **kwds)
 
-
-def isValidPath(projectName, stripFullPath=True, stripExtension=True):
-    """Check whether the project name is valid after stripping fullpath and extension
-    Can only contain alphanumeric characters and underscores
-
-    :param projectName: name of project to check
-    :param stripFullPath: set to true to remove leading directory
-    :param stripExtension: set to true to remove extension
-    :return: True if valid else False
-    """
-    if not projectName:
-        return
-
-    if isinstance(projectName, str):
-
-        name = aPath(projectName).name if stripFullPath else projectName
-        name = aPath(name).basename if stripExtension else name
-
-        STRIPCHARS = '_'
-        for ss in STRIPCHARS:
-            name = name.replace(ss, '')
-
-        if name.isalnum():
-            return True
-
-
-def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
-    """Check whether the project name is valid after stripping fullpath and extension
-    Can only contain alphanumeric characters and underscores
-
-    :param projectName: name of project to check
-    :param stripFullPath: set to true to remove leading directory
-    :param stripExtension: set to true to remove extension
-    :return: True if length <= 32 else False
-    """
-    if not projectName:
-        return
-
-    if isinstance(projectName, str):
-        name = aPath(projectName).name if stripFullPath else projectName
-        name = aPath(name).basename if stripExtension else name
-
-        return len(name) <= 32
+#
+# def isValidPath(projectName, stripFullPath=True, stripExtension=True):
+#     """Check whether the project name is valid after stripping fullpath and extension
+#     Can only contain alphanumeric characters and underscores
+#
+#     :param projectName: name of project to check
+#     :param stripFullPath: set to true to remove leading directory
+#     :param stripExtension: set to true to remove extension
+#     :return: True if valid else False
+#     """
+#     if not projectName:
+#         return
+#
+#     if isinstance(projectName, str):
+#
+#         name = os.path.basename(projectName) if stripFullPath else projectName
+#         name = os.path.splitext(name)[0] if stripExtension else name
+#
+#         STRIPCHARS = '_'
+#         for ss in STRIPCHARS:
+#             name = name.replace(ss, '')
+#
+#         if name.isalnum():
+#             return True
+#
+#
+# def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
+#     """Check whether the project name is valid after stripping fullpath and extension
+#     Can only contain alphanumeric characters and underscores
+#
+#     :param projectName: name of project to check
+#     :param stripFullPath: set to true to remove leading directory
+#     :param stripExtension: set to true to remove extension
+#     :return: True if length <= 32 else False
+#     """
+#     if not projectName:
+#         return
+#
+#     if isinstance(projectName, str):
+#         name = os.path.basename(projectName) if stripFullPath else projectName
+#         name = os.path.splitext(name)[0] if stripExtension else name
+#
+#         return len(name) <= 32

@@ -184,28 +184,26 @@ class StructureEnsemble(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(StructureEnsemble)
-def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, data: EnsembleData = None,
+def _newStructureEnsemble(self: Project, name: str = None, data: EnsembleData = None,
                           comment: str = None) -> StructureEnsemble:
     """Create new StructureEnsemble.
 
     See the StructureEnsemble class for details.
 
-    :param name:
-    :param data:
-    :param comment:
-    :param serial: optional serial number.
+    :param name: name of the structureEnsemble
+    :param data: an EnsembleData instance
+    :param comment: any comment string
     :return: a new StructureEnsemble instance.
     """
-    # stop circular import
+    # avoiding circular import
     from ccpn.core.Model import Model
 
     name = StructureEnsemble._uniqueName(project=self, name=name)
 
     nmrProject = self._wrappedData
 
-    if serial is None:
-        ll = nmrProject.root.structureEnsembles
-        serial = max(x.ensembleId for x in ll) + 1 if ll else 1
+    ll = nmrProject.root.structureEnsembles
+    serial = max(x.ensembleId for x in ll) + 1 if ll else 1
     params = {'molSystem': nmrProject.molSystem, 'ensembleId': serial, 'details': comment}
     if name:
         params['name'] = name
@@ -224,18 +222,14 @@ def _newStructureEnsemble(self: Project, serial: int = None, name: str = None, d
 
     if data is None:
         result.data = EnsembleData()
-    else:
-        logger.warning("EnsembleData successfully set on new StructureEnsemble were not echoed - too large")
 
+    else:
         result.data = data
         data._containingObject = result
         for modelNumber in sorted(data['modelNumber'].unique()):
             # _validateName
             _label = 'my%s_%s' % (Model.className, modelNumber)
             result.newModel(serial=modelNumber, label=_label)
-
-        # for model in result.models:           ?
-        #     model._finaliseAction('create')
 
     return result
 

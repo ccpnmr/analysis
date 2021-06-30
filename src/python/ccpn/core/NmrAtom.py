@@ -144,6 +144,7 @@ class NmrAtom(AbstractWrapperObject):
         """isotopeCode of NmrAtom. Used to facilitate the nmrAtom assignment."""
         return self._wrappedData.isotopeCode
 
+    # TODO: remove setter: This should not be allowed anymore; use _setIsotopeCode() method
     @isotopeCode.setter
     def isotopeCode(self, value) -> str:
         """Set the isotopeCode of NmrAtom. """
@@ -152,6 +153,11 @@ class NmrAtom(AbstractWrapperObject):
         if not self.isotopeCode == value:
             isotopeCode = value if value in ct.DEFAULT_ISOTOPE_DICT.values() else UnknownIsotopeCode
             self._wrappedData.isotopeCode = isotopeCode or UnknownIsotopeCode
+
+    def _setIsotopeCode(self, value):
+        # value must be defined, if not set then can set to arbitrary value '?'
+        # this means it can still be set at any isotopeCode later, otherwise need to undo or create new nmrAtom
+        self._wrappedData.isotopeCode = value if value else UnknownIsotopeCode
 
     @property
     def boundNmrAtoms(self) -> 'NmrAtom':
@@ -187,7 +193,7 @@ class NmrAtom(AbstractWrapperObject):
         apiPeaks.extend([x.peakDim.peak for x in apiResonance.peakDimContribNs])
 
         data2Obj = self._project._data2Obj
-        return sorted(data2Obj[x] for x in set(apiPeaks))
+        return tuple(data2Obj[x] for x in set(apiPeaks))
 
     @logCommand(get='self')
     def deassign(self):
@@ -364,11 +370,6 @@ class NmrAtom(AbstractWrapperObject):
                     if not (peak.isDeleted or peak._flaggedForDelete):
                         peak._finaliseAction('change')
             setattr(self, ASSIGNEDPEAKSCHANGED, None)
-
-    def _setIsotopeCode(self, value):
-        # value must be defined, if not set then can set to arbitrary value '?'
-        # this means it can still be set at any isotopeCode later, otherwise need to undo or create new nmrAtom
-        self._wrappedData.isotopeCode = value if value else '?'
 
     def _setApiName(self, name):
         # set a serial format name of the form ?@<n> from the current serial number

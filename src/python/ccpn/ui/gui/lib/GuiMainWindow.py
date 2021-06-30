@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__modifiedBy__ = "$modifiedBy: gvuister $"
 __dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
@@ -62,18 +62,24 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, showMulti
+
 from ccpn.util.Common import uniquify, camelCaseToString
 from ccpn.util import Logging
+#from ccpn.util.Logging import getLogger
 from ccpn.util import Path
 from ccpn.util.Path import aPath
+from ccpn.util.Common import isIterable
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
+
+from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.Peak import Peak
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QApplication
 
-#from ccpn.util.Logging import getLogger
+
 #from collections import OrderedDict
 
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -163,6 +169,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
 
+    @property
+    def project(self):
+        """The current project"""
+        return self._project
+
     def makeDisabledFileIcon(self, icon):
         return icon
 
@@ -171,12 +182,12 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         amDirty = self._project._undo.isDirty()
         self.setWindowModified(amDirty)
 
-        if not self._isTemporaryProject():
+        if not self.project.isTemporary:
             self.setWindowFilePath(self.application.project.path)
         else:
             self.setWindowFilePath("")
 
-        if self._isTemporaryProject():
+        if self.project.isTemporary:
             self.setWindowIcon(QtGui.QIcon())
         elif amDirty:
             self.setWindowIcon(self.disabledFileIcon)
@@ -284,7 +295,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         #GST certainly on osx i would even remove the app name as it should be in the menu
         #GST switched order file name first its the most important info and on osx it
         # appears next to the proxy icon
-        if not self._isTemporaryProject():
+        if not self.project.isTemporary:
             filename = self.application.project.name
             windowTitle = '{} - {}[{}][*]'.format(filename, applicationName, version)
         else:
@@ -493,85 +504,62 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 menuAction = Action(self, action[0], callback=action[1], **kwDict)
                 menu.addAction(menuAction)
 
-    def _isTemporaryProject(self):
-        """Return true if the project is temporary, i.e., not saved or updated.
+    # def _isTemporaryProject(self):
+    #     """Return true if the project is temporary, i.e., not saved or updated.
+    #     """
+    #     return self.project.isTemporary
+
+
+    def _checkForBadSpectra(self, project):
+        """Report bad spectra in a popup
         """
-        return self._project.isTemporary
+        badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
+        if badSpectra:
+            text = 'Detected invalid Spectrum file path(s) for:\n\n'
+            for sp in badSpectra:
+                text += '%s\n' % str(sp)
+            text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
+            showWarning('Spectrum file paths', text)
 
-    def _queryCloseProject(self, title, phrase):
+    # def _loadProjectSingleTry(self, projectDir):
+    #     """Load/Reload project after load dialog.
+    #     """
+    #     from ccpn.ui.gui.widgets.MessageDialog import showWarning
+    #
+    #     project = self.application.loadProject(projectDir)
+    #     if project is None:
+    #         showWarning('Load Project', 'Error loading project "%s"' % projectDir)
+    #
+    #     else:
+    #         project._mainWindow.sideBar.buildTree(project)
+    #         project._mainWindow.show()
+    #         QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+    #
+    #         # if the new project contains invalid spectra then open the popup to see them
+    #         badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
+    #         if badSpectra:
+    #             text = 'Detected invalid Spectrum file path(s) for:\n\n'
+    #             for sp in badSpectra:
+    #                 text += '%s\n' % str(sp)
+    #             text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
+    #             showWarning('Spectrum file paths', text)
+    #
+    #     return project
 
-        if self._isTemporaryProject():
-            return True
-
-        if self._project.isModified:
-            ss = ' and any changes will be lost'
-        else:
-            ss = ''
-        result = MessageDialog.showYesNo(title,
-                                         'Do you really want to %s project (current project will be closed%s)?' % (phrase, ss))
-
-        return result
-
-    def _loadProjectSingleTry(self, projectDir):
-        """Load/Reload project after load dialog.
-        """
-        from ccpn.ui.gui.widgets.MessageDialog import showWarning
-
-        try:
-            project = self.application.loadProject(projectDir)
-
-            if project:
-                project._mainWindow.sideBar.buildTree(project)
-                project._mainWindow.show()
-                QtWidgets.QApplication.setActiveWindow(project._mainWindow)
-
-                # if the new project contains invalid spectra then open the popup to see them
-                badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
-                # badSpectra = []
-                # for spectrum in project.spectra:
-                #     valid = False
-                #     try:
-                #         valid = spectrum.hasValidPath()  # can raise error if None
-                #     except:
-                #         pass
-                #     finally:
-                #         if not valid:
-                #             badSpectra.append(str(spectrum))
-
-                if badSpectra:
-                    text = 'Detected invalid Spectrum file path(s) for:\n\n'
-                    for sp in badSpectra:
-                        text += '%s\n' % str(sp)
-                    text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
-                    showWarning('Spectrum file paths', text)
-
-                # # TODO: there should be no need for this; check
-                # undo = self._project._undo
-                # if undo is not None:
-                #     undo.markClean()
-
-                return project
-
-            else:
-                showWarning('Load Project', 'Error loading project')
-
-        except Exception as es:
-            raise ValueError("Error loading project: %s" % str(es))
-
-    def _loadProjectLastValid(self, projectDir):
-        """Try and load a new project, if error try and load the last valid project.
-        """
-        lastValidProject = self.project.path
-        lastProjectisTemporary = self._isTemporaryProject()
-
-        # try and load the new project
-        # try:
-        project = self._loadProjectSingleTry(projectDir)
-        if project:
-            undo = self._project._undo
-            if undo is not None:
-                undo.markClean()
-            return project
+    # def _loadProjectLastValid(self, projectDir):
+    #     """Try and load a new project, if error try and load the last valid project.
+    #     """
+    #     lastValidProject = self.project.path
+    #     lastProjectisTemporary = self.project.isTemporary
+    #
+    #     # try and load the new project
+    #     # try:
+    #     project = self._loadProjectSingleTry(projectDir)
+    #     if project:
+    #         undo = self._project._undo
+    #         if undo is not None:
+    #             undo.markClean()
+    #         return project
 
         # except Exception as es:
         #     MessageDialog.showError('loadProject', 'Error loading project:\n%s\n\n%s\n\nReloading last saved position.' % (str(projectDir), str(es)))
@@ -603,58 +591,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         self.application._importNef(path)
 
-    def loadProject(self, projectDir=None):
-        """
-        Opens a loadProject dialog box if project directory is not specified.
-        Loads the selected project.
-        """
-        result = self._queryCloseProject(title='Open Project', phrase='open another')
-        lastValidProject = self.project.path
-
-        project = None
-        if result:
-            if projectDir is None:
-                dialog = ProjectFileDialog(parent=self, acceptMode='open')
-                dialog._show()
-                projectDir = dialog.selectedFile()
-
-            if projectDir:
-                # try and load the new project
-                # try:
-                project = self._loadProjectLastValid(projectDir)
-
-                if self.application.preferences.general.useProjectPath:
-                    Logging.getLogger().debug2('mainWindow - setting current path %s' % Path.Path(projectDir).parent)
-                    # this dialog doesn't need to be seen, required to set initialPath
-                    _dialog = ProjectFileDialog(parent=self, acceptMode='open')
-                    _dialog.initialPath = Path.Path(projectDir).parent
-
-            # except (ValueError, RuntimeError) as es:
-            #     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s' % str(projectDir))
-            #     Logging.getLogger().warning('Fatal error loading project: %s' % str(projectDir))
-            #     raise es
-
-            # try:
-            #     project = self._loadProject(projectDir)
-            #
-            # except Exception as es:
-            #     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s\nReloading last saved position.' % str(projectDir))
-            #     Logging.getLogger().warning('Fatal error loading project: %s - Reloading last saved position.' % str(projectDir))
-            #
-            #     # try and load the previous project (only one try)
-            #     try:
-            #         project = self._loadProject(lastValidProject)
-            #
-            #     except Exception as es:
-            #         MessageDialog.showError('loadProject', 'Fatal error loading previous project:\n%s' % str(lastValidProject))
-            #         Logging.getLogger().warning('Fatal error loading previous project: %s' % str(lastValidProject))
-
-        # undo = self._project._undo
-        # if undo is not None:
-        #     undo.markClean()
-
-        return project
-
     def _fillRecentProjectsMenu(self):
         """
         Populates recent projects menu with 10 most recently loaded projects
@@ -668,7 +604,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             #                callback=partial(self.application.loadProject, path=recentFile))
 
             action = Action(self, text=recentFile, translate=False,
-                            callback=partial(self.loadProject, projectDir=recentFile))
+                            callback=partial(self._openProject, projectDir=recentFile))
             recentFileMenu.addAction(action)
         recentFileMenu.addSeparator()
         recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
@@ -1169,36 +1105,146 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """
         assert 0 == 1
 
+    # def _processUrl(self, url) -> list:
+    #     """Handle the dropped url
+    #     return a tuple ([objs], errorText)
+    #     """
+    #     # CCPNINTERNAL. Called also from module area and GuiStrip. They should have same behaviour
+    #
+    #     url = str(url)
+    #     getLogger().debug('>>> dropped: ' + url)
+    #
+    #     objs = []
+    #
+    #     dataLoader = checkPathForDataLoader(url)
+    #
+    #     if dataLoader is None:
+    #         txt = 'Loading "%s" failed; unrecognised type' % url
+    #         getLogger().warning(txt)
+    #         # MessageDialog.showError('Load Data', txt, parent=self)
+    #         return ([], txt)
+    #
+    #     if dataLoader.createsNewProject:
+    #         if not self._queryCloseProject(title='Load %s project' % dataLoader.dataFormat,
+    #                                        phrase='create a new'):
+    #             return ([], None)
+    #
+    #         newProject = self._loadProject(dataLoader=dataLoader)
+    #         if newProject is not None:
+    #             objs.append(newProject)
+    #
+    #     else:
+    #         with undoBlockWithoutSideBar():
+    #             result = dataLoader.load()
+    #             objs.extend(result)
+    #
+    #     return (objs, None)
+
+    def _getDataLoader(self, url):
+        """Get dataLoader for the url (or None if not present)
+        Allows for reporting or checking through popups
+        does not do the actual loading
+        :returns a tuple (dataLoader, createsNewProject)
+        """
+        dataLoader = checkPathForDataLoader(url)
+
+        if dataLoader is None:
+            txt = 'Loading "%s" failed; unrecognised type' % url
+            getLogger().warning(txt)
+            return (None, False)
+
+        createsNewProject = dataLoader.createsNewProject
+
+        # local import here, as checkPathForDataLoaders needs to be called first to assure proper import orer
+        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+        from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
+        # check-for and set any specific attributes of the dataLoader instance
+        # depending on the dataFormat
+        if dataLoader.dataFormat == NefDataLoader.dataFormat or \
+           dataLoader.dataFormat == SparkyDataLoader.dataFormat:
+            choices = ['Import', 'New project', 'Cancel']
+            choice = showMulti('Load %s' % dataLoader.dataFormat,
+                               'How do you want to handle the file:',
+                               choices, parent=self)
+            if choice == choices[0]:
+                dataLoader.makeNewProject = False
+                createsNewProject = False
+            elif choice == choices[1]:
+                dataLoader.makeNewProject = True
+                createsNewProject = True
+            else:
+                dataLoader = None
+                createsNewProject = False
+
+        return (dataLoader, createsNewProject)
+
     def _processDroppedItems(self, data):
         """Handle the dropped urls
         """
-        # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviour
-        # use an undoBlockWithoutSideBar, and ignore logging if 5 or more items
+        # CCPNINTERNAL. Called also from module area and GuiStrip. They should have same behaviour
+        # use an undoBlockWithoutSideBar, and ignore logging if MAXITEMLOGGING or more items
         # to stop overloading of the log
-        objs = []
-        urls = data.get('urls', [])
-        if urls and len(urls) > 0:
 
-            project = self._checkUrlsForProject(urls)
+        urls = [str(url) for url in data.get(DropBase.URLS, []) if len(url)>0]
+        if urls is None:
+            return []
 
-            if project:
-                objs = self._processUrls(urls)
+        getLogger().info('Handling urls...')
 
+        # A list of (url, dataLoader, createsNewProject) tuples. (createsNew to modify behavior, eg. for NEF)
+        dataLoaders = []
+        # analyse the Urls
+        for url in urls:
+            dataLoader, createsNewProject = self._getDataLoader(url)
+            dataLoaders.append( (url, dataLoader, createsNewProject) )
+
+        # analyse for potential errors
+        errorUrls = [url for url, dl, createNew in dataLoaders if dl is None]
+        if len(errorUrls) == 1:
+            MessageDialog.showError('Load Data', 'Dropped item "%s" was not unrecognised' % errorUrls[0], parent=self)
+        elif len(errorUrls) > 1:
+            MessageDialog.showError('Load Data', '%d dropped items were not recognised (see log for details)' % \
+                                    len(errorUrls), parent=self)
+
+        # Analyse if any Url would create a new project
+        createNewProject = any([createNew for url, dl, createNew in dataLoaders])
+        if createNewProject and not self._queryCloseProject(title='Load project', phrase='create a new'):
+                return []
+
+        # load the url's with valid handlers
+        urlsToLoad = [(url, dl, createNew) for url, dl, createNew in dataLoaders if dl is not None]
+        doEchoBlocking = len(urlsToLoad) > MAXITEMLOGGING
+
+        # just a helper function to avoid code duplication
+        def _getResult(dLoader, createNew):
+            if createNew:
+                result = [self._loadProject(dataLoader=dLoader)]
             else:
                 with undoBlockWithoutSideBar():
-                    getLogger().info('Handling urls...')
-                    if len(urls) > MAXITEMLOGGING:
-                        with notificationEchoBlocking():
-                            objs = self._processUrls(urls)
-                    else:
-                        objs = self._processUrls(urls)
+                    result = dLoader.load()
+            return result
+
+        objs = []
+        for url, dataLoader, createNewProject in urlsToLoad:
+            try:
+                if doEchoBlocking:
+                    with notificationEchoBlocking():
+                        result = _getResult(dataLoader, createNewProject)
+                else:
+                    result = _getResult(dataLoader, createNewProject)
+
+                if result is not None:
+                    objs.extend(result)
+
+            except RuntimeError as es:
+                showWarning("Load data", 'Error loading "%s" \n(%s)' % (url, str(es)), parent=self)
 
         return objs
 
     def _processPids(self, data, position=None, relativeTo=None):
         """Handle the urls passed to the drop event
         """
-        # CCPN INTERNAL. Called also from CcpnModule and CcpnModuleArea. They should have same behaviour
+        # CCPNINTERNAL. Called also from CcpnModule and CcpnModuleArea. They should have same behaviour
 
         pids = data[DropBase.PIDS]
         if pids and len(pids) > 0:
@@ -1211,76 +1257,200 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
 
             checkSpectraToOpen(self, objs)
-
             _openItemObject(self, objs, position=position, relativeTo=relativeTo)
 
-    def _checkUrlsForProject(self, urls):
-        """Check whether there is a project in the dropped url list,
-        and return the first project
+    # def _checkUrlsForProject(self, urls):
+    #     """Check whether there is a project in the dropped url list,
+    #     and return the first project
+    #     """
+    #     for url in urls:
+    #         getLogger().debug('>>> dropped: ' + str(url))
+    #
+    #         dataType, subType, usePath = ioFormats.analyseUrl(url)
+    #         if dataType == 'Project' and subType in (ioFormats.CCPN,
+    #                                                  ioFormats.NEF,
+    #                                                  ioFormats.NMRSTAR,
+    #                                                  ioFormats.SPARKY):
+    #             return url
+
+    def _queryCloseProject(self, title, phrase):
+        """Query if project can be closed; always True for temporary projects
+        :returns True/False
         """
-        for url in urls:
-            getLogger().debug('>>> dropped: ' + str(url))
+        if self.project.isTemporary:
+            return True
 
-            dataType, subType, usePath = ioFormats.analyseUrl(url)
-            if dataType == 'Project' and subType in (ioFormats.CCPN,
-                                                     ioFormats.NEF,
-                                                     ioFormats.NMRSTAR,
-                                                     ioFormats.SPARKY):
-                return url
+        message = 'Do you really want to %s project (current project will be closed %s)?' % \
+                  (phrase, (' and any changes will be lost' if self.project.isModified else ''))
+        result = MessageDialog.showYesNo(title, message, parent=self)
+        return bool(result)
 
-    def _processUrls(self, urls):
-        """Handle the dropped urls
+    def _openProject(self, projectDir=None):
         """
-        # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviour
+        Opens a OpenProject dialog box if project directory is not specified.
+        Loads the selected project.
+        :returns new project instance or None
+        """
+        if not self._queryCloseProject(title='Open Project', phrase='open another'):
+            return None
 
-        objs = []
-        # for url in data.get('urls', []):
+        lastValidProject = self.project.path
+        project = None
 
-        for url in urls:
-            getLogger().debug('>>> dropped: ' + str(url))
+        if projectDir is None:
+            dialog = ProjectFileDialog(parent=self, acceptMode='open')
+            dialog._show()
+            projectDir = dialog.selectedFile()
 
-            dataType, subType, usePath = ioFormats.analyseUrl(url)
-            if subType == ioFormats.NMRSTAR:  # NMRStar file is available only as import of metadata not as stand alone project
-                self.application._loadNMRStarFile(url)
-                return objs
+        if projectDir:
+            # try and load the new project
+            project = self._loadProject(path=projectDir)
 
-            if subType == ioFormats.NEF and self.application.preferences.appearance.openImportPopupOnDroppedNef:
-                self.application._importNef(url)
-                return objs
+            if self.application.preferences.general.useProjectPath:
+                Logging.getLogger().debug2('mainWindow - setting current path %s' % Path.Path(projectDir).parent)
+                # this dialog doesn't need to be seen, required to set initialPath
+                _dialog = ProjectFileDialog(parent=self, acceptMode='open')
+                _dialog.initialPath = Path.Path(projectDir).parent
 
-            if dataType == 'Project' and subType in (ioFormats.CCPN,
-                                                     ioFormats.NEF,
-                                                     ioFormats.SPARKY):
+            # except (ValueError, RuntimeError) as es:
+            #     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s' % str(projectDir))
+            #     Logging.getLogger().warning('Fatal error loading project: %s' % str(projectDir))
+            #     raise es
 
-                try:
-                    okToContinue = self._queryCloseProject(title='Load %s project' % subType,
-                                                           phrase='create a new')
-                    if okToContinue:
-                        with progressManager(self, 'Loading project... ' + url):
-                            obj = None
-                            obj = self._loadProjectLastValid(url)
+            # try:
+            #     project = self._loadProject(projectDir)
+            #
+            # except Exception as es:
+            #     MessageDialog.showError('loadProject', 'Fatal error loading project:\n%s\nReloading last saved position.' % str(projectDir))
+            #     Logging.getLogger().warning('Fatal error loading project: %s - Reloading last saved position.' % str(projectDir))
+            #
+            #     # try and load the previous project (only one try)
+            #     try:
+            #         project = self._loadProject(lastValidProject)
+            #
+            #     except Exception as es:
+            #         MessageDialog.showError('loadProject', 'Fatal error loading previous project:\n%s' % str(lastValidProject))
+            #         Logging.getLogger().warning('Fatal error loading previous project: %s' % str(lastValidProject))
 
-                except Exception as es:
-                    MessageDialog.showError('Load Project', 'loadProject Error: %s' % str(es))
-                    getLogger().warning('loadProject Error: %s' % str(es), )
-                    getLogger().exception(str(es))
+        # undo = self._project._undo
+        # if undo is not None:
+        #     undo.markClean()
 
-            else:
-                # with progressManager(self.mainWindow, 'Loading data... ' + url):
-                try:  #  Why do we need this try?
-                    spectraPathsCount = len(ioFormats._searchSpectraPathsInSubDir(url))
-                    askBeforeOpen_lenght = 20  # Ask user if want to open all (spectra) before start loading the full set.
-                    if spectraPathsCount > askBeforeOpen_lenght:
-                        okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (~%s).'
-                                                                           ' Do you want to open all?' % str(spectraPathsCount))
-                        if not okToOpenAll:
-                            continue
-                    with notificationEchoBlocking():
-                        data = self.project.loadData(url)
-                        if data:
-                            objs.extend(data)
+        return project
 
-                except Exception as es:
-                    MessageDialog.showError('Load Data', 'Loading "%s" encountered error: %s' % (url,str(es)))
-                    getLogger().warning('loadData Error: %s' % str(es))
-        return objs
+    def _loadProject(self, dataLoader=None, path=None):
+        """Load a project either from a dataLoader instance or from path;
+        build the project Gui elements
+        :returns project instance or None
+        """
+        if dataLoader is None and path is not None:
+            dataLoader = checkPathForDataLoader(path)
+
+        if dataLoader is None:
+            MessageDialog.showError('Load Project', 'No suitable dataLoader found', parent=self)
+            return None
+
+        if not dataLoader.createsNewProject:
+            MessageDialog.showError('Load Project', '"%s" does not yield a new project' % dataLoader.path,
+                                    parent=self
+                                    )
+            return None
+
+        # Some error recovery; store info to re-open the current project (or a new default)
+        oldProjectPath = self.project.path
+        oldProjectIsTemporary = self.project.isTemporary
+
+        try:
+            with progressManager(self, 'Loading project %s ... ' % dataLoader.path):
+                newProject = dataLoader.load()[0]
+                # Note that the newProject has its own MainWindow; i.e. it is not self
+                newProject._mainWindow.sideBar.buildTree(newProject)
+                newProject._mainWindow.show()
+                QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
+
+            # if the new project contains invalid spectra then open the popup to see them
+            self._checkForBadSpectra(newProject)
+
+        except RuntimeError as es:
+            MessageDialog.showError('Load Project', '"%s" did not yield a valid new project (%s)' % \
+                                    (dataLoader.path, str(es)), parent=self
+                                   )
+
+            # First get to a defined state
+            self.application.newProject()
+            if not oldProjectIsTemporary:
+                self.application.loadProject(oldProjectPath)
+            return None
+
+        return newProject
+
+    # def _processUrls(self, urls):
+    #     """Handle the dropped urls
+    #     """
+    #     # CCPNINTERNAL. Called also from module area and GuiStrip. They should have same behaviour
+    #
+    #     objs = []
+    #     for url in urls:
+    #         url = str(url)
+    #         getLogger().debug('>>> dropped: ' + url)
+    #
+    #         dataLoader = checkPathForDataLoader(url)
+    #
+    #         if dataLoader is None:
+    #             txt = 'Loading "%s" failed' % url
+    #             MessageDialog.showError('Load Data', txt)
+    #             getLogger().warning(txt)
+    #
+    #         if dataLoader.createsNewProject:
+    #             okToContinue = self._queryCloseProject(title='Load %s project' % dataLoader.dataFormat,
+    #                                                     phrase='create a new')
+    #             if okToContinue:
+    #                 with progressManager(self, 'Loading project... ' + url):
+    #                     obj = self._loadProjectLastValid(url)
+
+            # dataType, subType, usePath = ioFormats.analyseUrl(url)
+            # if subType == ioFormats.NMRSTAR:  # NMRStar file is available only as import of metadata not as stand alone project
+            #     self.application._loadNMRStarFile(url)
+            #     return objs
+            #
+            # if subType == ioFormats.NEF and self.application.preferences.appearance.openImportPopupOnDroppedNef:
+            #     self.application._importNef(url)
+            #     return objs
+            #
+            # if dataType == 'Project' and subType in (ioFormats.CCPN,
+            #                                          ioFormats.NEF,
+            #                                          ioFormats.SPARKY):
+            #
+            #     try:
+            #         okToContinue = self._queryCloseProject(title='Load %s project' % subType,
+            #                                                phrase='create a new')
+            #         if okToContinue:
+            #             with progressManager(self, 'Loading project... ' + url):
+            #                 obj = None
+            #                 obj = self._loadProjectLastValid(url)
+            #
+            #     except Exception as es:
+            #         MessageDialog.showError('Load Project', 'loadProject Error: %s' % str(es))
+            #         getLogger().warning('loadProject Error: %s' % str(es), )
+            #         getLogger().exception(str(es))
+            #
+            # else:
+            #     # with progressManager(self.mainWindow, 'Loading data... ' + url):
+            #     try:  #  Why do we need this try?
+            #         spectraPathsCount = len(ioFormats._searchSpectraPathsInSubDir(url))
+            #         askBeforeOpen_lenght = 20  # Ask user if want to open all (spectra) before start loading the full set.
+            #         if spectraPathsCount > askBeforeOpen_lenght:
+            #             okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (~%s).'
+            #                                                                ' Do you want to open all?' % str(spectraPathsCount))
+            #             if not okToOpenAll:
+            #                 continue
+            #         with notificationEchoBlocking():
+            #             data = self.project.loadData(url)
+            #             if data:
+            #                 objs.extend(data)
+            #
+            #     except Exception as es:
+            #         MessageDialog.showError('Load Data', 'Loading "%s" encountered error: %s' % (url,str(es)))
+            #         getLogger().warning('loadData Error: %s' % str(es))
+        # return objs
+

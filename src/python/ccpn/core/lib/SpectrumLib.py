@@ -41,11 +41,11 @@ from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 # Dimension definitions
 # Defined here to prevent cyclic import problems in other modules that need access to these definitions
 #=========================================================================================
-DIMENSIONFID = 'Fid'
-DIMENSIONFREQUENCY = 'Frequency'
-DIMENSIONFREQ = 'Freq'
-DIMENSIONSAMPLED = 'Sampled'
-DIMENSIONTYPES = [DIMENSIONFID, DIMENSIONFREQUENCY, DIMENSIONSAMPLED]
+DIMENSION_TIME = 'Time'
+DIMENSION_FREQUENCY = 'Frequency'
+DIMENSION_SAMPLED = 'Sampled'
+DIMENSIONTYPES = [DIMENSION_TIME, DIMENSION_FREQUENCY, DIMENSION_SAMPLED]
+DIMENSIONFREQ = 'Freq'  # GWV: not sure why this is needed, used in the model??
 
 MAXDIM = 8  # Maximum dimensionality
 

@@ -1,5 +1,5 @@
 """
-This module defines the data loading mechanism for a V3 project
+This module defines the data loading mechanism for a V2 project
 """
 
 #=========================================================================================
@@ -29,18 +29,21 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
-from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_API_DIRECTORY
 from ccpn.framework.Framework import Framework
 
+from ccpnmodel.ccpncore.memops.metamodel import Constants as metaConstants
+MEMOPS = metaConstants.modellingPackageName
+IMPLEMENTATION = metaConstants.implementationPackageName
 
-class CcpNmrV3ProjectDataLoader(DataLoaderABC):
-    """V3 project data loader
+
+class CcpNmrV2ProjectDataLoader(DataLoaderABC):
+    """V2 project data loader
     """
-    dataFormat = 'ccpNmrV3Project'
-    suffixes = [CCPN_DIRECTORY_SUFFIX]  # a list of suffixes that get matched to path
+    dataFormat = 'ccpNmrV2Project'
+    suffixes = []  # a list of suffixes that get matched to path
     allowDirectory = True  # Can/Can't open a directory
     createsNewProject = True
-    loadFunction = (Framework._loadV3Project, 'application')
+    loadFunction = (Framework._loadV2Project, 'application')
 
     @classmethod
     def checkForValidFormat(cls, path):
@@ -52,10 +55,12 @@ class CcpNmrV3ProjectDataLoader(DataLoaderABC):
         if not _path.is_dir():
             return None
         # assume that all is good if we find the CCPN_API_DIRECTORY
-        _apiPath = _path / CCPN_API_DIRECTORY
+        _apiPath = _path / MEMOPS / IMPLEMENTATION
         if _apiPath.exists():
+            # it is a directory that has memops/implementation subdirectory,
+            # so we must assume it to be a V2 project directory.
             instance = cls(path)
             return instance
         return None
 
-CcpNmrV3ProjectDataLoader._registerFormat()
+CcpNmrV2ProjectDataLoader._registerFormat()

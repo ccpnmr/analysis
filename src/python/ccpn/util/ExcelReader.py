@@ -215,6 +215,10 @@ class ExcelReader(object):
         # with undoBlockWithoutSideBar():
         #     getLogger().info('Loading Excel File...')
         #     with notificationEchoBlocking():
+
+    def load(self):
+        """Load the actual data in the the project
+        """
         self._tempSpectrumGroupsSpectra = {}  # needed to improve the loading speed
         self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
         self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
@@ -418,21 +422,22 @@ class ExcelReader(object):
         name = dct.get(SPECTRUM_NAME)
         if not name:
             name = obj.name
-        if filePath.endswith('1r'):  # Not ideal implementation. But makes the loader much faster down the model by skipping internal loops.
-            data = self._project._loadSpectrum(filePath, 'Bruker', str(name))
-        else:
-            data = self._project.loadData(filePath)
-            if len(data) > 0:
-                if not data[0].name == name:
-                    data[0].rename(name)
 
-        if data is not None:
-            if len(data) > 0:
-                sp = data[0]
-                self._linkSpectrumToObj(obj, sp, dct)
-                if EXP_TYPE in dct:  # use exp name as it is much faster and safer to save than exp type.
-                    data[0].experimentName = dct[EXP_TYPE]
-                        # getLogger().debug3(msg=(e, data[0], dct[EXP_TYPE]))
+        # GWV 23/06/2021: Project._loadSpectrum does no longer exist
+        # if filePath.endswith('1r'):  # Not ideal implementation. But makes the loader much faster down the model by skipping internal loops.
+        #     data = self._project._loadSpectrum(filePath, 'Bruker', str(name))
+        # else:
+
+        data = self._project.application.loadData(filePath)
+        if data is not None and len(data) > 0:
+            sp = data[0]
+            if not sp.name == name:
+                sp.rename(name)
+
+            self._linkSpectrumToObj(obj, sp, dct)
+            if EXP_TYPE in dct:  # use exp name as it is much faster and safer to save than exp type.
+                sp.experimentName = dct[EXP_TYPE]
+                # getLogger().debug3(msg=(e, data[0], dct[EXP_TYPE]))
 
     ######################################################################################################################
     ######################              ADD SPECTRUM TO RELATIVE OBJECTS              ####################################

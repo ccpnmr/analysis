@@ -1,7 +1,7 @@
 """
 CcpNmr version of the Trailets; all subclassed for added functionalities:
 -  _traitOrder
-- fixing of default_value issues
+- fixing of default_value issues (see also https://github.com/ipython/traitlets/issues/165)
 - json handlers
 
 """
@@ -75,12 +75,16 @@ class _Ordered(object):
 
 class Any(_Any, _Ordered):
     def __init__(self, *args, **kwargs):
+        if not 'default_value' in kwargs:
+            raise ValueError('%s Traitlet without explicit default_value' % self.__class__.__name__)
         _Any.__init__(self, *args, **kwargs)
         _Ordered.__init__(self)
 
 
 class Instance(_Instance, _Ordered):
     def __init__(self, *args, **kwargs):
+        if not 'default_value' in kwargs:
+            raise ValueError('%s Traitlet without explicit default_value' % self.__class__.__name__)
         _Instance.__init__(self, *args, **kwargs)
         _Ordered.__init__(self)
 
@@ -273,7 +277,7 @@ class Odict(TraitType, _Ordered):
     default_value = OrderedDict()
     info_text = "'an OrderedDict'"
 
-    def __init__(self, default_value={}, allow_none=False, read_only=None, **kwargs):
+    def __init__(self, default_value={}, allow_none=False, read_only=False, **kwargs):
         TraitType.__init__(self, default_value=default_value, allow_none=allow_none, read_only=read_only, **kwargs)
         _Ordered.__init__(self)
         if default_value is not None:
@@ -335,7 +339,7 @@ class CPath(TraitType, _Ordered):
     default_value = aPath('.')
     info_text = "'an Path object'"
 
-    def __init__(self, default_value='', allow_none=False, read_only=None, **kwargs):
+    def __init__(self, default_value='', allow_none=False, read_only=False, **kwargs):
         TraitType.__init__(self, default_value=default_value, allow_none=allow_none, read_only=read_only, **kwargs)
         _Ordered.__init__(self)
         if default_value is not None:

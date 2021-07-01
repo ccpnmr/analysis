@@ -327,7 +327,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             spectrumAttribute=None,
             hasSetterInSpectrumClass=False
             )
-    dimensionTypes = CList(trait=CString(allow_none=False), default_value=[specLib.DIMENSION_FREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
+    dimensionTypes = CList(trait=CString(allow_none=True), default_value=[specLib.DIMENSION_FREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='dimensionTypes',

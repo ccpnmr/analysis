@@ -32,6 +32,7 @@ from typing import Sequence, Tuple
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
+from ccpn.core.lib.SpectrumLib import DIMENSION_FREQUENCY
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, undoStackBlocking
@@ -264,8 +265,9 @@ class Window(AbstractWrapperObject):
         from ccpn.ui.gui.guiSettings import ZPlaneNavigationModes
 
         spectrum = self.project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
-        if any(x != 'Frequency' for x in spectrum.dimensionTypes):
-            raise NotImplementedError("createSpectrumDisplay not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
+        # dimensionTypes = spectrum.getByAxisCodes('dimensionTypes', displayAxisCodes)
+        # if any(x != DIMENSION_FREQUENCY for x in dimensionTypes):
+        #     raise NotImplementedError("createSpectrumDisplay not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
 
         # change string names to objects
         if isinstance(relativeTo, str):

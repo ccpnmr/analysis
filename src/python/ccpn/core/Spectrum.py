@@ -956,10 +956,17 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     #TODO: add setter for dimensionTypes
     @property
     def dimensionTypes(self) -> Tuple[str, ...]:
-        """dimension types ('Fid' / 'Frequency' / 'Sampled'),  per dimension
+        """Dimension types as defined by the spectrum dataSource
         """
-        ll = [x.className[:-7] for x in self._wrappedData.sortedDataDims()]
-        return tuple(specLib.DIMENSION_FREQUENCY if x == specLib.DIMENSIONFREQ else x for x in ll)
+        # """dimension types ('Fid' / 'Frequency' / 'Sampled'),  per dimension
+        # """
+        # ll = [x.className[:-7] for x in self._wrappedData.sortedDataDims()]
+        # return tuple(specLib.DIMENSION_FREQUENCY if x == specLib.DIMENSIONFREQ else x for x in ll)
+        if self._dataSource is None:
+            getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning None only' % self)
+            return tuple([None] * self.dimensionCount)
+
+        return tuple(self._dataSource.dimensionTypes)
 
     # @dimensionTypes.setter
     # def dimensionTypes(self, value: Sequence):
@@ -1967,7 +1974,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             raise ValueError('axisCodes is not iterable "%s"; expected list or tuple' % axisCodes)
 
         if axisCodes is not None and not exactMatch:
-            axisCodes = self._mapAxisCodes(axisCodes)
+            if (_axisCodes := self._mapAxisCodes(axisCodes)) is None:
+                raise ValueError('Failed mapping axisCodes "%s"' % axisCodes)
+            axisCodes = _axisCodes
 
         try:
             values = getattr(self, parameterName)
@@ -3334,27 +3343,35 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
             # valuePerPoint is digital resolution in Hz
             # TODO: accomodate complex points
             _valuePerPoint = dataSource.spectralWidthsHz[n] / float(_nPoints)
-            freqDataDim = apiDataSource.newFreqDataDim(dim=n + 1, expDim=expDim,
-                                                       numPoints=_nPoints,
-                                                       numPointsOrig=_nPoints,
-                                                       pointOffset=0,
-                                                       isComplex=_isComplex,
-                                                       valuePerPoint=_valuePerPoint
-                                                       )
 
         elif  _dimType == specLib.DIMENSION_TIME:
             # _valuePerPoint is dwell time
-            _valuePerPoint = 1.0 / dataSource.spectralWidthsHz[n] if _isComplex \
-                             else 0.5 / dataSource.spectralWidthsHz[n]
-            fidDataDim = apiDataSource.newFidDataDim(dim=n + 1, expDim=expDim,
-                                                       numPoints=_nPoints,
-                                                       numPointsValid=_nPoints,
-                                                       isComplex=_isComplex,
-                                                       valuePerPoint=_valuePerPoint
-                                                     )
+            # _valuePerPoint = 1.0 / dataSource.spectralWidthsHz[n] if _isComplex \
+            #                  else 0.5 / dataSource.spectralWidthsHz[n]
+
+            # However, for now we leave it as until the Display routines have been
+            # updated
+            _valuePerPoint = dataSource.spectralWidthsHz[n] / float(_nPoints)
+
+            # fidDataDim = apiDataSource.newFidDataDim(dim=n + 1, expDim=expDim,
+            #                                            numPoints=_nPoints,
+            #                                            numPointsValid=_nPoints,
+            #                                            isComplex=_isComplex,
+            #                                            valuePerPoint=_valuePerPoint
+            #                                          )
 
         else:
             raise RuntimeError('Invalid dimensionType[%d]: "%s"' % (n, _dimType))
+
+        # for now, we have to give all dimensions a FreqDataDim, otherwise the code crashes
+        freqDataDim = apiDataSource.newFreqDataDim(dim=n+1, expDim=expDim,
+                                                   numPoints=_nPoints,
+                                                   numPointsOrig=_nPoints,
+                                                   pointOffset=0,
+                                                   isComplex=_isComplex,
+                                                   valuePerPoint=_valuePerPoint
+                                                   )
+
 
     # Done with api generation; Create the Spectrum object
 
@@ -3373,11 +3390,14 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     with inactivity():
         # initialise the dimensional SpectrumReference objects
         for n, dim in enumerate(dataSource.dimensions):
+            # if dataSource.dimensionTypes == specLib.DIMENSION_FREQUENCY:
+            _axisUnit = 'ppm' if  dataSource.dimensionTypes[n] == specLib.DIMENSION_FREQUENCY \
+                        else 'point'
             spectrum.newSpectrumReference(dimension=dim,
                                           spectrometerFrequency=dataSource.spectrometerFrequencies[n],
                                           isotopeCodes=(dataSource.isotopeCodes[n],),
                                           axisCode=dataSource.axisCodes[n],
-                                          axisUnit='ppm'
+                                          axisUnit=_axisUnit
                                           )
 
     # Set the references between spectrum and dataStore

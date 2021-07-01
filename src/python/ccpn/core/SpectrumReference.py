@@ -31,6 +31,7 @@ from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
+from ccpn.core.lib.SpectrumLib import DIMENSION_FREQUENCY
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
@@ -329,8 +330,10 @@ def _newSpectrumReference(self: Spectrum, dimension: int, spectrometerFrequency:
                                             unit=axisUnit, minAliasedFreq=minAliasedFrequency,
                                             maxAliasedFreq=maxAliasedFrequency, )
 
-    apiDataDimRef = dataDim.newDataDimRef(expDimRef=expDimRef, refPoint=referencePoint,
-                                       refValue=referenceValue)
+    apiDataDimRef = dataDim.newDataDimRef(expDimRef=expDimRef,
+                                          refPoint=referencePoint,
+                                          refValue=referenceValue)
+
     result = self.project._data2Obj[apiDataDimRef]
     if result is None:
         raise RuntimeError('Unable to generate new SpectrumReference item')

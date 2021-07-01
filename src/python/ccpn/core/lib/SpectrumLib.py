@@ -111,8 +111,8 @@ class SpectrumDimensionTrait(List):
     def _getValue(self, obj):
         """Get the value of trait, obtained from the obj's (i.e.spectrum) dimensions
         """
-        if (dimensionAttributeName := self.get_metadata('dimensionAttributeName', None)) is None:
-            raise RuntimeError('Undefined dimensionAttributeName for trait %r' % self.name)
+        if (dimensionAttributeName := self.get_metadata('attributeName', None)) is None:
+            raise RuntimeError('Undefined dimensional attributeName for trait %r' % self.name)
         value = [getattr(specDim, dimensionAttributeName) for specDim in obj.spectrumReferences]
         return value
 
@@ -141,8 +141,8 @@ class SpectrumDimensionTrait(List):
     def _setValue(self, obj, value):
         """Set the value of trait, stored in the obj's (i.e.spectrum) dimensions
         """
-        if (dimensionAttributeName := self.get_metadata('dimensionAttributeName', None)) is None:
-            raise RuntimeError('Undefined dimensionAttributeName for trait %r' % self.name)
+        if (dimensionAttributeName := self.get_metadata('attributeName', None)) is None:
+            raise RuntimeError('Undefined dimensional attributeName for trait %r' % self.name)
 
         for axis, val in enumerate(value):
             setattr(obj.spectrumReferences[axis], dimensionAttributeName, val)

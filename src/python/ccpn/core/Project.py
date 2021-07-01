@@ -361,8 +361,9 @@ class Project(AbstractWrapperObject):
                 raise ValueError('Cannot overwrite existing file "%s"' % newPath)
             if len(newPath.basename) > 32:
                 raise ValueError('Unfortunately, we currently have limited (32) length of the filename (%s)' % newPath.basename)
+            newPath = str(newPath)
 
-        savedOk = apiIo.saveProject(self._wrappedData.root, newPath=str(newPath),
+        savedOk = apiIo.saveProject(self._wrappedData.root, newPath=newPath,
                                     changeBackup=changeBackup, createFallback=createFallback,
                                     overwriteExisting=overwriteExisting, checkValid=checkValid,
                                     changeDataLocations=changeDataLocations)

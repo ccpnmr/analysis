@@ -530,8 +530,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInCopy
     def scale(self) -> float:
-        """Scaling factor for intensities and volumes.
-        Intensities and volumes should be *multiplied* by scale before comparison
+        """Scaling factor for data in the spectrum.
         """
         value = self._wrappedData.scale
         if value is None:
@@ -721,9 +720,10 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def reload(self):
         """Reload the spectrum defined by filePath
         """
-        # setting filePath will reload the the spectrum
+        # setting filePath will re-initialiase a dataSource instance
         _filePath = self.filePath
         self.filePath  = _filePath
+        self._dataSource.exportToSpectrum(self, includePath=False)
 
     @property
     def path(self):
@@ -1103,21 +1103,25 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def sineWindowShifts(self, value: Sequence):
         self._setStdDataDimValue('sineWindowShift', value)
 
+    _spectrometerFrequencies = SpectrumDimensionTrait(trait=Float(min=0.0)).tag(
+                               attributeName='spectrometerFrequency',
+                               doCopy = True
+    )
     @property
     @_includeInDimensionalCopy
     def spectrometerFrequencies(self) -> Tuple[Optional[float], ...]:
         """List of spectrometer frequency for each dimension
         """
         return [specDim.spectrometerFrequency for specDim in self.spectrumReferences]
-
+        # return self._spectrometerFrequencies
     @spectrometerFrequencies.setter
     def spectrometerFrequencies(self, value):
+        # self._spectrometerFreqencies = value
         if not isIterable(value) and len(value) != self.dimensionCount:
             raise ValueError('Setting spectrometerFrequencies; invalid value "%s"' % value)
         for axis, val in enumerate(value):
             self.spectrumReferences[axis].spectrometerFrequency = val
 
-    specFreqs = SpectrumDimensionTrait(trait=Float()).tag(dimensionAttributeName='spectrometerFrequency')
 
     @property
     @_includeInDimensionalCopy

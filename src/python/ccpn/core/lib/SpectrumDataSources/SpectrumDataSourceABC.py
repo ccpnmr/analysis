@@ -1786,6 +1786,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def printParameters(self, path=sys.stdout):
         """Print all to path"""
         path.write(str(self) + '\n')
+        path.write('%-24s: %s\n' % ('path', self.path))
         for param, value in self.getNonDimensionalParameters().items():
             path.write('%-24s: %s\n' % (param, value))
         for param, values in self.getDimensionalParameters().items():
@@ -1799,7 +1800,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     def __str__(self):
         if self.dimensionCount == 0:
-            return '<%s: _D (), path=%s>' % (self.__class__.__name__, self.path)
+            return '<%s: _D (), %s>' % (self.__class__.__name__, self.path.name)
         else:
             if self.hdf5buffer is not None:
                 fpStatus = '%r' % 'buffered'
@@ -1811,11 +1812,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 fpStatus = '%r' % 'closed'
                 path = self.path
 
-            return '<%s: %dD (%s), %s: path=%s>' % (self.__class__.__name__,
+            return '<%s: %dD (%s), (%s,%s)>' % (self.__class__.__name__,
                                                     self.dimensionCount,
                                                     'x'.join([str(p) for p in self.pointCounts]),
                                                     fpStatus,
-                                                    path
+                                                    path.name
                                                     )
 #end class
 

@@ -2038,6 +2038,15 @@ class Framework(NotifierBase):
         self._getUndo().markSave()
         return successful
 
+    @logCommand('application')
+    def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
+        """Save project to newPath and return True if successful"""
+        if self.project.isTemporary:
+            return self.saveProjectAs()
+        else:
+            return self._saveProject(newPath=newPath, createFallback=createFallback,
+                                     overwriteExisting=overwriteExisting)
+
     def _importNef(self, path=None):
         if not path:
             filter = '*.nef'
@@ -2236,14 +2245,6 @@ class Framework(NotifierBase):
                                expandSelection=expandSelection,
                                pidList=pidList)
 
-    def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
-        """Save project to newPath and return True if successful"""
-        # TODO: convert this to a save and call self.project.save()
-        if hasattr(self.project._wrappedData.root, '_temporaryDirectory'):
-            return self.saveProjectAs()
-        else:
-            return self._saveProject(newPath=newPath, createFallback=createFallback,
-                                     overwriteExisting=overwriteExisting)
 
     # GWV: This routine should not be used as it calls the graphics mainWindow routine
     # Instead: The graphics part now calls _getRecentFiles
@@ -2277,8 +2278,7 @@ class Framework(NotifierBase):
         path = project.path
         recentFiles = self.preferences.recentFiles
 
-        #TODO:RASMUS: replace by new function on project: isTemporary()
-        if not hasattr(project._wrappedData.root, '_temporaryDirectory'):
+        if not project.isTemporary:
             if path in recentFiles:
                 recentFiles.remove(path)
             elif oldPath in recentFiles:

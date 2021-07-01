@@ -92,30 +92,71 @@ class SpectrumReference(AbstractWrapperObject):
         """Spectrum containing spectrumReference."""
         return self._project._data2Obj[self._wrappedData.dataDim.dataSource]
 
+    @property
+    def _dataDim(self):
+        """
+        :return: dataDim instance
+        """
+        return self._wrappedData.dataDim
+
+    @property
+    def _dataDimRef(self):
+        """
+        :return: dataDim instance
+        """
+        return self._wrappedData
+
+    @property
+    def _expDim(self):
+        """
+        :return: expDim instance
+        """
+        return self._dataDim.expDim
+
+    @property
+    def _expDimRef(self):
+        """
+        :return: expDimRef instance
+        """
+        return self._wrappedData.expDimRef
+
     spectrum = _parent
 
-    # Attributes of DataSource and Experiment:
+    #-----------------------------------------------------------------------------------------
+    # Properties
+    #-----------------------------------------------------------------------------------------
 
     @property
     def dimension(self) -> int:
         """dimension number"""
-        return self._wrappedData.dataDim.dim
+        return self._dataDim.dim
 
     @property
-    def referenceSerial(self) -> int:
-        """Spectrum reference serial number"""
-        return self._wrappedData.expDimRef.serial
+    def isAcquisition(self) -> bool:
+        """
+        :return: True if dimension is acquisition
+        """
+        return self._wrappedData.dataDim.expDim.isAcquisition
+
+    @isAcquisition.setter
+    def isAcquisition(self, value):
+        self._wrappedData.dataDim.expDim.isAcquisition = value
+
+    # @property
+    # def referenceSerial(self) -> int:
+    #     """Spectrum reference serial number"""
+    #     return self._expDimRef.serial
 
     # Attributes belonging to ExpDimRef and DataDimRef
 
     @property
     def spectrometerFrequency(self) -> float:
         """Absolute frequency at carrier (or at splitting 0.0). In MHz or dimensionless."""
-        return self._wrappedData.expDimRef.sf
+        return self._expDimRef.sf
 
     @spectrometerFrequency.setter
     def spectrometerFrequency(self, value):
-        self._wrappedData.expDimRef.sf = value
+        self._expDimRef.sf = value
 
     @property
     def measurementType(self) -> str:
@@ -123,40 +164,53 @@ class SpectrumReference(AbstractWrapperObject):
         'Shift','ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling',
         'MQShift','T1','T2','T1rho','T1zz'
         """
-        return self._wrappedData.expDimRef.measurementType
+        return self._expDimRef.measurementType
 
     @measurementType.setter
     def measurementType(self, value):
-        self._wrappedData.expDimRef.measurementType = value
+        self._expDimRef.measurementType = value
 
     @property
     def maxAliasedFrequency(self) -> float:
         """maximum possible peak frequency (in ppm) for this reference """
-        return self._wrappedData.expDimRef.maxAliasedFreq
+        return self._expDimRef.maxAliasedFreq
 
     @maxAliasedFrequency.setter
     def maxAliasedFrequency(self, value):
-        self._wrappedData.expDimRef.maxAliasedFreq = value
+        self._expDimRef.maxAliasedFreq = value
 
     @property
     def minAliasedFrequency(self) -> float:
         """minimum possible peak frequency (in ppm) for this reference """
-        return self._wrappedData.expDimRef.minAliasedFreq
+        return self._expDimRef.minAliasedFreq
 
     @minAliasedFrequency.setter
     def minAliasedFrequency(self, value):
-        self._wrappedData.expDimRef.minAliasedFreq = value
+        self._expDimRef.minAliasedFreq = value
 
     @property
-    def isotopeCodes(self) -> typing.Tuple[str, ...]:
+    def isotopeCode(self) -> str:
+        """Isotope identification strings for isotopes.
+        """
+        if len(self._isotopeCodes) > 0:
+            return self._isotopeCodes[0]
+        return None
+
+    @isotopeCode.setter
+    def isotopeCode(self, value: str):
+        self._isotopeCodes = [value]
+
+    # GWV: moved this to a private attributes, as currently we only support one isotopeCode per dimension
+    @property
+    def _isotopeCodes(self) -> typing.Tuple[str, ...]:
         """Isotope identification strings for isotopes.
         NB there can be several isotopes for e.g. J-coupling or multiple quantum coherence.
         """
-        return self._wrappedData.expDimRef.isotopeCodes
+        return self._expDimRef.isotopeCodes
 
-    @isotopeCodes.setter
-    def isotopeCodes(self, value: typing.Sequence):
-        self._wrappedData.expDimRef.isotopeCodes = value
+    @_isotopeCodes.setter
+    def _isotopeCodes(self, value: typing.Sequence):
+        self._expDimRef.isotopeCodes = value
 
     @property
     def foldingMode(self) -> typing.Optional[str]:
@@ -233,15 +287,6 @@ class SpectrumReference(AbstractWrapperObject):
             else:
                 dataDimRef.dataDim.valuePerPoint *= (value / swold)
 
-    @property
-    def isAcquisition(self) -> bool:
-        """True if this dimension is the acquisition dimension?"""
-        return self._wrappedData.dataDim.expDim.isAcquisition
-
-    @isAcquisition.setter
-    def isAcquisition(self, value):
-        self._wrappedData.dataDim.expDim.isAcquisition = value
-
     def pointToValue(self, point: float) -> float:
         """Axis (ppm) value corresponding to point"""
         return self._wrappedData.pointToValue(point)
@@ -296,7 +341,6 @@ def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> Spectru
     """Create new SpectrumReference.
 
     :param dimension:
-    :param spectrometerFrequency:
     :param dataSource: A spectrum dataSource instance
 
     :return: a new SpectrumReference instance.
@@ -338,6 +382,8 @@ def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> Spectru
     apiDataSource = self._wrappedData
     apiExperiment = apiDataSource.experiment
     apiExpDim = apiExperiment.findFirstExpDim(dim=dimension)
+
+    apiExpDim.isAcquisition = False  # undated later
 
     # for now, we have to give all dimensions a FreqDataDim, otherwise the code crashes
     # A FidDataDim cannot have a DataDimRef, and that is the object used as _wrappedData
@@ -393,6 +439,7 @@ def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> Spectru
 
 
 # Notifiers:
+# TODO: Do we really need this?
 def _isAcquisitionHasChanged(project: Project, apiExpDim: Nmr.ExpDim):
     """Refresh SpectrumReference when ExpDim.isAcquisition has changed"""
     for dataDim in apiExpDim.dataDims:

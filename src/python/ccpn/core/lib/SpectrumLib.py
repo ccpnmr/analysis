@@ -92,6 +92,82 @@ NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min 
 #   value = factor * np.std(data)
 #   return value
 
+from ccpn.util.traits.CcpNmrTraits import List, Int, Float, TraitError
+
+class SpectrumDimensionTrait(List):
+    """
+    A trait to implement a Spectrum dimensional attribute; e.g. like spectrumFrequencies
+    """
+    isDimensional = True
+
+    def validate(self, obj, value):
+        """Validate the value
+        """
+        if len(value) != obj.dimensionCount:
+            raise TraitError('Setting "%s", invalid value "%s"' % (self.name, value))
+        value = self.validate_elements(obj, value)
+        return value
+
+    def _getValue(self, obj):
+        """Get the value of trait, obtained from the obj's (i.e.spectrum) dimensions
+        """
+        if (dimensionAttributeName := self.get_metadata('dimensionAttributeName', None)) is None:
+            raise RuntimeError('Undefined dimensionAttributeName for trait %r' % self.name)
+        value = [getattr(specDim, dimensionAttributeName) for specDim in obj.spectrumReferences]
+        return value
+
+    def get(self, obj, cls=None):
+        try:
+            value = self._getValue(obj)
+
+        except (AttributeError, ValueError, RuntimeError):
+            # Check for a dynamic initializer.
+            dynamic_default = self._dynamic_default_callable(obj)
+            if dynamic_default is None:
+                raise TraitError("No default value found for %s trait of %r"
+                                 % (self.name, obj))
+            value = self._validate(obj, dynamic_default())
+            obj._trait_values[self.name] = value
+            return value
+
+        except Exception:
+            # This should never be reached.
+            raise TraitError('Unexpected error in DimensionTrait')
+
+        else:
+            self._obj = obj  # last obje used for get
+            return value
+
+    def _setValue(self, obj, value):
+        """Set the value of trait, stored in the obj's (i.e.spectrum) dimensions
+        """
+        if (dimensionAttributeName := self.get_metadata('dimensionAttributeName', None)) is None:
+            raise RuntimeError('Undefined dimensionAttributeName for trait %r' % self.name)
+
+        for axis, val in enumerate(value):
+            setattr(obj.spectrumReferences[axis], dimensionAttributeName, val)
+
+    def set(self, obj, value):
+
+        new_value = self._validate(obj, value)
+        try:
+            old_value = self._getValue(obj)
+        except (AttributeError, ValueError, RuntimeError):
+            old_value = self.default_value
+
+        # obj._trait_values[self.name] = new_value
+        self._setValue(obj, new_value)
+
+        try:
+            silent = bool(old_value == new_value)
+        except:
+            # if there is an error in comparing, default to notify
+            silent = False
+        if silent is not True:
+            # we explicitly compare silent to True just in case the equality
+            # comparison above returns something other than True/False
+            obj._notify_trait(self.name, old_value, new_value)
+
 
 def _oldEstimateNoiseLevel1D(y, factor=0.5):
     """

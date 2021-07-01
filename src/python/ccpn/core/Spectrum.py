@@ -95,7 +95,8 @@ from ccpn.core.lib.Cache import cached
 from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerTrait
 
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, jsonHandler
-from ccpn.util.traits.CcpNmrTraits import Instance, Any
+from ccpn.util.traits.CcpNmrTraits import Int, Float, Instance, Any
+from ccpn.core.lib.SpectrumLib import SpectrumDimensionTrait
 
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY
 
@@ -265,7 +266,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     def spectrumReferences(self):
-        """STUB: hot-fixed later"""
+        """list of spectrumReferences objects
+        STUB: hot-fixed later
+        """
         return None
 
     @property
@@ -301,8 +304,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self._intensities = None
         self._positions = None
 
-        self._peakPicker = None
-
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
         self._scaleChanged = False
@@ -318,15 +319,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                                 None indicates no spectrum data file path has been defined"""
                                 )
 
-    # CcpnInternal: Also used in PeakPickers
+    # CCPNINTERNAL: Also used in PeakPickers
     _dataSource = DataSourceTrait(default_value = None, read_only = True).tag(
                                   saveToJson = True,
                                   info = """
                                   A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
                                   None indicates no valid spectrum data file has been defined""")
-    # @property
-    # def dataSource(self):
-    #     return self._dataSource
 
     _peakPicker = PeakPickerTrait(default_value = None).tag(
                                   saveToJson = True,
@@ -953,7 +951,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     #     else:
     #         raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
-    #TODO: add setter for dimensionTypes
     @property
     def dimensionTypes(self) -> Tuple[str, ...]:
         """Dimension types as defined by the spectrum dataSource
@@ -1109,21 +1106,27 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def spectrometerFrequencies(self) -> Tuple[Optional[float], ...]:
-        """Tuple of spectrometer frequency for main dimensions reference """
-        return tuple(x and x.sf for x in self._mainExpDimRefs())
+        """List of spectrometer frequency for each dimension
+        """
+        return [specDim.spectrometerFrequency for specDim in self.spectrumReferences]
 
     @spectrometerFrequencies.setter
     def spectrometerFrequencies(self, value):
-        self._setExpDimRefAttribute('sf', value)
+        if not isIterable(value) and len(value) != self.dimensionCount:
+            raise ValueError('Setting spectrometerFrequencies; invalid value "%s"' % value)
+        for axis, val in enumerate(value):
+            self.spectrumReferences[axis].spectrometerFrequency = val
+
+    specFreqs = SpectrumDimensionTrait(trait=Float()).tag(dimensionAttributeName='spectrometerFrequency')
 
     @property
     @_includeInDimensionalCopy
     def measurementTypes(self) -> Tuple[Optional[str], ...]:
         """Type of value being measured, per dimension.
-
         In normal cases the measurementType will be 'Shift', but other values might be
         'MQSHift' (for multiple quantum axes), JCoupling (for J-resolved experiments),
-        'T1', 'T2', ..."""
+        'T1', 'T2', ...
+        """
         return tuple(x and x.measurementType for x in self._mainExpDimRefs())
 
     @measurementTypes.setter
@@ -1133,40 +1136,47 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def isotopeCodes(self) -> Tuple[Optional[str], ...]:
-        """isotopeCode of isotope being measured, per dimension - None if no unique code"""
-        result = []
-        for dataDim in self._wrappedData.sortedDataDims():
-            expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
-            if expDimRef is None:
-                result.append(None)
-            else:
-                isotopeCodes = expDimRef.isotopeCodes
-                if len(isotopeCodes) == 1:
-                    result.append(isotopeCodes[0])
-                else:
-                    result.append(None)
-        #
-        return tuple(result)
+        """isotopeCode of isotope being measured, per dimension - None if no unique code
+        """
+        return [specDim.isotopeCode for specDim in self.spectrumReferences]
+        # result = []
+        # for dataDim in self._wrappedData.sortedDataDims():
+        #     expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
+        #     if expDimRef is None:
+        #         result.append(None)
+        #     else:
+        #         isotopeCodes = expDimRef.isotopeCodes
+        #         if len(isotopeCodes) == 1:
+        #             result.append(isotopeCodes[0])
+        #         else:
+        #             result.append(None)
+        # #
+        # return tuple(result)
 
     @isotopeCodes.setter
     def isotopeCodes(self, value: Sequence):
-        apiDataSource = self._wrappedData
-        if len(value) == apiDataSource.numDim:
-            #GWV 28/8/18: commented as cannot see the reason for this, while prevented correction of errors
-            # if value != self.isotopeCodes and self.peaks:
-            #   raise ValueError("Cannot reset isotopeCodes in a Spectrum that contains peaks")
-            for ii, dataDim in enumerate(apiDataSource.sortedDataDims()):
-                expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
-                val = value[ii]
-                if expDimRef is None:
-                    if val is not None:
-                        raise ValueError("Cannot set isotopeCode %s in dimension %s" % (val, ii + 1))
-                elif val is None:
-                    expDimRef.isotopeCodes = ()
-                else:
-                    expDimRef.isotopeCodes = (val,)
-        else:
-            raise ValueError("isotopeCodes must have length %s, was %s" % (apiDataSource.numDim, value))
+        if not isIterable(value) and len(value) != self.dimensionCount:
+            raise ValueError('Setting isotopeCodes; invalid value "%s"' % value)
+        for axis, val in enumerate(value):
+            self.spectrumReferences[axis].isotopeCode = val
+        #
+        # apiDataSource = self._wrappedData
+        # if len(value) == apiDataSource.numDim:
+        #     #GWV 28/8/18: commented as cannot see the reason for this, while prevented correction of errors
+        #     # if value != self.isotopeCodes and self.peaks:
+        #     #   raise ValueError("Cannot reset isotopeCodes in a Spectrum that contains peaks")
+        #     for ii, dataDim in enumerate(apiDataSource.sortedDataDims()):
+        #         expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
+        #         val = value[ii]
+        #         if expDimRef is None:
+        #             if val is not None:
+        #                 raise ValueError("Cannot set isotopeCode %s in dimension %s" % (val, ii + 1))
+        #         elif val is None:
+        #             expDimRef.isotopeCodes = ()
+        #         else:
+        #             expDimRef.isotopeCodes = (val,)
+        # else:
+        #     raise ValueError("isotopeCodes must have length %s, was %s" % (apiDataSource.numDim, value))
 
     @property
     @_includeInDimensionalCopy

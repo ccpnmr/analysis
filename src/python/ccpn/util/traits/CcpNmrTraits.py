@@ -40,7 +40,7 @@ from traitlets import \
     ObjectName, DottedObjectName, \
     Type, This, ForwardDeclaredInstance, ForwardDeclaredType, ForwardDeclaredMixin, \
     Enum, CaselessStrEnum, TCPAddress, CRegExp, \
-    TraitType, default, validate, observe, Undefined, HasTraits
+    TraitType, default, validate, observe, Undefined, HasTraits, TraitError
 
 from traitlets import Any as _Any
 from traitlets import Instance as _Instance

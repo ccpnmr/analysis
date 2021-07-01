@@ -31,7 +31,8 @@ from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
-from ccpn.core.lib.SpectrumLib import DIMENSION_FREQUENCY
+import ccpn.core.lib.SpectrumLib as specLib
+
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
@@ -120,7 +121,8 @@ class SpectrumReference(AbstractWrapperObject):
     def measurementType(self) -> str:
         """Type of NMR measurement referred to by this reference. Legal values are:
         'Shift','ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling',
-        'MQShift','T1','T2','T1rho','T1zz'"""
+        'MQShift','T1','T2','T1rho','T1zz'
+        """
         return self._wrappedData.expDimRef.measurementType
 
     @measurementType.setter
@@ -284,62 +286,96 @@ class SpectrumReference(AbstractWrapperObject):
     # CCPN functions
     #=========================================================================================
 
-    #===========================================================================================
-    # new'Object' and other methods
-    # Call appropriate routines in their respective locations
-    #===========================================================================================
-
 
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
 
 @newObject(SpectrumReference)
-def _newSpectrumReference(self: Spectrum, dimension: int, spectrometerFrequency: float,
-                          isotopeCodes: typing.Sequence[str], axisCode: str = None, measurementType: str = 'Shift',
-                          maxAliasedFrequency: float = None, minAliasedFrequency: float = None,
-                          foldingMode: str = None, axisUnit: str = None, referencePoint: float = 0.0,
-                          referenceValue: float = 0.0
-                          ) -> SpectrumReference:
+def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> SpectrumReference:
     """Create new SpectrumReference.
-
-    See the SpectrumReference class for details.
 
     :param dimension:
     :param spectrometerFrequency:
-    :param isotopeCodes:
-    :param axisCode:
-    :param measurementType:
-    :param maxAliasedFrequency:
-    :param minAliasedFrequency:
-    :param foldingMode:
-    :param axisUnit:
-    :param referencePoint:
-    :param referenceValue:
+    :param dataSource: A spectrum dataSource instance
+
     :return: a new SpectrumReference instance.
+
+    CCPNINTERNAL: called from _newSpectrumFromDataSource
     """
 
-    dataSource = self._wrappedData
-    dataDim = dataSource.findFirstDataDim(dim=dimension)
-    if dataDim is None:
-        raise ValueError("Cannot create SpectrumReference for non-existent dimension: %s" % dimension)
+    axis = dimension-1
 
-    expDimRef = dataDim.expDim.newExpDimRef(sf=spectrometerFrequency, isotopeCodes=isotopeCodes,
-                                            measurementType=measurementType,
-                                            isFolded=(foldingMode != 'folded'), axisCode=axisCode,
-                                            unit=axisUnit, minAliasedFreq=minAliasedFrequency,
-                                            maxAliasedFreq=maxAliasedFrequency, )
+    nPoints = dataSource.pointCounts[axis]
+    isComplex = dataSource.isComplex[axis]
 
-    apiDataDimRef = dataDim.newDataDimRef(expDimRef=expDimRef,
-                                          refPoint=referencePoint,
-                                          refValue=referenceValue)
+    dimType = dataSource.dimensionTypes[axis]
+    if dimType == specLib.DIMENSION_FREQUENCY:
+        # valuePerPoint is digital resolution in Hz
+        # TODO: accomodate complex points
+        valuePerPoint = dataSource.spectralWidthsHz[axis] / float(nPoints)
+        axisUnit = 'ppm'
 
-    result = self.project._data2Obj[apiDataDimRef]
-    if result is None:
-        raise RuntimeError('Unable to generate new SpectrumReference item')
+    elif dimType == specLib.DIMENSION_TIME:
+        # _valuePerPoint is dwell time
+        # _valuePerPoint = 1.0 / dataSource.spectralWidthsHz[n] if _isComplex \
+        #                  else 0.5 / dataSource.spectralWidthsHz[n]
+
+        # However, for now we leave it as until the Display routines have been
+        # updated
+        valuePerPoint = dataSource.spectralWidthsHz[axis] / float(nPoints)
+        axisUnit = 'point'  # model does not allow 'sec'!
+
+    else:
+        raise RuntimeError('Invalid dimensionType[%d]: "%s"' % (axis, dimType))
+
+    spectrometerFrequency = dataSource.spectrometerFrequencies[axis]
+    isotopeCodes = dataSource.isotopeCodes[axis:axis+1]
+    axisCode = dataSource.axisCodes[axis]
+
+    # generate some api objects
+    # Initialise the dimension; This seems a very complicated datastructure! (GWV)
+    apiDataSource = self._wrappedData
+    apiExperiment = apiDataSource.experiment
+    apiExpDim = apiExperiment.findFirstExpDim(dim=dimension)
+
+    # for now, we have to give all dimensions a FreqDataDim, otherwise the code crashes
+    # A FidDataDim cannot have a DataDimRef, and that is the object used as _wrappedData
+    if (apiDataDim := apiDataSource.newFreqDataDim(dim=dimension,
+                                                   expDim=apiExpDim,
+                                                   numPoints=nPoints,
+                                                   numPointsOrig=nPoints,
+                                                   pointOffset=0,
+                                                   isComplex=isComplex,
+                                                   valuePerPoint=valuePerPoint
+                                                  )
+    ) is None:
+        raise RuntimeError("Cannot create SpectrumReference for dimension: %s" % dimension)
+
+    if (apiExpDimRef := apiExpDim.newExpDimRef(sf=spectrometerFrequency,
+                                               isotopeCodes=isotopeCodes,
+                                               measurementType='shift',
+                                               isFolded=False,
+                                               axisCode=axisCode,
+                                               unit=axisUnit,
+                                               minAliasedFreq=None,
+                                               maxAliasedFreq=None,
+                                              )
+    ) is None:
+        raise RuntimeError("Cannot create SpectrumReference for dimension: %s" % dimension)
+
+    if (apiDataDimRef := apiDataDim.newDataDimRef(expDimRef=apiExpDimRef,
+                                                  refPoint=0.0,
+                                                  refValue=0.0
+                                                 )
+    ) is None:
+        raise RuntimeError("Cannot create SpectrumReference for dimension: %s" % dimension)
+
+
+    if (result := self.project._data2Obj[apiDataDimRef]) is None:
+        raise RuntimeError("Cannot create SpectrumReference for dimension: %s" % dimension)
 
     return result
-
 
 #EJB 20181205: moved to Spectrum
 # Spectrum.newSpectrumReference = _newSpectrumReference

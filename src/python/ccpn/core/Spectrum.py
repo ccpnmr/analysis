@@ -3197,38 +3197,40 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                                isConfirmed=isConfirmed, concentration=concentration, concentrationError=concentrationError,
                                concentrationUnit=concentrationUnit, comment=comment, **kwds)
 
-    @logCommand(get='self')
-    def newSpectrumReference(self, dimension: int, spectrometerFrequency: float,
-                             isotopeCodes: Sequence[str], axisCode: str = None, measurementType: str = 'Shift',
-                             maxAliasedFrequency: float = None, minAliasedFrequency: float = None,
-                             foldingMode: str = None, axisUnit: str = None, referencePoint: float = 0.0,
-                             referenceValue: float = 0.0, **kwds):
-        """Create new SpectrumReference.
+    # GWV: this should nver be done by a user; newSpectum generates these on creation
 
-        See the SpectrumReference class for details.
-
-        Optional keyword arguments can be passed in; see SpectrumReference._newSpectrumReference for details.
-
-        :param dimension:
-        :param spectrometerFrequency:
-        :param isotopeCodes:
-        :param axisCode:
-        :param measurementType:
-        :param maxAliasedFrequency:
-        :param minAliasedFrequency:
-        :param foldingMode:
-        :param axisUnit:
-        :param referencePoint:
-        :param referenceValue:
-        :return: a new SpectrumReference instance.
-        """
-        from ccpn.core.SpectrumReference import _newSpectrumReference
-
-        return _newSpectrumReference(self, dimension=dimension, spectrometerFrequency=spectrometerFrequency,
-                                     isotopeCodes=isotopeCodes, axisCode=axisCode, measurementType=measurementType,
-                                     maxAliasedFrequency=maxAliasedFrequency, minAliasedFrequency=minAliasedFrequency,
-                                     foldingMode=foldingMode, axisUnit=axisUnit, referencePoint=referencePoint,
-                                     referenceValue=referenceValue, **kwds)
+    # @logCommand(get='self')
+    # def newSpectrumReference(self, dimension: int, spectrometerFrequency: float,
+    #                          isotopeCodes: Sequence[str], axisCode: str = None, measurementType: str = 'Shift',
+    #                          maxAliasedFrequency: float = None, minAliasedFrequency: float = None,
+    #                          foldingMode: str = None, axisUnit: str = None, referencePoint: float = 0.0,
+    #                          referenceValue: float = 0.0, **kwds):
+    #     """Create new SpectrumReference.
+    #
+    #     See the SpectrumReference class for details.
+    #
+    #     Optional keyword arguments can be passed in; see SpectrumReference._newSpectrumReference for details.
+    #
+    #     :param dimension:
+    #     :param spectrometerFrequency:
+    #     :param isotopeCodes:
+    #     :param axisCode:
+    #     :param measurementType:
+    #     :param maxAliasedFrequency:
+    #     :param minAliasedFrequency:
+    #     :param foldingMode:
+    #     :param axisUnit:
+    #     :param referencePoint:
+    #     :param referenceValue:
+    #     :return: a new SpectrumReference instance.
+    #     """
+    #     from ccpn.core.SpectrumReference import _newSpectrumReference
+    #
+    #     return _newSpectrumReference(self, dimension=dimension, spectrometerFrequency=spectrometerFrequency,
+    #                                  isotopeCodes=isotopeCodes, axisCode=axisCode, measurementType=measurementType,
+    #                                  maxAliasedFrequency=maxAliasedFrequency, minAliasedFrequency=minAliasedFrequency,
+    #                                  foldingMode=foldingMode, axisUnit=axisUnit, referencePoint=referencePoint,
+    #                                  referenceValue=referenceValue, **kwds)
 
     #-----------------------------------------------------------------------------------------
     # Output, printing, etc
@@ -3305,6 +3307,8 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     """Create a new Spectrum instance with name using the data in dataStore and dataSource
     Returns Spectrum instance or None on error
     """
+    from ccpn.core.SpectrumReference import _newSpectrumReference
+
     if dataStore is None:
         raise ValueError('dataStore cannot be None')
 
@@ -3331,48 +3335,6 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
                                                 numDim=dataSource.dimensionCount,
                                                 dataType='processed'
                                                 )
-
-    # Initialise the freq/time dimensions; This seems a very complicated datastructure! (GWV)
-    # dataDim classnames are FidDataDim, FreqDataDim, SampledDataDim
-    for n, expDim in enumerate(apiExperiment.sortedExpDims()):
-        expDim.isAcquisition = False  #(dataSource.aquisitionAxisCode == dataSource.axisCodes[n]),
-        _nPoints = dataSource.pointCounts[n]
-        _dimType = dataSource.dimensionTypes[n]
-        _isComplex = dataSource.isComplex[n]
-        if  _dimType == specLib.DIMENSION_FREQUENCY:
-            # valuePerPoint is digital resolution in Hz
-            # TODO: accomodate complex points
-            _valuePerPoint = dataSource.spectralWidthsHz[n] / float(_nPoints)
-
-        elif  _dimType == specLib.DIMENSION_TIME:
-            # _valuePerPoint is dwell time
-            # _valuePerPoint = 1.0 / dataSource.spectralWidthsHz[n] if _isComplex \
-            #                  else 0.5 / dataSource.spectralWidthsHz[n]
-
-            # However, for now we leave it as until the Display routines have been
-            # updated
-            _valuePerPoint = dataSource.spectralWidthsHz[n] / float(_nPoints)
-
-            # fidDataDim = apiDataSource.newFidDataDim(dim=n + 1, expDim=expDim,
-            #                                            numPoints=_nPoints,
-            #                                            numPointsValid=_nPoints,
-            #                                            isComplex=_isComplex,
-            #                                            valuePerPoint=_valuePerPoint
-            #                                          )
-
-        else:
-            raise RuntimeError('Invalid dimensionType[%d]: "%s"' % (n, _dimType))
-
-        # for now, we have to give all dimensions a FreqDataDim, otherwise the code crashes
-        freqDataDim = apiDataSource.newFreqDataDim(dim=n+1, expDim=expDim,
-                                                   numPoints=_nPoints,
-                                                   numPointsOrig=_nPoints,
-                                                   pointOffset=0,
-                                                   isComplex=_isComplex,
-                                                   valuePerPoint=_valuePerPoint
-                                                   )
-
-
     # Done with api generation; Create the Spectrum object
 
     # Agggh, cannot do
@@ -3387,18 +3349,10 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
         raise RuntimeError("something went wrong creating a new Spectrum instance")
     spectrum._apiExperiment = apiExperiment
 
+    # initialise the dimensional SpectrumReference objects
     with inactivity():
-        # initialise the dimensional SpectrumReference objects
-        for n, dim in enumerate(dataSource.dimensions):
-            # if dataSource.dimensionTypes == specLib.DIMENSION_FREQUENCY:
-            _axisUnit = 'ppm' if  dataSource.dimensionTypes[n] == specLib.DIMENSION_FREQUENCY \
-                        else 'point'
-            spectrum.newSpectrumReference(dimension=dim,
-                                          spectrometerFrequency=dataSource.spectrometerFrequencies[n],
-                                          isotopeCodes=(dataSource.isotopeCodes[n],),
-                                          axisCode=dataSource.axisCodes[n],
-                                          axisUnit=_axisUnit
-                                          )
+        for dim in dataSource.dimensions:
+            _newSpectrumReference(spectrum, dimension=dim, dataSource=dataSource)
 
     # Set the references between spectrum and dataStore
     dataStore.dataFormat = dataSource.dataFormat

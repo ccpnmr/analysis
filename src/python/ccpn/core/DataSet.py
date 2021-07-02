@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 14:27:29 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-02 13:03:48 +0100 (Fri, July 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -97,9 +97,6 @@ class DataSet(AbstractWrapperObject):
         getLogger().warning('Deprecated, please use DataSet.name')
         self.name = value
 
-    # # fix for now
-    # name = title
-
     @property
     def name(self) -> str:
         """Name of DataSet.
@@ -176,10 +173,10 @@ class DataSet(AbstractWrapperObject):
             raise ValueError("assignment %s must have four dot-separated fields" % tt)
 
         dd = {
-            'chainCode': tt[0],
+            'chainCode'   : tt[0],
             'sequenceCode': tt[1],
-            'residueType': tt[2],
-            'name': tt[3]
+            'residueType' : tt[2],
+            'name'        : tt[3]
             }
 
         if checkUniqueness:
@@ -325,7 +322,7 @@ class DataSet(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(DataSet)
-def _newDataSet(self: Project, title: str = None, name: str = None, programName: str = None, programVersion: str = None,
+def _newDataSet(self: Project, name: str = None, title: str = None, programName: str = None, programVersion: str = None,
                 dataPath: str = None, creationDate: datetime.datetime = None, uuid: str = None,
                 comment: str = None) -> DataSet:
     """Create new DataSet
@@ -370,7 +367,3 @@ def _newDataSet(self: Project, title: str = None, name: str = None, programName:
         raise RuntimeError('Unable to generate new DataSet item')
 
     return result
-
-#EJB 20181206: moved to Project
-# Project.newDataSet = _newDataSet
-# del _newDataSet

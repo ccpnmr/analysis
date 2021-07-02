@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 19:13:07 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-02 13:06:59 +0100 (Fri, July 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -45,7 +45,7 @@ class PrintFormatter(object):
     """
     TAB = '    '
     CRLF = '\n'
-    ALLOWPICKLE = True
+    ALLOWPICKLE = False
 
     def __init__(self):
         """Initialise the class
@@ -105,7 +105,7 @@ class PrintFormatter(object):
             return repr(value)
         elif self.ALLOWPICKLE:
             # and finally catch any non-recognised object
-            return "PythonObject('{0}')".format(b64encode(pickle.dumps(value)).decode('utf-8'))
+            return "PythonObject('{0}')".format(b64encode(pickle.dumps(value, pickle.HIGHEST_PROTOCOL)).decode('utf-8'))
         return repr(None)
 
     def formatDictBase(self, value, indent, formatString=''):

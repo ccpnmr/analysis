@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-30 09:45:23 +0100 (Wed, June 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-02 13:05:43 +0100 (Fri, July 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1696,6 +1696,20 @@ class Project(AbstractWrapperObject):
 
         return getExpClassificationDict(self._wrappedData)
 
+    def getCcpnNefLogging(self, name):
+        """Get the ccpn logging information from the meta data
+        """
+        from ccpn.core.lib.CcpnNefLogging import getCcpnNefLogging
+
+        return getCcpnNefLogging(self, name)
+
+    def setCcpnNefLogging(self, name, value):
+        """Get the ccpn logging information from the meta data
+        """
+        from ccpn.core.lib.CcpnNefLogging import setCcpnNefLogging
+
+        return setCcpnNefLogging(self, name, value)
+
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
@@ -1937,7 +1951,7 @@ class Project(AbstractWrapperObject):
         return _fetchSample(self, name)
 
     @logCommand('project.')
-    def newDataSet(self, title: str = None, name: str = None, programName: str = None, programVersion: str = None,
+    def newDataSet(self, name: str = None, title: str = None, programName: str = None, programVersion: str = None,
                    dataPath: str = None, creationDate: datetime = None, uuid: str = None,
                    comment: str = None, **kwds):
         """Create new DataSet
@@ -1958,7 +1972,7 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.DataSet import _newDataSet
 
-        return _newDataSet(self, title=title, name=name, programName=programName, programVersion=programVersion,
+        return _newDataSet(self, name=name, title=title, programName=programName, programVersion=programVersion,
                            dataPath=dataPath, creationDate=creationDate, uuid=uuid, comment=comment, **kwds)
 
     @logCommand('project.')

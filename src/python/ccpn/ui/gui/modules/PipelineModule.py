@@ -56,7 +56,7 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipesTree
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, _stoppableProgressBar, progressManager
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.pipes import loadedPipes as LP
 import threading
@@ -293,7 +293,7 @@ class GuiPipeline(CcpnModule, Pipeline):
                                           tipTexts=['', ''], direction='H')
         # self.saveOpenFrameLayout.addWidget(self.pipelineNameLabel)
 
-        self.goButton = Button(self, text='', icon=self.goIcon, callback=self._runPipeline)
+        self.goButton = Button(self, text='', icon=self.goIcon, callback=self.runPipeline)
         self._addMenuToOpenButton()
         self.saveOpenButtons.setStyleSheet(transparentStyle)
         self.saveOpenFrameLayout.addWidget(self.goButton)
@@ -455,51 +455,33 @@ class GuiPipeline(CcpnModule, Pipeline):
                     newGuiPipe.label.checkBox.setChecked(autoActive)
                     return
 
+
     def runPipeline(self):
-        """Run all pipes in the specified order """
-        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
-
-        with undoBlockWithoutSideBar():
-            with notificationEchoBlocking():
-                self._kwargs = {}
-                if len(self.queue) > 0:
-                    for pipe in self.queue:
-                        if pipe is not None:
-                            self.updateInputData = False
-                            pipe.inputData = self.inputData
-                            pipe.spectrumGroups = self.spectrumGroups
-                            result = pipe.runPipe(self.inputData)
-                            # if not result: # that means the ran pipe does not return a valid data to use as input for next pipes
-                            #   break
-                            self.inputData = result or set()
-
-                return self.inputData
-
-    def _runPipeline(self):
         # self.goButton.setEnabled(False)
         self.project._logger.info('Pipeline: Started.')
         self.queue = []
         if self.inputData:
             if len(self.pipelineArea.findAll()[1]) > 0:
                 guiPipes = self.pipelineArea.orderedBoxes(self.pipelineArea.topContainer)
-                with undoBlockWithoutSideBar():
-                    with notificationEchoBlocking():
-                        self._kwargs = {}
-                        if len(guiPipes) > 0:
-                            for guiPipe in guiPipes:
-                                pipe = guiPipe.pipe
-                                if guiPipe.isActive:
-                                    pipe.isActive = True
-                                    pipe._kwargs = guiPipe.widgetsState
+                with progressManager(self, 'Running Pipeline. See terminal window for more info...'):
+                    with undoBlockWithoutSideBar():
+                        with notificationEchoBlocking():
+                            self._kwargs = {}
+                            if len(guiPipes) > 0:
+                                for guiPipe in guiPipes:
                                     pipe = guiPipe.pipe
-                                    self.queue.append(guiPipe.pipe)
-                                    self.updateInputData = False
-                                    pipe.inputData = self.inputData
-                                    pipe.spectrumGroups = self.spectrumGroups
-                                    result = pipe.runPipe(self.inputData)
-                                    self.inputData = result or set()
-                                else:
-                                    pipe.isActive = False
+                                    if guiPipe.isActive:
+                                        pipe.isActive = True
+                                        pipe._kwargs = guiPipe.widgetsState
+                                        pipe = guiPipe.pipe
+                                        self.queue.append(guiPipe.pipe)
+                                        self.updateInputData = False
+                                        pipe.inputData = self.inputData
+                                        pipe.spectrumGroups = self.spectrumGroups
+                                        result = pipe.runPipe(self.inputData)
+                                        self.inputData = result or set()
+                                    else:
+                                        pipe.isActive = False
         else:
             self.project._logger.info('Pipeline: No input data.')
             showWarning('Pipeline', 'No input data')

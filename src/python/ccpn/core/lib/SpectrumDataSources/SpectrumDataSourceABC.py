@@ -339,6 +339,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
             spectrumAttribute='isComplex',
             hasSetterInSpectrumClass=True
             )
+    _tmp = [False] * MAXDIM; _tmp[0] = True
+    isAquisition = CList(trait=CBool(), default_value=_tmp, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='isAquisition',
+            hasSetterInSpectrumClass=True
+            )
     isotopeCodes = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
@@ -349,12 +356,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='axisCodes',
-            hasSetterInSpectrumClass=True
-            )
-    acquisitionAxisCode = CString(allow_none=True, default_value=None).tag(
-            isDimensional=False,
-            doCopy=True,
-            spectrumAttribute='acquisitionAxisCode',
             hasSetterInSpectrumClass=True
             )
     axisLabels = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
@@ -836,7 +837,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 acode = '%s_%d' % (acode, idx + 1)
                 self.axisCodes[idx] = acode
 
-        self.acquisitionAxisCode = self.axisCodes[self.X_AXIS]
+        # self.acquisitionAxisCode = self.axisCodes[self.X_AXIS]
 
     def setDimensionCount(self, dimensionCount):
         """Change the dimensionality, assuring proper values of the dimensional parameters"""

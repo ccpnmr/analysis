@@ -785,7 +785,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     @_includeInDimensionalCopy
-    def axisCodes(self) -> list:
+    def axisCodes(self) -> List[str]:
         """List of an unique axisCode per dimension"""
         return self._getDimensionalAttributes('axisCode')
 
@@ -800,62 +800,30 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @_includeInCopy
     def acquisitionAxisCode(self) -> Optional[str]:
         """Axis code of acquisition axis - None if not known"""
-        for dataDim in self._wrappedData.sortedDataDims():
-            expDim = dataDim.expDim
-            if expDim.isAcquisition:
-                expDimRef = expDim.findFirstExpDimRef(serial=1)
-                axisCode = expDimRef.axisCode
-                if axisCode is None:
-                    self._wrappedData.experiment.resetAxisCodes()
-                    axisCode = expDimRef.axisCode
-                return axisCode
-        #
-        return None
-
-    @acquisitionAxisCode.setter
-    def acquisitionAxisCode(self, value):
-        if value is None:
-            index = None
+        trues = [idx for idx, val in enumerate(self.isAquisition) if val == True]
+        if len(trues) == 0:
+            return None
+        elif len(trues) == 1:
+            return self.axisCodes[trues[0]]
         else:
-            index = self.axisCodes.index(value)
-
-        for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
-            dataDim.expDim.isAcquisition = (ii == index)
-
+            raise RuntimeError(
+        'Spectrum.aquisitionAxisCode: this should not happen; more then one dimension defined as acquisition dimension')
 
     @property
-    def dimensionTypes(self) -> Tuple[str, ...]:
+    def dimensionTypes(self) -> List[str]:
         """Dimension types as defined by the spectrum dataSource
         """
-        # """dimension types ('Fid' / 'Frequency' / 'Sampled'),  per dimension
-        # """
-        # ll = [x.className[:-7] for x in self._wrappedData.sortedDataDims()]
-        # return tuple(specLib.DIMENSION_FREQUENCY if x == specLib.DIMENSIONFREQ else x for x in ll)
+        # dimension types ('Fid' / 'Frequency' / 'Sampled'),  per dimension
         if self._dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning None only' % self)
             return tuple([None] * self.dimensionCount)
 
         return tuple(self._dataSource.dimensionTypes)
 
-    # @dimensionTypes.setter
-    # def dimensionTypes(self, value: Sequence):
-    #
-    #     if len(value) != self.dimensionCount:
-    #         raise ValueError("DimensionTypes must have length %s, was %s" % (self.dimensionCount, value))
-    #
-    #     for dimType in value:
-    #         if dimType not in DIMENSIONTYPES:
-    #             raise ValueError("DimensionType %s not recognised" % dimType)
-    #
-    #     values = [i for i in zip(self.pointCounts, self.pointOffsets, self.isComplex, self.valuesPerPoint)]
-    #
-    #     for n, dataDimVal in enumerate(self._wrappedData.sortedDataDims()):
-    #         pass
-
     @property
     @_includeInDimensionalCopy
     def spectralWidthsHz(self) -> Tuple[Optional[float], ...]:
-        """spectral width (in Hz) before dividing by spectrometer frequency, per dimension"""
+        """spectral width (in Hz) per dimension"""
         return tuple(x.spectralWidth if hasattr(x, 'spectralWidth') else None
                      for x in self._wrappedData.sortedDataDims())
 

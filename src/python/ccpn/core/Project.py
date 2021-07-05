@@ -289,9 +289,19 @@ class Project(AbstractWrapperObject):
             if not isValidFileNameLength(newPath, stripFullPath=True, stripExtension=True):
                 raise ValueError('Filename must be 32 characters or fewer')
 
+        apiStatus = self._getAPIObjectsStatus()
+        if apiStatus.invalidObjects:
+            # if deleteInvalidObjects:
+                # delete here ...
+                # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
+            # else:
+            error = '\n '.join(apiStatus.invalidObjectsErrors)
+            raise ValueError(error)
+
+        # don't check valid inside this routine as it is not optimised and only results in a crash. Use apiStatus object.
         savedOk = apiIo.saveProject(self._wrappedData.root, newPath=newPath,
                                     changeBackup=changeBackup, createFallback=createFallback,
-                                    overwriteExisting=overwriteExisting, checkValid=checkValid,
+                                    overwriteExisting=overwriteExisting, checkValid=False,
                                     changeDataLocations=changeDataLocations)
         if savedOk:
             self._resetIds()
@@ -938,6 +948,25 @@ class Project(AbstractWrapperObject):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Library functions
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def _getAPIObjectsStatus(self, completeScan=False, includeDefaultChildren=False):
+        """
+        Scan all API objects and check their validity.
+
+        Parameters:
+        completeScan: bool, True to perform a complete validity check of all found API objects
+        includeDefaultChildren: bool, False to exclude default objects for inspection such as
+                                ChemComps and associated, nmrExpPrototypes etc.See _APIStatus._excludedChildren
+                                for the full list of exclusions.
+
+        Return: the API Status object. See _APIStatus for full description
+
+        """
+        getLogger().info('Validating Project integrity...')
+        from core._implementation.APIStatus import APIStatus
+        root = self._apiNmrProject.root
+        apiStatus = APIStatus(apiObj=root, completeScan=completeScan, includeDefaultChildren=includeDefaultChildren)
+        return apiStatus
 
     def _checkUpgradedFromV2(self):
         """Check whether the project has been upgraded from V2

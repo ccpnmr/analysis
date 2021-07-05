@@ -136,18 +136,38 @@ class SpectrumReference(AbstractWrapperObject):
         """
         :return: True if dimension is acquisition
         """
-        return self._wrappedData.dataDim.expDim.isAcquisition
+        return self._expDim.isAcquisition
 
     @isAcquisition.setter
     def isAcquisition(self, value):
-        self._wrappedData.dataDim.expDim.isAcquisition = value
+        self._expDim.isAcquisition = value
 
-    # @property
-    # def referenceSerial(self) -> int:
-    #     """Spectrum reference serial number"""
-    #     return self._expDimRef.serial
+    @property
+    def pointCount(self):
+        """Number of points in this dimension"""
+        if self._dataDim.className == 'FidDataDim' and hasattr(self._dataDim, 'numPointsValid'):
+            # GWV: compatibilty with v2?
+            result = self._dataDim.numPointsValid
+        else:
+            result = self._dataDim.numPoints
+        return result
 
-    # Attributes belonging to ExpDimRef and DataDimRef
+    @pointCount.setter
+    def pointCount(self, value):
+        if self._dataDim.className == 'FidDataDim':
+            # GWV: compatibilty with v2?
+            self._dataDim.numPointsValid = value
+        else:
+            self._dataDim.numPoints = value
+
+    @property
+    def isComplex(self):
+        """Boolean indicating complex data for this dimension"""
+        return self._dataDim.isComplex
+
+    @isComplex.setter
+    def isComplex(self, value):
+        self._dataDim.isComplex = bool(value)
 
     @property
     def spectrometerFrequency(self) -> float:
@@ -226,18 +246,11 @@ class SpectrumReference(AbstractWrapperObject):
     @property
     def axisCode(self) -> str:
         """Reference axisCode """
-        expDimRef = self._wrappedData.expDimRef
-        # dataDim = self._wrappedData.dataDim
-        result = expDimRef.axisCode
-        # if result is None:
-        #     dataDim.dataSource.experiment.resetAxisCodes()
-        #     result = expDimRef.axisCode
-        #
-        return result
+        return self._expDimRef.axisCode
 
     @axisCode.setter
     def axisCode(self, value: str):
-        self._wrappedData.expDimRef.axisCode = value
+        self._expDimRef.axisCode = value
 
     @property
     def axisUnit(self) -> str:
@@ -287,14 +300,6 @@ class SpectrumReference(AbstractWrapperObject):
             else:
                 dataDimRef.dataDim.valuePerPoint *= (value / swold)
 
-    def pointToValue(self, point: float) -> float:
-        """Axis (ppm) value corresponding to point"""
-        return self._wrappedData.pointToValue(point)
-
-    def valueToPoint(self, value: float) -> float:
-        """ Point number (float) corresponding to (ppm) value"""
-        return self._wrappedData.valueToPoint(value)
-
     @property
     def numPointsOrig(self) -> bool:
         """numPointsOrig"""
@@ -330,7 +335,13 @@ class SpectrumReference(AbstractWrapperObject):
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
+    def pointToValue(self, point: float) -> float:
+        """Axis (ppm) value corresponding to point"""
+        return self._wrappedData.pointToValue(point)
 
+    def valueToPoint(self, value: float) -> float:
+        """ Point number (float) corresponding to (ppm) value"""
+        return self._wrappedData.valueToPoint(value)
 
 #=========================================================================================
 # Connections to parents:

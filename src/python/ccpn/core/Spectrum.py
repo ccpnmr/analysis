@@ -77,8 +77,8 @@ from ccpn.core.Project import Project
 from ccpn.core.lib import Pid
 
 import ccpn.core.lib.SpectrumLib as specLib
-from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection, \
-    getDefaultSpectrumColours
+from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection, getDefaultSpectrumColours
+from ccpn.core.lib.SpectrumLib import _includeInDimensionalCopy, _includeInCopy, _includeInCopyList, checkSpectrumPropertyValue
 
 from ccpn.core.lib.ContextManagers import \
     newObject, deleteObject, ccpNmrV3CoreSimple, \
@@ -118,54 +118,13 @@ DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
 MAXALIASINGRANGE = 3
 
 #=========================================================================================
-# Decorators to define the Spectrum attributes to be copied
-#=========================================================================================
-
-@singleton
-class _includeInCopyList(list):
-    """Singleton class to store the attributes to be included when making a copy of object.
-    Attributes can be modified and can be either non-dimensional or dimension dependent,
-    Dynamically filled by two decorators
-    Stored as list of (attributeName, isMultiDimensional) tuples
-    """
-
-    def getNoneDimensional(self):
-        """return a list of one-dimensional attribute names"""
-        return [attr for attr, isNd in self if isNd == False]
-
-    def getMultiDimensional(self):
-        """return a list of one-dimensional attribute names"""
-        return [attr for attr, isNd in self if isNd == True]
-
-    def appendItem(self, attribute, isMultidimensional):
-        _t = (attribute, isMultidimensional)
-        if _t not in self:
-            super().append(_t)
-
-
-def _includeInCopy(func):
-    """Decorator to define that an non-dimensional attribute is to be included when making a copy of object
-    """
-    storage = _includeInCopyList()
-    storage.appendItem(func.__name__, False)
-    return func
-
-
-def _includeInDimensionalCopy(func):
-    """Decorator to define that a dimensional attribute is to be included when making a copy of object
-    """
-    storage = _includeInCopyList()
-    storage.appendItem(func.__name__, True)
-    return func
-
-
-#=========================================================================================
 # Spectrum class
 #=========================================================================================
 
 class Spectrum(AbstractWrapperObject, CcpNmrJson):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
-    path to the stored NMR data file
+    path to the NMR (binary) data file. The Spectrum object has methods to get the binary data
+    as numpy arrays.
     """
     #-----------------------------------------------------------------------------------------
 
@@ -265,11 +224,11 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return None
 
     @property
-    def spectrumReferences(self):
+    def spectrumReferences(self) -> list:
         """list of spectrumReferences objects
         STUB: hot-fixed later
         """
-        return None
+        return []
 
     @property
     def spectrumHits(self):
@@ -654,13 +613,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """
         return self._wrappedData.serial
 
-    # @property
-    # def _numDim(self):
-    #     """Return the _wrappedData numDim
-    #     CCPN Internal
-    #     """
-    #     return self._wrappedData.numDim
-
     @property
     def experiment(self):
         """Return the experiment assigned to the spectrum
@@ -755,42 +707,22 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         return self._dataStore.dataFormat
 
-    # @dataFormat.setter
-    # def dataFormat(self, value):
-    #     self._wrappedData.dataStore.fileType = value
 
-    # @property
-    # def headerSize(self) -> Optional[int]:
-    #     """File header size in bytes."""
-    #     xx = self._wrappedData.dataStore
-    #     if xx:
-    #         return xx.headerSize
-    #     else:
-    #         return None
-    #
-    # @property
-    # def numberType(self) -> Optional[str]:
-    #     """Data type of numbers stored in data matrix ('int' or 'float')."""
-    #     xx = self._wrappedData.dataStore
-    #     if xx:
-    #         return xx.numberType
-    #     else:
-    #         return None
-    #
-    # # NBNB TBD Should this be made modifiable? Would be a bit of work ...
-    #
-    # @property
-    # def complexStoredBy(self) -> str:
-    #     """Hypercomplex numbers are stored by ('timepoint', 'quadrant', or 'dimension')."""
-    #     xx = self._wrappedData.dataStore
-    #     if xx:
-    #         return xx.complexStoredBy
-    #     else:
-    #         return None
-    #
-    # # NBNB TBD Should this be made modifiable? Would be a bit of work ...
+    #-----------------------------------------------------------------------------------------
+    # Dimensional Attributes
+    #-----------------------------------------------------------------------------------------
 
-    # Attributes belonging to AbstractDataDim
+    def _setDimensionalAttributes(self, attributeName: str, value: (list, tuple)):
+        """Conveniance function set the spectrumReference.attributeName to the items of value
+        Assumes all checks have been done
+        """
+        for idx, val in enumerate(value):
+            setattr(self.spectrumReferences[idx], attributeName, val)
+
+    def _getDimensionalAttributes(self, attributeName: str) -> list:
+        """Conveniance function get the values for each spectrumReference.attributeName
+        """
+        return [getattr(specRef, attributeName) for specRef in self.spectrumReferences]
 
     def _setStdDataDimValue(self, attributeName, value: Sequence):
         """Set value for non-Sampled DataDims only"""
@@ -807,149 +739,49 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     @_includeInDimensionalCopy
-    def axisCodes(self) -> Tuple[Optional[str], ...]:
-        """axisCode, per dimension - None if no main ExpDimRef
-        """
-        result = []
-        for dataDim in self._wrappedData.sortedDataDims():
-            expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
-            if expDimRef is None:
-                result.append(None)
-            else:
-                axisCode = expDimRef.axisCode
-                result.append(axisCode)
-
-        return tuple(result)
+    def axisCodes(self) -> list:
+        """List of an unique axisCode per dimension"""
+        return self._getDimensionalAttributes('axisCode')
 
     @axisCodes.setter
-    def axisCodes(self, values):
-        check = {}
-        for i, v in enumerate(values):
-            if v in check:
-                raise ValueError('axisCodes should be an unique sequence of strings; got duplicate entry axisCodes[%s]="%s"'
-                                 % (i, v))
-            else:
-                check[v] = i
-        self._setExpDimRefAttribute('axisCode', values, mandatory=False)
+    @checkSpectrumPropertyValue(iterable=True, types=(str, None))
+    def axisCodes(self, value):
+        if len(set(value)) != len(value):
+            raise ValueError('axisCodes should be unique; got %r' % value)
+        self._setDimensionalAttributes('axisCode', value)
 
     @property
     @_includeInDimensionalCopy
-    def pointCounts(self) -> Tuple[int, ...]:
-        """Number active of points per dimension
-
-        NB, Changing the pointCounts will keep the spectralWidths (after Fourier transformation)
-        constant.
-
-        NB for FidDataDims more points than these may be stored (see totalPointCount)."""
-        result = []
-        for dataDim in self._wrappedData.sortedDataDims():
-            if hasattr(dataDim, 'numPointsValid'):
-                result.append(dataDim.numPointsValid)
-            else:
-                result.append(dataDim.numPoints)
-        return tuple(result)
+    def pointCounts(self) -> List[int]:
+        """Number of points per dimension"""
+        return self._getDimensionalAttributes('pointCount')
 
     @pointCounts.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(int,float))
     def pointCounts(self, value: Sequence):
-        apiDataSource = self._wrappedData
-        if len(value) == apiDataSource.numDim:
-            dataDimRefs = self._mainDataDimRefs()
-            for ii, dataDim in enumerate(apiDataSource.sortedDataDims()):
-                val = value[ii]
-                className = dataDim.className
-                if className == 'SampledDataDim':
-                    # No sweep width to worry about. Up to programmer to make sure sampled values match.
-                    dataDim.numPoints = val
-                elif className == 'FidDataDim':
-                    #Number of points refers to time domain, independent of sweep width
-                    dataDim.numPointsValid = val
-                elif className == 'FreqDataDim':
-                    # Changing the number of points may NOT change the spectralWidth
-                    relativeVal = val / dataDim.numPoints
-                    dataDim.numPoints = val
-                    dataDim.valuePerPoint /= relativeVal
-                    dataDimRef = dataDimRefs[ii]
-                    if dataDimRef is not None:
-                        # This will work if we are changing to a different factor of two in pointCount.
-                        # If we are making an arbitrary change, the referencing is not reliable anyway.
-                        dataDimRef.refPoint = ((dataDimRef.refPoint - 1) * relativeVal) + 1
-                else:
-                    raise TypeError("API DataDim object with unknown className:", className)
-        else:
-            raise ValueError("pointCounts value must have length %s, was %s" %
-                             (apiDataSource.numDim, value))
+        self._setDimensionalAttributes('pointCount', value)
 
     @property
     @_includeInDimensionalCopy
-    def totalPointCounts(self) -> Tuple[int, ...]:
-        """Total number of points per dimension
-
-        NB for FidDataDims and SampledDataDims these are the stored points,
-        for FreqDataDims these are the points after transformation before cutting down.
-
-        NB, changing the totalPointCount will *not* modify the resolution (or dwell time),
-        so the implied total width will change.
-        """
-        result = []
-        for dataDim in self._wrappedData.sortedDataDims():
-            if hasattr(dataDim, 'numPointsOrig'):
-                result.append(dataDim.numPointsOrig)
-            else:
-                result.append(dataDim.numPoints)
-        return tuple(result)
-
-    @totalPointCounts.setter
-    def totalPointCounts(self, value: Sequence):
-        apiDataSource = self._wrappedData
-        if len(value) == apiDataSource.numDim:
-            for ii, dataDim in enumerate(apiDataSource.sortedDataDims()):
-                if hasattr(dataDim, 'numPointsOrig'):
-                    dataDim.numPointsOrig = value[ii]
-                else:
-                    dataDim.numPoints = value[ii]
-        else:
-            raise ValueError("totalPointCount value must have length %s, was %s" %
-                             (apiDataSource.numDim, value))
-
-    # @property
-    # @_includeInDimensionalCopy
-    # def pointOffsets(self) -> Tuple[int, ...]:
-    #     """index of first active point relative to total points, per dimension"""
-    #     return tuple(x.pointOffset if x.className != 'SampledDataDim' else None
-    #                  for x in self._wrappedData.sortedDataDims())
-    #
-    # @pointOffsets.setter
-    # def pointOffsets(self, value: Sequence):
-    #     self._setStdDataDimValue('pointOffset', value)
+    def totalPointCounts(self) -> List[int]:
+        """Total number of points per dimension; i.e. twice pointCounts in case of complex data"""
+        result = self.pointCounts
+        for axis, isC in enumerate(self.isComplex):
+            if isC:
+                result[axis] *= 2
+        return result
 
     @property
     @_includeInDimensionalCopy
-    def isComplex(self) -> Tuple[bool, ...]:
-        """Is dimension complex? -  per dimension"""
-        return tuple(x.isComplex for x in self._wrappedData.sortedDataDims())
+    def isComplex(self) -> List[bool]:
+        """Boolean denoting Complex data per dimension"""
+        return self._getDimensionalAttributes('isComplex')
+        # return tuple(x.isComplex for x in self._wrappedData.sortedDataDims())
 
     @isComplex.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(bool, int, float))
     def isComplex(self, value: Sequence):
-        apiDataSource = self._wrappedData
-        if len(value) == apiDataSource.numDim:
-            for ii, dataDim in enumerate(apiDataSource.sortedDataDims()):
-                dataDim.isComplex = value[ii]
-        else:
-            raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
-
-    # @property
-    # @_includeInDimensionalCopy
-    # def blockSizes(self) -> Tuple[int, ...]:
-    #     """BlockSizes -  per dimension"""
-    #     return tuple(self._apiDataStore.blockSizes)
-    #
-    # @blockSizes.setter
-    # def blockSizes(self, value: Sequence):
-    #     apiDataSource = self._wrappedData
-    #     if len(value) == apiDataSource.numDim:
-    #         self._apiDataStore.blockSizes = value
-    #     else:
-    #         raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
+        self._setDimensionalAttributes('isComplex', value)
 
     @property
     def dimensionTypes(self) -> Tuple[str, ...]:
@@ -1038,8 +870,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def phases0(self) -> tuple:
-        """zero order phase correction (or None), per dimension. Always None for sampled dimensions.
-        """
+        """zero order phase correction (or None), per dimension"""
         return tuple(x.phase0 if x.className != 'SampledDataDim' else None
                      for x in self._wrappedData.sortedDataDims())
 
@@ -1050,7 +881,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def phases1(self) -> Tuple[Optional[float], ...]:
-        """first order phase correction (or None) per dimension. Always None for sampled dimensions."""
+        """first order phase correction (or None) per dimension"""
         return tuple(x.phase1 if x.className != 'SampledDataDim' else None
                      for x in self._wrappedData.sortedDataDims())
 
@@ -1062,7 +893,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @_includeInDimensionalCopy
     def windowFunctions(self) -> Tuple[Optional[str], ...]:
         """Window function name (or None) per dimension - e.g. 'EM', 'GM', 'SINE', 'QSINE', ....
-        Always None for sampled dimensions."""
+        """
         return tuple(x.windowFunction if x.className != 'SampledDataDim' else None
                      for x in self._wrappedData.sortedDataDims())
 
@@ -1073,7 +904,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def lorentzianBroadenings(self) -> Tuple[Optional[float], ...]:
-        """Lorenzian broadening in Hz per dimension. Always None for sampled dimensions."""
+        """Lorenzian broadening in Hz per dimension"""
         return tuple(x.lorentzianBroadening if x.className != 'SampledDataDim' else None
                      for x in self._wrappedData.sortedDataDims())
 
@@ -1084,7 +915,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def gaussianBroadenings(self) -> Tuple[Optional[float], ...]:
-        """Gaussian broadening per dimension. Always None for sampled dimensions."""
+        """Gaussian broadening per dimension"""
         return tuple(x.gaussianBroadening if x.className != 'SampledDataDim' else None
                      for x in self._wrappedData.sortedDataDims())
 
@@ -1095,7 +926,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def sineWindowShifts(self) -> Tuple[Optional[float], ...]:
-        """Shift of sine/sine-square window function in degrees. Always None for sampled dimensions."""
+        """Shift of sine/sine-square window function in degrees"""
         return tuple(x.sineWindowShift if x.className != 'SampledDataDim' else None
                      for x in self._wrappedData.sortedDataDims())
 
@@ -1103,25 +934,22 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def sineWindowShifts(self, value: Sequence):
         self._setStdDataDimValue('sineWindowShift', value)
 
-    _spectrometerFrequencies = SpectrumDimensionTrait(trait=Float(min=0.0)).tag(
-                               attributeName='spectrometerFrequency',
-                               doCopy = True
-    )
+    # GWV test
+    # _spectrometerFrequencies = SpectrumDimensionTrait(trait=Float(min=0.0)).tag(
+    #                            attributeName='spectrometerFrequency',
+    #                            doCopy = True
+    # )
+
     @property
     @_includeInDimensionalCopy
-    def spectrometerFrequencies(self) -> Tuple[Optional[float], ...]:
-        """List of spectrometer frequency for each dimension
-        """
-        return [specDim.spectrometerFrequency for specDim in self.spectrumReferences]
-        # return self._spectrometerFrequencies
-    @spectrometerFrequencies.setter
-    def spectrometerFrequencies(self, value):
-        # self._spectrometerFreqencies = value
-        if not isIterable(value) and len(value) != self.dimensionCount:
-            raise ValueError('Setting spectrometerFrequencies; invalid value "%s"' % value)
-        for axis, val in enumerate(value):
-            self.spectrumReferences[axis].spectrometerFrequency = val
+    def spectrometerFrequencies(self) -> List[float]:
+        """List of spectrometer frequency for each dimension"""
+        return self._getDimensionalAttributes('spectrometerFrequency')
 
+    @spectrometerFrequencies.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(float, int))
+    def spectrometerFrequencies(self, value):
+        self._setDimensionalAttributes('spectrometerFrequency', value)
 
     @property
     @_includeInDimensionalCopy
@@ -1139,48 +967,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     @_includeInDimensionalCopy
-    def isotopeCodes(self) -> Tuple[Optional[str], ...]:
-        """isotopeCode of isotope being measured, per dimension - None if no unique code
-        """
-        return [specDim.isotopeCode for specDim in self.spectrumReferences]
-        # result = []
-        # for dataDim in self._wrappedData.sortedDataDims():
-        #     expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
-        #     if expDimRef is None:
-        #         result.append(None)
-        #     else:
-        #         isotopeCodes = expDimRef.isotopeCodes
-        #         if len(isotopeCodes) == 1:
-        #             result.append(isotopeCodes[0])
-        #         else:
-        #             result.append(None)
-        # #
-        # return tuple(result)
+    def isotopeCodes(self) -> List[str]:
+        """isotopeCode per dimension - None if not known"""
+        return self._getDimensionalAttributes('isotopeCode')
 
     @isotopeCodes.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(str, None))
     def isotopeCodes(self, value: Sequence):
-        if not isIterable(value) and len(value) != self.dimensionCount:
-            raise ValueError('Setting isotopeCodes; invalid value "%s"' % value)
-        for axis, val in enumerate(value):
-            self.spectrumReferences[axis].isotopeCode = val
-        #
-        # apiDataSource = self._wrappedData
-        # if len(value) == apiDataSource.numDim:
-        #     #GWV 28/8/18: commented as cannot see the reason for this, while prevented correction of errors
-        #     # if value != self.isotopeCodes and self.peaks:
-        #     #   raise ValueError("Cannot reset isotopeCodes in a Spectrum that contains peaks")
-        #     for ii, dataDim in enumerate(apiDataSource.sortedDataDims()):
-        #         expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
-        #         val = value[ii]
-        #         if expDimRef is None:
-        #             if val is not None:
-        #                 raise ValueError("Cannot set isotopeCode %s in dimension %s" % (val, ii + 1))
-        #         elif val is None:
-        #             expDimRef.isotopeCodes = ()
-        #         else:
-        #             expDimRef.isotopeCodes = (val,)
-        # else:
-        #     raise ValueError("isotopeCodes must have length %s, was %s" % (apiDataSource.numDim, value))
+        self._setDimensionalAttributes('isotopeCode', value)
 
     @property
     @_includeInDimensionalCopy

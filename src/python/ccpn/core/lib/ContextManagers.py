@@ -880,16 +880,17 @@ class BlankedPartial(object):
             self._obj._finaliseAction(self._trigger)
 
 
-def ccpNmrV3CoreSetter():
+def ccpNmrV3CoreSetter(doNotify=True):
     """A decorator wrap the property setters method in an undo block and triggering the
-    'change' notification
+    'change' notification if doNotify=True
     """
 
     @decorator.decorator
     def theDecorator(*args, **kwds):
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
-        self = args[0]
+        self = args[0]  # this is the object
+        value = args[1]
 
         application = getApplication()  # pass it in to reduce overhead
 
@@ -903,7 +904,8 @@ def ccpNmrV3CoreSetter():
                 addUndoItem(undo=BlankedPartial(func, self, 'change', False, self, oldValue),
                             redo=BlankedPartial(func, self, 'change', False, self, args[1]))
 
-        self._finaliseAction('change')
+        if doNotify:
+            self._finaliseAction('change')
 
         return result
 

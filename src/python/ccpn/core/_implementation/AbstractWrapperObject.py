@@ -39,7 +39,8 @@ from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, apiNotificationBlanking
+from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
+    apiNotificationBlanking, inactivity
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 
 
@@ -654,54 +655,6 @@ class AbstractWrapperObject(NotifierBase):
         result = list(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
         return result
 
-    def _restoreChildren(self, classes=['all']):
-        """GWV: A method to restore the children of self
-        classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
-        For restore 3.1 branch
-        """
-        _classMap = dict([(cls.className, cls) for cls in self._childClasses])
-
-        # loop over all the child-classses
-        for clsName, apiChildren in self._getApiChildren(classes=classes).items():
-
-            cls = _classMap.get(clsName)
-            if cls is None:
-                raise RuntimeError('Undefined class "%s"' % clsName)
-
-            for apiChild in apiChildren:
-
-                newInstance = self._newInstanceWithApiData(cls=cls, apiData=apiChild)
-                if newInstance is None:
-                    raise RuntimeError('Error creating new instance of class "%s"' % clsName)
-
-                # add the newInstance to the appropriate mapping dictionaries
-                self._project._data2Obj[apiChild] = newInstance
-                _d = self._project._pid2Obj.setdefault(clsName, {})
-                _d[newInstance.pid] = newInstance
-
-                # recursively do the children of newInstance
-                newInstance._restoreChildren(classes=classes)
-
-    def _newInstanceWithApiData(self, cls, apiData):
-        """Return a new instance of cls, initialised with apiData
-        For restore 3.1 branch
-        """
-        if apiData in self._project._data2Obj:
-            # This happens with Window, as it get initialised by the Windowstore and then once
-            # more as child of Project
-            newInstance = self._project._data2Obj[apiData]
-
-        elif hasattr(cls, '_factoryFunction') and getattr(cls, '_factoryFunction') is not None:
-            newInstance = cls._factoryFunction(self._project, apiData)
-
-        else:
-            newInstance = cls(self._project, apiData)
-
-        if newInstance is None:
-            raise RuntimeError('Error creating new instance of class "%s"' % cls.className)
-
-        return newInstance
-
     def _getApiObjectTree(self) -> tuple:
         """Retrieve the apiObject tree contained by this object
 
@@ -772,6 +725,104 @@ class AbstractWrapperObject(NotifierBase):
     # AND ALL UNDERLYING DATA, taking in all parameters necessary to do so.
 
     #=========================================================================================
+    # Restore methods
+    #=========================================================================================
+
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Restores object from apiObj; checks for _factoryFunction.
+        Restores the children
+        :return Restored obj
+
+        CCPNINTERNAL: subclassed in special cases
+        """
+        if apiObj is None:
+            raise ValueError('_restoreObject: undefined apiObj')
+
+        factoryFunction = cls._factoryFunction
+        if factoryFunction is None:
+            obj = cls(project, apiObj)
+        else:
+            obj = factoryFunction(project, apiObj)
+
+        if obj is None:
+            raise RuntimeError('Error restoring object encoded by %s' % apiObj)
+
+        # restore the children
+        obj._restoreChildren()
+
+        return obj
+
+    def _restoreChildren(self):
+        """Initialize children, using existing objects in data model"""
+
+        project = self._project
+        data2Obj = project._data2Obj
+
+        for childClass in self._childClasses:
+            # print('>>> childClass', childClass)
+            # recursively create children
+            for apiObj in childClass._getAllWrappedData(self):
+                obj = data2Obj.get(apiObj)
+
+                if obj is None:
+                    try:
+                        obj = childClass._restoreObject(project, apiObj)
+                    except RuntimeError as es:
+
+                        _text = 'Error restoring child object %s of %s' % (apiObj, self)
+                        getLogger().warning(_text)
+                        raise RuntimeError(_text)
+
+    # def _restoreChildren(self, classes=['all']):
+    #     """GWV: A method to restore the children of self
+    #     classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
+    #     For restore 3.2 branch
+    #     """
+    #     _classMap = dict([(cls.className, cls) for cls in self._childClasses])
+    #
+    #     # loop over all the child-classses
+    #     for clsName, apiChildren in self._getApiChildren(classes=classes).items():
+    #
+    #         cls = _classMap.get(clsName)
+    #         if cls is None:
+    #             raise RuntimeError('Undefined class "%s"' % clsName)
+    #
+    #         for apiChild in apiChildren:
+    #
+    #             newInstance = self._newInstanceWithApiData(cls=cls, apiData=apiChild)
+    #             if newInstance is None:
+    #                 raise RuntimeError('Error creating new instance of class "%s"' % clsName)
+    #
+    #             # add the newInstance to the appropriate mapping dictionaries
+    #             self._project._data2Obj[apiChild] = newInstance
+    #             _d = self._project._pid2Obj.setdefault(clsName, {})
+    #             _d[newInstance.pid] = newInstance
+    #
+    #             # recursively do the children of newInstance
+    #             newInstance._restoreChildren(classes=classes)
+    #
+    # def _newInstanceWithApiData(self, cls, apiData):
+    #     """Return a new instance of cls, initialised with apiData
+    #     For restore 3.2 branch
+    #     """
+    #     if apiData in self._project._data2Obj:
+    #         # This happens with Window, as it get initialised by the Windowstore and then once
+    #         # more as child of Project
+    #         newInstance = self._project._data2Obj[apiData]
+    #
+    #     elif hasattr(cls, '_factoryFunction') and getattr(cls, '_factoryFunction') is not None:
+    #         newInstance = cls._factoryFunction(self._project, apiData)
+    #
+    #     else:
+    #         newInstance = cls(self._project, apiData)
+    #
+    #     if newInstance is None:
+    #         raise RuntimeError('Error creating new instance of class "%s"' % cls.className)
+    #
+    #     return newInstance
+
+    #=========================================================================================
     # CCPN functions
     #=========================================================================================
 
@@ -821,22 +872,6 @@ class AbstractWrapperObject(NotifierBase):
         if obj is not None and obj.isDeleted:
             raise RuntimeError('Pid "%s" defined a deleted object' % pid)
         return obj
-
-        # GWV 20181201: refactored
-        # tt = pidstring.split(Pid.PREFIXSEP, 1)
-        # if len(tt) == 2:
-        #     if tt[0] in ('GM', 'Mark', 'GA', 'Axis', 'GO', 'Module', 'GS', 'Strip',
-        #                  'GL', 'PeakListView', 'GI', 'IntegralListView', 'GU', 'MultipletListView',
-        #                  'GD', 'SpectrumDisplay', 'GW', 'Window',
-        #                  'GV', 'SpectrumView', 'GT', 'Task'):
-        #         from warnings import warn
-        #         warn('ui.getByGid should be used for getting graphics ({})'.format(pidstring),
-        #              category=DeprecationWarning)
-        #     dd = self._project._pid2Obj.get(tt[0])
-        #     if dd:
-        #         return dd.get(tt[1])
-        # #
-        # return None
 
     #=========================================================================================
     # CCPN Implementation methods
@@ -994,27 +1029,6 @@ class AbstractWrapperObject(NotifierBase):
 
         NB: the returned list of NmrResidues is sorted; if not: breaks the programme
         """
-
-        # GWV 20181201: refactored to use _getChildren and recursion
-        # project = self._project
-        # data2Obj = project._data2Obj
-        # objects = [self]
-        #
-        # for cls in descendantClasses:
-        #
-        #     # function gets wrapped data for all children starting from parent
-        #     func = cls._getAllWrappedData
-        #     # data is iterator of wrapped data for children starting from all parents
-        #     ll = itertools.chain(*(func(x) for x in objects))
-        #     # objects is all wrapper objects for next child level down
-        #     # NB this may sometimes (during undo/redo) get called when not all objects
-        #     # are finalised - hence the test if y is None
-        #     objects = list(y for y in (data2Obj.get(x) for x in ll) if y is not None)
-        #     if cls.className == 'NmrResidue':
-        #         # These must always be sorted
-        #         objects.sort()
-        # #
-        # return objects
         from ccpn.core.NmrResidue import NmrResidue  # Local import to avoid cycles
 
         if descendantClasses is None or len(descendantClasses) == 0:
@@ -1044,49 +1058,51 @@ class AbstractWrapperObject(NotifierBase):
             objs.extend(children)
         return objs
 
-    @classmethod
-    def _restoreObject(cls, project, apiObj):
-        """Restores object from apiObj; checks for _factoryFunction.
-        Returns obj
-        CCPNINTERNAL: subclassed in special cases
-        """
-        if apiObj is None:
-            raise ValueError('undefined apiObj')
-
-        factoryFunction = cls._factoryFunction
-        if factoryFunction is None:
-            obj = cls(project, apiObj)
-        else:
-            obj = factoryFunction(project, apiObj)
-
-        if obj is None:
-            raise RuntimeError('Error restoring object encoded by %s' % apiObj)
-
-        return obj
-
-    def _initializeAll(self):
-        """Initialize children, using existing objects in data model"""
-
-        project = self._project
-        data2Obj = project._data2Obj
-
-        for childClass in self._childClasses:
-            # print('>>> childClass', childClass)
-            # recursively create children
-            for apiObj in childClass._getAllWrappedData(self):
-                obj = data2Obj.get(apiObj)
-                if obj is None:
-                    obj = childClass._restoreObject(project, apiObj)
-                    # factoryFunction = childClass._factoryFunction
-                    # if factoryFunction is None:
-                    #     obj = childClass(project, apiObj)
-                    # else:
-                    #     obj = factoryFunction(project, apiObj)
-                if obj is not None:
-                    obj._initializeAll()
-                else:
-                    getLogger().warning('Error restoring object %s.' % apiObj)
-                    raise RuntimeError('Error restoring object %s.' % apiObj)
+    # @classmethod
+    # def _restoreObject(cls, project, apiObj):
+    #     """Restores object from apiObj; checks for _factoryFunction.
+    #     Restores the children
+    #     :return Restored obj
+    #
+    #     CCPNINTERNAL: subclassed in special cases
+    #     """
+    #     if apiObj is None:
+    #         raise ValueError('_restoreObject: undefined apiObj')
+    #
+    #     factoryFunction = cls._factoryFunction
+    #     if factoryFunction is None:
+    #         obj = cls(project, apiObj)
+    #     else:
+    #         obj = factoryFunction(project, apiObj)
+    #
+    #     if obj is None:
+    #         raise RuntimeError('Error restoring object encoded by %s' % apiObj)
+    #
+    #     # restore the children
+    #     obj._initializeAll()
+    #
+    #     return obj
+    #
+    # def _initializeAll(self):
+    #     """Initialize children, using existing objects in data model"""
+    #
+    #     project = self._project
+    #     data2Obj = project._data2Obj
+    #
+    #     for childClass in self._childClasses:
+    #         # print('>>> childClass', childClass)
+    #         # recursively create children
+    #         for apiObj in childClass._getAllWrappedData(self):
+    #             obj = data2Obj.get(apiObj)
+    #
+    #             if obj is None:
+    #                 try:
+    #                     obj = childClass._restoreObject(project, apiObj)
+    #                 except RuntimeError as es:
+    #
+    #                     _text = 'Error restoring child object %s of %s' % (apiObj, self)
+    #                     getLogger().warning(_text)
+    #                     raise RuntimeError(_text)
 
     def _unwrapAll(self):
         """remove wrapper from object and child objects

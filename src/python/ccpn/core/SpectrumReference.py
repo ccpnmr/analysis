@@ -414,12 +414,11 @@ def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> Spectru
         axisUnit = 'ppm'
 
     elif dimType == specLib.DIMENSION_TIME:
-        # _valuePerPoint is dwell time
-        # _valuePerPoint = 1.0 / dataSource.spectralWidthsHz[n] if _isComplex \
+        # valuePerPoint is dwell time
+        # valuePerPoint = 1.0 / dataSource.spectralWidthsHz[n] if _isComplex \
         #                  else 0.5 / dataSource.spectralWidthsHz[n]
 
-        # However, for now we leave it as until the Display routines have been
-        # updated
+        # However, for now we leave it as until we have settled the FidDataDim issue (see below)
         valuePerPoint = dataSource.spectralWidthsHz[axis] / float(nPoints)
         axisUnit = 'point'  # model does not allow 'sec'!
 
@@ -439,7 +438,7 @@ def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> Spectru
     apiExpDim.isAcquisition = False  # undated later
 
     # for now, we have to give all dimensions a FreqDataDim, otherwise the code crashes
-    # A FidDataDim cannot have a DataDimRef, and that is the object used as _wrappedData
+    # A FidDataDim cannot have a DataDimRef, and that is the object used as _wrappedData!
     if (apiDataDim := apiDataSource.newFreqDataDim(dim=dimension,
                                                    expDim=apiExpDim,
                                                    numPoints=nPoints,

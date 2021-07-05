@@ -1674,9 +1674,8 @@ class Framework(NotifierBase):
         if self.project is not None:  # always close for Ccpn
             self._closeProject()
         project = coreIo.loadProject(str(_path), useFileLogger=self.useFileLogger, level=self.level)
-        project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+        # project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
         self._initialiseProject(project)
-        self.project = project
         return [project]
 
     @logCommand('application.')

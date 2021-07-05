@@ -837,71 +837,53 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @checkSpectrumPropertyValue(iterable=True, types=(float,int))
     def spectralWidthsHz(self, value: Sequence):
         self._setDimensionalAttributes('spectralWidthHz', value)
-        # apiDataSource = self._wrappedData
-        # attributeName = 'spectralWidth'
-        # if len(value) == apiDataSource.numDim:
-        #     for ii, dataDim in enumerate(apiDataSource.sortedDataDims()):
-        #         val = value[ii]
-        #         if hasattr(dataDim, attributeName):
-        #             if not val:
-        #                 raise ValueError("Attempt to set %s to %s in dimension %s: %s"
-        #                                  % (attributeName, val, ii + 1, value))
-        #             else:
-        #                 # We assume that the number of points is constant, so setting SW changes valuePerPoint
-        #                 swold = getattr(dataDim, attributeName)
-        #                 dataDim.valuePerPoint *= (val / swold)
-        #         elif val is not None:
-        #             raise ValueError("Attempt to set %s in sampled dimension %s: %s"
-        #                              % (attributeName, ii + 1, value))
-        # else:
-        #     raise ValueError("SpectralWidth value must have length %s, was %s" %
-        #                      (apiDataSource.numDim, value))
 
     @property
     @_includeInDimensionalCopy
     def spectralWidths(self) -> Tuple[Optional[float], ...]:
         """spectral width (in ppm) per dimension """
         return self._getDimensionalAttributes('spectralWidth')
-        # return tuple(x and x.spectralWidth for x in self._mainDataDimRefs())
 
     @spectralWidths.setter
     @checkSpectrumPropertyValue(iterable=True, types=(float, int))
     def spectralWidths(self, value):
         self._setDimensionalAttributes('spectralWidth', value)
-        # oldValues = self.spectralWidths
-        # for ii, dataDimRef in enumerate(self._mainDataDimRefs()):
-        #     if dataDimRef is not None:
-        #         oldsw = oldValues[ii]
-        #         sw = value[ii]
-        #         localValuePerPoint = dataDimRef.localValuePerPoint
-        #         if localValuePerPoint:
-        #             dataDimRef.localValuePerPoint = localValuePerPoint * sw / oldsw
-        #         else:
-        #             dataDimRef.dataDim.valuePerPoint *= (sw / oldsw)
 
     @property
-    def valuesPerPoint(self) -> Tuple[Optional[float], ...]:
+    def valuesPerPoint(self) -> List[Optional[float]]:
         """valuePerPoint for each dimension:
         in ppm for Frequency dimensions
-        in time units (seconds) for time (Fid) dimensions
+        in time units (seconds) for Time (Fid) dimensions
         None for sampled dimensions
         """
         result = []
-        for dataDim in self._wrappedData.sortedDataDims():
-            if hasattr(dataDim, 'primaryDataDimRef'):
-                # FreqDataDim - get ppm valuePerPoint
-                ddr = dataDim.primaryDataDimRef
-                valuePerPoint = ddr and ddr.valuePerPoint
-            elif hasattr(dataDim, 'valuePerPoint'):
-                # FidDataDim - get time valuePerPoint
-                valuePerPoint = dataDim.valuePerPoint
+        for axis, dimType in enumerate(self.dimensionTypes):
+
+            if dimType == specLib.DIMENSION_FREQUENCY:
+                valuePerPoint = self.spectralWidths[axis] / self.pointCounts[axis]
+
+            elif dimType == specLib.DIMENSION_TIME:
+                # valuePerPoint is dwell time
+                valuePerPoint = 1.0 / self.spectralWidthsHz[axis] if self.isComplex[axis] \
+                                 else 0.5 / self.spectralWidthsHz[axis]
             else:
-                # Sampled DataDim - return None
                 valuePerPoint = None
+
+        # for dataDim in self._wrappedData.sortedDataDims():
+        #     if hasattr(dataDim, 'primaryDataDimRef'):
+        #         # FreqDataDim - get ppm valuePerPoint
+        #         ddr = dataDim.primaryDataDimRef
+        #         valuePerPoint = ddr and ddr.valuePerPoint
+        #     elif hasattr(dataDim, 'valuePerPoint'):
+        #         # FidDataDim - get time valuePerPoint
+        #         valuePerPoint = dataDim.valuePerPoint
+        #     else:
+        #         # Sampled DataDim - return None
+        #         valuePerPoint = None
             #
             result.append(valuePerPoint)
         #
-        return tuple(result)
+        return result
 
     @property
     @_includeInDimensionalCopy
@@ -2516,7 +2498,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         if dataStore.dataFormat == EmptySpectrumDataSource.dataFormat:
             # Special case, empty spectrum
-            dataSource = EmptySpectrumDataSource(spectrum=self)
+            dataSource = EmptySpectrumDataSource()
+            dataSource.importFromSpectrum(self)
 
         else:
             dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
@@ -2534,7 +2517,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                     raise RuntimeError('Spectrum._getDataSource: incompatible pointsCount[%s] = %s of "%s"' %
                                      (idx, dataSource.pointCounts[idx], dataStore.aPath()))
 
-        dataSource.spectrum = self
+            dataSource.spectrum = self
+
         return dataSource
 
     def _getPeakPicker(self):
@@ -2639,7 +2623,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             getLogger().warning('Error restoring valid data source for %s (%s)' % (spectrum, es))
 
         try:
-                spectrum._peakPicker = spectrum._getPeakPicker()
+            spectrum._peakPicker = spectrum._getPeakPicker()
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid peak picker for %s (%s)' % (spectrum, es))
 
@@ -3036,7 +3020,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     #-----------------------------------------------------------------------------------------
 
     def __str__(self):
-        return '<%s (%s)>' % (self.pid, ','.join(self.axisCodes))
+        return '<%s; %dD (%s)>' % (self.pid, self.dimensionCount, ','.join(self.axisCodes))
 
     def _infoString(self, includeDimensions=False):
         """Return info string about self, optionally including dimensional

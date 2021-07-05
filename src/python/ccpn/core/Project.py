@@ -60,7 +60,7 @@ from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 # from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
-                                          notificationEchoBlocking
+                                          notificationEchoBlocking, inactivity
 from ccpn.util.Logging import getLogger
 
 
@@ -282,10 +282,11 @@ class Project(AbstractWrapperObject):
         # for tt in self._coreNotifiers:
         #     self.registerNotifier(*tt)
 
-        # initialise, creating the wrapped objects
-        self._initializeAll()
-
+        # initialise, creating the children
         self._resetUndo()
+        with inactivity():
+            self._restoreChildren()
+
 
         with undoStackBlocking(self.application):
             with notificationBlanking(self.application):

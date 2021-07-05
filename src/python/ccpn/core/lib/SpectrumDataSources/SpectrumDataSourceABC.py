@@ -1283,7 +1283,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             position = [1] * self.dimensionCount
 
         if not isIterable(position):
-            raise ValueError('position must be an tuple or list')
+            raise ValueError('checkForValidPosition: position must be an tuple or list')
 
         if len(position) < self.dimensionCount:
             position += [1] * self.dimensionCount - len(position)
@@ -1291,7 +1291,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         for idx, p in enumerate(position):
             if not (1 <= p <= self.pointCounts[idx]):
-                raise ValueError('dimension %d: value must be in [1,%d]: got "%d"' % \
+                raise ValueError('checkForValidPosition: dimension %d: value must be in [1,%d]: got "%d"' % \
                                  (idx + 1, self.pointCounts[idx], p))
         return position
 
@@ -1308,11 +1308,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
         position = self.checkForValidPosition(position)
 
         if not (1 <= xDim <= self.dimensionCount):
-            raise ValueError('invalid xDim (%d), should be in range [1,%d]' % (xDim, self.dimensionCount))
+            raise ValueError('checkForValidPlane: invalid xDim (%d), should be in range [1,%d]' % (xDim, self.dimensionCount))
         if not (1 <= yDim <= self.dimensionCount):
-            raise ValueError('invalid yDim (%d), should be in range [1,%d]' % (yDim, self.dimensionCount))
+            raise ValueError('checkForValidPlane: invalid yDim (%d), should be in range [1,%d]' % (yDim, self.dimensionCount))
         if xDim == yDim:
-            raise ValueError('xDim = %d; yDim = %d' % (xDim, yDim))
+            raise ValueError('checkForValidPlane: xDim == yDim = %d' % (xDim,))
 
         return position
 

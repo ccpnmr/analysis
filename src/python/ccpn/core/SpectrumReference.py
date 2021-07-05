@@ -133,9 +133,7 @@ class SpectrumReference(AbstractWrapperObject):
 
     @property
     def isAcquisition(self) -> bool:
-        """
-        :return: True if dimension is acquisition
-        """
+        """True if dimension is acquisition"""
         return self._expDim.isAcquisition
 
     @isAcquisition.setter
@@ -315,8 +313,13 @@ class SpectrumReference(AbstractWrapperObject):
         self._wrappedData.assignmentTolerance = value
 
     #=========================================================================================
-    # Implementation functions
+    # Implementation properties and functions
     #=========================================================================================
+
+    @property
+    def _serial(self) -> int:
+        """Spectrum reference serial number"""
+        return self._expDimRef.serial
 
     @classmethod
     def _getAllWrappedData(cls, parent: Spectrum) -> list:

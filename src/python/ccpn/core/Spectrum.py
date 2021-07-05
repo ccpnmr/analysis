@@ -739,19 +739,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     @_includeInDimensionalCopy
-    def axisCodes(self) -> list:
-        """List of an unique axisCode per dimension"""
-        return self._getDimensionalAttributes('axisCode')
-
-    @axisCodes.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(str, None))
-    def axisCodes(self, value):
-        if len(set(value)) != len(value):
-            raise ValueError('axisCodes should be unique; got %r' % value)
-        self._setDimensionalAttributes('axisCode', value)
-
-    @property
-    @_includeInDimensionalCopy
     def pointCounts(self) -> List[int]:
         """Number of points per dimension"""
         return self._getDimensionalAttributes('pointCount')
@@ -776,12 +763,65 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def isComplex(self) -> List[bool]:
         """Boolean denoting Complex data per dimension"""
         return self._getDimensionalAttributes('isComplex')
-        # return tuple(x.isComplex for x in self._wrappedData.sortedDataDims())
 
     @isComplex.setter
     @checkSpectrumPropertyValue(iterable=True, types=(bool, int, float))
     def isComplex(self, value: Sequence):
         self._setDimensionalAttributes('isComplex', value)
+
+    @property
+    @_includeInDimensionalCopy
+    def isAquisition(self) -> List[bool]:
+        """Boolean per dimension denoting if it is the aquisition dimension"""
+        return self._getDimensionalAttributes('isAcquisition')
+
+    @isAquisition.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(bool, int, float))
+    def isAquisition(self, value: Sequence):
+        trues = [val for val in value if val == True]
+        if len(trues) > 1:
+            raise ValueError('Spectrum.isAquisition: expected zero or one dimension; got %r' % value)
+        self._setDimensionalAttributes('isAcquisition', value)
+
+    @property
+    @_includeInDimensionalCopy
+    def axisCodes(self) -> list:
+        """List of an unique axisCode per dimension"""
+        return self._getDimensionalAttributes('axisCode')
+
+    @axisCodes.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(str, None))
+    def axisCodes(self, value):
+        if len(set(value)) != len(value):
+            raise ValueError('axisCodes should be unique; got %r' % value)
+        self._setDimensionalAttributes('axisCode', value)
+
+    @property
+    @_includeInCopy
+    def acquisitionAxisCode(self) -> Optional[str]:
+        """Axis code of acquisition axis - None if not known"""
+        for dataDim in self._wrappedData.sortedDataDims():
+            expDim = dataDim.expDim
+            if expDim.isAcquisition:
+                expDimRef = expDim.findFirstExpDimRef(serial=1)
+                axisCode = expDimRef.axisCode
+                if axisCode is None:
+                    self._wrappedData.experiment.resetAxisCodes()
+                    axisCode = expDimRef.axisCode
+                return axisCode
+        #
+        return None
+
+    @acquisitionAxisCode.setter
+    def acquisitionAxisCode(self, value):
+        if value is None:
+            index = None
+        else:
+            index = self.axisCodes.index(value)
+
+        for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
+            dataDim.expDim.isAcquisition = (ii == index)
+
 
     @property
     def dimensionTypes(self) -> Tuple[str, ...]:
@@ -1068,32 +1108,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             raise ValueError("Folding modes must be 'circular', 'mirror', None")
 
         self._setExpDimRefAttribute('isFolded', [dd[x] for x in values])
-
-    @property
-    @_includeInCopy
-    def acquisitionAxisCode(self) -> Optional[str]:
-        """Axis code of acquisition axis - None if not known"""
-        for dataDim in self._wrappedData.sortedDataDims():
-            expDim = dataDim.expDim
-            if expDim.isAcquisition:
-                expDimRef = expDim.findFirstExpDimRef(serial=1)
-                axisCode = expDimRef.axisCode
-                if axisCode is None:
-                    self._wrappedData.experiment.resetAxisCodes()
-                    axisCode = expDimRef.axisCode
-                return axisCode
-        #
-        return None
-
-    @acquisitionAxisCode.setter
-    def acquisitionAxisCode(self, value):
-        if value is None:
-            index = None
-        else:
-            index = self.axisCodes.index(value)
-
-        for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
-            dataDim.expDim.isAcquisition = (ii == index)
 
     @property
     @_includeInDimensionalCopy

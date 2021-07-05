@@ -231,6 +231,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return []
 
     @property
+    def spectrumDimensions(self):
+        """A better name for spectrumReferences
+        """
+        return self.spectrumReferences
+
+    @property
     def spectrumHits(self):
         """STUB: hot-fixed later"""
         return None
@@ -707,7 +713,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         return self._dataStore.dataFormat
 
-
     #-----------------------------------------------------------------------------------------
     # Dimensional Attributes
     #-----------------------------------------------------------------------------------------
@@ -717,12 +722,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         Assumes all checks have been done
         """
         for idx, val in enumerate(value):
-            setattr(self.spectrumReferences[idx], attributeName, val)
+            setattr(self.spectrumDimensions[idx], attributeName, val)
 
     def _getDimensionalAttributes(self, attributeName: str) -> list:
         """Conveniance function get the values for each spectrumReference.attributeName
         """
-        return [getattr(specRef, attributeName) for specRef in self.spectrumReferences]
+        return [getattr(dim, attributeName) for dim in self.spectrumDimensions]
 
     def _setStdDataDimValue(self, attributeName, value: Sequence):
         """Set value for non-Sampled DataDims only"""
@@ -785,7 +790,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     @_includeInDimensionalCopy
-    def axisCodes(self) -> List[str]:
+    def axisCodes(self) -> List[Optional[str]]:
         """List of an unique axisCode per dimension"""
         return self._getDimensionalAttributes('axisCode')
 
@@ -810,52 +815,75 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         'Spectrum.aquisitionAxisCode: this should not happen; more then one dimension defined as acquisition dimension')
 
     @property
-    def dimensionTypes(self) -> List[str]:
-        """Dimension types as defined by the spectrum dataSource
+    def dimensionTypes(self) -> List[Optional[str]]:
+        """Dimension types ('Time' / 'Frequency' / 'Sampled') per dimension
         """
-        # dimension types ('Fid' / 'Frequency' / 'Sampled'),  per dimension
-        if self._dataSource is None:
-            getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning None only' % self)
-            return tuple([None] * self.dimensionCount)
+        return self._getDimensionalAttributes('dimensionType')
 
-        return tuple(self._dataSource.dimensionTypes)
+    @dimensionTypes.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(str, None))
+    def dimensionTypes(self, value):
+        self._setDimensionalAttributes('dimensionType', value)
 
     @property
     @_includeInDimensionalCopy
-    def spectralWidthsHz(self) -> Tuple[Optional[float], ...]:
+    def spectralWidthsHz(self) -> List[float]:
         """spectral width (in Hz) per dimension"""
-        return tuple(x.spectralWidth if hasattr(x, 'spectralWidth') else None
-                     for x in self._wrappedData.sortedDataDims())
+        return self._getDimensionalAttributes('spectralWidthHz')
+        # return tuple(x.spectralWidth if hasattr(x, 'spectralWidth') else None
+        #              for x in self._wrappedData.sortedDataDims())
 
     @spectralWidthsHz.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(float,int))
     def spectralWidthsHz(self, value: Sequence):
-        apiDataSource = self._wrappedData
-        attributeName = 'spectralWidth'
-        if len(value) == apiDataSource.numDim:
-            for ii, dataDim in enumerate(apiDataSource.sortedDataDims()):
-                val = value[ii]
-                if hasattr(dataDim, attributeName):
-                    if not val:
-                        raise ValueError("Attempt to set %s to %s in dimension %s: %s"
-                                         % (attributeName, val, ii + 1, value))
-                    else:
-                        # We assume that the number of points is constant, so setting SW changes valuePerPoint
-                        swold = getattr(dataDim, attributeName)
-                        dataDim.valuePerPoint *= (val / swold)
-                elif val is not None:
-                    raise ValueError("Attempt to set %s in sampled dimension %s: %s"
-                                     % (attributeName, ii + 1, value))
-        else:
-            raise ValueError("SpectralWidth value must have length %s, was %s" %
-                             (apiDataSource.numDim, value))
+        self._setDimensionalAttributes('spectralWidthHz', value)
+        # apiDataSource = self._wrappedData
+        # attributeName = 'spectralWidth'
+        # if len(value) == apiDataSource.numDim:
+        #     for ii, dataDim in enumerate(apiDataSource.sortedDataDims()):
+        #         val = value[ii]
+        #         if hasattr(dataDim, attributeName):
+        #             if not val:
+        #                 raise ValueError("Attempt to set %s to %s in dimension %s: %s"
+        #                                  % (attributeName, val, ii + 1, value))
+        #             else:
+        #                 # We assume that the number of points is constant, so setting SW changes valuePerPoint
+        #                 swold = getattr(dataDim, attributeName)
+        #                 dataDim.valuePerPoint *= (val / swold)
+        #         elif val is not None:
+        #             raise ValueError("Attempt to set %s in sampled dimension %s: %s"
+        #                              % (attributeName, ii + 1, value))
+        # else:
+        #     raise ValueError("SpectralWidth value must have length %s, was %s" %
+        #                      (apiDataSource.numDim, value))
+
+    @property
+    @_includeInDimensionalCopy
+    def spectralWidths(self) -> Tuple[Optional[float], ...]:
+        """spectral width (in ppm) per dimension """
+        return self._getDimensionalAttributes('spectralWidth')
+        # return tuple(x and x.spectralWidth for x in self._mainDataDimRefs())
+
+    @spectralWidths.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(float, int))
+    def spectralWidths(self, value):
+        self._setDimensionalAttributes('spectralWidth', value)
+        # oldValues = self.spectralWidths
+        # for ii, dataDimRef in enumerate(self._mainDataDimRefs()):
+        #     if dataDimRef is not None:
+        #         oldsw = oldValues[ii]
+        #         sw = value[ii]
+        #         localValuePerPoint = dataDimRef.localValuePerPoint
+        #         if localValuePerPoint:
+        #             dataDimRef.localValuePerPoint = localValuePerPoint * sw / oldsw
+        #         else:
+        #             dataDimRef.dataDim.valuePerPoint *= (sw / oldsw)
 
     @property
     def valuesPerPoint(self) -> Tuple[Optional[float], ...]:
-        """valuePerPoint for each dimension
-
-        in ppm for Frequency dimensions with a single, well-defined reference
-        None for Frequency dimensions without a single, well-defined reference
-        in time units (seconds) for FId dimensions
+        """valuePerPoint for each dimension:
+        in ppm for Frequency dimensions
+        in time units (seconds) for time (Fid) dimensions
         None for sampled dimensions
         """
         result = []
@@ -1211,25 +1239,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                 tolerances[ii] = max(tolerance, self.spectralWidths[ii] / self.pointCounts[ii])
         #
         return tolerances
-
-    @property
-    @_includeInDimensionalCopy
-    def spectralWidths(self) -> Tuple[Optional[float], ...]:
-        """spectral width after processing in axis unit (ppm), per dimension """
-        return tuple(x and x.spectralWidth for x in self._mainDataDimRefs())
-
-    @spectralWidths.setter
-    def spectralWidths(self, value):
-        oldValues = self.spectralWidths
-        for ii, dataDimRef in enumerate(self._mainDataDimRefs()):
-            if dataDimRef is not None:
-                oldsw = oldValues[ii]
-                sw = value[ii]
-                localValuePerPoint = dataDimRef.localValuePerPoint
-                if localValuePerPoint:
-                    dataDimRef.localValuePerPoint = localValuePerPoint * sw / oldsw
-                else:
-                    dataDimRef.dataDim.valuePerPoint *= (sw / oldsw)
 
     @property
     @_includeInDimensionalCopy

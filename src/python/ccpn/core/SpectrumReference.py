@@ -152,11 +152,14 @@ class SpectrumReference(AbstractWrapperObject):
 
     @pointCount.setter
     def pointCount(self, value):
+        # To decouple pointCount from spectralWidth
+        oldSw = self.spectralWidthHz
         if self._dataDim.className == 'FidDataDim':
             # GWV: compatibilty with v2?
             self._dataDim.numPointsValid = value
         else:
             self._dataDim.numPoints = value
+        self.spectralWidthHz = oldSw
 
     @property
     def isComplex(self):
@@ -166,6 +169,22 @@ class SpectrumReference(AbstractWrapperObject):
     @isComplex.setter
     def isComplex(self, value):
         self._dataDim.isComplex = bool(value)
+
+    @property
+    def dimensionType(self) -> typing.Optional[str]:
+        """Dimension type ('Time' / 'Frequency' / 'Sampled')"""
+        if not self._hasInternalParameter('dimensionType'):
+            result = specLib.DIMENSION_FREQUENCY
+            self.dimensionType = result
+        else:
+            result = self._getInternalParameter('dimensionType')
+        return result
+
+    @dimensionType.setter
+    def dimensionType(self, value):
+        if value not in specLib.DIMENSIONTYPES:
+            raise ValueError('dimensionType should be one of %r' % specLib.DIMENSIONTYPES)
+        self._setInternalParameter('dimensionType', value)
 
     @property
     def spectrometerFrequency(self) -> float:
@@ -252,7 +271,7 @@ class SpectrumReference(AbstractWrapperObject):
 
     @property
     def axisUnit(self) -> str:
-        """unit for transformed data using thei reference (most commonly 'ppm')"""
+        """unit for transformed data using their reference (most commonly 'ppm')"""
         return self._wrappedData.expDimRef.unit
 
     @axisUnit.setter
@@ -280,28 +299,48 @@ class SpectrumReference(AbstractWrapperObject):
         self._wrappedData.refValue = value
 
     @property
+    def spectralWidthHz(self) -> float:
+        """spectral width in Hz"""
+        return self._dataDim.spectralWidth
+
+    @spectralWidthHz.setter
+    def spectralWidthHz(self, value: float):
+        swOld = self.spectralWidthHz
+        # self._dataDim.spectralWidth = value # This is not allowed; it needs to go via valuePerPoint
+        self._valuePerPoint *= (value / swOld)
+
+    @property
     def spectralWidth(self) -> float:
-        """spectral width after processing (generally in ppm) """
-        return self._wrappedData.spectralWidth
+        """spectral width in ppm"""
+        return self._dataDimRef.spectralWidth
 
     @spectralWidth.setter
     def spectralWidth(self, value: float):
-        if not value:
-            raise ValueError("Attempt to set spectralWidth to %s"
-                             % value)
-        else:
-            # We assume that the number of points is constant, so setting SW changes valuePerPoint
-            dataDimRef = self._wrappedData
-            swold = dataDimRef.spectralWidth
-            if dataDimRef.localValuePerPoint:
-                dataDimRef.localValuePerPoint *= (value / swold)
-            else:
-                dataDimRef.dataDim.valuePerPoint *= (value / swold)
+        swOld = self.spectralWidth
+        # self._dataDimRef.spectralWidth = value  # This is not allowed; it needs to go via valuePerPoint
+        self._valuePerPoint = (value / swOld)
 
+    # This is a crucial property that effectively governs the spectral width (both in Hz and ppm)
+    #     # We assume that the number of points is constant, so setting SW changes valuePerPoint
+    #     dataDimRef = self._wrappedData
+    #     swold = dataDimRef.spectralWidth
+    #     if dataDimRef.localValuePerPoint:
+    #         dataDimRef.localValuePerPoint *= (value / swold)
+    #     else:
+    #         dataDimRef.dataDim.valuePerPoint *= (value / swold)
     @property
-    def numPointsOrig(self) -> bool:
-        """numPointsOrig"""
-        return self._wrappedData.dataDim.numPointsOrig
+    def _valuePerPoint(self) -> float:
+        """Value per point: in Hz for Frequency domain data, in secs for time/fid domain data"""
+        return self._dataDim.valuePerPoint
+
+    @_valuePerPoint.setter
+    def _valuePerPoint(self, value: float):
+        self._dataDim.valuePerPoint = value
+
+    # @property
+    # def numPointsOrig(self) -> bool:
+    #     """numPointsOrig"""
+    #     return self._wrappedData.dataDim.numPointsOrig
 
     @property
     def assignmentTolerance(self) -> float:

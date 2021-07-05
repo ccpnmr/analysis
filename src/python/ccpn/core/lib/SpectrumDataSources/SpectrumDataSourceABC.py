@@ -331,7 +331,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='dimensionTypes',
-            hasSetterInSpectrumClass=False
+            hasSetterInSpectrumClass=True
             )
     isComplex = CList(trait=CBool(), default_value=[False] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,

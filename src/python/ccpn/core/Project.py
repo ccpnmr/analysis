@@ -295,8 +295,9 @@ class Project(AbstractWrapperObject):
                 # delete here ...
                 # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
             # else:
-            error = '\n '.join(apiStatus.invalidObjectsErrors)
-            raise ValueError(error)
+            errorMsg = '\n '.join(apiStatus.invalidObjectsErrors)
+            getLogger().critical('Found compromised items. Project might be left in an invalid state. %s' %errorMsg)
+            # raise ValueError(error)
 
         # don't check valid inside this routine as it is not optimised and only results in a crash. Use apiStatus object.
         savedOk = apiIo.saveProject(self._wrappedData.root, newPath=newPath,

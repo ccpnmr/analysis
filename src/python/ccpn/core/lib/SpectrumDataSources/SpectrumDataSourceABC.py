@@ -365,10 +365,16 @@ class SpectrumDataSourceABC(CcpNmrJson):
             hasSetterInSpectrumClass=False,
             info='per dimension: labels, as e.g. present in Felix or NmrPipe',
             )
-    measurementTypes = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
+    measurementTypes = CList(trait=CString(allow_none=True), default_value=['Shift'] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='measurementTypes',
+            hasSetterInSpectrumClass=True,
+            )
+    foldingModes = CList(trait=CString(allow_none=True), default_value=[specLib.FOLDING_MODE_CIRCULAR] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='foldingModes',
             hasSetterInSpectrumClass=True,
             )
     spectrometerFrequencies = CList(trait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(

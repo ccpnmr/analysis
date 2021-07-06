@@ -78,7 +78,16 @@ E_DIM = 8
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
 
-WINDOW_FUNCTIONS = ('EM', 'GM', 'SINE', 'QSINE')
+FOLDING_MODE_CIRCULAR = 'circular'
+FOLDING_MODE_MIRROR = 'mirror'
+FOLDING_MODES = (FOLDING_MODE_CIRCULAR, FOLDING_MODE_MIRROR)
+
+WINDOW_FUNCTION_EM = 'EM'
+WINDOW_FUNCTION_GM = 'GM'
+WINDOW_FUNCTION_SINE = 'Sine'
+WINDOW_FUNCTION_QSINE = 'squaredSine'
+WINDOW_FUNCTIONS = (WINDOW_FUNCTION_EM, WINDOW_FUNCTION_GM, WINDOW_FUNCTION_SINE, WINDOW_FUNCTION_QSINE)
+
 MEASUREMENT_TYPES = ('Shift','ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling', \
                      'MQShift','T1','T2','T1rho','T1zz')
 
@@ -138,6 +147,10 @@ def checkSpectrumPropertyValue(iterable, allowNone=False, types=(), enumerated=(
         :return: value cast into types[0]
         """
         checkedValue = value
+        if not allowNone and value is None:
+            raise ValueError('Value for "%s" of %s cannot be None)' %
+                             (attributeName, obj))
+
         if len(types) > 0:
             if not isinstance(value, types):
                 typeNames = tuple(t.__name__ for t in types)

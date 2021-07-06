@@ -795,7 +795,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('axisCode')
 
     @axisCodes.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(str, type(None)))
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,))
     def axisCodes(self, value):
         if len(set(value)) != len(value):
             raise ValueError('axisCodes should be unique; got %r' % value)
@@ -821,7 +821,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('dimensionType')
 
     @dimensionTypes.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(str, type(None)))
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,))
     def dimensionTypes(self, value):
         self._setDimensionalAttributes('dimensionType', value)
 
@@ -892,7 +892,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('phase0')
 
     @phases0.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(float, int, type(None)))
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(float, int))
     def phases0(self, value: Sequence):
         self._setDimensionalAttributes('phase0', value)
         # self._setStdDataDimValue('phase0', value)
@@ -976,7 +976,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('measurementType')
 
     @measurementTypes.setter
-    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,), enumerated=specLib.MEASUREMENT_TYPES)
+    @checkSpectrumPropertyValue(iterable=True, types=(str,), enumerated=specLib.MEASUREMENT_TYPES)
     def measurementTypes(self, value):
         self._setDimensionalAttributes('measurementType', value)
 
@@ -1023,6 +1023,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if len(_vals) != len(set(_vals)):
             raise ValueError('referenceExperimentDimensions must be unique')
 
+        #TODO: use self.spectrumReferences and its attributes/methods (if needed add method)
         for ii, (dataDim, val) in enumerate(zip(apiDataSource.sortedDataDims(), values)):
             expDim = dataDim.expDim
             if expDim is None and val is not None:
@@ -1066,25 +1067,25 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     @_includeInDimensionalCopy
-    def foldingModes(self) -> Tuple[Optional[str], ...]:
+    def foldingModes(self) -> List[Optional[str]]:
         """folding mode (values: 'circular', 'mirror', None), per dimension"""
-        dd = {True: 'mirror', False: 'circular', None: None}
-        return tuple(dd[x and x.isFolded] for x in self._mainExpDimRefs())
+        return self._getDimensionalAttributes('foldingMode')
+        # dd = {True: 'mirror', False: 'circular', None: None}
+        # return tuple(dd[x and x.isFolded] for x in self._mainExpDimRefs())
 
     @foldingModes.setter
-    def foldingModes(self, values):
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,), enumerated=specLib.FOLDING_MODES)
+    def foldingModes(self, value):
+        self._setDimensionalAttributes('foldingMode', value)
 
-        # TODO For NEF we should support both True, False, and None
-        # That requires an API change
-
-        dd = {'circular': False, 'mirror': True, None: False}
-
-        if len(values) != self.dimensionCount:
-            raise ValueError("Length of %s does not match number of dimensions." % str(values))
-        if not all(isinstance(dimVal, (str, type(None))) and dimVal in dd.keys() for dimVal in values):
-            raise ValueError("Folding modes must be 'circular', 'mirror', None")
-
-        self._setExpDimRefAttribute('isFolded', [dd[x] for x in values])
+        # dd = {'circular': False, 'mirror': True, None: False}
+        #
+        # if len(values) != self.dimensionCount:
+        #     raise ValueError("Length of %s does not match number of dimensions." % str(values))
+        # if not all(isinstance(dimVal, (str, type(None))) and dimVal in dd.keys() for dimVal in values):
+        #     raise ValueError("Folding modes must be 'circular', 'mirror', None")
+        #
+        # self._setExpDimRefAttribute('isFolded', [dd[x] for x in values])
 
     @property
     @_includeInDimensionalCopy

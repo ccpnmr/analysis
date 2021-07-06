@@ -211,11 +211,12 @@ class SpectrumReference(AbstractWrapperObject):
         self._expDimRef.sf = value
 
     @property
-    def measurementType(self) -> str:
+    def measurementType(self) -> Optional[str]:
         """Type of NMR measurement referred to by this reference. Legal values are:
         'Shift','ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling',
         'MQShift','T1','T2','T1rho','T1zz' --- defined SpectrumLib.MEASUREMENT_TYPES
         """
+        # TODO: Model-change to allow None
         return self._expDimRef.measurementType
 
     @measurementType.setter
@@ -266,14 +267,19 @@ class SpectrumReference(AbstractWrapperObject):
 
     @property
     def foldingMode(self) -> Optional[str]:
-        """folding mode matching reference (values: 'aliased', 'folded', None)"""
-        dd = {True: 'folded', False: 'aliased', None: None}
-        return dd[self._wrappedData.expDimRef.isFolded]
+        """folding mode matching reference (values: 'circular', 'mirror', None)"""
+        if not self._hasInternalParameter('foldingMode'):
+            result = None
+            self.foldingMode = result
+        else:
+            result = self._getInternalParameter('foldingMode')
+        return result
 
     @foldingMode.setter
     def foldingMode(self, value):
-        dd = {'aliased': False, 'folded': True, None: None}
-        self._wrappedData.expDimRef.isFolded = dd[value]
+        if value not in specLib.FOLDING_MODES:
+            raise ValueError('foldingMode should be one of %r' % specLib.FOLDING_MODES)
+        self._setInternalParameter('foldingMode', value)
 
     @property
     def axisCode(self) -> str:

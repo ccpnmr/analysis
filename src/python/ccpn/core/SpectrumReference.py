@@ -389,6 +389,33 @@ class SpectrumReference(AbstractWrapperObject):
         self._dataDim.windowFunction = value
 
     @property
+    def lorentzianBroadening(self) -> Optional[float]:
+        """Lorenzian broadening (in Hz)"""
+        return (self._dataDim.lorentzianBroadening if not self._isSampledDimension else None)
+
+    @lorentzianBroadening.setter
+    def lorentzianBroadening(self, value):
+        self._dataDim.lorentzianBroadening = value
+
+    @property
+    def GaussianBroadening(self) -> Optional[float]:
+        """Gaussian broadening"""
+        return (self._dataDim.GaussianBroadening if not self._isSampledDimension else None)
+
+    @GaussianBroadening.setter
+    def GaussianBroadening(self, value):
+        self._dataDim.GaussianBroadening = value
+
+    @property
+    def sineWindowShift(self) -> Optional[float]:
+        """Shift of sine/sine-square window function (in degrees)"""
+        return (self._dataDim.sineWindowShift if not self._isSampledDimension else None)
+
+    @sineWindowShift.setter
+    def sineWindowShift(self, value):
+        self._dataDim.sineWindowShift = value
+
+    @property
     def assignmentTolerance(self) -> float:
         """Assignment Tolerance"""
         return self._wrappedData.assignmentTolerance
@@ -416,6 +443,7 @@ class SpectrumReference(AbstractWrapperObject):
         if not super()._finaliseAction(action):
             return
 
+        #TODO: GWV asks: why do we have this?
         if action == 'change':
             for peak in self.spectrum.peaks:
                 peak._finaliseAction('change')
@@ -424,11 +452,11 @@ class SpectrumReference(AbstractWrapperObject):
     # CCPN functions
     #=========================================================================================
     def pointToValue(self, point: float) -> float:
-        """Axis (ppm) value corresponding to point"""
+        """:return ppm-value corresponding to point (float)"""
         return self._wrappedData.pointToValue(point)
 
     def valueToPoint(self, value: float) -> float:
-        """ Point number (float) corresponding to (ppm) value"""
+        """:return point (float) corresponding to ppm-value"""
         return self._wrappedData.valueToPoint(value)
 
 #=========================================================================================

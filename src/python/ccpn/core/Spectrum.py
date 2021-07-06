@@ -923,36 +923,36 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     @_includeInDimensionalCopy
-    def lorentzianBroadenings(self) -> Tuple[Optional[float], ...]:
-        """Lorenzian broadening in Hz per dimension"""
-        return tuple(x.lorentzianBroadening if x.className != 'SampledDataDim' else None
-                     for x in self._wrappedData.sortedDataDims())
+    def lorentzianBroadenings(self) -> List[Optional[float]]:
+        """Lorenzian broadening per dimension (in Hz)"""
+        return self._getDimensionalAttributes('lorentzianBroadening')
 
     @lorentzianBroadenings.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(float, int, type(None)))
     def lorentzianBroadenings(self, value: Sequence):
-        self._setStdDataDimValue('lorentzianBroadening', value)
+        self._setDimensionalAttributes('lorentzianBroadening', value)
 
     @property
     @_includeInDimensionalCopy
-    def gaussianBroadenings(self) -> Tuple[Optional[float], ...]:
+    def gaussianBroadenings(self) -> List[Optional[float]]:
         """Gaussian broadening per dimension"""
-        return tuple(x.gaussianBroadening if x.className != 'SampledDataDim' else None
-                     for x in self._wrappedData.sortedDataDims())
+        return self._getDimensionalAttributes('gaussianBroadening')
 
     @gaussianBroadenings.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(float, int, type(None)))
     def gaussianBroadenings(self, value: Sequence):
-        self._setStdDataDimValue('gaussianBroadening', value)
+        self._setDimensionalAttributes('gaussianBroadening', value)
 
     @property
     @_includeInDimensionalCopy
-    def sineWindowShifts(self) -> Tuple[Optional[float], ...]:
-        """Shift of sine/sine-square window function in degrees"""
-        return tuple(x.sineWindowShift if x.className != 'SampledDataDim' else None
-                     for x in self._wrappedData.sortedDataDims())
+    def sineWindowShifts(self) -> List[Optional[float]]:
+        """Shift of sine/sine-square window function per dimension (in degrees)"""
+        return self._getDimensionalAttributes('sineWindowShift')
 
     @sineWindowShifts.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(float, int, type(None)))
     def sineWindowShifts(self, value: Sequence):
-        self._setStdDataDimValue('sineWindowShift', value)
+        self._setDimensionalAttributes('sineWindowShift', value)
 
     # GWV test
     # _spectrometerFrequencies = SpectrumDimensionTrait(trait=Float(min=0.0)).tag(

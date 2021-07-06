@@ -521,6 +521,8 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
     :param bool independentStrips: if True do freeStrip display.
     """
 
+#TODO; this needs to be cleaned of all (Spectrum) api-calls, except those pertaining to SpectrumDisplay creation
+
     if title and Pid.altCharacter in title:
         raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
 

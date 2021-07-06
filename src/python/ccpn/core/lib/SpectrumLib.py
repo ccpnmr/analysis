@@ -147,9 +147,15 @@ def _includeInDimensionalCopy(func):
     return func
 
 
-def checkSpectrumPropertyValue(iterable, allowNone=False, types=(), enumerated=()):
+def checkSpectrumPropertyValue(iterable:bool, unique:bool=False, allowNone:bool=False, types:tuple=(), enumerated:tuple=()):
     """Decorator to check values in Spectrum property setters
+    :param iterable: True, False: indicates that value should be an iterable
+    :param unique: True, False: indicates if iterable items should be unique
+    :param allowNone: True, False indicates if None value is allowed
+    :param types: a tuple of permittable types for value; value is cast into first type
+    :param enumerated: a tuple indicating that value should be one of the items of the tuple
     """
+
     if allowNone:
         types = tuple(list(types) + [type(None)])
         if len(enumerated) > 0:
@@ -185,6 +191,12 @@ def checkSpectrumPropertyValue(iterable, allowNone=False, types=(), enumerated=(
         if len(value) != obj.dimensionCount:
             raise ValueError('Value for "%s" of %s needs to be of length %d; got %r' %
                              (attributeName, obj, obj.dimensionCount, value))
+
+        if unique:
+            vals = [val for val in value if val is not None]
+            if len(vals) != len(set(vals)):
+                raise ValueError('The items of "%s" of %s need to be unique; got %r' %
+                                (attributeName, obj, value))
 
     def checkEnumerate(obj, attributeName, value):
         """Check if values needs to be in enumerate

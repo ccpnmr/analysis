@@ -604,13 +604,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         raise ValueError('No reference experiment matches name "%s"' % value)
 
     @property
-    def _serial(self) -> int:
-        """Return the _wrappedData serial
-        CCPN Internal
-        """
-        return self._wrappedData.serial
-
-    @property
     def experiment(self):
         """Return the experiment assigned to the spectrum
         """
@@ -786,10 +779,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('axisCode')
 
     @axisCodes.setter
-    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,))
+    @checkSpectrumPropertyValue(iterable=True, unique=True, allowNone=True, types=(str,))
     def axisCodes(self, value):
-        if len(set(value)) != len(value):
-            raise ValueError('axisCodes should be unique; got %r' % value)
         self._setDimensionalAttributes('axisCode', value)
 
     @property
@@ -807,8 +798,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     def dimensionTypes(self) -> List[Optional[str]]:
-        """Dimension types ('Time' / 'Frequency' / 'Sampled') per dimension
-        """
+        """Dimension types ('Time' / 'Frequency' / 'Sampled') per dimension"""
         return self._getDimensionalAttributes('dimensionType')
 
     @dimensionTypes.setter
@@ -821,8 +811,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def spectralWidthsHz(self) -> List[float]:
         """spectral width (in Hz) per dimension"""
         return self._getDimensionalAttributes('spectralWidthHz')
-        # return tuple(x.spectralWidth if hasattr(x, 'spectralWidth') else None
-        #              for x in self._wrappedData.sortedDataDims())
 
     @spectralWidthsHz.setter
     @checkSpectrumPropertyValue(iterable=True, types=(float, int))
@@ -831,7 +819,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     @_includeInDimensionalCopy
-    def spectralWidths(self) -> Tuple[Optional[float], ...]:
+    def spectralWidths(self) -> List[float]:
         """spectral width (in ppm) per dimension """
         return self._getDimensionalAttributes('spectralWidth')
 
@@ -999,7 +987,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @referenceExperimentDimensions.setter
     @ccpNmrV3CoreSetter()
-    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,))
+    @checkSpectrumPropertyValue(iterable=True, unique=True, allowNone=True, types=(str,))
     def referenceExperimentDimensions(self, values: Sequence):
         apiDataSource = self._wrappedData
 
@@ -1010,9 +998,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         # if not all(isinstance(dimVal, (str, type(None))) for dimVal in values):
         #     raise ValueError('referenceExperimentDimensions must be str, None')
 
-        _vals = [val for val in values if val is not None]
-        if len(_vals) != len(set(_vals)):
-            raise ValueError('referenceExperimentDimensions must be unique')
+        # _vals = [val for val in values if val is not None]
+        # if len(_vals) != len(set(_vals)):
+        #     raise ValueError('referenceExperimentDimensions must be unique')
 
         #TODO: use self.spectrumReferences and its attributes/methods (if needed add method)
         for ii, (dataDim, val) in enumerate(zip(apiDataSource.sortedDataDims(), values)):
@@ -2486,8 +2474,15 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._dataSource.allSlices(sliceDim=sliceDim)
 
     #-----------------------------------------------------------------------------------------
-    # Implementation functions
+    # Implementation properties and functions
     #-----------------------------------------------------------------------------------------
+
+    @property
+    def _serial(self) -> int:
+        """Return the _wrappedData serial
+        CCPN Internal
+        """
+        return self._wrappedData.serial
 
     def _getDataSource(self, dataStore):
         """Check the validity and access the file defined by dataStore;

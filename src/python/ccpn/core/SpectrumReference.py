@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import typing
+from typing import Optional, Sequence, Tuple, List
 
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -66,10 +66,15 @@ class SpectrumReference(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.DataDimRef._metaclass.qualifiedName()
 
+    #-----------------------------------------------------------------------------------------
+
     def __init__(self, project, wrappedData):
         super().__init__(project, wrappedData)
 
+    #-----------------------------------------------------------------------------------------
     # CCPN properties
+    #-----------------------------------------------------------------------------------------
+
     @property
     def _apiSpectrumReference(self) -> Nmr.DataDimRef:
         """ CCPN DataDimRef matching Spectrum"""
@@ -82,7 +87,7 @@ class SpectrumReference(AbstractWrapperObject):
         return Pid.createId(dataDimRef.dataDim.dim, dataDimRef.expDimRef.serial)
 
     @property
-    def _localCcpnSortKey(self) -> typing.Tuple:
+    def _localCcpnSortKey(self) -> Tuple:
         """Local sorting key, in context of parent."""
         dataDimRef = self._wrappedData
         return (dataDimRef.dataDim.dim, dataDimRef.expDimRef.serial)
@@ -120,10 +125,20 @@ class SpectrumReference(AbstractWrapperObject):
         """
         return self._wrappedData.expDimRef
 
+    @property
+    def _isSampledDimension(self) -> bool:
+        """True if this is a sampled dimension; mainly to implement code to upward compatible with v2"""
+        return self._dataDim.className == 'SampledDataDim'
+
+    @property
+    def _isFidDimension(self) -> bool:
+        """True if this is a Fid dimension; mainly to implement code to upward compatible with v2"""
+        return self._dataDim.className == 'FidDataDim'
+
     spectrum = _parent
 
     #-----------------------------------------------------------------------------------------
-    # Properties
+    # Object properties
     #-----------------------------------------------------------------------------------------
 
     @property
@@ -143,7 +158,7 @@ class SpectrumReference(AbstractWrapperObject):
     @property
     def pointCount(self):
         """Number of points in this dimension"""
-        if self._dataDim.className == 'FidDataDim' and hasattr(self._dataDim, 'numPointsValid'):
+        if self._isFidDimension and hasattr(self._dataDim, 'numPointsValid'):
             # GWV: compatibilty with v2?
             result = self._dataDim.numPointsValid
         else:
@@ -154,7 +169,7 @@ class SpectrumReference(AbstractWrapperObject):
     def pointCount(self, value):
         # To decouple pointCount from spectralWidth
         oldSw = self.spectralWidthHz
-        if self._dataDim.className == 'FidDataDim':
+        if self._isFidDimension:
             # GWV: compatibilty with v2?
             self._dataDim.numPointsValid = value
         else:
@@ -171,7 +186,7 @@ class SpectrumReference(AbstractWrapperObject):
         self._dataDim.isComplex = bool(value)
 
     @property
-    def dimensionType(self) -> typing.Optional[str]:
+    def dimensionType(self) -> Optional[str]:
         """Dimension type ('Time' / 'Frequency' / 'Sampled')"""
         if not self._hasInternalParameter('dimensionType'):
             result = specLib.DIMENSION_FREQUENCY
@@ -239,18 +254,18 @@ class SpectrumReference(AbstractWrapperObject):
 
     # GWV: moved this to a private attributes, as currently we only support one isotopeCode per dimension
     @property
-    def _isotopeCodes(self) -> typing.Tuple[str, ...]:
+    def _isotopeCodes(self) -> Tuple[str, ...]:
         """Isotope identification strings for isotopes.
         NB there can be several isotopes for e.g. J-coupling or multiple quantum coherence.
         """
         return self._expDimRef.isotopeCodes
 
     @_isotopeCodes.setter
-    def _isotopeCodes(self, value: typing.Sequence):
+    def _isotopeCodes(self, value: Sequence):
         self._expDimRef.isotopeCodes = value
 
     @property
-    def foldingMode(self) -> typing.Optional[str]:
+    def foldingMode(self) -> Optional[str]:
         """folding mode matching reference (values: 'aliased', 'folded', None)"""
         dd = {True: 'folded', False: 'aliased', None: None}
         return dd[self._wrappedData.expDimRef.isFolded]
@@ -341,6 +356,37 @@ class SpectrumReference(AbstractWrapperObject):
     # def numPointsOrig(self) -> bool:
     #     """numPointsOrig"""
     #     return self._wrappedData.dataDim.numPointsOrig
+
+    @property
+    def phase0(self) -> Optional[float]:
+        """Zero-order phase"""
+        return (self._dataDim.phase0 if not self._isSampledDimension else None)
+
+    @phase0.setter
+    def phase0(self, value):
+        self._dataDim.phase0 = value
+
+    @property
+    def phase1(self) -> Optional[float]:
+        """First-order phase"""
+        return (self._dataDim.phase1 if not self._isSampledDimension else None)
+
+    @phase1.setter
+    def phase1(self, value):
+        self._dataDim.phase1 = value
+
+    @property
+    def windowFunction(self) -> Optional[str]:
+        """Window function
+        e.g. 'EM', 'GM', 'SINE', 'QSINE', .... (defined in SpectrumLib.WINDOW_FUNCTIONS)
+        """
+        return (self._dataDim.windowFunction if not self._isSampledDimension else None)
+
+    @windowFunction.setter
+    def windowFunction(self, value):
+        if not value in list(specLib.WINDOW_FUNCTIONS) + [None]:
+            raise ValueError('windowFunction should be one of %r; got %r' % (specLib.WINDOW_FUNCTIONS, value))
+        self._dataDim.windowFunction = value
 
     @property
     def assignmentTolerance(self) -> float:
@@ -478,16 +524,6 @@ def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> Spectru
 #EJB 20181205: moved to Spectrum
 # Spectrum.newSpectrumReference = _newSpectrumReference
 # del _newSpectrumReference
-
-
-# def getter(self: Spectrum) -> typing.List[typing.Optional[SpectrumReference]]:
-#     data2Obj = self._project._data2Obj
-#     return list(data2Obj.get(x) if x else None for x in self._mainDataDimRefs())
-#
-#
-# Spectrum.mainSpectrumReferences = property(getter, None, None,
-#                                            "Main SpectrumReference for each dimension (value is None for non-frequency dimensions"
-#                                            )
 
 
 # Notifiers:

@@ -268,8 +268,8 @@ class Project(AbstractWrapperObject):
 
     def _initialiseProject(self):
         """Complete initialisation of project,
-
-        set up logger and notifiers, and wrap underlying data"""
+        set up logger and notifiers, and wrap underlying data
+        """
 
         # The logger has already been set up when creating/loading the API project
         # so just get it
@@ -286,30 +286,20 @@ class Project(AbstractWrapperObject):
         self._resetUndo()
         with inactivity():
             self._restoreChildren()
-
-
-        with undoStackBlocking(self.application):
-            with notificationBlanking(self.application):
-                with notificationEchoBlocking(self.application):
-                    # 20190520:ED routines that use core objects, not sure whether the correct place
-                    # GWV: it is not; the Spectrum instances need to assure they are ok after
-                    # (re-)initialisation
-                    # self._setContourColours()
-                    # self._setNoiseLevels()
-
-                    if len(self.chemicalShiftLists) == 0:
-                        self.newChemicalShiftList(name='default')
+            # we always have the default chemicalShift list
+            if len(self.chemicalShiftLists) == 0:
+                self.newChemicalShiftList(name='default')
 
     def _close(self):
         self.close()
 
     def close(self):
         """Clean up the wrapper project previous to deleting or replacing
-
-        Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)"""
-        # Remove undo stack:
+        Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)
+        """
         self._logger.info("Closing %s" % self.path)
 
+        # Remove undo stack:
         self._resetUndo(maxWaypoints=0)
 
         apiIo.cleanupProject(self)
@@ -323,9 +313,9 @@ class Project(AbstractWrapperObject):
     def __repr__(self):
         """String representation"""
         if self.isDeleted:
-            return "<ccpn.core.Project:%s, isDeleted=True>" % self.name
+            return "<Project:%s, isDeleted=True>" % self.name
         else:
-            return "<ccpn.core.Project:%s>" % self.name
+            return "<Project:%s>" % self.name
 
     def __str__(self):
         """String representation"""

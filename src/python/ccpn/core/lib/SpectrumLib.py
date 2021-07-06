@@ -1,4 +1,4 @@
-"""Spectrum-related functions and utilities
+"""Spectrum-related definitions, functions and utilities
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -77,6 +77,8 @@ E_DIM = 8
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
+
+WINDOW_FUNCTIONS = ('EM', 'GM', 'SINE', 'QSINE')
 
 #=========================================================================================
 # Decorators for Spectrum attributes

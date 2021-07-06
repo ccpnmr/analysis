@@ -795,7 +795,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('axisCode')
 
     @axisCodes.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(str, None))
+    @checkSpectrumPropertyValue(iterable=True, types=(str, type(None)))
     def axisCodes(self, value):
         if len(set(value)) != len(value):
             raise ValueError('axisCodes should be unique; got %r' % value)
@@ -821,7 +821,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('dimensionType')
 
     @dimensionTypes.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(str, None))
+    @checkSpectrumPropertyValue(iterable=True, types=(str, type(None)))
     def dimensionTypes(self, value):
         self._setDimensionalAttributes('dimensionType', value)
 
@@ -834,7 +834,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         #              for x in self._wrappedData.sortedDataDims())
 
     @spectralWidthsHz.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(float,int))
+    @checkSpectrumPropertyValue(iterable=True, types=(float, int))
     def spectralWidthsHz(self, value: Sequence):
         self._setDimensionalAttributes('spectralWidthHz', value)
 
@@ -869,6 +869,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             else:
                 valuePerPoint = None
 
+            result.append(valuePerPoint)
+
         # for dataDim in self._wrappedData.sortedDataDims():
         #     if hasattr(dataDim, 'primaryDataDimRef'):
         #         # FreqDataDim - get ppm valuePerPoint
@@ -880,44 +882,44 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         #     else:
         #         # Sampled DataDim - return None
         #         valuePerPoint = None
-            #
-            result.append(valuePerPoint)
-        #
+
         return result
 
     @property
     @_includeInDimensionalCopy
-    def phases0(self) -> tuple:
-        """zero order phase correction (or None), per dimension"""
-        return tuple(x.phase0 if x.className != 'SampledDataDim' else None
-                     for x in self._wrappedData.sortedDataDims())
+    def phases0(self) -> List[Optional[float]]:
+        """Zero-order phase correction (or None), per dimension"""
+        return self._getDimensionalAttributes('phase0')
 
     @phases0.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(float, int, type(None)))
     def phases0(self, value: Sequence):
-        self._setStdDataDimValue('phase0', value)
+        self._setDimensionalAttributes('phase0', value)
+        # self._setStdDataDimValue('phase0', value)
 
     @property
     @_includeInDimensionalCopy
-    def phases1(self) -> Tuple[Optional[float], ...]:
-        """first order phase correction (or None) per dimension"""
-        return tuple(x.phase1 if x.className != 'SampledDataDim' else None
-                     for x in self._wrappedData.sortedDataDims())
+    def phases1(self) -> List[Optional[float]]:
+        """First-order phase correction (or None) per dimension"""
+        return self._getDimensionalAttributes('phase1')
 
     @phases1.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(float, int, type(None)))
     def phases1(self, value: Sequence):
-        self._setStdDataDimValue('phase1', value)
+        self._setDimensionalAttributes('phase1', value)
 
     @property
     @_includeInDimensionalCopy
-    def windowFunctions(self) -> Tuple[Optional[str], ...]:
-        """Window function name (or None) per dimension - e.g. 'EM', 'GM', 'SINE', 'QSINE', ....
+    def windowFunctions(self) -> List[Optional[str]]:
+        """Window function name (or None) per dimension
+        e.g. 'EM', 'GM', 'SINE', 'QSINE', .... (defined in SpectrumLib.WINDOW_FUNCTIONS)
         """
-        return tuple(x.windowFunction if x.className != 'SampledDataDim' else None
-                     for x in self._wrappedData.sortedDataDims())
+        return self._getDimensionalAttributes('windowFunction')
 
     @windowFunctions.setter
+    @checkSpectrumPropertyValue(iterable=True, types=(str, type(None)))
     def windowFunctions(self, value: Sequence):
-        self._setStdDataDimValue('windowFunction', value)
+        self._setDimensionalAttributes('windowFunction', value)
 
     @property
     @_includeInDimensionalCopy

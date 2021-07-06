@@ -214,7 +214,7 @@ class SpectrumReference(AbstractWrapperObject):
     def measurementType(self) -> str:
         """Type of NMR measurement referred to by this reference. Legal values are:
         'Shift','ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling',
-        'MQShift','T1','T2','T1rho','T1zz'
+        'MQShift','T1','T2','T1rho','T1zz' --- defined SpectrumLib.MEASUREMENT_TYPES
         """
         return self._expDimRef.measurementType
 
@@ -526,7 +526,7 @@ def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> Spectru
 
     if (apiExpDimRef := apiExpDim.newExpDimRef(sf=spectrometerFrequency,
                                                isotopeCodes=isotopeCodes,
-                                               measurementType='shift',
+                                               measurementType='Shift',
                                                isFolded=False,
                                                axisCode=axisCode,
                                                unit=axisUnit,

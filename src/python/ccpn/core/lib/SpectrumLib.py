@@ -79,6 +79,8 @@ MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple'
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
 
 WINDOW_FUNCTIONS = ('EM', 'GM', 'SINE', 'QSINE')
+MEASUREMENT_TYPES = ('Shift','ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling', \
+                     'MQShift','T1','T2','T1rho','T1zz')
 
 #=========================================================================================
 # Decorators for Spectrum attributes
@@ -122,9 +124,13 @@ def _includeInDimensionalCopy(func):
     return func
 
 
-def checkSpectrumPropertyValue(iterable=True, types=()):
+def checkSpectrumPropertyValue(iterable, allowNone=False, types=(), enumerated=()):
     """Decorator to check values in Spectrum property setters
     """
+    if allowNone:
+        types = tuple(list(types) + [type(None)])
+        if len(enumerated) > 0:
+            enumerated = list(enumerated) + [None]
 
     def checkType(obj, attributeName, value):
         """Check and optional casts value
@@ -153,11 +159,22 @@ def checkSpectrumPropertyValue(iterable=True, types=()):
             raise ValueError('Value for "%s" of %s needs to be of length %d; got %r' %
                              (attributeName, obj, obj.dimensionCount, value))
 
+    def checkEnumerate(obj, attributeName, value):
+        """Check if values needs to be in enumerate
+        """
+        if len(enumerated) > 0 and value not in enumerated:
+           raise ValueError('Value for "%s" of %s needs to be of %r; got %r' %
+                             (attributeName, obj, enumerated, value))
+        return value
+
     @decorator.decorator
     def theDecorator(*args, **kwds):
         func = args[0]
         self = args[1]
         value = args[2]
+
+        # if func.__name__ == 'measurementTypes':
+        #     print('>>>', isIterable, types, enumerated)
 
         if iterable:
             checkIterable(self, func.__name__, value)
@@ -166,10 +183,13 @@ def checkSpectrumPropertyValue(iterable=True, types=()):
             checkedValue = []
             for idx, val in enumerate(value):
                 _itemName = '%s[%d]' % (func.__name__, idx)
-                checkedValue.append(checkType(self, _itemName, val))
+                val = checkType(self, _itemName, val)
+                val = checkEnumerate(self, _itemName, val)
+                checkedValue.append(val)
 
         else:
             checkedValue = checkType(self, func.__name__, value)
+            checkedValue = checkEnumerate(self, func.__name__, checkedValue)
 
         return func(self, checkedValue)
 
@@ -1942,6 +1962,12 @@ class SpectrumDimensionTrait(List):
     """
     A trait to implement a Spectrum dimensional attribute; e.g. like spectrumFrequencies
     """
+    # GWV test
+    # _spectrometerFrequencies = SpectrumDimensionTrait(trait=Float(min=0.0)).tag(
+    #                            attributeName='spectrometerFrequency',
+    #                            doCopy = True
+    # )
+
     isDimensional = True
 
     def validate(self, obj, value):

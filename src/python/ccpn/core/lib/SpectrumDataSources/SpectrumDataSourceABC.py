@@ -365,7 +365,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             hasSetterInSpectrumClass=False,
             info='per dimension: labels, as e.g. present in Felix or NmrPipe',
             )
-    measurementTypes = CList(trait=CString(allow_none=True), default_value=['shift'] * MAXDIM, maxlen=MAXDIM).tag(
+    measurementTypes = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='measurementTypes',

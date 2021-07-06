@@ -904,7 +904,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('phase1')
 
     @phases1.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(float, int, type(None)))
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(float, int))
     def phases1(self, value: Sequence):
         self._setDimensionalAttributes('phase1', value)
 
@@ -917,7 +917,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('windowFunction')
 
     @windowFunctions.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(str, type(None)))
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,), enumerated=specLib.WINDOW_FUNCTIONS)
     def windowFunctions(self, value: Sequence):
         self._setDimensionalAttributes('windowFunction', value)
 
@@ -928,7 +928,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('lorentzianBroadening')
 
     @lorentzianBroadenings.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(float, int, type(None)))
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(float, int))
     def lorentzianBroadenings(self, value: Sequence):
         self._setDimensionalAttributes('lorentzianBroadening', value)
 
@@ -939,7 +939,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('gaussianBroadening')
 
     @gaussianBroadenings.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(float, int, type(None)))
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(float, int))
     def gaussianBroadenings(self, value: Sequence):
         self._setDimensionalAttributes('gaussianBroadening', value)
 
@@ -950,15 +950,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('sineWindowShift')
 
     @sineWindowShifts.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(float, int, type(None)))
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(float, int))
     def sineWindowShifts(self, value: Sequence):
         self._setDimensionalAttributes('sineWindowShift', value)
-
-    # GWV test
-    # _spectrometerFrequencies = SpectrumDimensionTrait(trait=Float(min=0.0)).tag(
-    #                            attributeName='spectrometerFrequency',
-    #                            doCopy = True
-    # )
 
     @property
     @_includeInDimensionalCopy
@@ -973,17 +967,18 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     @_includeInDimensionalCopy
-    def measurementTypes(self) -> Tuple[Optional[str], ...]:
+    def measurementTypes(self) -> List[Optional[str]]:
         """Type of value being measured, per dimension.
         In normal cases the measurementType will be 'Shift', but other values might be
         'MQSHift' (for multiple quantum axes), JCoupling (for J-resolved experiments),
-        'T1', 'T2', ...
+        'T1', 'T2', --- defined SpectrumLib.MEASUREMENT_TYPES
         """
-        return tuple(x and x.measurementType for x in self._mainExpDimRefs())
+        return self._getDimensionalAttributes('measurementType')
 
     @measurementTypes.setter
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,), enumerated=specLib.MEASUREMENT_TYPES)
     def measurementTypes(self, value):
-        self._setExpDimRefAttribute('measurementType', value)
+        self._setDimensionalAttributes('measurementType', value)
 
     @property
     @_includeInDimensionalCopy
@@ -992,7 +987,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('isotopeCode')
 
     @isotopeCodes.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(str, None))
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,))
     def isotopeCodes(self, value: Sequence):
         self._setDimensionalAttributes('isotopeCode', value)
 
@@ -1013,15 +1008,17 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @referenceExperimentDimensions.setter
     @ccpNmrV3CoreSetter()
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,))
     def referenceExperimentDimensions(self, values: Sequence):
         apiDataSource = self._wrappedData
 
-        if not isinstance(values, (tuple, list)):
-            raise ValueError('referenceExperimentDimensions must be a list or tuple')
-        if len(values) != apiDataSource.numDim:
-            raise ValueError('referenceExperimentDimensions must have length %s, was %s' % (apiDataSource.numDim, values))
-        if not all(isinstance(dimVal, (str, type(None))) for dimVal in values):
-            raise ValueError('referenceExperimentDimensions must be str, None')
+        # if not isinstance(values, (tuple, list)):
+        #     raise ValueError('referenceExperimentDimensions must be a list or tuple')
+        # if len(values) != apiDataSource.numDim:
+        #     raise ValueError('referenceExperimentDimensions must have length %s, was %s' % (apiDataSource.numDim, values))
+        # if not all(isinstance(dimVal, (str, type(None))) for dimVal in values):
+        #     raise ValueError('referenceExperimentDimensions must be str, None')
+
         _vals = [val for val in values if val is not None]
         if len(_vals) != len(set(_vals)):
             raise ValueError('referenceExperimentDimensions must be unique')

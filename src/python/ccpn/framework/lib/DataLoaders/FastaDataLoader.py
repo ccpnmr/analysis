@@ -41,29 +41,4 @@ class FastaDataLoader(DataLoaderABC):
     createsNewProject = False
     loadFunction = (Project._loadFastaFile, 'project')
 
-    # @classmethod
-    # def checkForValidFormat(cls, path):
-    #     """check if valid format corresponding to dataFormat
-    #     :return: None or instance of the class
-    #     """
-    #     if (_path := cls.checkPath(path)) is None:
-    #         return None
-    #     # assume that all is good
-    #     instance = cls(path)
-    #     return instance
-    #
-    # def load(self):
-    #     """The actual Nef loading method;
-    #     raises RunTimeError on error
-    #     :return: a list of [chains]
-    #     """
-    #     # with logCommand('application.loadData(%r)' % self.path):
-    #
-    #     try:
-    #         chains = self.project._loadFastaFile(self.path)
-    #     except Exception as es:
-    #         raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
-    #
-    #     return chains
-
 FastaDataLoader._registerFormat()

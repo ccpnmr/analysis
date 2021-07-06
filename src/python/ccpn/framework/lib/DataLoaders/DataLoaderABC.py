@@ -169,7 +169,7 @@ class DataLoaderABC(TraitBase):
             obj = getattr(self, attributeName)
             result = func(obj, self.path)
 
-        except Exception as es:
+        except (ValueError, RuntimeError) as es:
             raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
 
         return result

@@ -92,7 +92,7 @@ class SpectrumDataLoader(DataLoaderABC):
         try:
             spectrum = _newSpectrumFromDataSource(project=self.project, dataStore=self.dataStore,
                                                   dataSource=self.dataSource)
-        except Exception as es:
+        except (RuntimeError, ValueError) as es:
             raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
 
         return [spectrum]

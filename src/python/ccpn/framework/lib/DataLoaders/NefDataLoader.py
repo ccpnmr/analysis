@@ -51,7 +51,7 @@ class NefDataLoader(DataLoaderABC):
         """
         try:
             project = self.application._loadNefFile(self.path, makeNewProject=self.makeNewProject)
-        except Exception as es:
+        except (ValueError, RuntimeError) as es:
             raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
 
         return [project]

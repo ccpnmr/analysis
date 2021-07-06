@@ -126,13 +126,18 @@ class SpectrumReference(AbstractWrapperObject):
         return self._wrappedData.expDimRef
 
     @property
+    def _isFrequencyDimension(self) -> bool:
+        """True if this is a frequency dimension; mainly used to implement code to upward compatible with v2"""
+        return self._dataDim.className == 'FreqDataDim'
+
+    @property
     def _isSampledDimension(self) -> bool:
-        """True if this is a sampled dimension; mainly to implement code to upward compatible with v2"""
+        """True if this is a sampled dimension; mainly used to implement code to upward compatible with v2"""
         return self._dataDim.className == 'SampledDataDim'
 
     @property
     def _isFidDimension(self) -> bool:
-        """True if this is a Fid dimension; mainly to implement code to upward compatible with v2"""
+        """True if this is a Fid dimension; mainly used to implement code to upward compatible with v2"""
         return self._dataDim.className == 'FidDataDim'
 
     spectrum = _parent
@@ -202,6 +207,13 @@ class SpectrumReference(AbstractWrapperObject):
         self._setInternalParameter('dimensionType', value)
 
     @property
+    def isReversed(self) -> bool:
+        """:return True if dimension is reversed
+        depricated!
+        """
+        return self._expDimRef.isAxisReversed
+
+    @property
     def spectrometerFrequency(self) -> float:
         """Absolute frequency at carrier (or at splitting 0.0). In MHz or dimensionless."""
         return self._expDimRef.sf
@@ -223,10 +235,18 @@ class SpectrumReference(AbstractWrapperObject):
     def measurementType(self, value):
         self._expDimRef.measurementType = value
 
+    # GWV this was carried from the previous Spectrum implementation; no idea why, but it mattered
+    # point1 = 1 - dataDim.pointOffset
+    # result[ii] = tuple(sorted((ff(point1), ff(point1 + dataDim.numPointsOrig))
+
     @property
     def maxAliasedFrequency(self) -> float:
         """maximum possible peak frequency (in ppm) for this reference """
-        return self._expDimRef.maxAliasedFreq
+        if (result := self._expDimRef.maxAliasedFreq) is None:
+            point_1 = 1 - self._dataDim.pointOffset
+            point_n = point_1 + self.pointCount
+            result = self.pointToValue((point_n))
+        return result
 
     @maxAliasedFrequency.setter
     def maxAliasedFrequency(self, value):
@@ -235,11 +255,24 @@ class SpectrumReference(AbstractWrapperObject):
     @property
     def minAliasedFrequency(self) -> float:
         """minimum possible peak frequency (in ppm) for this reference """
-        return self._expDimRef.minAliasedFreq
+        if (result := self._expDimRef.minAliasedFreq) is None:
+            point_1 = 1 - self._dataDim.pointOffset
+            result = self.pointToValue((point_1))
+        return result
 
     @minAliasedFrequency.setter
     def minAliasedFrequency(self, value):
         self._expDimRef.minAliasedFreq = value
+
+    @property
+    def limits(self) -> Tuple[float, float]:
+        """Return the limits of this dimension as a tuple of floats"""
+        if self.dimensionType == specLib.DIMENSION_FREQUENCY:
+            return (self.pointToValue(1), self.pointToValue(self.pointCount+1))
+        elif self.dimensionType == specLib.DIMENSION_TIME:
+            return (0.0, self._valuePerPoint * self.pointCount)
+        else:
+            raise RuntimeError('SpectrumReference.limits not implemented for sampled data')
 
     @property
     def isotopeCode(self) -> str:
@@ -293,31 +326,31 @@ class SpectrumReference(AbstractWrapperObject):
     @property
     def axisUnit(self) -> str:
         """unit for transformed data using their reference (most commonly 'ppm')"""
-        return self._wrappedData.expDimRef.unit
+        return self._expDimRef.unit
 
     @axisUnit.setter
     def axisUnit(self, value: str):
-        self._wrappedData.expDimRef.unit = value
+        self._expDimRef.unit = value
 
     # Attributes belonging to DataDimRef
 
     @property
     def referencePoint(self) -> float:
         """point used for axis (chemical shift) referencing."""
-        return self._wrappedData.refPoint
+        return self._dataDimRef.refPoint
 
     @referencePoint.setter
     def referencePoint(self, value):
-        self._wrappedData.refPoint = value
+        self._dataDimRef.refPoint = value
 
     @property
     def referenceValue(self) -> float:
-        """value used for axis (chemical shift) referencing."""
-        return self._wrappedData.refValue
+        """ppm-value used for axis (chemical shift) referencing."""
+        return self._dataDimRef.refValue
 
     @referenceValue.setter
     def referenceValue(self, value: float):
-        self._wrappedData.refValue = value
+        self._dataDimRef.refValue = value
 
     @property
     def spectralWidthHz(self) -> float:
@@ -424,11 +457,11 @@ class SpectrumReference(AbstractWrapperObject):
     @property
     def assignmentTolerance(self) -> float:
         """Assignment Tolerance"""
-        return self._wrappedData.assignmentTolerance
+        return self._dataDimRef.assignmentTolerance
 
     @assignmentTolerance.setter
     def assignmentTolerance(self, value):
-        self._wrappedData.assignmentTolerance = value
+        self._dataDimRef.assignmentTolerance = value
 
     #=========================================================================================
     # Implementation properties and functions

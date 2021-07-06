@@ -91,6 +91,20 @@ WINDOW_FUNCTIONS = (WINDOW_FUNCTION_EM, WINDOW_FUNCTION_GM, WINDOW_FUNCTION_SINE
 MEASUREMENT_TYPES = ('Shift','ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling', \
                      'MQShift','T1','T2','T1rho','T1zz')
 
+
+# Isotope-dependent assignment tolerances (in ppm)
+defaultAssignmentTolerance = 0.4
+isotope2Tolerance = {
+    '1H' : 0.03,
+    '13C': 0.4,
+    '15N': 0.4,
+    '19F': 0.03,
+    }
+def getAssignmentTolerances(isotopeCode) -> float:
+    """:return assignmentTolerance for isotopeCode"""
+    return isotope2Tolerance.get(isotopeCode, defaultAssignmentTolerance)
+
+
 #=========================================================================================
 # Decorators for Spectrum attributes
 #=========================================================================================

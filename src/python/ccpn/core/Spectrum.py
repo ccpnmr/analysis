@@ -172,15 +172,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     D_DIM = specLib.D_DIM  # 7
     E_DIM = specLib.E_DIM  # 8
 
-    # Isotope-dependent assignment tolerances (in ppm)
-    defaultAssignmentTolerance = 0.4
-    isotope2Tolerance = {
-        '1H' : 0.03,
-        '13C': 0.4,
-        '15N': 0.4,
-        '19F': 0.03,
-        }
-
     #-----------------------------------------------------------------------------------------
     # Internal NameSpace  and other definitions
     #-----------------------------------------------------------------------------------------
@@ -1089,74 +1080,75 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     @_includeInDimensionalCopy
-    def axisUnits(self) -> Tuple[Optional[str], ...]:
-        """Main axis unit (most commonly 'ppm'), per dimension - None if no unique code
-
-        Uses first Shift-type ExpDimRef if there is more than one, otherwise first ExpDimRef"""
-        return tuple(x and x.unit for x in self._mainExpDimRefs())
+    def axisUnits(self) -> List[Optional[str]]:
+        """Main axis unit (most commonly 'ppm'), per dimension - None if no unique code"""
+        return self._getDimensionalAttributes('axisUnit')
 
     @axisUnits.setter
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,))
     def axisUnits(self, value):
-        self._setExpDimRefAttribute('unit', value, mandatory=False)
+        self._setDimensionalAttributes('axisUnit', value)
 
     # Attributes belonging to DataDimRef
 
-    def _mainDataDimRefs(self) -> list:
-        """ List of DataDimRef matching main ExpDimRef for each dimension"""
-        result = []
-        expDimRefs = self._mainExpDimRefs()
-        for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
-            if hasattr(dataDim, 'dataDimRefs'):
-                result.append(dataDim.findFirstDataDimRef(expDimRef=expDimRefs[ii]))
-            else:
-                result.append(None)
-        #
-        return result
+    # def _mainDataDimRefs(self) -> list:
+    #     """ List of DataDimRef matching main ExpDimRef for each dimension"""
+    #     result = []
+    #     expDimRefs = self._mainExpDimRefs()
+    #     for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
+    #         if hasattr(dataDim, 'dataDimRefs'):
+    #             result.append(dataDim.findFirstDataDimRef(expDimRef=expDimRefs[ii]))
+    #         else:
+    #             result.append(None)
+    #     #
+    #     return result
 
-    def _setDataDimRefAttribute(self, attributeName: str, value: Sequence, mandatory: bool = True):
-        """Set main DataDimRef attribute for each dimension
-        - uses first ExpDimRef with serial=1"""
-        apiDataSource = self._wrappedData
-        if len(value) == apiDataSource.numDim:
-            expDimRefs = self._mainExpDimRefs()
-            for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
-                if hasattr(dataDim, 'dataDimRefs'):
-                    dataDimRef = dataDim.findFirstDataDimRef(expDimRef=expDimRefs[ii])
-                else:
-                    dataDimRef = None
-
-                if dataDimRef is None:
-                    if value[ii] is not None:
-                        raise ValueError("Cannot set value for attribute %s in dimension %s: %s" %
-                                         (attributeName, ii + 1, value))
-                elif value is None and mandatory:
-                    raise ValueError(
-                            "Attempt to set value to None for mandatory attribute %s in dimension %s: %s" %
-                            (attributeName, ii + 1, value))
-                else:
-                    setattr(dataDimRef, attributeName, value[ii])
-        else:
-            raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
+    # def _setDataDimRefAttribute(self, attributeName: str, value: Sequence, mandatory: bool = True):
+    #     """Set main DataDimRef attribute for each dimension
+    #     - uses first ExpDimRef with serial=1"""
+    #     apiDataSource = self._wrappedData
+    #     if len(value) == apiDataSource.numDim:
+    #         expDimRefs = self._mainExpDimRefs()
+    #         for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
+    #             if hasattr(dataDim, 'dataDimRefs'):
+    #                 dataDimRef = dataDim.findFirstDataDimRef(expDimRef=expDimRefs[ii])
+    #             else:
+    #                 dataDimRef = None
+    #
+    #             if dataDimRef is None:
+    #                 if value[ii] is not None:
+    #                     raise ValueError("Cannot set value for attribute %s in dimension %s: %s" %
+    #                                      (attributeName, ii + 1, value))
+    #             elif value is None and mandatory:
+    #                 raise ValueError(
+    #                         "Attempt to set value to None for mandatory attribute %s in dimension %s: %s" %
+    #                         (attributeName, ii + 1, value))
+    #             else:
+    #                 setattr(dataDimRef, attributeName, value[ii])
+    #     else:
+    #         raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
     @property
     @_includeInDimensionalCopy
-    def referencePoints(self) -> Tuple[Optional[float], ...]:
+    def referencePoints(self) -> List[Optional[float]]:
         """point used for axis (chemical shift) referencing, per dimension."""
-        return tuple(x and x.refPoint for x in self._mainDataDimRefs())
+        return self._getDimensionalAttributes('referencePoint')
 
     @referencePoints.setter
+    @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(float, int))
     def referencePoints(self, value):
-        self._setDataDimRefAttribute('refPoint', value)
+        self._setDimensionalAttributes('referencePoint', value)
 
     @property
     @_includeInDimensionalCopy
-    def referenceValues(self) -> Tuple[Optional[float], ...]:
-        """value used for axis (chemical shift) referencing, per dimension."""
-        return tuple(x and x.refValue for x in self._mainDataDimRefs())
+    def referenceValues(self) -> List[Optional[float]]:
+        """ppm-value used for axis (chemical shift) referencing, per dimension."""
+        return self._getDimensionalAttributes('referenceValue')
 
     @referenceValues.setter
+    @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(float, int))
     def referenceValues(self, value):
-        self._setDataDimRefAttribute('refValue', value)
+        self._setDimensionalAttributes('referenceValue', value)
 
     @property
     @cached(_REFERENCESUBSANCESCACHE, maxItems=5000, debug=False)
@@ -1200,83 +1192,94 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     @_includeInDimensionalCopy
-    def assignmentTolerances(self) -> Tuple[Optional[float], ...]:
-        """Assignment tolerance in axis unit (ppm), per dimension."""
-        return tuple(x and x.assignmentTolerance for x in self._mainDataDimRefs())
+    def assignmentTolerances(self) -> List[Optional[float]]:
+        """Assignment tolerance in axis unit (ppm), per dimension"""
+        return self._getDimensionalAttributes('assignmentTolerance')
 
     @assignmentTolerances.setter
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(float, int))
     def assignmentTolerances(self, value):
-        self._setDataDimRefAttribute('assignmentTolerance', value)
+        self._setDimensionalAttributes('assignmentTolerance', value)
 
     @property
-    def defaultAssignmentTolerances(self):
+    def defaultAssignmentTolerances(self) -> List[Optional[float]]:
         """Default assignment tolerances per dimension (in ppm), upward adjusted (if needed) for
         digital resolution
-        NB for Fid or Sampled dimensions value will be None
+        NB for Time or Sampled dimensions value will be None
         """
         tolerances = [None] * self.dimensionCount
         for ii, dimensionType in enumerate(self.dimensionTypes):
-            if dimensionType == 'Frequency':
-                tolerance = self.isotope2Tolerance.get(self.isotopeCodes[ii], self.defaultAssignmentTolerance)
+            if dimensionType == specLib.DIMENSION_FREQUENCY:
+                tolerance = specLib.getAssignmentTolerances(self.isotopeCodes[ii])
                 tolerances[ii] = max(tolerance, self.spectralWidths[ii] / self.pointCounts[ii])
         #
         return tolerances
 
     @property
     @_includeInDimensionalCopy
-    def aliasingLimits(self) -> Tuple[Tuple[Optional[float], Optional[float]], ...]:
-        """\- (*(float,float)*)\*dimensionCount
-
-        tuple of tuples of (lowerAliasingLimit, higherAliasingLimit) for spectrum
+    def aliasingLimits(self) -> Tuple[tuple, ...]:
+        """Tuple of tuples of sorted(minAliasingLimit, maxAliasingLimit) per dimension
         """
-        result = [(x and x.minAliasedFreq, x and x.maxAliasedFreq) for x in self._mainExpDimRefs()]
+        minVals = self._getDimensionalAttributes('minAliasedFrequency')
+        maxVals = self._getDimensionalAttributes('maxAliasedFrequency')
+        return tuple(tuple(sorted(t)) for t in zip(minVals, maxVals))
 
-        if any(None in tt for tt in result):
-            # Some values not set, or missing. Try to get them as spectrum limits
-            for ii, dataDimRef in enumerate(self._mainDataDimRefs()):
-                if None in result[ii] and dataDimRef is not None:
-                    dataDim = dataDimRef.dataDim
-                    ff = dataDimRef.pointToValue
-                    point1 = 1 - dataDim.pointOffset
-                    result[ii] = tuple(sorted((ff(point1), ff(point1 + dataDim.numPointsOrig))))
+        # result = [(x and x.minAliasedFreq, x and x.maxAliasedFreq) for x in self._mainExpDimRefs()]
         #
-        return tuple(result)
+        # if any(None in tt for tt in result):
+        #     # Some values not set, or missing. Try to get them as spectrum limits
+        #     for ii, dataDimRef in enumerate(self._mainDataDimRefs()):
+        #         if None in result[ii] and dataDimRef is not None:
+        #             dataDim = dataDimRef.dataDim
+        #             ff = dataDimRef.pointToValue
+        #             point1 = 1 - dataDim.pointOffset
+        #             result[ii] = tuple(sorted((ff(point1), ff(point1 + dataDim.numPointsOrig))))
+        # #
+        # return tuple(result)
 
     @aliasingLimits.setter
+    @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(tuple, list))
     def aliasingLimits(self, value):
-        if len(value) != self.dimensionCount:
-            raise ValueError("length of aliasingLimits must match spectrum dimension, was %s" % value)
+        # check that we have iterables with two (min,max) values
+        for axis, t in enumerate(value):
+            if not isIterable(t) and len(t) != 2:
+                raise ValueError('invalid aliasingLimit[%s]; expected (minLimit, maxlimit) but got %r' % (axis, t))
+        minVals = [t[0] for t in value]
+        maxVals = [t[1] for t in value]
+        self._setDimensionalAttributes('minAliasedFrequency', minVals)
+        self._setDimensionalAttributes('maxAliasedFrequency', maxVals)
 
-        expDimRefs = self._mainExpDimRefs()
-        for ii, tt in enumerate(value):
-            expDimRef = expDimRefs[ii]
-            if expDimRef:
-                if len(tt) != 2:
-                    raise ValueError("Aliasing limits must have two value (min,max), was %s" % tt)
-                expDimRef.minAliasedFreq = tt[0]
-                expDimRef.maxAliasedFreq = tt[1]
+    #     if len(value) != self.dimensionCount:
+    #         raise ValueError("length of aliasingLimits must match spectrum dimension, was %s" % value)
+    #
+    #     expDimRefs = self._mainExpDimRefs()
+    #     for ii, tt in enumerate(value):
+    #         expDimRef = expDimRefs[ii]
+    #         if expDimRef:
+    #             if len(tt) != 2:
+    #                 raise ValueError("Aliasing limits must have two value (min,max), was %s" % tt)
+    #             expDimRef.minAliasedFreq = tt[0]
+    #             expDimRef.maxAliasedFreq = tt[1]
 
     @property
-    def spectrumLimits(self) -> Tuple[Tuple[Optional[float], Optional[float]], ...]:
-        """\- (*(float,float)*)\*dimensionCount
-
-        tuple of tuples of (ppmPoint(1), ppmPoint(n+1)) for each spectrum axis
-        direction of axis is preserved
+    def spectrumLimits(self) -> List[Tuple[float, float]]:
+        """list of tuples of (ppmPoint(1), ppmPoint(n+1)) for each dimension
         """
-        ll = []
-        for ii, ddr in enumerate(self._mainDataDimRefs()):
-            if ddr is None:
-                ll.append((None, None))
-            else:
-                ll.append((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints + 1)))
-        return tuple(ll)
+        return self._getDimensionalAttributes('limits')
+        # ll = []
+        # for ii, ddr in enumerate(self._mainDataDimRefs()):
+        #     if ddr is None:
+        #         ll.append((None, None))
+        #     else:
+        #         ll.append((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints + 1)))
+        # return tuple(ll)
 
     @property
     def axesReversed(self) -> Tuple[Optional[bool], ...]:
-        """Return whether any of the axes are reversed
-        May contain None for undefined axes
+        """Return True if the axis is reversed per dimension
         """
-        return tuple((x and x.isAxisReversed) for x in self._mainExpDimRefs())
+        return tuple(self._getDimensionalAttributes('isReversed'))
+        # return tuple((x and x.isAxisReversed) for x in self._mainExpDimRefs())
 
     @property
     def magnetisationTransfers(self) -> Tuple[MagnetisationTransferTuple, ...]:
@@ -1303,7 +1306,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if apiRefExperiment:
             # We should use the refExperiment - if present
             magnetisationTransferDict = apiRefExperiment.magnetisationTransferDict()
-            refExpDimRefs = [x if x is None else x.refExpDimRef for x in self._mainExpDimRefs()]
+            mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]
+            refExpDimRefs = [x if x is None else x.refExpDimRef for x in mainExpDimRefs]
             for ii, rxdr in enumerate(refExpDimRefs):
                 dim1 = ii + 1
                 if rxdr is not None:
@@ -1344,7 +1348,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if apiRefExperiment is None:
             for et in apiExperiment.expTransfers:
                 et.delete()
-            mainExpDimRefs = self._mainExpDimRefs()
+            mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]  # self._mainExpDimRefs()
             for tt in value:
                 try:
                     dim1, dim2, transferType, isIndirect = tt
@@ -2840,32 +2844,32 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     # Attributes belonging to ExpDimRef and DataDimRef
 
-    def _mainExpDimRefs(self) -> tuple:
-        """Get main API ExpDimRef (serial=1) for each dimension
-        """
-        result = []
-        for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
-            # NB MUST loop over dataDims, in case of projection spectra
-            result.append(dataDim.expDim.findFirstExpDimRef(serial=1))
-        return tuple(result)
+    # def _mainExpDimRefs(self) -> tuple:
+    #     """Get main API ExpDimRef (serial=1) for each dimension
+    #     """
+    #     result = []
+    #     for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
+    #         # NB MUST loop over dataDims, in case of projection spectra
+    #         result.append(dataDim.expDim.findFirstExpDimRef(serial=1))
+    #     return tuple(result)
 
-    def _setExpDimRefAttribute(self, attributeName: str, value: Sequence, mandatory: bool = True):
-        """Set main ExpDimRef attribute (serial=1) for each dimension"""
-        apiDataSource = self._wrappedData
-        if len(value) == apiDataSource.numDim:
-            for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
-                # NB MUST loop over dataDims, in case of projection spectra
-                expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
-                val = value[ii]
-                if expDimRef is None and val is not None:
-                    raise ValueError("Attempt to set attribute %s in dimension %s to %s - must be None" %
-                                     (attributeName, ii + 1, val))
-                elif val is None and mandatory:
-                    raise ValueError(
-                            "Attempt to set mandatory attribute %s to None in dimension %s: %s" %
-                            (attributeName, ii + 1, val))
-                else:
-                    setattr(expDimRef, attributeName, val)
+    # def _setExpDimRefAttribute(self, attributeName: str, value: Sequence, mandatory: bool = True):
+    #     """Set main ExpDimRef attribute (serial=1) for each dimension"""
+    #     apiDataSource = self._wrappedData
+    #     if len(value) == apiDataSource.numDim:
+    #         for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
+    #             # NB MUST loop over dataDims, in case of projection spectra
+    #             expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
+    #             val = value[ii]
+    #             if expDimRef is None and val is not None:
+    #                 raise ValueError("Attempt to set attribute %s in dimension %s to %s - must be None" %
+    #                                  (attributeName, ii + 1, val))
+    #             elif val is None and mandatory:
+    #                 raise ValueError(
+    #                         "Attempt to set mandatory attribute %s to None in dimension %s: %s" %
+    #                         (attributeName, ii + 1, val))
+    #             else:
+    #                 setattr(expDimRef, attributeName, val)
 
     #-----------------------------------------------------------------------------------------
     # new'Object' and other methods
@@ -3161,6 +3165,9 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
         spectrum.positiveContourCount = 0
         spectrum.negativeContourCount = 0
         spectrum._updateParameterValues()
+
+        # set default assignment tolerances
+        spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
 
         spectrum._saveSpectrumMetaData()
 

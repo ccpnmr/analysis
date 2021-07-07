@@ -713,18 +713,18 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """
         return [getattr(dim, attributeName) for dim in self.spectrumDimensions]
 
-    def _setStdDataDimValue(self, attributeName, value: Sequence):
-        """Set value for non-Sampled DataDims only"""
-        apiDataSource = self._wrappedData
-        if len(value) == apiDataSource.numDim:
-            for ii, dataDim in enumerate(apiDataSource.sortedDataDims()):
-                if dataDim.className != 'SampledDataDim':
-                    setattr(dataDim, attributeName, value[ii])
-                elif value[ii] is not None:
-                    raise ValueError("Attempt to set value for invalid attribute %s in dimension %s: %s" %
-                                     (attributeName, ii + 1, value))
-        else:
-            raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
+    # def _setStdDataDimValue(self, attributeName, value: Sequence):
+    #     """Set value for non-Sampled DataDims only"""
+    #     apiDataSource = self._wrappedData
+    #     if len(value) == apiDataSource.numDim:
+    #         for ii, dataDim in enumerate(apiDataSource.sortedDataDims()):
+    #             if dataDim.className != 'SampledDataDim':
+    #                 setattr(dataDim, attributeName, value[ii])
+    #             elif value[ii] is not None:
+    #                 raise ValueError("Attempt to set value for invalid attribute %s in dimension %s: %s" %
+    #                                  (attributeName, ii + 1, value))
+    #     else:
+    #         raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
     @property
     @_includeInDimensionalCopy

@@ -270,7 +270,8 @@ class SpectrumReference(AbstractWrapperObject):
         if self.dimensionType == specLib.DIMENSION_FREQUENCY:
             return (self.pointToValue(1), self.pointToValue(self.pointCount+1))
         elif self.dimensionType == specLib.DIMENSION_TIME:
-            return (0.0, self._valuePerPoint * self.pointCount)
+            return (self.pointToValue(1), self.pointToValue(self.pointCount+1))
+            # return (0.0, self._valuePerPoint * self.pointCount)
         else:
             raise RuntimeError('SpectrumReference.limits not implemented for sampled data')
 
@@ -310,8 +311,9 @@ class SpectrumReference(AbstractWrapperObject):
 
     @foldingMode.setter
     def foldingMode(self, value):
-        if value not in specLib.FOLDING_MODES:
-            raise ValueError('foldingMode should be one of %r' % specLib.FOLDING_MODES)
+        if value not in list(specLib.FOLDING_MODES) + [None]:
+            raise ValueError('foldingMode should be one of %r or None; got %r' %
+                             (specLib.FOLDING_MODES, value))
         self._setInternalParameter('foldingMode', value)
 
     @property
@@ -424,7 +426,7 @@ class SpectrumReference(AbstractWrapperObject):
     @windowFunction.setter
     def windowFunction(self, value):
         if not value in list(specLib.WINDOW_FUNCTIONS) + [None]:
-            raise ValueError('windowFunction should be one of %r; got %r' % (specLib.WINDOW_FUNCTIONS, value))
+            raise ValueError('windowFunction should be one of %r or None; got %r' % (specLib.WINDOW_FUNCTIONS, value))
         self._dataDim.windowFunction = value
 
     @property
@@ -437,13 +439,13 @@ class SpectrumReference(AbstractWrapperObject):
         self._dataDim.lorentzianBroadening = value
 
     @property
-    def GaussianBroadening(self) -> Optional[float]:
+    def gaussianBroadening(self) -> Optional[float]:
         """Gaussian broadening"""
-        return (self._dataDim.GaussianBroadening if not self._isSampledDimension else None)
+        return (self._dataDim.gaussianBroadening if not self._isSampledDimension else None)
 
-    @GaussianBroadening.setter
-    def GaussianBroadening(self, value):
-        self._dataDim.GaussianBroadening = value
+    @gaussianBroadening.setter
+    def gaussianBroadening(self, value):
+        self._dataDim.gaussianBroadening = value
 
     @property
     def sineWindowShift(self) -> Optional[float]:

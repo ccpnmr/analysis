@@ -476,7 +476,7 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
             apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
         elif code == 'intensity':
             apiSpectrumDisplay.newIntensityAxis(code=code, stripSerial=stripSerial)
-        elif code.startswith('fid'):
+        elif code.startswith('Time'):
             apiSpectrumDisplay.newFidAxis(code=code, stripSerial=stripSerial)
         else:
             apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
@@ -576,7 +576,8 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
         # # NBNB TBD FIXME
 
     with undoBlockWithoutSideBar():
-        display = project.newSpectrumDisplay(axisCodes=displayAxisCodes, stripDirection=stripDirection,
+        display = _newSpectrumDisplay(window.project,
+                                      axisCodes=displayAxisCodes, stripDirection=stripDirection,
                                              independentStrips=independentStrips,
                                              title=title, zPlaneNavigationMode=zPlaneNavigationMode)
 

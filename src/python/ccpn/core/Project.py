@@ -1693,31 +1693,31 @@ class Project(AbstractWrapperObject):
         return _newDataSet(self, title=title, name=name, programName=programName, programVersion=programVersion,
                            dataPath=dataPath, creationDate=creationDate, uuid=uuid, comment=comment, **kwds)
 
-    @logCommand('project.')
-    def newSpectrumDisplay(self, axisCodes: (str,), stripDirection: str = 'Y',
-                           title: str = None, window=None, comment: str = None,
-                           independentStrips=False, nmrResidue=None, **kwds):
-        """Create new SpectrumDisplay
-
-        See the SpectrumDisplay class for details.
-
-        Optional keyword arguments can be passed in; see SpectrumDisplay._newSpectrumDisplay for details.
-
-        :param axisCodes:
-        :param stripDirection:
-        :param title:
-        :param window:
-        :param comment:
-        :param independentStrips:
-        :param nmrResidue:
-        :param serial: optional serial number.
-        :return: a new SpectrumDisplay instance.
-        """
-        from ccpn.ui._implementation.SpectrumDisplay import _newSpectrumDisplay
-
-        return _newSpectrumDisplay(self, axisCodes=axisCodes, stripDirection=stripDirection,
-                                   title=title, window=window, independentStrips=independentStrips,
-                                   comment=comment, **kwds)
+    # @logCommand('project.')
+    # def newSpectrumDisplay(self, axisCodes: (str,), stripDirection: str = 'Y',
+    #                        title: str = None, window=None, comment: str = None,
+    #                        independentStrips=False, nmrResidue=None, **kwds):
+    #     """Create new SpectrumDisplay
+    #
+    #     See the SpectrumDisplay class for details.
+    #
+    #     Optional keyword arguments can be passed in; see SpectrumDisplay._newSpectrumDisplay for details.
+    #
+    #     :param axisCodes:
+    #     :param stripDirection:
+    #     :param title:
+    #     :param window:
+    #     :param comment:
+    #     :param independentStrips:
+    #     :param nmrResidue:
+    #     :param serial: optional serial number.
+    #     :return: a new SpectrumDisplay instance.
+    #     """
+    #     from ccpn.ui._implementation.SpectrumDisplay import _newSpectrumDisplay
+    #
+    #     return _newSpectrumDisplay(self, axisCodes=axisCodes, stripDirection=stripDirection,
+    #                                title=title, window=window, independentStrips=independentStrips,
+    #                                comment=comment, **kwds)
 
     @logCommand('project.')
     def newSpectrumGroup(self, name: str, spectra=(), **kwds):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-11 09:59:05 +0100 (Tue, May 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-07 20:15:17 +0100 (Wed, July 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -211,6 +211,142 @@ class CcpnNefContent:
         return components
 
     contents['ccpn_sample_component'] = content_ccpn_sample_component
+
+    def content_ccpn_logging(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        # Get the contents of ccpn_logging
+        # ccpn-to-nef mapping for saveframe
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+
+        name = framecode[len(category) + 1:]
+        result = {category: (name,)}
+
+        self._contentLoops(project, saveFrame, addLoopAttribs=['date'])
+        self.updateContent(saveFrame, result)
+
+    contents['ccpn_logging'] = content_ccpn_logging
+
+    def content_ccpn_history(self, parent, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+                             date: str = None) -> Optional[OrderedSet]:
+        """Get the contents for ccpn_history loop"""
+        components = OrderedSet()
+
+        if date is None:
+            self.error('Undefined ccpn_history', loop, None)
+            return None
+
+        mapping = nef2CcpnMap.get(loop.name) or {}
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            parameters = _parametersFromLoopRow(row, map2)
+            try:
+                result = (date,)
+                components.add(result)
+            except Exception as es:
+                self.error('>>> content_ccpn_history {}'.format(es), loop, None)
+
+        return components
+
+    contents['ccpn_history'] = content_ccpn_history
+
+    def content_ccpn_dataset(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        # Get the contents of ccpn_dataset
+        # ccpn-to-nef mapping for saveframe
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+
+        name = framecode[len(category) + 1:]
+        result = {category: (name,)}
+
+        self._contentLoops(project, saveFrame, addLoopAttribs=['id'])
+        self.updateContent(saveFrame, result)
+
+    contents['ccpn_dataset'] = content_ccpn_dataset
+
+    def content_ccpn_calculation_step(self, parent, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+                                      value: str = None) -> Optional[OrderedSet]:
+        """Get the contents for ccpn_calculation_step loop"""
+        components = OrderedSet()
+
+        if value is None:
+            self.error('Undefined ccpn_calculation_step', loop, None)
+            return None
+
+        mapping = nef2CcpnMap.get(loop.name) or {}
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            parameters = _parametersFromLoopRow(row, map2)
+            try:
+                result = (value,)
+                components.add(result)
+            except Exception as es:
+                self.error('>>> content_ccpn_calculation_step {}'.format(es), loop, None)
+
+        return components
+
+    contents['ccpn_calculation_step'] = content_ccpn_calculation_step
+
+    def content_ccpn_calculation_data(self, parent, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+                                      value: str = None) -> Optional[OrderedSet]:
+        """Get the contents for ccpn_calculation_data loop"""
+        components = OrderedSet()
+
+        if value is None:
+            self.error('Undefined ccpn_calculation_data', loop, None)
+            return None
+
+        mapping = nef2CcpnMap.get(loop.name) or {}
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            parameters = _parametersFromLoopRow(row, map2)
+            try:
+                result = (value,)
+                components.add(result)
+            except Exception as es:
+                self.error('>>> content_ccpn_calculation_data {}'.format(es), loop, None)
+
+        return components
+
+    contents['ccpn_calculation_data'] = content_ccpn_calculation_data
+
+    def content_ccpn_parameter(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        # Get the contents of ccpn_parameter
+        # ccpn-to-nef mapping for saveframe
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        mapping = nef2CcpnMap.get(category) or {}
+        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+
+        _name = f"{parameters.get('dataSet')}.{parameters.get('name')}:{parameters.get('parameterName')}"
+        result = {category: (_name,)}
+
+        self._contentLoops(project, saveFrame, addLoopAttribs=['ccpn_dataset_id', 'ccpn_data_id', 'ccpn_parameter_name'])
+        self.updateContent(saveFrame, result)
+
+    contents['ccpn_parameter'] = content_ccpn_parameter
+
+    def content_ccpn_dataframe(self, parent, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+                               dataSet: str, name: str, key) -> Optional[OrderedSet]:
+        """Get the contents for ccpn_dataframe loop"""
+        components = OrderedSet()
+
+        if not all((dataSet, name, key)):
+            self.error('Undefined ccpn_dataframe', loop, None)
+            return None
+
+        mapping = nef2CcpnMap.get(loop.name) or {}
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            parameters = _parametersFromLoopRow(row, map2)
+            try:
+                result = (f'{dataSet}.{name}:{key}',)
+                components.add(result)
+            except Exception as es:
+                self.error('>>> content_ccpn_dataframe {}'.format(es), loop, None)
+
+        return components
+
+    contents['ccpn_dataframe'] = content_ccpn_dataframe
 
     def content_ccpn_substance(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """Get the contents of ccpn_substance saveFrame"""
@@ -654,7 +790,7 @@ class CcpnNefContent:
     contents['ccpn_spectrum_reference_substances'] = content_ccpn_spectrum_reference_substances
 
     def content_ccpn_substance_reference_spectra(self, parent: Substance, loop: StarIo.NmrLoop,
-                                                   parentFrame: StarIo.NmrSaveFrame, **kwargs):
+                                                 parentFrame: StarIo.NmrSaveFrame, **kwargs):
         """Get the contents of ccpn_group_spectrum loop"""
         spectra = OrderedSet()
         for row in loop.data:
@@ -740,7 +876,7 @@ class CcpnNefContent:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def content_ccpn_restraint_violation(self, restraintList: RestraintList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
-                              itemLength: int = None) -> Optional[OrderedSet]:
+                                         itemLength: int = None) -> Optional[OrderedSet]:
         """Get the contents for ccpn_restraint_violation loops
         """
         result = OrderedSet()
@@ -932,6 +1068,3 @@ class CcpnNefContent:
     contents['ccpn_spectrum_dimension'] = _noLoopContent
     contents['nef_spectrum_dimension'] = _noLoopContent
     contents['ccpn_substance_synonym'] = _noLoopContent
-    contents['ccpn_dataset'] = _contentLoops
-    contents['ccpn_calculation_step'] = _noLoopContent
-    contents['ccpn_calculation_data'] = _noLoopContent

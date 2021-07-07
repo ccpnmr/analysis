@@ -1,5 +1,5 @@
 """
-Module Documentation here
+PeakPickers; user peakPickers are automatically picked up by getPeakPickerTypes
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -26,10 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-"""
-User peakPickers are automatically picked up by getPeakPickerTypes
-"""
-
+#
 from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPickerTypes
-
 getPeakPickerTypes()
+

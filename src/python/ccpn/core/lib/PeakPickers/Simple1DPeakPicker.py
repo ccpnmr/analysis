@@ -65,4 +65,4 @@ class Simple1DPeakPicker(PeakPickerABC):
         return peaks
 
 
-Simple1DPeakPicker.register()
+Simple1DPeakPicker._registerPeakPicker()

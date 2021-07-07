@@ -291,10 +291,10 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """A peakPicker instance for region picking in this spectrum.
         None indicates no valid peakPicker has been defined
         """
-        from ccpn.core.lib.SpectrumLib import _createDefaultPeakPicker
+        from ccpn.core.lib.SpectrumLib import _createPeakPicker
 
         if not self._peakPicker:
-            _peakPicker = _createDefaultPeakPicker(self)
+            _peakPicker = _createPeakPicker(self)
             # automatically store in the spectrum internal store
             if _peakPicker:
                 with undoBlockWithoutSideBar():

@@ -30,6 +30,7 @@ __date__ = "$Date: 2021-01-13 10:28:41 +0000 (Wed, Jan 13, 2021) $"
 
 from json import loads
 from collections import OrderedDict
+
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, CString
 from ccpn.util.Logging import getLogger
@@ -53,8 +54,10 @@ def getPeakPickerTypes() -> OrderedDict:
     # from ccpn.core.lib.PeakPickers.Simple1DPeakPicker import Simple1DPeakPicker
     # from ccpn.core.lib.PeakPickers.NmrgluePeakPicker import NmrgluePeakPicker
 
-    # load all from folder
-    loadModules([peakPickerPath, ])
+    if not PeakPickerABC._loadedPeakPickers:
+        # load all from folder
+        loadModules([peakPickerPath, ])
+        PeakPickerABC._loadedPeakPickers = True
 
     return PeakPickerABC._peakPickers
 
@@ -134,12 +137,13 @@ class PeakPickerABC(CcpNmrJson):
     # A dict of registered dataFormat: filled by _registerPeakPicker classmethod, called once after
     # each definition of a new derived class
     _peakPickers = OrderedDict()
+    _loadedPeakPickers = False
 
     @classmethod
-    def register(cls):
+    def _registerPeakPicker(cls):
         """register cls.peakPickerType"""
         if cls.peakPickerType in cls._peakPickers:
-            raise RuntimeError(f'PeakPicker "{cls.peakPickerType}" was already registered')
+            getLogger().debug(f'PeakPicker "{cls.peakPickerType}" was already registered')
         PeakPickerABC._peakPickers[cls.peakPickerType] = cls
         getLogger().info(f'Registering peakPicker class {cls.peakPickerType}')
 

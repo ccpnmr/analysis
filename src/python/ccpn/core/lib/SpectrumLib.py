@@ -1963,14 +1963,16 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
                 getLogger().warning(f'could not pick peaks for {spectrum} in region {axisDict}')
 
 
-def _createDefaultPeakPicker(spectrum):
-    """Create a default PeakPicker from preferences
+def _createPeakPicker(spectrum):
+    """Create a PeakPicker from preferences; resort to default types when not set
 
     :param spectrum: instance of type Spectrum
-    :return: new peakPicker of type defined in 1d or Nd section of preferences or None
+    :return: new peakPicker instance of type defined in 1d or Nd section of preferences or None
     """
     from ccpn.framework.Application import getApplication
     from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPicker
+    from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
+    from ccpn.core.lib.PeakPickers.Simple1DPeakPicker import Simple1DPeakPicker
 
     app = getApplication()
 
@@ -1978,17 +1980,19 @@ def _createDefaultPeakPicker(spectrum):
         prefsGeneral = app.preferences.general
 
         if spectrum.dimensionCount == 1:
-            _pickerType = prefsGeneral.peakPicker1d
+            _pickerType = prefsGeneral.peakPicker1d if prefsGeneral.peakPicker1d is not None \
+                          else Simple1DPeakPicker.peakPickerType
         else:
-            _pickerType = prefsGeneral.peakPickerNd
+            _pickerType = prefsGeneral.peakPickerNd if prefsGeneral.peakPickerNd is not None \
+                          else PeakPickerNd.peakPickerType
 
-        if _pickerType:
-            _picker = getPeakPicker(_pickerType, spectrum)
-
+        _picker = None
+        if _pickerType and (_picker := getPeakPicker(_pickerType, spectrum)) is not None:
             getLogger().debug(f'{spectrum}: creating default peakPicker {_picker}')
-            return _picker
         else:
-            getLogger().debug(f'{spectrum}: default peakPicker not defined')
+            getLogger().warning(f'{spectrum}: unable to define peakPicker')
+
+        return _picker
 
 
 #===========================================================================================================

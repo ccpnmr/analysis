@@ -89,4 +89,4 @@ class NmrgluePeakPicker(PeakPickerABC):
         return peaks
 # end class
 
-NmrgluePeakPicker.register()
+NmrgluePeakPicker._registerPeakPicker()

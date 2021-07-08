@@ -404,7 +404,8 @@ def _newSpectrumView(display, spectrumName: str = None,
                                                  stripSerial=stripSerial, dataSource=dataSource,
                                                  dimensionOrdering=dimensionOrdering)
 
-    result = display.project._data2Obj.get(apiSpectrumView)
+    # result = display.project._data2Obj.get(apiSpectrumView)
+    result = SpectrumView(display.project, apiSpectrumView)
     if result is None:
         raise RuntimeError('Unable to generate new SpectrumView item')
 

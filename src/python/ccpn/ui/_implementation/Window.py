@@ -29,11 +29,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from functools import partial
 from typing import Sequence, Tuple
 
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
+
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import DIMENSION_FREQUENCY
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, undoStackBlocking
 from ccpn.util.Logging import getLogger
@@ -60,7 +62,17 @@ class Window(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiWindow._metaclass.qualifiedName()
 
+    #=========================================================================================
+    @property
+    def spectrumDisplays(self):
+        """A tuple of SpectrumDisplay instances displayed in the window"""
+        ll = [x for x in self._wrappedData.sortedModules() if isinstance(x, ApiBoundDisplay)]
+        return tuple(self._project._data2Obj[x] for x in ll if x in self._project._data2Obj)
+
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiWindow(self) -> ApiWindow:
         """ CCPN Window matching Window"""
@@ -292,7 +304,7 @@ class Window(AbstractWrapperObject):
             # create the new spectrumDisplay
             display = _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
                                              title=title, positions=positions, widths=widths, units=units,
-                                             stripDirection=stripDirection, is1D=is1D, isGrouped=isGrouped,
+                                             stripDirection=stripDirection, isGrouped=isGrouped,
                                              zPlaneNavigationMode=zPlaneNavigationMode,
                                              **kwds)
 

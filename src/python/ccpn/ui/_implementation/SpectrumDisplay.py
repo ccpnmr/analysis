@@ -32,6 +32,7 @@ from typing import Sequence, Tuple, Optional
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
+
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
@@ -404,8 +405,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 
 @newObject(SpectrumDisplay)
 def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 'Y',
-                        title: str = None, window: Window = None, comment: str = None,
-                        independentStrips=False, nmrResidue=None,
+                        name: str = None, window: Window = None, comment: str = None,
                         zPlaneNavigationMode: str = None):
     """Create new SpectrumDisplay
 
@@ -416,46 +416,49 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
     :param title:
     :param window:
     :param comment:
-    :param independentStrips:
-    :param nmrResidue:
     :return: a new SpectrumDisplay instance.
     """
 
     window = self.getByPid(window) if isinstance(window, str) else window
-    nmrResidue = self.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue
 
     apiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
                self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
-
-    if len(axisCodes) < 2:
-        raise ValueError("New SpectrumDisplay must have at least two axisCodes")
+    window = window or apiTask.sortedWindows()[0]
 
     # set parameters for display
-    window = window or apiTask.sortedWindows()[0]
     displayPars = dict(
             stripDirection=stripDirection, window=window,
-            details=comment, resonanceGroup=nmrResidue and nmrResidue._wrappedData
+            details=comment,
             )
 
     # Add name, setting and insuring uniqueness if necessary
-    if title is None:
+    if name is None:
         if 'intensity' in axisCodes:
-            title = ''.join(['1D:', axisCodes[0]] + list(axisCodes[2:]))
+            name = ''.join(['1D:', axisCodes[0]] + list(axisCodes[2:]))
         else:
-            title = ''.join([str(x)[0:1] for x in axisCodes])
-    elif Pid.altCharacter in title:
-        raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
-    while apiTask.findFirstModule(name=title):
-        title = commonUtil.incrementName(title)
-    displayPars['name'] = title
+            name = ''.join([str(x)[0:1] for x in axisCodes])
+    name = SpectrumDisplay._uniqueApiName(self, name)
+    displayPars['name'] = name
 
-    if independentStrips:
-        # Create FreeStripDisplay
-        apiSpectrumDisplay = apiTask.newFreeDisplay(**displayPars)
-    else:
-        # Create Boundstrip/Nostrip display and first strip
-        displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
-        apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
+    # elif Pid.altCharacter in title:
+    #     raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
+    # while apiTask.findFirstModule(name=title):
+    #     title = commonUtil.incrementName(title)
+
+    if len(axisCodes) < 2:
+        raise ValueError("New SpectrumDisplay must have at least two axisCodes")
+    displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
+
+    # if independentStrips:
+    #     # Create FreeStripDisplay
+    #     apiSpectrumDisplay = apiTask.newFreeDisplay(**displayPars)
+    # else:
+
+    # Create Boundstrip/Nostrip display and first strip
+    apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
+
+    if (result := self._project._data2Obj.get(apiSpectrumDisplay)) is None:
+        raise RuntimeError('Unable to generate new SpectrumDisplay item')
 
     # Create axes
     for ii, code in enumerate(axisCodes):
@@ -481,20 +484,16 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
         else:
             apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
 
-    result = self._project._data2Obj.get(apiSpectrumDisplay)
-    if result is None:
-        raise RuntimeError('Unable to generate new SpectrumDisplay item')
-
     result.stripArrangement = stripDirection
     # may need to set other values here, guarantees before strip generation
     if zPlaneNavigationMode:
         result.zPlaneNavigationMode = zPlaneNavigationMode
 
     # Create first strip
-    if independentStrips:
-        apiSpectrumDisplay.newFreeStrip(axisCodes=axisCodes, axisOrder=axisCodes)
-    else:
-        apiSpectrumDisplay.newBoundStrip()
+    # if independentStrips:
+    #     apiSpectrumDisplay.newFreeStrip(axisCodes=axisCodes, axisOrder=axisCodes)
+    # else:
+    apiSpectrumDisplay.newBoundStrip()
 
     return result
 
@@ -507,8 +506,8 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
 def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes: Sequence[str] = (),
                            axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
                            widths: Sequence[float] = (), units: Sequence[str] = (),
-                           stripDirection: str = 'Y', is1D: bool = False,
-                           independentStrips: bool = False, isGrouped=False,
+                           stripDirection: str = 'Y',
+                           isGrouped=False,
                            zPlaneNavigationMode: str = 'strip'):
     """
     :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
@@ -523,10 +522,11 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
 
 #TODO; this needs to be cleaned of all (Spectrum) api-calls, except those pertaining to SpectrumDisplay creation
 
-    if title and Pid.altCharacter in title:
-        raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
-
     spectrum = window.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
+    if spectrum is None:
+        raise ValueError('_createSpectrumDisplay: undefined spectrum')
+    is1D = (spectrum.dimensionCount == 1)
+
     dataSource = spectrum._wrappedData
     project = window._project
 
@@ -578,8 +578,7 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
     with undoBlockWithoutSideBar():
         display = _newSpectrumDisplay(window.project,
                                       axisCodes=displayAxisCodes, stripDirection=stripDirection,
-                                             independentStrips=independentStrips,
-                                             title=title, zPlaneNavigationMode=zPlaneNavigationMode)
+                                      name=title, zPlaneNavigationMode=zPlaneNavigationMode)
 
         # Set unit, position and width
         orderedApiAxes = display._wrappedData.orderedAxes
@@ -644,10 +643,15 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
         display.isGrouped = isGrouped
 
     # Make spectrumView. NB We need notifiers on for these
-    stripSerial = 1 if independentStrips else 0
-    _newSpectrumView = display._wrappedData.newSpectrumView(spectrumName=dataSource.name,
-                                                            stripSerial=stripSerial, dataSource=dataSource,
-                                                            dimensionOrdering=dimensionOrdering)
+    _spectrumView = display._wrappedData.newSpectrumView(spectrumName=spectrum.name,
+                                                         stripSerial=0,
+                                                         dataSource=spectrum._wrappedData,
+                                                         dimensionOrdering=dimensionOrdering)
+    # from ccpn.ui._implementation.SpectrumView import _newSpectrumView
+    # _spectrumView = _newSpectrumView(display,
+    #                                  spectrumName=dataSource.name,
+    #                                  stripSerial=0, dataSource=dataSource,
+    #                                  dimensionOrdering=dimensionOrdering)
 
     # call any post initialise routines for the spectrumDisplay here
     display._postInit()
@@ -659,16 +663,16 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
 # Window.createSpectrumDisplay = _createSpectrumDisplay
 # del _createSpectrumDisplay
 
-
-# Window.spectrumDisplays property
-def getter(window: Window):
-    ll = [x for x in window._wrappedData.sortedModules() if isinstance(x, ApiBoundDisplay)]
-    return tuple(window._project._data2Obj[x] for x in ll if x in window._project._data2Obj)
-
-
-Window.spectrumDisplays = property(getter, None, None,
-                                   "SpectrumDisplays shown in Window")
-del getter
+# GWV 20210807: moved to _implementation.Window
+# # Window.spectrumDisplays property
+# def getter(window: Window):
+#     ll = [x for x in window._wrappedData.sortedModules() if isinstance(x, ApiBoundDisplay)]
+#     return tuple(window._project._data2Obj[x] for x in ll if x in window._project._data2Obj)
+#
+#
+# Window.spectrumDisplays = property(getter, None, None,
+#                                    "SpectrumDisplays shown in Window")
+# del getter
 
 # Notifiers:
 

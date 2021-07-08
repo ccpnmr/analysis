@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-08 13:01:55 +0100 (Thu, July 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-08 13:06:29 +0100 (Thu, July 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -289,15 +289,18 @@ class Project(AbstractWrapperObject):
             if not isValidFileNameLength(newPath, stripFullPath=True, stripExtension=True):
                 raise ValueError('Filename must be 32 characters or fewer')
 
-        apiStatus = self._getAPIObjectsStatus()
-        if apiStatus.invalidObjects:
-            # if deleteInvalidObjects:
-                # delete here ...
-                # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
-            # else:
-            errorMsg = '\n '.join(apiStatus.invalidObjectsErrors)
-            getLogger().critical('Found compromised items. Project might be left in an invalid state. %s' %errorMsg)
-            # raise ValueError(error)
+        try:
+            apiStatus = self._getAPIObjectsStatus()
+            if apiStatus.invalidObjects:
+                # if deleteInvalidObjects:
+                    # delete here ...
+                    # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
+                # else:
+                errorMsg = '\n '.join(apiStatus.invalidObjectsErrors)
+                getLogger().critical('Found compromised items. Project might be left in an invalid state. %s' %errorMsg)
+                # raise ValueError(error)
+        except Exception as es:
+            getLogger().warning('Error checking project status: %s' % str(es))
 
         # don't check valid inside this routine as it is not optimised and only results in a crash. Use apiStatus object.
         savedOk = apiIo.saveProject(self._wrappedData.root, newPath=newPath,

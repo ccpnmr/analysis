@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 09:34:32 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-08 09:32:36 +0100 (Thu, July 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,6 @@ __date__ = "$Date: 2016-11-15 21:37:50 +0000 (Tue, 15 Nov 2016) $"
 
 from itertools import product
 
-from LabelledEnum import LabelledEnum
 from ccpn.ui.gui.widgets.Font import Font, DEFAULTFONT, \
     DEFAULTFONTSIZE, DEFAULTFONTNAME, CONSOLEFONT, SIDEBARFONT, \
     TABLEFONT, SEQUENCEGRAPHFONT, _readFontFromAppearances

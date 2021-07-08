@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-10 15:14:29 +0100 (Thu, June 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-08 13:01:55 +0100 (Thu, July 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -964,7 +964,7 @@ class Project(AbstractWrapperObject):
 
         """
         getLogger().info('Validating Project integrity...')
-        from core._implementation.APIStatus import APIStatus
+        from ccpn.core._implementation.APIStatus import APIStatus
         root = self._apiNmrProject.root
         apiStatus = APIStatus(apiObj=root, completeScan=completeScan, includeDefaultChildren=includeDefaultChildren)
         return apiStatus

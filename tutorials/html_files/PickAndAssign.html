@@ -6,11 +6,17 @@
     <link rel="stylesheet" href="CcpnVideoTutorials.css">
 </head>
 <body>
-<div><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html"><img src="VideoTutorialsLogo.png" alt="Video Tutorials Logo" height="50" style="padding-left: 20px"></a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 20px"></a></div>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
 <br>
 <div class="headerBar">Pick and Assign</div>
 <div class="tutorial">
-<iframe width=80% height="315" src="https://www.youtube.com/embed/5JwplD3Fmn4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+<div class="videoContainer">
+  <div class="videoWrapper">
+    <iframe src="https://www.youtube.com/embed/5JwplD3Fmn4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</div>
+
 <h2>Pick and Assign</h2>
 <p>Once you've set up your NmrResidues in your HSQC (or other base spectrum), you will need to peak pick your 3D spectra. You could do this by going to <span class="action">Spectrum / Pick Peaks / Pick ND Peaks...</span> (or type <span class="action">PP</span>). Here you can select an area in which you peak pick your 3D spectrum. The problem with this approach is that you can end up peak picking lots of noise peaks or artefacts and you won't be able to transfer your NmrAtom assignments from your HSQC to the 3D. A better way is to use the <span class="action">Pick and Assign</span> module.</p>
 <p>Open this module by going to <span class="action">Assign / Pick and Assign</span> or typing <span class="action">PA</span>. Go to the module settings by clicking on the gear icon. Select the spectrum display in which you would like to pick your 3D peaks (make sure that you have a spectrum display module with your 3D spectra open already - it can also be helpful to have another display open with your HSQC/base spectrum). You can make changes to the peak picking tolerances here if you decide this is necessary at a later stage. In the main <span class="action">Pick and Assign</span> module, select your NmrChain from the drop-down menu. You will see that the table is now populated with all of your NmrResidues in this NmrChain. It is also useful to open the <span class="action">NmrAtom Assigner</span> which you can do by going to <span class="action">Assign / NmrAtom Assigner</span> or typing <span class="action">AN</span>.</p>

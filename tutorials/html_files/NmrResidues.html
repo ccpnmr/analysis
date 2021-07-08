@@ -6,11 +6,17 @@
     <link rel="stylesheet" href="CcpnVideoTutorials.css">
 </head>
 <body>
-<div><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html"><img src="VideoTutorialsLogo.png" alt="Video Tutorials Logo" height="50" style="padding-left: 20px"></a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 20px"></a></div>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
 <br>
 <div class="headerBar">NmrResidues</div>
 <div class="tutorial">
-<iframe width=80% height="315" src="https://www.youtube.com/embed/DS9IZzNsBbQ" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+<div class="videoContainer">
+  <div class="videoWrapper">
+    <iframe src="https://www.youtube.com/embed/DS9IZzNsBbQ" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</div>
+
 <h2>NmrAtoms, NmrResidues and NmrChains</h2>
 <p>If you add a protein chain to your Analysis project, it will be described as a <span class="action">Chain</span>, which contains <span class="action">Residues</span>, which are of a particular <span class="action">Residue Type</span> and in turn contain <span class="action">Atoms</span>. So equally, looking at it the other way up, you can say that each Atom, is seen as belonging to a particular, Residue, Residue Type and Chain.
     We write these as <span class="action">Chain.Residue.ResidueType.Atom</span>. This is also referred to as the project ID or <span class="action">PID</span> of an atom. In practice, this might look like this: <span class="action">A.46.Ala.HA</span></p>

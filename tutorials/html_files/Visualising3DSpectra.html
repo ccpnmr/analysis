@@ -6,11 +6,17 @@
     <link rel="stylesheet" href="CcpnVideoTutorials.css">
 </head>
 <body>
-<div><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html"><img src="VideoTutorialsLogo.png" alt="Video Tutorials Logo" height="50" style="padding-left: 20px"></a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 20px"></a></div>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
 <br>
 <div class="headerBar">Visualising 3D Spectra</div>
 <div class="tutorial">
-<iframe width=80% height="315" src="https://www.youtube.com/embed/XXRBElD97pk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+<div class="videoContainer">
+  <div class="videoWrapper">
+    <iframe src="https://www.youtube.com/embed/XXRBElD97pk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</div>
+
 <h2>Visualising 3D Spectra</h2>
 <h3>Theory</h3>
 <p>Many 3D spectra are based upon a 2D spectrum and it is easiest to understand how 3D spectra are visualised by using one of these as an example. So we might start with a 2D 1H-15N HSQC spectrum. In an experiment such as an HNCO, you now add a third dimension which is a carbon dimension. You can image each HSQC peak being lifted up into the third dimension by the amount of the carbon chemical shift. What you then end up with, is essentially lots of 'blobs' (3D peaks) 'floating' in a 3D cube. Now that is not a very useful way of looking at a 3D spectrum. So instead we look at at individual planes out of that cube. In each plane you will see a different peak. You can do this in several ways - either by taking 1H-13C planes at different 15N positions, or by taking 1H-15N planes at different 13C positions (15N-13C planes at 1H positions is, of course, also possible, but in practice not done very often).</p>

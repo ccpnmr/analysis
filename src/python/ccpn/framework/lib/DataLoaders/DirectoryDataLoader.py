@@ -68,7 +68,7 @@ class DirectoryDataLoader(DataLoaderABC):
             for dataLoader in self.dataLoaders:
                 objs = dataLoader.load()  # This will automatically recurse
                 result.extend(objs)
-        except Exception as es:
+        except (ValueError, RuntimeError) as es:
             raise RuntimeError('Error loading files from "%s"' % self.path)
         return result
 

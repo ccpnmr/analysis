@@ -584,4 +584,4 @@ class PeakPickerNd(PeakPickerABC):
     # plt.show()
 
 
-PeakPickerNd.register()
+PeakPickerNd._registerPeakPicker()

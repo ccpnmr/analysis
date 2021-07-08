@@ -184,6 +184,7 @@ class GuiStripNd(GuiStrip):
         # test
         #PlaneSelectorWidget(qtParent=self._stripToolBarWidget, strip=self, axis=2, grid=(0,1))
 
+        # tuple of "plane-selection" widgets; i.e. for 3D, 4D, etc
         self.planeAxisBars = ()
 
         # a large(ish) unbound widget to contain the text - may need more rows
@@ -530,7 +531,7 @@ class GuiStripNd(GuiStrip):
 
         self.haveSetupZWidgets = True
 
-    @logCommand(get='self')
+    # @logCommand(get='self')
     def changeZPlane(self, n: int = None, planeCount: int = None, position: float = None):
         """
         Changes the position of the z axis of the strip by number of planes or a ppm position, depending
@@ -542,6 +543,7 @@ class GuiStripNd(GuiStrip):
         if not (self.planeAxisBars and self.activePlaneAxis is not None):
             return
 
+        # GWV: don't get this; Z is always 2; why pass it in??
         n = (n if isinstance(n, int) else self.activePlaneAxis)
         if not (0 <= (n - 2) < len(self.planeAxisBars)):
             getLogger().warning('planeIndex out of range %s' % str(n))
@@ -549,7 +551,7 @@ class GuiStripNd(GuiStrip):
 
         zAxis = self.orderedAxes[n]  # was + 2
 
-        planeMin, planeMax, planeSize, planePpmPosition, _ = self.planeAxisBars[n - 2].getPlaneValues()
+        planeMin, planeMax, planeSize, planePpmPosition, _tmp = self.planeAxisBars[n - 2].getPlaneValues()
         # planeLabel = self.planeToolbar.planeLabels[n]
         # planeSize = planeLabel.singleStep()
 

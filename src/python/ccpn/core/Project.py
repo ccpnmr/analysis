@@ -60,7 +60,7 @@ from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 # from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
-                                          notificationEchoBlocking
+                                          notificationEchoBlocking, inactivity
 from ccpn.util.Logging import getLogger
 
 
@@ -268,8 +268,8 @@ class Project(AbstractWrapperObject):
 
     def _initialiseProject(self):
         """Complete initialisation of project,
-
-        set up logger and notifiers, and wrap underlying data"""
+        set up logger and notifiers, and wrap underlying data
+        """
 
         # The logger has already been set up when creating/loading the API project
         # so just get it
@@ -282,33 +282,24 @@ class Project(AbstractWrapperObject):
         # for tt in self._coreNotifiers:
         #     self.registerNotifier(*tt)
 
-        # initialise, creating the wrapped objects
-        self._initializeAll()
-
+        # initialise, creating the children
         self._resetUndo()
-
-        with undoStackBlocking(self.application):
-            with notificationBlanking(self.application):
-                with notificationEchoBlocking(self.application):
-                    # 20190520:ED routines that use core objects, not sure whether the correct place
-                    # GWV: it is not; the Spectrum instances need to assure they are ok after
-                    # (re-)initialisation
-                    # self._setContourColours()
-                    # self._setNoiseLevels()
-
-                    if len(self.chemicalShiftLists) == 0:
-                        self.newChemicalShiftList(name='default')
+        with inactivity():
+            self._restoreChildren()
+            # we always have the default chemicalShift list
+            if len(self.chemicalShiftLists) == 0:
+                self.newChemicalShiftList(name='default')
 
     def _close(self):
         self.close()
 
     def close(self):
         """Clean up the wrapper project previous to deleting or replacing
-
-        Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)"""
-        # Remove undo stack:
+        Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)
+        """
         self._logger.info("Closing %s" % self.path)
 
+        # Remove undo stack:
         self._resetUndo(maxWaypoints=0)
 
         apiIo.cleanupProject(self)
@@ -322,9 +313,9 @@ class Project(AbstractWrapperObject):
     def __repr__(self):
         """String representation"""
         if self.isDeleted:
-            return "<ccpn.core.Project:%s, isDeleted=True>" % self.name
+            return "<Project:%s, isDeleted=True>" % self.name
         else:
-            return "<ccpn.core.Project:%s>" % self.name
+            return "<Project:%s>" % self.name
 
     def __str__(self):
         """String representation"""
@@ -361,6 +352,7 @@ class Project(AbstractWrapperObject):
                 raise ValueError('Cannot overwrite existing file "%s"' % newPath)
             if len(newPath.basename) > 32:
                 raise ValueError('Unfortunately, we currently have limited (32) length of the filename (%s)' % newPath.basename)
+            newPath = str(newPath)
 
         try:
             apiStatus = self._getAPIObjectsStatus()
@@ -1347,7 +1339,7 @@ class Project(AbstractWrapperObject):
         path = aPath(path)
         name = path.basename
 
-        ensemble = EnsembleData.from_pdb(path)
+        ensemble = EnsembleData.from_pdb(str(path))
         se = self.newStructureEnsemble(name=name, data=ensemble)
 
         return [se]
@@ -1376,7 +1368,7 @@ class Project(AbstractWrapperObject):
         CCPNINTERNAL: used in Excel data loader
         """
         with undoBlock():
-            reader = ExcelReader(project=self, excelPath=path)
+            reader = ExcelReader(project=self, excelPath=str(path))
             result = reader.load()
             return result
 
@@ -1748,31 +1740,31 @@ class Project(AbstractWrapperObject):
         return _newDataSet(self, name=name, title=title, programName=programName, programVersion=programVersion,
                            dataPath=dataPath, creationDate=creationDate, uuid=uuid, comment=comment, **kwds)
 
-    @logCommand('project.')
-    def newSpectrumDisplay(self, axisCodes: (str,), stripDirection: str = 'Y',
-                           title: str = None, window=None, comment: str = None,
-                           independentStrips=False, nmrResidue=None, **kwds):
-        """Create new SpectrumDisplay
-
-        See the SpectrumDisplay class for details.
-
-        Optional keyword arguments can be passed in; see SpectrumDisplay._newSpectrumDisplay for details.
-
-        :param axisCodes:
-        :param stripDirection:
-        :param title:
-        :param window:
-        :param comment:
-        :param independentStrips:
-        :param nmrResidue:
-        :param serial: optional serial number.
-        :return: a new SpectrumDisplay instance.
-        """
-        from ccpn.ui._implementation.SpectrumDisplay import _newSpectrumDisplay
-
-        return _newSpectrumDisplay(self, axisCodes=axisCodes, stripDirection=stripDirection,
-                                   title=title, window=window, independentStrips=independentStrips,
-                                   comment=comment, **kwds)
+    # @logCommand('project.')
+    # def newSpectrumDisplay(self, axisCodes: (str,), stripDirection: str = 'Y',
+    #                        title: str = None, window=None, comment: str = None,
+    #                        independentStrips=False, nmrResidue=None, **kwds):
+    #     """Create new SpectrumDisplay
+    #
+    #     See the SpectrumDisplay class for details.
+    #
+    #     Optional keyword arguments can be passed in; see SpectrumDisplay._newSpectrumDisplay for details.
+    #
+    #     :param axisCodes:
+    #     :param stripDirection:
+    #     :param title:
+    #     :param window:
+    #     :param comment:
+    #     :param independentStrips:
+    #     :param nmrResidue:
+    #     :param serial: optional serial number.
+    #     :return: a new SpectrumDisplay instance.
+    #     """
+    #     from ccpn.ui._implementation.SpectrumDisplay import _newSpectrumDisplay
+    #
+    #     return _newSpectrumDisplay(self, axisCodes=axisCodes, stripDirection=stripDirection,
+    #                                title=title, window=window, independentStrips=independentStrips,
+    #                                comment=comment, **kwds)
 
     @logCommand('project.')
     def newSpectrumGroup(self, name: str, spectra=(), **kwds):

@@ -144,19 +144,23 @@ class NmrAtom(AbstractWrapperObject):
         """isotopeCode of NmrAtom. Used to facilitate the nmrAtom assignment."""
         return self._wrappedData.isotopeCode
 
-    # TODO: remove setter: This should not be allowed anymore; use _setIsotopeCode() method
-    @isotopeCode.setter
-    def isotopeCode(self, value) -> str:
-        """Set the isotopeCode of NmrAtom. """
-        from ccpn.util import Constants as ct
-
-        if not self.isotopeCode == value:
-            isotopeCode = value if value in ct.DEFAULT_ISOTOPE_DICT.values() else UnknownIsotopeCode
-            self._wrappedData.isotopeCode = isotopeCode or UnknownIsotopeCode
+    # @isotopeCode.setter
+    # def isotopeCode(self, value) -> str:
+    #     """Set the isotopeCode of NmrAtom. """
+    #     from ccpn.util import Constants as ct
+    #
+    #     if not self.isotopeCode == value:
+    #         isotopeCode = value if value in ct.DEFAULT_ISOTOPE_DICT.values() else UnknownIsotopeCode
+    #         self._wrappedData.isotopeCode = isotopeCode or UnknownIsotopeCode
 
     def _setIsotopeCode(self, value):
-        # value must be defined, if not set then can set to arbitrary value '?'
-        # this means it can still be set at any isotopeCode later, otherwise need to undo or create new nmrAtom
+        """
+        :param value:  value must be defined, if not set then can set to arbitrary value '?'
+        this means it can still be set at any isotopeCode later, otherwise
+        need to undo or create new nmrAtom
+
+        CCPNINTERNAL: used in _newNmrAtom, Peak.assignDimension
+        """
         self._wrappedData.isotopeCode = value if value else UnknownIsotopeCode
 
     @property
@@ -536,7 +540,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
     if not isinstance(isotopeCode, (str, type(None))):
         raise TypeError('isotopeCode {} must be of type string (or None)'.format(isotopeCode))
     if isotopeCode:
-        result.isotopeCode = isotopeCode # it has to be set after the creation to avoid API errors.
+        result._setIsotopeCode(isotopeCode) # it has to be set after the creation to avoid API errors.
 
     if comment is not None and len(comment) > 0:
         result.comment = comment

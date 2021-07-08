@@ -327,17 +327,23 @@ class SpectrumDataSourceABC(CcpNmrJson):
             spectrumAttribute=None,
             hasSetterInSpectrumClass=False
             )
-    #TODO dimensionTypes needs setting in Spectrum class
-    dimensionTypes = CList(trait=CString(allow_none=False), default_value=[specLib.DIMENSION_FREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
+    dimensionTypes = CList(trait=CString(allow_none=True), default_value=[specLib.DIMENSION_FREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='dimensionTypes',
-            hasSetterInSpectrumClass=False
+            hasSetterInSpectrumClass=True
             )
     isComplex = CList(trait=CBool(), default_value=[False] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='isComplex',
+            hasSetterInSpectrumClass=True
+            )
+    _tmp = [False] * MAXDIM; _tmp[0] = True
+    isAquisition = CList(trait=CBool(), default_value=_tmp, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='isAquisition',
             hasSetterInSpectrumClass=True
             )
     isotopeCodes = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
@@ -352,12 +358,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
             spectrumAttribute='axisCodes',
             hasSetterInSpectrumClass=True
             )
-    acquisitionAxisCode = CString(allow_none=True, default_value=None).tag(
-            isDimensional=False,
-            doCopy=True,
-            spectrumAttribute='acquisitionAxisCode',
-            hasSetterInSpectrumClass=True
-            )
     axisLabels = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
@@ -365,10 +365,16 @@ class SpectrumDataSourceABC(CcpNmrJson):
             hasSetterInSpectrumClass=False,
             info='per dimension: labels, as e.g. present in Felix or NmrPipe',
             )
-    measurementTypes = CList(trait=CString(allow_none=True), default_value=['shift'] * MAXDIM, maxlen=MAXDIM).tag(
+    measurementTypes = CList(trait=CString(allow_none=True), default_value=['Shift'] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
             spectrumAttribute='measurementTypes',
+            hasSetterInSpectrumClass=True,
+            )
+    foldingModes = CList(trait=CString(allow_none=True), default_value=[specLib.FOLDING_MODE_CIRCULAR] * MAXDIM, maxlen=MAXDIM).tag(
+            isDimensional=True,
+            doCopy=True,
+            spectrumAttribute='foldingModes',
             hasSetterInSpectrumClass=True,
             )
     spectrometerFrequencies = CList(trait=CFloat(allow_none=False), default_value=[1.0] * MAXDIM, maxlen=MAXDIM).tag(
@@ -837,7 +843,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 acode = '%s_%d' % (acode, idx + 1)
                 self.axisCodes[idx] = acode
 
-        self.acquisitionAxisCode = self.axisCodes[self.X_AXIS]
+        # self.acquisitionAxisCode = self.axisCodes[self.X_AXIS]
 
     def setDimensionCount(self, dimensionCount):
         """Change the dimensionality, assuring proper values of the dimensional parameters"""
@@ -1283,7 +1289,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             position = [1] * self.dimensionCount
 
         if not isIterable(position):
-            raise ValueError('position must be an tuple or list')
+            raise ValueError('checkForValidPosition: position must be an tuple or list')
 
         if len(position) < self.dimensionCount:
             position += [1] * self.dimensionCount - len(position)
@@ -1291,7 +1297,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         for idx, p in enumerate(position):
             if not (1 <= p <= self.pointCounts[idx]):
-                raise ValueError('dimension %d: value must be in [1,%d]: got "%d"' % \
+                raise ValueError('checkForValidPosition: dimension %d: value must be in [1,%d]: got "%d"' % \
                                  (idx + 1, self.pointCounts[idx], p))
         return position
 
@@ -1308,11 +1314,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
         position = self.checkForValidPosition(position)
 
         if not (1 <= xDim <= self.dimensionCount):
-            raise ValueError('invalid xDim (%d), should be in range [1,%d]' % (xDim, self.dimensionCount))
+            raise ValueError('checkForValidPlane: invalid xDim (%d), should be in range [1,%d]' % (xDim, self.dimensionCount))
         if not (1 <= yDim <= self.dimensionCount):
-            raise ValueError('invalid yDim (%d), should be in range [1,%d]' % (yDim, self.dimensionCount))
+            raise ValueError('checkForValidPlane: invalid yDim (%d), should be in range [1,%d]' % (yDim, self.dimensionCount))
         if xDim == yDim:
-            raise ValueError('xDim = %d; yDim = %d' % (xDim, yDim))
+            raise ValueError('checkForValidPlane: xDim == yDim = %d' % (xDim,))
 
         return position
 
@@ -1787,6 +1793,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def printParameters(self, path=sys.stdout):
         """Print all to path"""
         path.write(str(self) + '\n')
+        path.write('%-24s: %s\n' % ('path', self.path))
         for param, value in self.getNonDimensionalParameters().items():
             path.write('%-24s: %s\n' % (param, value))
         for param, values in self.getDimensionalParameters().items():
@@ -1800,7 +1807,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     def __str__(self):
         if self.dimensionCount == 0:
-            return '<%s: _D (), path=%s>' % (self.__class__.__name__, self.path)
+            return '<%s: _D (), %s>' % (self.__class__.__name__, self.path.name)
         else:
             if self.hdf5buffer is not None:
                 fpStatus = '%r' % 'buffered'
@@ -1812,11 +1819,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 fpStatus = '%r' % 'closed'
                 path = self.path
 
-            return '<%s: %dD (%s), %s: path=%s>' % (self.__class__.__name__,
+            return '<%s: %dD (%s), (%s,%s)>' % (self.__class__.__name__,
                                                     self.dimensionCount,
                                                     'x'.join([str(p) for p in self.pointCounts]),
                                                     fpStatus,
-                                                    path
+                                                    path.name
                                                     )
 #end class
 

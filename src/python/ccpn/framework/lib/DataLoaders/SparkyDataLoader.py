@@ -35,8 +35,8 @@ class SparkyDataLoader(DataLoaderABC):
     """Sparky data loader
     """
     dataFormat = 'sparkyProject'
-    suffixes = ['.sparky']  # a list of suffixes that get matched to path
-    allowDirectory = True  # Can/Can't open a directory
+    suffixes = ['.proj', '.save']  # a list of suffixes that get matched to path
+    allowDirectory = False  # Can/Can't open a directory
     createsNewProject = True
 
     def __init__(self, path):
@@ -50,11 +50,9 @@ class SparkyDataLoader(DataLoaderABC):
         """
         if (_path := cls.checkPath(path)) is None:
             return None
-        if not _path.is_dir():
-            return None
-        # # assume that all is good if we find the CCPN_API_DIRECTORY
-        # _apiPath = _path / CCPN_API_DIRECTORY
-        # if _apiPath.exists():
+
+        #TODO: implement additional checks?
+
         instance = cls(path)
         return instance
         # return None
@@ -68,7 +66,7 @@ class SparkyDataLoader(DataLoaderABC):
         try:
             project = self.application._loadSparkyProject(path=self.path, makeNewProject=self.makeNewProject)
 
-        except Exception as es:
+        except (ValueError, RuntimeError) as es:
             raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
 
         return [project]

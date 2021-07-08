@@ -36,7 +36,7 @@ from typing import Sequence
 from ccpn.util.Path import Path
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flatten
-from ccpn.core.lib.SpectrumLib import DIMENSION_TIME
+import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 
 from nmrglue.fileio.bruker import read_acqus_file, read_jcamp
@@ -307,10 +307,6 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 dimDict.update(self.acqus[i])
                 dimDict.update(self.procs[i])
 
-                if int(float(dimDict.get('FT_mod', 1))) == 0:
-                    self.dimensionTypes[i] = DIMENSION_TIME
-                    self.measurementTypes[i] = 'time'
-
                 self.pointCounts[i] = int(dimDict['SI'])
                 self.blockSizes[i] = int(dimDict['XDIM'])
                 if self.blockSizes[i] == 0:
@@ -322,6 +318,15 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 
                 self.isotopeCodes[i] = dimDict.get('AXNUC')
                 self.axisLabels[i] = dimDict.get('AXNAME')
+
+                if int(float(dimDict.get('FT_mod', 1))) == 0:
+                    # point/time axis
+                    self.dimensionTypes[i] = specLib.DIMENSION_TIME
+                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_TIME
+                else:
+                   # frequency axis
+                    self.dimensionTypes[i] = specLib.DIMENSION_FREQUENCY
+                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_SHIFT
 
                 self.spectralWidthsHz[i] = float(dimDict.get('SW_p', 1.0))  # SW in Hz processed (from proc file)
                 self.spectrometerFrequencies[i] = float(dimDict.get('SFO1', dimDict.get('SF', 1.0)))

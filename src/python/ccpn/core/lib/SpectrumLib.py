@@ -1,4 +1,4 @@
-"""Spectrum-related functions and utilities
+"""Spectrum-related definitions, functions and utilities
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -29,13 +29,16 @@ import collections
 import math
 import random
 import numpy as np
+import decorator
+
 from typing import Tuple, Optional
-from ccpn.core.lib.ContextManagers import notificationEchoBlocking
-from ccpn.util.Common import percentage
+
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
-from ccpn.util.Logging import getLogger
 from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeTransfers
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+from ccpn.util.Common import percentage, isIterable
+from ccpn.util.Logging import getLogger
+from ccpn.util.decorators import singleton
 
 #=========================================================================================
 # Dimension definitions
@@ -71,11 +74,170 @@ B_DIM = 5
 C_DIM = 6
 D_DIM = 7
 E_DIM = 8
-#=========================================================================================
-
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
+
+FOLDING_MODE_CIRCULAR = 'circular'
+FOLDING_MODE_MIRROR = 'mirror'
+FOLDING_MODES = (FOLDING_MODE_CIRCULAR, FOLDING_MODE_MIRROR)
+
+WINDOW_FUNCTION_EM = 'EM'
+WINDOW_FUNCTION_GM = 'GM'
+WINDOW_FUNCTION_SINE = 'Sine'
+WINDOW_FUNCTION_QSINE = 'squaredSine'
+WINDOW_FUNCTIONS = (WINDOW_FUNCTION_EM, WINDOW_FUNCTION_GM, WINDOW_FUNCTION_SINE, WINDOW_FUNCTION_QSINE)
+
+MEASUREMENT_TYPE_TIME = 'Time'
+MEASUREMENT_TYPE_SHIFT = 'Shift'
+MEASUREMENT_TYPES = (MEASUREMENT_TYPE_TIME, MEASUREMENT_TYPE_SHIFT, 'ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling', \
+                     'MQShift','T1','T2','T1rho','T1zz')
+
+
+# Isotope-dependent assignment tolerances (in ppm)
+defaultAssignmentTolerance = 0.4
+isotope2Tolerance = {
+    '1H' : 0.03,
+    '13C': 0.4,
+    '15N': 0.4,
+    '19F': 0.03,
+    }
+def getAssignmentTolerances(isotopeCode) -> float:
+    """:return assignmentTolerance for isotopeCode"""
+    return isotope2Tolerance.get(isotopeCode, defaultAssignmentTolerance)
+
+
+#=========================================================================================
+# Decorators for Spectrum attributes
+#=========================================================================================
+
+@singleton
+class _includeInCopyList(list):
+    """Singleton class to store the attributes to be included when making a copy of object.
+    Attributes can be modified and can be either non-dimensional or dimension dependent,
+    Dynamically filled by two decorators
+    Stored as list of (attributeName, isMultiDimensional) tuples
+    """
+
+    def getNoneDimensional(self):
+        """return a list of one-dimensional attribute names"""
+        return [attr for attr, isNd in self if isNd == False]
+
+    def getMultiDimensional(self):
+        """return a list of one-dimensional attribute names"""
+        return [attr for attr, isNd in self if isNd == True]
+
+    def appendItem(self, attribute, isMultidimensional):
+        _t = (attribute, isMultidimensional)
+        if _t not in self:
+            super().append(_t)
+
+
+def _includeInCopy(func):
+    """Decorator to define that an non-dimensional attribute is to be included when making a copy of object
+    """
+    storage = _includeInCopyList()
+    storage.appendItem(func.__name__, isMultidimensional=False)
+    return func
+
+
+def _includeInDimensionalCopy(func):
+    """Decorator to define that a dimensional attribute is to be included when making a copy of object
+    """
+    storage = _includeInCopyList()
+    storage.appendItem(func.__name__, isMultidimensional=True)
+    return func
+
+
+def checkSpectrumPropertyValue(iterable:bool, unique:bool=False, allowNone:bool=False, types:tuple=(), enumerated:tuple=()):
+    """Decorator to check values in Spectrum property setters
+    :param iterable: True, False: indicates that value should be an iterable
+    :param unique: True, False: indicates if iterable items should be unique
+    :param allowNone: True, False indicates if None value is allowed
+    :param types: a tuple of permittable types for value; value is cast into first type
+    :param enumerated: a tuple indicating that value should be one of the items of the tuple
+    """
+
+    if allowNone:
+        types = tuple(list(types) + [type(None)])
+        if len(enumerated) > 0:
+            enumerated = list(enumerated) + [None]
+
+    def checkType(obj, attributeName, value):
+        """Check and optional casts value
+        :param value:
+        :return: value cast into types[0]
+        """
+        checkedValue = value
+        if not allowNone and value is None:
+            raise ValueError('Value for "%s" of %s cannot be None)' %
+                             (attributeName, obj))
+
+        if len(types) > 0:
+            if not isinstance(value, types):
+                typeNames = tuple(t.__name__ for t in types)
+                raise ValueError('Value for "%s" of %s needs to be of type %s; got %r (type %s)' %
+                                 (attributeName, obj, typeNames, value, type(value).__name__))
+            # cast into types[0]
+            if value is not None:
+                checkedValue = types[0](value)
+        return checkedValue
+
+    def checkIterable(obj, attributeName, value):
+        """Check for iterable properties
+        """
+        if not isinstance(value, (list,tuple,set)):
+            raise ValueError('Value for "%s" of %s needs to be one of (list, tuple, set); got %r (type %s)' %
+                             (attributeName, obj, value, type(value).__name__))
+
+        if len(value) != obj.dimensionCount:
+            raise ValueError('Value for "%s" of %s needs to be of length %d; got %r' %
+                             (attributeName, obj, obj.dimensionCount, value))
+
+        if unique:
+            vals = [val for val in value if val is not None]
+            if len(vals) != len(set(vals)):
+                raise ValueError('The items of "%s" of %s need to be unique; got %r' %
+                                (attributeName, obj, value))
+
+    def checkEnumerate(obj, attributeName, value):
+        """Check if values needs to be in enumerate
+        """
+        if len(enumerated) > 0 and value not in enumerated:
+           raise ValueError('Value for "%s" of %s needs to be of %r; got %r' %
+                             (attributeName, obj, enumerated, value))
+        return value
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        self = args[1]
+        value = args[2]
+
+        # if func.__name__ == 'measurementTypes':
+        #     print('>>>', isIterable, types, enumerated)
+
+        if iterable:
+            checkIterable(self, func.__name__, value)
+
+            # check the individual elements
+            checkedValue = []
+            for idx, val in enumerate(value):
+                _itemName = '%s[%d]' % (func.__name__, idx)
+                val = checkType(self, _itemName, val)
+                val = checkEnumerate(self, _itemName, val)
+                checkedValue.append(val)
+
+        else:
+            checkedValue = checkType(self, func.__name__, value)
+            checkedValue = checkEnumerate(self, func.__name__, checkedValue)
+
+        return func(self, checkedValue)
+
+    return theDecorator
+
+#=========================================================================================
+
 
 
 # def _oldEstimateNoiseLevel1D(x, y, factor=3):
@@ -1803,14 +1965,16 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
                 getLogger().warning(f'could not pick peaks for {spectrum} in region {axisDict}')
 
 
-def _createDefaultPeakPicker(spectrum):
-    """Create a default PeakPicker from preferences
+def _createPeakPicker(spectrum):
+    """Create a PeakPicker from preferences; resort to default types when not set
 
     :param spectrum: instance of type Spectrum
-    :return: new peakPicker of type defined in 1d or Nd section of preferences or None
+    :return: new peakPicker instance of type defined in 1d or Nd section of preferences or None
     """
     from ccpn.framework.Application import getApplication
     from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPicker
+    from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
+    from ccpn.core.lib.PeakPickers.Simple1DPeakPicker import Simple1DPeakPicker
 
     app = getApplication()
 
@@ -1818,14 +1982,103 @@ def _createDefaultPeakPicker(spectrum):
         prefsGeneral = app.preferences.general
 
         if spectrum.dimensionCount == 1:
-            _pickerType = prefsGeneral.peakPicker1d
+            _pickerType = prefsGeneral.peakPicker1d if prefsGeneral.peakPicker1d is not None \
+                          else Simple1DPeakPicker.peakPickerType
         else:
-            _pickerType = prefsGeneral.peakPickerNd
+            _pickerType = prefsGeneral.peakPickerNd if prefsGeneral.peakPickerNd is not None \
+                          else PeakPickerNd.peakPickerType
 
-        if _pickerType:
-            _picker = getPeakPicker(_pickerType, spectrum)
-
+        _picker = None
+        if _pickerType and (_picker := getPeakPicker(_pickerType, spectrum)) is not None:
             getLogger().debug(f'{spectrum}: creating default peakPicker {_picker}')
-            return _picker
         else:
-            getLogger().debug(f'{spectrum}: default peakPicker not defined')
+            getLogger().warning(f'{spectrum}: unable to define peakPicker')
+
+        return _picker
+
+
+#===========================================================================================================
+# GWV testing only
+#===========================================================================================================
+
+from ccpn.util.traits.CcpNmrTraits import List, Int, Float, TraitError
+
+class SpectrumDimensionTrait(List):
+    """
+    A trait to implement a Spectrum dimensional attribute; e.g. like spectrumFrequencies
+    """
+    # GWV test
+    # _spectrometerFrequencies = SpectrumDimensionTrait(trait=Float(min=0.0)).tag(
+    #                            attributeName='spectrometerFrequency',
+    #                            doCopy = True
+    # )
+
+    isDimensional = True
+
+    def validate(self, obj, value):
+        """Validate the value
+        """
+        if len(value) != obj.dimensionCount:
+            raise TraitError('Setting "%s", invalid value "%s"' % (self.name, value))
+        value = self.validate_elements(obj, value)
+        return value
+
+    def _getValue(self, obj):
+        """Get the value of trait, obtained from the obj's (i.e.spectrum) dimensions
+        """
+        if (dimensionAttributeName := self.get_metadata('attributeName', None)) is None:
+            raise RuntimeError('Undefined dimensional attributeName for trait %r' % self.name)
+        value = [getattr(specDim, dimensionAttributeName) for specDim in obj.spectrumReferences]
+        return value
+
+    def get(self, obj, cls=None):
+        try:
+            value = self._getValue(obj)
+
+        except (AttributeError, ValueError, RuntimeError):
+            # Check for a dynamic initializer.
+            dynamic_default = self._dynamic_default_callable(obj)
+            if dynamic_default is None:
+                raise TraitError("No default value found for %s trait of %r"
+                                 % (self.name, obj))
+            value = self._validate(obj, dynamic_default())
+            obj._trait_values[self.name] = value
+            return value
+
+        except Exception:
+            # This should never be reached.
+            raise TraitError('Unexpected error in DimensionTrait')
+
+        else:
+            self._obj = obj  # last obje used for get
+            return value
+
+    def _setValue(self, obj, value):
+        """Set the value of trait, stored in the obj's (i.e.spectrum) dimensions
+        """
+        if (dimensionAttributeName := self.get_metadata('attributeName', None)) is None:
+            raise RuntimeError('Undefined dimensional attributeName for trait %r' % self.name)
+
+        for axis, val in enumerate(value):
+            setattr(obj.spectrumReferences[axis], dimensionAttributeName, val)
+
+    def set(self, obj, value):
+
+        new_value = self._validate(obj, value)
+        try:
+            old_value = self._getValue(obj)
+        except (AttributeError, ValueError, RuntimeError):
+            old_value = self.default_value
+
+        # obj._trait_values[self.name] = new_value
+        self._setValue(obj, new_value)
+
+        try:
+            silent = bool(old_value == new_value)
+        except:
+            # if there is an error in comparing, default to notify
+            silent = False
+        if silent is not True:
+            # we explicitly compare silent to True just in case the equality
+            # comparison above returns something other than True/False
+            obj._notify_trait(self.name, old_value, new_value)

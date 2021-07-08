@@ -29,10 +29,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from functools import partial
 from typing import Sequence, Tuple
 
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
+from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
+
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
+from ccpn.core.lib.SpectrumLib import DIMENSION_FREQUENCY
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, undoStackBlocking
 from ccpn.util.Logging import getLogger
@@ -59,7 +62,17 @@ class Window(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiWindow._metaclass.qualifiedName()
 
+    #=========================================================================================
+    @property
+    def spectrumDisplays(self):
+        """A tuple of SpectrumDisplay instances displayed in the window"""
+        ll = [x for x in self._wrappedData.sortedModules() if isinstance(x, ApiBoundDisplay)]
+        return tuple(self._project._data2Obj[x] for x in ll if x in self._project._data2Obj)
+
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiWindow(self) -> ApiWindow:
         """ CCPN Window matching Window"""
@@ -242,7 +255,7 @@ class Window(AbstractWrapperObject):
         else:
             return windowStore.sortedWindows()
 
-    # @logCommand('mainWindow.') there is already a log command internally. This is not needed it and slows down the process.
+    @logCommand('mainWindow.')  #there is already a log command internally. This is not needed it and slows down the process.
     def createSpectrumDisplay(self, spectrum, displayAxisCodes: Sequence[str] = (),
                               axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
                               widths: Sequence[float] = (), units: Sequence[str] = (),
@@ -264,8 +277,9 @@ class Window(AbstractWrapperObject):
         from ccpn.ui.gui.guiSettings import ZPlaneNavigationModes
 
         spectrum = self.project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
-        if any(x != 'Frequency' for x in spectrum.dimensionTypes):
-            raise NotImplementedError("createSpectrumDisplay not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
+        # dimensionTypes = spectrum.getByAxisCodes('dimensionTypes', displayAxisCodes)
+        # if any(x != DIMENSION_FREQUENCY for x in dimensionTypes):
+        #     raise NotImplementedError("createSpectrumDisplay not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
 
         # change string names to objects
         if isinstance(relativeTo, str):
@@ -290,7 +304,7 @@ class Window(AbstractWrapperObject):
             # create the new spectrumDisplay
             display = _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
                                              title=title, positions=positions, widths=widths, units=units,
-                                             stripDirection=stripDirection, is1D=is1D, isGrouped=isGrouped,
+                                             stripDirection=stripDirection, isGrouped=isGrouped,
                                              zPlaneNavigationMode=zPlaneNavigationMode,
                                              **kwds)
 

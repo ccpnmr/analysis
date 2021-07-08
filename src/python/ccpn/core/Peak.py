@@ -721,9 +721,9 @@ class Peak(AbstractWrapperObject):
                                                           Sequence[Union[str, 'NmrAtom']]] = None):
         """Assign dimension with axisCode to value (NmrAtom, or Pid or sequence of either, or None)."""
 
-        axisCodes = self._parent._parent.axisCodes
+        axisCodes = self.spectrum.axisCodes
         try:
-            index = axisCodes.index(axisCode)
+            axis = axisCodes.index(axisCode)
         except ValueError:
             raise ValueError("axisCode %s not recognised" % axisCode)
 
@@ -739,7 +739,7 @@ class Peak(AbstractWrapperObject):
 
         # store the currently attached nmrAtoms
         _pre = set(makeIterableList(dimensionNmrAtoms))
-        dimensionNmrAtoms[index] = value
+        dimensionNmrAtoms[axis] = value
         _post = set(makeIterableList(dimensionNmrAtoms))
 
         _cs = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt.chemicalShifts]))

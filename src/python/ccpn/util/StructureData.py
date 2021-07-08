@@ -1261,6 +1261,7 @@ class EnsembleData(pd.DataFrame):
 
         return '<EnsembleData (M:{models},C:{chains},R:{residues},A:{atoms})>'.format(**d)
 
+    __repr__ = __str__
 
 # NBNB TODO this should be Collection, not Sequence (from python 3.6 only)
 def fitToDataType(data: collections.Sequence, dataType: type, force: bool = False) -> list:

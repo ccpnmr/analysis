@@ -244,7 +244,7 @@ class SpectrumReference(AbstractWrapperObject):
         """maximum possible peak frequency (in ppm) for this reference """
         if (result := self._expDimRef.maxAliasedFreq) is None:
             point_1 = 1 - self._dataDim.pointOffset
-            point_n = point_1 + self.pointCount
+            point_n = float(point_1 + self.pointCount) + 0.5
             result = self.pointToValue((point_n))
         return result
 
@@ -256,7 +256,7 @@ class SpectrumReference(AbstractWrapperObject):
     def minAliasedFrequency(self) -> float:
         """minimum possible peak frequency (in ppm) for this reference """
         if (result := self._expDimRef.minAliasedFreq) is None:
-            point_1 = 1 - self._dataDim.pointOffset
+            point_1 = float(1 - self._dataDim.pointOffset) - 0.5
             result = self.pointToValue((point_1))
         return result
 
@@ -268,9 +268,9 @@ class SpectrumReference(AbstractWrapperObject):
     def limits(self) -> Tuple[float, float]:
         """Return the limits of this dimension as a tuple of floats"""
         if self.dimensionType == specLib.DIMENSION_FREQUENCY:
-            return (self.pointToValue(1), self.pointToValue(self.pointCount+1))
+            return (self.pointToValue(1.0), self.pointToValue(float(self.pointCount)))
         elif self.dimensionType == specLib.DIMENSION_TIME:
-            return (self.pointToValue(1), self.pointToValue(self.pointCount+1))
+            return (self.pointToValue(1.0), self.pointToValue(float(self.pointCount)))
             # return (0.0, self._valuePerPoint * self.pointCount)
         else:
             raise RuntimeError('SpectrumReference.limits not implemented for sampled data')

@@ -1658,10 +1658,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
         spectrumLimits = self.spectrumLimits[dimension - 1]
-        axisReversed = self.axesReversed[dimension - 1]
-        valuePerPoint = self.valuesPerPoint[dimension - 1] * (-1.0 if axisReversed else 1.0)
-
-        result = np.linspace(spectrumLimits[0], spectrumLimits[1] - valuePerPoint, self.pointCounts[dimension - 1])
+        result = np.linspace(spectrumLimits[0], spectrumLimits[1], self.pointCounts[dimension - 1])
 
         return result
 

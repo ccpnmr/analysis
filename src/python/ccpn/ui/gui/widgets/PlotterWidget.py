@@ -26,7 +26,7 @@ from contextlib import contextmanager
 from collections import OrderedDict as od
 import matplotlib
 import os
-from ccpn.ui.gui.guiSettings import getColourScheme, DARK
+import ccpn.ui.gui.guiSettings as GS
 from ccpn.ui.gui.widgets.Widget import Widget
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -35,7 +35,6 @@ import matplotlib.backend_bases as backends
 import matplotlib.backends.qt_editor.figureoptions as figureoptions
 from matplotlib.backends.qt_editor.formsubplottool import UiSubplotTool
 from matplotlib.backend_managers import ToolManager
-
 import matplotlib.pyplot as plt
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Action import Action
@@ -45,14 +44,48 @@ import time
 from ccpn.ui.gui.widgets import MessageDialog as md
 
 
-# Background colour:
-# Use style.available for all list
-# print(plt.style.available)
-if getColourScheme() == DARK:
-    plt.style.use('dark_background')
 
-# backend
+# TODO # Set appearance as Main CCPN plots #
+
+## backend
 matplotlib.rcParams['backend'] = 'Qt5Agg'
+
+CLASSIC = 'classic'
+ColourMap = {
+            GS.DEFAULT  : CLASSIC,
+            GS.DARK     :'dark_background',
+            GS.LIGHT    :'seaborn-bright',
+            }
+
+def setPlotStyle(plt):
+
+    ccpnColourScheme = GS.getColourScheme()
+    # background
+    plt.style.use(ColourMap.get(ccpnColourScheme, CLASSIC))
+    # fonts
+    # font size
+    # font colour
+    # curve thickness
+    # axis thickness
+    # axis colours
+    # axis thick orientation
+
+    setPlotPreference(plt, 'ytick.right', False)        # don't show Y ticks on right
+    setPlotPreference(plt, 'xtick.top', False)          # don't show Top X ticks
+    # setPlotPreference(plt, 'ytick.labelright', False) # don't show label ticks
+    # setPlotPreference(plt, 'xtick.labelleft', False)  # don't show label ticks
+    # zoomPercent
+    # ...
+
+
+def setPlotPreference(plt, key, value):
+    """
+    Set a preference for matplot lib. Require restarting the plot.
+    """
+    plt.rcParams[key] = value
+
+def getPlotPreferences(plt):
+    return plt.rcParams
 
 
 class PyPlotToolbar(ToolBar,  backends.NavigationToolbar2):
@@ -171,10 +204,37 @@ class PyPlotToolbar(ToolBar,  backends.NavigationToolbar2):
                 md.showError('Error saving', e)
 
     def showSettings(self):
-        from matplotlib.backends.backend_qt5 import SubplotToolQt
-        # TODO replace with CCPN dialog
-        dia = SubplotToolQt(self.canvas.figure, self.canvas.parent())
-        dia.exec_()
+        self._editParameters()
+
+    def _editParameters(self):
+        """
+        Copied from NavigationToolbar2QT
+        """
+        axes = self.canvas.figure.get_axes()
+        if not axes:
+            QtWidgets.QMessageBox.warning(
+                self.parent, "Error", "There are no axes to edit.")
+            return
+        elif len(axes) == 1:
+            ax, = axes
+        else:
+            titles = [
+                ax.get_label() or
+                ax.get_title() or
+                " - ".join(filter(None, [ax.get_xlabel(), ax.get_ylabel()])) or
+                f"<anonymous {type(ax).__name__}>"
+                for ax in axes]
+            duplicate_titles = [
+                title for title in titles if titles.count(title) > 1]
+            for i, ax in enumerate(axes):
+                if titles[i] in duplicate_titles:
+                    titles[i] += f" (id: {id(ax):#x})"  # Deduplicate titles.
+            item, ok = QtWidgets.QInputDialog.getItem(
+                self.parent, 'Customise', 'Select axes:', titles, 0, False)
+            if not ok:
+                return
+            ax = axes[titles.index(item)]
+        figureoptions.figure_edit(ax, self)
 
     def _initConnections(self, *args):
         """
@@ -262,6 +322,7 @@ class PyPlotWidget(Widget):
 
     For more example and complex usages see matplotlib documentation.
     https://matplotlib.org/tutorials/introductory/pyplot.html#sphx-glr-tutorials-introductory-pyplot-py
+    https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.html#module-matplotlib.pyplot
 
     Possible errors:
         - backend: set one of the valid backend. E.g. matplotlib.rcParams['backend'] = 'Qt5Agg'
@@ -284,7 +345,106 @@ class PyPlotWidget(Widget):
         layout = self.getLayout()
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
+        setPlotStyle(plt)
 
+    ############### Plotting options ###############
+
+    def plotLine(self, *args, **kwargs):
+        """
+        Plot data as line using the native MatplotLib Module.
+        -------------
+        Parameters:
+            ===== args =====
+            x, y:   array-like or scalar
+                    The horizontal / vertical coordinates of the data points.
+                    x values are optional and default to range(len(y)).
+            fmt:    optional str. A format string that consists of a part for color, marker and line:
+                    fmt = '[marker][line][color]'
+                    Markers:
+                    '.' 	point marker
+                    ',' 	pixel marker
+                    'o' 	circle marker
+                    'v' 	triangle_down marker
+                    '^' 	triangle_up marker
+                    Lines:
+                    '-' 	solid line style
+                    '--' 	dashed line style
+                    '-.' 	dash-dot line style
+                    ':' 	dotted line style
+                    Colours:
+                    'b' 	blue
+                    'g' 	green
+                    'r' 	red
+                    'c' 	cyan
+                    'm' 	magenta
+                    'y' 	yellow
+                    'k' 	black
+                    'w' 	white
+                    Example format strings:
+                    'b'    # blue markers with default shape
+                    'or'   # red circles
+                    '-g'   # green solid line
+                    '--'   # dashed line with default color
+                    '^k:'  # black triangle_up markers connected by a dotted line
+            showLegend: bool, True to auto-show the legend based on the given Labels
+
+            ===== kwargs =====
+            color or c:         str, see above (fmt Colours)
+            linestyle or ls:    str, see above (fmt Lines)
+            marker: 	        str, see above (fmt Markers),
+            gid:                str,
+            linewidth or lw:    float
+            label:              str, the name for the line that will go on the legend.
+
+        """
+        self.pyplot.plot(*args, **kwargs)
+
+    def plotHist(self, x, bins=None, range=None, density=False, weights=None,
+                cumulative=False, bottom=None, histtype='bar', align='mid',
+                orientation='vertical', rwidth=None, log=False, colour=None,
+                label=None, stacked=False, normed=None, data=None, **kwargs):
+        """
+        Plot data as histogram using the native MatplotLib Module.
+        For full documentation see:
+         https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hist.html#matplotlib.pyplot.hist
+        -------------
+        Parameters:
+            x: float or array-like
+            bins: int or sequence or str, default: 10.
+                    If bins is an integer, it defines the number of equal-width bins in the range.
+                    If bins is a sequence, it defines the bin edges.
+                    If bins is a string, it is one of the binning strategies: One of
+                    'auto', 'fd', 'doane', 'scott', 'stone', 'rice', 'sturges', or 'sqrt'.
+            density: bool, default: False. If True, draw and return a probability density
+            weights(n,) array-like or None, default: None. An array of weights, of the same shape as x.
+                    Each value in x only contributes its associated weight towards the bin count (instead of 1).
+                    If density is True, the weights are normalized, so that the integral of the
+                    density over the range remains 1.
+
+        """
+
+        self.pyplot.hist(x, bins=bins, range=range, density=density, weights=weights,
+                cumulative=cumulative, bottom=bottom, histtype=histtype, align=align,
+                orientation=orientation, rwidth=rwidth, log=log, color=colour,
+                label=label, stacked=stacked, normed=normed, data=data,**kwargs)
+
+    def plotContour(self, x, y, heights, levels=None, colours=None, **kwargs):
+        """
+        Plot contours.
+        For full documentation see:
+        https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.contour.html#matplotlib.pyplot.contour
+        -------------
+        Parameters:
+            heights: (M, N) array-like. The height values over which the contour is drawn.
+            x,y:  (x,y) array-like, optional. The coordinates of the values in heights. X and y must have the same shape.
+            levels: int or array-like, optional .Determines the number and positions of the contour lines / regions.
+            colours: color string or sequence of colors, optional. The colors of the levels, i.e. the lines for contour
+
+        For more optional parameters see the original documentation in matplotlib.pyplot.contour.
+        See _contourExample for x,y,heights demo data.
+
+        """
+        self.pyplot.contour(x, y, heights, levels=levels, colors=colours, **kwargs)
 
     def plotDataFrame(self, dataFrame, kind='line', *args, **kwds):
         """
@@ -423,7 +583,7 @@ class PyPlotWidget(Widget):
                 self.axis('off')
             return img
 
-    def show(self, *args, **kwds):
+    def show(self, windowTitle='', size=(700, 700), *args, **kwds):
         """
         :param args: as CcpnDialog
         :param kwds: CcpnDialog
@@ -431,7 +591,7 @@ class PyPlotWidget(Widget):
         """
         from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
-        popup = CcpnDialog(setLayout=True, *args, **kwds)
+        popup = CcpnDialog(setLayout=True, windowTitle=windowTitle, size=size, *args, **kwds)
         popup.getLayout().addWidget(self)
         popup.show()
         popup.raise_()
@@ -439,25 +599,36 @@ class PyPlotWidget(Widget):
     def clear(self):
         self._figure.clear()
 
+    def setColourScheme(self):
+        self.plot
+
 @contextmanager
-def plotter(*args, **kwargs):
+def plotter(xLabel=None, yLabel=None, plotTitle=None, showLegend=True,
+            windowTitle=None, size=(700, 700), *args, **kwargs):
     """Wrap a pyplot and show the window at the end
 
     ===============
     usage:
+        from ui.gui.widgets.PlotterWidget import plotter
         with plotter() as plot:
             x = [1,2,3,]
             y = [10,20,30]
-            plot.plot(x,y)
+            plot.plot(x,y, label='myCurve')
     ===============
     """
-    plot = PyPlotWidget(*args, **kwargs)
-
+    plot = PyPlotWidget()
 
     try:
         yield plot
     finally:
-        plot.show(*args, **kwargs)
+        # plot.tight_layout()
+        if showLegend:
+            plot.legend()
+        plot.xlabel(xLabel)
+        plot.ylabel(yLabel)
+        plot.title(plotTitle)
+        plot.show(size=size, windowTitle=windowTitle, *args, **kwargs)
+
         # plot.deleteLater()
 
 
@@ -468,13 +639,14 @@ if __name__ == '__main__':
     import pandas as pd
     app = TestApplication()
 
-    with plotter() as plot:
+    def _plotterExample():
+        with plotter() as plot:
 
-        d = {'one': np.random.rand(5),
-             'two': np.random.rand(5)}
-        df = pd.DataFrame(d)
-        plot.plotDataFrame(df, kind='line', x='two', y='one')
-        # plot.hist([1,2,3,4])
+            d = {'one': np.random.rand(5),
+                 'two': np.random.rand(5)}
+            df = pd.DataFrame(d)
+            plot.plotDataFrame(df, kind='line', x='two', y='one')
+            # plot.hist([1,2,3,4])
 
 
     def _simplePlotExample():
@@ -579,6 +751,24 @@ if __name__ == '__main__':
         fig.colorbar(surf, shrink=0.5, aspect=5)
         plt.show(windowTitle='Surface Example', size=(1000, 500))
 
+    def _contourExample():
+        import numpy as np
+
+        # generate 101 x and y values between -10 and 10
+        x = np.linspace(-10, 10, 101)
+        y = np.linspace(-10, 10, 101)
+
+        # make X and Y matrices representing x and y values of 2d plane
+        X, Y = np.meshgrid(x, y)
+
+        # compute z value of a point as a function of x and y (z = l2 distance form 0,0)
+        Z = np.sqrt(X ** 2 + Y ** 2)
+
+        plt = PyPlotWidget()
+        plt.plotContour(X, Y, Z, [1,4,7], ['r','g','b'])
+        plt.show()
+
+    _contourExample()
     # _imageExample()
     # _multiPlotExample()
     # _simplePlotExample()

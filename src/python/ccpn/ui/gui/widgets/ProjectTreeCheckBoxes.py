@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:51 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-07 20:15:17 +0100 (Wed, July 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -414,6 +414,8 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         'restraintLinks',
         'additionalData',
         'restraintViolations',
+        'ccpnDataSetParameters',
+        'ccpnLogging',
         ]
 
     lockedItems = {
@@ -421,29 +423,31 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
     nefToTreeViewMapping = {
         # 'nef_sequence': Chain._pluralLinkName,
-        'nef_sequence_chain_code'    : (Chain._pluralLinkName, Chain.className),
-        'nef_chemical_shift_list'    : (ChemicalShiftList._pluralLinkName, ChemicalShiftList.className),
-        'nef_distance_restraint_list': (RestraintList._pluralLinkName, RestraintList.className),
-        'nef_dihedral_restraint_list': (RestraintList._pluralLinkName, RestraintList.className),
-        'nef_rdc_restraint_list'     : (RestraintList._pluralLinkName, RestraintList.className),
-        'ccpn_restraint_list'        : (RestraintList._pluralLinkName, RestraintList.className),
+        'nef_sequence_chain_code'               : (Chain._pluralLinkName, Chain.className),
+        'nef_chemical_shift_list'               : (ChemicalShiftList._pluralLinkName, ChemicalShiftList.className),
+        'nef_distance_restraint_list'           : (RestraintList._pluralLinkName, RestraintList.className),
+        'nef_dihedral_restraint_list'           : (RestraintList._pluralLinkName, RestraintList.className),
+        'nef_rdc_restraint_list'                : (RestraintList._pluralLinkName, RestraintList.className),
+        'ccpn_restraint_list'                   : (RestraintList._pluralLinkName, RestraintList.className),
         # 'nef_nmr_spectrum': PeakList._pluralLinkName,XXXXX.className),
-        'nef_peak'                   : (PeakList._pluralLinkName, PeakList.className),
-        'ccpn_integral_list'         : (IntegralList._pluralLinkName, IntegralList.className),
-        'ccpn_multiplet_list'        : (MultipletList._pluralLinkName, MultipletList.className),
-        'ccpn_sample'                : (Sample._pluralLinkName, Sample.className),
-        'ccpn_substance'             : (Substance._pluralLinkName, Substance.className),
+        'nef_peak'                              : (PeakList._pluralLinkName, PeakList.className),
+        'ccpn_integral_list'                    : (IntegralList._pluralLinkName, IntegralList.className),
+        'ccpn_multiplet_list'                   : (MultipletList._pluralLinkName, MultipletList.className),
+        'ccpn_sample'                           : (Sample._pluralLinkName, Sample.className),
+        'ccpn_substance'                        : (Substance._pluralLinkName, Substance.className),
         # 'ccpn_assignment': NmrChain._pluralLinkName,XXXXX.className),
-        'nmr_chain'                  : (NmrChain._pluralLinkName, NmrChain.className),
-        'ccpn_dataset'               : (DataSet._pluralLinkName, DataSet.className),
-        'ccpn_complex'               : (Complex._pluralLinkName, Complex.className),
-        'ccpn_spectrum_group'        : (SpectrumGroup._pluralLinkName, SpectrumGroup.className),
-        'ccpn_notes'                 : (Note._pluralLinkName, Note.className),
-        'ccpn_peak_cluster'          : (PeakCluster._pluralLinkName, PeakCluster.className),
+        'nmr_chain'                             : (NmrChain._pluralLinkName, NmrChain.className),
+        'ccpn_dataset'                          : (DataSet._pluralLinkName, DataSet.className),
+        'ccpn_complex'                          : (Complex._pluralLinkName, Complex.className),
+        'ccpn_spectrum_group'                   : (SpectrumGroup._pluralLinkName, SpectrumGroup.className),
+        'ccpn_notes'                            : (Note._pluralLinkName, Note.className),
+        'ccpn_peak_cluster'                     : (PeakCluster._pluralLinkName, PeakCluster.className),
         # 'ccpn_peak_cluster_serial'          : (PeakCluster._pluralLinkName, PeakCluster.className),
-        'nef_peak_restraint_links'   : ('restraintLinks','RestraintLink'),
-        'ccpn_additional_data'       : ('additionalData', 'internalData'),
-        'ccpn_distance_restraint_violation_list'       : ('restraintViolations', 'restraintViolation'),
+        'nef_peak_restraint_links'              : ('restraintLinks', 'RestraintLink'),
+        'ccpn_additional_data'                  : ('additionalData', 'internalData'),
+        'ccpn_distance_restraint_violation_list': ('restraintViolations', 'restraintViolation'),
+        'ccpn_logging'                          : ('ccpnLogging', 'ccpnHistory'),
+        'ccpn_parameter'                        : ('ccpnDataSetParameters', 'ccpnDataFrame'),
         }
 
     # defines the names of the saveframe loops that are displayed
@@ -462,7 +466,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         Substance._pluralLinkName        : ['ccpn_substance'],
         NmrChain._pluralLinkName         : ['nmr_chain', 'nmr_residue', 'nmr_atom'],
         # TODO:ED - not done yet
-        DataSet._pluralLinkName          : [],
+        DataSet._pluralLinkName          : ['ccpn_dataset', 'ccpn_calculation_step', 'ccpn_calculation_data'],
         Complex._pluralLinkName          : ['ccpn_complex', 'ccpn_complex_chain'],
         SpectrumGroup._pluralLinkName    : ['ccpn_spectrum_group', 'ccpn_group_spectrum'],
         Note._pluralLinkName             : ['ccpn_note'],
@@ -470,6 +474,8 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         'restraintLinks'                 : ['nef_peak_restraint_link'],
         'additionalData'                 : ['ccpn_internal_data'],
         'restraintViolations'            : ['ccpn_distance_restraint_violation_list', 'ccpn_distance_restraint_violation'],
+        'ccpnLogging'                    : ['ccpn_logging', 'ccpn_history'],
+        'ccpnDataSetParameters'          : ['ccpn_parameter', 'ccpn_dataframe']
         }
 
     nefProjectToHandlerMapping = {
@@ -492,6 +498,8 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         'restraintLinks'                 : None,
         'additionalData'                 : 'ccpn_internal_data',
         'restraintViolations'            : None,
+        'ccpnDataSetParameters'          : None,
+        'ccpnLogging'                    : None,
         }
 
     contents = {}
@@ -546,6 +554,10 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                     if self._enableCheckBoxes:
                         item.setCheckState(0, QtCore.Qt.Unchecked)
 
+                # # hide the sections if required? not quite working
+                # item.setHidden(True)
+                # item.setDisabled(True)
+
     # NOTE:ED - define methods here to match CcpnNefIo
     def content_nef_molecular_system(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag):
         self._contentLoops(project, saveFrame, saveFrameTag,  #name=spectrumName, itemLength=saveFrame['num_dimensions'],
@@ -593,16 +605,20 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
                     # NOTE:ED - this defines the list of items that are added to each plural group in the tree
                     #           i.e. Chains = saveFrame._content['chain_code'] from nefToTreeViewMapping
-                    for listItem in thisList:
-                        child = QtWidgets.QTreeWidgetItem(found[0])
-                        if self._enableCheckBoxes:
-                            child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
-                        else:
-                            child.setFlags(child.flags() & ~QtCore.Qt.ItemIsUserCheckable)
-                        child.setData(1, 0, saveFrame)
-                        child.setText(0, str(listItem))
-                        if self._enableCheckBoxes:
-                            child.setCheckState(0, QtCore.Qt.Unchecked)
+                    if thisList:
+                        for listItem in thisList:
+                            child = QtWidgets.QTreeWidgetItem(found[0])
+                            if self._enableCheckBoxes:
+                                child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                            else:
+                                child.setFlags(child.flags() & ~QtCore.Qt.ItemIsUserCheckable)
+                            child.setData(1, 0, saveFrame)
+                            child.setText(0, str(listItem))
+                            if self._enableCheckBoxes:
+                                child.setCheckState(0, QtCore.Qt.Unchecked)
+                    # else:
+                    # found[0].setHidden(False)
+                    # found[0].setDisabled(False)
 
     def _contentLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag=None,
                       addLoopAttribs=None, excludeList=(), **kwds):
@@ -726,6 +742,10 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     contents['ccpn_additional_data'] = content_list
 
     contents['ccpn_distance_restraint_violation_list'] = content_list  # content_nef_restraint_list
+
+    contents['ccpn_logging'] = content_list
+    contents['ccpn_dataset'] = content_list
+    contents['ccpn_parameter'] = content_list
 
     def _fillFunc(self, project, saveFrame, *args, **kwds):
         saveFrameName = saveFrame['sf_category']

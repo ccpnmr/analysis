@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 16:10:38 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-07 20:15:17 +0100 (Wed, July 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -124,6 +124,8 @@ saveFrameReadingOrder = [
     'ccpn_notes',
     'ccpn_additional_data',
     'ccpn_distance_restraint_violation_list',
+    'ccpn_parameter',
+    'ccpn_logging'
     ]
 
 # Saveframe writing order - must start with official 'nef_' frames
@@ -178,8 +180,6 @@ nef2CcpnMap = {
         ('creation_date', None),
         ('uuid', None),
         ('coordinate_file_name', None),
-        ('ccpn_dataset_serial', None),
-        ('ccpn_dataset_comment', None),
         ('nef_related_entries', _isALoop),
         ('nef_program_script', _isALoop),
         ('nef_run_history', _isALoop),
@@ -204,6 +204,22 @@ nef2CcpnMap = {
         ('script', 'script'),
         ('ccpn_input_uuid', 'inputDataUuid'),
         ('ccpn_output_uuid', 'outputDataUuid'),
+        )),
+
+    # new saveframes to handle ccpn specific logging
+    'ccpn_logging'                          : OD((
+        ('ccpn_history', _isALoop),
+        )),
+
+    'ccpn_history'                          : OD((
+        ('date', 'date'),
+        ('username', 'username'),
+        ('program_name', 'program_name'),
+        ('program_version', 'program_version'),
+        ('script_name', 'script_name'),
+        ('input_uuid', 'input_uuid'),
+        ('saveframe', 'saveframe'),
+        ('comment', 'comment'),
         )),
 
     'nef_molecular_system'                  : OD((
@@ -267,6 +283,7 @@ nef2CcpnMap = {
         ('ccpn_tensor_rhombicity', 'tensorRhombicity'),
         ('ccpn_tensor_isotropic_value', 'tensorIsotropicValue'),
         ('ccpn_serial', 'serial'),
+        ('ccpn_dataset_id', 'dataSet.id'),
         ('ccpn_dataset_serial', 'dataSet.serial'),
         ('ccpn_unit', 'unit'),
         ('ccpn_comment', 'comment'),
@@ -306,6 +323,7 @@ nef2CcpnMap = {
         ('ccpn_tensor_rhombicity', 'tensorRhombicity'),
         ('ccpn_tensor_isotropic_value', 'tensorIsotropicValue'),
         ('ccpn_serial', 'serial'),
+        ('ccpn_dataset_id', 'dataSet.id'),
         ('ccpn_dataset_serial', 'dataSet.serial'),
         ('ccpn_unit', 'unit'),
         ('ccpn_comment', 'comment'),
@@ -354,6 +372,7 @@ nef2CcpnMap = {
         ('tensor_residue_name', 'tensorResidueType'),
         ('ccpn_tensor_isotropic_value', 'tensorIsotropicValue'),
         ('ccpn_serial', 'serial'),
+        ('ccpn_dataset_id', 'dataSet.id'),
         ('ccpn_dataset_serial', 'dataSet.serial'),
         ('ccpn_unit', 'unit'),
         ('ccpn_comment', 'comment'),
@@ -405,15 +424,6 @@ nef2CcpnMap = {
         ('ccpn_spectrum_comment', 'comment'),
         ('ccpn_spectrum_file_path', 'filePath'),
         ('ccpn_sample', None),
-        ('ccpn_file_header_size', '_dataSource.headerSize'),
-        ('ccpn_file_number_type', '_dataSource.numberType'),
-        ('ccpn_file_complex_stored_by', '_dataSource.complexStoredBy'),
-        ('ccpn_file_scale_factor', '_dataSource.scaleFactor'),
-        ('ccpn_file_is_big_endian', '_dataSource.isBigEndian'),
-        ('ccpn_file_byte_number', '_dataSource.nByte'),
-        ('ccpn_file_has_block_padding', '_dataSource.hasBlockPadding'),
-        ('ccpn_file_block_header_size', '_dataSource.blockHeaderSize'),
-        ('ccpn_file_type', '_dataSource.fileType'),
 
         # NOTE:ED - testing again
         # ('ccpn_peaklist_serial', 'serial'),
@@ -463,7 +473,6 @@ nef2CcpnMap = {
         ('point_count', 'pointCounts'),
         ('reference_point', 'referencePoints'),
         ('total_point_count', 'totalPointCounts'),
-        ('point_offset', 'pointOffsets'),
         ('assignment_tolerance', 'assignmentTolerances'),
         ('lower_aliasing_limit', None),
         ('higher_aliasing_limit', None),
@@ -474,8 +483,6 @@ nef2CcpnMap = {
         ('lorentzian_broadening', 'lorentzianBroadenings'),
         ('gaussian_broadening', 'gaussianBroadenings'),
         ('sine_window_shift', 'sineWindowShifts'),
-        ('dimension_is_complex', '_dataSource.isComplex'),
-        ('dimension_block_size', '_dataSource.blockSizes'),
         )),
 
     'nef_spectrum_dimension_transfer'       : OD((
@@ -838,7 +845,7 @@ nef2CcpnMap = {
 
     'ccpn_dataset'                          : OD((
         ('serial', 'serial'),
-        ('title', 'title'),
+        ('name', 'name'),
         ('program_name', 'programName'),
         ('program_version', 'programVersion'),
         ('data_path', 'dataPath'),
@@ -862,9 +869,22 @@ nef2CcpnMap = {
     'ccpn_calculation_data'                 : OD((
         ('data_name', 'name'),
         ('attached_object_pid', 'attachedObjectPid'),
-        ('parameter_name', None),
-        ('parameter_value', None),
         )),
+
+    # saveframe to handle dataSet.data storage
+    'ccpn_parameter'                        : OD((
+        ('ccpn_dataset_id', 'dataSet'),
+        ('ccpn_dataset_serial', 'serial'),
+        ('ccpn_data_id', 'name'),
+        ('ccpn_parameter_name', 'parameterName'),
+        ('ccpn_value', 'value'),
+        ('ccpn_dataframe', _isALoop),
+        )),
+
+    # saveframe to handle dataSet.data storage
+    # holds a pandas dataframe - structure is loaded from loop.data, columns not explicitly required
+    'ccpn_dataframe'                        : OD((
+    )),
 
     'ccpn_restraint_list'                   : OD((
         ('potential_type', 'potentialType'),
@@ -875,15 +895,15 @@ nef2CcpnMap = {
         ('tensor_magnitude', 'tensorMagnitude'),
         ('tensor_rhombicity', 'tensorRhombicity'),
         ('tensor_isotropic_value', 'tensorIsotropicValue'),
-        # NB These tags have 'ccpn' prefix to match corresponding nef restraint lists
-        ('ccpn_serial', 'serial'),
-        ('ccpn_dataset_serial', 'dataSet.serial'),
         ('name', 'name'),
         ('restraint_type', 'restraintType'),
         ('restraint_item_length', 'restraintItemLength'),
         ('unit', 'unit'),
         ('measurement_type', 'measurementType'),
         ('comment', 'comment'),
+        ('ccpn_serial', 'serial'),
+        ('ccpn_dataset_id', 'dataSet.id'),
+        ('ccpn_dataset_serial', 'dataSet.serial'),
         ('ccpn_restraint', _isALoop),
         )),
 
@@ -947,13 +967,13 @@ nef2CcpnMap = {
     'ccpn_distance_restraint_violation_list': OD((
         ('nef_spectrum', None),
         ('nef_restraint_list', 'restraintList.pid'),
-        ('ccpn_dataset', 'dataSet.id'),
-        ('run_id', 'runID'),
+        ('run_id', 'runId'),
         ('program', None),
         ('program_version', None),
         ('protocol', None),
         ('protocol_version', None),
         ('protocol_parameters', None),
+        ('ccpn_dataset_id', 'dataSet.id'),
         ('ccpn_distance_restraint_violation', _isALoop),
         )),
 

@@ -6,10 +6,12 @@
     <link rel="stylesheet" href="CcpnVideoTutorials.css">
 </head>
 <body>
-<div><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html"><img src="VideoTutorialsLogo.png" alt="Video Tutorials Logo" height="50" style="padding-left: 20px"></a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 20px"></a></div>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
 <br>
 <div class="headerBar">Macro Writing - Objects and Methods</div>
 <div class="tutorial">
+
+
 <h2>Macro Writing - Objects and Methods</h2>
     <p><b>The pages on macro writing assume that you have a basic understanding of python scripting and programming, but are not necessarily familiar with object-oriented programming.</b></p>
     <p>CcpNmr Analysis is written as an object-oriented programme. In effect, this means that different types of data (e.g. spectra, peak lists, peaks, chemical shifts, NmrAtoms etc.) automatically have certain properties/attributes and 'subroutines' or functions/methods associated with them. For example, <span class="action">peak.positions</span> would give you the ppm positions of  a peak, or <span class="action">peak.assignDimension(axisCode='H', value=['NA:A.23.ALA.H'])</span> would assign the NmrAtom <span class="action">A.23.ALA.H</span> to the <span class="action">H</span> dimension of a peak. Thus, if you want to write a macro, there are a large number of routines that you can draw on to access and manipulate all the data objects in the programme. So what are the objects and how do I find the methods associated with them?</p>

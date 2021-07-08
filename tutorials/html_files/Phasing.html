@@ -6,11 +6,17 @@
     <link rel="stylesheet" href="CcpnVideoTutorials.css">
 </head>
 <body>
-<div><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html"><img src="VideoTutorialsLogo.png" alt="Video Tutorials Logo" height="50" style="padding-left: 20px"></a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 20px"></a></div>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
 <br>
 <div class="headerBar">Phasing</div>
 <div class="tutorial">
-<iframe width=80% height="315" src="https://www.youtube.com/embed/Yu2ZSyR7G34" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+<div class="videoContainer">
+  <div class="videoWrapper">
+    <iframe src="https://www.youtube.com/embed/Yu2ZSyR7G34" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</div>
+
 <h2>Phasing Spectra</h2>
 <p>If you use a program such as NMRPipe to process your spectra, you can use CcpNmr Analysis to obtain your phasing parameters.</p>
 <p>You can open the phasing console using <span class="action">right-click / Enter Phasing Console</span> or by typing <span class="action">PC</span>. Select 1D traces with <span class="action">right-click / Add Trace</span> or by typing <span class="action">TA</span>. You can remove all traces again with <span class="action">right-click / Remove All Traces</span> or <span class="action">TR</span>. To change the scaling of the traces either use the buttons in the toolbar, <span class="action">TU</span> and <span class="action">TD</span> for 'Trace Up' and 'Trace Down' or use the commands in the right-hand mouse menu. The position of the pivot is indicated by a dashed black line and by default it is set in the middle of the spectrum. You can place this elsewhere either by <span class="action">left-dragging</span> the pivot line with the mouse, by placing the mouse at the desired pivot point and typing <span class="action">PV</span> or doing <span class="action">right-click / Set Pivot</span>. Alternatively, you can type a value into the <span class="action">pivot</span> box below. Change the phasing using the sliders at the bottom of the display or by typing values into the <span class="action">ph0</span> and <span class="action">ph1</span> boxes.</p>

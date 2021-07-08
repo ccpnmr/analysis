@@ -6,11 +6,19 @@
     <link rel="stylesheet" href="CcpnVideoTutorials.css">
 </head>
 <body>
-<div><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html"><img src="VideoTutorialsLogo.png" alt="Video Tutorials Logo" height="50" style="padding-left: 20px"></a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 20px"></a></div>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
 <br>
 <div class="headerBar">Keyboard Shortcuts</div>
 <div class="tutorial">
-<iframe width=80% height="315" src="https://www.youtube.com/embed/L6bXCpeVU5g" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
+<div class="videoContainer">
+  <div class="videoWrapper">
+    <iframe src="https://www.youtube.com/embed/L6bXCpeVU5g" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</div>
+
+
 <h2>Keyboard Shortcuts</h2>
 <p>Many menu items and functions in Analysis can be carried out using a two-key keyboard shortcut. Although we usually write these out in uppercase letters, they are not case-dependent.</p>
 <p>The shortcut for menu items in shown on the right hand side of the menu in the format '<span class="action">A, B</span>', although the comma is not required (it is an unfortunate Qt side-effect). You can view a pdf document listing all the shortcuts by going to <span class="action">Help / Show Shortcuts</span>.</p>
@@ -18,12 +26,16 @@
 <p>If you have accidentally started typing an incorrect letter, you can press <span class="action">Esc</span> to clear it and then start typing a new keyboard shortcut.</p>
 <p>On the whole, the keyboard shortcuts will act upon the active spectrum display, i.e. the display whose axes are highlighted. The only exception to this are the cursor keys, as these can also be used to navigate within tables.</p>
 <p></p>
-<table style="width:80%">
- <tr>
-  <th align="left" width="50%"><h3>Action</h3></th>
-  <th align="left" width="25%"><h3>Shortcut</h3></th>
-  <th align="left" width="25%"><h3>Related</h3></th>
+
+<table class="mouseUsage">
+ <thead>
+  <tr>
+  <th align="left" width="50%">Action</th>
+  <th align="left" width="25%">Shortcut</th>
+  <th align="left" width="25%">Related</th>
  </tr>
+ </thead>
+ <tbody>
  <tr>
      <td><i><b>Graphics :</b></i></td>
   <td></td>
@@ -590,6 +602,7 @@
      <td><span class="action">Y0, Y1, …Y9</span></td>
   <td></td>
  </tr>
+ </tbody>
 </table>
 
 </div>

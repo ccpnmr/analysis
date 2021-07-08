@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 19:13:07 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-08 11:20:01 +0100 (Thu, July 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ __date__ = "$Date: 2020-05-04 17:15:05 +0000 (Mon, May 04, 2020) $"
 import os
 from functools import partial
 from collections import OrderedDict as OD
-from PrintFormatter import PrintFormatter
+from ccpn.util.PrintFormatter import PrintFormatter
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ImportTreeCheckBoxes, RENAMEACTION, BADITEMACTION
@@ -947,6 +947,24 @@ class NefDictFrame(Frame):
                                                                          errorCode='ccpn_distance_restraint_violation_list',
                                                                          tableColourFunc=None)
 
+    handleSaveFrames['ccpn_logging'] = partial(handle_treeView_selection,
+                                               prefix='ccpn_history_',
+                                               mappingCode='ccpn_logging',
+                                               errorCode='ccpn_logging',
+                                               tableColourFunc=None)
+
+    handleSaveFrames['ccpn_dataset'] = partial(handle_treeView_selection,
+                                               prefix='ccpn_calculation_step_',
+                                               mappingCode='ccpn_dataset',
+                                               errorCode='ccpn_dataset',
+                                               tableColourFunc=None)
+
+    handleSaveFrames['ccpn_parameter'] = partial(handle_treeView_selection,
+                                                 prefix='ccpn_dataframe_',
+                                                 mappingCode='ccpn_parameter',
+                                                 errorCode='ccpn_parameter',
+                                                 tableColourFunc=None)
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     _setBadSaveFrames['nef_sequence'] = partial(_set_bad_saveframe,
@@ -1064,6 +1082,24 @@ class NefDictFrame(Frame):
                                                                           errorCode='ccpn_distance_restraint_violation_list',
                                                                           tableColourFunc=None)
 
+    _setBadSaveFrames['ccpn_logging'] = partial(_set_bad_saveframe,
+                                                prefix='ccpn_history_',
+                                                mappingCode='ccpn_logging',
+                                                errorCode='ccpn_logging',
+                                                tableColourFunc=None)
+
+    _setBadSaveFrames['ccpn_dataset'] = partial(_set_bad_saveframe,
+                                                prefix='ccpn_calculation_step_',
+                                                mappingCode='ccpn_dataset',
+                                                errorCode='ccpn_dataset',
+                                                tableColourFunc=None)
+
+    _setBadSaveFrames['ccpn_parameter'] = partial(_set_bad_saveframe,
+                                                  prefix='ccpn_dataframe_',
+                                                  mappingCode='ccpn_parameter',
+                                                  errorCode='ccpn_parameter',
+                                                  tableColourFunc=None)
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     applyCheckBoxes['nef_sequence'] = partial(apply_checkBox_item,
@@ -1168,6 +1204,21 @@ class NefDictFrame(Frame):
                                                                         prefix='ccpn_distance_restraint_violation_',
                                                                         mappingCode='ccpn_distance_restraint_violation_list',
                                                                         )
+
+    applyCheckBoxes['ccpn_logging'] = partial(apply_checkBox_item,
+                                              prefix='ccpn_history_',
+                                              mappingCode='ccpn_logging',
+                                              )
+
+    applyCheckBoxes['ccpn_dataset'] = partial(apply_checkBox_item,
+                                              prefix='ccpn_calculation_step_',
+                                              mappingCode='ccpn_dataset',
+                                              )
+
+    applyCheckBoxes['ccpn_parameter'] = partial(apply_checkBox_item,
+                                                prefix='ccpn_dataframe_',
+                                                mappingCode='ccpn_parameter',
+                                                )
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-02 13:01:43 +0100 (Fri, July 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,6 @@ from ccpn.core.Project import Project
 from ccpn.core.DataSet import DataSet
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
-from ccpn.util.Logging import getLogger
 
 
 class Data(AbstractWrapperObject):
@@ -80,7 +79,7 @@ class Data(AbstractWrapperObject):
         return self._wrappedData.name
 
     @name.setter
-    def name(self, value:str):
+    def name(self, value: str):
         """set name of Data object."""
         self.rename(value)
 
@@ -222,17 +221,13 @@ def _newData(self: DataSet, name: str, attachedObjectPid: str = None,
                     "Either attachedObject or attachedObjectPid must be None - values were %s and %s"
                     % (attachedObject, attachedObjectPid))
 
-    apiDataSet = self._wrappedData.newData(name=name, attachedObjectPid=attachedObjectPid)
-    result = project._data2Obj.get(apiDataSet)
+    apiData = self._wrappedData.newData(name=name, attachedObjectPid=attachedObjectPid)
+    result = project._data2Obj.get(apiData)
     if result is None:
         raise RuntimeError('Unable to generate new Data item')
 
     return result
 
-
-#EJB 20181204: moved to DataSet
-# DataSet.newData = _newData
-# del _newData
 
 # Notifiers:
 # Data change whenever a parameter is created, deleted, or changed

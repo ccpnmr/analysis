@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 09:34:32 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-08 18:24:44 +0100 (Thu, July 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1975,6 +1975,7 @@ class GuiSpectrumDisplay(CcpnModule):
                         if not isinstance(result, GuiStrip):
                             raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))
 
+                    # required because the above clone is wrapped in notificationBlanking
                     result._finaliseAction('create')
 
                     # copy the strip Header if needed

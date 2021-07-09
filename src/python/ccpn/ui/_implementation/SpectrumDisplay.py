@@ -36,6 +36,7 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDispl
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
+import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.lib.OrderedSpectrumViews import OrderedSpectrumViews
@@ -405,6 +406,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 
 @newObject(SpectrumDisplay)
 def _newSpectrumDisplay(window: Window,
+                        spectrum: Spectrum,
                         axisCodes: (str,),
                         stripDirection: str = 'Y',
                         name: str = None,
@@ -427,33 +429,34 @@ def _newSpectrumDisplay(window: Window,
     apiWindow = window._wrappedData
     project = window.project
 
+    if (spectrum := project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum) is None:
+        raise ValueError('_newSpectrumDisplay: undefined spectrum')
+    is1D = (spectrum.dimensionCount == 1)
+
     apiTask = (project._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
                project._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
     # window = window or apiTask.sortedWindows()[0]
 
-    # set parameters for display
+    # set api-parameters for display generation
     displayPars = dict(
             stripDirection=stripDirection,
             window=apiWindow,
             )
 
-    # Add name, setting and insuring uniqueness if necessary
-    if name is None:
-        if 'intensity' in axisCodes:
-            name = ''.join(['1D:', axisCodes[0]] + list(axisCodes[2:]))
-        else:
-            name = ''.join([str(x)[0:1] for x in axisCodes])
-    name = SpectrumDisplay._uniqueApiName(project, name)
-    displayPars['name'] = name
-
+    if is1D:
+        axisCodes = spectrum.axisCodes + ['intensity']
     if len(axisCodes) < 2:
         raise ValueError("New SpectrumDisplay must have at least two axisCodes")
     displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
 
-    # if independentStrips:
-    #     # Create FreeStripDisplay
-    #     apiSpectrumDisplay = apiTask.newFreeDisplay(**displayPars)
-    # else:
+    # Add name, setting and insuring uniqueness if necessary
+    if name is None:
+        if is1D:
+            name = ''.join(['1D_', axisCodes[0]])
+        else:
+            name = ''.join(['%dD_' % spectrum.dimensionCount] + [str(x)[0:1] for x in axisCodes])
+    name = SpectrumDisplay._uniqueApiName(project, name)
+    displayPars['name'] = name
 
     # Create Boundstrip/Nostrip display and first strip
     apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
@@ -461,31 +464,48 @@ def _newSpectrumDisplay(window: Window,
         raise RuntimeError('Unable to generate new SpectrumDisplay')
 
     # Create axes
-    for ii, axisCode in enumerate(axisCodes):
-        # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
-        #    not stripDirection):
-        # Reactivate this code if we reintroduce non-strip displays (stripDirection == None)
-        if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y'):
-            stripSerial = 0
-        else:
+    if is1D:
+        if spectrum.dimensionTypes[0] == specLib.DIMENSION_FREQUENCY:
+            apiSpectrumDisplay.newFrequencyAxis(code=axisCodes[0], stripSerial=1)
+        elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
+            apiSpectrumDisplay.newFidAxis('time', stripSerial=1)
+
+        apiSpectrumDisplay.newIntensityAxis(code='intensity', stripSerial=1)
+
+    else:
+        # nD
+        for ii, axisCode in enumerate(axisCodes):
+            # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
+            #    not stripDirection):
+            # Reactivate this code if we reintroduce non-strip displays (stripDirection == None)
+            if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y'):
+                stripSerial = 0
+            else:
+                stripSerial = 1
+
+            # NOTE: ED setting to 1 notifies api to create a full axis set for each additional spectrum
+            #       required for dynamic switching of strip arrangement
+            #       stripDirection is no longer used in the api
             stripSerial = 1
 
-        # NOTE: ED setting to 1 notifies api to create a full axis set for each additional spectrum
-        #       required for dynamic switching of strip arrangement
-        #       stripDirection is no longer used in the api
-        stripSerial = 1
+            # code = 'Time' if axisCode.lower().startswith('time') else axisCode[0]
+            # apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
+            if spectrum.dimensionTypes[0] == specLib.DIMENSION_FREQUENCY:
+                apiSpectrumDisplay.newFrequencyAxis(code=axisCode, stripSerial=1)
+            elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
+                apiSpectrumDisplay.newFidAxis('time_%d' % (ii+1), stripSerial=1)
+            else:
+                raise NotImplementedError('No sampled axes (yet)')
 
-        # code = 'Time' if axisCode.lower().startswith('time') else axisCode[0]
-        # apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
 
-        if axisCode[0].isupper():
-            apiSpectrumDisplay.newFrequencyAxis(code=axisCode, stripSerial=stripSerial)
-        elif axisCode == 'intensity':
-            apiSpectrumDisplay.newIntensityAxis(code=axisCode, stripSerial=stripSerial)
-        elif axisCode.startswith('Time'):
-            apiSpectrumDisplay.newFidAxis(code=axisCode, stripSerial=stripSerial)
-        else:
-            apiSpectrumDisplay.newSampledAxis(code=axisCode, stripSerial=stripSerial)
+            # if axisCode[0].isupper():
+            #     apiSpectrumDisplay.newFrequencyAxis(code=axisCode, stripSerial=stripSerial)
+            # elif axisCode == 'intensity':
+            #     apiSpectrumDisplay.newIntensityAxis(code=axisCode, stripSerial=stripSerial)
+            # elif axisCode.startswith('Time'):
+            #     apiSpectrumDisplay.newFidAxis(code=axisCode, stripSerial=stripSerial)
+            # else:
+            #     apiSpectrumDisplay.newSampledAxis(code=axisCode, stripSerial=stripSerial)
 
     display.stripArrangement = stripDirection
     # may need to set other values here, guarantees before strip generation
@@ -577,6 +597,7 @@ def _createSpectrumDisplay(window: Window,
 
     with undoBlockWithoutSideBar():
         display = _newSpectrumDisplay(window=window,
+                                      spectrum=spectrum,
                                       axisCodes=displayAxisCodes,
                                       stripDirection=stripDirection,
                                       name=title,

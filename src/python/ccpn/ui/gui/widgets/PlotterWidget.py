@@ -622,7 +622,7 @@ class PlotterWidget(Widget):
     #     self.canvas.draw()
     #     return plot
 
-    def displayImage(self, image:str=None, format=None, axis=False, *args, **kwds):
+    def displayImage(self, imagePath:str=None, format=None, axis=False, *args, **kwds):
         """
         quick way to display images using the built-in methods from pyPlot
         :param image: str -- Path
@@ -632,8 +632,8 @@ class PlotterWidget(Widget):
         :param kwds: as imshow
         :return:
         """
-        if image:
-            img = self.imread(image, format)
+        if imagePath:
+            img = self.imread(imagePath, format)
             self.imshow(img, *args, **kwds)
             if not axis:
                 self.axis('off')

@@ -33,6 +33,7 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDispl
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 
 from ccpn.core.Project import Project
+from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import DIMENSION_FREQUENCY
@@ -255,11 +256,29 @@ class Window(AbstractWrapperObject):
         else:
             return windowStore.sortedWindows()
 
-    @logCommand('mainWindow.')  #there is already a log command internally. This is not needed it and slows down the process.
-    def createSpectrumDisplay(self, spectrum, displayAxisCodes: Sequence[str] = (),
-                              axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
+    @logCommand('mainWindow.')
+    def newSpectrumDisplay(self, spectrum: Spectrum, axisCodes: (str,), stripDirection: str = 'Y',
+                           name: str = None, zPlaneNavigationMode: str = None):
+        """Create new SpectrumDisplay
+
+        :param spectrum: a Spectrum instance to be displayed
+        :param axisCodes: display order of the dimensions of spectrum
+        :param stripDirection: stripDirection: if 'X' or 'Y' set strip axis
+        :param name: optional name
+        :param zPlaneNavigationMode:
+        :return: a new SpectrumDisplay instance.
+        """
+        from ccpn.ui._implementation.SpectrumDisplay import _newSpectrumDisplay
+        return _newSpectrumDisplay(window=self, spectrum=spectrum, axisCodes=axisCodes,
+                                   stripDirection=stripDirection, name=name, zPlaneNavigationMode=zPlaneNavigationMode)
+
+    # @logCommand('mainWindow.')  #there is already a log command internally. This is not needed it and slows down the process.
+    def _createSpectrumDisplay(self, spectrum, displayAxisCodes: Sequence[str] = (),
+                              axisOrder: Sequence[str] = (),
+                              title: str = None, positions: Sequence[float] = (),
                               widths: Sequence[float] = (), units: Sequence[str] = (),
-                              stripDirection: str = None, is1D: bool = False,
+                              stripDirection: str = None,
+                              is1D: bool = False,
                               position='right', relativeTo=None, isGrouped=False,
                               **kwds):
         """
@@ -270,7 +289,6 @@ class Window(AbstractWrapperObject):
         :param \*str units: axis units in display order - default to heuristic
         :param str stripDirection: if 'X' or 'Y' set strip axis
         :param bool is1D: If True, or spectrum passed in is 1D, do 1D display
-        :param bool independentStrips: if True do freeStrip display.
         """
         from ccpn.ui._implementation.SpectrumDisplay import _createSpectrumDisplay
         from ccpn.ui.gui.lib.GuiSpectrumDisplay import STRIPDIRECTIONS

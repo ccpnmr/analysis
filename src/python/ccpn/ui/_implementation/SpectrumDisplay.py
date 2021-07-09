@@ -405,21 +405,17 @@ class SpectrumDisplay(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(SpectrumDisplay)
-def _newSpectrumDisplay(window: Window,
-                        spectrum: Spectrum,
-                        axisCodes: (str,),
-                        stripDirection: str = 'Y',
-                        name: str = None,
-                        zPlaneNavigationMode: str = None):
+@logCommand('mainWindow.')
+def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
+                        stripDirection: str = 'Y', name: str = None, zPlaneNavigationMode: str = None):
     """Create new SpectrumDisplay
 
-    See the SpectrumDisplay class for details.
-
-    :param axisCodes:
-    :param stripDirection:
-    :param title:
     :param window:
-    :param comment:
+    :param spectrum: a Spectrum instance to be displayed
+    :param axisCodes: display order of the dimensions of spectrum
+    :param stripDirection: stripDirection: if 'X' or 'Y' set strip axis
+    :param name: optional name
+    :param zPlaneNavigationMode:
     :return: a new SpectrumDisplay instance.
     """
 
@@ -427,14 +423,15 @@ def _newSpectrumDisplay(window: Window,
     if window is None or not isinstance(window, Window):
         raise ValueError('Expected window argument; got %r' % window)
     apiWindow = window._wrappedData
+    apiTask = apiWindow.getGuiTask()
     project = window.project
 
     if (spectrum := project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum) is None:
         raise ValueError('_newSpectrumDisplay: undefined spectrum')
     is1D = (spectrum.dimensionCount == 1)
 
-    apiTask = (project._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
-               project._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+    # apiTask = (project._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+    #            project._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
     # window = window or apiTask.sortedWindows()[0]
 
     # set api-parameters for display generation
@@ -463,6 +460,9 @@ def _newSpectrumDisplay(window: Window,
     if (display := project._data2Obj.get(apiSpectrumDisplay)) is None:
         raise RuntimeError('Unable to generate new SpectrumDisplay')
 
+    # Create first strip
+    apiSpectrumDisplay.newBoundStrip()
+
     # Create axes
     if is1D:
         if spectrum.dimensionTypes[0] == specLib.DIMENSION_FREQUENCY:
@@ -471,6 +471,7 @@ def _newSpectrumDisplay(window: Window,
             apiSpectrumDisplay.newFidAxis('time', stripSerial=1)
 
         apiSpectrumDisplay.newIntensityAxis(code='intensity', stripSerial=1)
+        dimensionOrdering = [1,0]
 
     else:
         # nD
@@ -507,13 +508,31 @@ def _newSpectrumDisplay(window: Window,
             # else:
             #     apiSpectrumDisplay.newSampledAxis(code=axisCode, stripSerial=stripSerial)
 
+        dimensionOrdering = spectrum.getByAxisCodes('dimensions', axisCodes, exactMatch=True)
+
     display.stripArrangement = stripDirection
     # may need to set other values here, guarantees before strip generation
     if zPlaneNavigationMode:
         display.zPlaneNavigationMode = zPlaneNavigationMode
 
-    # Create first strip
-    apiSpectrumDisplay.newBoundStrip()
+    # GWV: no idea what these are for; just adapted from original code
+    # it gets crazy on 1D displays
+    display._useFirstDefault = is1D
+    display.isGrouped = False
+
+    # Make spectrumView. Do We need notifiers on for these??
+    _spectrumView = display._wrappedData.newSpectrumView(spectrumName=spectrum.name,
+                                                         stripSerial=0,
+                                                         dataSource=spectrum._wrappedData,
+                                                         dimensionOrdering=dimensionOrdering)
+    # from ccpn.ui._implementation.SpectrumView import _newSpectrumView
+    # _spectrumView = _newSpectrumView(display,
+    #                                  spectrumName=dataSource.name,
+    #                                  stripSerial=0, dataSource=dataSource,
+    #                                  dimensionOrdering=dimensionOrdering)
+
+    # call any post initialise routines for the spectrumDisplay here
+    display._postInit()
 
     return display
 
@@ -665,19 +684,19 @@ def _createSpectrumDisplay(window: Window,
 
         display.isGrouped = isGrouped
 
-    # Make spectrumView. NB We need notifiers on for these
-    _spectrumView = display._wrappedData.newSpectrumView(spectrumName=spectrum.name,
-                                                         stripSerial=0,
-                                                         dataSource=spectrum._wrappedData,
-                                                         dimensionOrdering=dimensionOrdering)
-    # from ccpn.ui._implementation.SpectrumView import _newSpectrumView
-    # _spectrumView = _newSpectrumView(display,
-    #                                  spectrumName=dataSource.name,
-    #                                  stripSerial=0, dataSource=dataSource,
-    #                                  dimensionOrdering=dimensionOrdering)
-
-    # call any post initialise routines for the spectrumDisplay here
-    display._postInit()
+    # # Make spectrumView. NB We need notifiers on for these
+    # _spectrumView = display._wrappedData.newSpectrumView(spectrumName=spectrum.name,
+    #                                                      stripSerial=0,
+    #                                                      dataSource=spectrum._wrappedData,
+    #                                                      dimensionOrdering=dimensionOrdering)
+    # # from ccpn.ui._implementation.SpectrumView import _newSpectrumView
+    # # _spectrumView = _newSpectrumView(display,
+    # #                                  spectrumName=dataSource.name,
+    # #                                  stripSerial=0, dataSource=dataSource,
+    # #                                  dimensionOrdering=dimensionOrdering)
+    #
+    # # call any post initialise routines for the spectrumDisplay here
+    # display._postInit()
 
     return display
 

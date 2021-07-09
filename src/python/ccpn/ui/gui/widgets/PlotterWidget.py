@@ -41,10 +41,10 @@ class PlotterWidget(Widget):
     """
     This widget allows to plot several kinds of plots using the libraries of MatplotLib, Seaborn and Pandas.
     It includes:
-        - Standard plots: Line, LineErrors, Scatter, Bars, hist etc.
+        - Standard plots: Line, LineErrors, Scatter, Bars, hist, contour etc.
         - Distribution plots: univariate and bivariate(kde) distributions, Box&Whisker
         - Matrix plots: HeatMap and ClusterMap
-        - Statistical plots: Regression, CrossCorrelation,
+        - Statistical plots: Regression, CrossCorrelation, AutoCorrelation, Coherence, CrossSpectralDensity
         - 3D (advance see examples)
         - images
 
@@ -833,6 +833,26 @@ if __name__ == '__main__':
         plt.plotContour(X, Y, Z, [1,4,7], ['r','g','b'])
         plt.show()
 
+    def _3dCountourExample():
+        import matplotlib.pyplot as plt
+        from scipy.stats import multivariate_normal
+        from mpl_toolkits.mplot3d import Axes3D  # <--- This is important for 3d plotting  :O
+
+        x, y = np.mgrid[3:5:100j, 3:5:100j]
+        xy = np.column_stack([x.flat, y.flat])
+        mu = np.array([4.0, 4.0])
+        sigma = np.array([0.1, 0.1])
+        covariance = np.diag(sigma ** 2)
+        z = multivariate_normal.pdf(xy, mean=mu, cov=covariance)
+        z = z.reshape(x.shape)
+
+
+        plt = PlotterWidget()
+        fig = plt._figure
+        ax = fig.gca(projection='3d')
+        ax.plot_surface(x, y, z)
+        plt.show()
+
     def _barExample(orientation='v'):
         import numpy as np
 
@@ -905,7 +925,8 @@ if __name__ == '__main__':
         plot.plotClusterMap(iris)
         plot.show(windowTitle='ClusterMap Example', size=(500, 500))
 
-    # _contourExample()
+    _contourExample()
+    _3dCountourExample()
     # _pieExample()
     # _scatterExample()
     # _barExample('h')
@@ -914,12 +935,11 @@ if __name__ == '__main__':
     # _3DsurfaceExample()
     # _imageExample()
     # _multiPlotExample()
-    _simplePlotExample()
+    # _simplePlotExample()
     # _plotLineWithErrorsExample()
     # _BoxAndWhiskerExample()
     # _heatMapExample()
     # _clusterMapExample()
-    _pandasPlotExample()
-
+    # _pandasPlotExample()
 
     app.start()

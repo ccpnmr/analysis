@@ -607,6 +607,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 
     # call any post initialise routines for the spectrumDisplay here
     display._postInit()
+    display.autoRange()
 
     return display
 

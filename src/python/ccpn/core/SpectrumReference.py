@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 14:33:30 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-09 11:36:32 +0100 (Fri, July 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import Optional, Sequence, Tuple, List
+from typing import Optional, Sequence, Tuple
 
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -35,7 +35,6 @@ import ccpn.core.lib.SpectrumLib as specLib
 
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core.lib.ContextManagers import newObject
-from ccpn.util.Logging import getLogger
 
 
 class SpectrumReference(AbstractWrapperObject):
@@ -55,7 +54,7 @@ class SpectrumReference(AbstractWrapperObject):
     _parentClass = Spectrum
 
     # Type of dimension. Always 'Frequency' for frequency (Fourier transformed) dimension
-    dimensionType = 'Frequency'
+    _dimensionType = specLib.DIMENSION_FREQUENCY  # 'Frequency'
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'spectrumReferences'
@@ -164,7 +163,7 @@ class SpectrumReference(AbstractWrapperObject):
     def pointCount(self):
         """Number of points in this dimension"""
         if self._isFidDimension and hasattr(self._dataDim, 'numPointsValid'):
-            # GWV: compatibilty with v2?
+            # GWV: compatibility with v2?
             result = self._dataDim.numPointsValid
         else:
             result = self._dataDim.numPoints
@@ -175,7 +174,7 @@ class SpectrumReference(AbstractWrapperObject):
         # To decouple pointCount from spectralWidth
         oldSw = self.spectralWidthHz
         if self._isFidDimension:
-            # GWV: compatibilty with v2?
+            # GWV: compatibility with v2?
             self._dataDim.numPointsValid = value
         else:
             self._dataDim.numPoints = value
@@ -195,7 +194,7 @@ class SpectrumReference(AbstractWrapperObject):
         """Dimension type ('Time' / 'Frequency' / 'Sampled')"""
         if not self._hasInternalParameter('dimensionType'):
             result = specLib.DIMENSION_FREQUENCY
-            self.dimensionType = result
+            # self._dimensionType = result
         else:
             result = self._getInternalParameter('dimensionType')
         return result
@@ -268,15 +267,15 @@ class SpectrumReference(AbstractWrapperObject):
     def limits(self) -> Tuple[float, float]:
         """Return the limits of this dimension as a tuple of floats"""
         if self.dimensionType == specLib.DIMENSION_FREQUENCY:
-            return (self.pointToValue(1), self.pointToValue(self.pointCount+1))
+            return (self.pointToValue(1), self.pointToValue(self.pointCount + 1))
         elif self.dimensionType == specLib.DIMENSION_TIME:
-            return (self.pointToValue(1), self.pointToValue(self.pointCount+1))
+            return (self.pointToValue(1), self.pointToValue(self.pointCount + 1))
             # return (0.0, self._valuePerPoint * self.pointCount)
         else:
             raise RuntimeError('SpectrumReference.limits not implemented for sampled data')
 
     @property
-    def isotopeCode(self) -> str:
+    def isotopeCode(self) -> Optional[str]:
         """Isotope identification strings for isotopes.
         """
         if len(self._isotopeCodes) > 0:
@@ -379,11 +378,11 @@ class SpectrumReference(AbstractWrapperObject):
     # This is a crucial property that effectively governs the spectral width (both in Hz and ppm)
     #     # We assume that the number of points is constant, so setting SW changes valuePerPoint
     #     dataDimRef = self._wrappedData
-    #     swold = dataDimRef.spectralWidth
+    #     swOld = dataDimRef.spectralWidth
     #     if dataDimRef.localValuePerPoint:
-    #         dataDimRef.localValuePerPoint *= (value / swold)
+    #         dataDimRef.localValuePerPoint *= (value / swOld)
     #     else:
-    #         dataDimRef.dataDim.valuePerPoint *= (value / swold)
+    #         dataDimRef.dataDim.valuePerPoint *= (value / swOld)
     @property
     def _valuePerPoint(self) -> float:
         """Value per point: in Hz for Frequency domain data, in secs for time/fid domain data"""
@@ -500,6 +499,7 @@ class SpectrumReference(AbstractWrapperObject):
         """:return point (float) corresponding to ppm-value"""
         return self._wrappedData.valueToPoint(value)
 
+
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
@@ -516,7 +516,7 @@ def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> Spectru
     CCPNINTERNAL: called from _newSpectrumFromDataSource
     """
 
-    axis = dimension-1
+    axis = dimension - 1
 
     nPoints = dataSource.pointCounts[axis]
     isComplex = dataSource.isComplex[axis]
@@ -524,7 +524,7 @@ def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> Spectru
     dimType = dataSource.dimensionTypes[axis]
     if dimType == specLib.DIMENSION_FREQUENCY:
         # valuePerPoint is digital resolution in Hz
-        # TODO: accomodate complex points
+        # TODO: accommodate complex points
         valuePerPoint = dataSource.spectralWidthsHz[axis] / float(nPoints)
         axisUnit = 'ppm'
 
@@ -541,11 +541,11 @@ def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> Spectru
         raise RuntimeError('Invalid dimensionType[%d]: "%s"' % (axis, dimType))
 
     spectrometerFrequency = dataSource.spectrometerFrequencies[axis]
-    isotopeCodes = dataSource.isotopeCodes[axis:axis+1]
+    isotopeCodes = dataSource.isotopeCodes[axis:axis + 1]
     axisCode = dataSource.axisCodes[axis]
 
     # generate some api objects
-    # Initialise the dimension; This seems a very complicated datastructure! (GWV)
+    # Initialise the dimension; This seems a very complicated data structure! (GWV)
     apiDataSource = self._wrappedData
     apiExperiment = apiDataSource.experiment
     apiExpDim = apiExperiment.findFirstExpDim(dim=dimension)
@@ -561,7 +561,7 @@ def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> Spectru
                                                    pointOffset=0,
                                                    isComplex=isComplex,
                                                    valuePerPoint=valuePerPoint
-                                                  )
+                                                   )
     ) is None:
         raise RuntimeError("Cannot create SpectrumReference for dimension: %s" % dimension)
 
@@ -573,22 +573,22 @@ def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> Spectru
                                                unit=axisUnit,
                                                minAliasedFreq=None,
                                                maxAliasedFreq=None,
-                                              )
+                                               )
     ) is None:
         raise RuntimeError("Cannot create SpectrumReference for dimension: %s" % dimension)
 
     if (apiDataDimRef := apiDataDim.newDataDimRef(expDimRef=apiExpDimRef,
                                                   refPoint=0.0,
                                                   refValue=0.0
-                                                 )
+                                                  )
     ) is None:
         raise RuntimeError("Cannot create SpectrumReference for dimension: %s" % dimension)
-
 
     if (result := self.project._data2Obj[apiDataDimRef]) is None:
         raise RuntimeError("Cannot create SpectrumReference for dimension: %s" % dimension)
 
     return result
+
 
 #EJB 20181205: moved to Spectrum
 # Spectrum.newSpectrumReference = _newSpectrumReference

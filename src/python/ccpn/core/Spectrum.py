@@ -1251,7 +1251,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     def spectrumLimits(self) -> List[Tuple[float, float]]:
-        """list of tuples of (ppmPoint(1), ppmPoint(n+1)) for each dimension
+        """list of tuples of (ppmPoint(1), ppmPoint(n)) for each dimension
         """
         return self._getDimensionalAttributes('limits')
         # ll = []
@@ -1261,6 +1261,18 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         #     else:
         #         ll.append((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints + 1)))
         # return tuple(ll)
+
+    def get1Dlimits(self):
+        """Get the 1D spectrum ppm-limits and the intensity limits
+        :return ((ppm1, ppm2), (minValue, maxValue)
+        """
+        if self.dimensionCount != 1:
+            raise RuntimeError('Spectrum.get1Dlimits() is only implemented for 1D spectra')
+        ppmLimits = self.spectrumLimits[0]
+        sliceData = self.getSliceData()
+        minValue = float(min(sliceData))
+        maxValue = float(max(sliceData))
+        return (ppmLimits, (minValue, maxValue))
 
     @property
     def axesReversed(self) -> Tuple[Optional[bool], ...]:
@@ -1584,24 +1596,24 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """
         result = self._getInternalParameter(PREFERREDAXISORDERING)
         if result is None:
-            # default to None
-            return None
+            result = self.axes
         return result
 
     @preferredAxisOrdering.setter
+    @checkSpectrumPropertyValue(iterable=True, unique=True, types=(int,))
     def preferredAxisOrdering(self, order):
         """Set the preferred ordering for the axis codes when opening a new spectrumDisplay
         """
-        if not order:
-            raise ValueError('order is not defined')
-        if not isinstance(order, tuple):
-            raise TypeError('order is not a tuple')
-        if len(order) != self.dimensionCount:
-            raise TypeError('order is not the correct length')
+        # if not order:
+        #     raise ValueError('order is not defined')
+        # if not isinstance(order, tuple):
+        #     raise TypeError('order is not a tuple')
+        # if len(order) != self.dimensionCount:
+        #     raise TypeError('order is not the correct length')
         if not all(isinstance(ss, int) and ss >= 0 and ss < self.dimensionCount for ss in order):
-            raise TypeError('order elements must be integer and in (0 .. %d)' % (self.dimensionCount - 1))
-        if len(set(order)) != len(order):
-            raise ValueError('order must contain unique elements')
+            raise TypeError('Spectrum.preferredAxisOrdering: elements must be in range (0 .. %d)' % (self.dimensionCount - 1))
+        # if len(set(order)) != len(order):
+        #     raise ValueError('order must contain unique elements')
 
         self._setInternalParameter(PREFERREDAXISORDERING, order)
 

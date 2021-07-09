@@ -294,7 +294,11 @@ class Window(AbstractWrapperObject):
         from ccpn.ui.gui.lib.GuiSpectrumDisplay import STRIPDIRECTIONS
         from ccpn.ui.gui.guiSettings import ZPlaneNavigationModes
 
-        spectrum = self.project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
+        if (spectrum := self.project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum) is None:
+            raise ValueError('Invalid spectrum; got %r' % spectrum)
+        if not displayAxisCodes:
+            displayAxisCodes = tuple(spectrum.axisCodes[aa] for aa in spectrum.preferredAxisOrdering)
+
         # dimensionTypes = spectrum.getByAxisCodes('dimensionTypes', displayAxisCodes)
         # if any(x != DIMENSION_FREQUENCY for x in dimensionTypes):
         #     raise NotImplementedError("createSpectrumDisplay not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
@@ -320,11 +324,17 @@ class Window(AbstractWrapperObject):
                 getLogger().warning(f'createSpectrumDisplay {es}')
 
             # create the new spectrumDisplay
-            display = _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
-                                             title=title, positions=positions, widths=widths, units=units,
-                                             stripDirection=stripDirection, isGrouped=isGrouped,
-                                             zPlaneNavigationMode=zPlaneNavigationMode,
-                                             **kwds)
+            # display = _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
+            #                                  title=title, positions=positions, widths=widths, units=units,
+            #                                  stripDirection=stripDirection, isGrouped=isGrouped,
+            #                                  zPlaneNavigationMode=zPlaneNavigationMode,
+            #                                  **kwds)
+            display = self.newSpectrumDisplay(spectrum,
+                                              axisCodes=displayAxisCodes,
+                                              stripDirection=stripDirection,
+                                              zPlaneNavigationMode=zPlaneNavigationMode,
+                                             )
+            display.isGrouped = isGrouped
 
             # add the new module to mainWindow at the required position
             self.moduleArea.addModule(display, position=position, relativeTo=relativeTo)

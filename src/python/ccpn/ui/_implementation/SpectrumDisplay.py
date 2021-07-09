@@ -71,7 +71,19 @@ class SpectrumDisplay(AbstractWrapperObject):
     # store the list of ordered spectrumViews
     _orderedSpectrumViews = None
 
+    #-----------------------------------------------------------------------------------------
+    # Attributes of the data structure
+    #-----------------------------------------------------------------------------------------
+
+    @property
+    def strips(self) -> list:
+        """STUB: hot-fixed later"""
+        return []
+
+    #-----------------------------------------------------------------------------------------
     # CCPN properties
+    #-----------------------------------------------------------------------------------------
+
     @property
     def _apiSpectrumDisplay(self) -> ApiBoundDisplay:
         """ CCPN SpectrumDisplay matching SpectrumDisplay"""
@@ -128,7 +140,6 @@ class SpectrumDisplay(AbstractWrapperObject):
     @property
     def axisCodes(self) -> Tuple[str, ...]:
         """Fixed string Axis codes in original display order (X, Y, Z1, Z2, ...)"""
-        # TODO axisCodes shold be unique, but I am not sure this is enforced
         return self._wrappedData.axisCodes
 
     @property
@@ -394,6 +405,38 @@ class SpectrumDisplay(AbstractWrapperObject):
     # CCPN functions
     #=========================================================================================
 
+    def _setFromLimits(self, axis, value: Tuple[float,float]):
+        """Set width,position for axis"""
+        width = value[1] - value[0] if value[1]>value[0] else value[0] - value[1]
+        pos = value[0] + width*0.5 if value[1]>value[0] else value[0] - width*0.5
+
+        positions = list(self.positions)
+        positions[axis] = pos
+        self.positions = positions
+
+        widths = list(self.widths)
+        widths[axis] = width
+        self.widths = widths
+
+    def _setLimits(self, spectrum:Spectrum, dimensionOrdering):
+        """Define the relevant limits from dimensions of spectrum
+        CCPNMRINTERNAL: used in _newSpectrumDisplay
+        """
+        if spectrum.dimensionCount == 1:
+            # 1D spectrum
+            ppmLimits, valueLimits = spectrum.get1Dlimits()
+            self._setFromLimits(0, ppmLimits)
+            self._setFromLimits(1, valueLimits)
+        else:
+            # nD
+            for ii, dim in enumerate(dimensionOrdering):
+                axis = dim-1
+                self._setFromLimits(ii, spectrum.spectrumLimits[axis])
+
+        self.strips[0].positions = self.positions
+        self.strips[0].widths = self.widths
+
+
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
@@ -471,11 +514,16 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
             apiSpectrumDisplay.newFidAxis('time', stripSerial=1)
 
         apiSpectrumDisplay.newIntensityAxis(code='intensity', stripSerial=1)
+
         dimensionOrdering = [1,0]
 
     else:
         # nD
-        for ii, axisCode in enumerate(axisCodes):
+        dimensionOrdering = spectrum.getByAxisCodes('dimensions', axisCodes, exactMatch=True)
+
+        for ii, dim in enumerate(dimensionOrdering):
+            axisCode = axisCodes[ii]
+            axis = dim-1
             # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
             #    not stripDirection):
             # Reactivate this code if we reintroduce non-strip displays (stripDirection == None)
@@ -508,7 +556,8 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
             # else:
             #     apiSpectrumDisplay.newSampledAxis(code=axisCode, stripSerial=stripSerial)
 
-        dimensionOrdering = spectrum.getByAxisCodes('dimensions', axisCodes, exactMatch=True)
+    display._setLimits(spectrum, dimensionOrdering)
+
 
     display.stripArrangement = stripDirection
     # may need to set other values here, guarantees before strip generation

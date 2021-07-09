@@ -115,10 +115,9 @@ class Axis(AbstractWrapperObject):
         """Display unit for axis"""
         return self._wrappedData.axis.unit
 
-    # NBNB TBD This should be settable, but changing it requires changing the position
-    # values. For now we leave it unsettable.
-
-    # NBNB TBD the 'regions' attribute may not be needed. leave it out
+    @unit.setter
+    def unit(self, value: str):
+        self._wrappedData.axis.unit = value
 
     @property
     def nmrAtoms(self) -> Tuple[NmrAtom]:

@@ -404,8 +404,10 @@ class SpectrumDisplay(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(SpectrumDisplay)
-def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 'Y',
-                        name: str = None, window: Window = None, comment: str = None,
+def _newSpectrumDisplay(window: Window,
+                        axisCodes: (str,),
+                        stripDirection: str = 'Y',
+                        name: str = None,
                         zPlaneNavigationMode: str = None):
     """Create new SpectrumDisplay
 
@@ -419,16 +421,20 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
     :return: a new SpectrumDisplay instance.
     """
 
-    window = self.getByPid(window) if isinstance(window, str) else window
+    # window = project.getByPid(window) if isinstance(window, str) else window
+    if window is None or not isinstance(window, Window):
+        raise ValueError('Expected window argument; got %r' % window)
+    apiWindow = window._wrappedData
+    project = window.project
 
-    apiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
-               self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
-    window = window or apiTask.sortedWindows()[0]
+    apiTask = (project._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+               project._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+    # window = window or apiTask.sortedWindows()[0]
 
     # set parameters for display
     displayPars = dict(
-            stripDirection=stripDirection, window=window,
-            details=comment,
+            stripDirection=stripDirection,
+            window=apiWindow,
             )
 
     # Add name, setting and insuring uniqueness if necessary
@@ -437,13 +443,8 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
             name = ''.join(['1D:', axisCodes[0]] + list(axisCodes[2:]))
         else:
             name = ''.join([str(x)[0:1] for x in axisCodes])
-    name = SpectrumDisplay._uniqueApiName(self, name)
+    name = SpectrumDisplay._uniqueApiName(project, name)
     displayPars['name'] = name
-
-    # elif Pid.altCharacter in title:
-    #     raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
-    # while apiTask.findFirstModule(name=title):
-    #     title = commonUtil.incrementName(title)
 
     if len(axisCodes) < 2:
         raise ValueError("New SpectrumDisplay must have at least two axisCodes")
@@ -456,12 +457,11 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
 
     # Create Boundstrip/Nostrip display and first strip
     apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
-
-    if (result := self._project._data2Obj.get(apiSpectrumDisplay)) is None:
-        raise RuntimeError('Unable to generate new SpectrumDisplay item')
+    if (display := project._data2Obj.get(apiSpectrumDisplay)) is None:
+        raise RuntimeError('Unable to generate new SpectrumDisplay')
 
     # Create axes
-    for ii, code in enumerate(axisCodes):
+    for ii, axisCode in enumerate(axisCodes):
         # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
         #    not stripDirection):
         # Reactivate this code if we reintroduce non-strip displays (stripDirection == None)
@@ -475,37 +475,37 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
         #       stripDirection is no longer used in the api
         stripSerial = 1
 
-        if code[0].isupper():
-            apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
-        elif code == 'intensity':
-            apiSpectrumDisplay.newIntensityAxis(code=code, stripSerial=stripSerial)
-        elif code.startswith('Time'):
-            apiSpectrumDisplay.newFidAxis(code=code, stripSerial=stripSerial)
-        else:
-            apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
+        # code = 'Time' if axisCode.lower().startswith('time') else axisCode[0]
+        # apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
 
-    result.stripArrangement = stripDirection
+        if axisCode[0].isupper():
+            apiSpectrumDisplay.newFrequencyAxis(code=axisCode, stripSerial=stripSerial)
+        elif axisCode == 'intensity':
+            apiSpectrumDisplay.newIntensityAxis(code=axisCode, stripSerial=stripSerial)
+        elif axisCode.startswith('Time'):
+            apiSpectrumDisplay.newFidAxis(code=axisCode, stripSerial=stripSerial)
+        else:
+            apiSpectrumDisplay.newSampledAxis(code=axisCode, stripSerial=stripSerial)
+
+    display.stripArrangement = stripDirection
     # may need to set other values here, guarantees before strip generation
     if zPlaneNavigationMode:
-        result.zPlaneNavigationMode = zPlaneNavigationMode
+        display.zPlaneNavigationMode = zPlaneNavigationMode
 
     # Create first strip
-    # if independentStrips:
-    #     apiSpectrumDisplay.newFreeStrip(axisCodes=axisCodes, axisOrder=axisCodes)
-    # else:
     apiSpectrumDisplay.newBoundStrip()
 
-    return result
+    return display
 
 
-#EJB 20181205: moved to Project
-# Project.newSpectrumDisplay = _newSpectrumDisplay
-# del _newSpectrumDisplay
-
-
-def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes: Sequence[str] = (),
-                           axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
-                           widths: Sequence[float] = (), units: Sequence[str] = (),
+def _createSpectrumDisplay(window: Window,
+                           spectrum: Spectrum,
+                           displayAxisCodes: Sequence[str] = (),
+                           axisOrder: Sequence[str] = (),
+                           title: str = None,
+                           positions: Sequence[float] = (),
+                           widths: Sequence[float] = (),
+                           units: Sequence[str] = (),
                            stripDirection: str = 'Y',
                            isGrouped=False,
                            zPlaneNavigationMode: str = 'strip'):
@@ -576,9 +576,11 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
         # # NBNB TBD FIXME
 
     with undoBlockWithoutSideBar():
-        display = _newSpectrumDisplay(window.project,
-                                      axisCodes=displayAxisCodes, stripDirection=stripDirection,
-                                      name=title, zPlaneNavigationMode=zPlaneNavigationMode)
+        display = _newSpectrumDisplay(window=window,
+                                      axisCodes=displayAxisCodes,
+                                      stripDirection=stripDirection,
+                                      name=title,
+                                      zPlaneNavigationMode=zPlaneNavigationMode)
 
         # Set unit, position and width
         orderedApiAxes = display._wrappedData.orderedAxes
@@ -637,7 +639,7 @@ def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes:
                     apiAxis.position = 0.0
                     apiAxis.width = 1.0
 
-        if dataSource.numDim != 1:  # it gets crazy on 1D displays
+        if not is1D:  # it gets crazy on 1D displays
             display._useFirstDefault = False
 
         display.isGrouped = isGrouped

@@ -405,8 +405,8 @@ class SpectrumDisplay(AbstractWrapperObject):
     # CCPN functions
     #=========================================================================================
 
-    def _setFromLimits(self, axis, value: Tuple[float,float]):
-        """Set width,position for axis"""
+    def _setFromLimits(self, axis, value):
+        """Set width,position for axis from value tuple/list"""
         width = value[1] - value[0] if value[1]>value[0] else value[0] - value[1]
         pos = value[0] + width*0.5 if value[1]>value[0] else value[0] - width*0.5
 
@@ -419,22 +419,47 @@ class SpectrumDisplay(AbstractWrapperObject):
         self.widths = widths
 
     def _setLimits(self, spectrum:Spectrum, dimensionOrdering):
-        """Define the relevant limits from dimensions of spectrum
+        """Define the relevant display limits from the dimensions of spectrum
         CCPNMRINTERNAL: used in _newSpectrumDisplay
         """
         if spectrum.dimensionCount == 1:
             # 1D spectrum
             ppmLimits, valueLimits = spectrum.get1Dlimits()
-            self._setFromLimits(0, ppmLimits)
-            self._setFromLimits(1, valueLimits)
+
+            ppmLimits = sorted(ppmLimits)
+            ppmWidth = ppmLimits[1] - ppmLimits[0]
+            ppmPos = ppmLimits[0] + 0.5*ppmWidth
+
+            valueWidth = valueLimits[1] - valueLimits[0]
+            valuePos = valueLimits[0] + 0.5*valueWidth
+
+            self.positions = (ppmPos, valuePos)
+            self.widths = (ppmWidth, valueWidth)
+
         else:
             # nD
+            positions = []
+            widths = []
             for ii, dim in enumerate(dimensionOrdering):
                 axis = dim-1
-                self._setFromLimits(ii, spectrum.spectrumLimits[axis])
+                width = spectrum.spectralWidths[axis]
+                ppmLimits = sorted(spectrum.spectrumLimits[axis])
+                pos = ppmLimits[0] + 0.5*width
 
-        self.strips[0].positions = self.positions
-        self.strips[0].widths = self.widths
+                if ii < 2:
+                    positions.append(pos)
+                    widths.append(width)
+                else:
+                    # A display "plane-axis"
+                    positions.append(pos)
+                    widths.append(spectrum.valuesPerPoint[axis])
+            self.positions = positions
+            self.widths = widths
+
+        # Copy to strips
+        for strip in self.strips:
+            strip.positions = self.positions
+            strip.widths = self.widths
 
 
     #===========================================================================================

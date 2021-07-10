@@ -56,16 +56,17 @@ ColourMap = {
 def _setDefaultGlobalPlotPreferences(plt):
 
     """
-    Set the global preferences
-    # TODO add missing bits:
-        # fonts
-        # font size
-        # font colour
-        # curve thickness
-        # axis thickness
-        # axis colours
-        # axis thick orientation
-        # zoomPercent
+    Set the global preferences in the plt.rcParams dictionary.
+    # TODO: make a better mechanism to set these from general preferences.
+    # add missing bits:
+    # fonts
+    # font size
+    # font colour
+    # curve thickness
+    # axis thickness
+    # axis colours
+    # axis thick orientation
+    # zoomPercent
     """
     ccpnColourScheme = GS.getColourScheme()
     ## set background

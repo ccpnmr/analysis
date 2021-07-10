@@ -701,6 +701,9 @@ def plotter(xAxisTitle=None, yAxisTitle=None, plotTitle=None, showLegend=True,
                   showLegend=showLegend, *args, **kwargs)
         plot.close()
 
+###################################################
+###############      Examples       ###############
+###################################################
 
 
 if __name__ == '__main__':
@@ -710,7 +713,6 @@ if __name__ == '__main__':
 
     def _plotterExample():
         with plotter() as plot:
-
             d = {'one': np.random.rand(5),
                  'two': np.random.rand(5)}
             df = pd.DataFrame(d)
@@ -927,19 +929,21 @@ if __name__ == '__main__':
 
     _contourExample()
     _3dCountourExample()
-    # _pieExample()
-    # _scatterExample()
-    # _barExample('h')
-    # _barExample('v')
-    # _3DExample()
-    # _3DsurfaceExample()
+    _pieExample()
+    _scatterExample()
+    _barExample('h')
+    _barExample('v')
+    _3DExample()
+    _3DsurfaceExample()
     # _imageExample()
-    # _multiPlotExample()
-    # _simplePlotExample()
-    # _plotLineWithErrorsExample()
-    # _BoxAndWhiskerExample()
-    # _heatMapExample()
-    # _clusterMapExample()
-    # _pandasPlotExample()
+    _multiPlotExample()
+    _simplePlotExample()
+    _plotLineWithErrorsExample()
+    _BoxAndWhiskerExample()
+    _heatMapExample()
+    _clusterMapExample()
+    _pandasPlotExample()
+    _kdeExample()
+    _distributionExample()
 
-    app.start()
+    # app.start()

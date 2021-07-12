@@ -1058,52 +1058,6 @@ class AbstractWrapperObject(NotifierBase):
             objs.extend(children)
         return objs
 
-    # @classmethod
-    # def _restoreObject(cls, project, apiObj):
-    #     """Restores object from apiObj; checks for _factoryFunction.
-    #     Restores the children
-    #     :return Restored obj
-    #
-    #     CCPNINTERNAL: subclassed in special cases
-    #     """
-    #     if apiObj is None:
-    #         raise ValueError('_restoreObject: undefined apiObj')
-    #
-    #     factoryFunction = cls._factoryFunction
-    #     if factoryFunction is None:
-    #         obj = cls(project, apiObj)
-    #     else:
-    #         obj = factoryFunction(project, apiObj)
-    #
-    #     if obj is None:
-    #         raise RuntimeError('Error restoring object encoded by %s' % apiObj)
-    #
-    #     # restore the children
-    #     obj._initializeAll()
-    #
-    #     return obj
-    #
-    # def _initializeAll(self):
-    #     """Initialize children, using existing objects in data model"""
-    #
-    #     project = self._project
-    #     data2Obj = project._data2Obj
-    #
-    #     for childClass in self._childClasses:
-    #         # print('>>> childClass', childClass)
-    #         # recursively create children
-    #         for apiObj in childClass._getAllWrappedData(self):
-    #             obj = data2Obj.get(apiObj)
-    #
-    #             if obj is None:
-    #                 try:
-    #                     obj = childClass._restoreObject(project, apiObj)
-    #                 except RuntimeError as es:
-    #
-    #                     _text = 'Error restoring child object %s of %s' % (apiObj, self)
-    #                     getLogger().warning(_text)
-    #                     raise RuntimeError(_text)
-
     def _unwrapAll(self):
         """remove wrapper from object and child objects
         For special case where wrapper objects are removed without deleting wrappedData"""

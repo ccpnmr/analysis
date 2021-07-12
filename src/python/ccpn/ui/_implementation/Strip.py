@@ -299,24 +299,29 @@ class Strip(AbstractWrapperObject):
 
     @logCommand(get='self')
     def displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = ()):
+        """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
+        :return SpectrumView instance
+        """
         return self._displaySpectrum(spectrum, axisOrder)
 
     def _displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = (), useUndoBlock=True):
         """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
+        CCPNINTERNAL: also used in _newSpectrumDisplay
         """
+        from ccpn.ui._implementation.SpectrumView import _newSpectrumView
+
         getLogger().debug('Strip.displaySpectrum>>> %s' % spectrum)
 
         spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
         if not isinstance(spectrum, Spectrum):
-            raise TypeError('spectrum %s is not of type Spectrum' % str(spectrum))
+            raise ValueError('Expected Spectrum instance; got %s ' % str(spectrum))
 
         dataSource = spectrum._wrappedData
-        apiStrip = self._wrappedData
-        if apiStrip.findFirstSpectrumView(dataSource=dataSource) is not None:
-            getLogger().debug('Strip.displaySpectrum>>> spectrumView is not None')
+        if self._apiStrip.findFirstSpectrumView(dataSource=dataSource) is not None:
+            getLogger().debug('Strip.displaySpectrum>>> spectrumView already displayed on %s' % self)
             return
 
-        displayAxisCodes = apiStrip.axisCodes
+        displayAxisCodes = self.axisCodes
 
         # make axis mapping indices
         if axisOrder and axisOrder != displayAxisCodes:
@@ -350,26 +355,13 @@ class Strip(AbstractWrapperObject):
             else:
                 dimensionOrdering.append(sortedDataDims[index].dim)
 
-        # Set stripSerial
-        if 'Free' in apiStrip.className:
-            # Independent strips
-            stripSerial = apiStrip.serial
-        else:
-            stripSerial = 0
 
+        # Make spectrumView
         if useUndoBlock:
             with undoBlockWithoutSideBar():
-                # Make spectrumView
-                obj = apiStrip.spectrumDisplay.newSpectrumView(spectrumName=dataSource.name,
-                                                               stripSerial=stripSerial, dataSource=dataSource,
-                                                               dimensionOrdering=dimensionOrdering)
-                result = self._project._data2Obj[apiStrip.findFirstStripSpectrumView(spectrumView=obj)]
-
+                result = _newSpectrumView(self.spectrumDisplay, spectrum, dimensionOrdering=dimensionOrdering)
         else:
-            obj = apiStrip.spectrumDisplay.newSpectrumView(spectrumName=dataSource.name,
-                                                           stripSerial=stripSerial, dataSource=dataSource,
-                                                           dimensionOrdering=dimensionOrdering)
-            result = self._project._data2Obj[apiStrip.findFirstStripSpectrumView(spectrumView=obj)]
+            result = _newSpectrumView(self.spectrumDisplay, spectrum, dimensionOrdering=dimensionOrdering)
 
         return result
 

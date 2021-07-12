@@ -393,19 +393,40 @@ class SpectrumView(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-@newObject(SpectrumView)
-def _newSpectrumView(display, spectrumName: str = None,
-                        stripSerial: int = None, dataSource=None,
-                        dimensionOrdering=None, **kwds):
+
+
+# @newObject(SpectrumView)
+# Cannot use the decorator
+# """
+#   File "/Users/geerten/Code/CCPNv3/CcpNmr/src/python/ccpn/core/lib/ContextManagers.py", line 638, in theDecorator
+#     apiObjectsCreated = result._getApiObjectTree()
+#   File "/Users/geerten/Code/CCPNv3/CcpNmr/src/python/ccpn/core/_implementation/AbstractWrapperObject.py", line 683, in _getApiObjectTree
+#     obj._checkDelete(apiObjectlist, objsToBeChecked, linkCounter, topObjectsToCheck)  # This builds the list/set
+#   File "/Users/geerten/Code/CCPNv3/CcpNmr/src/python/ccpnmodel/ccpncore/api/ccpnmr/gui/Task.py", line 28366, in _checkDelete
+#     raise ApiError("StripSpectrumView %s: StripSpectrumViews can only be deleted when the SpectrumView or Strip is deleted." % self)
+# ccpnmodel.ccpncore.memops.ApiError.ApiError: StripSpectrumView <ccpnmr.gui.Task.StripSpectrumView ['user', 'View', '1D_H', 1, <ccpnmr.gui.Task.SpectrumView ['user', 'View', '1D_H', 'AcetatePE', 0]>]>: StripSpectrumViews can only be deleted when the SpectrumView or Strip is deleted.
+# """
+
+def _newSpectrumView(display, spectrum, dimensionOrdering):
     """Create new SpectrumView
     """
-    # 20191113:ED testing - doesn't work yet, _data2Obj not created in correct place
-    apiSpectrumView = display._wrappedData.newSpectrumView(spectrumName=spectrumName,
-                                                 stripSerial=stripSerial, dataSource=dataSource,
-                                                 dimensionOrdering=dimensionOrdering)
 
-    # result = display.project._data2Obj.get(apiSpectrumView)
-    result = SpectrumView(display.project, apiSpectrumView)
+    # # Set stripSerial
+    # if 'Free' in apiStrip.className:
+    #     # Independent strips
+    #     stripSerial = apiStrip.serial
+    # else:
+    #     stripSerial = 0
+
+
+    obj = display._wrappedData.newSpectrumView(spectrumName=spectrum.name, stripSerial=0, dataSource=spectrum._wrappedData,
+                                               dimensionOrdering=dimensionOrdering)
+
+    # 20191113:ED testing - doesn't work yet, _data2Obj not created in correct place
+    # GWV: don't know why, but only querying via the FindFirstStripSpectrumView seems to allows to yield the V2 object
+    apiSpectrumView = display.strips[0]._wrappedData.findFirstStripSpectrumView(spectrumView=obj)
+    result = display.project._data2Obj.get(apiSpectrumView)
+
     if result is None:
         raise RuntimeError('Unable to generate new SpectrumView item')
 

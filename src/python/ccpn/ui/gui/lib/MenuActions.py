@@ -653,7 +653,7 @@ class _openItemSpectrumDisplay(OpenItemABC):
         from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
         checkSpectraToOpen(mainWindow, [spectrum])
 
-        spectrumDisplay = mainWindow._createSpectrumDisplay(spectrum, position=position, relativeTo=relativeTo)
+        spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum, position=position, relativeTo=relativeTo)
         if spectrumDisplay and len(spectrumDisplay.strips) > 0:
             mainWindow.current.strip = spectrumDisplay.strips[0]
 

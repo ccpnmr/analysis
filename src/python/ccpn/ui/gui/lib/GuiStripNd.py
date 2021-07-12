@@ -282,7 +282,7 @@ class GuiStripNd(GuiStrip):
         """
         with undoBlockWithoutSideBar():
             # create a new spectrum display
-            newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=self.axisOrder)
+            newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=self.axisOrder)
             for spectrum in self.spectra:
                 newDisplay.displaySpectrum(spectrum)
 
@@ -304,7 +304,7 @@ class GuiStripNd(GuiStrip):
 
             with undoBlockWithoutSideBar():
                 # create a new spectrum display with the new axis order
-                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
+                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
                 for spectrum in self.spectra:
                     newDisplay.displaySpectrum(spectrum)
 
@@ -328,7 +328,7 @@ class GuiStripNd(GuiStrip):
 
             with undoBlockWithoutSideBar():
                 # create a new spectrum display with the new axis order
-                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
+                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
                 for spectrum in self.spectra:  #[1:]:
                     newDisplay.displaySpectrum(spectrum)
 
@@ -352,7 +352,7 @@ class GuiStripNd(GuiStrip):
 
             with undoBlockWithoutSideBar():
                 # create a new spectrum display with the new axis order
-                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
+                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
                 for spectrum in self.spectra:
                     newDisplay.displaySpectrum(spectrum)
 
@@ -551,7 +551,8 @@ class GuiStripNd(GuiStrip):
 
         zAxis = self.orderedAxes[n]  # was + 2
 
-        planeMin, planeMax, planeSize, planePpmPosition, _tmp = self.planeAxisBars[n - 2].getPlaneValues()
+        planeAxisBar = self.planeAxisBars[n - 2]
+        planeMin, planeMax, planeSize, planePpmPosition, _tmp = planeAxisBar.getPlaneValues()
         # planeLabel = self.planeToolbar.planeLabels[n]
         # planeSize = planeLabel.singleStep()
 
@@ -560,6 +561,7 @@ class GuiStripNd(GuiStrip):
             return
 
         if planeCount:
+            _tmp2 = planeSize
             delta = planeSize * planeCount
             position = zAxis.position + delta
 
@@ -577,7 +579,7 @@ class GuiStripNd(GuiStrip):
             self.axisRegionChanged(zAxis)
             self.refresh()
 
-        elif position is not None:  # should always be the case
+        if position is not None:  # should always be the case
             if planeMin <= position <= planeMax:
                 zAxis.position = position
                 self.axisRegionChanged(zAxis)

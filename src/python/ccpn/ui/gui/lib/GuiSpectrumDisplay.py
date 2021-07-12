@@ -494,7 +494,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     def _postInit(self):
         """Method to be called as last item during spectrumDisplay creation
-        Called from _newSpectrumDisplay/_createSpectrumDisplay
+        CCPNMRINTERNAL: Called from _newSpectrumDisplay
         """
         self.setToolbarButtons()
         try:
@@ -2364,7 +2364,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     # def _deletedPeak(self, peak):
     #     apiPeak = peak._wrappedData
-    #     # NBNB TBD FIXME rewrite this to not use API peaks
+    #     # NBNB TBD
     #     # ALSO move this machinery from subclasses to this class.
     #     for peakListView in self.activePeakItemDict:
     #         peakItemDict = self.activePeakItemDict[peakListView]

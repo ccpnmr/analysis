@@ -256,52 +256,61 @@ class Window(AbstractWrapperObject):
         else:
             return windowStore.sortedWindows()
 
+    # @logCommand('mainWindow.')
+    # def newSpectrumDisplay(self, spectrum: Spectrum, axisCodes: (str,) = None, stripDirection: str = 'Y',
+    #                        name: str = None, zPlaneNavigationMode: str = None):
+    #     """Create new SpectrumDisplay
+    #
+    #     :param spectrum: a Spectrum instance to be displayed
+    #     :param axisCodes: display order of the dimensions of spectrum (defaults to spectrum.preferredAxisOrdering)
+    #     :param stripDirection: stripDirection: if 'X' or 'Y' set strip axis
+    #     :param name: optional name
+    #     :param zPlaneNavigationMode:
+    #     :return: a new SpectrumDisplay instance.
+    #     """
+    #     from ccpn.ui._implementation.SpectrumDisplay import _newSpectrumDisplay
+    #     if axisCodes is None:
+    #         axisCodes = tuple(spectrum.axisCodes[aa] for aa in spectrum.preferredAxisOrdering)
+    #     return _newSpectrumDisplay(window=self, spectrum=spectrum, axisCodes=axisCodes,
+    #                                stripDirection=stripDirection, name=name, zPlaneNavigationMode=zPlaneNavigationMode)
+
+
+    #TODO: rename to newSpectrumDisplay?
     @logCommand('mainWindow.')
-    def newSpectrumDisplay(self, spectrum: Spectrum, axisCodes: (str,), stripDirection: str = 'Y',
-                           name: str = None, zPlaneNavigationMode: str = None):
+    def createSpectrumDisplay(self, spectrum, axisCodes: Sequence[str] = (),
+                              # axisOrder: Sequence[str] = (),
+                              # title: str = None, positions: Sequence[float] = (),
+                              # widths: Sequence[float] = (), units: Sequence[str] = (),
+                              stripDirection: str = None,
+                              position='right', relativeTo=None, isGrouped=False,
+                              **kwds):
         """Create new SpectrumDisplay
 
         :param spectrum: a Spectrum instance to be displayed
-        :param axisCodes: display order of the dimensions of spectrum
+        :param axisCodes: display order of the dimensions of spectrum (defaults to spectrum.preferredAxisOrdering)
         :param stripDirection: stripDirection: if 'X' or 'Y' set strip axis
         :param name: optional name
         :param zPlaneNavigationMode:
         :return: a new SpectrumDisplay instance.
-        """
-        from ccpn.ui._implementation.SpectrumDisplay import _newSpectrumDisplay
-        return _newSpectrumDisplay(window=self, spectrum=spectrum, axisCodes=axisCodes,
-                                   stripDirection=stripDirection, name=name, zPlaneNavigationMode=zPlaneNavigationMode)
 
-    # @logCommand('mainWindow.')  #there is already a log command internally. This is not needed it and slows down the process.
-    def _createSpectrumDisplay(self, spectrum, displayAxisCodes: Sequence[str] = (),
-                              axisOrder: Sequence[str] = (),
-                              title: str = None, positions: Sequence[float] = (),
-                              widths: Sequence[float] = (), units: Sequence[str] = (),
-                              stripDirection: str = None,
-                              is1D: bool = False,
-                              position='right', relativeTo=None, isGrouped=False,
-                              **kwds):
         """
-        :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
-        :param \*str axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
-        :param \*float positions: axis positions in order - default to heuristic
-        :param \*float widths: axis widths in order - default to heuristic
-        :param \*str units: axis units in display order - default to heuristic
-        :param str stripDirection: if 'X' or 'Y' set strip axis
-        :param bool is1D: If True, or spectrum passed in is 1D, do 1D display
-        """
-        from ccpn.ui._implementation.SpectrumDisplay import _createSpectrumDisplay
+
+        # :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
+        # :param \*str axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
+        # :param \*float positions: axis positions in order - default to heuristic
+        # :param \*float widths: axis widths in order - default to heuristic
+        # :param \*str units: axis units in display order - default to heuristic
+        # :param str stripDirection: if 'X' or 'Y' set strip axis
+        # :param bool is1D: If True, or spectrum passed in is 1D, do 1D display
+
+        from ccpn.ui._implementation.SpectrumDisplay import _newSpectrumDisplay
         from ccpn.ui.gui.lib.GuiSpectrumDisplay import STRIPDIRECTIONS
         from ccpn.ui.gui.guiSettings import ZPlaneNavigationModes
 
         if (spectrum := self.project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum) is None:
             raise ValueError('Invalid spectrum; got %r' % spectrum)
-        if not displayAxisCodes:
-            displayAxisCodes = tuple(spectrum.axisCodes[aa] for aa in spectrum.preferredAxisOrdering)
-
-        # dimensionTypes = spectrum.getByAxisCodes('dimensionTypes', displayAxisCodes)
-        # if any(x != DIMENSION_FREQUENCY for x in dimensionTypes):
-        #     raise NotImplementedError("createSpectrumDisplay not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
+        if not axisCodes:
+            axisCodes = tuple(spectrum.axisCodes[ac] for ac in spectrum.preferredAxisOrdering)
 
         # change string names to objects
         if isinstance(relativeTo, str):
@@ -324,17 +333,13 @@ class Window(AbstractWrapperObject):
                 getLogger().warning(f'createSpectrumDisplay {es}')
 
             # create the new spectrumDisplay
-            # display = _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
-            #                                  title=title, positions=positions, widths=widths, units=units,
-            #                                  stripDirection=stripDirection, isGrouped=isGrouped,
-            #                                  zPlaneNavigationMode=zPlaneNavigationMode,
-            #                                  **kwds)
-            display = self.newSpectrumDisplay(spectrum,
-                                              axisCodes=displayAxisCodes,
-                                              stripDirection=stripDirection,
-                                              zPlaneNavigationMode=zPlaneNavigationMode,
-                                             )
-            display.isGrouped = isGrouped
+            display = _newSpectrumDisplay(self,
+                                          spectrum = spectrum,
+                                          axisCodes=axisCodes,
+                                          stripDirection=stripDirection,
+                                          zPlaneNavigationMode=zPlaneNavigationMode,
+                                          isGrouped = isGrouped
+                                         )
 
             # add the new module to mainWindow at the required position
             self.moduleArea.addModule(display, position=position, relativeTo=relativeTo)

@@ -115,7 +115,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
                 self.closeFile()
 
             if not self.checkPath(self.path, mode=mode):
-                raise FileNotFoundError('Invalid %s' % self)
+                raise FileNotFoundError('Invalid path %r (mode=%r)' % (self.path, mode))
 
             self.disableCache()  # Hdf has its own caching
             # Adjust hdf chunk caching parameters
@@ -131,29 +131,30 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             text = '%s.openFile(mode=%r): %s' % (self.__class__.__name__, mode, str(es))
             getLogger().warning(text)
 
+        if mode.startswith('r'):
+            # old file
+            self.readParameters()
+
         else:
-            if mode.startswith('r'):
-                self.readParameters()
+            # New file
+            dataSetKwds = {}
+            dataSetKwds.setdefault('fletcher32', True)
+            dataSetKwds.setdefault('fillvalue', 0.0)
+            if self.defaultCompressionMode is not None and self.defaultCompressionMode in self.compressionModes:
+                dataSetKwds.setdefault('compression', self.defaultCompressionMode)
+                dataSetKwds.setdefault('fletcher32', False)
 
-            else:
-                dataSetKwds = {}
-                dataSetKwds.setdefault('fletcher32', True)
-                dataSetKwds.setdefault('fillvalue', 0.0)
-                if self.defaultCompressionMode is not None and self.defaultCompressionMode in self.compressionModes:
-                    dataSetKwds.setdefault('compression', self.defaultCompressionMode)
-                    dataSetKwds.setdefault('fletcher32', False)
+            self.fp.create_dataset(SPECTRUM_DATASET_NAME, self.pointCounts[::-1],
+                                   dtype=self.dataType, chunks=True,
+                                   track_times=False,  # to assure same hash after opening/storing
+                                   **dataSetKwds)
+            self.blockSizes = tuple(self.spectrumData.chunks[::-1])
+            self.writeParameters()
 
-                self.fp.create_dataset(SPECTRUM_DATASET_NAME, self.pointCounts[::-1],
-                                       dtype=self.dataType, chunks=True,
-                                       track_times=False,  # to assure same hash after opening/storing
-                                       **dataSetKwds)
-                self.blockSizes = tuple(self.spectrumData.chunks[::-1])
-                self.writeParameters()
+        getLogger().debug('opened %s; %s blocks with size %s; chunks=%s' %
+                          (self, self._totalBlocks, self._totalBlockSize, tuple(self.blockSizes)))
 
-            getLogger().debug('opened %s; %s blocks with size %s; chunks=%s' %
-                              (self, self._totalBlocks, self._totalBlockSize, tuple(self.blockSizes)))
-
-            return self.fp
+        return self.fp
 
     def readParameters(self):
         """Read the parameters from the hdf5 data structure

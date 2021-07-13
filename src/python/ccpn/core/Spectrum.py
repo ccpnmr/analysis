@@ -2016,8 +2016,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         try:
             dimensions = self.getByAxisCodes('dimensions', [axisCode])
             self._dataSource.checkForValidSlice(position=position, sliceDim=dimensions[0])
-            newSpectrum = self._extractToFile(axisCodes=[axisCode], position=position, path=path, dataFormat=dataFormat,
-                                              tag='slice')
+            newSpectrum = self._extractToFile(axisCodes=[axisCode], position=position,
+                                              path=path, dataFormat=dataFormat, tag='slice')
 
         except (ValueError, RuntimeError) as es:
             text = 'Spectrum.extractSliceToFile: %s' % es
@@ -2381,17 +2381,19 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         suffix = klass.suffixes[0] if len(klass.suffixes) > 0 else '.dat'
 
         tagStr = '%s_%s' % (tag, '_'.join(axisCodes))
-        spectrumName = '%s_%s' % (self.name, tagStr)
         appendToFilename = '_%s_%s' % (tagStr, '_'.join([str(p) for p in position]))
 
         if path is None:
             dataStore = DataStore.newFromPath(path=self.filePath, appendToName=appendToFilename,
-                                              autoVersioning=True, withSuffix=suffix)
+                                              autoVersioning=True, withSuffix=suffix,
+                                              dataFormat=klass.dataFormat)
         else:
-            dataStore = DataStore.newFromPath(path=path, autoVersioning=True, withSuffix=suffix)
+            dataStore = DataStore.newFromPath(path=path,
+                                              autoVersioning=True, withSuffix=suffix,
+                                              dataFormat=klass.dataFormat)
 
-        newSpectrum = _extractRegionToFile(self, dimensions=dimensions, position=position,
-                                           name=spectrumName, dataStore=dataStore, dataFormat=dataFormat)
+        newSpectrum = _extractRegionToFile(self, dimensions=dimensions, position=position, dataStore=dataStore)
+
         # add some comment as to the origin of the data
         comment = newSpectrum.comment
         if comment is None:
@@ -3046,7 +3048,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 @newObject(Spectrum)
 def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spectrum:
     """Create a new Spectrum instance with name using the data in dataStore and dataSource
-    Returns Spectrum instance or None on error
+    :returns Spectrum instance or None on error
     """
     from ccpn.core.SpectrumReference import _newSpectrumReference
 
@@ -3118,11 +3120,11 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
         # Hack to trigger initialisation of contours
         spectrum.positiveContourCount = 0
         spectrum.negativeContourCount = 0
-        spectrum._updateParameterValues()
 
         # set default assignment tolerances
         spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
 
+        spectrum._updateParameterValues()
         spectrum._saveSpectrumMetaData()
 
     return spectrum
@@ -3174,11 +3176,12 @@ def _newSpectrum(project: Project, path: (str, Path), name: str=None) -> (Spectr
         return None
 
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
+    # spectrum._updateParameterValues()
 
     return spectrum
 
 
-def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=None, dataFormat='Hdf5') -> Spectrum:
+def _extractRegionToFile(spectrum, dimensions, position, dataStore) -> Spectrum:
     """Extract a region of spectrum, defined by dimensions, position to path defined by dataStore
     (optionally auto-generated from spectrum.path)
 
@@ -3187,7 +3190,7 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
     """
 
     getLogger().debug('Extracting from %s, dimensions=%r, position=%r, dataStore=%s, dataFormat %r' %
-                      (spectrum, dimensions, position, dataStore, dataFormat))
+                      (spectrum, dimensions, position, dataStore, dataStore.dataFormat))
 
     if spectrum is None or not isinstance(spectrum, Spectrum):
         raise ValueError('invalid spectrum argument %r' % spectrum)
@@ -3196,24 +3199,33 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
 
     for dim in dimensions:
         if dim < 1 or dim > spectrum.dimensionCount:
-            raise ValueError('invalid dimnsion %r in dimensions argument (%s)' % (dim, dimensions))
+            raise ValueError('Invalid dimnsion %r in dimensions argument (%s)' % (dim, dimensions))
     dimensions = list(dimensions)  # assure a list
 
     position = spectrum._dataSource.checkForValidPosition(position)
 
-    dimString = '_' + '_'.join(spectrum.getByDimensions('axisCodes', dimensions))
-    if name is None:
-        name = spectrum.name + dimString
+    if dataStore is None:
+        raise ValueError('Undefined dataStore')
+    if dataStore.dataFormat is None:
+        raise ValueError('Undefined dataStore.dataFormat')
 
-    klass = getDataFormats().get(dataFormat)
+    # dimString = '_' + '_'.join(spectrum.getByDimensions('axisCodes', dimensions))
+    # if name is None:
+    #     name = spectrum.name + dimString
+
+    klass = getDataFormats().get(dataStore.dataFormat)
     if klass is None:
-        raise ValueError('invalid dataFormat %r' % dataFormat)
+        raise ValueError('Invalid dataStore.dataFormat %r' % dataStore.dataFormat)
 
     # Do path-related stuff
     suffix = klass.suffixes[0] if len(klass.suffixes) > 0 else '.dat'
-    if dataStore is None:
-        dataStore = DataStore.newFromPath(spectrum.filePath, appendToName=dimString,
-                                          withSuffix=suffix, autoVersioning=True)
+    # if dataStore is None:
+    #     dataStore = DataStore.newFromPath(spectrum.filePath,
+    #                                       appendToName=dimString, withSuffix=suffix, autoVersioning=True,
+    #                                       dataFormat=klass.dataFormat
+    #                                      )
+    # else:
+    #     dataStore.dataFormat = klass.dataFormat
 
     # Create a dataSource object
     dataSource = klass(spectrum=spectrum)
@@ -3228,9 +3240,6 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
     # new spectrum
     dataSource.setDimensionCount(len(dimensions))
 
-    # create the new spectrum from the dataSource
-    newSpectrum = _newSpectrumFromDataSource(project=spectrum.project, dataStore=dataStore,
-                                             dataSource=dataSource, name=name)
     # copy the data
     indexMap = dict((k - 1, v - 1) for k, v in dimensionsMap.items())  # source -> destination
     inverseIndexMap = dict((v - 1, k - 1) for k, v, in dimensionsMap.items())  # destination -> source
@@ -3244,7 +3253,7 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
         sliceTuples[dim - 1] = (1, spectrum.pointCounts[dim - 1])
 
     with spectrum._dataSource.openExistingFile() as input:
-        with newSpectrum._dataSource.openNewFile() as output:
+        with dataSource.openNewFile(path=dataStore.aPath()) as output:
             # loop over all requested slices
             for position, aliased in input._selectedPointsIterator(sliceTuples=sliceTuples,
                                                                    excludeDimensions=[readSliceDim]):
@@ -3254,6 +3263,11 @@ def _extractRegionToFile(spectrum, dimensions, position, name=None, dataStore=No
                 outPosition = [position[inverseIndexMap[p]] for p in output.axes]
                 # print('>>>', position, outPosition)
                 output.setSliceData(data, outPosition, writeSliceDim)
+
+    # create the new spectrum from the dataSource
+    newSpectrum = _newSpectrumFromDataSource(project=spectrum.project,
+                                             dataStore=dataStore,
+                                             dataSource=dataSource)
 
     # copy/set some more parameters (e.g. noiseLevel)
     spectrum._copyNonDimensionalParameters(newSpectrum)

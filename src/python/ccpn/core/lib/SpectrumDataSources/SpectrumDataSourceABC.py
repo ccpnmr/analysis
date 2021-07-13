@@ -279,6 +279,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                                                   spectrumAttribute='temperature',
                                                                   hasSetterInSpectrumClass=True
                                                                   )
+    noiseLevel = CFloat(allow_none=True, default_value=None).tag(isDimensional=False,
+                                                                  doCopy=True,
+                                                                  spectrumAttribute='noiseLevel',
+                                                                  hasSetterInSpectrumClass=True
+                                                                  )
     isBigEndian = Bool(default_value=_bigEndian).tag(isDimensional=False,
                                                      doCopy=True,
                                                      spectrumAttribute=None,
@@ -314,7 +319,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
             spectrumAttribute=None,
             hasSetterInSpectrumClass=False
             )
-
     pointCounts = CList(trait=CInt(allow_none=False), default_value=[0] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
@@ -1623,6 +1627,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         median = numpy.median(absData)
         std = numpy.std(absData)
         noiseLevel = median + 1.0 * std
+        self.noiseLevel = noiseLevel
         return noiseLevel
 
     #=========================================================================================

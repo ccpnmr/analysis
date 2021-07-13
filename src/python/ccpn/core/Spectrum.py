@@ -3149,6 +3149,7 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str =
     dataSource.isotopeCodes = isotopeCodes
     dataSource._setSpectralParametersFromIsotopeCodes()
     dataSource._assureProperDimensionality()
+    dataSource.noiseLevel = 0.0
 
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
 
@@ -3174,6 +3175,7 @@ def _newSpectrum(project: Project, path: (str, Path), name: str=None) -> (Spectr
     if dataSource is None:
         logger.warning('Invalid spectrum path "%s"' % path)  # report the argument given
         return None
+    dataSource.estimateNoise()
 
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
     # spectrum._updateParameterValues()
@@ -3209,26 +3211,12 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore) -> Spectrum:
     if dataStore.dataFormat is None:
         raise ValueError('Undefined dataStore.dataFormat')
 
-    # dimString = '_' + '_'.join(spectrum.getByDimensions('axisCodes', dimensions))
-    # if name is None:
-    #     name = spectrum.name + dimString
-
     klass = getDataFormats().get(dataStore.dataFormat)
     if klass is None:
         raise ValueError('Invalid dataStore.dataFormat %r' % dataStore.dataFormat)
 
-    # Do path-related stuff
-    suffix = klass.suffixes[0] if len(klass.suffixes) > 0 else '.dat'
-    # if dataStore is None:
-    #     dataStore = DataStore.newFromPath(spectrum.filePath,
-    #                                       appendToName=dimString, withSuffix=suffix, autoVersioning=True,
-    #                                       dataFormat=klass.dataFormat
-    #                                      )
-    # else:
-    #     dataStore.dataFormat = klass.dataFormat
-
-    # Create a dataSource object
-    dataSource = klass(spectrum=spectrum)
+    # Create a dataSource object; import spectrum to initialise the dataSource values
+    dataSource = klass().importFromSpectrum(spectrum=spectrum, includePath=False)
 
     disgardedDimensions = list(set(spectrum.dimensions) - set(dimensions))
     # The dimensional parameters of spectrum were copied on initialisation

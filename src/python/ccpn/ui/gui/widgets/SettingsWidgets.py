@@ -284,7 +284,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             _texts = _texts[:self._spectrumDisplay.MAXPEAKLABELTYPES]
             _names = _names[:self._spectrumDisplay.MAXPEAKLABELTYPES]
 
-            self.annotationsLabel = Label(parent, text="Labelling", hAlign='r', grid=(row, 0))
+            self.annotationsLabel = Label(parent, text="Label", hAlign='r', grid=(row, 0))
             self.annotationsData = RadioButtons(parent, texts=_texts,
                                                 objectNames=_names,
                                                 objectName='annSDS',

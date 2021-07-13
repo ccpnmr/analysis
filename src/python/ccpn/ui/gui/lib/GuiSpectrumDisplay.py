@@ -455,10 +455,6 @@ class GuiSpectrumDisplay(CcpnModule):
         units = self.units
         xUnit = AXISUNITS.index(units[0])
         yUnit = AXISUNITS.index(units[1]) if not self.is1D else None
-        # if xAxisUnit not in AXISUNITS:
-        #     raise ValueError('Invalid xAxisUnit %r; should be one of %r' % (xAxisUnit, AXISUNITS))
-        # if yAxisUnit not in AXISUNITS:
-        #     raise ValueError('Invalid yAxisUnit %r; should be one of %r' % (yAxisUnit, AXISUNITS))
 
         self._spectrumDisplaySettings._setAxesUnits(xUnit, yUnit)
         self._spectrumDisplaySettings._settingsChanged()
@@ -528,6 +524,8 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         self.setToolbarButtons()
         try:
+            # # force an update for units
+            # self._updateAxesUnits() This proved not to work; adjusted the code in initialiseAxes() instead
             self.strips[0]._CcpnGLWidget.initialiseAxes(strip=self.strips[0])
         except:
             getLogger().debugGL('OpenGL widget not instantiated')

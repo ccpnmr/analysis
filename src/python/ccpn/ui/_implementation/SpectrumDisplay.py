@@ -212,8 +212,16 @@ class SpectrumDisplay(AbstractWrapperObject):
                 raise ValueError('Invalid units[%d] %r; should be on of %r' % (idx, val, options))
             self.axes[idx].unit = val
         # assure the update of the widgets is done
-        self._updateAxisUnits()
+        self._updateAxesUnits()
         # self._wrappedData.units = value
+
+    def _getUnitsIndices(self):
+        """Conveniance function to get units as an index
+        CCPNINTERNAL: used CcppnOpenGl.initialiseAxes()
+        """
+        from ccpn.ui.gui.lib.GuiSpectrumDisplay import AXISUNITS, AXISUNIT_NUMBER
+        options = AXISUNITS + [AXISUNIT_NUMBER] # To allow for 1D intensity axis unit
+        return [options.index(unit) for unit in self.units]
 
     # GWV WTF?? Why is this even here?????
     # @property
@@ -432,12 +440,16 @@ class SpectrumDisplay(AbstractWrapperObject):
         widths[axis] = width
         self.widths = widths
 
-    def _setLimits(self, spectrum:Spectrum, dimensionOrdering):
+    def _setLimits(self, spectrum:Spectrum):
         """Define the relevant display limits from the dimensions of spectrum
         CCPNMRINTERNAL: used in _newSpectrumDisplay
         """
         # NB setting Axis.region translates into setting position (== halfway point)
         # and widths of the axis
+
+        # Get the mapping of the the axes of spectrum onto this SpectrumDisplay
+        spectrumAxes = spectrum.getByAxisCodes('axes', self.axisCodes, exactMatch=False)
+
         if spectrum.dimensionCount == 1:
             # 1D spectrum
             ppmLimits, valueLimits = spectrum.get1Dlimits()
@@ -446,10 +458,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 
         else:
             # nD
-            for ii, dim in enumerate(dimensionOrdering):
-                axis = dim-1
-                self.axes[ii].region = spectrum.spectrumLimits[axis]
-
+            for ii, axis in enumerate(spectrumAxes):
                 if ii < 2:
                     self.axes[ii].region = spectrum.spectrumLimits[axis]
 
@@ -457,6 +466,8 @@ class SpectrumDisplay(AbstractWrapperObject):
                     # A display "plane-axis"
                     self.axes[ii].region = spectrum.spectrumLimits[axis]
                     self.axes[ii].width = spectrum.valuesPerPoint[axis]
+                    if spectrum.dimensionTypes[axis] == specLib.DIMENSION_TIME:
+                        self.axes[ii].position = 0.0
 
         # Copy to strips
         for strip in self.strips:
@@ -585,7 +596,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
             else:
                 raise NotImplementedError('No sampled axes (yet)')
 
-    display._setLimits(spectrum, dimensionOrdering)
+    display._setLimits(spectrum)
 
     # display the spectrum, this will also create a new spectrumView
     # display.strips[0]._displaySpectrum(spectrum=spectrum, axisOrder=axisCodes, useUndoBlock=False)
@@ -595,9 +606,6 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 
     # call any post initialise routines for the spectrumDisplay here
     display._postInit()
-
-    # force an update for units
-    display._updateAxesUnits()
 
     return display
 

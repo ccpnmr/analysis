@@ -500,17 +500,18 @@ class GuiStripNd(GuiStrip):
 
                 if ignoreSpectrumView is spectrumView:
                     continue
-
+                spectrum = spectrumView.spectrum
                 # get a mapping of the axes to the strip - effectively the same as spectrumView.dimensionOrdering
                 # but allows for finding close matched axis codes
-                indices = getAxisCodeMatchIndices(self.axisCodes, spectrumView.spectrum.axisCodes)
+                # indices = getAxisCodeMatchIndices(self.axisCodes, spectrumView.spectrum.axisCodes)
+                indices = spectrum.getByAxisCodes('axes', self.axisCodes, exactMatch=False)
                 _index = indices[n + 2]
                 if _index is None:
                     continue
 
-                _minAliasedFrequency, _maxAliasedFrequency = sorted(spectrumView.spectrum.aliasingLimits[_index])  # ppm limits (min, max) sorted for clarity
-                _minSpectrumFrequency, _maxSpectrumFrequency = sorted(spectrumView.spectrum.spectrumLimits[_index])
-                _valuePerPoint = spectrumView.spectrum.valuesPerPoint[_index]
+                _minAliasedFrequency, _maxAliasedFrequency = sorted(spectrum.aliasingLimits[_index])  # ppm limits (min, max) sorted for clarity
+                _minSpectrumFrequency, _maxSpectrumFrequency = sorted(spectrum.spectrumLimits[_index])
+                _valuePerPoint = spectrum.valuesPerPoint[_index]
 
                 _minFreq = _minAliasedFrequency or _minSpectrumFrequency
                 _maxFreq = _maxAliasedFrequency or _maxSpectrumFrequency

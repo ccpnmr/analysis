@@ -567,11 +567,11 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 
     else:
         # nD
-        dimensionOrdering = spectrum.getByAxisCodes('dimensions', axisCodes, exactMatch=True)
+        spectrumAxes = spectrum.getByAxisCodes('axes', axisCodes, exactMatch=False)
 
-        for ii, dim in enumerate(dimensionOrdering):
-            axisCode = axisCodes[ii]
-            axis = dim-1
+        for ii, axis in enumerate(spectrumAxes):
+            displayAxisCode = axisCodes[ii]
+
             # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
             #    not stripDirection):
             # Reactivate this code if we reintroduce non-strip displays (stripDirection == None)
@@ -586,12 +586,12 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
             stripSerial = 1
 
             if spectrum.dimensionTypes[axis] == specLib.DIMENSION_FREQUENCY:
-                apiSpectrumDisplay.newFrequencyAxis(code=axisCode, stripSerial=1, unit=AXISUNIT_PPM)
+                apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_PPM)
 
             elif spectrum.dimensionTypes[axis] == specLib.DIMENSION_TIME:
                 # Cannot do; all falls apart
                 # apiSpectrumDisplay.newFidAxis(code=axisCode, stripSerial=1, unit=AXISUNIT_POINT)
-                apiSpectrumDisplay.newFrequencyAxis(code=axisCode, stripSerial=1, unit=AXISUNIT_POINT)
+                apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_POINT)
 
             else:
                 raise NotImplementedError('No sampled axes (yet)')

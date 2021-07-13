@@ -278,16 +278,14 @@ class Window(AbstractWrapperObject):
 
     #TODO: rename to newSpectrumDisplay?
     @logCommand('mainWindow.')
-    def createSpectrumDisplay(self, spectra, axisCodes: Sequence[str] = (),
-                              stripDirection: str = 'Y',
+    def createSpectrumDisplay(self, spectra, axisCodes: Sequence[str] = (), stripDirection: str = 'Y',
                               position='right', relativeTo=None):
         """Create new SpectrumDisplay
 
         :param spectra: a Spectrum or SpectrumGroup instance to be displayed
         :param axisCodes: display order of the dimensions of spectrum (defaults to spectrum.preferredAxisOrdering)
         :param stripDirection: stripDirection: if 'X' or 'Y' set strip axis
-        :param name: optional name
-        :param zPlaneNavigationMode:
+
         :return: a new SpectrumDisplay instance.
 
         """

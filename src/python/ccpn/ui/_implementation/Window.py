@@ -281,7 +281,7 @@ class Window(AbstractWrapperObject):
                               # axisOrder: Sequence[str] = (),
                               # title: str = None, positions: Sequence[float] = (),
                               # widths: Sequence[float] = (), units: Sequence[str] = (),
-                              stripDirection: str = None,
+                              stripDirection: str = 'Y',
                               position='right', relativeTo=None, isGrouped=False,
                               **kwds):
         """Create new SpectrumDisplay

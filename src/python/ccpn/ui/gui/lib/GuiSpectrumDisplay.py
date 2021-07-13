@@ -2402,6 +2402,8 @@ class GuiSpectrumDisplay(CcpnModule):
         """Display additional spectrum, with spectrum axes ordered according ton axisOrder
         :return SpectrumView instance or None
         """
+        from ccpn.ui._implementation.SpectrumView import _newSpectrumView
+
         spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
         if not isinstance(spectrum, Spectrum):
             raise TypeError('spectrum is not of type Spectrum')
@@ -2414,6 +2416,10 @@ class GuiSpectrumDisplay(CcpnModule):
 
         _oldOrdering = self.getOrderedSpectrumViewsIndex()
 
+        dimensionOrdering = [1, 0] if self.is1D else spectrum.getByAxisCodes('dimensions', self.axisCodes, exactMatch=False)
+        if len(dimensionOrdering) != len(self.axisCodes):
+            raise RuntimeError('Unable to match display.axisCodes (%r) to %s' % (self.axisCodes, spectrum))
+
         with undoStackRevert(self.application) as revertStack:
             with undoBlockWithoutSideBar(self.application):
                 # push/pop ordering
@@ -2422,7 +2428,8 @@ class GuiSpectrumDisplay(CcpnModule):
                     # add toolbar ordering to the undo stack
                     addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))
 
-                    if (newSpectrumView := self.strips[0]._displaySpectrum(spectrum, axisOrder=axisOrder, useUndoBlock=False)) \
+                    # Make spectrumView
+                    if (spectrumView := _newSpectrumView(self, spectrum=spectrum, dimensionOrdering=dimensionOrdering)) \
                         is None:
                         # notify the stack to revert to the pre-context manager stack
                         revertStack(True)
@@ -2431,13 +2438,13 @@ class GuiSpectrumDisplay(CcpnModule):
 
                         # add the spectrum to the end of the spectrum ordering in the toolbar
                         index = self.getOrderedSpectrumViewsIndex()
-                        newInd = self.spectrumViews.index(newSpectrumView)
+                        newInd = self.spectrumViews.index(spectrumView)
                         index = tuple((ii + 1) if (ii >= newInd) else ii for ii in index)
                         index += (newInd,)
 
                         self.setToolbarButtons(tuple(index))
                         addUndoItem(redo=partial(self.setToolbarButtons, tuple(index)))
-        return newSpectrumView
+        return spectrumView
 
     @logCommand(get='self')
     def removeSpectrum(self, spectrum):

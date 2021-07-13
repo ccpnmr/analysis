@@ -3178,7 +3178,6 @@ def _newSpectrum(project: Project, path: (str, Path), name: str=None) -> (Spectr
     dataSource.estimateNoise()
 
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
-    # spectrum._updateParameterValues()
 
     return spectrum
 

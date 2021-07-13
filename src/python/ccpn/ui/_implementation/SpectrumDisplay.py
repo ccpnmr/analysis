@@ -200,11 +200,20 @@ class SpectrumDisplay(AbstractWrapperObject):
     @property
     def units(self) -> Tuple[str, ...]:
         """Axis units, in display order"""
-        return self._wrappedData.units
+        return [a.unit for a in self.axes]
 
     @units.setter
     def units(self, value):
-        self._wrappedData.units = value
+        # local import to avoid cycles
+        from ccpn.ui.gui.lib.GuiSpectrumDisplay import AXISUNITS, AXISUNIT_NUMBER
+        options = AXISUNITS + [AXISUNIT_NUMBER] # To allow for 1D intensity axis unit
+        for idx, val in enumerate(value):
+            if val not in options:
+                raise ValueError('Invalid units[%d] %r; should be on of %r' % (idx, val, options))
+            self.axes[idx].unit = val
+        # assure the update of the widgets is done
+        self._updateAxisUnits()
+        # self._wrappedData.units = value
 
     # GWV WTF?? Why is this even here?????
     # @property
@@ -481,6 +490,8 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     :param zPlaneNavigationMode:
     :return: a new SpectrumDisplay instance.
     """
+    # local import to avoid cycles
+    from ccpn.ui.gui.lib.GuiSpectrumDisplay import AXISUNIT_PPM, AXISUNIT_POINT, AXISUNIT_NUMBER
 
     if window is None or not isinstance(window, Window):
         raise ValueError('Expected window argument; got %r' % window)
@@ -535,11 +546,11 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     # Create axes
     if is1D:
         if spectrum.dimensionTypes[0] == specLib.DIMENSION_FREQUENCY:
-            apiSpectrumDisplay.newFrequencyAxis(code=axisCodes[0], stripSerial=1, unit='ppm')
+            apiSpectrumDisplay.newFrequencyAxis(code=axisCodes[0], stripSerial=1, unit=AXISUNIT_PPM)
         elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
-            apiSpectrumDisplay.newFidAxis('time', stripSerial=1, unit='points')
+            apiSpectrumDisplay.newFidAxis('time', stripSerial=1, unit=AXISUNIT_POINT)
 
-        apiSpectrumDisplay.newIntensityAxis(code='intensity', stripSerial=1, unit='number')
+        apiSpectrumDisplay.newIntensityAxis(code='intensity', stripSerial=1, unit=AXISUNIT_NUMBER)
 
         dimensionOrdering = [1,0]
 
@@ -563,11 +574,13 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
             #       stripDirection is no longer used in the api
             stripSerial = 1
 
-            if spectrum.dimensionTypes[0] == specLib.DIMENSION_FREQUENCY:
-                apiSpectrumDisplay.newFrequencyAxis(code=axisCode, stripSerial=1, unit='ppm')
+            if spectrum.dimensionTypes[axis] == specLib.DIMENSION_FREQUENCY:
+                apiSpectrumDisplay.newFrequencyAxis(code=axisCode, stripSerial=1, unit=AXISUNIT_PPM)
 
-            elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
-                apiSpectrumDisplay.newFidAxis('time_%d' % (ii+1), stripSerial=1, unit='points')
+            elif spectrum.dimensionTypes[axis] == specLib.DIMENSION_TIME:
+                # Cannot do; all falls apart
+                # apiSpectrumDisplay.newFidAxis(code=axisCode, stripSerial=1, unit=AXISUNIT_POINT)
+                apiSpectrumDisplay.newFrequencyAxis(code=axisCode, stripSerial=1, unit=AXISUNIT_POINT)
 
             else:
                 raise NotImplementedError('No sampled axes (yet)')
@@ -582,6 +595,9 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 
     # call any post initialise routines for the spectrumDisplay here
     display._postInit()
+
+    # force an update for units
+    display._updateAxisUnits()
 
     return display
 
@@ -660,7 +676,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 #         # return
 #         raise NotImplementedError(
 #                 "Display of sampled dimension spectra is not implemented yet")
-#         # # NBNB TBD FIXME
+#         # # NBNB TBD
 #
 #     with undoBlockWithoutSideBar():
 #         display = _newSpectrumDisplay(window=window,

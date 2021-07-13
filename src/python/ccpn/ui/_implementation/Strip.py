@@ -306,7 +306,7 @@ class Strip(AbstractWrapperObject):
 
     def _displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = (), useUndoBlock=True):
         """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
-        CCPNINTERNAL: also used in _newSpectrumDisplay
+        CCPNINTERNAL: also used in GuiSpectrumDisplay.displaySpectrum
         """
         from ccpn.ui._implementation.SpectrumView import _newSpectrumView
 

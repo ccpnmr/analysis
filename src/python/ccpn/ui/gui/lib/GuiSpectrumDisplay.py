@@ -83,7 +83,14 @@ from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPN
 
 STRIP_SPACING = 5
 AXIS_WIDTH = 30
-AXISUNITS = ['ppm', 'Hz', 'points']
+
+AXISUNIT_PPM = 'ppm'
+AXISUNIT_HZ = 'Hz'
+AXISUNIT_POINT = 'point'  # Cannot be 'points' because of the v2-model; Grrrr
+AXISUNIT_NUMBER = 'number'
+# AXISUNITS = ['ppm', 'Hz', 'point']
+AXISUNITS = [AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT]
+
 SPECTRUMGROUPS = 'spectrumGroups'
 SPECTRUMISGROUPED = 'spectrumIsGrouped'
 SPECTRUMGROUPLIST = 'spectrumGroupList'
@@ -432,6 +439,19 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        prefsGen.aliasEnabled, prefsGen.aliasShade, prefsGen.aliasLabelsEnabled,
                                                        prefsGen.contourThickness,
                                                        prefsGen.zPlaneNavigationMode)
+
+    def _updateAxisUnits(self):
+        """Update the x- and y-axis units of the display"""
+        units = self.units
+        xUnit = AXISUNITS.index(units[0])
+        yUnit = AXISUNITS.index(units[1]) if not self.is1D else None
+        # if xAxisUnit not in AXISUNITS:
+        #     raise ValueError('Invalid xAxisUnit %r; should be one of %r' % (xAxisUnit, AXISUNITS))
+        # if yAxisUnit not in AXISUNITS:
+        #     raise ValueError('Invalid yAxisUnit %r; should be one of %r' % (yAxisUnit, AXISUNITS))
+
+        self._spectrumDisplaySettings._setAxisUnits(xUnit, yUnit)
+        self._spectrumDisplaySettings._settingsChanged()
 
     def restoreSpectrumState(self, discard=False):
         """Restore the state for this widget
@@ -2380,16 +2400,17 @@ class GuiSpectrumDisplay(CcpnModule):
     @logCommand(get='self')
     def displaySpectrum(self, spectrum, axisOrder: (str,) = ()):
         """Display additional spectrum, with spectrum axes ordered according ton axisOrder
+        :return SpectrumView instance or None
         """
         spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
         if not isinstance(spectrum, Spectrum):
             raise TypeError('spectrum is not of type Spectrum')
 
         # check not already here
-        _spectra = [specView.spectrum for specView in self.spectrumViews]
-        if spectrum in _spectra:
-            getLogger().warning(f'displaySpectrum: Spectrum {spectrum.pid} already in this display')
-            return
+        _specViews = self.getSpectrumViewFromSpectrum(spectrum)
+        if len(_specViews) > 0:
+            getLogger().debug('displaySpectrum: Spectrum %s already in display %s' % (spectrum, self))
+            return _specViews[0]
 
         _oldOrdering = self.getOrderedSpectrumViewsIndex()
 
@@ -2397,13 +2418,17 @@ class GuiSpectrumDisplay(CcpnModule):
             with undoBlockWithoutSideBar(self.application):
                 # push/pop ordering
                 with undoStackBlocking(self.application) as addUndoItem:
+
+                    # add toolbar ordering to the undo stack
                     addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))
 
-                newSpectrumView = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
+                    if (newSpectrumView := self.strips[0]._displaySpectrum(spectrum, axisOrder=axisOrder, useUndoBlock=False)) \
+                        is None:
+                        # notify the stack to revert to the pre-context manager stack
+                        revertStack(True)
 
-                if newSpectrumView:
-                    # push/pop ordering
-                    with undoStackBlocking(self.application) as addUndoItem:
+                    else:
+
                         # add the spectrum to the end of the spectrum ordering in the toolbar
                         index = self.getOrderedSpectrumViewsIndex()
                         newInd = self.spectrumViews.index(newSpectrumView)
@@ -2412,9 +2437,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
                         self.setToolbarButtons(tuple(index))
                         addUndoItem(redo=partial(self.setToolbarButtons, tuple(index)))
-                else:
-                    # notify the stack to revert to the pre-context manager stack
-                    revertStack(True)
+        return newSpectrumView
 
     @logCommand(get='self')
     def removeSpectrum(self, spectrum):

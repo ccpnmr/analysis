@@ -678,7 +678,7 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
             # check whether a new spectrumDisplay is needed, and check axisOrdering
             from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
             checkSpectraToOpen(mainWindow, [spectrumGroup])
-            spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0], position=position, relativeTo=relativeTo, isGrouped=True)
+            spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup, position=position, relativeTo=relativeTo)
             # set the spectrumView colours
             # spectrumDisplay._colourChanged(spectrumGroup)
             if len(spectrumDisplay.strips)>0:
@@ -688,11 +688,11 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
                         for spectrum in spectrumGroup.spectra[1:]:  # Add the other spectra
                             spectrumDisplay.displaySpectrum(spectrum)
                         # update the spectrumView colours
-                        spectrumDisplay._colourChanged(spectrumGroup)
-                        # spectrumDisplay.isGrouped = True
-                        spectrumDisplay.spectrumToolBar.hide()
-                        spectrumDisplay.spectrumGroupToolBar.show()
-                        spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
+                        # spectrumDisplay._colourChanged(spectrumGroup)
+                        # # spectrumDisplay.isGrouped = True
+                        # spectrumDisplay.spectrumToolBar.hide()
+                        # spectrumDisplay.spectrumGroupToolBar.show()
+                        # spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
                 mainWindow.application.current.strip = spectrumDisplay.strips[0]
             # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
             spectrumDisplay.autoRange()

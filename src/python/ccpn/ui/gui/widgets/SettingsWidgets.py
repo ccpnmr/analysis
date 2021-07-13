@@ -382,7 +382,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
             # put the values into the correct widgets
 
-            self._setAxisUnits(xAxisUnits, yAxisUnits)
+            self._setAxesUnits(xAxisUnits, yAxisUnits)
 
 
             self.useAspectRatioModeButtons.setIndex(aspectRatioMode)
@@ -408,7 +408,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.aliasShadeData.setEnabled(aliasEnabled)
             self.zPlaneNavigationModeData.setIndex(zPlaneNavigationMode)
 
-    def _setAxisUnits(self, xAxisUnits, yAxisUnits):
+    def _setAxesUnits(self, xAxisUnits, yAxisUnits):
         """Set the unit's checkboxes
         CCPNINTERNAL: used in GuiSpectrumDisplay
         """

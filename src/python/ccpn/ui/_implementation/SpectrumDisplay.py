@@ -597,7 +597,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     display._postInit()
 
     # force an update for units
-    display._updateAxisUnits()
+    display._updateAxesUnits()
 
     return display
 

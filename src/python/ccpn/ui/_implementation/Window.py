@@ -34,6 +34,7 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
+from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import DIMENSION_FREQUENCY
@@ -277,16 +278,12 @@ class Window(AbstractWrapperObject):
 
     #TODO: rename to newSpectrumDisplay?
     @logCommand('mainWindow.')
-    def createSpectrumDisplay(self, spectrum, axisCodes: Sequence[str] = (),
-                              # axisOrder: Sequence[str] = (),
-                              # title: str = None, positions: Sequence[float] = (),
-                              # widths: Sequence[float] = (), units: Sequence[str] = (),
+    def createSpectrumDisplay(self, spectra, axisCodes: Sequence[str] = (),
                               stripDirection: str = 'Y',
-                              position='right', relativeTo=None, isGrouped=False,
-                              **kwds):
+                              position='right', relativeTo=None):
         """Create new SpectrumDisplay
 
-        :param spectrum: a Spectrum instance to be displayed
+        :param spectra: a Spectrum or SpectrumGroup instance to be displayed
         :param axisCodes: display order of the dimensions of spectrum (defaults to spectrum.preferredAxisOrdering)
         :param stripDirection: stripDirection: if 'X' or 'Y' set strip axis
         :param name: optional name
@@ -307,8 +304,21 @@ class Window(AbstractWrapperObject):
         from ccpn.ui.gui.lib.GuiSpectrumDisplay import STRIPDIRECTIONS
         from ccpn.ui.gui.guiSettings import ZPlaneNavigationModes
 
-        if (spectrum := self.project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum) is None:
-            raise ValueError('Invalid spectrum; got %r' % spectrum)
+        if isinstance(spectra, str):
+            spectra = self.project.getByPid(spectra)
+
+        if not isinstance(spectra, (Spectrum, SpectrumGroup)):
+            raise ValueError('Invalid spectra argument, expected Spectrum or SpectrumGroup; got "%s"' % spectra)
+
+        if isinstance(spectra, Spectrum):
+            spectrum = spectra
+            isGrouped = False
+        elif isinstance(spectra, SpectrumGroup) and len(spectra.spectra) > 0:
+            spectrum = spectra.spectra[0]
+            isGrouped = True
+        else:
+            raise ValueError('%s has no spectra' % spectra)
+
         if not axisCodes:
             axisCodes = tuple(spectrum.axisCodes[ac] for ac in spectrum.preferredAxisOrdering)
 
@@ -356,6 +366,12 @@ class Window(AbstractWrapperObject):
 
             # if not positions and not widths:
             #     display.autoRange()
+
+            if isGrouped:
+                display._colourChanged(spectra)
+                display.spectrumToolBar.hide()
+                display.spectrumGroupToolBar.show()
+                display.spectrumGroupToolBar._addAction(spectra)
 
         return display
 

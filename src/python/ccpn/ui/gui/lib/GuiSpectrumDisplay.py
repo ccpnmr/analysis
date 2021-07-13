@@ -268,20 +268,30 @@ class GuiSpectrumDisplay(CcpnModule):
         aspectCodes = self.application.preferences.general.aspectRatios
 
         # create settings widget
-        if not self.is1D:
+        if self.is1D:
+            # Can't do for now; Axes do not yet exist
+            # xAxisUnits = AXISUNITS.index(self.axes[0].unit)
+            xAxisUnits = yAxisUnits = 0
+
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
                                                                     mainWindow=self.mainWindow, spectrumDisplay=self,
                                                                     grid=(0, 0),
-                                                                    xTexts=AXISUNITS, yTexts=AXISUNITS,
+                                                                    xTexts=AXISUNITS, xAxisUnits=xAxisUnits,
+                                                                    yTexts=[''],
+                                                                    showYAxis=False,
                                                                     _baseAspectRatioAxisCode=baseAspectRatioCode,
                                                                     _aspectRatios=aspectCodes,
                                                                     )
         else:
+            # Can't do for now; Axes do not yet exist
+            # xAxisUnits = AXISUNITS.index(self.axes[0].unit)
+            # yAxisUnits = AXISUNITS.index(self.axes[1].unit)
+            xAxisUnits = yAxisUnits = 0
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
                                                                     mainWindow=self.mainWindow, spectrumDisplay=self,
                                                                     grid=(0, 0),
-                                                                    xTexts=AXISUNITS, yTexts=[''],
-                                                                    showYAxis=False,
+                                                                    xTexts=AXISUNITS, xAxisUnits=xAxisUnits,
+                                                                    yTexts=AXISUNITS, yAxisUnits=yAxisUnits,
                                                                     _baseAspectRatioAxisCode=baseAspectRatioCode,
                                                                     _aspectRatios=aspectCodes,
                                                                     )
@@ -440,7 +450,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        prefsGen.contourThickness,
                                                        prefsGen.zPlaneNavigationMode)
 
-    def _updateAxisUnits(self):
+    def _updateAxesUnits(self):
         """Update the x- and y-axis units of the display"""
         units = self.units
         xUnit = AXISUNITS.index(units[0])
@@ -450,7 +460,7 @@ class GuiSpectrumDisplay(CcpnModule):
         # if yAxisUnit not in AXISUNITS:
         #     raise ValueError('Invalid yAxisUnit %r; should be one of %r' % (yAxisUnit, AXISUNITS))
 
-        self._spectrumDisplaySettings._setAxisUnits(xUnit, yUnit)
+        self._spectrumDisplaySettings._setAxesUnits(xUnit, yUnit)
         self._spectrumDisplaySettings._settingsChanged()
 
     def restoreSpectrumState(self, discard=False):

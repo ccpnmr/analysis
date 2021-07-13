@@ -2037,7 +2037,7 @@ class Framework(NotifierBase):
         self._getUndo().markSave()
         return successful
 
-    @logCommand('application')
+    @logCommand('application.')
     def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
         """Save project to newPath and return True if successful"""
         if self.project.isTemporary:

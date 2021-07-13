@@ -352,7 +352,9 @@ class Project(AbstractWrapperObject):
                 raise ValueError('Cannot overwrite existing file "%s"' % newPath)
             if len(newPath.basename) > 32:
                 raise ValueError('Unfortunately, we currently have limited (32) length of the filename (%s)' % newPath.basename)
-            newPath = str(newPath)
+            path = str(newPath)
+        else:
+            path = str(self.path)
 
         try:
             apiStatus = self._getAPIObjectsStatus()
@@ -368,7 +370,7 @@ class Project(AbstractWrapperObject):
             getLogger().warning('Error checking project status: %s' % str(es))
 
         # don't check valid inside this routine as it is not optimised and only results in a crash. Use apiStatus object.
-        savedOk = apiIo.saveProject(self._wrappedData.root, newPath=str(newPath),
+        savedOk = apiIo.saveProject(self._wrappedData.root, newPath=path,
                                     changeBackup=changeBackup, createFallback=createFallback,
                                     overwriteExisting=overwriteExisting, checkValid=False,
                                     changeDataLocations=changeDataLocations)

@@ -2406,7 +2406,7 @@ class GuiSpectrumDisplay(CcpnModule):
         if not isinstance(spectrum, Spectrum):
             raise TypeError('spectrum is not of type Spectrum')
 
-        # check not already here
+        # check if not already here
         _specViews = self.getSpectrumViewFromSpectrum(spectrum)
         if len(_specViews) > 0:
             getLogger().debug('displaySpectrum: Spectrum %s already in display %s' % (spectrum, self))

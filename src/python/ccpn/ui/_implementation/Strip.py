@@ -297,64 +297,71 @@ class Strip(AbstractWrapperObject):
         """Find axis"""
         return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
-    @logCommand(get='self')
-    def displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = ()):
-        """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
-        :return SpectrumView instance
-        """
-        return self._displaySpectrum(spectrum, axisOrder)
+    # @logCommand(get='self')
+    # def displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = ()):
+    #     """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
+    #     :return SpectrumView instance
+    #     """
+    #     return self._displaySpectrum(spectrum, axisOrder)
 
     def _displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = (), useUndoBlock=True):
         """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
+        :return SpectrumView instance
         CCPNINTERNAL: also used in GuiSpectrumDisplay.displaySpectrum
         """
         from ccpn.ui._implementation.SpectrumView import _newSpectrumView
 
-        getLogger().debug('Strip.displaySpectrum>>> %s' % spectrum)
+        getLogger().debug('Strip._displaySpectrum>>> %s' % spectrum)
 
         spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
         if not isinstance(spectrum, Spectrum):
             raise ValueError('Expected Spectrum instance; got %s ' % str(spectrum))
 
         dataSource = spectrum._wrappedData
-        if self._apiStrip.findFirstSpectrumView(dataSource=dataSource) is not None:
-            getLogger().debug('Strip.displaySpectrum>>> spectrumView already displayed on %s' % self)
-            return
+        # if self._apiStrip.findFirstSpectrumView(dataSource=dataSource) is not None:
+        #     getLogger().debug('Strip.displaySpectrum>>> spectrumView already displayed on %s' % self)
+        #     return
+
+
 
         displayAxisCodes = self.axisCodes
 
-        # make axis mapping indices
-        if axisOrder and axisOrder != displayAxisCodes:
-            # Map axes to axisOrder, and remap to original setting
-            ll = _axisCodeMapIndices(spectrum.axisCodes, axisOrder)
-            mapIndices = [ll[axisOrder.index(x)] for x in displayAxisCodes]
+        # # make axis mapping indices
+        # if axisOrder and axisOrder != displayAxisCodes:
+        #     # Map axes to axisOrder, and remap to original setting
+        #     ll = _axisCodeMapIndices(spectrum.axisCodes, axisOrder)
+        #     mapIndices = [ll[axisOrder.index(x)] for x in displayAxisCodes]
+        # else:
+        #     # Map axes to original display setting
+        #     mapIndices = _axisCodeMapIndices(spectrum.axisCodes, displayAxisCodes)
+        #
+        # if mapIndices is None:
+        #     getLogger().debug('Strip.displaySpectrum>>> mapIndices is None')
+        #     return
+        #
+        # # if None in mapIndices[:2]: # make sure that x/y always mapped
+        # #   return
+        # if mapIndices[0] is None or mapIndices[1] is None and displayAxisCodes[1] != 'intensity':
+        #     getLogger().debug('Strip.displaySpectrum>>> mapIndices, x/y not mapped')
+        #     return
+        #
+        # if mapIndices.count(None) + spectrum.dimensionCount != len(mapIndices):
+        #     getLogger().debug('Strip.displaySpectrum>>> mapIndices, dimensionCount not matching')
+        #     return
+
+        # # Make dimensionOrdering
+        # sortedDataDims = dataSource.sortedDataDims()
+        # dimensionOrdering = []
+        # for index in mapIndices:
+        #     if index is None:
+        #         dimensionOrdering.append(0)
+        #     else:
+        #         dimensionOrdering.append(sortedDataDims[index].dim)
+
+        if self.spectrumDisplay.is1D:
+            dimensionOrdering = [1, 0]
         else:
-            # Map axes to original display setting
-            mapIndices = _axisCodeMapIndices(spectrum.axisCodes, displayAxisCodes)
-
-        if mapIndices is None:
-            getLogger().debug('Strip.displaySpectrum>>> mapIndices is None')
-            return
-
-        # if None in mapIndices[:2]: # make sure that x/y always mapped
-        #   return
-        if mapIndices[0] is None or mapIndices[1] is None and displayAxisCodes[1] != 'intensity':
-            getLogger().debug('Strip.displaySpectrum>>> mapIndices, x/y not mapped')
-            return
-
-        if mapIndices.count(None) + spectrum.dimensionCount != len(mapIndices):
-            getLogger().debug('Strip.displaySpectrum>>> mapIndices, dimensionCount not matching')
-            return
-
-        # Make dimensionOrdering
-        sortedDataDims = dataSource.sortedDataDims()
-        dimensionOrdering = []
-        for index in mapIndices:
-            if index is None:
-                dimensionOrdering.append(0)
-            else:
-                dimensionOrdering.append(sortedDataDims[index].dim)
-
+            dimensionOrdering = spectrum.getByAxisCodes('dimensions', self.axisCodes, exactMatch=False)
 
         # Make spectrumView
         if useUndoBlock:

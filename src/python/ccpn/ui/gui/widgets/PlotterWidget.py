@@ -95,7 +95,7 @@ class PlotterWidget(Widget):
                                      grid=(0, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
 
         self.pyplot.show = self.show # overrides the original show method, open the CcpnDialog instead
-
+        self.isClosed = False
         ### sets all plt attr to this widget to easy access them
         for att in dir(self.pyplot):
             setattr(self, att, getattr(self.pyplot, att))
@@ -502,126 +502,6 @@ class PlotterWidget(Widget):
         self.currentPlot.csd(x, y, *args, **kwargs)
 
 
-    # def plotDataFrame(self, dataFrame, kind='line', *args, **kwds):
-    #     """
-    #
-    #     Make plots of a DataFrame.
-    #
-    #     Parameters
-    #     ----------
-    #     dataFrame : Pandas DataFrame
-    #
-    #     kind : str
-    #         The kind of plot to produce:
-    #         - 'line' : line plot (default)
-    #         - 'bar' : vertical bar plot
-    #         - 'barh' : horizontal bar plot
-    #         - 'hist' : histogram
-    #         - 'box' : boxplot
-    #         - 'kde' : Kernel Density Estimation plot
-    #         - 'density' : same as 'kde'
-    #         - 'area' : area plot
-    #         - 'pie' : pie plot
-    #         - 'scatter' : scatter plot
-    #         - 'hexbin' : hexbin plot.
-    #     x : label or position, default None
-    #         Only used if data is a DataFrame.
-    #     y : label, position or list of label, positions, default None
-    #         Allows plotting of one column versus another. Only used if data is a
-    #         DataFrame.
-    #     figsize : a tuple (width, height) in inches
-    #     use_index : bool, default True
-    #         Use index as ticks for x axis.
-    #     title : str or list
-    #         Title to use for the plot. If a string is passed, print the string
-    #         at the top of the figure. If a list is passed and `subplots` is
-    #         True, print each item in the list above the corresponding subplot.
-    #     grid : bool, default None (matlab style default)
-    #         Axis grid lines.
-    #     legend : bool or {'reverse'}
-    #         Place legend on axis subplots.
-    #     style : list or dict
-    #         The matplotlib line style per column.
-    #     logx : bool or 'sym', default False
-    #         Use log scaling or symlog scaling on x axis.
-    #         .. versionchanged:: 0.25.0
-    #
-    #     logy : bool or 'sym' default False
-    #         Use log scaling or symlog scaling on y axis.
-    #         .. versionchanged:: 0.25.0
-    #
-    #     loglog : bool or 'sym', default False
-    #         Use log scaling or symlog scaling on both x and y axes.
-    #         .. versionchanged:: 0.25.0
-    #
-    #     xticks : sequence
-    #         Values to use for the xticks.
-    #     yticks : sequence
-    #         Values to use for the yticks.
-    #     xlim : 2-tuple/list
-    #     ylim : 2-tuple/list
-    #     rot : int, default None
-    #         Rotation for ticks (xticks for vertical, yticks for horizontal
-    #         plots).
-    #     fontsize : int, default None
-    #         Font size for xticks and yticks.
-    #     colormap : str or matplotlib colormap object, default None
-    #         Colormap to select colors from. If string, load colormap with that
-    #         name from matplotlib.
-    #     colorbar : bool, optional
-    #         If True, plot colorbar (only relevant for 'scatter' and 'hexbin'
-    #         plots).
-    #     position : float
-    #         Specify relative alignments for bar plot layout.
-    #         From 0 (left/bottom-end) to 1 (right/top-end). Default is 0.5
-    #         (center).
-    #     table : bool, Series or DataFrame, default False
-    #         If True, draw a table using the data in the DataFrame and the data
-    #         will be transposed to meet matplotlib's default layout.
-    #         If a Series or DataFrame is passed, use passed data to draw a
-    #         table.
-    #     yerr : DataFrame, Series, array-like, dict and str
-    #         See :ref:`Plotting with Error Bars <visualization.errorbars>` for
-    #         detail.
-    #     xerr : DataFrame, Series, array-like, dict and str
-    #         Equivalent to yerr.
-    #     mark_right : bool, default True
-    #         When using a secondary_y axis, automatically mark the column
-    #         labels with "(right)" in the legend.
-    #     include_bool : bool, default is False
-    #         If True, boolean values can be plotted.
-    #     backend : str, default None
-    #         Backend to use instead of the backend specified in the option
-    #         ``plotting.backend``. For instance, 'matplotlib'. Alternatively, to
-    #         specify the ``plotting.backend`` for the whole session, set
-    #         ``pd.options.plotting.backend``.
-    #
-    #         .. versionadded:: 1.0.0
-    #
-    #     **kwargs
-    #         Options to pass to matplotlib plotting method.
-    #
-    #     Returns
-    #     -------
-    #     :class:`matplotlib.axes.Axes` or numpy.ndarray of them
-    #         If the backend is not the default matplotlib one, the return value
-    #         will be the object returned by the backend.
-    #
-    #     Notes
-    #     -----
-    #     - See matplotlib documentation online for more on this subject
-    #     - If `kind` = 'bar' or 'barh', you can specify relative alignments
-    #       for bar plot layout by `position` keyword.
-    #       From 0 (left/bottom-end) to 1 (right/top-end). Default is 0.5
-    #       (center)
-    #     """
-    #
-    #     self._figure.clear()
-    #     ax = self.currentPlot
-    #     plot = dataFrame.plot(kind=kind, ax=ax, *args, **kwds)
-    #     self.canvas.draw()
-    #     return plot
-
     def displayImage(self, imagePath:str=None, format=None, axis=False, *args, **kwds):
         """
         quick way to display images using the built-in methods from pyPlot
@@ -646,6 +526,10 @@ class PlotterWidget(Widget):
         :param kwds: CcpnDialog
         :return: opens a CcpnDialog with the plot
         """
+        if self.isClosed:
+            showWarning('Cannot show','Plot has been closed. Please create a new instance.')
+            return
+
         dialogKwds = dialogKwds or {}
         if showLegend:
             if self._getCurrentLegendLabels():
@@ -676,11 +560,25 @@ class PlotterWidget(Widget):
         objs, labels = _get_legend_handles_labels([self.currentPlot])
         return labels
 
+    def close(self):
+        self.clear()
+        self.currentPlot.close()
+        self.currentFigure.close()
+        self.isClosed = True
+
+    def __repr__(self):
+        name = self.__class__.__name__
+        if self.isClosed:
+            return f'<{name}.closed>'
+        return f'<{name}>'
+
 
 @contextmanager
 def plotter(xAxisTitle=None, yAxisTitle=None, plotTitle=None, showLegend=True,
             windowTitle=None, size=(700, 700), *args, **kwargs):
-    """Wrap a pyplot and show the window at the end
+    """Wrap a Plotter and show the GUI dialog Window at the end.
+    At the end of the "with" statement stream, the Plotter instance is automatically closed to avoid
+    wrong state representations. The GUI window cannot be reopened after closing the Dialog.
 
     ===============
     usage:

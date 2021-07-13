@@ -222,13 +222,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return []
 
     @property
-    def spectrumDimensions(self):
-        """A better name for spectrumReferences
+    def spectrumDimensions(self) -> list:
+        """:return A list with the spectrum dimension (== SpectrumReference) instances
         """
-        return self.spectrumReferences
+        from ccpn.core.SpectrumReference import SpectrumReference
+        return self._getChildrenByClass(SpectrumReference)
 
     @property
-    def spectrumHits(self):
+    def spectrumHits(self) -> list:
         """STUB: hot-fixed later"""
         return None
 
@@ -705,26 +706,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """Conveniance function set the spectrumReference.attributeName to the items of value
         Assumes all checks have been done
         """
+        specDims = self.spectrumDimensions  # local copy to avoid getting it N-times
         for idx, val in enumerate(value):
-            setattr(self.spectrumDimensions[idx], attributeName, val)
+            setattr(specDims[idx], attributeName, val)
 
     def _getDimensionalAttributes(self, attributeName: str) -> list:
         """Conveniance function get the values for each spectrumReference.attributeName
         """
-        return [getattr(dim, attributeName) for dim in self.spectrumDimensions]
-
-    # def _setStdDataDimValue(self, attributeName, value: Sequence):
-    #     """Set value for non-Sampled DataDims only"""
-    #     apiDataSource = self._wrappedData
-    #     if len(value) == apiDataSource.numDim:
-    #         for ii, dataDim in enumerate(apiDataSource.sortedDataDims()):
-    #             if dataDim.className != 'SampledDataDim':
-    #                 setattr(dataDim, attributeName, value[ii])
-    #             elif value[ii] is not None:
-    #                 raise ValueError("Attempt to set value for invalid attribute %s in dimension %s: %s" %
-    #                                  (attributeName, ii + 1, value))
-    #     else:
-    #         raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
+        return [getattr(specDim, attributeName) for specDim in self.spectrumDimensions]
 
     @property
     @_includeInDimensionalCopy
@@ -1076,45 +1065,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,))
     def axisUnits(self, value):
         self._setDimensionalAttributes('axisUnit', value)
-
-    # Attributes belonging to DataDimRef
-
-    # def _mainDataDimRefs(self) -> list:
-    #     """ List of DataDimRef matching main ExpDimRef for each dimension"""
-    #     result = []
-    #     expDimRefs = self._mainExpDimRefs()
-    #     for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
-    #         if hasattr(dataDim, 'dataDimRefs'):
-    #             result.append(dataDim.findFirstDataDimRef(expDimRef=expDimRefs[ii]))
-    #         else:
-    #             result.append(None)
-    #     #
-    #     return result
-
-    # def _setDataDimRefAttribute(self, attributeName: str, value: Sequence, mandatory: bool = True):
-    #     """Set main DataDimRef attribute for each dimension
-    #     - uses first ExpDimRef with serial=1"""
-    #     apiDataSource = self._wrappedData
-    #     if len(value) == apiDataSource.numDim:
-    #         expDimRefs = self._mainExpDimRefs()
-    #         for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
-    #             if hasattr(dataDim, 'dataDimRefs'):
-    #                 dataDimRef = dataDim.findFirstDataDimRef(expDimRef=expDimRefs[ii])
-    #             else:
-    #                 dataDimRef = None
-    #
-    #             if dataDimRef is None:
-    #                 if value[ii] is not None:
-    #                     raise ValueError("Cannot set value for attribute %s in dimension %s: %s" %
-    #                                      (attributeName, ii + 1, value))
-    #             elif value is None and mandatory:
-    #                 raise ValueError(
-    #                         "Attempt to set value to None for mandatory attribute %s in dimension %s: %s" %
-    #                         (attributeName, ii + 1, value))
-    #             else:
-    #                 setattr(dataDimRef, attributeName, value[ii])
-    #     else:
-    #         raise ValueError("Value must have length %s, was %s" % (apiDataSource.numDim, value))
 
     @property
     @_includeInDimensionalCopy

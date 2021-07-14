@@ -1,5 +1,5 @@
 """
-This module defines the data loading mechanism for loading a pdb file
+This module defines the data loading mechanism for loading a python file
 """
 
 #=========================================================================================
@@ -29,16 +29,16 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
-from ccpn.core.Project import Project
+from ccpn.framework.Framework import Framework
 
 
-class PdbDataLoader(DataLoaderABC):
-    """Pdb file data loader
+class PythonDataLoader(DataLoaderABC):
+    """Python file data loader
     """
-    dataFormat = 'pdbFile'
-    suffixes = ['.pdb']  # a list of suffixes that get matched to path
+    dataFormat = 'pythonFile'
+    suffixes = ['.py']  # a list of suffixes that get matched to path
     allowDirectory = False  # Can/Can't open a directory
     createsNewProject = False
-    loadFunction = (Project._loadPdbFile, 'project')
+    loadFunction = (Framework._loadPythonFile, 'application')
 
-PdbDataLoader._registerFormat()
+PythonDataLoader._registerFormat()

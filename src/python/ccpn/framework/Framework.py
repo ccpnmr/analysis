@@ -93,7 +93,8 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, undoBlock, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, undoBlock, \
+    notificationEchoBlocking, logCommandManager
 
 from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
 from ccpn.framework.Version import authors
@@ -1818,6 +1819,17 @@ class Framework(NotifierBase):
         popup = StarImporterPopup(project=self.project, bmrbFilePath=path, directory=relativePath, dataBlock=dataBlock)
         popup.show()
         popup.raise_()
+
+    def _loadPythonFile(self, path):
+        """Load python file path into the macro editor
+        CCPNINTERNAL: called from loadPython dataLoader
+        """
+        mainWindow = self.mainWindow
+        with logCommandManager('application.', 'loadData', path):
+            macroEditor = MacroEditor(mainWindow=mainWindow, filePath=str(path))
+            mainWindow.moduleArea.addModule(macroEditor, position='top',
+                                            relativeTo=mainWindow.moduleArea)
+        return []
 
     # """Load Project from NEF file at path, and do necessary setup"""
     #

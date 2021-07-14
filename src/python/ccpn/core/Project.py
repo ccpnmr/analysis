@@ -1299,22 +1299,13 @@ class Project(AbstractWrapperObject):
 
 # To implement
         #
-        #     elif dataType == 'Text':
-        #         # Special case - you return the text instead of a list of Pids
-        #         # GWV: Can't do this!! -> have to return a list of tuples: [(dataType, pid or data)]
-        #         # need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!
-        #
-        #         return open(usePath).read()
+
         #
         #     elif dataType == 'Macro' and subType == ioFormats.PYTHON:
         #         # GWV: Can't do this: have to call the routine with a flag: autoExecute=True
         #         # with suspendSideBarNotifications(self, 'runMacro', usePath, quiet=False):
         #         self._appBase.runMacro(usePath)
         #
-        #     elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
-        #         # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-        #         projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
-        #         project = self.loadProject(projectPath, ioFormats.CCPN)
 
 
 
@@ -1322,27 +1313,28 @@ class Project(AbstractWrapperObject):
         """Load Fasta sequence(s) from file into Wrapper project
         CCPNINTERNAL: called from FastDataLoader
         """
-        sequences = fastaIo.parseFastaFile(path)
-        chains = []
-        for sequence in sequences:
-            newChain = self.createChain(sequence=sequence[1], compoundName=sequence[0],
-                                        molType='protein')
-            chains.append(newChain)
-        #
+        with logCommandManager('application.', 'loadData', path):
+            sequences = fastaIo.parseFastaFile(path)
+            chains = []
+            for sequence in sequences:
+                newChain = self.createChain(sequence=sequence[1], compoundName=sequence[0],
+                                            molType='protein')
+                chains.append(newChain)
+            #
         return chains
 
     def _loadPdbFile(self, path: (str, Path)) -> list:
         """Load data from pdb file path into new StructureEnsemble object(s)
         CCPNINTERNAL: called from pdb dataLoader
         """
-
         from ccpn.util.StructureData import EnsembleData
 
-        path = aPath(path)
-        name = path.basename
+        with logCommandManager('application.', 'loadData', path):
+            path = aPath(path)
+            name = path.basename
 
-        ensemble = EnsembleData.from_pdb(str(path))
-        se = self.newStructureEnsemble(name=name, data=ensemble)
+            ensemble = EnsembleData.from_pdb(str(path))
+            se = self.newStructureEnsemble(name=name, data=ensemble)
 
         return [se]
 
@@ -1358,7 +1350,7 @@ class Project(AbstractWrapperObject):
                 # cannot do read() as we want one string
                 text = ''.join(line for line in fp.readlines())
             note = self.newNote(name=name, text=text)
-            return [note]
+        return [note]
 
     def _loadLayout(self, path: (str, Path), subType: str):
         # this is a GUI only function call. Please move to the appropriate location on 3.1
@@ -1370,10 +1362,11 @@ class Project(AbstractWrapperObject):
         CCPNINTERNAL: used in Excel data loader
         """
 
-        with undoBlock():
-            reader = ExcelReader(project=self, excelPath=str(path))
-            result = reader.load()
-            return result
+        with logCommandManager('application.', 'loadData', path):
+            with undoBlock():
+                reader = ExcelReader(project=self, excelPath=str(path))
+                result = reader.load()
+        return result
 
     #===========================================================================================
     # End data loaders

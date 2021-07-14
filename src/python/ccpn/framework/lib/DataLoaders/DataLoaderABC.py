@@ -67,6 +67,7 @@ def getDataLoaders():
     from ccpn.framework.lib.DataLoaders.ExelDataLoader import ExcelDataLoader
     from ccpn.framework.lib.DataLoaders.PdbDataLoader import PdbDataLoader
     from ccpn.framework.lib.DataLoaders.TextDataLoader import TextDataLoader
+    from ccpn.framework.lib.DataLoaders.PythonDataLoader import PythonDataLoader
     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
     return DataLoaderABC._dataLoaders
 

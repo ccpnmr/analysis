@@ -60,7 +60,7 @@ from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 # from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
-                                          notificationEchoBlocking, inactivity
+                                          notificationEchoBlocking, inactivity, logCommandManager
 from ccpn.util.Logging import getLogger
 
 
@@ -1350,10 +1350,7 @@ class Project(AbstractWrapperObject):
         """Load text from file path into new Note object
         CCPNINTERNAL: called from text dataLoader
         """
-        path = str(path)
-        # 'wrap' this to get proper echo-ing
-        @logCommand('application.')
-        def loadData(path):
+        with logCommandManager('application.', 'loadData', path):
             path = aPath(path)
             name = path.basename
 
@@ -1362,8 +1359,6 @@ class Project(AbstractWrapperObject):
                 text = ''.join(line for line in fp.readlines())
             note = self.newNote(name=name, text=text)
             return [note]
-
-        return loadData(self, path)
 
     def _loadLayout(self, path: (str, Path), subType: str):
         # this is a GUI only function call. Please move to the appropriate location on 3.1

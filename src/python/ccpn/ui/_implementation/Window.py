@@ -39,7 +39,8 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import DIMENSION_FREQUENCY
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, undoStackBlocking
+from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, undoStackBlocking, \
+    logCommandManager
 from ccpn.util.Logging import getLogger
 
 
@@ -315,8 +316,9 @@ class Window(AbstractWrapperObject):
                 raise ValueError("Error, not a unique module")
             relativeTo = modules[0] if modules else None
 
-        @logCommand('mainWindow.')
-        def newSpectrumDisplay(spectra, axisCodes, stripDirection, position, relativeTo):
+        with logCommandManager('mainWindow.', 'newSpectrumDisplay',
+                               spectra, axisCodes=axisCodes, stripDirection=stripDirection,
+                               position=position, relativeTo=relativeTo):
             with undoBlockWithoutSideBar():
 
                 try:
@@ -328,7 +330,7 @@ class Window(AbstractWrapperObject):
                     _zPlaneNavigationMode = self.project.application.preferences.general.zPlaneNavigationMode
                     zPlaneNavigationMode = ZPlaneNavigationModes(_zPlaneNavigationMode).label
                 except Exception as es:
-                    getLogger().warning(f'createSpectrumDisplay {es}')
+                    getLogger().warning(f'newSpectrumDisplay {es}')
 
                 # create the new spectrumDisplay
                 display = _newSpectrumDisplay(self,
@@ -361,9 +363,7 @@ class Window(AbstractWrapperObject):
                     display.spectrumGroupToolBar.show()
                     display.spectrumGroupToolBar._addAction(spectra)
 
-                return display
-
-        return newSpectrumDisplay(spectra, axisCodes, stripDirection, position, relativeTo)
+        return display
 
     # deprecated
     createSpectrumDisplay = newSpectrumDisplay

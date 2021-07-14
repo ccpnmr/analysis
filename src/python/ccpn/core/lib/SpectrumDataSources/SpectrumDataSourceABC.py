@@ -1619,15 +1619,27 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         if self.dimensionCount == 1:
             data = self.getSliceData()
+            stdFactor = 1.0
+
+        elif self.dimensionCount == 2:
+            # 2D: presumably t has data (and potentially water!)
+            data =self.getPlaneData()
+            data.flatten()
+            stdFactor = 0.5
+
         else:
-            data = self.getPlaneData()
+            # 3D and up: use a yz-plane, about 10 points in; this plane is likely mostly empty
+            position = [min(10, self.pointCounts[0])] + [1] * (self.dimensionCount-1)
+            data = self.getPlaneData(xDim=self.Y_DIM, yDim=self.Z_DIM, position=position)
             data = data.flatten()
+            stdFactor = 2.0
 
         absData = numpy.array([v for v in map(abs, data)])
         median = numpy.median(absData)
-        std = numpy.std(absData)
-        noiseLevel = median + 1.0 * std
+        std = numpy.std(data)
+        noiseLevel = median + stdFactor * std
         self.noiseLevel = noiseLevel
+
         return noiseLevel
 
     #=========================================================================================

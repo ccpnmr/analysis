@@ -276,27 +276,16 @@ class Window(AbstractWrapperObject):
     #                                stripDirection=stripDirection, name=name, zPlaneNavigationMode=zPlaneNavigationMode)
 
 
-    #TODO: rename to newSpectrumDisplay?
-    @logCommand('mainWindow.')
-    def createSpectrumDisplay(self, spectra, axisCodes: Sequence[str] = (), stripDirection: str = 'Y',
+    def newSpectrumDisplay(self, spectra, axisCodes: Sequence[str] = (), stripDirection: str = 'Y',
                               position='right', relativeTo=None):
         """Create new SpectrumDisplay
 
         :param spectra: a Spectrum or SpectrumGroup instance to be displayed
         :param axisCodes: display order of the dimensions of spectrum (defaults to spectrum.preferredAxisOrdering)
-        :param stripDirection: stripDirection: if 'X' or 'Y' set strip axis
+        :param stripDirection: stripDirection: if 'X' or 'Y' sets strip axis
 
         :return: a new SpectrumDisplay instance.
-
         """
-
-        # :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
-        # :param \*str axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
-        # :param \*float positions: axis positions in order - default to heuristic
-        # :param \*float widths: axis widths in order - default to heuristic
-        # :param \*str units: axis units in display order - default to heuristic
-        # :param str stripDirection: if 'X' or 'Y' set strip axis
-        # :param bool is1D: If True, or spectrum passed in is 1D, do 1D display
 
         from ccpn.ui._implementation.SpectrumDisplay import _newSpectrumDisplay
         from ccpn.ui.gui.lib.GuiSpectrumDisplay import STRIPDIRECTIONS
@@ -309,13 +298,12 @@ class Window(AbstractWrapperObject):
             raise ValueError('Invalid spectra argument, expected Spectrum or SpectrumGroup; got "%s"' % spectra)
 
         if isinstance(spectra, Spectrum):
-            spectrum = spectra
             isGrouped = False
         elif isinstance(spectra, SpectrumGroup) and len(spectra.spectra) > 0:
-            spectrum = spectra.spectra[0]
             isGrouped = True
         else:
             raise ValueError('%s has no spectra' % spectra)
+        spectrum = spectra.spectra[0] if isGrouped else spectra
 
         if not axisCodes:
             axisCodes = tuple(spectrum.axisCodes[ac] for ac in spectrum.preferredAxisOrdering)
@@ -327,51 +315,58 @@ class Window(AbstractWrapperObject):
                 raise ValueError("Error, not a unique module")
             relativeTo = modules[0] if modules else None
 
-        with undoBlockWithoutSideBar():
+        @logCommand('mainWindow.')
+        def newSpectrumDisplay(window, spectra, axisCodes, stripDirection, position, relativeTo):
+            with undoBlockWithoutSideBar():
 
-            try:
-                zPlaneNavigationMode = ZPlaneNavigationModes(0).label
+                try:
+                    zPlaneNavigationMode = ZPlaneNavigationModes(0).label
 
-                # default to preferences if not set
-                _stripDirection = self.project.application.preferences.general.stripArrangement
-                stripDirection = stripDirection or STRIPDIRECTIONS[_stripDirection]
-                _zPlaneNavigationMode = self.project.application.preferences.general.zPlaneNavigationMode
-                zPlaneNavigationMode = ZPlaneNavigationModes(_zPlaneNavigationMode).label
-            except Exception as es:
-                getLogger().warning(f'createSpectrumDisplay {es}')
+                    # default to preferences if not set
+                    _stripDirection = self.project.application.preferences.general.stripArrangement
+                    stripDirection = stripDirection or STRIPDIRECTIONS[_stripDirection]
+                    _zPlaneNavigationMode = self.project.application.preferences.general.zPlaneNavigationMode
+                    zPlaneNavigationMode = ZPlaneNavigationModes(_zPlaneNavigationMode).label
+                except Exception as es:
+                    getLogger().warning(f'createSpectrumDisplay {es}')
 
-            # create the new spectrumDisplay
-            display = _newSpectrumDisplay(self,
-                                          spectrum = spectrum,
-                                          axisCodes=axisCodes,
-                                          stripDirection=stripDirection,
-                                          zPlaneNavigationMode=zPlaneNavigationMode,
-                                          isGrouped = isGrouped
-                                         )
+                # create the new spectrumDisplay
+                display = _newSpectrumDisplay(window,
+                                              spectrum = spectrum,
+                                              axisCodes=axisCodes,
+                                              stripDirection=stripDirection,
+                                              zPlaneNavigationMode=zPlaneNavigationMode,
+                                              isGrouped = isGrouped
+                                              )
 
-            # add the new module to mainWindow at the required position
-            self.moduleArea.addModule(display, position=position, relativeTo=relativeTo)
-            display._insertPosition = (position, relativeTo)
+                # add the new module to mainWindow at the required position
+                self.moduleArea.addModule(display, position=position, relativeTo=relativeTo)
+                display._insertPosition = (position, relativeTo)
 
-            with undoStackBlocking() as addUndoItem:
-                # disable all notifiers in spectrumDisplays
-                addUndoItem(undo=partial(self._setBlankingSpectrumDisplayNotifiers, display, True),
-                            redo=partial(self._setBlankingSpectrumDisplayNotifiers, display, False))
+                with undoStackBlocking() as addUndoItem:
+                    # disable all notifiers in spectrumDisplays
+                    addUndoItem(undo=partial(window._setBlankingSpectrumDisplayNotifiers, display, True),
+                                redo=partial(window._setBlankingSpectrumDisplayNotifiers, display, False))
 
-                # add/remove spectrumDisplay from module Area - use moveDock not addModule, otherwise introduces extra splitters
-                addUndoItem(undo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None),
-                            redo=partial(self.moduleArea.moveDock, display, position=position, neighbor=relativeTo))
+                    # add/remove spectrumDisplay from module Area - use moveDock not addModule, otherwise introduces extra splitters
+                    addUndoItem(undo=partial(window._hiddenModules.moveDock, display, position='top', neighbor=None),
+                                redo=partial(window.moduleArea.moveDock, display, position=position, neighbor=relativeTo))
 
-            # if not positions and not widths:
-            #     display.autoRange()
+                # if not positions and not widths:
+                #     display.autoRange()
 
-            if isGrouped:
-                display._colourChanged(spectra)
-                display.spectrumToolBar.hide()
-                display.spectrumGroupToolBar.show()
-                display.spectrumGroupToolBar._addAction(spectra)
+                if isGrouped:
+                    display._colourChanged(spectra)
+                    display.spectrumToolBar.hide()
+                    display.spectrumGroupToolBar.show()
+                    display.spectrumGroupToolBar._addAction(spectra)
 
-        return display
+                return display
+
+        return newSpectrumDisplay(self, spectra, axisCodes, stripDirection, position, relativeTo)
+
+    # deprecated
+    createSpectrumDisplay = newSpectrumDisplay
 
     @logCommand('mainWindow.')
     def _deleteSpectrumDisplay(self, display):

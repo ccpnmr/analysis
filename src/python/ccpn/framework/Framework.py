@@ -1648,35 +1648,37 @@ class Framework(NotifierBase):
         """Actual V2 project loader
         CCPNINTERNAL: called from CcpNmrV2ProjectDataLoader
         """
-        logger = getLogger()
-        project = self._loadV3Project(path)
-        logger.info('Upgraded %s to version-3' % project)
-        try:
-            project.save()
-            logger.info('Saved %s as "%s"' % (project, project.path))
-        except Exception as es:
-            logger.warning('Failed saving %s (%s)' % (project, str(es)))
+        with logCommandManager('application.', 'loadProject', path):
+            logger = getLogger()
+            project = self._loadV3Project(path)
+            logger.info('==> Upgraded %s to version-3' % project)
+            try:
+                project.save()
+                logger.info('==> Saved %s as "%s"' % (project, project.path))
+            except Exception as es:
+                logger.warning('Failed saving %s (%s)' % (project, str(es)))
 
-        return project
+        return [project]
 
     def _loadV3Project(self, path):
         """Actual V3 project loader
         CCPNINTERNAL: called from CcpNmrV3ProjectDataLoader
         """
-        if not isinstance(path, (Path.Path, str)):
-            raise ValueError('invalid path "%s"' % path)
+        with logCommandManager('application.', 'loadProject', path):
+            if not isinstance(path, (Path.Path, str)):
+                raise ValueError('invalid path "%s"' % path)
 
-        _path = Path.aPath(path)
-        if not _path.exists():
-            raise ValueError('path "%s" does not exist' % path)
+            _path = Path.aPath(path)
+            if not _path.exists():
+                raise ValueError('path "%s" does not exist' % path)
 
-        getLogger().info('==> Loading ccpn project "%s"' % path)
+            if self.project is not None:  # always close for Ccpn
+                self._closeProject()
+            project = coreIo.loadProject(str(_path), useFileLogger=self.useFileLogger, level=self.level)
+            # project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+            self._initialiseProject(project)
+            getLogger().info('==> Loaded ccpn project "%s"' % path)
 
-        if self.project is not None:  # always close for Ccpn
-            self._closeProject()
-        project = coreIo.loadProject(str(_path), useFileLogger=self.useFileLogger, level=self.level)
-        # project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-        self._initialiseProject(project)
         return [project]
 
     @logCommand('application.')
@@ -1822,14 +1824,25 @@ class Framework(NotifierBase):
 
     def _loadPythonFile(self, path):
         """Load python file path into the macro editor
-        CCPNINTERNAL: called from loadPython dataLoader
+        CCPNINTERNAL: called from PythonDataLoader
         """
         mainWindow = self.mainWindow
         with logCommandManager('application.', 'loadData', path):
             macroEditor = MacroEditor(mainWindow=mainWindow, filePath=str(path))
-            mainWindow.moduleArea.addModule(macroEditor, position='top',
-                                            relativeTo=mainWindow.moduleArea)
+            mainWindow.moduleArea.addModule(macroEditor, position='top', relativeTo=mainWindow.moduleArea)
         return []
+
+    def _loadHtmlFile(self, path):
+        """Load html file path into a HtmlModule
+        CCPNINTERNAL: called from HtmlDataLoader
+        """
+        mainWindow = self.mainWindow
+        with logCommandManager('application.', 'loadData', path):
+            path = Path.aPath(path)
+            title = path.basename
+            mainWindow.newHtmlModule(urlPath=str(path), title=title, position='top', relativeTo=mainWindow.moduleArea)
+        return []
+
 
     # """Load Project from NEF file at path, and do necessary setup"""
     #
@@ -3321,16 +3334,11 @@ class Framework(NotifierBase):
             webbrowser.open(urlPath)
             # self._systemOpen(path)
         else:
-            from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
-
-            self.newModule = CcpnWebView(mainWindow=mainWindow, name=title, urlPath=urlPath)
-
-            # self.newModule = CcpnModule(mainWindow=mainWindow, name=title)
-            # view = CcpnWebView(path)
-            # self.newModule.addWidget(view, 0, 0, 1, 1)      # make it the first item
-            # self.newModule.mainWidget = view      # ejb
-
-            self.ui.mainWindow.moduleArea.addModule(self.newModule, position='top', relativeTo=mainWindow.moduleArea)
+            # from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
+            #
+            # _newModule = CcpnWebView(mainWindow=mainWindow, name=title, urlPath=urlPath)
+            # self.ui.mainWindow.moduleArea.addModule(_newModule, position='top', relativeTo=mainWindow.moduleArea)
+            mainWindow.newHtmlModule(urlPath=urlPath, title=title, position='top', relativeTo=mainWindow.moduleArea)
 
     def showBeginnersTutorial(self):
         from ccpn.framework.PathsAndUrls import beginnersTutorialPath

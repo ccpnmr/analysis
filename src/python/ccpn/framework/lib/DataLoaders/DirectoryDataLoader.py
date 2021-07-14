@@ -24,13 +24,14 @@ __version__ = "$Revision: 3.1.0 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: geertenv $"
-__date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
+__date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC, checkPathForDataLoader
 from ccpn.util.traits.CcpNmrTraits import Bool, List, Int
+from ccpn.core.lib.ContextManagers import logCommandManager
 
 
 class DirectoryDataLoader(DataLoaderABC):
@@ -63,13 +64,15 @@ class DirectoryDataLoader(DataLoaderABC):
         raises RunTimeError on error
         :return: a list of [object(s)] representing the directory
         """
-        result = []
-        try:
-            for dataLoader in self.dataLoaders:
-                objs = dataLoader.load()  # This will automatically recurse
-                result.extend(objs)
-        except (ValueError, RuntimeError) as es:
-            raise RuntimeError('Error loading files from "%s"' % self.path)
+        with logCommandManager('application.', 'loadData', self.path):
+
+            result = []
+            try:
+                for dataLoader in self.dataLoaders:
+                    objs = dataLoader.load()  # This will automatically recurse
+                    result.extend(objs)
+            except (ValueError, RuntimeError) as es:
+                raise RuntimeError('Error loading files from "%s"' % self.path)
         return result
 
     def __init__(self, path, recursive: bool = False, filterForDataFormats: (tuple,list) = None):

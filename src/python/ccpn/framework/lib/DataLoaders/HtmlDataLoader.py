@@ -1,5 +1,5 @@
 """
-This module defines the data loading mechanism for loading a NEF file
+This module defines the data loading mechanism for loading a html file
 """
 
 #=========================================================================================
@@ -23,37 +23,22 @@ __version__ = "$Revision: 3.1.0 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: geertenv $"
-__date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
+__date__ = "$Date: 2021-07-14 10:28:41 +0000 (Fri, July 14, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
+from ccpn.framework.Framework import Framework
 
 
-class NefDataLoader(DataLoaderABC):
-    """NEF data loader
+class HtmlDataLoader(DataLoaderABC):
+    """Html file data loader
     """
-    dataFormat = 'nefFile'
-    suffixes = ['.nef']  # a list of suffixes that get matched to path
+    dataFormat = 'htmlFile'
+    suffixes = ['.html']  # a list of suffixes that get matched to path
     allowDirectory = False  # Can/Can't open a directory
-    createsNewProject = True
+    createsNewProject = False
+    loadFunction = (Framework._loadHtmlFile, 'application')
 
-    def __init__(self, path):
-        super(NefDataLoader, self).__init__(path)
-        self.makeNewProject = self.createsNewProject  # A instance 'copy' to allow modification by the Gui
-
-    def load(self):
-        """The actual Nef loading method; subclassed to account for special
-        circumstances
-        raises RunTimeError on error
-        :return: a list of [project]
-        """
-        try:
-            project = self.application._loadNefFile(self.path, makeNewProject=self.makeNewProject)
-        except (ValueError, RuntimeError) as es:
-            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
-
-        return [project]
-
-NefDataLoader._registerFormat()
+HtmlDataLoader._registerFormat()

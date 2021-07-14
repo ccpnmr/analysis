@@ -258,24 +258,14 @@ class Window(AbstractWrapperObject):
         else:
             return windowStore.sortedWindows()
 
-    # @logCommand('mainWindow.')
-    # def newSpectrumDisplay(self, spectrum: Spectrum, axisCodes: (str,) = None, stripDirection: str = 'Y',
-    #                        name: str = None, zPlaneNavigationMode: str = None):
-    #     """Create new SpectrumDisplay
-    #
-    #     :param spectrum: a Spectrum instance to be displayed
-    #     :param axisCodes: display order of the dimensions of spectrum (defaults to spectrum.preferredAxisOrdering)
-    #     :param stripDirection: stripDirection: if 'X' or 'Y' set strip axis
-    #     :param name: optional name
-    #     :param zPlaneNavigationMode:
-    #     :return: a new SpectrumDisplay instance.
-    #     """
-    #     from ccpn.ui._implementation.SpectrumDisplay import _newSpectrumDisplay
-    #     if axisCodes is None:
-    #         axisCodes = tuple(spectrum.axisCodes[aa] for aa in spectrum.preferredAxisOrdering)
-    #     return _newSpectrumDisplay(window=self, spectrum=spectrum, axisCodes=axisCodes,
-    #                                stripDirection=stripDirection, name=name, zPlaneNavigationMode=zPlaneNavigationMode)
+    @logCommand('mainWindow.')
+    def newHtmlModule(self, urlPath, title, position='top', relativeTo=None):
+        """Open a new Module to display urlPath
+        """
+        from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
 
+        _newModule = CcpnWebView(mainWindow=self, name=title, urlPath=urlPath)
+        self.moduleArea.addModule(_newModule, position=position, relativeTo=relativeTo)
 
     def newSpectrumDisplay(self, spectra, axisCodes: Sequence[str] = (), stripDirection: str = 'Y',
                               position='right', relativeTo=None):

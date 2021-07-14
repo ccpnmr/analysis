@@ -24,7 +24,7 @@ __version__ = "$Revision: 3.1.0 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: geertenv $"
-__date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
+__date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -34,6 +34,7 @@ from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataForma
       DataSourceTrait
 from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
 from ccpn.core.Spectrum import _newSpectrumFromDataSource
+from ccpn.core.lib.ContextManagers import logCommandManager
 
 
 class SpectrumDataLoader(DataLoaderABC):
@@ -83,17 +84,18 @@ class SpectrumDataLoader(DataLoaderABC):
         raises RunTimeError on error
         :return: a list of [spectrum]
         """
-        if self.dataSource is None:
-            self.dataStore, self.dataSource = self._check(self.path)
+        with logCommandManager('application', 'loadData', self.path):
+            if self.dataSource is None:
+                self.dataStore, self.dataSource = self._check(self.path)
 
-        if self.dataSource is None:
-            raise RuntimeError('Error loading "%s"' % self.path)
+            if self.dataSource is None:
+                raise RuntimeError('Error loading "%s"' % self.path)
 
-        try:
-            spectrum = _newSpectrumFromDataSource(project=self.project, dataStore=self.dataStore,
-                                                  dataSource=self.dataSource)
-        except (RuntimeError, ValueError) as es:
-            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
+            try:
+                spectrum = _newSpectrumFromDataSource(project=self.project, dataStore=self.dataStore,
+                                                      dataSource=self.dataSource)
+            except (RuntimeError, ValueError) as es:
+                raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
 
         return [spectrum]
 

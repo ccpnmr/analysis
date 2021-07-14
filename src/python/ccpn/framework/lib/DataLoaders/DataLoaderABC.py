@@ -27,7 +27,7 @@ __version__ = "$Revision: 3.1.0 $"
 # Created
 #=========================================================================================
 __author__ = "$Author: geertenv $"
-__date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
+__date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -68,6 +68,7 @@ def getDataLoaders():
     from ccpn.framework.lib.DataLoaders.PdbDataLoader import PdbDataLoader
     from ccpn.framework.lib.DataLoaders.TextDataLoader import TextDataLoader
     from ccpn.framework.lib.DataLoaders.PythonDataLoader import PythonDataLoader
+    from ccpn.framework.lib.DataLoaders.HtmlDataLoader import HtmlDataLoader
     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
     return DataLoaderABC._dataLoaders
 

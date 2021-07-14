@@ -316,7 +316,7 @@ class Window(AbstractWrapperObject):
             relativeTo = modules[0] if modules else None
 
         @logCommand('mainWindow.')
-        def newSpectrumDisplay(window, spectra, axisCodes, stripDirection, position, relativeTo):
+        def newSpectrumDisplay(spectra, axisCodes, stripDirection, position, relativeTo):
             with undoBlockWithoutSideBar():
 
                 try:
@@ -331,7 +331,7 @@ class Window(AbstractWrapperObject):
                     getLogger().warning(f'createSpectrumDisplay {es}')
 
                 # create the new spectrumDisplay
-                display = _newSpectrumDisplay(window,
+                display = _newSpectrumDisplay(self,
                                               spectrum = spectrum,
                                               axisCodes=axisCodes,
                                               stripDirection=stripDirection,
@@ -345,12 +345,12 @@ class Window(AbstractWrapperObject):
 
                 with undoStackBlocking() as addUndoItem:
                     # disable all notifiers in spectrumDisplays
-                    addUndoItem(undo=partial(window._setBlankingSpectrumDisplayNotifiers, display, True),
-                                redo=partial(window._setBlankingSpectrumDisplayNotifiers, display, False))
+                    addUndoItem(undo=partial(self._setBlankingSpectrumDisplayNotifiers, display, True),
+                                redo=partial(self._setBlankingSpectrumDisplayNotifiers, display, False))
 
                     # add/remove spectrumDisplay from module Area - use moveDock not addModule, otherwise introduces extra splitters
-                    addUndoItem(undo=partial(window._hiddenModules.moveDock, display, position='top', neighbor=None),
-                                redo=partial(window.moduleArea.moveDock, display, position=position, neighbor=relativeTo))
+                    addUndoItem(undo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None),
+                                redo=partial(self.moduleArea.moveDock, display, position=position, neighbor=relativeTo))
 
                 # if not positions and not widths:
                 #     display.autoRange()
@@ -363,7 +363,7 @@ class Window(AbstractWrapperObject):
 
                 return display
 
-        return newSpectrumDisplay(self, spectra, axisCodes, stripDirection, position, relativeTo)
+        return newSpectrumDisplay(spectra, axisCodes, stripDirection, position, relativeTo)
 
     # deprecated
     createSpectrumDisplay = newSpectrumDisplay

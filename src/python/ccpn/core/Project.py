@@ -1350,15 +1350,20 @@ class Project(AbstractWrapperObject):
         """Load text from file path into new Note object
         CCPNINTERNAL: called from text dataLoader
         """
-        path = aPath(path)
-        name = path.basename
+        path = str(path)
+        # 'wrap' this to get proper echo-ing
+        @logCommand('application.')
+        def loadData(path):
+            path = aPath(path)
+            name = path.basename
 
-        with path.open('r') as fp:
-            # cannot do read() as we want one string
-            text = ''.join(line for line in fp.readlines())
-        note = self.newNote(name=name, text=text)
+            with path.open('r') as fp:
+                # cannot do read() as we want one string
+                text = ''.join(line for line in fp.readlines())
+            note = self.newNote(name=name, text=text)
+            return [note]
 
-        return [note]
+        return loadData(self, path)
 
     def _loadLayout(self, path: (str, Path), subType: str):
         # this is a GUI only function call. Please move to the appropriate location on 3.1
@@ -1369,6 +1374,7 @@ class Project(AbstractWrapperObject):
         :returns list of loaded objects (awaiting adjust ment of excelReader)
         CCPNINTERNAL: used in Excel data loader
         """
+
         with undoBlock():
             reader = ExcelReader(project=self, excelPath=str(path))
             result = reader.load()

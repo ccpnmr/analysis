@@ -944,7 +944,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('measurementType')
 
     @measurementTypes.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(str,), enumerated=specLib.MEASUREMENT_TYPES)
+    @checkSpectrumPropertyValue(iterable=True, types=(str,), enumerated=specLib.MEASUREMENT_TYPES,
+                                mapping={'shift':'Shift'})
     def measurementTypes(self, value):
         self._setDimensionalAttributes('measurementType', value)
 

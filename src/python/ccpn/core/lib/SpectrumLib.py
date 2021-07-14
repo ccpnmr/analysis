@@ -149,13 +149,17 @@ def _includeInDimensionalCopy(func):
     return func
 
 
-def checkSpectrumPropertyValue(iterable:bool, unique:bool=False, allowNone:bool=False, types:tuple=(), enumerated:tuple=()):
-    """Decorator to check values in Spectrum property setters
+def checkSpectrumPropertyValue(iterable:bool, unique:bool=False, allowNone:bool=False, types:tuple=(),
+                               enumerated:tuple=(), mapping={}):
+    """Decorator to check values of the Spectrum class property setters
+
     :param iterable: True, False: indicates that value should be an iterable
     :param unique: True, False: indicates if iterable items should be unique
     :param allowNone: True, False indicates if None value is allowed
-    :param types: a tuple of permittable types for value; value is cast into first type
-    :param enumerated: a tuple indicating that value should be one of the items of the tuple
+    :param types: a tuple of allowed types for value; value is cast into first type
+    :param enumerated: a tuple/list indicating that value should be one of the items of the tuple
+    :param mapping: an optional (originalValue, mappedValue) mapping dict; applied to
+                    the value or values-items
     """
 
     if allowNone:
@@ -223,12 +227,17 @@ def checkSpectrumPropertyValue(iterable:bool, unique:bool=False, allowNone:bool=
             # check the individual elements
             checkedValue = []
             for idx, val in enumerate(value):
+                if len(mapping) > 0:
+                    val = mapping.get(val, val)
+
                 _itemName = '%s[%d]' % (func.__name__, idx)
                 val = checkType(self, _itemName, val)
                 val = checkEnumerate(self, _itemName, val)
                 checkedValue.append(val)
 
         else:
+            if len(mapping) > 0:
+                    value = mapping.get(value, value)
             checkedValue = checkType(self, func.__name__, value)
             checkedValue = checkEnumerate(self, func.__name__, checkedValue)
 

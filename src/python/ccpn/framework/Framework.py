@@ -65,6 +65,7 @@ from ccpn.core.lib.Pid import Pid
 
 from ccpn.framework.Application import getApplication
 from ccpn.framework import Version
+from ccpn.framework.credits import printCreditsText
 from ccpn.framework.Current import Current
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.framework.Translation import languages, defaultLanguage
@@ -143,95 +144,8 @@ def _ccpnExceptionhook(ccpnType, value, tback):
 
     sys.__excepthook__(ccpnType, value, tback)
 
-
 sys.excepthook = _ccpnExceptionhook
 
-
-def _strList(inlist: list, maxlen: int = 80) -> list:
-    #TODO: do not put a private method in the top of the file of the most important class of the whole programme
-    # GWV: What does this do; should be a library function!! Only used in printCreditsText --> Make a credits.py file
-    # (like in the 'sandbox' code)
-    outstr = ''
-    # skip = False  # print commas and ampersand
-    lencount = maxlen
-
-    nameList = sorted(inlist, key=lambda name: name.split()[-1])
-
-    outList = []
-
-    for cName in nameList[:-1]:
-        skip = False
-        if len(outstr + cName) > lencount and cName not in nameList[-2:]:
-            outstr += cName + ', '
-            outList.append(outstr)
-            lencount += maxlen
-            skip = True
-            outstr = ''
-        elif cName not in nameList[-2:]:
-            outstr += cName + ', '
-        else:
-            outstr += cName
-
-    if len(nameList) == 1:
-        outstr = nameList[0]
-    else:
-        outstr = outstr + ' & ' + nameList[-1]
-
-    if outstr:
-        outList.append(outstr)
-
-    return outList
-
-
-def printCreditsText(fp, programName, version):
-    """Initial text to terminal """
-    from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
-
-    lines = []  # ejb
-    lines.append("%s, version: %s" % (programName, version))
-    lines.append("")
-    # lines.append("%s" % __copyright__[0:__copyright__.index('-')] + '- 2016')
-    lines.append("%s" % __copyright__)
-    lines.append("")
-    lines.append("CCPN licence. See %s. Not to be distributed without prior consent!" % ccpnLicenceUrl)
-    lines.append("")
-
-    try:
-        prefix = "Active Developers:   "
-        if isinstance(authors, str):
-            lines.append("%s%s" % (prefix, authors))
-        elif isinstance(authors, (list, tuple)):
-            authorList = _strList(authors, maxlen=60)
-            lines.append("%s%s" % (prefix, authorList[0]))
-            for crLine in authorList[1:]:
-                lines.append("%s%s" % (' ' * len(prefix), crLine))
-    except:
-        pass
-
-    lines.append("")
-    try:
-        if isinstance(__reference__, str):
-            lines.append("Please cite:  %s" % __reference__)
-        else:
-            if isinstance(__reference__, tuple):
-                lines.append("Please cite:  %s" % __reference__[0])
-                for refLine in __reference__[1:]:
-                    lines.append("              %s" % refLine)
-    except:
-        pass
-
-    lines.append("")
-    lines.append("DISCLAIMER:   This program is offered 'as-is'. Under no circumstances will the authors, CCPN,")
-    lines.append("              the Department of Molecular and Cell Biology, or the University of Leicester be")
-    lines.append("              liable of any damage, loss of data, loss of revenue or any other undesired")
-    lines.append("              consequences originating from the usage of this software.")
-
-    # print with aligning '|'s
-    maxlen = max(map(len, lines))
-    fp.write('%s\n' % ('=' * (maxlen + 8)))
-    for line in lines:
-        fp.write('|   %s ' % line + ' ' * (maxlen - len(line)) + '  |\n')
-    fp.write('%s\n' % ('=' * (maxlen + 8)))
 
 
 def defineProgramArguments():

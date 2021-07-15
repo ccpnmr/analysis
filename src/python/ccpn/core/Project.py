@@ -1416,8 +1416,7 @@ class Project(AbstractWrapperObject):
         #
         return result
 
-    def getObjectsById(self, className: str,
-                       id: str) -> typing.List[AbstractWrapperObject]:
+    def getObjectsById(self, className: str, id: str) -> typing.List[AbstractWrapperObject]:
         """get objects from class name / shortName and the start of the ID.
 
         The function does NOT interrogate the API level, which makes it faster in a
@@ -1501,24 +1500,6 @@ class Project(AbstractWrapperObject):
             return _newMark(self, colour=colour, positions=pos, axisCodes=axes,
                             style=style, units=units, labels=lbls
                             )
-
-    # GWV 20181127: not used
-    # def _newSimpleMark(self, colour: str, position: float, axisCode: str, style: str = 'simple',
-    #                    unit: str = 'ppm', label: str = None):
-    #     """Create new child Mark with a single line
-    #
-    #     :param str colour: Mark colour
-    #     :param tuple/list position: Position in unit (default ppm)
-    #     :param tuple/list axisCode: Axis code
-    #     :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
-    #     :param tuple/list unit: Axis unit. Default: all ppm
-    #     :param tuple/list label: Line label. Default: None
-    #
-    #     return Mark instance
-    #
-    #     Inserted later ccpn.ui._implementation.Mark
-    #     """
-    #     pass
 
     @logCommand('project.')
     def newSpectrum(self, path:str, name: str = None):

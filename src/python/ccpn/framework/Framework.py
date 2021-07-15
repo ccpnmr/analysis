@@ -1600,97 +1600,6 @@ class Framework(NotifierBase):
         """
         self.ui.mainWindow._openProject(path)
 
-        # """Load project from path
-        #    If not path then opens a file dialog box and loads project from selected file.
-        #
-        #    Returns Project instance or None on error
-        # """
-        # if not path:
-        #     dialog = ProjectFileDialog(parent=self.ui.mainWindow, acceptMode='load')
-        #     dialog._show()
-        #     path = dialog.selectedFile()
-        #     if not path:
-        #         return None
-        #
-        # dataLoader = checkPathForDataLoader(path)
-        # if dataLoader is None or not dataLoader.createsNewProject:
-        #     raise ValueError('File "%s" does not encode a valid project' % path)
-        #
-        # return dataLoader.load()[0]
-
-        # dataType, subType, usePath = ioFormats.analyseUrl(path)
-        # project = None
-        #
-        # if dataType == 'Project' and subType in (ioFormats.CCPN,
-        #                                          ioFormats.NEF,
-        #                                          # ioFormats.NMRSTAR,
-        #                                          ioFormats.SPARKY):
-        #
-        #     # if subType != ioFormats.NEF:    # ejb - only reset project for CCPN files
-        #     #   if self.project is not None:
-        #     #     self._closeProject()
-        #
-        #     if subType == ioFormats.CCPN:
-        #         project = self._loadV3Project(path)
-        #         # sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
-        #         #
-        #         # if self.project is not None:  # always close for Ccpn
-        #         #     self._closeProject()
-        #         # project = coreIo.loadProject(path, useFileLogger=self.useFileLogger, level=self.level)
-        #         # project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-        #         # self._initialiseProject(project)
-        #
-        #     elif subType == ioFormats.NEF:
-        #         sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
-        #         project = self._loadNefFile(path, makeNewProject=True)  # RHF - new by default
-        #         project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-        #
-        #     # elif subType == ioFormats.NMRSTAR: This is all Broken!
-        #     #     sys.stderr.write('==> Loading %s NMRStar project "%s"\n' % (subType, path))
-        #     #     project = self._loadNMRStarFile(path, makeNewProject=True)  # RHF - new by default
-        #     #     project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-        #
-        #     elif subType == ioFormats.SPARKY:
-        #         sys.stderr.write('==> Loading %s Sparky project "%s"\n' % (subType, path))
-        #         project = self._loadSparkyProject(path, makeNewProject=True)  # RHF - new by default
-        #         project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-        #
-        #     # project._validateDataUrlAndFilePaths()
-        #     project._checkUpgradedFromV2()
-        #
-        #     if self.preferences.general.useProjectPath:
-        #         getLogger().debug2('application - setting current path %s' % Path.Path(path).parent)
-        #         # temporary dialog to set initialPath
-        #         _dialog = ProjectFileDialog(self.ui.mainWindow)
-        #         _dialog.initialPath = Path.Path(path).parent
-        #
-        #     # if project and project._undo:
-        #     #     project._undo.clear()
-        #
-        #     self.project = project
-        #
-        #     return project
-        #
-        # # elif dataType == 'NefFile' and subType in (ioFormats.NEF):
-        # # # ejb - testing - 24/6/17 hopefully this will insert into project
-        # # #                 is caught by the test above
-        # # #                 need to deciode whether it is a 'project' or 'NefFile' load
-        # #
-        # #   sys.stderr.write('==> Loading %s NefFile "%s"\n' % (subType, path))
-        # #   project = self._loadNefFile(path, makeNewProject=False)
-        # #   project._resetUndo(debug=_DEBUG)
-        # #
-        # #   return project
-        #
-        # else:
-        #     sys.stderr.write('==> Could not recognise "%s" as a project; loading into default project\n' % path)
-        #     self.project = self.newProject()
-        #     self.loadData(paths=[path])
-        #
-        #     if project and project._undo:
-        #         project._undo.clear()
-        #     return self.project
-
     def _loadNefFile(self, path: str, makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup"""
 
@@ -1735,28 +1644,6 @@ class Framework(NotifierBase):
         popup.show()
         popup.raise_()
 
-    def _loadPythonFile(self, path):
-        """Load python file path into the macro editor
-        CCPNINTERNAL: called from PythonDataLoader
-        """
-        mainWindow = self.mainWindow
-        with logCommandManager('application.', 'loadData', path):
-            macroEditor = MacroEditor(mainWindow=mainWindow, filePath=str(path))
-            mainWindow.moduleArea.addModule(macroEditor, position='top', relativeTo=mainWindow.moduleArea)
-        return []
-
-    def _loadHtmlFile(self, path):
-        """Load html file path into a HtmlModule
-        CCPNINTERNAL: called from HtmlDataLoader
-        """
-        mainWindow = self.mainWindow
-        with logCommandManager('application.', 'loadData', path):
-            path = Path.aPath(path)
-            title = path.basename
-            mainWindow.newHtmlModule(urlPath=str(path), title=title, position='top', relativeTo=mainWindow.moduleArea)
-        return []
-
-
     # """Load Project from NEF file at path, and do necessary setup"""
     #
     # from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
@@ -1800,8 +1687,8 @@ class Framework(NotifierBase):
         dataBlock = sparkyReader.parseSparkyFile(str(path))
         sparkyName = dataBlock.getDataValues(SPARKY_NAME, firstOnly=True)
 
+        # Just a helper function for cleaner code below"
         def _import():
-            """Just a helper function for cleaner code below"""
             with undoBlockWithoutSideBar():
                 with notificationEchoBlocking():
                     with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s',
@@ -1824,6 +1711,27 @@ class Framework(NotifierBase):
             getLogger().info('==> Imported Sparky file: "%s"' % (path,))
 
         return project
+
+    def _loadPythonFile(self, path):
+        """Load python file path into the macro editor
+        CCPNINTERNAL: called from PythonDataLoader
+        """
+        mainWindow = self.mainWindow
+        with logCommandManager('application.', 'loadData', path):
+            macroEditor = MacroEditor(mainWindow=mainWindow, filePath=str(path))
+            mainWindow.moduleArea.addModule(macroEditor, position='top', relativeTo=mainWindow.moduleArea)
+        return []
+
+    def _loadHtmlFile(self, path):
+        """Load html file path into a HtmlModule
+        CCPNINTERNAL: called from HtmlDataLoader
+        """
+        mainWindow = self.mainWindow
+        with logCommandManager('application.', 'loadData', path):
+            path = Path.aPath(path)
+            title = path.basename
+            mainWindow.newHtmlModule(urlPath=str(path), title=title, position='top', relativeTo=mainWindow.moduleArea)
+        return []
 
     def clearRecentProjects(self):
         self.preferences.recentFiles = []

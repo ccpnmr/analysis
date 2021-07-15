@@ -7203,7 +7203,7 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
             spectrum.chemicalShiftList = spectrumParameters.get('chemicalShiftList')
 
             if acquisitionAxisIndex is not None:
-                spectrum.acquisitionAxisCode = axisCodes[acquisitionAxisIndex]
+                spectrum.isAquisition[acquisitionAxisIndex] = True
 
         # Delete autocreated peaklist  and reset - we want any read-in peakList to be the first
         # If necessary an empty PeakList is added downstream

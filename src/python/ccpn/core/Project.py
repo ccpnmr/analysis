@@ -1475,31 +1475,15 @@ class Project(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
-    @logCommand('project.')
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],
                 style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
-        """Create new Mark
-
-        :param str colour: Mark colour
-        :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
-        :param tuple/list axisCodes: Axis codes for all lines in the mark
-        :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
-        :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
-        :param tuple/list labels: Ruler labels for all lines in the mark. Default: None
-
-        :return Mark instance
-
-        To be depreciated in next version in lieu of mainWindow.newMark (with different call signature)
-
         """
-        from ccpn.ui._implementation.Mark import _newMark, _removeMarkAxes
+        To be depreciated in next version; use mainWindow.newMark() instead
+        """
 
-        marks = _removeMarkAxes(self, positions=positions, axisCodes=axisCodes, labels=labels)
-        if marks:
-            pos, axes, lbls = marks
-            return _newMark(self, colour=colour, positions=pos, axisCodes=axes,
-                            style=style, units=units, labels=lbls
-                            )
+        return self.application.mainWindow.newMark(colour=colour, positions=positions,
+                                                   axisCodes=axisCodes, style=style,
+                                                   units=units, labels=labels)
 
     @logCommand('project.')
     def newSpectrum(self, path:str, name: str = None):

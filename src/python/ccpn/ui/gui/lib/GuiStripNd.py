@@ -708,9 +708,9 @@ class GuiStripNd(GuiStrip):
                 if objAxisIndex is not None and (0 <= objAxisIndex < len(ppmPositions)):
                     position = (ppmPositions[objAxisIndex],)
                     axisCode = (axisCodes[objAxisIndex],)
-                    self._project.newMark(defaultColour, position, axisCode)
+                    self.mainWindow.newMark(defaultColour, position, axisCode)
             else:
-                self._project.newMark(defaultColour, ppmPositions, axisCodes)
+                self.mainWindow.newMark(defaultColour, ppmPositions, axisCodes)
 
             # add the marks for the double cursor - needs to be enabled in preferences
             if self.doubleCrosshairVisible and self._CcpnGLWidget._matchingIsotopeCodes:
@@ -729,14 +729,14 @@ class GuiStripNd(GuiStrip):
                         if objAxisIndex is not None and objDoubleAxisIndex is not None:
                             position = (ppmPositions[objAxisIndex],)
                             axisCode = (axisCodes[objDoubleAxisIndex],)
-                            self._project.newMark(defaultColour, position, axisCode)
+                            self.mainWindow.newMark(defaultColour, position, axisCode)
                 else:
                     # flip the XY axes for the peak
                     if None not in indices:
                         ppmPositions = [ppmPositions[ii] for ii in indices]
                         axisCodes = [axisCodes[ii] for ii in indices]
                         ppmPositions = [ppmPositions[1], ppmPositions[0]] + ppmPositions[2:]
-                        self._project.newMark(defaultColour, ppmPositions, axisCodes)
+                        self.mainWindow.newMark(defaultColour, ppmPositions, axisCodes)
 
         except Exception as es:
             getLogger().warning('Error setting mark at position')

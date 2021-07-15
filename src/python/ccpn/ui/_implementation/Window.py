@@ -68,10 +68,15 @@ class Window(AbstractWrapperObject):
 
     #=========================================================================================
     @property
-    def spectrumDisplays(self):
+    def spectrumDisplays(self) -> tuple:
         """A tuple of SpectrumDisplay instances displayed in the window"""
         ll = [x for x in self._wrappedData.sortedModules() if isinstance(x, ApiBoundDisplay)]
         return tuple(self._project._data2Obj[x] for x in ll if x in self._project._data2Obj)
+
+    @property
+    def marks(self) -> tuple:
+        """A redirections for now, as the marks still live in the project (for now)"""
+        return tuple(self.application.project.marks)
 
     #=========================================================================================
     # CCPN properties
@@ -286,6 +291,7 @@ class Window(AbstractWrapperObject):
         self.moduleArea.addModule(htmlModule, position=position, relativeTo=relativeTo)
         return htmlModule
 
+    #Command logging done inside the method
     def newSpectrumDisplay(self, spectra, axisCodes: Sequence[str] = (), stripDirection: str = 'Y',
                               position='right', relativeTo=None):
         """Create new SpectrumDisplay
@@ -412,6 +418,31 @@ class Window(AbstractWrapperObject):
             # delete the spectrumDisplay
             display.delete()
 
+    @logCommand('mainWindow.')
+    def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],
+                style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
+        """Create new Mark
+
+        :param str colour: Mark colour
+        :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
+        :param tuple/list axisCodes: Axis codes for all lines in the mark
+        :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
+        :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
+        :param tuple/list labels: Ruler labels for all lines in the mark. Default: None
+
+        :return Mark instance
+        """
+        from ccpn.ui._implementation.Mark import _newMark, _removeMarkAxes
+
+        # Marks are stored in the project!
+        project = self.project
+
+        marks = _removeMarkAxes(project, positions=positions, axisCodes=axisCodes, labels=labels)
+        if marks:
+            pos, axes, lbls = marks
+            return _newMark(project, colour=colour, positions=pos, axisCodes=axes,
+                            style=style, units=units, labels=lbls
+                            )
 
 #=========================================================================================
 # Connections to parents:

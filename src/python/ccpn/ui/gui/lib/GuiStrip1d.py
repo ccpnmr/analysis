@@ -452,7 +452,7 @@ class GuiStrip1d(GuiStrip):
                 else:
                     return
 
-            self._project.newMark(defaultColour, position, axisCodes)
+            self.mainWindow.newMark(defaultColour, position, axisCodes)
 
         except Exception as es:
             getLogger().warning('Error setting mark at position')

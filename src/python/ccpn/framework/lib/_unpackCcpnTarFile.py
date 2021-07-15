@@ -1,5 +1,5 @@
 """
-This module defines the data loading mechanism for loading a NEF file
+This module contains helper code for untarring file
 """
 
 #=========================================================================================
@@ -22,38 +22,46 @@ __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: geertenv $"
-__date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
+__author__ = "$Author: CCPN $"
+__date__ = "$Date: 2021-07-14 10:28:41 +0000 (Fri, July 14, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
+import os
+import tempfile
+import tarfile
 
-
-class NefDataLoader(DataLoaderABC):
-    """NEF data loader
+def _unpackCcpnTarfile(tarfilePath, outputPath=None, directoryPrefix='CcpnProject_'):
     """
-    dataFormat = 'nefFile'
-    suffixes = ['.nef']  # a list of suffixes that get matched to path
-    canCreateNewProject = True
-    alwaysCreateNewProject = False
+    # CCPNINTERNAL - called in Framework.restoreFromArchive
+    """
 
-    # def __init__(self, path):
-    #     super(NefDataLoader, self).__init__(path)
-    #     self.makeNewProject = self.createsNewProject  # A instance 'copy' to allow modification by the Gui
+    if outputPath:
+        if not os.path.exists(outputPath):
+            os.makedirs(outputPath)
+        temporaryDirectory = None
+    else:
+        temporaryDirectory = tempfile.TemporaryDirectory(prefix=directoryPrefix)
+        outputPath = temporaryDirectory.name
 
-    def load(self):
-        """The actual Nef loading method; subclassed to account for special
-        circumstances
-        raises RunTimeError on error
-        :return: a list of [project]
-        """
-        try:
-            project = self.application._loadNefFile(self.path, makeNewProject=self.createNewProject)
-        except (ValueError, RuntimeError) as es:
-            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
+    cwd = os.getcwd()
+    try:
+        os.chdir(outputPath)
+        tp = tarfile.open(tarfilePath)
+        tp.extractall()
 
-        return [project]
+        # look for a directory inside and assume the first found is the project directory (there should be exactly one)
+        relfiles = os.listdir('.')
+        for relfile in relfiles:
+            fullfile = os.path.join(outputPath, relfile)
+            if os.path.isdir(fullfile):
+                outputPath = fullfile
+                break
+        else:
+            raise IOError('Could not find project directory in tarfile')
 
-NefDataLoader._registerFormat()
+    finally:
+        os.chdir(cwd)
+
+    return outputPath, temporaryDirectory

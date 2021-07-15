@@ -69,6 +69,7 @@ def getDataLoaders():
     from ccpn.framework.lib.DataLoaders.TextDataLoader import TextDataLoader
     from ccpn.framework.lib.DataLoaders.PythonDataLoader import PythonDataLoader
     from ccpn.framework.lib.DataLoaders.HtmlDataLoader import HtmlDataLoader
+    from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
     return DataLoaderABC._dataLoaders
 
@@ -103,10 +104,12 @@ class DataLoaderABC(TraitBase):
     #=========================================================================================
     dataFormat = None
     suffixes = []  # a list of suffixes that gets matched to path
-    createsNewProject = False
+    alwaysCreateNewProject = False
+    canCreateNewProject = False
     allowDirectory = False  # Can/Can't open a directory
     loadFunction = (None, None) # A (function, attributeName) tuple;
-                                # attributeName := 'project' or 'application'
+                                # :param function(obj:(Application,Project), path:Path) -> List[newObj]
+                                # :param attributeName := 'project' or 'application'
 
     #=========================================================================================
     # end to be subclassed
@@ -115,6 +118,7 @@ class DataLoaderABC(TraitBase):
     # traits
     path = CPath().tag(info='a path to a file to be loaded')
     application = Any(default_value=None, allow_none=True)
+    createNewProject = Bool().tag(info='flag to indicate if a new project will be created')
 
     # A dict of registered DataLoaders: filled by _registerFormat classmethod, called
     # once after each definition of a new derived class (e.g. PdbDataLoader)
@@ -135,6 +139,9 @@ class DataLoaderABC(TraitBase):
         self.path = aPath(path)
         if not self.path.exists():
             raise ValueError('Invalid path "%s"' % path)
+
+        # get default setting for project creation
+        self.createNewProject = self.alwaysCreateNewProject or self.canCreateNewProject
 
         # local import to avoid cycles
         from ccpn.framework.Framework import getApplication

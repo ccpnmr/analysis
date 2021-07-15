@@ -49,6 +49,8 @@ from PyQt5.QtWidgets import QApplication
 from distutils.dir_util import copy_tree
 from functools import partial
 
+from typing import List, Tuple, Sequence
+
 from tqdm import tqdm
 
 
@@ -57,7 +59,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
-from ccpn.core.lib import CcpnNefIo, CcpnSparkyIo
+from ccpn.core.lib import CcpnNefIo
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.Pid import Pid
 
@@ -385,9 +387,6 @@ class Framework(NotifierBase):
 
         # NEF reader
         self.nefReader = CcpnNefIo.CcpnNefReader(self)
-
-        # SPARKY reader - ejb
-        self.sparkyReader = CcpnSparkyIo.CcpnSparkyReader(self)
 
         self._backupTimerQ = None
         self.autoBackupThread = None
@@ -1636,6 +1635,7 @@ class Framework(NotifierBase):
 
         # 20190424:ED reset the flag so that spectrumDisplays open correctly again
         project._isNew = None
+        self.project = project
 
         return project
 
@@ -1874,35 +1874,43 @@ class Framework(NotifierBase):
     # getLogger().info('==> Loaded NmrStar file: "%s"' % (path,))
     # return self.project
 
-    def _loadSparkyProject(self, path: str, makeNewProject=True) -> Project:
+    def _loadSparkyFile(self, path: str, createNewProject=True) -> Project:
         """Load Project from Sparky file at path, and do necessary setup
+        :return Project-instance (either existing or newly created)
+
         CCPNINTERNAL: called from SparkyDataLoader
         """
+        from ccpn.core.lib.CcpnSparkyIo import SPARKY_NAME, CcpnSparkyReader
 
-        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
+        sparkyReader = CcpnSparkyReader(self)
 
-        # read data files
-        from ccpn.core.lib.CcpnSparkyIo import SPARKY_NAME
-
-        dataBlock = self.sparkyReader.parseSparkyFile(str(path))
+        dataBlock = sparkyReader.parseSparkyFile(str(path))
         sparkyName = dataBlock.getDataValues(SPARKY_NAME, firstOnly=True)
 
-        if makeNewProject and (dataBlock.getDataValues('sparky', firstOnly=True) == 'project file'):
-            self._closeProject()
-            self.project = self.newProject(sparkyName)
+        def _import():
+            """Just a helper function for cleaner code below"""
+            with undoBlockWithoutSideBar():
+                with notificationEchoBlocking():
+                    with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s',
+                                         printTraceBack=True):
+                        sparkyReader.importSparkyProject(self.project, dataBlock)
+        #end def
 
-        self.project.shiftAveraging = True
+        if createNewProject and (dataBlock.getDataValues('sparky', firstOnly=True) == 'project file'):
+            with logCommandManager('application.', 'loadProject', path):
+                self._closeProject()
+                project = self.newProject(sparkyName)
+                _import()
+                self.project.shiftAveraging = True
+            getLogger().info('==> Created project from Sparky file: "%s"' % (path,))
 
-        # with suspendSideBarNotifications(project=self.project):
-        with undoBlockWithoutSideBar():
-            with notificationEchoBlocking():
-                with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s', printTraceBack=True):
-                    self.sparkyReader.importSparkyProject(self.project, dataBlock)
+        else:
+            project = self.project
+            with logCommandManager('application.', 'loadData', path):
+                _import()
+            getLogger().info('==> Imported Sparky file: "%s"' % (path,))
 
-        self.project.shiftAveraging = True
-
-        getLogger().info('==> Loaded Sparky project files: "%s", building project' % (path,))
-        return self.project
+        return project
 
     def clearRecentProjects(self):
         self.preferences.recentFiles = []
@@ -1974,11 +1982,11 @@ class Framework(NotifierBase):
             if dataLoader is None:
                 getLogger().warning('Unable to load "%s"' % path)
 
-            elif dataLoader.createsNewProject:
-                newProject = self.loadProject(path)
-                objs.append(newProject)
+            elif dataLoader.alwaysCreateNewProject:
+                getLogger().warning('Loading of "%s" would create a new project; use application.loadProject() instead')
 
             else:
+                dataLoader.createNewObject = False  # The loadData() method was used; No project created
                 result = dataLoader.load()
                 if not isIterable(result):
                     result = [result]
@@ -2269,28 +2277,6 @@ class Framework(NotifierBase):
                                expandSelection=expandSelection,
                                pidList=pidList)
 
-
-    # GWV: This routine should not be used as it calls the graphics mainWindow routine
-    # Instead: The graphics part now calls _getRecentFiles
-    #
-    # def _updateRecentFiles(self, oldPath=None):
-    #   project = self.project
-    #   path = project.path
-    #   recentFiles = self.preferences.recentFiles
-    #   mainWindow = self.ui.mainWindow or self._mainWindow
-    #
-    #   if not hasattr(project._wrappedData.root, '_temporaryDirectory'):
-    #     if path in recentFiles:
-    #       recentFiles.remove(path)
-    #     elif oldPath in recentFiles:
-    #       recentFiles.remove(oldPath)
-    #     elif len(recentFiles) >= 10:
-    #       recentFiles.pop()
-    #     recentFiles.insert(0, path)
-    #   recentFiles = uniquify(recentFiles)
-    #   mainWindow._fillRecentProjectsMenu()
-    #   self.preferences.recentFiles = recentFiles
-
     def _getRecentFiles(self, oldPath=None) -> list:
         """Get and return a list of recent files, setting reference to
            self as first element, unless it is a temp project
@@ -2336,8 +2322,6 @@ class Framework(NotifierBase):
 
             return successful
 
-        # NBNB TODO Consider appropriate failure handling. Is this OK?
-
     @logCommand('application.')
     def undo(self):
         if self.project._undo.canUndo():
@@ -2353,47 +2337,6 @@ class Framework(NotifierBase):
                 self.project._undo.redo()
         else:
             getLogger().warning('nothing to redo.')
-
-    # def undo(self):
-    #     if self.project._undo.canUndo():
-    #         with MessageDialog.progressManager(self.ui.mainWindow, 'performing Undo'):
-    #
-    #             self.ui.echoCommands(['application.undo()'])
-    #             self._echoBlocking += 1
-    #
-    #             self.ui.mainWindow.sideBar._saveExpandedState()
-    #             self.project._undo.undo()
-    #             self.ui.mainWindow.sideBar._restoreExpandedState()
-    #
-    #             # TODO:ED this is a hack until guiNotifiers are working
-    #             try:
-    #                 self.ui.mainWindow.moduleArea.repopulateModules()
-    #             except:
-    #                 getLogger().info('application has no Gui')
-    #
-    #             self._echoBlocking -= 1
-    #     else:
-    #         getLogger().warning('nothing to undo')
-    #
-    # def redo(self):
-    #     if self.project._undo.canRedo():
-    #         with MessageDialog.progressManager(self.ui.mainWindow, 'performing Redo'):
-    #             self.ui.echoCommands(['application.redo()'])
-    #             self._echoBlocking += 1
-    #
-    #             self.ui.mainWindow.sideBar._saveExpandedState()
-    #             self.project._undo.redo()
-    #             self.ui.mainWindow.sideBar._restoreExpandedState()
-    #
-    #             # TODO:ED this is a hack until guiNotifiers are working
-    #             try:
-    #                 self.ui.mainWindow.moduleArea.repopulateModules()
-    #             except:
-    #                 getLogger().info('application has no Gui')
-    #
-    #             self._echoBlocking -= 1
-    #     else:
-    #         getLogger().warning('nothing to redo.')
 
     def _getUndo(self):
         """Return the undo object for the project
@@ -2454,7 +2397,9 @@ class Framework(NotifierBase):
         return paths
 
     def restoreFromArchive(self, archivePath=None):
+        """Restore a project from archive"""
 
+        from ccpn.framework.lib._unpackCcpnTarFile import _unpackCcpnTarfile
         if not archivePath:
             archivesDirectory = Path.aPath(self.project.path) / Path.CCPN_ARCHIVES_DIRECTORY
             _filter = '*.tgz'
@@ -2464,46 +2409,46 @@ class Framework(NotifierBase):
 
         if archivePath:
             directoryPrefix = archivePath[:-4]  # -4 removes the .tgz
-            outputPath, temporaryDirectory = self._unpackCcpnTarfile(archivePath, outputPath=directoryPrefix)
+            outputPath, temporaryDirectory = _unpackCcpnTarfile(archivePath, outputPath=directoryPrefix)
             pythonExe = os.path.join(Path.getTopDirectory(), Path.CCPN_PYTHON)
             command = [pythonExe, sys.argv[0], outputPath]
             from subprocess import Popen
 
             Popen(command)
 
-    def _unpackCcpnTarfile(self, tarfilePath, outputPath=None, directoryPrefix='CcpnProject_'):
-        """
-        # CCPN INTERNAL - called in loadData method of Project
-        """
-
-        if outputPath:
-            if not os.path.exists(outputPath):
-                os.makedirs(outputPath)
-            temporaryDirectory = None
-        else:
-            temporaryDirectory = tempfile.TemporaryDirectory(prefix=directoryPrefix)
-            outputPath = temporaryDirectory.name
-
-        cwd = os.getcwd()
-        try:
-            os.chdir(outputPath)
-            tp = tarfile.open(tarfilePath)
-            tp.extractall()
-
-            # look for a directory inside and assume the first found is the project directory (there should be exactly one)
-            relfiles = os.listdir('.')
-            for relfile in relfiles:
-                fullfile = os.path.join(outputPath, relfile)
-                if os.path.isdir(fullfile):
-                    outputPath = fullfile
-                    break
-            else:
-                raise IOError('Could not find project directory in tarfile')
-
-        finally:
-            os.chdir(cwd)
-
-        return outputPath, temporaryDirectory
+    # def _unpackCcpnTarfile(self, tarfilePath, outputPath=None, directoryPrefix='CcpnProject_'):
+    #     """
+    #     # CCPN INTERNAL - called in loadData method of Project
+    #     """
+    #
+    #     if outputPath:
+    #         if not os.path.exists(outputPath):
+    #             os.makedirs(outputPath)
+    #         temporaryDirectory = None
+    #     else:
+    #         temporaryDirectory = tempfile.TemporaryDirectory(prefix=directoryPrefix)
+    #         outputPath = temporaryDirectory.name
+    #
+    #     cwd = os.getcwd()
+    #     try:
+    #         os.chdir(outputPath)
+    #         tp = tarfile.open(tarfilePath)
+    #         tp.extractall()
+    #
+    #         # look for a directory inside and assume the first found is the project directory (there should be exactly one)
+    #         relfiles = os.listdir('.')
+    #         for relfile in relfiles:
+    #             fullfile = os.path.join(outputPath, relfile)
+    #             if os.path.isdir(fullfile):
+    #                 outputPath = fullfile
+    #                 break
+    #         else:
+    #             raise IOError('Could not find project directory in tarfile')
+    #
+    #     finally:
+    #         os.chdir(cwd)
+    #
+    #     return outputPath, temporaryDirectory
 
     def showApplicationPreferences(self):
         """

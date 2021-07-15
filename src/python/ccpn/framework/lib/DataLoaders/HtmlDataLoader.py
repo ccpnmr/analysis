@@ -37,8 +37,6 @@ class HtmlDataLoader(DataLoaderABC):
     """
     dataFormat = 'htmlFile'
     suffixes = ['.html']  # a list of suffixes that get matched to path
-    allowDirectory = False  # Can/Can't open a directory
-    createsNewProject = False
     loadFunction = (Framework._loadHtmlFile, 'application')
 
 HtmlDataLoader._registerFormat()

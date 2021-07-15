@@ -37,8 +37,6 @@ class PythonDataLoader(DataLoaderABC):
     """
     dataFormat = 'pythonFile'
     suffixes = ['.py']  # a list of suffixes that get matched to path
-    allowDirectory = False  # Can/Can't open a directory
-    createsNewProject = False
     loadFunction = (Framework._loadPythonFile, 'application')
 
 PythonDataLoader._registerFormat()

@@ -37,8 +37,6 @@ class FastaDataLoader(DataLoaderABC):
     """
     dataFormat = 'fastaFile'
     suffixes = ['.fasta']  # a list of suffixes that get matched to path
-    allowDirectory = False  # Can/Can't open a directory
-    createsNewProject = False
     loadFunction = (Project._loadFastaFile, 'project')
 
 FastaDataLoader._registerFormat()

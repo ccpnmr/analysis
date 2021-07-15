@@ -39,7 +39,8 @@ class CcpNmrV3ProjectDataLoader(DataLoaderABC):
     dataFormat = 'ccpNmrV3Project'
     suffixes = [CCPN_DIRECTORY_SUFFIX]  # a list of suffixes that get matched to path
     allowDirectory = True  # Can/Can't open a directory
-    createsNewProject = True
+    alwaysCreateNewProject = True
+    canCreateNewProject = False
     loadFunction = (Framework._loadV3Project, 'application')
 
     @classmethod

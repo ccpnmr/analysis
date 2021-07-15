@@ -381,8 +381,8 @@ def logCommandManager(prefix, funcName, *args, **kwds):
 
         application.ui.echoCommands([msg])
 
-        with notificationEchoBlocking(application=application):
-            yield
+    with notificationEchoBlocking(application=application):
+        yield
 
 
 @contextmanager

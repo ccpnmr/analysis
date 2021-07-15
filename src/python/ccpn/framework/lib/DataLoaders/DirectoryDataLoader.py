@@ -40,7 +40,6 @@ class DirectoryDataLoader(DataLoaderABC):
     dataFormat = 'directoryData'
     suffixes = []  # a list of suffixes that get matched to path
     allowDirectory = True  # Can/Can't open a directory
-    createsNewProject = False
 
     recursive = Bool(default_value=False).tag(info='Flag to define recursive behavior')
     dataLoaders = List(default_value=[]).tag(info='List with dataLoader instances for the files of the directory "path"')

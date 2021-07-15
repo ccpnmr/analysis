@@ -36,8 +36,6 @@ class ExcelDataLoader(DataLoaderABC):
     """
     dataFormat = 'excelFile'
     suffixes = ['.xlsx', '.xls']  # a list of suffixes that get matched to path
-    allowDirectory = False  # Can/Can't open a directory
-    createsNewProject = False
     loadFunction = (Project._loadExcelFile, 'project')
 
 ExcelDataLoader._registerFormat()

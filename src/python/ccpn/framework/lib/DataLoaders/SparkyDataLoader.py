@@ -37,11 +37,11 @@ class SparkyDataLoader(DataLoaderABC):
     dataFormat = 'sparkyProject'
     suffixes = ['.proj', '.save']  # a list of suffixes that get matched to path
     allowDirectory = False  # Can/Can't open a directory
-    createsNewProject = True
+    canCreateNewProject = True
+    alwaysCreateNewProject = False
 
-    def __init__(self, path):
-        super(SparkyDataLoader, self).__init__(path)
-        self.makeNewProject = self.createsNewProject  # A instance 'copy' to allow modification by the Gui
+    # def __init__(self, path):
+    #     super(SparkyDataLoader, self).__init__(path)
 
     @classmethod
     def checkForValidFormat(cls, path):
@@ -64,7 +64,7 @@ class SparkyDataLoader(DataLoaderABC):
         :return: a list of [project]
         """
         try:
-            project = self.application._loadSparkyProject(path=self.path, makeNewProject=self.makeNewProject)
+            project = self.application._loadSparkyFile(path=self.path, createNewProject=self.createNewProject)
 
         except (ValueError, RuntimeError) as es:
             raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))

@@ -43,8 +43,6 @@ class SpectrumDataLoader(DataLoaderABC):
     dataFormat = 'Spectrum'
     suffixes = list(set([suf for spec in getDataFormats().values()
                          for suf in spec.suffixes if suf is not None]))  # a list of possible spectrum suffixes
-    createsNewProject = False
-
 
     dataSource = DataSourceTrait(default_value=None)
     dataStore = DataStoreTrait(default_value=None)

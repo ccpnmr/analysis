@@ -567,7 +567,11 @@ class CcpnSparkyReader:
 
     def parseSparkyFile(self, path):
 
-        with open(path, 'r') as fileName:
+        _path = aPath(path)
+        if not _path.exists():
+            raise FileNotFoundError('File %s does not exist' % path)
+
+        with open(_path, 'r') as fileName:
             self.text = fileName.read()
 
         self.tokeniser = getSparkyTokenIterator(self.text)
@@ -731,8 +735,10 @@ class CcpnSparkyReader:
 
         spectrumPath = (aPath(pathName) / aPath(filePath)).normalise()
 
-        getLogger().info('Loading spectrum: %s' % spectrumPath)
-        loadedSpectrum = self.project.loadData(spectrumPath)  # load the spectrum
+        loadedSpectrum = None
+        if spectrumPath.exists():
+            getLogger().info('Loading spectrum: %s' % spectrumPath)
+            loadedSpectrum = self.project.application.loadData(spectrumPath)  # load the spectrum
         if not loadedSpectrum:
             if parentBlock:
                 fileName = aPath(parentBlock.getDataValues(SPARKY_NAME, firstOnly=True))
@@ -1001,8 +1007,11 @@ class CcpnSparkyReader:
             saveFiles = sparkyDict.getBlocks(SPARKY_SAVEFILES, firstOnly=True)
             loadedBlocks = []
             for sp in saveFiles.getData():
-                savefilePath = (aPath(filePath) / aPath(sp)).normalise()
-                loadedBlocks.append(self.parseSparkyFile(savefilePath))
+                savefilePath = aPath(filePath) / sp
+                if not savefilePath.exists():
+                    getLogger().warning('Skipping %s, file not found' % savefilePath)
+                else:
+                    loadedBlocks.append(self.parseSparkyFile(savefilePath))
 
             # now import the molecule from the main project file
             self.importSparkyMolecule(project, sparkyDict)

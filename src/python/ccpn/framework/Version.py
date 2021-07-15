@@ -27,9 +27,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 
 applicationVersion = '3.1.0'
-
 revision = '3'
 
-authors = ('Ed Brooksbank', 'Joanna Fox', 'Victoria A Higman', 'Luca Mureddu', 'Eliza Płoskoń',
-           'Timothy J Ragan', 'Gary S Thompson', 'Brian O Smith', 'Geerten W Vuister')
-projectName = 'CCPN'
+# moved to credits.py
+# authors = ('Ed Brooksbank', 'Joanna Fox', 'Victoria A Higman', 'Luca Mureddu', 'Eliza Płoskoń',
+#            'Timothy J Ragan', 'Gary S Thompson', 'Brian O Smith', 'Geerten W Vuister')
+# projectName = 'CCPN'

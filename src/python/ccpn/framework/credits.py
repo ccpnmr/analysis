@@ -22,16 +22,18 @@ __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: geertenv $"
-__date__ = "$Date: 2021-07-14 10:28:41 +0000 (Fri, July 14, 2021) $"
+__author__ = "$Author: CCPN $"
+__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
+authors = ('Ed Brooksbank', 'Joanna Fox', 'Victoria A Higman', 'Luca Mureddu', 'Eliza Płoskoń',
+           'Timothy J Ragan', 'Gary S Thompson', 'Brian O Smith', 'Geerten W Vuister')
+
+
 def _strList(inlist: list, maxlen: int = 80) -> list:
-    #TODO: do not put a private method in the top of the file of the most important class of the whole programme
-    # GWV: What does this do; should be a library function!! Only used in printCreditsText --> Make a credits.py file
-    # (like in the 'sandbox' code)
+
     outstr = ''
     # skip = False  # print commas and ampersand
     lencount = maxlen

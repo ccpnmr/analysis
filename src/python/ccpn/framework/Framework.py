@@ -100,7 +100,6 @@ from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideB
     notificationEchoBlocking, logCommandManager
 
 from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
-from ccpn.framework.Version import authors
 from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_OVERVIEW
 
 from PyQt5.QtCore import QTimer

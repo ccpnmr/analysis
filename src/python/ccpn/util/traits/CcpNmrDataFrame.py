@@ -38,8 +38,10 @@ class DataFrameTrait(Instance):
     default_value = pd.DataFrame()
     info_text = 'A json serialisable DataFrame'
 
-    def __init__(self):
-        Instance.__init__(self, pd.DataFrame)
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('default_value', pd.DataFrame())
+        kwargs['klass'] = pd.DataFrame
+        Instance.__init__(self, *args, **kwargs)
 
     # trait-specific json handler
     class jsonHandler(TraitJsonHandlerBase):

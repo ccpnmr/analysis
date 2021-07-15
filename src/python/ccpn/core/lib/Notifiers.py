@@ -455,13 +455,13 @@ class NotifierBase(object):
     """
     A class confering notifier management routines
     """
-    NOTIFIERSDICT = '_ccpNmrV3notifiersDict'  # attribute name for storing notifiers in Ccpn objects
+    _NOTIFIERSDICT = '_ccpNmrV3notifiersDict'  # attribute name for storing notifiers in Ccpn objects
 
     def _getObjectNotifiersDict(self):
         """Internal routine to get the object notifiers dict"""
-        if not hasattr(self, self.NOTIFIERSDICT):
-            setattr(self, self.NOTIFIERSDICT, _NotifiersDict())
-        objNotifiers = getattr(self, self.NOTIFIERSDICT)
+        if not hasattr(self, self._NOTIFIERSDICT):
+            setattr(self, self._NOTIFIERSDICT, _NotifiersDict())
+        objNotifiers = getattr(self, self._NOTIFIERSDICT)
         # check type
         if not isinstance(objNotifiers, _NotifiersDict):
             raise RuntimeError('Invalid NotifiersDict, got %s, expected %s' %
@@ -538,7 +538,7 @@ class NotifierBase(object):
         :param notifier: Notifier instance or None
         :return: True or False
         """
-        if not hasattr(self, self.NOTIFIERSDICT):
+        if not hasattr(self, self._NOTIFIERSDICT):
             return False
 
         objNotifiers = self._getObjectNotifiersDict()
@@ -565,7 +565,7 @@ class NotifierBase(object):
         :param targetName: valid className, attributeName or ANY
         :return: None or list of existing notifiers
         """
-        if not hasattr(self, self.NOTIFIERSDICT):
+        if not hasattr(self, self._NOTIFIERSDICT):
             return ()
 
         objNotifiers = self._getObjectNotifiersDict()

@@ -1375,7 +1375,7 @@ class Framework(NotifierBase):
             ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
             (),
             ("Import", (("Nef File", self._importNef, [('shortcut', 'in'), ('enabled', True)]),
-                        ("NmrStar File", self._loadNMRStarFile, [('shortcut', 'bi')]),
+                        ("NmrStar File", self._loadNMRStarFileCallback, [('shortcut', 'bi')]),
                         )),
             ("Export", (("Nef File", self._exportNEF, [('shortcut', 'ex'), ('enabled', True)]),
                         )),
@@ -1474,9 +1474,9 @@ class Framework(NotifierBase):
                          ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
                          (),
                          ("New SpectrumDisplay with strip", self.copyStrip, []),
-                         ("Copy with X-Y Axes flipped", self.flipXYAxis, [('shortcut', 'xy')]),
-                         ("Copy with X-Z Axes flipped", self.flipXZAxis, [('shortcut', 'xz')]),
-                         ("Copy with Y-Z Axes flipped", self.flipYZAxis, [('shortcut', 'yz')]),
+                         ("Copy with X-Y Axes flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
+                         ("Copy with X-Z Axes flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
+                         ("Copy with Y-Z Axes flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
                          ("Copy with Axes Flipped...", self.showFlipArbitraryAxisPopup, [('shortcut', 'fa')]),
                          )),
             (),
@@ -1484,17 +1484,17 @@ class Framework(NotifierBase):
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
                 ])),
-            ("Python Console", self._toggleConsole, [('shortcut', '  '),
-                                                     ('checkable', True),
-                                                     ('checked', False)])
+            ("Python Console", self._toggleConsoleCallback, [('shortcut', '  '),
+                                                             ('checkable', True),
+                                                             ('checked', False)])
             ]
                    ))
 
         ms.append(('Macro', [
-            ("New", self.showMacroEditor),
+            ("New Macro Editor", self._showMacroEditorCallback),
             (),
-            ("Open User Macro...", self.openMacroOnEditor),
-            ("Open CCPN Macro...", self.openCcpnMacroOnEditor),
+            ("Open User Macro...", self._openMacroCallback),
+            ("Open CCPN Macro...", partial(self._openMacroCallback, directory=macroPath)),
             (),
             ("Run...", self.runMacro),
             ("Run Recent", ()),
@@ -1805,7 +1805,7 @@ class Framework(NotifierBase):
         getLogger().info('==> Loaded NEF file: "%s"' % (path,))
         return self.project
 
-    def _loadNMRStarFile(self, path=None):
+    def _loadNMRStarFileCallback(self, path=None):
         if not path:
             dialog = NMRStarFileDialog(parent=self.ui.mainWindow, acceptMode='import')
             dialog._show()
@@ -3110,19 +3110,22 @@ class Framework(NotifierBase):
             popup = ReorderPeakListAxes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
-    def flipXYAxis(self):
+    def _flipXYAxisCallback(self):
+        """Callback to flip axes"""
         if self.current.strip is not None:
             self.current.strip.flipXYAxis()
         else:
             getLogger().warning('No strip selected')
 
-    def flipXZAxis(self):
+    def _flipXZAxisCallback(self):
+        """Callback to flip axes"""
         if self.current.strip is not None:
             self.current.strip.flipXZAxis()
         else:
             getLogger().warning('No strip selected')
 
-    def flipYZAxis(self):
+    def _flipYZAxisCallback(self):
+        """Callback to flip axes"""
         if self.current.strip is not None:
             self.current.strip.flipYZAxis()
         else:
@@ -3135,24 +3138,9 @@ class Framework(NotifierBase):
         #GWV should not be here; moved to GuiMainWindow
         self.ui.mainWindow._findMenuAction(menubarText, menuText)
 
-        #
-        # for menuBarAction in self.ui.mainWindow._menuBar.actions():
-        #   if menuBarAction.text() == menubarText:
-        #     break
-        # else:
-        #   return None
-        #
-        # for menuAction in menuBarAction.menu().actions():
-        #   if menuAction.text() == menuText:
-        #     return menuAction
-        #
-        # return None
-
-    def _toggleConsole(self):
+    def _toggleConsoleCallback(self):
+        """Toggles whether python console is displayed at bottom of the main window.
         """
-        Toggles whether python console is displayed at bottom of the main window.
-        """
-
         self.ui.mainWindow.toggleConsole()
 
     def showChemicalShiftMapping(self, position: str = 'top', relativeTo: CcpnModule = None):
@@ -3170,40 +3158,21 @@ class Framework(NotifierBase):
     #################################################################################################
 
     @logCommand('application.')
-    def showMacroEditor(self):
+    def _showMacroEditorCallback(self):
+        """Displays macro editor. Just handing down to MainWindow for now
         """
-        Displays macro editor.
-        """
-        mainWindow = self.ui.mainWindow
-        self.editor = MacroEditor(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
-        return self.editor
+        self.mainWindow.newMacroEditor()
 
-    def openMacroOnEditor(self):
-        """
-        Displays macro editor.
+    def _openMacroCallback(self, directory=None):
+        """ Select macro file and on MacroEditor.
         """
         mainWindow = self.ui.mainWindow
-        fType = '*.py'
-        dialog = MacrosFileDialog(parent=mainWindow, acceptMode='open', fileFilter=fType)
+        dialog = MacrosFileDialog(parent=mainWindow, acceptMode='open', fileFilter='*.py', directory=directory)
         dialog._show()
-        filePath = dialog.selectedFile()
-        if filePath is not None:
-            macroEditor = MacroEditor(mainWindow=mainWindow, filePath=filePath)
-            mainWindow.moduleArea.addModule(macroEditor, position='top', relativeTo=mainWindow.moduleArea)
+        path = dialog.selectedFile()
+        if path is not None:
+            self.mainWindow.newMacroEditor(path=path)
 
-    def openCcpnMacroOnEditor(self):
-        """
-        Displays macro editor.
-        """
-        mainWindow = self.ui.mainWindow
-        fType = '*.py'
-        dialog = CcpnMacrosFileDialog(parent=mainWindow, acceptMode='open', fileFilter=fType, directory=macroPath)
-        dialog._show()
-        filePath = dialog.selectedFile()
-        if filePath is not None:
-            macroEditor = MacroEditor(mainWindow=mainWindow, filePath=filePath)
-            mainWindow.moduleArea.addModule(macroEditor, position='top', relativeTo=mainWindow.moduleArea)
 
     def defineUserShortcuts(self):
 

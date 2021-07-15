@@ -44,6 +44,7 @@ from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, un
 from ccpn.util.Logging import getLogger
 
 
+
 class Window(AbstractWrapperObject):
     """UI window, corresponds to OS window"""
 
@@ -258,14 +259,32 @@ class Window(AbstractWrapperObject):
         else:
             return windowStore.sortedWindows()
 
+    #=========================================================================================
+    # 'new' methods
+    #=========================================================================================
+
     @logCommand('mainWindow.')
-    def newHtmlModule(self, urlPath, title, position='top', relativeTo=None):
+    def newMacroEditor(self, path=None, position='top', relativeTo=None):
+        """Open a new Module to edit macros
+        """
+        # local to prevent circular import
+        from ccpn.ui.gui.modules.MacroEditor import MacroEditor
+
+        path = str(path) if path is not None else None
+        macroEditor = MacroEditor(mainWindow=self, filePath=path)
+        self.moduleArea.addModule(macroEditor, position=position, relativeTo=relativeTo)
+        return macroEditor
+
+    @logCommand('mainWindow.')
+    def newHtmlModule(self, urlPath, position='top', relativeTo=None):
         """Open a new Module to display urlPath
         """
+        # local to prevent circular imports
         from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
 
-        _newModule = CcpnWebView(mainWindow=self, name=title, urlPath=urlPath)
-        self.moduleArea.addModule(_newModule, position=position, relativeTo=relativeTo)
+        htmlModule = CcpnWebView(mainWindow=self, urlPath=urlPath)
+        self.moduleArea.addModule(htmlModule, position=position, relativeTo=relativeTo)
+        return htmlModule
 
     def newSpectrumDisplay(self, spectra, axisCodes: Sequence[str] = (), stripDirection: str = 'Y',
                               position='right', relativeTo=None):

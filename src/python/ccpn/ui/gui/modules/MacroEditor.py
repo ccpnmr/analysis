@@ -71,7 +71,7 @@ class MacroEditor(CcpnModule):
 
     className = 'MacroEditor'
 
-    def __init__(self, mainWindow=None, name='Macro Editor', filePath=None):
+    def __init__(self, mainWindow=None, name='MacroEditor', filePath=None):
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
         self.mainWindow = mainWindow

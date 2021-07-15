@@ -38,7 +38,7 @@ class CcpnWebView(CcpnModule):
 
     IGNORE_SHORTCUTS = False
 
-    def __init__(self, mainWindow=None, name='CcpNmr V3 Documentation', urlPath=None):
+    def __init__(self, mainWindow=None, name='HtmlModule', urlPath=None):
         """
         Initialise the Module widgets
         """
@@ -53,9 +53,9 @@ class CcpnWebView(CcpnModule):
                                              'background: transparent;' % (BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR))
 
         # may be a Path object
-        urlPath = str(urlPath)
+        urlPath = str(urlPath) if urlPath is not None else ''
+        # urlPath = urlPath or ''
 
-        urlPath = urlPath or ''
         if (urlPath.startswith('http://') or urlPath.startswith('https://')):
             pass
         elif urlPath.startswith('file://'):
@@ -68,7 +68,7 @@ class CcpnWebView(CcpnModule):
             if isWindowsOS():
                 urlPath = urlPath.replace(os.sep, posixpath.sep)
             else:
-                urlPath = 'file://'+urlPath
+                urlPath = 'file://'+ str(aPath(urlPath))
 
         self.webView.load(QUrl(urlPath))
         self.webView.show()

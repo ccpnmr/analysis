@@ -377,7 +377,6 @@ class Window(AbstractWrapperObject):
     # deprecated
     createSpectrumDisplay = newSpectrumDisplay
 
-    @logCommand('mainWindow.')
     def _deleteSpectrumDisplay(self, display):
         """Delete a spectrumDisplay from the moduleArea
         Removes the display to a hidden moduleArea of mainWindow, deletes the _wrappedData, and disables all notifiers

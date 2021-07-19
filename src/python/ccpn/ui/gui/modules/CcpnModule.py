@@ -508,6 +508,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             if self.area._isValidName(newName):
                 self.label.setText(newName)
                 self._name = newName
+                self.moduleName = self._name
                 return newName
             else:
                 showWarning('Could not rename module', 'Please use a different name')
@@ -743,14 +744,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         else:
             return moduleName
 
-    @property
-    def widgetsState(self):
-        return self._widgetsState
-
-    # @widgetsState.setter
-    # def widgetsState(self, value):
-    #   self._widgetsState = value
-
     def _setNestedWidgetsAttrToModule(self):
         """
         :return: nestedWidgets
@@ -913,33 +906,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
     def _hideModule(self):
         self.setVisible(not self.isVisible())
-
-    def _closeModule(self):
-        """Close the module
-        """
-        try:
-            if self.closeFunc:
-                self.closeFunc()
-        except:
-            pass
-
-        # delete any notifiers initiated with this Module
-        self.deleteAllNotifiers()
-
-        getLogger().debug('Closing %s' % str(self.container()))
-
-        if self.maximised:
-            self.toggleMaximised()
-
-        if not self._container:
-            area = self.mainWindow.moduleArea
-            if area:
-                if area._container is None:
-                    for i in area.children():
-                        if isinstance(i, Container):
-                            self._container = i
-
-        super().close()
 
     def close(self):
         """Close the module from the commandline

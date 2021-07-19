@@ -282,7 +282,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
         takenNames = [m.pid for m in self.modules.values()]
         tests = [name in takenNames]
         tests += [x+':'+name in takenNames for x in ll]
-        tests += [isinstance(name, str)]
+        # tests += [isinstance(name, str)]
         return not any(tests)
 
 

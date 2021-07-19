@@ -828,8 +828,9 @@ def copyToClipboard(items):
                   Each value is single quoted if a str (Pid if an AbstractWrapperObject instance),
                   or preserved the format for other cases. All values are comma separated.
 
-    Not to use for nested lists or complex structures, in that case use Pandas "DataFrame.to_clipboard" directly.
-
+    A very simple implementation of str to clipboard.
+    An ideal implementation should deal with AbstractWrapperObjects using some sort of parser to be able to perform
+    actions such as copy-paste peakLists via NEF etc.
     """
     import pandas as pd
     from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject

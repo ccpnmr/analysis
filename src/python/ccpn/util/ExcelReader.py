@@ -446,7 +446,7 @@ class ExcelReader(object):
     def _linkSpectrumToObj(self, obj, spectrum, dct):
         from ccpn.core.Sample import Sample
         from ccpn.core.Substance import Substance
-        from ccpn.core.Spectrum import SPECTRUMSERIES, SPECTRUMSERIESITEMS
+        from ccpn.core.Spectrum import SERIESITEMS
 
         if isinstance(obj, Substance):
             obj.referenceSpectra += (spectrum,)
@@ -463,7 +463,7 @@ class ExcelReader(object):
                 # if spectrumGroup is not None: # this strategy is very slow. do not use here.
                 #     spectrumGroup.spectra += (spectrum,)
                 if SERIES in dct:  # direct insertion of series values for speed optimisation
-                    spectrum.setParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS, {'SG:' + str(value): dct[SERIES]})
+                    spectrum._setInternalParameter(SERIESITEMS, {'SG:' + str(value): dct[SERIES]})
 
     def _fillSpectrumGroups(self):
         for sgName, spectra in self._tempSpectrumGroupsSpectra.items():

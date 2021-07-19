@@ -833,6 +833,7 @@ def copyToClipboard(items):
     """
     import pandas as pd
     from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+    from ccpn.util.Logging import getLogger
 
     texts = []
     for i in items:

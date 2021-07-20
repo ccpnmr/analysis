@@ -205,9 +205,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return ()
 
     @property
-    def spectrumViews(self):
-        """STUB: hot-fixed later"""
-        return ()
+    def spectrumViews(self) -> tuple:
+        """Return a tuple of SpectrumView instances associated with this spectrum"""
+        specViews = [self._project._data2Obj.get(y)
+                     for x in self._wrappedData.sortedSpectrumViews()
+                     for y in x.sortedStripSpectrumViews()]
+        return tuple(specViews)
 
     @property
     def chemicalShiftList(self):
@@ -2085,7 +2088,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         :param axisCodes: tuple/list of two axisCodes
         :param position: a list/tuple of point-positions (1-based)
         :param path: path of the resulting file; auto-generated if None
-        :param dataFormat: a data format valid for writing
+        :param dataFormat: a data format valid for writing (default='Hdf5')
 
         :returns plane as Spectrum instance
         """

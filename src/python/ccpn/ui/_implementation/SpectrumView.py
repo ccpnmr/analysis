@@ -356,7 +356,7 @@ class SpectrumView(AbstractWrapperObject):
 
     @property
     def dimensionOrdering(self) -> Tuple[int, ...]:
-        """Indices of spectrum dimensions in display order (x, y, Z1, ...)"""
+        """Axes Indices (zero-based) of spectrum dimensions in display order (x, y, Z1, ...)"""
         apiStripSpectrumView = self._wrappedData
         axisCodes = self.strip.axisCodes
         axisOrder = self.strip.axisOrder
@@ -437,42 +437,41 @@ def _newSpectrumView(display, spectrum, dimensionOrdering):
 #=========================================================================================
 
 
-# newSpectrumView functions: None
-
-# Spectrum.spectrumViews property
-def getter(spectrum: Spectrum):
-    specViews = [spectrum._project._data2Obj.get(y)
-                 for x in spectrum._wrappedData.sortedSpectrumViews()
-                 for y in x.sortedStripSpectrumViews()]
-    return tuple(specViews)
-
-Spectrum.spectrumViews = property(getter, None, None,
-                                  "SpectrumViews showing Spectrum")
-
-
-# Strip.spectrumViews property
-def getter(strip: Strip):
-    return tuple(strip._project._data2Obj.get(x)
-                 for x in strip._wrappedData.sortedStripSpectrumViews())
+# GWV 20/7/2021: Moved to Spectrum class
+# # Spectrum.spectrumViews property
+# def getter(spectrum: Spectrum):
+#     specViews = [spectrum._project._data2Obj.get(y)
+#                  for x in spectrum._wrappedData.sortedSpectrumViews()
+#                  for y in x.sortedStripSpectrumViews()]
+#     return tuple(specViews)
+#
+# Spectrum.spectrumViews = property(getter, None, None,
+#                                   "SpectrumViews showing Spectrum")
 
 
-Strip.spectrumViews = property(getter, None, None,
-                               "SpectrumViews shown in Strip")
-del getter
+# # Strip.spectrumViews property
+# def getter(strip: Strip):
+#     return tuple(strip._project._data2Obj.get(x)
+#                  for x in strip._wrappedData.sortedStripSpectrumViews())
+#
+#
+# Strip.spectrumViews = property(getter, None, None,
+#                                "SpectrumViews shown in Strip")
+# del getter
 
+# GWV 20/7/2021: Moved to Spectrum class
+# def _findSpectrumView(strip: Strip, spectrum: Spectrum) -> SpectrumView:
+#     """find Strip.spectrumView that matches spectrum, or None if not present"""
+#     dataSource = spectrum._wrappedData
+#     for stripSpectrumView in strip._wrappedData.sortedStripSpectrumViews():
+#         if stripSpectrumView.spectrumView.dataSource is dataSource:
+#             return strip._project._data2Obj.get(stripSpectrumView)
+#     #
+#     return None
 
-def _findSpectrumView(strip: Strip, spectrum: Spectrum) -> SpectrumView:
-    """find Strip.spectrumView that matches spectrum"""
-    dataSource = spectrum._wrappedData
-    for stripSpectrumView in strip._wrappedData.sortedStripSpectrumViews():
-        if stripSpectrumView.spectrumView.dataSource is dataSource:
-            return strip._project._data2Obj.get(stripSpectrumView)
-    #
-    return None
-
-
-Strip.findSpectrumView = _findSpectrumView
-del _findSpectrumView
+#
+# Strip.findSpectrumView = _findSpectrumView
+# del _findSpectrumView
 
 # Notifiers:
 # Notify SpectrumView change when ApiSpectrumView changes (underlying object is StripSpectrumView)

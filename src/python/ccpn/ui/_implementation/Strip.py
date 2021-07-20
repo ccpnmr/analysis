@@ -71,28 +71,31 @@ class Strip(AbstractWrapperObject):
     # store the list of ordered spectrumViews
     _orderedSpectrumViews = None
 
-    # CCPN properties
-    @property
-    def _apiStrip(self) -> ApiBoundStrip:
-        """ CCPN Strip matching Strip"""
-        return self._wrappedData
+    #-----------------------------------------------------------------------------------------
+    # Attributes and methods related to the data structure
+    #-----------------------------------------------------------------------------------------
 
     @property
-    def _key(self) -> str:
-        """id string - serial number converted to string"""
-        return str(self._wrappedData.serial)
-
-    @property
-    def serial(self) -> int:
-        """serial number of Strip, used in Pid and to identify the Strip. """
-        return self._wrappedData.serial
-
-    @property
-    def _parent(self) -> SpectrumDisplay:
+    def spectrumDisplay(self) -> SpectrumDisplay:
         """SpectrumDisplay containing strip."""
         return self._project._data2Obj.get(self._wrappedData.spectrumDisplay)
 
-    spectrumDisplay = _parent
+    _parent = spectrumDisplay
+
+    @property
+    def spectrumViews(self) -> tuple:
+        "SpectrumViews shown in Strip"
+        pass
+        # STUB for now; hot-fixed later
+        # return tuple(self._project._data2Obj.get(x)
+        #      for x in self._wrappedData.sortedStripSpectrumViews())
+
+    def findSpectrumView(self, spectrum):
+        """find Strip.spectrumView that matches spectrum, or None if not present"""
+        sViews = [sv for sv in self.spectrumViews if sv.spectrum == spectrum]
+        return sViews[0] if len(sViews) == 1 else None
+
+    #-----------------------------------------------------------------------------------------
 
     @property
     def axisCodes(self) -> Tuple[str, ...]:
@@ -161,6 +164,25 @@ class Strip(AbstractWrapperObject):
         """The spectra attached to the strip (whether display is currently turned on  or not)"""
         pids = self.spectrumDisplay._getSpectrumGroups()
         return tuple(self.project.getByPid(x) for x in pids)
+
+    #=========================================================================================
+    # CCPN properties
+    #=========================================================================================
+
+    @property
+    def _apiStrip(self) -> ApiBoundStrip:
+        """ CCPN Strip matching Strip"""
+        return self._wrappedData
+
+    @property
+    def _key(self) -> str:
+        """id string - serial number converted to string"""
+        return str(self._wrappedData.serial)
+
+    @property
+    def serial(self) -> int:
+        """serial number of Strip, used in Pid and to identify the Strip. """
+        return self._wrappedData.serial
 
     #=========================================================================================
     # Implementation functions
